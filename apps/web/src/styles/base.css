@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+html { min-width: 20rem; scroll-behavior: smooth; }
+body { min-width: 20rem; min-height: 100vh; margin: 0; background: var(--color-canvas); color: var(--color-text); }
+body, button, input, select, textarea { font-family: var(--font-body); }
+button, input, select, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: var(--color-action); text-underline-offset: .2em; }
+a:hover { color: var(--color-action-hover); }
+h1, h2, h3 { margin-block: 0; color: var(--color-ink); font-family: var(--font-display); font-weight: 600; line-height: 1.22; }
+h1 { font-size: clamp(2.25rem, 5vw, 4.75rem); letter-spacing: -.03em; }
+h2 { font-size: clamp(1.65rem, 3vw, 2.5rem); }
+h3 { font-size: 1.25rem; }
+p { line-height: 1.65; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+

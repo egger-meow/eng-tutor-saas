@@ -1,0 +1,53 @@
+:root {
+  color-scheme: light;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  color: #343a40;
+  background: #f6f2e9;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --color-canvas: #f6f2e9;
+  --color-paper: #fffdf8;
+  --color-ink: #172238;
+  --color-text: #343a40;
+  --color-muted: #62645f;
+  --color-rule: #d8d1c3;
+  --color-rule-strong: #aaa295;
+  --color-action: #355c4a;
+  --color-action-hover: #294839;
+  --color-accent: #b77942;
+  --color-success: #316044;
+  --color-success-soft: #e6efe8;
+  --color-warning: #7a552c;
+  --color-warning-soft: #f4eadb;
+  --color-error: #873a35;
+  --color-error-soft: #f5e7e4;
+
+  --font-display: "Noto Serif TC", "Songti TC", Georgia, serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --space-1: .25rem;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-control: .625rem;
+  --radius-surface: .75rem;
+  --focus-ring: 0 0 0 3px rgb(53 92 74 / 24%);
+  --content-width: 72rem;
+  --transition-fast: 180ms ease;
+
+  /* Temporary compatibility aliases for the extracted prototype styles. */
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --paper: var(--color-paper);
+  --line: var(--color-rule);
+  --line-strong: var(--color-rule-strong);
+  --accent: var(--color-action);
+  --success: var(--color-success);
+  --success-bg: var(--color-success-soft);
+  --error: var(--color-error);
+  --error-bg: var(--color-error-soft);
+}

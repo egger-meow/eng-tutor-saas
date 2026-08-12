@@ -4,6 +4,7 @@ import './App.css'
 import { archiveChild, createChild, listChildren, updateChild, type Child } from './lib/children'
 import { listMaterials, openMaterialDownload, saveFeedback, type FeedbackInput, type Material } from './lib/materials'
 import { getSupabaseClient } from './lib/supabase'
+import { useRoute } from './app/use-route'
 
 type Notice = { kind: 'error' | 'success'; text: string } | null
 
@@ -229,6 +230,7 @@ function Dashboard({ session }: { session: Session }) {
 }
 
 function App() {
+  const route = useRoute()
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(false)
 
@@ -240,7 +242,7 @@ function App() {
   }, [])
 
   if (!ready) return <main className="shell loading">正在確認登入狀態…</main>
-  return session ? <Dashboard session={session} /> : <Login />
+  return <div data-route={route.name}>{session ? <Dashboard session={session} /> : <Login />}</div>
 }
 
 export default App

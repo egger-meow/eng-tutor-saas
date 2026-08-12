@@ -1,0 +1,24 @@
+.app-shell { min-height: 100vh; }
+.page-shell, .site-header { width: min(var(--content-width), calc(100% - 2rem)); margin-inline: auto; }
+.page-shell { padding-block: clamp(var(--space-8), 7vw, 5rem); }
+.skip-link { position: fixed; z-index: 100; top: var(--space-3); left: var(--space-3); padding: var(--space-3) var(--space-4); transform: translateY(-180%); border-radius: var(--radius-control); background: var(--color-ink); color: white; }
+.skip-link:focus { transform: translateY(0); }
+.site-header { display: flex; min-height: 4.5rem; align-items: center; gap: var(--space-8); border-bottom: 1px solid var(--color-rule); }
+.wordmark { color: var(--color-ink); font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.site-header nav { display: flex; align-items: center; gap: var(--space-6); }
+.site-header nav a { color: var(--color-text); font-size: .9375rem; text-decoration: none; }
+.site-header nav a:hover { color: var(--color-action); }
+.account-menu { display: flex; min-width: 0; align-items: center; gap: var(--space-3); margin-left: auto; }
+.account-menu span { overflow: hidden; max-width: 15rem; color: var(--color-muted); font-size: .8125rem; text-overflow: ellipsis; white-space: nowrap; }
+.button { min-height: 2.75rem; padding: .625rem var(--space-4); border: 1px solid var(--color-action); border-radius: var(--radius-control); background: var(--color-action); color: white; cursor: pointer; font-weight: 700; transition: background var(--transition-fast), border-color var(--transition-fast); }
+.button:hover { border-color: var(--color-action-hover); background: var(--color-action-hover); }
+.button-quiet { border-color: var(--color-rule); background: transparent; color: var(--color-ink); }
+.button-quiet:hover { border-color: var(--color-rule-strong); background: var(--color-paper); }
+@media (max-width: 43rem) {
+  .site-header { min-height: 4rem; gap: var(--space-4); }
+  .site-header nav { order: 3; position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; justify-content: space-around; gap: 0; padding: var(--space-2) max(var(--space-2), env(safe-area-inset-right)) max(var(--space-2), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-rule); background: var(--color-paper); }
+  .site-header nav a { display: grid; min-height: 2.75rem; place-items: center; padding-inline: var(--space-3); }
+  .page-shell { padding-bottom: 6rem; }
+  .account-menu span { display: none; }
+}
+
