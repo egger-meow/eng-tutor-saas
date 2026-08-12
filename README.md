@@ -19,10 +19,11 @@ The browser app accepts only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_
 ```powershell
 pnpm lint
 pnpm test
+pnpm test:db
 pnpm typecheck
 pnpm build
 ```
 
-For local backend work, inspect available commands with `pnpm exec supabase --help`, then use `pnpm exec supabase start` and `pnpm exec supabase db reset`.
+For local backend work, inspect available commands with `pnpm exec supabase --help`, then use `pnpm exec supabase start` and `pnpm exec supabase db reset`. This project uses ports `55320`–`55329` so it can run beside another default Supabase stack.
 
 Read `docs/SPEC.md` before changing product behavior. The future ChatGPT Work schedule is intentionally not enabled yet; its operational contract is in `docs/generation-workflow.md`.

@@ -9,6 +9,7 @@
     "dev": "pnpm --filter @paper-english/web dev",
     "lint": "pnpm --filter @paper-english/web lint",
     "test": "vitest run",
+    "test:db": "supabase db query --local --file supabase/tests/smoke.sql",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build"
   },

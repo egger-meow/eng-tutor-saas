@@ -12,6 +12,7 @@ Use Node.js 24+ and pnpm 11+. Repository commands are:
 pnpm dev          # run the Vite parent portal
 pnpm lint         # run Oxlint on the web app
 pnpm test         # run Vitest across the workspace
+pnpm test:db      # smoke-test the running local Supabase stack
 pnpm typecheck    # type-check every package
 pnpm build        # create production builds
 ```
@@ -26,7 +27,7 @@ Vitest discovers `*.test.ts` and `*.test.tsx` beside source files. Add focused b
 
 ## Commit & Pull Request Guidelines
 
-Git history is not available in this workspace, so no repository-specific commit convention can be inferred. Use short, imperative subjects such as `Add generation job schema`. Keep commits scoped and include migrations, tests, and documentation together when they describe one change. Pull requests should explain the user impact, link the relevant issue or specification section, list verification performed, and include screenshots for UI or PDF changes.
+History uses Conventional Commit-style subjects such as `build: initialize product foundation`. Use a short lowercase type (`build`, `chore`, `docs`, `feat`, `fix`, or `test`), an optional scope, and an imperative summary. Keep commits scoped and include migrations, tests, and documentation together when they describe one change. Pull requests should explain user impact, link the relevant issue or specification section, list verification performed, and include screenshots for UI or PDF changes.
 
 ## Security & Agent Instructions
 
