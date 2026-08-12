@@ -1,3 +1,5 @@
+begin;
+
 do $$
 declare
   claimed_count integer;
@@ -240,6 +242,11 @@ begin
     '00000000-0000-0000-0000-000000000031', 100
   );
 
+  insert into storage.objects (bucket_id, name)
+  values
+    ('weekly-materials', 'family-a/student.pdf'),
+    ('weekly-materials', 'family-b/student.pdf');
+
   perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000011', true);
   perform set_config('role', 'authenticated', true);
 
@@ -251,6 +258,13 @@ begin
   select count(*) into visible_count from public.child_profiles;
   if visible_count <> 2 then
     raise exception 'family A should see exactly two child profiles, saw %', visible_count;
+  end if;
+
+  select count(*) into visible_count
+  from storage.objects
+  where bucket_id = 'weekly-materials';
+  if visible_count <> 1 then
+    raise exception 'family A should see exactly one owned storage object, saw %', visible_count;
   end if;
 
   update public.children
@@ -323,6 +337,8 @@ exception
     raise;
 end;
 $$;
+
+rollback;
 
 do $$
 begin

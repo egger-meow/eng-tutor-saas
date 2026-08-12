@@ -15,6 +15,8 @@
 - Implement deterministic packet validation and PDF rendering.
 - Prove synthetic Week 1 → feedback → personalized Week 2.
 
+Current implementation now proves that loop locally, including private parent download. Remaining beta work is the full child profile UI, hosted staging proof, operator recovery, and billing.
+
 ## Scheduled Operations
 
 - Provision staging and production Supabase projects.

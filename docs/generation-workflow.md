@@ -57,3 +57,5 @@ Operators may adjust normal capacity in Supabase, manually invoke the same worke
 - Private downloads are ownership-tested.
 - Worker credentials are available only to the ChatGPT Work project.
 - Manual run and recovery are proven before enabling the daily schedule.
+
+Run `pnpm test:e2e` against the local Supabase stack for the repeatable synthetic proof. It covers queue claim, canonical validation, PDF rendering, private upload, parent-owned signed download, feedback submission, and Week 2 context propagation. A hosted staging/manual run is still required before the ChatGPT Work schedule is enabled.

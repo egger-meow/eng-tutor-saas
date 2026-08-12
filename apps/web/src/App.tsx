@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import './App.css'
 import { archiveChild, createChild, listChildren, updateChild, type Child } from './lib/children'
+import { listMaterials, openMaterialDownload, saveFeedback, type FeedbackInput, type Material } from './lib/materials'
 import { getSupabaseClient } from './lib/supabase'
 
 type Notice = { kind: 'error' | 'success'; text: string } | null
@@ -91,16 +92,91 @@ function ChildForm({ child, onSaved, onCancel }: { child?: Child; onSaved: () =>
   )
 }
 
+function FeedbackForm({ material, onSaved }: { material: Material; onSaved: () => void }) {
+  const existing = material.feedback
+  const [input, setInput] = useState<FeedbackInput>({
+    difficulty: existing?.difficulty ?? 3,
+    completion_rate: existing?.completion_rate ?? 100,
+    weak_area: existing?.weak_area ?? null,
+    mistakes_text: existing?.mistakes_text ?? '',
+    child_comments: existing?.child_comments ?? '',
+    parent_comments: existing?.parent_comments ?? '',
+  })
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    try {
+      await saveFeedback(material.child_id, material.id, input)
+      onSaved()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '回饋儲存失敗。')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return <form className="feedback-form" onSubmit={submit}>
+    <div><label>完成度</label><select value={input.completion_rate} onChange={(event) => setInput({ ...input, completion_rate: Number(event.target.value) })}>
+      {[0, 25, 50, 75, 100].map((value) => <option key={value} value={value}>{value}%</option>)}
+    </select></div>
+    <div><label>難度</label><select value={input.difficulty} onChange={(event) => setInput({ ...input, difficulty: Number(event.target.value) })}>
+      <option value={1}>太簡單</option><option value={2}>偏簡單</option><option value={3}>剛好</option><option value={4}>偏難</option><option value={5}>太難</option>
+    </select></div>
+    <div><label>最需要加強</label><select value={input.weak_area ?? ''} onChange={(event) => setInput({ ...input, weak_area: event.target.value || null })}>
+      <option value="">未指定</option><option value="vocabulary">單字</option><option value="grammar">文法</option><option value="reading">閱讀</option><option value="writing">寫作</option><option value="mixed">綜合</option>
+    </select></div>
+    <label className="wide">錯誤或卡住的地方<textarea value={input.mistakes_text} maxLength={4000} onChange={(event) => setInput({ ...input, mistakes_text: event.target.value })} /></label>
+    <label className="wide">孩子的話<textarea value={input.child_comments} maxLength={2000} onChange={(event) => setInput({ ...input, child_comments: event.target.value })} /></label>
+    <label className="wide">家長補充<textarea value={input.parent_comments} maxLength={2000} onChange={(event) => setInput({ ...input, parent_comments: event.target.value })} /></label>
+    <div className="wide actions"><button type="submit" disabled={busy}>{busy ? '儲存中…' : existing ? '更新本週回饋' : '送出本週回饋'}</button></div>
+    {error && <p className="wide notice error" role="alert">{error}</p>}
+  </form>
+}
+
+function MaterialCard({ material, childName, onFeedbackSaved }: { material: Material; childName: string; onFeedbackSaved: () => void }) {
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [error, setError] = useState('')
+  const summary = material.generation_summary
+  const title = typeof summary.title === 'string' ? summary.title : `第 ${material.material_week} 週教材`
+
+  async function download(path: string, suffix: string) {
+    setError('')
+    try { await openMaterialDownload(path, `${childName}-${material.material_week}-${suffix}.pdf`) }
+    catch (caught) { setError(caught instanceof Error ? caught.message : '下載連結建立失敗。') }
+  }
+
+  return <article className="material-card">
+    <div className="material-heading"><div><p className="material-date">{material.material_week}</p><h3>{title}</h3></div>{material.feedback && <span className="status-chip">已回饋</span>}</div>
+    {typeof summary.learningAdjustmentSummary === 'string' && <p className="muted">{summary.learningAdjustmentSummary}</p>}
+    <div className="actions material-actions">
+      <button onClick={() => void download(material.student_pdf_path, '學生教材')}>下載學生教材</button>
+      <button className="secondary" onClick={() => void download(material.parent_answer_pdf_path, '家長解答')}>下載家長解答</button>
+      <button className="text-button" onClick={() => setShowFeedback(!showFeedback)}>{showFeedback ? '收起回饋' : material.feedback ? '查看／修改回饋' : '填寫回饋'}</button>
+    </div>
+    {error && <p className="notice error" role="alert">{error}</p>}
+    {showFeedback && <FeedbackForm material={material} onSaved={() => { setShowFeedback(false); onFeedbackSaved() }} />}
+  </article>
+}
+
 function Dashboard({ session }: { session: Session }) {
   const [children, setChildren] = useState<Child[]>([])
   const [editing, setEditing] = useState<string | null>(null)
+  const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   const refresh = useCallback(async () => {
     setLoading(true)
     setError('')
-    try { setChildren(await listChildren()) }
+    try {
+      const nextChildren = await listChildren()
+      setChildren(nextChildren)
+      setMaterials(await listMaterials(nextChildren.map((child) => child.id)))
+    }
     catch (caught) { setError(caught instanceof Error ? caught.message : '無法載入孩子資料。') }
     finally { setLoading(false) }
   }, [])
@@ -140,6 +216,13 @@ function Dashboard({ session }: { session: Session }) {
           <p className="muted">目前只需要稱呼與年級；詳細程度會在後續設定。</p>
           <ChildForm onSaved={() => void refresh()} />
         </aside>
+      </section>
+      <section className="card materials-section" aria-labelledby="materials-title">
+        <p className="step">03</p><h2 id="materials-title">每週教材</h2>
+        <p className="muted">教材與家長解答皆為私有檔案。下載連結只在短時間內有效；回饋會用於下一週教材。</p>
+        {materials.length === 0 ? <p className="empty">第一份教材完成後會出現在這裡。</p> : <div className="materials-list">
+          {materials.map((material) => <MaterialCard key={material.id} material={material} childName={children.find((child) => child.id === material.child_id)?.display_name ?? '教材'} onFeedbackSaved={() => void refresh()} />)}
+        </div>}
       </section>
     </main>
   )

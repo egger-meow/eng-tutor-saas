@@ -44,8 +44,8 @@ Parents may read all records belonging to their children and edit profiles and f
 Use private bucket `weekly-materials` and opaque paths:
 
 ```text
-<parent-id>/<child-id>/<material-id>/student.pdf
-<parent-id>/<child-id>/<material-id>/parent-answer.pdf
+<child-id>/<generation-job-id>/student.pdf
+<child-id>/<generation-job-id>/parent-answer.pdf
 ```
 
-The owning parent receives short-lived signed URLs. Paths and object metadata are not treated as authorization by themselves.
+The owning parent receives short-lived signed URLs. Storage RLS verifies that the exact object path is recorded on a material owned through `material → child → parent`; paths and object metadata are not treated as authorization by themselves.
