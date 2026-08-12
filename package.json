@@ -1,0 +1,20 @@
+{
+  "name": "eng-tutor-saas",
+  "private": true,
+  "packageManager": "pnpm@11.16.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @paper-english/web dev",
+    "lint": "pnpm --filter @paper-english/web lint",
+    "test": "vitest run",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "supabase": "^2.48.3",
+    "typescript": "~6.0.2",
+    "vitest": "^4.0.18"
+  }
+}

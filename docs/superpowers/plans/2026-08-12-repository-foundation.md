@@ -22,48 +22,48 @@
 
 **Files:** Existing `AGENTS.md`, `docs/SPEC.md`, and approved design/plan documents.
 
-- [ ] Initialize Git on `main` and commit the specification-first baseline.
-- [ ] Confirm the worktree is clean before structural edits.
+- [x] Initialize Git on `main` and commit the specification-first baseline.
+- [x] Confirm the worktree is clean before structural edits.
 
 ### Task 2: Replace the fragmented specification with focused contracts
 
 **Files:** Modify `docs/SPEC.md`; create `docs/architecture.md`, `docs/data-model.md`, `docs/generation-workflow.md`, `docs/product-rules.md`, `docs/eng-tutor-upstream.md`, and `docs/roadmap.md`.
 
-- [ ] Preserve all MVP-defining decisions while removing repetition and obsolete implementation speculation.
-- [ ] Make acceptance criteria, non-goals, ownership, and operational boundaries explicit.
-- [ ] Search headings and key terms to verify coverage.
+- [x] Preserve all MVP-defining decisions while removing repetition and obsolete implementation speculation.
+- [x] Make acceptance criteria, non-goals, ownership, and operational boundaries explicit.
+- [x] Search headings and key terms to verify coverage.
 
 ### Task 3: Scaffold the pnpm workspace and web application
 
 **Files:** Create root workspace/config files and `apps/web/**`.
 
-- [ ] Scaffold the current React TypeScript Vite template.
-- [ ] Add repository-level `dev`, `lint`, `test`, `typecheck`, and `build` commands.
-- [ ] Add a minimal product shell and Supabase browser-client boundary.
-- [ ] Add focused configuration tests, then run lint, test, type-check, and build.
+- [x] Scaffold the current React TypeScript Vite template.
+- [x] Add repository-level `dev`, `lint`, `test`, `typecheck`, and `build` commands.
+- [x] Add a minimal product shell and Supabase browser-client boundary.
+- [x] Add focused configuration tests, then run lint, test, type-check, and build.
 
 ### Task 4: Define generator and PDF boundaries
 
 **Files:** Create `packages/generator/**` and `packages/pdf/**`.
 
-- [ ] Define typed job/context/result contracts without implementing AI generation.
-- [ ] Define PDF artifact names and rendering interface without committing private output.
-- [ ] Verify packages through workspace type-check and tests.
+- [x] Define typed job/context/result contracts without implementing AI generation.
+- [x] Define PDF artifact names and rendering interface without committing private output.
+- [x] Verify packages through workspace type-check and tests.
 
 ### Task 5: Add the initial Supabase contract
 
 **Files:** Create `supabase/config.toml`, `supabase/migrations/*_initial_schema.sql`, and seed documentation.
 
-- [ ] Use the Supabase CLI to create the migration filename.
-- [ ] Add profiles, children, subscriptions, feedback, materials, settings, and generation jobs.
-- [ ] Add explicit grants, RLS ownership policies, private Storage buckets, idempotency constraints, and a safe claim function for the privileged worker.
-- [ ] Verify locally when Docker/Supabase CLI is available; otherwise run static SQL checks and document the remaining environment-dependent verification.
+- [x] Use the Supabase CLI to create the migration filename.
+- [x] Add profiles, children, subscriptions, feedback, materials, settings, and generation jobs.
+- [x] Add explicit grants, RLS ownership policies, private Storage buckets, idempotency constraints, and a safe claim function for the privileged worker.
+- [x] Verify CLI discovery and static invariants; local database application remains environment-dependent because Docker was unavailable on 2026-08-12.
 
 ### Task 6: Add CI and future worker runbook
 
 **Files:** Create `.github/workflows/ci.yml`, `.github/workflows/deploy-pages.yml`, `.env.example`, and update `AGENTS.md`/`README.md`.
 
-- [ ] Configure CI for frozen install, lint, test, type-check, and build.
-- [ ] Configure GitHub Pages deployment only; do not add lesson-generation cron.
-- [ ] Document how a future ChatGPT Work task claims jobs, obtains secrets, uploads artifacts, reports failures, and is manually rerun.
-- [ ] Run final repository verification and commit the coherent foundation.
+- [x] Configure CI for frozen install, lint, test, type-check, and build.
+- [x] Configure GitHub Pages deployment only; do not add lesson-generation cron.
+- [x] Document how a future ChatGPT Work task claims jobs, obtains secrets, uploads artifacts, reports failures, and is manually rerun.
+- [x] Run final repository verification and commit the coherent foundation.

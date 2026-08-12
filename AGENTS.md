@@ -2,24 +2,27 @@
 
 ## Project Structure & Module Organization
 
-This repository is currently specification-first. The product and technical contract lives in `docs/SPEC.md`; read it before making product, data-model, or architecture changes. As implementation is added, follow the proposed layout: `apps/web/src/` for the web application, `generator/` for curriculum and weekly-material generation, `pdf/` for templates and rendering, `supabase/migrations/` and `supabase/functions/` for backend changes, and `.github/workflows/` for CI. Keep supporting design decisions in `docs/`.
+Read `docs/SPEC.md` before changing product behavior. Use `apps/web/src/` for the parent portal, `packages/generator/` for curriculum contracts, `packages/pdf/` for rendering boundaries, `supabase/migrations/` for backend changes, and `.github/workflows/` for CI/deployment. Keep supporting decisions in focused files under `docs/`.
 
 ## Build, Test, and Development Commands
 
-No build system or package manifest has been committed yet. Do not invent commands in documentation. After a toolchain is introduced, expose the standard workflows through repository-level scripts (for example, `npm run dev`, `npm test`, `npm run lint`, and `npm run build`) and update this section in the same change. Current documentation checks can use:
+Use Node.js 24+ and pnpm 11+. Repository commands are:
 
 ```powershell
-rg "^#" docs/SPEC.md       # inspect specification structure
-git diff --check           # detect whitespace errors
+pnpm dev          # run the Vite parent portal
+pnpm lint         # run Oxlint on the web app
+pnpm test         # run Vitest across the workspace
+pnpm typecheck    # type-check every package
+pnpm build        # create production builds
 ```
 
 ## Coding Style & Naming Conventions
 
-Prefer simple architecture, explicit state, idempotent operations, and easily debugged code. Use the formatter and linter selected by the eventual application scaffold; commit their configuration with the first source files. Until then, keep Markdown concise, use descriptive headings, UTF-8 encoding, and one concept per section. Use kebab-case for documentation and prompt filenames (for example, `weekly-material.md`) and timestamped, descriptive names for Supabase migrations.
+Use two-space indentation in TypeScript, strict compiler settings, extensionless imports in browser code, and explicit exported types at package boundaries. Oxlint is the current linter. Use PascalCase for React components/types, camelCase for functions, kebab-case for documentation, and CLI-generated timestamped names for Supabase migrations.
 
 ## Testing Guidelines
 
-Add focused tests alongside each implementation area and regression tests for defects. Prioritize ownership boundaries (parent, child, subscription), generation-job idempotency, private storage access, and week-to-week personalization. Name tests after observable behavior rather than internal methods. Once a framework is chosen, document its test file pattern and coverage command here; no coverage threshold currently exists.
+Vitest discovers `*.test.ts` and `*.test.tsx` beside source files. Add focused behavioral tests and regression tests for defects. Prioritize ownership boundaries, queue idempotency, private storage, and week-to-week personalization. Run `pnpm test`; no numeric coverage threshold is set yet.
 
 ## Commit & Pull Request Guidelines
 
