@@ -1,0 +1,17 @@
+import { describe, expect, it } from 'vitest'
+import { emptyProfileDraft, toChildProfileInput, validateProfileStep } from './profile-form'
+
+describe('profile form', () => {
+  it('requires only generation-critical fields', () => {
+    expect(validateProfileStep(1, emptyProfileDraft)).toHaveProperty('displayName')
+    expect(validateProfileStep(2, emptyProfileDraft)).toHaveProperty('baselineLevel')
+    expect(validateProfileStep(3, emptyProfileDraft)).toEqual({})
+    expect(validateProfileStep(6, emptyProfileDraft)).toHaveProperty('learningGoals')
+  })
+
+  it('maps flexible context into preferences without losing core profile fields', () => {
+    const input = toChildProfileInput({ ...emptyProfileDraft, baselineLevel: 'grade-7', learningGoals: 'read independently', interests: ['動物'], upcomingTest: '9/15' })
+    expect(input.baseline_level).toBe('grade-7')
+    expect(input.preferences).toMatchObject({ interests: ['動物'], upcomingTest: '9/15' })
+  })
+})

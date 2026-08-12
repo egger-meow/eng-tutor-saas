@@ -12,13 +12,13 @@ export type Child = {
   created_at: string
 }
 
-type ChildInput = Pick<Child, 'display_name' | 'grade'>
+export type ChildInput = Pick<Child, 'display_name' | 'grade'> & { textbook_version?: string | null }
 
 function cleanInput(input: ChildInput): ChildInput {
   const displayName = input.display_name.trim()
   if (!displayName) throw new Error('請輸入孩子稱呼。')
   if (![7, 8, 9].includes(input.grade)) throw new Error('年級必須是七、八或九年級。')
-  return { display_name: displayName, grade: input.grade }
+  return { display_name: displayName, grade: input.grade, textbook_version: input.textbook_version?.trim() || null }
 }
 
 export async function listChildren(): Promise<Child[]> {
@@ -27,11 +27,12 @@ export async function listChildren(): Promise<Child[]> {
   return data as Child[]
 }
 
-export async function createChild(input: ChildInput): Promise<void> {
+export async function createChild(input: ChildInput): Promise<string> {
   const { data: { user }, error: userError } = await getSupabaseClient().auth.getUser()
   if (userError || !user) throw userError ?? new Error('登入已失效，請重新登入。')
-  const { error } = await getSupabaseClient().from('children').insert({ ...cleanInput(input), parent_id: user.id })
+  const { data, error } = await getSupabaseClient().from('children').insert({ ...cleanInput(input), parent_id: user.id }).select('id').single()
   if (error) throw error
+  return data.id as string
 }
 
 export async function updateChild(id: string, input: ChildInput): Promise<void> {

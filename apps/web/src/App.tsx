@@ -6,7 +6,8 @@ import { AuthPanel } from './components/auth/AuthPanel'
 import { AppShell } from './components/layout/AppShell'
 import { PublicHeader } from './components/layout/PublicHeader'
 import { getSupabaseClient } from './lib/supabase'
-import { ChildBasicsPage } from './routes/ChildBasicsPage'
+import { ChildOnboardingPage } from './routes/ChildOnboardingPage'
+import { ChildProfilePage } from './routes/ChildProfilePage'
 import { DashboardPage } from './routes/DashboardPage'
 
 function PublicEntry() {
@@ -38,8 +39,9 @@ function App() {
 
   if (!ready) return <main className="loading-state" role="status">正在確認登入狀態…</main>
   if (!session) return <PublicEntry />
-  if (route.name === 'child-new') return <ChildBasicsPage session={session} />
-  if (route.name === 'child-overview' || route.name === 'child-edit') return <ChildBasicsPage session={session} childId={route.params.id} />
+  if (route.name === 'child-new') return <ChildOnboardingPage session={session} />
+  if (route.name === 'child-edit') return <ChildOnboardingPage session={session} childId={route.params.id} />
+  if (route.name === 'child-overview') return <ChildProfilePage session={session} childId={route.params.id} />
   return <DashboardPage session={session} />
 }
 
