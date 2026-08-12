@@ -14,6 +14,7 @@ export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavi
       <nav aria-label="家長功能">
         <a href="/dashboard" onClick={handleInternalLink}>本週教材</a>
         <a href={childPath} onClick={handleInternalLink}>孩子資料</a>
+        <a href="/children/new" onClick={handleInternalLink}>＋ 新增孩子</a>
         <a href="/billing" onClick={handleInternalLink}>訂閱</a>
       </nav>
       <div className="account-menu">

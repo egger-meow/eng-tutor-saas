@@ -16,8 +16,19 @@ export async function prepareCheckout(childId: string): Promise<CheckoutPreparat
   const { data, error } = await getSupabaseClient().functions.invoke('paddle-checkout', {
     body: { child_id: childId },
   })
-  if (error) throw error
-  if (!data?.transaction_id) throw new Error('Checkout transaction was not created')
+  if (error) {
+    let code = ''
+    try {
+      const response = error.context as Response | undefined
+      const body = response ? await response.clone().json() as { error?: string } : null
+      code = body?.error ?? ''
+    } catch { /* Fall through to the generic message. */ }
+    if (code === 'paddle_checkout_url_missing') {
+      throw new Error('Paddle Sandbox 尚未設定預設付款連結，設定完成後即可測試付款。')
+    }
+    throw new Error('目前無法開啟安全付款，請稍後再試。')
+  }
+  if (!data?.transaction_id) throw new Error('付款交易未成功建立，請稍後再試。')
   return {
     transactionId: data.transaction_id as string,
     foundingApplies: data.founding_applies === true,

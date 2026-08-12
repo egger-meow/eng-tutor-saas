@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { navigate } from '../app/use-route'
 import { ChildSubscription } from '../components/billing/ChildSubscription'
 import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
@@ -32,8 +33,8 @@ export function BillingPage({ session }: { session: Session }) {
         window.setTimeout(() => void refreshSubscriptions(), 2500)
         window.setTimeout(() => void refreshSubscriptions(), 7000)
       })
-    } catch {
-      setError('目前無法開啟安全付款，請稍後再試。')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '目前無法開啟安全付款，請稍後再試。')
     } finally {
       setCheckoutChildId(null)
     }
@@ -58,7 +59,7 @@ export function BillingPage({ session }: { session: Session }) {
     {loading && <p role="status">正在讀取訂閱…</p>}
     {error && <p className="notice notice-error" role="alert">{error}</p>}
     {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
-    {!loading && !error && children.length === 0 && <div className="empty-state">新增孩子並完成第一週設定後，訂閱狀態會顯示在這裡。</div>}
+    {!loading && children.length === 0 && <div className="empty-state"><h2>先新增孩子</h2><p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p><button className="button" type="button" onClick={() => navigate('/children/new')}>＋ 新增孩子</button></div>}
     <div className="subscription-list">
       {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
     </div>

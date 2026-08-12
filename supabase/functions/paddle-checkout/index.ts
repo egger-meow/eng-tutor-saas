@@ -67,6 +67,9 @@ Deno.serve(async (request) => {
     const paddleBody = await paddleResponse.json()
     if (!paddleResponse.ok) {
       console.error('Paddle transaction creation failed', paddleResponse.status, paddleBody)
+      if (paddleBody?.error?.code === 'transaction_default_checkout_url_not_set') {
+        return jsonResponse(503, { error: 'paddle_checkout_url_missing' })
+      }
       return jsonResponse(502, { error: 'paddle_transaction_failed' })
     }
 
