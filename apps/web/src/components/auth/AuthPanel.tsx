@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { buildAuthRedirectUrl } from '../../lib/auth-redirect'
 import { getSupabaseClient } from '../../lib/supabase'
 
 export function AuthPanel() {
@@ -12,7 +13,9 @@ export function AuthPanel() {
     setNotice(null)
     const { error } = await getSupabaseClient().auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: buildAuthRedirectUrl(window.location.origin, import.meta.env.BASE_URL),
+      },
     })
     setBusy(false)
     setNotice(error
@@ -34,4 +37,3 @@ export function AuthPanel() {
     </section>
   )
 }
-
