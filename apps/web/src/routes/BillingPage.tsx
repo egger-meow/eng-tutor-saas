@@ -7,7 +7,7 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { listChildren, type Child } from '../lib/children'
 import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
 import { prepareCheckout } from '../lib/subscriptions'
-import { openPaddleCheckout } from '../lib/paddle'
+import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function BillingPage({ session }: { session: Session }) {
@@ -16,6 +16,7 @@ export function BillingPage({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [checkoutChildId, setCheckoutChildId] = useState<string | null>(null)
+  const [activeCheckoutChildId, setActiveCheckoutChildId] = useState<string | null>(null)
   const [checkoutNotice, setCheckoutNotice] = useState('')
 
   async function refreshSubscriptions() {
@@ -24,20 +25,28 @@ export function BillingPage({ session }: { session: Session }) {
 
   async function startCheckout(childId: string) {
     setCheckoutChildId(childId)
+    setActiveCheckoutChildId(childId)
     setCheckoutNotice('')
     setError('')
     try {
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
       const checkout = await prepareCheckout(childId)
-      await openPaddleCheckout(checkout.transactionId, () => {
+      await openPaddleCheckout(checkout.transactionId, 'paddle-checkout-frame', () => {
         setCheckoutNotice('付款已送出，正在等候 Paddle 確認訂閱狀態。通常幾秒內會完成。')
         window.setTimeout(() => void refreshSubscriptions(), 2500)
         window.setTimeout(() => void refreshSubscriptions(), 7000)
       })
     } catch (caught) {
+      setActiveCheckoutChildId(null)
       setError(caught instanceof Error ? caught.message : '目前無法開啟安全付款，請稍後再試。')
     } finally {
       setCheckoutChildId(null)
     }
+  }
+
+  async function closeCheckout() {
+    await closePaddleCheckout()
+    setActiveCheckoutChildId(null)
   }
 
   useEffect(() => {
@@ -60,8 +69,26 @@ export function BillingPage({ session }: { session: Session }) {
     {error && <p className="notice notice-error" role="alert">{error}</p>}
     {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
     {!loading && children.length === 0 && <div className="empty-state"><h2>先新增孩子</h2><p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p><button className="button" type="button" onClick={() => navigate('/children/new')}>＋ 新增孩子</button></div>}
-    <div className="subscription-list">
+    <div className="billing-layout">
+      <div className="subscription-list">
       {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
+      </div>
+      {activeCheckoutChildId && <aside className="checkout-panel" aria-label="安全付款">
+        <div className="checkout-panel-heading">
+          <div>
+            <p className="overline">安全付款</p>
+            <h2>為 {children.find((child) => child.id === activeCheckoutChildId)?.display_name} 開始訂閱</h2>
+          </div>
+          <button className="button-link text-link" type="button" onClick={() => void closeCheckout()}>稍後再付</button>
+        </div>
+        <div className="checkout-plan-summary">
+          <span>紙屬英文月費</span>
+          <strong>NT$499 <small>／月</small></strong>
+          <p>符合 Founding 30 資格時，第一個付費月自動折為 NT$299。稅額由 Paddle 依付款資料計算。</p>
+        </div>
+        <div className="paddle-checkout-frame" />
+        <p className="checkout-security-note">付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。</p>
+      </aside>}
     </div>
     <p className="muted">付款由 Paddle 安全處理。訂閱狀態以伺服器收到的 Paddle 通知為準；需要取消或處理付款問題時，請透過聯絡管道協助。</p>
   </AppShell>

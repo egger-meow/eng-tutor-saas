@@ -23,17 +23,27 @@ async function getPaddle() {
   return paddle
 }
 
-export async function openPaddleCheckout(transactionId: string, onCompleted: () => void) {
+export async function openPaddleCheckout(transactionId: string, frameTarget: string, onCompleted: () => void) {
   completedCallback = onCompleted
   const paddle = await getPaddle()
+  paddle.Checkout.close()
   paddle.Checkout.open({
     transactionId,
     settings: {
-      displayMode: 'overlay',
+      displayMode: 'inline',
       theme: 'light',
       locale: 'zh-TW',
+      variant: 'one-page',
+      frameTarget,
+      frameInitialHeight: 720,
+      frameStyle: 'width: 100%; min-width: 312px; background-color: transparent; border: none;',
       showAddDiscounts: false,
       allowDiscountRemoval: false,
     },
   })
+}
+
+export async function closePaddleCheckout() {
+  const paddle = await getPaddle()
+  paddle.Checkout.close()
 }
