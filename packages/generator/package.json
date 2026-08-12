@@ -7,11 +7,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+    ,"audit:curriculum": "tsx src/audit-curriculum.ts"
   },
   "dependencies": {
     "zod": "^4.0.1"
   },
   "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsx": "^4.20.6",
     "typescript": "~6.0.2"
   }
 }
