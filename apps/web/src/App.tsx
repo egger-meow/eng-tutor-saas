@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import './App.css'
-import { createChild, deleteChild, listChildren, updateChild, type Child } from './lib/children'
+import { archiveChild, createChild, listChildren, updateChild, type Child } from './lib/children'
 import { getSupabaseClient } from './lib/supabase'
 
 type Notice = { kind: 'error' | 'success'; text: string } | null
@@ -108,9 +108,9 @@ function Dashboard({ session }: { session: Session }) {
   useEffect(() => { void refresh() }, [refresh])
 
   async function remove(child: Child) {
-    if (!window.confirm(`確定移除「${child.display_name}」？相關資料也會一併刪除。`)) return
-    try { await deleteChild(child.id); await refresh() }
-    catch (caught) { setError(caught instanceof Error ? caught.message : '移除失敗。') }
+    if (!window.confirm(`確定封存「${child.display_name}」？既有教材與學習紀錄會保留。`)) return
+    try { await archiveChild(child.id); await refresh() }
+    catch (caught) { setError(caught instanceof Error ? caught.message : '封存失敗。') }
   }
 
   return (
@@ -129,7 +129,7 @@ function Dashboard({ session }: { session: Session }) {
               {children.map((child) => <li key={child.id}>
                 {editing === child.id ? <ChildForm child={child} onSaved={() => { setEditing(null); void refresh() }} onCancel={() => setEditing(null)} /> : <>
                   <div><strong>{child.display_name}</strong><span>{child.grade} 年級 · {child.is_active ? '準備中' : '已暫停'}</span></div>
-                  <div className="row-actions"><button className="text-button" onClick={() => setEditing(child.id)}>編輯</button><button className="text-button danger" onClick={() => void remove(child)}>移除</button></div>
+                  <div className="row-actions"><button className="text-button" onClick={() => setEditing(child.id)}>編輯</button><button className="text-button danger" onClick={() => void remove(child)}>封存</button></div>
                 </>}
               </li>)}
             </ul>

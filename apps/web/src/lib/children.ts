@@ -20,7 +20,7 @@ function cleanInput(input: ChildInput): ChildInput {
 }
 
 export async function listChildren(): Promise<Child[]> {
-  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, is_active, timezone, delivery_weekday, created_at').order('created_at')
+  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, is_active, timezone, delivery_weekday, created_at').eq('is_active', true).order('created_at')
   if (error) throw error
   return data as Child[]
 }
@@ -37,7 +37,7 @@ export async function updateChild(id: string, input: ChildInput): Promise<void> 
   if (error) throw error
 }
 
-export async function deleteChild(id: string): Promise<void> {
-  const { error } = await getSupabaseClient().from('children').delete().eq('id', id)
+export async function archiveChild(id: string): Promise<void> {
+  const { error } = await getSupabaseClient().from('children').update({ is_active: false }).eq('id', id)
   if (error) throw error
 }

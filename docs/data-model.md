@@ -2,19 +2,29 @@
 
 ## Ownership Graph
 
-`auth.users → profiles → children → subscriptions/materials/feedback/generation_jobs`
+`auth.users → profiles → children → subscriptions/materials/feedback/learning memory`
 
 `profiles.id` equals the authenticated parent's user ID. Every child belongs to exactly one profile. Child-scoped records reference `child_id`; RLS verifies ownership through `children.parent_id = auth.uid()`.
 
 ## Core Records
 
 - `profiles`: parent identity and service preferences.
-- `children`: grade, learning preferences, timezone, and weekly delivery configuration.
-- `subscriptions`: one entitlement per child, with provider identifiers and status.
-- `feedback`: structured reaction to a completed material; immutable source material plus timestamps.
-- `materials`: one weekly edition, its input/rule versions, and private artifact paths.
-- `generation_jobs`: scheduled, claimed, completed, or failed work with an idempotency key and retry metadata.
+- `children`: identity, grade, textbook version, timezone, delivery day, next generation time, and archive state.
+- `child_profiles`: parent-editable baseline, current levels, goals, school progress, expectations, and preferences.
+- `child_vocab_progress` and `child_grammar_progress`: dynamic mastery keyed by stable text IDs from the Git-owned curriculum.
+- `child_learning_state`: compact weekly history, recurring mistakes, comprehension accuracy, and difficulty trend.
+- `subscriptions`: one entitlement per child, including provider/customer IDs, plan, TWD price, founding status, and billing period state.
+- `feedback`: structured completion, difficulty, weak area, mistakes, and parent/child updates. Its `child_id` and `material_id` are immutable.
+- `materials`: one weekly edition, canonical source, generation summary, prompt/generator/model versions, input snapshot, and private artifact paths.
+- `generation_jobs`: private worker queue with idempotency, scheduling, leases, retries, and sanitized errors. Browser roles cannot read raw jobs.
 - `operational_settings`: privileged configuration such as `daily_generation_limit = 15`.
+- `enrollment_settings`: typed public capacity state (`open`, `waitlist`, or `closed`) with capacity and founding limits.
+
+## Memory Boundaries
+
+Stable parent-provided context belongs in `child_profiles`; generator-owned observations belong in the progress and learning-state tables. Weekly history stays compact instead of storing prompt transcripts. Curriculum definitions remain versioned in Git—the database stores only stable curriculum IDs and each child's progress.
+
+Parents may read all records belonging to their children and edit profiles and feedback. Children are archived with `is_active = false`; browser hard deletion is denied so materials and learning history remain intact. Service-role workers maintain progress, learning state, materials, subscriptions, and generation jobs.
 
 ## Queue Invariants
 

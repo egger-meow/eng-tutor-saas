@@ -29,6 +29,16 @@ begin
     raise exception 'new child did not receive a beta trial entitlement';
   end if;
 
+  if not exists (
+    select 1 from public.child_profiles
+    where child_id = '00000000-0000-0000-0000-000000000002'
+  ) or not exists (
+    select 1 from public.child_learning_state
+    where child_id = '00000000-0000-0000-0000-000000000002'
+  ) then
+    raise exception 'new child did not receive learning memory records';
+  end if;
+
   insert into public.generation_jobs (
     child_id,
     material_week,
@@ -61,6 +71,13 @@ begin
   end if;
 
   if not exists (
+    select 1 from public.enrollment_settings
+    where key = 'default' and status = 'open' and capacity = 100 and founding_limit = 30
+  ) then
+    raise exception 'typed enrollment settings mismatch';
+  end if;
+
+  if not exists (
     select 1
     from storage.buckets
     where id = 'weekly-materials'
@@ -81,12 +98,39 @@ begin
     ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000011', 'Sibling A2', 8),
     ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000012', 'Family B Child', 9);
 
+  insert into public.materials (
+    id, child_id, material_week, rule_version, input_snapshot,
+    student_pdf_path, parent_answer_pdf_path
+  ) values
+    (
+      '00000000-0000-0000-0000-000000000031',
+      '00000000-0000-0000-0000-000000000021', current_date, 'test-v1', '{}'::jsonb,
+      'family-a/student.pdf', 'family-a/answer.pdf'
+    ),
+    (
+      '00000000-0000-0000-0000-000000000032',
+      '00000000-0000-0000-0000-000000000023', current_date, 'test-v1', '{}'::jsonb,
+      'family-b/student.pdf', 'family-b/answer.pdf'
+    );
+
+  insert into public.feedback (id, child_id, material_id, completion_rate)
+  values (
+    '00000000-0000-0000-0000-000000000041',
+    '00000000-0000-0000-0000-000000000021',
+    '00000000-0000-0000-0000-000000000031', 100
+  );
+
   perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000011', true);
   perform set_config('role', 'authenticated', true);
 
   select count(*) into visible_count from public.children;
   if visible_count <> 2 then
     raise exception 'family A should see exactly its two siblings, saw %', visible_count;
+  end if;
+
+  select count(*) into visible_count from public.child_profiles;
+  if visible_count <> 2 then
+    raise exception 'family A should see exactly two child profiles, saw %', visible_count;
   end if;
 
   update public.children
@@ -105,6 +149,38 @@ begin
   end;
   if not blocked then
     raise exception 'cross-family insert bypassed RLS';
+  end if;
+
+  blocked := false;
+  begin
+    delete from public.children
+    where id = '00000000-0000-0000-0000-000000000021';
+  exception when insufficient_privilege then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'authenticated parent retained hard-delete access';
+  end if;
+
+  blocked := false;
+  begin
+    update public.feedback
+    set child_id = '00000000-0000-0000-0000-000000000023',
+        material_id = '00000000-0000-0000-0000-000000000032'
+    where id = '00000000-0000-0000-0000-000000000041';
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'feedback source identity was mutable';
+  end if;
+
+  update public.children
+  set is_active = false
+  where id = '00000000-0000-0000-0000-000000000021';
+  get diagnostics changed_count = row_count;
+  if changed_count <> 1 then
+    raise exception 'owner could not archive child';
   end if;
 
   perform set_config('role', 'none', true);
