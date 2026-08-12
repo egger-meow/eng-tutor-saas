@@ -12,12 +12,7 @@ export type GenerationContext = {
   priorFeedback: ReadonlyArray<string>
 }
 
-export type GeneratedLesson = {
-  title: string
-  studentMarkdown: string
-  parentAnswerMarkdown: string
-}
-
-export interface LessonGenerator {
-  generate(job: GenerationJob, context: GenerationContext): Promise<GeneratedLesson>
-}
+export { WeeklyLessonSchema } from './lesson-schema.js'
+export type { WeeklyLesson } from './lesson-schema.js'
+export { parseWeeklyLesson, validateWeeklyLesson } from './validate-lesson.js'
+export type { LessonValidationIssue, LessonValidationResult } from './validate-lesson.js'
