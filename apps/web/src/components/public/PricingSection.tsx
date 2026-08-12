@@ -10,5 +10,6 @@ export function PricingSection() {
       <article><p className="status-label">前 {productConfig.foundingLimit} 位孩子</p><h3>Founding 30</h3><p>第一週免費；第一個付費月 NT${productConfig.foundingPrice}，之後恢復 NT${productConfig.standardPrice}。</p></article>
     </div>
     <CapacityStatus />
+    <p className="capacity-explainer">前 100 位是第一階段。我們希望先把每週教材品質和系統真正顧好，再開放下一批；額滿後既有家庭仍會正常收到教材。</p>
   </section>
 }

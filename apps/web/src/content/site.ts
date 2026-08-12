@@ -1,5 +1,5 @@
 export const productConfig = {
-  name: '紙上英文',
+  name: '紙屬英文',
   standardPrice: 499,
   foundingPrice: 299,
   foundingLimit: 30,
@@ -18,4 +18,3 @@ export const founderContent = {
   scoreEvidencePath: '',
   scoreSummary: '',
 } as const
-

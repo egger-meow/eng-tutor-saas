@@ -6,16 +6,16 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  --color-canvas: #f6f2e9;
+  --color-canvas: #f3efe6;
   --color-paper: #fffdf8;
-  --color-ink: #172238;
-  --color-text: #343a40;
-  --color-muted: #62645f;
-  --color-rule: #d8d1c3;
-  --color-rule-strong: #aaa295;
-  --color-action: #355c4a;
-  --color-action-hover: #294839;
-  --color-accent: #b77942;
+  --color-ink: #18261f;
+  --color-text: #3e413c;
+  --color-muted: #6c6b63;
+  --color-rule: #d8d0c1;
+  --color-rule-strong: #9e978a;
+  --color-action: #284f3e;
+  --color-action-hover: #17392b;
+  --color-accent: #9a5938;
   --color-success: #316044;
   --color-success-soft: #e6efe8;
   --color-warning: #7a552c;
@@ -36,7 +36,7 @@
   --radius-control: .625rem;
   --radius-surface: .75rem;
   --focus-ring: 0 0 0 3px rgb(53 92 74 / 24%);
-  --content-width: 72rem;
+  --content-width: 76rem;
   --transition-fast: 180ms ease;
 
   /* Temporary compatibility aliases for the extracted prototype styles. */

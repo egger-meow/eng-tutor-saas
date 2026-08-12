@@ -10,7 +10,7 @@ export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavi
   const childPath = activeChildId ? `/children/${activeChildId}` : '/children/new'
   return (
     <header className="site-header parent-header">
-      <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>紙上英文</a>
+      <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>紙屬英文</a>
       <nav aria-label="家長功能">
         <a href="/dashboard" onClick={handleInternalLink}>本週教材</a>
         <a href={childPath} onClick={handleInternalLink}>孩子資料</a>
@@ -23,4 +23,3 @@ export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavi
     </header>
   )
 }
-
