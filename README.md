@@ -27,3 +27,14 @@ pnpm build
 For local backend work, inspect available commands with `pnpm exec supabase --help`, then use `pnpm exec supabase start` and `pnpm exec supabase db reset`. This project uses ports `55320`–`55329` so it can run beside another default Supabase stack.
 
 Read `docs/SPEC.md` before changing product behavior. The future ChatGPT Work schedule is intentionally not enabled yet; its operational contract is in `docs/generation-workflow.md`.
+
+## Generate the synthetic PDF pair
+
+Install the pinned Chromium runtime once, then generate the validated fixture:
+
+```powershell
+pnpm --filter @paper-english/pdf pdf:install
+pnpm generate:synthetic
+```
+
+The command writes private, git-ignored artifacts to `output/pdf/`. It validates one canonical lesson, derives both the Student Worksheet and Parent Answer Guide from it, and replaces only the two synthetic outputs. If Chromium is missing, rerun the install command. Production child data and Supabase access are intentionally outside this local slice.

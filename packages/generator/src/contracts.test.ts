@@ -9,8 +9,8 @@ const validLesson = () => ({
   reading: { title: 'A Small Garden', passage: 'A community builds a garden.' },
   grammar: { topic: 'Present simple', explanation: 'Use it for routines.', examples: ['They water plants.'] },
   exercises: [{ title: 'Reading', instructions: 'Answer each question.', questions: [{ questionId: 'q1', prompt: 'What did they build?', type: 'short-answer', writingLines: 2 }] }],
-  homework: { instructions: 'Review today’s lesson.', tasks: ['Write one sentence.'] },
-  answers: [{ questionId: 'q1', answer: 'A garden.', explanation: 'The passage states this directly.' }],
+  homework: { instructions: 'Review today’s lesson.', tasks: [{ questionId: 'h1', prompt: 'Write one sentence.', writingLines: 2 }] },
+  answers: [{ questionId: 'q1', answer: 'A garden.', explanation: 'The passage states this directly.' }, { questionId: 'h1', answer: 'Answers vary.', explanation: 'Check for a complete sentence.' }],
   parentGuidance: { weeklyFocus: 'Main ideas', supportTips: ['Ask for evidence.'], completionCheck: 'Check every answer.' },
 })
 

@@ -68,7 +68,7 @@ export const WeeklyLessonSchema = z.strictObject({
   exercises: z.array(ExerciseGroupSchema).min(1),
   homework: z.strictObject({
     instructions: RequiredText,
-    tasks: z.array(RequiredText).min(1).max(8),
+    tasks: z.array(z.strictObject({ questionId: StableId, prompt: RequiredText, writingLines: z.number().int().min(1).max(8).default(2) })).min(1).max(8),
   }),
   answers: z.array(AnswerSchema).min(1),
   parentGuidance: z.strictObject({

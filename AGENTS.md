@@ -424,3 +424,21 @@ Begin with:
 Then use the numbered map to retrieve only the detailed requirements needed for the current task.
 
 Treat context window space as an engineering resource.
+
+---
+
+# Current Build and PDF Commands
+
+Use repository-level scripts after following the reading protocol:
+
+```powershell
+pnpm dev
+pnpm lint
+pnpm test
+pnpm typecheck
+pnpm build
+pnpm --filter @paper-english/pdf pdf:install
+pnpm generate:synthetic
+```
+
+Source lives under `apps/web/src/`, `packages/generator/src/`, and `packages/pdf/src/`; Supabase migrations and tests live under `supabase/`. Generated PDFs belong only in the git-ignored `output/pdf/` directory. The synthetic command proves canonical validation and deterministic PDF rendering locally; the future ChatGPT Work schedule remains responsible for queue claiming, production generation, private upload, and job completion.

@@ -16,8 +16,8 @@ const lesson = parseWeeklyLesson({
   reading: { title: 'Reading', passage: 'Passage.' },
   grammar: { topic: 'Grammar', explanation: 'Explanation.', examples: ['Example.'] },
   exercises: [{ title: 'Practice', instructions: 'Answer.', questions: [{ questionId: 'q1', prompt: 'Question?', type: 'short-answer', writingLines: 1 }] }],
-  homework: { instructions: 'Review.', tasks: ['Write.'] },
-  answers: [{ questionId: 'q1', answer: 'Answer.', explanation: 'Reason.' }],
+  homework: { instructions: 'Review.', tasks: [{ questionId: 'h1', prompt: 'Write.', writingLines: 1 }] },
+  answers: [{ questionId: 'q1', answer: 'Answer.', explanation: 'Reason.' }, { questionId: 'h1', answer: 'Answers vary.', explanation: 'Check the response.' }],
   parentGuidance: { weeklyFocus: 'Reading', supportTips: ['Ask why.'], completionCheck: 'Check q1.' },
 })
 

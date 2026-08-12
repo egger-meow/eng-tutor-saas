@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:db": "supabase db query --local --file supabase/tests/smoke.sql",
     "typecheck": "pnpm -r typecheck",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "generate:synthetic": "pnpm --filter @paper-english/pdf generate:synthetic"
   },
   "devDependencies": {
     "supabase": "^2.48.3",

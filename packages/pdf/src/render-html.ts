@@ -34,15 +34,18 @@ export function renderStudentHtml(lesson: WeeklyLesson): string {
     <section><h2>Reading</h2><h3>${h(lesson.reading.title)}</h3><p class="passage">${h(lesson.reading.passage)}</p></section>
     <section><h2>Grammar Focus</h2><h3>${h(lesson.grammar.topic)}</h3><p>${h(lesson.grammar.explanation)}</p>${list(lesson.grammar.examples)}</section>
     <section>${lesson.exercises.map((group) => `<h2>${h(group.title)}</h2><p>${h(group.instructions)}</p>${group.questions.map(questionHtml).join('')}`).join('')}</section>
-    <section><h2>Homework</h2><p>${h(lesson.homework.instructions)}</p>${list(lesson.homework.tasks)}</section>`
+    <section><h2>Homework</h2><p>${h(lesson.homework.instructions)}</p>${lesson.homework.tasks.map((task) => `<article class="question" data-question-id="${h(task.questionId)}"><div class="label">${h(task.questionId)}</div><p>${h(task.prompt)}</p>${Array.from({ length: task.writingLines }, () => '<div class="writing-line"></div>').join('')}</article>`).join('')}</section>`
   return documentShell(`${lesson.metadata.title} - Student Worksheet`, body)
 }
 
 export function renderParentAnswerHtml(lesson: WeeklyLesson): string {
-  const questions = new Map(lesson.exercises.flatMap((group) => group.questions.map((question) => [question.questionId, question] as const)))
+  const questions = new Map([
+    ...lesson.exercises.flatMap((group) => group.questions.map((question) => [question.questionId, question.prompt] as const)),
+    ...lesson.homework.tasks.map((task) => [task.questionId, task.prompt] as const),
+  ])
   const body = `${header(lesson, 'Parent Answer Guide')}
     <section><h2>Personalization Summary</h2><p>${h(lesson.personalization.rationale)}</p><p><strong>Focus areas:</strong> ${lesson.personalization.focusAreas.map(h).join(', ')}</p><p><strong>Previous feedback:</strong> ${h(lesson.personalization.priorFeedbackSummary)}</p></section>
-    <section><h2>Answers and Explanations</h2>${lesson.answers.map((answer) => { const question = questions.get(answer.questionId)!; return `<article class="answer" data-question-id="${h(answer.questionId)}"><div class="label">${h(answer.questionId)}</div><p>${h(question.prompt)}</p><p><strong>Answer:</strong> ${h(answer.answer)}</p><p><strong>Why:</strong> ${h(answer.explanation)}</p></article>` }).join('')}</section>
+    <section><h2>Answers and Explanations</h2>${lesson.answers.map((answer) => { const prompt = questions.get(answer.questionId)!; return `<article class="answer" data-question-id="${h(answer.questionId)}"><div class="label">${h(answer.questionId)}</div><p>${h(prompt)}</p><p><strong>Answer:</strong> ${h(answer.answer)}</p><p><strong>Why:</strong> ${h(answer.explanation)}</p></article>` }).join('')}</section>
     <section><h2>Parent Guidance</h2><p><strong>Weekly focus:</strong> ${h(lesson.parentGuidance.weeklyFocus)}</p>${list(lesson.parentGuidance.supportTips)}<p><strong>Completion check:</strong> ${h(lesson.parentGuidance.completionCheck)}</p></section>`
   return documentShell(`${lesson.metadata.title} - Parent Answer Guide`, body)
 }

@@ -10,8 +10,8 @@ const lesson = parseWeeklyLesson({
   reading: { title: 'Garden', passage: 'A short passage.' },
   grammar: { topic: 'Present simple', explanation: 'Use it for routines.', examples: ['They grow plants.'] },
   exercises: [{ title: 'Practice', instructions: 'Answer.', questions: [{ questionId: 'q1', prompt: 'What grows?', type: 'short-answer', writingLines: 2 }] }],
-  homework: { instructions: 'Review.', tasks: ['Write a sentence.'] },
-  answers: [{ questionId: 'q1', answer: 'Plants grow.', explanation: 'The passage says so.' }],
+  homework: { instructions: 'Review.', tasks: [{ questionId: 'h1', prompt: 'Write a sentence.', writingLines: 2 }] },
+  answers: [{ questionId: 'q1', answer: 'Plants grow.', explanation: 'The passage says so.' }, { questionId: 'h1', answer: 'Answers vary.', explanation: 'Check the sentence.' }],
   parentGuidance: { weeklyFocus: 'Evidence', supportTips: ['Ask why.'], completionCheck: 'Check q1.' },
 })
 

@@ -19,7 +19,10 @@ function schemaIssues(error: ZodError): LessonValidationIssue[] {
 
 function relationshipIssues(lesson: WeeklyLesson): LessonValidationIssue[] {
   const issues: LessonValidationIssue[] = []
-  const questionIds = lesson.exercises.flatMap((group) => group.questions.map((question) => question.questionId))
+  const questionIds = [
+    ...lesson.exercises.flatMap((group) => group.questions.map((question) => question.questionId)),
+    ...lesson.homework.tasks.map((task) => task.questionId),
+  ]
   const answerIds = lesson.answers.map((answer) => answer.questionId)
 
   for (const [label, ids, path] of [
