@@ -47,3 +47,5 @@ Perform a silent learner simulation before returning findings. Assume the child 
 - delayed retrieval in a new context.
 
 Audit the trajectory as well as this packet: prior evidence, uncertainty, and a concrete next-week decision must be visible. Repeated feedback themes become reviewed rubric/process candidates rather than silently mutating production prompts from one anecdote. Prefer compact structured IDs over repeated raw history, but never remove evidence needed to explain a decision.
+
+Treat `improvementComparedToPrevious` as a claim to audit, not an author assertion. For each claim, point to the changed packet section and explain what observable learner behavior or reduced friction would show that it worked. Mark critical when the field is generic, contradicts the draft, or claims improvement without a previous-packet baseline.

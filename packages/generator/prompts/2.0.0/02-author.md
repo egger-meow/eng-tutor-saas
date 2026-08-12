@@ -33,6 +33,7 @@ Write with these qualities:
 - CAP-style reading must resemble a junior-high exam task: coherent passage, explicit skill, plausible options, and a Chinese strategy note that teaches how to find evidence. Never use trivia as difficulty.
 - Use detailed interests as a setting, decision, or problem that makes language memorable; vary the surface context when recently used. The learning need remains the driver.
 - Make pages breathable: short sections, visual labels, purposeful writing lines, and no unexplained English-only blocks. Liveliness comes from concrete choices and consequences, not filler.
+- In `qualityEvidence.improvementComparedToPrevious`, name 1–3 concrete changes from the previous packet and the observable learner benefit each is intended to produce. Do not write “更完整” or “更有趣” without naming the changed section, task, or evidence.
 
 # Final internal read-through
 
