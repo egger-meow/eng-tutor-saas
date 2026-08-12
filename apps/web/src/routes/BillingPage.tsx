@@ -17,10 +17,27 @@ export function BillingPage({ session }: { session: Session }) {
   const [error, setError] = useState('')
   const [checkoutChildId, setCheckoutChildId] = useState<string | null>(null)
   const [activeCheckoutChildId, setActiveCheckoutChildId] = useState<string | null>(null)
+  const [activatingChildId, setActivatingChildId] = useState<string | null>(null)
   const [checkoutNotice, setCheckoutNotice] = useState('')
 
   async function refreshSubscriptions() {
-    setSubscriptions(await listOwnedSubscriptions())
+    const nextSubscriptions = await listOwnedSubscriptions()
+    setSubscriptions(nextSubscriptions)
+    return nextSubscriptions
+  }
+
+  async function waitForSubscriptionActivation(childId: string) {
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, 2000))
+      const nextSubscriptions = await refreshSubscriptions()
+      const current = nextSubscriptions.find((subscription) => subscription.childId === childId)
+      if (current?.status === 'active') {
+        setActivatingChildId(null)
+        setCheckoutNotice('訂閱已啟用。之後會依這位孩子自己的七天週期持續準備教材。')
+        return
+      }
+    }
+    setCheckoutNotice('付款已完成，Paddle 狀態仍在同步中；稍後重新整理即可看到最新訂閱狀態。')
   }
 
   async function startCheckout(childId: string) {
@@ -32,9 +49,13 @@ export function BillingPage({ session }: { session: Session }) {
       await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()))
       const checkout = await prepareCheckout(childId)
       await openPaddleCheckout(checkout.transactionId, 'paddle-checkout-frame', () => {
-        setCheckoutNotice('付款已送出，正在等候 Paddle 確認訂閱狀態。通常幾秒內會完成。')
-        window.setTimeout(() => void refreshSubscriptions(), 2500)
-        window.setTimeout(() => void refreshSubscriptions(), 7000)
+        setActivatingChildId(childId)
+        setCheckoutNotice('付款完成，正在同步訂閱狀態，通常約 10 秒。這個頁面會自動更新。')
+        setActiveCheckoutChildId(null)
+        void closePaddleCheckout()
+        void waitForSubscriptionActivation(childId).catch(() => {
+          setCheckoutNotice('付款已完成，但目前無法自動讀取最新狀態；稍後重新整理即可再次確認。')
+        })
       })
     } catch (caught) {
       setActiveCheckoutChildId(null)
@@ -71,7 +92,7 @@ export function BillingPage({ session }: { session: Session }) {
     {!loading && children.length === 0 && <div className="empty-state"><h2>先新增孩子</h2><p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p><button className="button" type="button" onClick={() => navigate('/children/new')}>＋ 新增孩子</button></div>}
     <div className="billing-layout">
       <div className="subscription-list">
-      {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
+      {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} activationPending={activatingChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
       </div>
       {activeCheckoutChildId && <aside className="checkout-panel" aria-label="安全付款">
         <div className="checkout-panel-heading">

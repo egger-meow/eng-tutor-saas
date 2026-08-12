@@ -11,8 +11,9 @@ const labels = {
 
 function formatDate(value: string | null) { return value ? new Intl.DateTimeFormat('zh-TW', { dateStyle: 'medium', timeZone: 'Asia/Taipei' }).format(new Date(value)) : null }
 
-export function ChildSubscription({ child, subscription, busy, onSubscribe }: { child: Child; subscription?: SubscriptionView; busy?: boolean; onSubscribe: (childId: string) => void }) {
+export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe }: { child: Child; subscription?: SubscriptionView; busy?: boolean; activationPending?: boolean; onSubscribe: (childId: string) => void }) {
   if (!subscription) return <article className="subscription-card"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></article>
+  if (activationPending) return <article className="subscription-card"><div><p className="overline">{child.grade} 年級</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果。完成後這個頁面會自動更新，不需要重新付款或重新整理。</p></article>
   const [title, description] = labels[subscription.status]
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
