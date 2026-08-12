@@ -150,6 +150,7 @@ function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
     targets: pkg.learningPlan.targets.map((target) => target.id),
     coreVocabulary: pkg.studentLesson.vocabulary.map((item) => item.word),
     feedbackApplied: pkg.qualityEvidence.feedbackApplied,
+    improvementComparedToPrevious: pkg.qualityEvidence.improvementComparedToPrevious,
     trackingHypotheses: pkg.trackingDelta.hypothesesToVerify,
   }
 }
