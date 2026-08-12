@@ -1,0 +1,37 @@
+import { useState, type FormEvent } from 'react'
+import { getSupabaseClient } from '../../lib/supabase'
+
+export function AuthPanel() {
+  const [email, setEmail] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null)
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setBusy(true)
+    setNotice(null)
+    const { error } = await getSupabaseClient().auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    })
+    setBusy(false)
+    setNotice(error
+      ? { kind: 'error', text: error.message }
+      : { kind: 'success', text: '登入連結已寄出，請回到 Email 信箱完成登入。' })
+  }
+
+  return (
+    <section className="auth-panel" aria-labelledby="auth-title">
+      <p className="overline">家長登入</p>
+      <h2 id="auth-title">從 Email 繼續</h2>
+      <p className="muted">不用記密碼。我們會寄一封安全登入連結到你的信箱。</p>
+      <form onSubmit={submit}>
+        <label htmlFor="email">Email</label>
+        <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+        <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄送登入連結'}</button>
+      </form>
+      {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
+    </section>
+  )
+}
+
