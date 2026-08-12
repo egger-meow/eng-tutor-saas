@@ -47,7 +47,18 @@ export async function claimJobs(client: WorkerClient, workerId: string): Promise
 
 export async function loadGenerationContext(client: WorkerClient, jobId: string, workerId: string): Promise<GenerationContext> {
   const result = await client.rpc('worker_generation_context', { job_id: jobId, worker_id: workerId })
-  return unwrap(result, 'load generation context') as GenerationContext
+  const context = unwrap(result, 'load generation context') as GenerationContext
+  if (context.job.childId) {
+    try {
+      const trends = await client.rpc('worker_quality_trends', { child_id: context.job.childId })
+      context.qualityTrends = unwrap(trends, 'load quality trends')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown quality trend error'
+      console.warn(`Quality trends unavailable for ${context.job.childId}: ${message}`)
+      context.qualityTrends = []
+    }
+  }
+  return context
 }
 
 function assertLessonMatchesContext(lesson: WeeklyLesson, context: GenerationContext): void {
