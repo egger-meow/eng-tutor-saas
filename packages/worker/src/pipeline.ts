@@ -168,7 +168,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     unwrap(await storage.upload(paths.student, pdfs.student, { contentType: 'application/pdf', upsert: false }), 'upload student v2 PDF')
     unwrap(await storage.upload(paths.parent, pdfs.parentAnswer, { contentType: 'application/pdf', upsert: false }), 'upload parent v2 PDF')
     completionStarted = true
-    return unwrap(await input.client.rpc('worker_complete_generation_job', {
+    const materialId = unwrap(await input.client.rpc('worker_complete_generation_job', {
       job_id: input.context.job.id,
       worker_id: input.workerId,
       student_pdf_path: paths.student,
@@ -179,6 +179,13 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       generator_version: pkg.metadata.curriculumVersion,
       model_name: pkg.metadata.model,
     }), 'complete curriculum generation job') as string
+    try {
+      await input.client.rpc('worker_record_curriculum_observations', { material_id: materialId, worker_id: input.workerId, canonical_source: pkg })
+    } catch (observationError) {
+      const message = observationError instanceof Error ? observationError.message : 'Unknown observation error'
+      console.warn(`Curriculum observations were not recorded for ${materialId}: ${message}`)
+    }
+    return materialId
   } catch (error) {
     if (!completionStarted) {
       await storage.remove([paths.student, paths.parent])
