@@ -34,3 +34,16 @@ Mark `critical` when any of these occur:
 
 Compare with the previous packet's known weaknesses. “Different” does not mean “better”: state exactly which evidence shows improved calibration. Do not allow a high result in one dimension to cancel a critical failure in another.
 
+# Adversarial self-study audit
+
+Perform a silent learner simulation before returning findings. Assume the child is alone and tired. Verify that the packet provides, in order:
+
+- a clear promise and time estimate;
+- Chinese instructions explaining both action and purpose;
+- a worked example before each genuinely new task;
+- a cue that can be removed, then an independent attempt;
+- answer and explanation coverage without leaking answers in the student PDF;
+- a short recovery path when an answer is wrong;
+- delayed retrieval in a new context.
+
+Audit the trajectory as well as this packet: prior evidence, uncertainty, and a concrete next-week decision must be visible. Repeated feedback themes become reviewed rubric/process candidates rather than silently mutating production prompts from one anecdote. Prefer compact structured IDs over repeated raw history, but never remove evidence needed to explain a decision.

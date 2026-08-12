@@ -28,8 +28,12 @@ Write with these qualities:
 - Homework performs spaced retrieval and transfer. It may not be mere duplication of the same page.
 - Student output contains no answer leakage. Parent output stays compact: answer, short reasoning, accepted variants, likely misconception, and optional follow-up.
 - The tracking delta contains hypotheses to verify, not invented mastery claims.
+- Every new idea follows this loop: explain in Traditional Chinese → show a worked example → let the child try with a cue → remove the cue → check and explain the result. Never test a new idea before teaching it.
+- Include enough answerable practice to reveal the planned evidence: at least one supported, independent, transfer, and production item for each major target.
+- CAP-style reading must resemble a junior-high exam task: coherent passage, explicit skill, plausible options, and a Chinese strategy note that teaches how to find evidence. Never use trivia as difficulty.
+- Use detailed interests as a setting, decision, or problem that makes language memorable; vary the surface context when recently used. The learning need remains the driver.
+- Make pages breathable: short sections, visual labels, purposeful writing lines, and no unexplained English-only blocks. Liveliness comes from concrete choices and consequences, not filler.
 
 # Final internal read-through
 
 Mentally complete the lesson as the child. At every transition ask: “Do I know what to do, why I am doing it, and what earlier explanation helps?” Repair any abrupt jump, ambiguous item, unexplained term, childish passage, excessive density, or decorative empty page before output.
-
