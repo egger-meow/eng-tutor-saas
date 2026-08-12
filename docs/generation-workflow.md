@@ -10,6 +10,18 @@ ChatGPT Work must produce JSON matching `WeeklyLessonSchema` in `packages/genera
 
 Use `pnpm generate:synthetic` to test this boundary without Supabase or private credentials. The command writes only synthetic, git-ignored files under `output/pdf/`. It is a development proof, not a replacement for the scheduled worker, queue claiming, entitlement checks, private Storage upload, or transactional completion.
 
+## Worker Commands
+
+The future ChatGPT Work schedule calls the repository worker instead of reimplementing queue or Storage logic. Configure `SUPABASE_URL` and the server-only `SUPABASE_SECRET_KEY`; never use the browser publishable key.
+
+```powershell
+pnpm worker claim --worker chatgpt-work-daily
+pnpm worker context --worker chatgpt-work-daily --job <job-id>
+pnpm worker complete --worker chatgpt-work-daily --job <job-id> --lesson <lesson.json> --prompt-version <git-version> --generator-version <git-sha> --model <model-id>
+```
+
+`claim` prints generation contexts as JSON. ChatGPT Work creates one canonical lesson JSON per context and passes it to `complete`. Completion validates job identity, renders both PDFs, uploads them under `weekly-materials/<child-id>/<job-id>/`, and calls a transactional completion RPC. A rendering, upload, or completion failure removes staged paths and records a sanitized job failure.
+
 ## Daily Run
 
 1. Check out the current production branch and read `AGENTS.md`, `docs/SPEC.md`, `docs/product-rules.md`, and this runbook.

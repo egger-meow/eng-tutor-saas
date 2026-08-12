@@ -1,0 +1,21 @@
+{
+  "name": "@paper-english/worker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@paper-english/generator": "workspace:*",
+    "@paper-english/pdf": "workspace:*",
+    "@supabase/supabase-js": "^2.57.4"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "worker": "tsx src/cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsx": "^4.20.6",
+    "typescript": "~6.0.2"
+  }
+}

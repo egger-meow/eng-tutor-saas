@@ -6,6 +6,7 @@ import { renderPdf } from './render-pdf.js'
 
 export type PdfByteRenderer = (html: string) => Promise<Uint8Array>
 export type LessonPdfPair = { studentPath: string; parentAnswerPath: string }
+export type LessonPdfBytes = { student: Uint8Array; parentAnswer: Uint8Array }
 
 function assertPdf(bytes: Uint8Array, label: string): void {
   const signature = new TextDecoder().decode(bytes.subarray(0, 4))
@@ -34,11 +35,8 @@ export async function renderLessonPdfPair(lesson: WeeklyLesson, outputDir: strin
   let studentPublished = false
   let parentPublished = false
   try {
-    const studentBytes = await renderer(renderStudentHtml(lesson))
-    assertPdf(studentBytes, 'Student')
+    const { student: studentBytes, parentAnswer: parentBytes } = await renderLessonPdfBytes(lesson, renderer)
     await writeFile(temporaryStudent, studentBytes)
-    const parentBytes = await renderer(renderParentAnswerHtml(lesson))
-    assertPdf(parentBytes, 'Parent answer')
     await writeFile(temporaryParent, parentBytes)
     await rename(temporaryStudent, studentPath)
     studentPublished = true
@@ -52,4 +50,12 @@ export async function renderLessonPdfPair(lesson: WeeklyLesson, outputDir: strin
   } finally {
     await rm(temporaryDir, { recursive: true, force: true })
   }
+}
+
+export async function renderLessonPdfBytes(lesson: WeeklyLesson, renderer: PdfByteRenderer = renderPdf): Promise<LessonPdfBytes> {
+  const student = await renderer(renderStudentHtml(lesson))
+  assertPdf(student, 'Student')
+  const parentAnswer = await renderer(renderParentAnswerHtml(lesson))
+  assertPdf(parentAnswer, 'Parent answer')
+  return { student, parentAnswer }
 }

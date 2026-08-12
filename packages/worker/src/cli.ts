@@ -1,0 +1,54 @@
+import { readFile } from 'node:fs/promises'
+import { createWorkerClient } from './client.js'
+import { claimJobs, completeJob, loadGenerationContext } from './pipeline.js'
+
+function option(name: string, required = true): string | undefined {
+  const index = process.argv.indexOf(`--${name}`)
+  const value = index >= 0 ? process.argv[index + 1] : undefined
+  if (required && !value) throw new Error(`--${name} is required`)
+  return value
+}
+
+async function main(): Promise<void> {
+  const command = process.argv[2]
+  const workerId = option('worker') ?? ''
+  const client = createWorkerClient()
+
+  if (command === 'claim') {
+    const jobs = await claimJobs(client, workerId)
+    const contexts = await Promise.all(jobs.map((job) => loadGenerationContext(client, job.id, workerId)))
+    process.stdout.write(`${JSON.stringify(contexts, null, 2)}\n`)
+    return
+  }
+
+  if (command === 'context') {
+    const context = await loadGenerationContext(client, option('job') ?? '', workerId)
+    process.stdout.write(`${JSON.stringify(context, null, 2)}\n`)
+    return
+  }
+
+  if (command === 'complete') {
+    const jobId = option('job') ?? ''
+    const context = await loadGenerationContext(client, jobId, workerId)
+    const lesson = JSON.parse(await readFile(option('lesson') ?? '', 'utf8')) as unknown
+    const materialId = await completeJob({
+      client,
+      workerId,
+      context,
+      lesson,
+      promptVersion: option('prompt-version') ?? '',
+      generatorVersion: option('generator-version') ?? '',
+      modelName: option('model') ?? '',
+    })
+    process.stdout.write(`${JSON.stringify({ jobId, materialId })}\n`)
+    return
+  }
+
+  throw new Error('Usage: worker <claim|context|complete> --worker <id> [options]')
+}
+
+main().catch((error: unknown) => {
+  const message = error instanceof Error ? error.message : 'Unknown worker error'
+  process.stderr.write(`${message}\n`)
+  process.exitCode = 1
+})

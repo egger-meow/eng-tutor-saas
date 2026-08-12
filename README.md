@@ -38,3 +38,13 @@ pnpm generate:synthetic
 ```
 
 The command writes private, git-ignored artifacts to `output/pdf/`. It validates one canonical lesson, derives both the Student Worksheet and Parent Answer Guide from it, and replaces only the two synthetic outputs. If Chromium is missing, rerun the install command. Production child data and Supabase access are intentionally outside this local slice.
+
+## Run the Generation Worker
+
+Production commands require `SUPABASE_URL` and a server-only `SUPABASE_SECRET_KEY`:
+
+```powershell
+pnpm worker claim --worker local-operator
+```
+
+See `docs/generation-workflow.md` for context and completion commands. Never expose the worker key in GitHub Pages or commit generated customer artifacts.

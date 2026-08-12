@@ -323,3 +323,18 @@ exception
     raise;
 end;
 $$;
+
+do $$
+begin
+  if has_function_privilege('anon', 'public.worker_claim_generation_jobs(text)', 'execute')
+    or has_function_privilege('authenticated', 'public.worker_claim_generation_jobs(text)', 'execute') then
+    raise exception 'browser roles can execute worker claim RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.worker_claim_generation_jobs(text)', 'execute') then
+    raise exception 'service role cannot execute worker claim RPC';
+  end if;
+  if has_function_privilege('authenticated', 'public.worker_complete_generation_job(uuid,text,text,text,jsonb,jsonb,text,text,text)', 'execute') then
+    raise exception 'authenticated role can execute worker completion RPC';
+  end if;
+end;
+$$;

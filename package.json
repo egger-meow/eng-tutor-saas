@@ -8,11 +8,12 @@
   "scripts": {
     "dev": "pnpm --filter @paper-english/web dev",
     "lint": "pnpm --filter @paper-english/web lint",
-    "test": "vitest run",
-    "test:db": "supabase db query --local --file supabase/tests/smoke.sql",
+    "test": "vitest run --exclude **/dist/**",
+    "test:db": "node scripts/test-db.mjs",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
-    "generate:synthetic": "pnpm --filter @paper-english/pdf generate:synthetic"
+    "generate:synthetic": "pnpm --filter @paper-english/pdf generate:synthetic",
+    "worker": "pnpm --filter @paper-english/worker worker"
   },
   "devDependencies": {
     "supabase": "^2.48.3",
