@@ -37,6 +37,18 @@
 .field-wide { grid-column: 1 / -1; }
 .notice { padding: var(--space-3) var(--space-4); border-radius: var(--radius-control); }
 .notice-error { background: var(--color-error-soft); color: var(--color-error); }
+.capacity-status { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding: var(--space-4); border: 1px solid var(--color-rule); border-left: .25rem solid var(--color-success); border-radius: var(--radius-control); }
+.capacity-status span { color: var(--color-muted); }
+.capacity-status .button { margin-left: auto; }
+.status-waitlist { border-left-color: var(--color-warning); }
+.subscription-list { display: grid; gap: var(--space-6); margin-block: var(--space-8); }
+.subscription-card { padding: var(--space-6); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper); }
+.subscription-card h2 { margin-bottom: var(--space-2); }
+.status-trialing { background: var(--color-warning-soft); color: var(--color-warning); }
+.status-active { background: var(--color-success-soft); color: var(--color-success); }
+.status-past_due, .status-canceled { background: var(--color-error-soft); color: var(--color-error); }
+.status-paused { background: var(--color-paper-deep); color: var(--color-muted); }
+.narrow-page { width: min(42rem, 100%); margin-inline: auto; }
 .empty-state { padding: var(--space-8); border: 1px dashed var(--color-rule-strong); color: var(--color-muted); text-align: center; }
 @media (max-width: 43rem) {
   .site-header { min-height: 4rem; gap: var(--space-4); }
@@ -46,5 +58,7 @@
   .account-menu span { display: none; }
   .child-identity { align-items: start; flex-direction: column; }
   .feedback-form { grid-template-columns: 1fr; }
+  .capacity-status { align-items: stretch; flex-direction: column; }
+  .capacity-status .button { margin-left: 0; text-align: center; }
   .field-wide { grid-column: auto; }
 }

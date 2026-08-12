@@ -9,6 +9,8 @@ import { ChildProfilePage } from './routes/ChildProfilePage'
 import { DashboardPage } from './routes/DashboardPage'
 import { GuidePage } from './routes/GuidePage'
 import { LandingPage } from './routes/LandingPage'
+import { BillingPage } from './routes/BillingPage'
+import { WaitlistPage } from './routes/WaitlistPage'
 
 function App() {
   const route = useRoute()
@@ -26,11 +28,13 @@ function App() {
   if (!session) {
     if (route.name === 'about') return <AboutPage />
     if (route.name === 'guide') return <GuidePage />
+    if (route.name === 'waitlist') return <WaitlistPage />
     return <LandingPage />
   }
   if (route.name === 'child-new') return <ChildOnboardingPage session={session} />
   if (route.name === 'child-edit') return <ChildOnboardingPage session={session} childId={route.params.id} />
   if (route.name === 'child-overview') return <ChildProfilePage session={session} childId={route.params.id} />
+  if (route.name === 'billing') return <BillingPage session={session} />
   return <DashboardPage session={session} />
 }
 
