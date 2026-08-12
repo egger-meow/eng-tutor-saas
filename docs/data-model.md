@@ -16,7 +16,7 @@
 - `subscriptions`: one entitlement per child, including provider/customer IDs, plan, TWD price, founding status, and billing period state.
 - `feedback`: structured completion, difficulty, weak area, mistakes, and parent/child updates. Its `child_id` and `material_id` are immutable.
 - `materials`: one weekly edition, canonical source, generation summary, prompt/generator/model versions, input snapshot, and private artifact paths.
-- `generation_jobs`: private worker queue with idempotency, scheduling, leases, retries, and sanitized errors. Browser roles cannot read raw jobs.
+- `generation_jobs`: private worker queue with a source material, promised release, 48-hour feedback cutoff, 24-hour generation deadline, idempotency, leases, retries, and sanitized errors. Browser roles cannot read raw jobs.
 - `operational_settings`: privileged configuration such as `daily_generation_limit = 15`.
 - `enrollment_settings`: typed public capacity state (`open`, `waitlist`, or `closed`) with capacity and founding limits.
 
@@ -29,7 +29,11 @@ Parents may read all records belonging to their children and edit profiles and f
 ## Queue Invariants
 
 - A unique idempotency key prevents duplicate work for the same child/week/rule version.
-- A job can be claimed only when pending, due, and not already leased.
+- A delivered material immediately creates the next job on the child's unchanged seven-day release anchor.
+- A job with a source material is waiting for feedback until qualifying feedback arrives or its 48-hour cutoff passes.
+- Waiting jobs never consume spare normal capacity. Feedback after the cutoff applies to the following cycle.
+- Every eligible job at its 24-hour generation deadline is mandatory and may exceed normal capacity; otherwise eligible jobs fill the configured limit in deadline order.
+- Claiming without qualifying feedback records `feedback_missing = true` and does not imply successful completion.
 - A lease records worker identity and expiry so abandoned work can be recovered.
 - Completion requires both artifact paths and a material record.
 - Failures preserve a sanitized diagnostic and increment attempts.

@@ -39,19 +39,53 @@ begin
     raise exception 'new child did not receive learning memory records';
   end if;
 
+  insert into public.materials (
+    id, child_id, material_week, rule_version, input_snapshot,
+    student_pdf_path, parent_answer_pdf_path
+  ) values (
+    '00000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000002',
+    current_date - 7,
+    'test-v1',
+    '{}'::jsonb,
+    'migration-test/student.pdf',
+    'migration-test/answer.pdf'
+  );
+
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, scheduled_for,
+    source_material_id, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000002',
+    current_date + 7,
+    'test-v1',
+    'waiting-feedback',
+    now() - interval '1 minute',
+    '00000000-0000-0000-0000-000000000003',
+    now() + interval '4 days',
+    now() + interval '2 days',
+    now() + interval '3 days'
+  );
+
   insert into public.generation_jobs (
     child_id,
     material_week,
     rule_version,
     idempotency_key,
-    scheduled_for
+    scheduled_for,
+    release_at,
+    feedback_cutoff_at,
+    generation_due_at
   )
   select
     '00000000-0000-0000-0000-000000000002',
     current_date + n,
     'test-v1',
     'test-' || n,
-    now() - interval '1 minute'
+    now() - interval '1 minute',
+    now() + interval '4 days',
+    now() + interval '2 days',
+    now() + interval '3 days'
   from generate_series(1, 16) as n;
 
   select count(*)
@@ -60,6 +94,92 @@ begin
 
   if claimed_count <> 15 then
     raise exception 'expected 15 claims, got %', claimed_count;
+  end if;
+
+  if (
+    select status
+    from public.generation_jobs
+    where idempotency_key = 'waiting-feedback'
+  ) <> 'pending' then
+    raise exception 'job waiting for feedback was claimed to fill spare capacity';
+  end if;
+
+  insert into public.feedback (child_id, material_id, completion_rate)
+  values (
+    '00000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000003',
+    100
+  );
+
+  perform private_generation.claim_due_generation_jobs('feedback-test');
+
+  if not exists (
+    select 1
+    from public.generation_jobs
+    where idempotency_key = 'waiting-feedback'
+      and status = 'claimed'
+      and feedback_missing = false
+  ) then
+    raise exception 'qualifying feedback did not unlock its next job';
+  end if;
+
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, scheduled_for,
+    source_material_id, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000002',
+    current_date + 14,
+    'test-v1',
+    'cutoff-with-late-feedback',
+    now() - interval '1 minute',
+    '00000000-0000-0000-0000-000000000003',
+    now() + interval '47 hours',
+    now() - interval '1 hour',
+    now() + interval '23 hours'
+  );
+
+  perform private_generation.claim_due_generation_jobs('cutoff-test');
+
+  if not exists (
+    select 1
+    from public.generation_jobs
+    where idempotency_key = 'cutoff-with-late-feedback'
+      and status = 'claimed'
+      and feedback_missing = true
+  ) then
+    raise exception 'cutoff did not unlock job or late feedback was applied';
+  end if;
+
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, scheduled_for,
+    release_at, feedback_cutoff_at, generation_due_at
+  )
+  select
+    '00000000-0000-0000-0000-000000000002',
+    current_date + 100 + n,
+    'test-v1',
+    'mandatory-' || n,
+    now() - interval '1 minute',
+    now() + interval '12 hours',
+    now() - interval '36 hours',
+    now() - interval '12 hours'
+  from generate_series(1, 18) as n;
+
+  select count(*)
+  into claimed_count
+  from private_generation.claim_due_generation_jobs('mandatory-test');
+
+  if claimed_count <> 18 then
+    raise exception 'expected all 18 mandatory claims, got %', claimed_count;
+  end if;
+
+  if exists (
+    select 1
+    from public.generation_jobs
+    where idempotency_key like 'mandatory-%'
+      and feedback_missing = false
+  ) then
+    raise exception 'mandatory jobs without feedback were not marked feedback_missing';
   end if;
 
   if (

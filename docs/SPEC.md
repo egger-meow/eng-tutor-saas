@@ -2373,6 +2373,8 @@ Feedback affects:
 
 Submitting feedback must not trigger immediate regeneration.
 
+Each promised next delivery already has a generation job. Feedback submitted on or before that job's cutoff makes the job eligible for the normal worker queue; it does not create a second job. Feedback submitted after the cutoff is reserved for the following cycle.
+
 Correct flow:
 
 ```text
@@ -2584,11 +2586,24 @@ The public product cap is:
 
 The internal job-processing limit is an operational setting.
 
+The default normal capacity is 15 jobs per daily run. It is not a delivery cap:
+
+* jobs at or beyond their generation deadline are mandatory;
+* every mandatory job is claimed even when the count exceeds normal capacity;
+* when mandatory work is below capacity, eligible normal work fills the remaining slots;
+* unused capacity never causes a job that is still waiting for feedback to run early.
+
+Each child has an independent rolling cadence. A successful delivery schedules the next `release_at` exactly seven days after the existing release anchor, not seven days after generation happens to finish. The feedback cutoff is 48 hours before release and the generation deadline is 24 hours before release.
+
 ---
 
 # 123. Job Claiming
 
 A worker must claim a job before processing it.
+
+A job with a preceding `source_material_id` is eligible only when qualifying feedback was submitted by `feedback_cutoff_at`, or that cutoff has passed. When the cutoff passes without feedback, generation continues from existing learning state and records `feedback_missing = true`; missing feedback must not be interpreted as successful completion.
+
+Claim priority is mandatory work first, then earliest `generation_due_at`, then oldest creation time. Claiming must remain atomic under concurrent workers.
 
 Two workers or retries must not successfully generate the same target release twice unintentionally.
 
