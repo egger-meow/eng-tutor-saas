@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>正在返回英語教材服務</title>
+    <script>
+      var segment = window.location.pathname.split('/').filter(Boolean)[0]
+      var base = segment ? '/' + segment + '/' : '/'
+      window.location.replace(base)
+    </script>
+  </head>
+  <body><p>正在返回首頁…</p></body>
+</html>

@@ -1,4 +1,4 @@
-# 紙屬英文
+# Paper English｜個人化紙本英語教材
 
 Paper-first, personalized weekly English materials for Taiwanese junior-high learners. The parent portal is a static React application; Supabase owns authentication, tenant data, private PDFs, and the generation queue.
 
@@ -26,6 +26,10 @@ pnpm build
 ```
 
 For local backend work, inspect available commands with `pnpm exec supabase --help`, then use `pnpm exec supabase start` and `pnpm exec supabase db reset`. This project uses ports `55320`–`55329` so it can run beside another default Supabase stack.
+
+## Web application structure
+
+Public and authenticated route pages live in `apps/web/src/routes/`; reusable UI is grouped under `apps/web/src/components/`, and browser-safe Supabase access stays in `apps/web/src/lib/`. GitHub Pages builds with `/eng-tutor-saas/` as its asset and router base. The deploy workflow copies the SPA entry to `404.html`, so direct links such as `/eng-tutor-saas/billing` keep working after refresh.
 
 `pnpm test:e2e` is local-only and refuses non-local Supabase URLs. It creates a synthetic parent, child, and Week 1 job; renders and uploads both PDFs; verifies an authenticated signed download; submits feedback; confirms that Week 2 receives it; then removes all synthetic records and artifacts.
 

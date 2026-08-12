@@ -1,20 +1,22 @@
 import { useEffect, useState, type MouseEvent } from 'react'
-import { parseRoute, type Route } from './routes'
+import { addBasePath, parseRoute, stripBasePath, type Route } from './routes'
 
 const routeChangeEvent = 'paper-english:route-change'
 
 export function navigate(path: string) {
-  if (window.location.pathname === path) return
-  window.history.pushState({}, '', path)
+  const browserPath = addBasePath(path, import.meta.env.BASE_URL)
+  if (window.location.pathname === browserPath) return
+  window.history.pushState({}, '', browserPath)
   window.dispatchEvent(new Event(routeChangeEvent))
   window.scrollTo({ top: 0, behavior: 'auto' })
 }
 
 export function useRoute(): Route {
-  const [route, setRoute] = useState(() => parseRoute(window.location.pathname))
+  const readRoute = () => parseRoute(stripBasePath(window.location.pathname, import.meta.env.BASE_URL))
+  const [route, setRoute] = useState(readRoute)
 
   useEffect(() => {
-    const update = () => setRoute(parseRoute(window.location.pathname))
+    const update = () => setRoute(readRoute())
     window.addEventListener('popstate', update)
     window.addEventListener(routeChangeEvent, update)
     return () => {
@@ -33,4 +35,3 @@ export function handleInternalLink(event: MouseEvent<HTMLAnchorElement>) {
   event.preventDefault()
   navigate(href)
 }
-

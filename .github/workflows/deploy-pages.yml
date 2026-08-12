@@ -22,17 +22,21 @@ jobs:
       VITE_SUPABASE_URL: https://ykzszjrqynrhgdhoeovo.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HegGPcdXuCMcYtI9RSkXdg_qqHUgBpL
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
         with:
           version: 11.16.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @paper-english/web build
+      - name: Add SPA deep-link fallback
+        run: cp apps/web/dist/index.html apps/web/dist/404.html
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/dist
