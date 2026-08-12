@@ -1,34 +1,426 @@
-# Repository Guidelines
+# Mandatory SPEC Reading Protocol for Agents
 
-## Project Structure & Module Organization
+Before doing ANY implementation, architecture change, database migration, curriculum change, frontend change, billing change, or product behavior change in this repository, follow this protocol.
 
-Read `docs/SPEC.md` before changing product behavior. Use `apps/web/src/` for the parent portal, `packages/generator/` for curriculum contracts, `packages/pdf/` for rendering boundaries, `supabase/migrations/` for backend changes, and `.github/workflows/` for CI/deployment. Keep supporting decisions in focused files under `docs/`.
+## 1. Do NOT read the full `SPEC.md` first
 
-## Build, Test, and Development Commands
+`SPEC.md` is intentionally very large and detailed.
 
-Use Node.js 24+ and pnpm 11+. Repository commands are:
+It is a product knowledge base, not a document that should be loaded entirely into context for every task.
 
-```powershell
-pnpm dev          # run the Vite parent portal
-pnpm lint         # run Oxlint on the web app
-pnpm test         # run Vitest across the workspace
-pnpm test:db      # smoke-test the running local Supabase stack
-pnpm typecheck    # type-check every package
-pnpm build        # create production builds
+Reading all of it by default wastes context and may reduce implementation quality.
+
+---
+
+## 2. Read `SPEC-TOC.md` FIRST
+
+Your first specification read MUST be:
+
+```text
+SPEC-TOC.md
 ```
 
-## Coding Style & Naming Conventions
+Read the complete 210-section index.
 
-Use two-space indentation in TypeScript, strict compiler settings, extensionless imports in browser code, and explicit exported types at package boundaries. Oxlint is the current linter. Use PascalCase for React components/types, camelCase for functions, kebab-case for documentation, and CLI-generated timestamped names for Supabase migrations.
+Use it to understand:
 
-## Testing Guidelines
+* how the product is divided;
+* where the relevant requirements live;
+* which sections apply to the current task.
 
-Vitest discovers `*.test.ts` and `*.test.tsx` beside source files. Add focused behavioral tests and regression tests for defects. Prioritize ownership boundaries, queue idempotency, private storage, and week-to-week personalization. Run `pnpm test`; no numeric coverage threshold is set yet.
+Do not modify code before doing this.
 
-## Commit & Pull Request Guidelines
+---
 
-History uses Conventional Commit-style subjects such as `build: initialize product foundation`. Use a short lowercase type (`build`, `chore`, `docs`, `feat`, `fix`, or `test`), an optional scope, and an imperative summary. Keep commits scoped and include migrations, tests, and documentation together when they describe one change. Pull requests should explain user impact, link the relevant issue or specification section, list verification performed, and include screenshots for UI or PDF changes.
+## 3. Select relevant SPEC sections
 
-## Security & Agent Instructions
+After reading `SPEC-TOC.md`, determine which numbered sections of `SPEC.md` are relevant.
 
-Never commit real child data, credentials, generated private PDFs, or local environment files. Preserve parent-to-child-to-subscription ownership and the paper-first product philosophy. Treat `eng-tutor` as an upstream reference only; do not introduce a runtime dependency. Favor MVP-scale solutions and avoid features outside `docs/SPEC.md` without explicit approval.
+Before implementation, explicitly state internally or in your work plan:
+
+```text
+Relevant SPEC sections:
+#...
+#...
+#...
+```
+
+Then read those sections from `SPEC.md`.
+
+Do NOT read unrelated sections just because they exist.
+
+---
+
+## 4. Always read Section 204
+
+Every implementation task must read:
+
+> **Section 204 — Agent Instructions**
+
+This section contains repository-wide behavioral requirements.
+
+---
+
+## 5. Curriculum / generator work must also read Section 205
+
+If the task touches:
+
+* weekly material generation;
+* vocabulary;
+* grammar;
+* CAP alignment;
+* reading articles;
+* homework;
+* Student PDF educational content;
+* personalization logic;
+* `eng-tutor` curriculum upstream;
+
+you MUST also read:
+
+> **Section 205 — Curriculum Agent Instructions**
+
+---
+
+## 6. Use Section 210 to resolve ambiguity
+
+If two possible implementations both technically work, but the product direction is unclear, read:
+
+> **Section 210 — Final Product Rule**
+
+Prefer the implementation that better serves the core learning loop.
+
+---
+
+## 7. Expand context gradually
+
+Start with the smallest reasonable section set.
+
+If a section references another requirement that matters, read that additional section.
+
+Do not respond to uncertainty by loading the entire SPEC.
+
+Preferred pattern:
+
+```text
+Read TOC
+↓
+Read 5–10 relevant sections
+↓
+Inspect code
+↓
+Discover one dependency
+↓
+Read 2–3 additional sections
+↓
+Implement
+```
+
+Not:
+
+```text
+Read all 4000+ lines
+↓
+lose useful context
+↓
+implement from memory
+```
+
+---
+
+## 8. Use exact numbered headings
+
+When reading `SPEC.md`, locate content using section number and heading.
+
+Example:
+
+```text
+# 114. Generation Must Use Explicit Jobs
+```
+
+Read until the next numbered section begins.
+
+Do not depend on approximate keyword summaries when the actual requirement exists.
+
+---
+
+## 9. The TOC is not the requirement
+
+`SPEC-TOC.md` only tells you where requirements live.
+
+For example:
+
+```text
+64. Core Vocabulary Defines Difficulty Ceiling
+```
+
+does NOT contain enough detail by itself to implement the rule.
+
+If Section 64 matters to your task:
+
+> read Section 64 in `SPEC.md`.
+
+---
+
+## 10. Inspect the repository after reading relevant requirements
+
+After reading the relevant SPEC sections:
+
+1. inspect existing code;
+2. inspect current schema/migrations;
+3. inspect existing tests;
+4. follow existing architecture where it remains compatible with SPEC.
+
+Do not redesign working systems unnecessarily.
+
+---
+
+## 11. `eng-tutor` is upstream, not runtime
+
+For curriculum/material-generation work:
+
+1. read Sections 53–67 and 205 when relevant;
+2. inspect `docs/eng-tutor-upstream.md`;
+3. inspect only relevant current files from `egger-meow/eng-tutor`;
+4. port validated principles deliberately.
+
+Do NOT:
+
+* copy the entire repository;
+* blindly copy Jonathan-specific state;
+* create runtime dependency on `eng-tutor`;
+* automatically sync experimental upstream behavior.
+
+---
+
+## 12. Do not invent missing product rules
+
+If a behavior is already defined in SPEC:
+
+> follow it.
+
+If a behavior is genuinely undefined:
+
+1. check neighboring relevant sections;
+2. check Section 210;
+3. choose the simplest solution consistent with the product;
+4. document any meaningful new assumption.
+
+Do not silently invent a large new subsystem.
+
+---
+
+## 13. Respect MVP non-goals
+
+Before adding a feature not obviously required, read:
+
+> **Section 183 — MVP Non-Goals**
+
+and:
+
+> **Section 184 — Explicit Product Simplicity Rule**
+
+Do not implement something merely because other EdTech products commonly have it.
+
+---
+
+## 14. Read the matching Definition of Done
+
+For any major feature, read its relevant Definition of Done.
+
+Examples:
+
+### Account / multi-child
+
+Read:
+
+* 192
+* 198
+
+### Material generation
+
+Read:
+
+* 193
+* 199
+
+### Feedback / personalization
+
+Read:
+
+* 194
+
+### Billing
+
+Read:
+
+* 195
+* 196
+
+### Capacity
+
+Read:
+
+* 197
+
+### Learning guide
+
+Read:
+
+* 200
+
+Implementation is not complete until the relevant Definition of Done is satisfied.
+
+---
+
+## 15. Full SPEC reads are exceptional
+
+You may read the entire `SPEC.md` only when the task genuinely requires it, such as:
+
+* full product audit;
+* full SPEC refactor;
+* detecting contradictions across the whole specification;
+* producing a new global architecture from scratch;
+* explicit user instruction to review the complete SPEC.
+
+Even then:
+
+> read it in sections/chunks rather than loading the entire file at once when possible.
+
+---
+
+## 16. Updating SPEC
+
+If implementation requires an intentional change to the product contract:
+
+1. update the relevant section in `SPEC.md`;
+2. update `SPEC-TOC.md` if a section is added, removed, renamed, or renumbered;
+3. keep section numbering and titles synchronized.
+
+Never allow the TOC and SPEC headings to drift apart.
+
+---
+
+## 17. Mandatory first-step template
+
+At the beginning of a new substantial task, use this mental workflow:
+
+```text
+1. Read SPEC-TOC.md.
+2. Classify the task.
+3. Identify relevant section numbers.
+4. Read those sections in SPEC.md.
+5. Read Section 204.
+6. Read Section 205 if curriculum/generator-related.
+7. Inspect relevant existing code.
+8. Make the smallest implementation that satisfies SPEC.
+9. Run relevant tests.
+10. Check the matching Definition of Done.
+```
+
+---
+
+# Quick Examples
+
+## Example: "Build the parent dashboard"
+
+Do NOT read all of SPEC.
+
+Read approximately:
+
+```text
+17–21
+36–45
+141–152
+159–162
+179
+182
+192
+198
+204
+```
+
+Then inspect frontend and Supabase code.
+
+---
+
+## Example: "Generate weekly English materials"
+
+Read approximately:
+
+```text
+46–87
+109–132
+180–181
+187
+193–194
+199
+204–205
+210
+```
+
+Then inspect the generator and relevant `eng-tutor` upstream files.
+
+---
+
+## Example: "Integrate Paddle"
+
+Read approximately:
+
+```text
+20–24
+26–32
+133–140
+190
+195–197
+204
+```
+
+Then verify current Paddle behavior before implementation.
+
+---
+
+## Example: "Change vocabulary difficulty rules"
+
+Read:
+
+```text
+46–67
+73–81
+180–181
+204
+205
+210
+```
+
+Then inspect the latest relevant `eng-tutor` curriculum/generation files.
+
+---
+
+## Example: "Change landing page copy"
+
+Read:
+
+```text
+2–16
+22–32
+163–167
+191
+204
+209–210
+```
+
+There is no reason to load database retry semantics or PDF storage requirements.
+
+---
+
+# Final Rule
+
+**Never begin by reading the entire `SPEC.md`.**
+
+Begin with:
+
+> `SPEC-TOC.md`
+
+Then use the numbered map to retrieve only the detailed requirements needed for the current task.
+
+Treat context window space as an engineering resource.
