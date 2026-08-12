@@ -17,6 +17,7 @@ The future ChatGPT Work schedule calls the repository worker instead of reimplem
 ```powershell
 pnpm worker claim --worker chatgpt-work-daily
 pnpm worker context --worker chatgpt-work-daily --job <job-id>
+pnpm worker prompt-v2 --worker chatgpt-work-daily --job <job-id>
 pnpm worker complete --worker chatgpt-work-daily --job <job-id> --lesson <lesson.json> --prompt-version <git-version> --generator-version <git-sha> --model <model-id>
 pnpm worker complete-v2 --worker chatgpt-work-daily --job <job-id> --package <curriculum-package.json>
 ```

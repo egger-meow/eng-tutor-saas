@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
 import { claimJobs, completeCurriculumJob, completeJob, loadGenerationContext } from './pipeline.js'
+import { buildCurriculumPromptBundle } from './prompt-v2.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -24,6 +25,12 @@ async function main(): Promise<void> {
   if (command === 'context') {
     const context = await loadGenerationContext(client, option('job') ?? '', workerId)
     process.stdout.write(`${JSON.stringify(context, null, 2)}\n`)
+    return
+  }
+
+  if (command === 'prompt-v2') {
+    const context = await loadGenerationContext(client, option('job') ?? '', workerId)
+    process.stdout.write(`${await buildCurriculumPromptBundle(context)}\n`)
     return
   }
 
@@ -53,7 +60,7 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|complete|complete-v2> --worker <id> [options]')
+  throw new Error('Usage: worker <claim|context|prompt-v2|complete|complete-v2> --worker <id> [options]')
 }
 
 main().catch((error: unknown) => {
