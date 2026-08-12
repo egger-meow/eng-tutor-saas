@@ -70,6 +70,9 @@ Deno.serve(async (request) => {
       if (paddleBody?.error?.code === 'transaction_default_checkout_url_not_set') {
         return jsonResponse(503, { error: 'paddle_checkout_url_missing' })
       }
+      if (paddleResponse.status === 403 && paddleBody?.error?.code === 'forbidden') {
+        return jsonResponse(503, { error: 'paddle_api_key_forbidden' })
+      }
       return jsonResponse(502, { error: 'paddle_transaction_failed' })
     }
 

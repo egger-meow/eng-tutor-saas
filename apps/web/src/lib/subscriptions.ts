@@ -26,6 +26,9 @@ export async function prepareCheckout(childId: string): Promise<CheckoutPreparat
     if (code === 'paddle_checkout_url_missing') {
       throw new Error('Paddle Sandbox 尚未設定預設付款連結，設定完成後即可測試付款。')
     }
+    if (code === 'paddle_api_key_forbidden') {
+      throw new Error('Paddle API key 缺少 Transactions 的讀取或建立權限，請更新 Sandbox API key 後再試。')
+    }
     throw new Error('目前無法開啟安全付款，請稍後再試。')
   }
   if (!data?.transaction_id) throw new Error('付款交易未成功建立，請稍後再試。')
