@@ -5,6 +5,8 @@ import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { listChildren, type Child } from '../lib/children'
 import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
+import { prepareCheckout } from '../lib/subscriptions'
+import { openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function BillingPage({ session }: { session: Session }) {
@@ -12,6 +14,30 @@ export function BillingPage({ session }: { session: Session }) {
   const [subscriptions, setSubscriptions] = useState<SubscriptionView[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [checkoutChildId, setCheckoutChildId] = useState<string | null>(null)
+  const [checkoutNotice, setCheckoutNotice] = useState('')
+
+  async function refreshSubscriptions() {
+    setSubscriptions(await listOwnedSubscriptions())
+  }
+
+  async function startCheckout(childId: string) {
+    setCheckoutChildId(childId)
+    setCheckoutNotice('')
+    setError('')
+    try {
+      const checkout = await prepareCheckout(childId)
+      await openPaddleCheckout(checkout.transactionId, () => {
+        setCheckoutNotice('付款已送出，正在等候 Paddle 確認訂閱狀態。通常幾秒內會完成。')
+        window.setTimeout(() => void refreshSubscriptions(), 2500)
+        window.setTimeout(() => void refreshSubscriptions(), 7000)
+      })
+    } catch {
+      setError('目前無法開啟安全付款，請稍後再試。')
+    } finally {
+      setCheckoutChildId(null)
+    }
+  }
 
   useEffect(() => {
     void Promise.all([listChildren(), listOwnedSubscriptions()])
@@ -31,10 +57,11 @@ export function BillingPage({ session }: { session: Session }) {
     </header>
     {loading && <p role="status">正在讀取訂閱…</p>}
     {error && <p className="notice notice-error" role="alert">{error}</p>}
+    {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
     {!loading && !error && children.length === 0 && <div className="empty-state">新增孩子並完成第一週設定後，訂閱狀態會顯示在這裡。</div>}
     <div className="subscription-list">
-      {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} />)}
+      {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
     </div>
-    <p className="muted">需要取消或處理付款問題？目前請透過聯絡管道協助；正式付款服務完成伺服器端驗證後才會開放自助操作。</p>
+    <p className="muted">付款由 Paddle 安全處理。訂閱狀態以伺服器收到的 Paddle 通知為準；需要取消或處理付款問題時，請透過聯絡管道協助。</p>
   </AppShell>
 }

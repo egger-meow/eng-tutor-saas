@@ -18,9 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VITE_BASE_PATH: /eng-tutor-saas/
-      VITE_SUPABASE_URL: https://ykzszjrqynrhgdhoeovo.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HegGPcdXuCMcYtI9RSkXdg_qqHUgBpL
+      VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH }}
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}
+      VITE_PADDLE_ENV: sandbox
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4

@@ -60,6 +60,8 @@
 .subscription-list { display: grid; gap: var(--space-6); margin-block: var(--space-8); }
 .subscription-card { padding: var(--space-6); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper); }
 .subscription-card h2 { margin-bottom: var(--space-2); }
+.subscription-action { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-rule); }
+.subscription-action .button { margin-top: var(--space-2); }
 .status-trialing { background: var(--color-warning-soft); color: var(--color-warning); }
 .status-active { background: var(--color-success-soft); color: var(--color-success); }
 .status-past_due, .status-canceled { background: var(--color-error-soft); color: var(--color-error); }

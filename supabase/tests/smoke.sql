@@ -31,6 +31,33 @@ begin
     raise exception 'new child did not receive a beta trial entitlement';
   end if;
 
+  perform public.prepare_paddle_checkout(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002'
+  );
+  if (
+    select founding_status from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000002'
+  ) <> 'eligible' then
+    raise exception 'checkout preparation did not reserve founding eligibility';
+  end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_checkout_smoke', 'subscription.created', now(),
+    '00000000-0000-0000-0000-000000000002',
+    'sub_checkout_smoke', 'ctm_checkout_smoke', 'active',
+    now(), now() + interval '1 month', false
+  );
+  if not exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000002'
+      and provider = 'paddle'
+      and status = 'active'
+      and founding_status = 'redeemed'
+  ) then
+    raise exception 'Paddle webhook did not activate and redeem founding subscription';
+  end if;
+
   if not exists (
     select 1 from public.child_profiles
     where child_id = '00000000-0000-0000-0000-000000000002'
@@ -351,6 +378,13 @@ begin
   end if;
   if has_function_privilege('authenticated', 'public.worker_complete_generation_job(uuid,text,text,text,jsonb,jsonb,text,text,text)', 'execute') then
     raise exception 'authenticated role can execute worker completion RPC';
+  end if;
+  if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute')
+    or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then
+    raise exception 'browser roles can execute Paddle checkout preparation RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then
+    raise exception 'service role cannot prepare Paddle checkout';
   end if;
 end;
 $$;
