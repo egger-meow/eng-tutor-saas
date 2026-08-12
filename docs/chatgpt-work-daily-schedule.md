@@ -10,7 +10,8 @@ This is the operational contract for the future daily ChatGPT Work schedule. The
 4. Produce one JSON file conforming to `CurriculumPackageSchema`. Run plan, author, deterministic validation, independent critic, and targeted repair in that order. A generic or placeholder answer is a failure.
 5. Save the package as a temporary local file and run `pnpm audit:curriculum <package-file>`. A critical finding blocks completion.
 6. Run `pnpm worker complete-v2 --worker chatgpt-work-daily --job <job-id> --package <package-file>`. Never run `complete` for a new v2 job.
-7. Record the job result and observation-write result. Continue other jobs after one failure; do not silently retry a critical-quality failure.
+7. Before completion, confirm `qualityEvidence.improvementComparedToPrevious` names concrete changed sections and an observable learner benefit; generic claims such as “更完整” are not acceptable.
+8. Record the job result and observation-write result. Continue other jobs after one failure; do not silently retry a critical-quality failure.
 
 ## Quality obligations
 
@@ -19,12 +20,7 @@ This is the operational contract for the future daily ChatGPT Work schedule. The
 - Interests personalize the reading vehicle; learning state, school progress, mistakes, feedback, and quality trends determine what is taught next.
 - `trackingDelta` is a hypothesis record, never proof of mastery.
 - Repeated quality trends are evidence for a reviewed prompt/rubric change. Do not mutate production prompts during the daily run.
-- If `feedback_missing` is true, continue from existing state without assuming the child completed the previous packet successfully.
 
-## End-of-run report
-
-Report claimed, completed, mandatory overflow, waiting-for-feedback, failed, deferred, observation-write failures, oldest deadline, and the commit SHA used. Include job IDs and sanitized failure paths; never include secrets, raw child data, or full prompt transcripts in chat.
-
-## Activation gate
+## Enablement gate
 
 Enable this schedule only after one hosted staging job has completed through `complete-v2`, private Student/Parent downloads have been ownership-tested, feedback has appeared in the next context, and the resulting PDFs have been inspected page by page.
