@@ -14,4 +14,21 @@ describe('profile form', () => {
     expect(input.baseline_level).toBe('grade-7')
     expect(input.preferences).toMatchObject({ interests: ['動物'], upcomingTest: '9/15' })
   })
+
+  it('stores specific interests as generator-readable context', () => {
+    const input = toChildProfileInput({
+      ...emptyProfileDraft,
+      favoriteStories: '排球少年\n葬送的芙莉蓮',
+      favoriteGames: 'Minecraft 生存模式',
+      activities: '跆拳道藍帶',
+      currentFascinations: 'F1 進站策略',
+    })
+    expect(input.preferences).toMatchObject({
+      schemaVersion: 2,
+      favoriteStories: '排球少年\n葬送的芙莉蓮',
+      favoriteGames: 'Minecraft 生存模式',
+      activities: '跆拳道藍帶',
+      currentFascinations: 'F1 進站策略',
+    })
+  })
 })

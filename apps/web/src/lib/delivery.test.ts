@@ -4,7 +4,7 @@ import type { Child } from './children'
 import type { Material } from './materials'
 
 const child: Child = {
-  id: 'child', display_name: '安安', grade: 7, is_active: true, timezone: 'Asia/Taipei', delivery_weekday: 1,
+  id: 'child', display_name: '安安', grade: 7, grade_stage: 'grade_7', is_active: true, timezone: 'Asia/Taipei', delivery_weekday: 1,
   textbook_version: null, next_generation_at: '2026-08-16T01:00:00Z', created_at: '2026-08-01T00:00:00Z',
 }
 
@@ -32,4 +32,3 @@ describe('getDeliveryViewModel', () => {
     expect(view.detail).toContain('仍會')
   })
 })
-

@@ -142,6 +142,8 @@
 .onboarding-fields label, .onboarding-fields fieldset { display: grid; gap: var(--space-2); margin: 0; padding: 0; border: 0; color: var(--color-ink); font-weight: 700; }
 .onboarding-fields input, .onboarding-fields select, .onboarding-fields textarea { width: 100%; min-height: 3rem; padding: var(--space-3); border: 1px solid var(--color-rule-strong); border-radius: var(--radius-control); background: var(--color-paper); color: var(--color-text); }
 .onboarding-fields textarea { min-height: 6rem; resize: vertical; }
+.onboarding-fields .interest-intro { padding: var(--space-4); border-left: 3px solid var(--color-action); background: var(--color-success-soft); }
+.onboarding-fields .interest-intro p { margin: var(--space-1) 0 0; color: var(--color-muted); font-weight: 400; }
 .onboarding-actions { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-6); }
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
 .optional { margin-left: var(--space-2); color: var(--color-muted); font-size: .75rem; font-weight: 500; }

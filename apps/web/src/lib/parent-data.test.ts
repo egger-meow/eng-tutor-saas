@@ -5,7 +5,7 @@ import { readGenerationSummary } from './materials'
 const child = (id: string): ChildWithProfile => ({
   id,
   display_name: id,
-  grade: 7,
+  grade: 7, grade_stage: 'grade_7',
   is_active: true,
   timezone: 'Asia/Taipei',
   delivery_weekday: 1,

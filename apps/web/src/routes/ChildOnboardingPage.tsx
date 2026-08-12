@@ -68,8 +68,9 @@ export function ChildOnboardingPage({ session, childId }: ChildOnboardingPagePro
     setBusy(true)
     setError('')
     try {
-      const id = childId ?? await createChild({ display_name: draft.displayName, grade: draft.grade, textbook_version: draft.textbookVersion })
-      if (childId) await updateChild(childId, { display_name: draft.displayName, grade: draft.grade, textbook_version: draft.textbookVersion })
+      const childInput = { display_name: draft.displayName, grade: draft.grade, grade_stage: draft.gradeStage, textbook_version: draft.textbookVersion }
+      const id = childId ?? await createChild(childInput)
+      if (childId) await updateChild(childId, childInput)
       await saveChildProfile(id, toChildProfileInput(draft))
       window.sessionStorage.removeItem(storageKey)
       navigate(`/children/${id}`)
@@ -92,4 +93,3 @@ export function ChildOnboardingPage({ session, childId }: ChildOnboardingPagePro
     </AppShell>
   )
 }
-

@@ -4,6 +4,7 @@ export type Child = {
   id: string
   display_name: string
   grade: number
+  grade_stage: 'incoming_grade_7' | 'grade_7' | 'grade_8' | 'grade_9'
   is_active: boolean
   timezone: string
   delivery_weekday: number
@@ -12,17 +13,20 @@ export type Child = {
   created_at: string
 }
 
-export type ChildInput = Pick<Child, 'display_name' | 'grade'> & { textbook_version?: string | null }
+export type ChildInput = Pick<Child, 'display_name' | 'grade' | 'grade_stage'> & { textbook_version?: string | null }
 
 function cleanInput(input: ChildInput): ChildInput {
   const displayName = input.display_name.trim()
   if (!displayName) throw new Error('請輸入孩子稱呼。')
   if (![7, 8, 9].includes(input.grade)) throw new Error('年級必須是七、八或九年級。')
-  return { display_name: displayName, grade: input.grade, textbook_version: input.textbook_version?.trim() || null }
+  if (!['incoming_grade_7', 'grade_7', 'grade_8', 'grade_9'].includes(input.grade_stage)) throw new Error('請選擇目前就學階段。')
+  const expectedGrade = input.grade_stage === 'incoming_grade_7' ? 7 : Number(input.grade_stage.slice(-1))
+  if (input.grade !== expectedGrade) throw new Error('年級與就學階段不一致。')
+  return { display_name: displayName, grade: input.grade, grade_stage: input.grade_stage, textbook_version: input.textbook_version?.trim() || null }
 }
 
 export async function listChildren(): Promise<Child[]> {
-  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, is_active, timezone, delivery_weekday, textbook_version, next_generation_at, created_at').eq('is_active', true).order('created_at')
+  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, grade_stage, is_active, timezone, delivery_weekday, textbook_version, next_generation_at, created_at').eq('is_active', true).order('created_at')
   if (error) throw error
   return data as Child[]
 }
