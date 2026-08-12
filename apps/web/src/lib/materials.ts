@@ -8,6 +8,13 @@ export type MaterialFeedback = {
   child_comments: string | null
   parent_comments: string | null
   created_at: string
+  updated_at?: string
+}
+
+export type GenerationSummary = {
+  title: string | null
+  learningFocus: string | null
+  learningAdjustmentSummary: string | null
 }
 
 export type Material = {
@@ -20,6 +27,15 @@ export type Material = {
   generation_summary: Record<string, unknown>
   created_at: string
   feedback: MaterialFeedback | null
+}
+
+export function readGenerationSummary(summary: Record<string, unknown>): GenerationSummary {
+  const stringOrNull = (value: unknown) => typeof value === 'string' && value.trim() ? value : null
+  return {
+    title: stringOrNull(summary.title),
+    learningFocus: stringOrNull(summary.learningFocus),
+    learningAdjustmentSummary: stringOrNull(summary.learningAdjustmentSummary),
+  }
 }
 
 export type FeedbackInput = {
@@ -36,7 +52,7 @@ export async function listMaterials(childIds: string[]): Promise<Material[]> {
   const client = getSupabaseClient()
   const [{ data: materials, error: materialsError }, { data: feedback, error: feedbackError }] = await Promise.all([
     client.from('materials').select('id, child_id, material_week, revision, student_pdf_path, parent_answer_pdf_path, generation_summary, created_at').in('child_id', childIds).order('material_week', { ascending: false }),
-    client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at').in('child_id', childIds),
+    client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds),
   ])
   if (materialsError) throw materialsError
   if (feedbackError) throw feedbackError

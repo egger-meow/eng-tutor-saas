@@ -7,6 +7,8 @@ export type Child = {
   is_active: boolean
   timezone: string
   delivery_weekday: number
+  textbook_version: string | null
+  next_generation_at: string | null
   created_at: string
 }
 
@@ -20,7 +22,7 @@ function cleanInput(input: ChildInput): ChildInput {
 }
 
 export async function listChildren(): Promise<Child[]> {
-  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, is_active, timezone, delivery_weekday, created_at').eq('is_active', true).order('created_at')
+  const { data, error } = await getSupabaseClient().from('children').select('id, display_name, grade, is_active, timezone, delivery_weekday, textbook_version, next_generation_at, created_at').eq('is_active', true).order('created_at')
   if (error) throw error
   return data as Child[]
 }
