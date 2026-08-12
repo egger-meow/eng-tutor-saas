@@ -1,2 +1,5 @@
 export { artifactFilename, renderParentAnswerHtml, renderStudentHtml } from './render-html.js'
 export type { PdfKind } from './render-html.js'
+export { renderPdf } from './render-pdf.js'
+export { renderLessonPdfPair } from './render-pair.js'
+export type { LessonPdfPair, PdfByteRenderer } from './render-pair.js'

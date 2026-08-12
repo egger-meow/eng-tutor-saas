@@ -12,4 +12,6 @@ coverage/
 .vscode/
 supabase/.temp/
 generated/
+output/
+tmp/pdfs/
 *.pdf
