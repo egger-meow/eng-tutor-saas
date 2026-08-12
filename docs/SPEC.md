@@ -2268,6 +2268,15 @@ Required quick fields should remain small.
 
 Optional fields can be detailed.
 
+The default interface must use progressive disclosure:
+
+* quick feedback is visible immediately;
+* quick feedback requires no typing;
+* optional observations remain collapsed until the parent chooses to add detail;
+* quick feedback alone is a complete, valid submission.
+
+The weekly experience should feel like a brief check-in, not a questionnaire or homework for the parent.
+
 ---
 
 # 110. Weekly Feedback Quick Fields
@@ -2279,6 +2288,8 @@ difficulty
 completion_rate
 weak_area
 ```
+
+Prefer tap-friendly choices over open text inputs for these fields.
 
 Difficulty:
 
@@ -2317,6 +2328,8 @@ Optional fields should include:
 * new interest;
 * changed interest;
 * free-text context.
+
+Keep these fields behind one clearly labeled optional-details control. When expanded, use short prompts and examples so the parent knows what is useful, while allowing any field to remain blank. Existing detailed feedback should expand automatically when the parent returns to edit it.
 
 Suggested logical structure:
 
