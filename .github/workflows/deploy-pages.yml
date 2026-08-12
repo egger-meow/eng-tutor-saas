@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_BASE_PATH: /eng-tutor-saas/
+      VITE_SUPABASE_URL: https://ykzszjrqynrhgdhoeovo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HegGPcdXuCMcYtI9RSkXdg_qqHUgBpL
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
