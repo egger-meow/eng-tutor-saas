@@ -71,6 +71,7 @@ export const CurriculumPackageSchema = z.strictObject({
   }),
   qualityEvidence: z.strictObject({
     feedbackApplied: z.array(Text).min(1),
+    improvementComparedToPrevious: z.array(Text).min(1).max(8),
     criticalChecks: z.array(z.strictObject({ id: StableId, passed: z.boolean(), evidence: Text })).min(1),
     criticFindings: z.array(z.strictObject({ dimension: StableId, severity: z.enum(['info', 'warning', 'critical']), finding: Text, resolution: Text.nullable() })),
   }),

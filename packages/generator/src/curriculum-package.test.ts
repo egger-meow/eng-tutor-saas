@@ -33,7 +33,7 @@ function validPackage(): CurriculumPackage {
     answers: allQuestions.map((item) => ({ questionId: item.id, answer: '示範答案', acceptedAnswers: [], explanationZh: '答案必須引用文章中的線索。', likelyMisconceptionZh: null, followUpZh: null })),
     parentSummary: { focusZh: '推論證據與 do / does', observeZh: ['是否能自己指出證據'], completionCheckZh: '確認每一題都有作答即可。' },
     trackingDelta: { introducedVocabularyIds: Array.from({ length: 7 }, (_, index) => `vocab-${index}`), reviewedVocabularyIds: [], grammarTargets: ['grammar-do-does'], readingTargets: ['reading-inference'], hypothesesToVerify: ['提高閱讀難度後仍能在時間內完成'], nextReviewCandidates: ['do / does'] },
-    qualityEvidence: { feedbackApplied: ['提升閱讀篇幅與推論深度', '加入完整中文解說'], criticalChecks: [{ id: 'self-study', passed: true, evidence: '每個新概念均有中文解說與 worked examples。' }], criticFindings: [] },
+    qualityEvidence: { feedbackApplied: ['提升閱讀篇幅與推論深度', '加入完整中文解說'], improvementComparedToPrevious: ['本週加入中文策略示範，並將推論題改為有證據可回查的 CAP 題型。'], criticalChecks: [{ id: 'self-study', passed: true, evidence: '每個新概念均有中文解說與 worked examples。' }], criticFindings: [] },
   }
 }
 
