@@ -91,7 +91,7 @@ export function LandingPage() {
           </StaggerContainer>
 
           <FadeInUp delay={0.1} className="editorial-quote">
-            如果孩子喜歡 Minecraft，教材可以真的用他的興趣來設計。<br />
+            教材主題、難度與練習重點，都會跟著孩子每週的狀態調整。<br />
             <span>但個人化不只是換主題——孩子讀什麼，與孩子下一步需要練什麼，每週都會動態調整。</span>
           </FadeInUp>
         </section>

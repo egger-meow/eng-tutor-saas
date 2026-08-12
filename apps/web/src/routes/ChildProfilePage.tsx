@@ -17,7 +17,7 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
       header={
         <ParentNavigation
           email={session.user.email}
-          activeChildId={childId}
+          childHref={`/children/${childId}`}
           onSignOut={() => void getSupabaseClient().auth.signOut()}
         />
       }

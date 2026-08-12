@@ -16,7 +16,7 @@ export function DashboardPage({ session }: { session: Session }) {
       header={
         <ParentNavigation
           email={session.user.email}
-          activeChildId={data.children[0]?.id}
+          childHref={data.children.length === 1 ? `/children/${data.children[0].id}` : '/dashboard'}
           onSignOut={() => void getSupabaseClient().auth.signOut()}
         />
       }
@@ -48,8 +48,9 @@ export function DashboardPage({ session }: { session: Session }) {
           <div className="dashboard-container">
             <header className="dashboard-top-header">
               <div>
-                <p className="eyebrow">家長儀表板</p>
-                <h1>本週教材與交付狀態</h1>
+                <p className="eyebrow">本週教材</p>
+                <h1>每個孩子，都有自己的下一步。</h1>
+                <p className="dashboard-subtitle">查看本週交付、完成回饋，讓下一份教材接著成長。</p>
               </div>
               <button className="button button-secondary" type="button" onClick={() => navigate('/children/new')}>
                 ＋ 新增孩子

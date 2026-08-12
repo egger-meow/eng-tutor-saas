@@ -4,23 +4,17 @@ import { handleInternalLink, useRoute } from '../../app/use-route'
 
 type ParentNavigationProps = {
   email?: string
-  activeChildId?: string
+  childHref?: string
   onSignOut: () => void
 }
 
-export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavigationProps) {
+export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }: ParentNavigationProps) {
   const route = useRoute()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const childPath = activeChildId ? `/children/${activeChildId}` : '/children/new'
 
   const navItems = [
     { href: '/dashboard', label: '本週教材', isActive: route.name === 'dashboard' },
-    {
-      href: childPath,
-      label: '孩子資料',
-      isActive: route.name === 'child-overview' || route.name === 'child-edit',
-    },
-    { href: '/children/new', label: '＋ 新增孩子', isActive: route.name === 'child-new' },
+    { href: childHref, label: '孩子資料', isActive: route.name === 'child-overview' || route.name === 'child-edit' },
     { href: '/billing', label: '訂閱', isActive: route.name === 'billing' },
   ]
 
@@ -35,7 +29,7 @@ export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavi
           className="mobile-menu-toggle"
           type="button"
           aria-expanded={mobileMenuOpen}
-          aria-label="選單Toggle"
+          aria-label="選單"
           onClick={() => setMobileMenuOpen((prev) => !prev)}
         >
           <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />
@@ -64,6 +58,8 @@ export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavi
               </a>
             ))}
           </nav>
+
+          <a className="nav-action" href="/children/new" onClick={(e) => { setMobileMenuOpen(false); handleInternalLink(e) }}><span aria-hidden="true">＋</span> 新增孩子</a>
 
           <div className="account-menu">
             {email && <span className="user-email" title={email}>{email}</span>}

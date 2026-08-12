@@ -83,7 +83,7 @@ export function ChildOnboardingPage({ session, childId }: ChildOnboardingPagePro
   const [title, description] = stepMeta[step - 1]
 
   return (
-    <AppShell header={<ParentNavigation email={session.user.email} activeChildId={childId} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
+    <AppShell header={<ParentNavigation email={session.user.email} childHref={childId ? `/children/${childId}` : '/dashboard'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
       {loading ? <p className="loading-state" role="status">正在載入學習資料…</p> : error && !draft.displayName && childId ? <p className="notice notice-error">{error}</p> : (
         <OnboardingLayout step={step} title={title} description={description} actions={<><button className="button button-secondary" type="button" onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}>{step === 1 ? '取消' : '上一步'}</button><button className="button" type="button" disabled={busy} onClick={() => step === profileStepCount ? void save() : next()}>{busy ? '儲存中…' : step === profileStepCount ? '儲存學習資料' : '繼續'}</button></>}>
           <StepComponent draft={draft} errors={errors} update={update} />

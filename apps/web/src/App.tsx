@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'
 import './App.css'
 import { useRoute } from './app/use-route'
@@ -26,18 +27,11 @@ function App() {
   }, [])
 
   if (!ready) return <main className="loading-state" role="status">正在確認登入狀態…</main>
-  if (!session) {
-    if (route.name === 'about') return <AboutPage />
-    if (route.name === 'guide') return <GuidePage />
-    if (route.name === 'sample') return <SamplePage />
-    if (route.name === 'waitlist') return <WaitlistPage />
-    return <LandingPage />
-  }
-  if (route.name === 'child-new') return <ChildOnboardingPage session={session} />
-  if (route.name === 'child-edit') return <ChildOnboardingPage session={session} childId={route.params.id} />
-  if (route.name === 'child-overview') return <ChildProfilePage session={session} childId={route.params.id} />
-  if (route.name === 'billing') return <BillingPage session={session} />
-  return <DashboardPage session={session} />
+  const page = !session
+    ? route.name === 'about' ? <AboutPage /> : route.name === 'guide' ? <GuidePage /> : route.name === 'sample' ? <SamplePage /> : route.name === 'waitlist' ? <WaitlistPage /> : <LandingPage />
+    : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'child-overview' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'billing' ? <BillingPage session={session} /> : <DashboardPage session={session} />
+
+  return <AnimatePresence mode="wait" initial={false}><motion.div key={`${session ? 'app' : 'public'}:${route.name}`} className="route-stage" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>{page}</motion.div></AnimatePresence>
 }
 
 export default App
