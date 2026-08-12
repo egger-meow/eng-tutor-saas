@@ -11,7 +11,7 @@ export const printStyles = `
   li { margin-bottom: 1.5mm; }
   .meta { color: #444; display: flex; flex-wrap: wrap; gap: 2mm 6mm; font-size: 9.5pt; }
   .meta span { white-space: nowrap; }
-  .card, .question, .answer { break-inside: avoid; border: 1px solid #aaa; margin: 0 0 3mm; padding: 3mm; }
+  .card, .question, .answer { break-inside: avoid-page; page-break-inside: avoid; -webkit-column-break-inside: avoid; display: flow-root; border: 1px solid #aaa; margin: 0 0 3mm; padding: 3mm; }
   .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; }
   .word { font-weight: 700; }
   .muted, .label { color: #555; }
