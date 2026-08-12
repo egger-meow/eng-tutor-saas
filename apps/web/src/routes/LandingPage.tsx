@@ -3,6 +3,7 @@ import { AppShell } from '../components/layout/AppShell'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { FounderSummary } from '../components/public/FounderSummary'
 import { PricingSection } from '../components/public/PricingSection'
+import { handleInternalLink } from '../app/use-route'
 
 const memorySignals = [
   ['程度', '真正讀得懂多少，而不只是年級'],
@@ -20,7 +21,7 @@ export function LandingPage() {
         <p className="eyebrow">每週個人化英文教材</p>
         <h1>每週一份，<em>只屬於你孩子</em>的英文教材。</h1>
         <p className="lede">程度、學校進度、上週錯題、學習難度與家長回饋，都會真正改變下一份教材。</p>
-        <div className="hero-actions"><a className="button hero-cta" href="#login">免費產生第一週</a><a className="text-link" href="#personalization">看看教材如何改變</a></div>
+        <div className="hero-actions"><a className="button hero-cta" href="#login">免費產生第一週</a><a className="text-link" href="/sample" onClick={handleInternalLink}>先看完整範例</a></div>
         <p className="hero-note">前 30 位孩子第一週免費，不需先綁定付費。</p>
       </div>
       <div className="hero-editorial" aria-label="紙屬英文個人化概念">
@@ -59,6 +60,7 @@ export function LandingPage() {
     <section className="public-section deliverables-section">
       <div className="section-heading"><p className="overline">每週兩份 PDF</p><h2>孩子能獨立做，家長不用先備課。</h2></div>
       <div className="document-pair"><article><span>01</span><p className="document-label">Student PDF</p><h3>一份留給孩子思考的教材</h3><p>自然閱讀、核心單字、文法提示、理解練習與作業。答案不混在學生教材裡。</p></article><article><span>02</span><p className="document-label">Parent Answer PDF</p><h3>一份讓家長看懂重點的解答</h3><p>完整答案、簡短說明、本週觀察重點，以及下一次回饋時值得留意的地方。</p></article></div>
+      <p className="deliverables-action"><a className="button secondary" href="/sample" onClick={handleInternalLink}>查看範例孩子資料與兩份完整 PDF</a></p>
     </section>
 
     <section className="public-section philosophy-section">

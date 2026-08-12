@@ -10,4 +10,8 @@ describe('hosted route paths', () => {
     expect(addBasePath('/billing', '/eng-tutor-saas/')).toBe('/eng-tutor-saas/billing')
     expect(addBasePath('/billing', '/')).toBe('/billing')
   })
+
+  it('keeps the public sample route addressable', () => {
+    expect(parseRoute('/sample')).toMatchObject({ name: 'sample', path: '/sample' })
+  })
 })

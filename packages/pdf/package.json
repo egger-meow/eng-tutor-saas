@@ -12,7 +12,8 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pdf:install": "playwright install chromium",
-    "generate:synthetic": "tsx src/generate-synthetic.ts"
+    "generate:synthetic": "tsx src/generate-synthetic.ts",
+    "generate:public-sample": "tsx src/generate-public-sample.ts"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

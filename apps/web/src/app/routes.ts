@@ -2,6 +2,7 @@ export type RouteName =
   | 'landing'
   | 'about'
   | 'guide'
+  | 'sample'
   | 'waitlist'
   | 'dashboard'
   | 'child-new'
@@ -21,6 +22,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/', 'landing'],
   ['/about', 'about'],
   ['/guide', 'guide'],
+  ['/sample', 'sample'],
   ['/waitlist', 'waitlist'],
   ['/dashboard', 'dashboard'],
   ['/children/new', 'child-new'],

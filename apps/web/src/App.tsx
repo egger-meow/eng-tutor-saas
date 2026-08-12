@@ -11,6 +11,7 @@ import { GuidePage } from './routes/GuidePage'
 import { LandingPage } from './routes/LandingPage'
 import { BillingPage } from './routes/BillingPage'
 import { WaitlistPage } from './routes/WaitlistPage'
+import { SamplePage } from './routes/SamplePage'
 
 function App() {
   const route = useRoute()
@@ -28,6 +29,7 @@ function App() {
   if (!session) {
     if (route.name === 'about') return <AboutPage />
     if (route.name === 'guide') return <GuidePage />
+    if (route.name === 'sample') return <SamplePage />
     if (route.name === 'waitlist') return <WaitlistPage />
     return <LandingPage />
   }

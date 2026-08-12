@@ -14,6 +14,7 @@
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
     "generate:synthetic": "pnpm --filter @paper-english/pdf generate:synthetic",
+    "generate:public-sample": "pnpm --filter @paper-english/pdf generate:public-sample",
     "worker": "pnpm --filter @paper-english/worker worker"
   },
   "devDependencies": {

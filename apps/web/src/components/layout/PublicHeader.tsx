@@ -1,6 +1,7 @@
 import { handleInternalLink } from '../../app/use-route'
 
 const links = [
+  { href: '/sample', label: '查看範例' },
   { href: '/guide', label: '學習方法' },
   { href: '/about', label: '關於作者' },
   { href: '/billing', label: '方案' },
