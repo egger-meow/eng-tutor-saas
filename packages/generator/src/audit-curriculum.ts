@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises'
+import { access, readFile } from 'node:fs/promises'
+import { isAbsolute, resolve } from 'node:path'
 import { validateCurriculumPackage } from './validate-curriculum-package.js'
 import type { CurriculumPackage } from './curriculum-package-schema.js'
 
@@ -44,8 +45,14 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
 }
 
 if (process.argv[1]?.endsWith('audit-curriculum.ts')) {
-  const path = process.argv[2]
+  const path = process.argv.slice(2).find((argument) => argument !== '--')
   if (!path) throw new Error('Usage: tsx src/audit-curriculum.ts <curriculum-package.json>')
-  const input = JSON.parse(await readFile(path, 'utf8')) as unknown
+  const candidates = isAbsolute(path) ? [path] : [resolve(process.cwd(), path), resolve(process.cwd(), '..', '..', path)]
+  let filePath: string | undefined
+  for (const candidate of candidates) {
+    try { await access(candidate); filePath = candidate; break } catch { /* try next base */ }
+  }
+  if (!filePath) throw new Error(`Curriculum package not found. Tried: ${candidates.join(', ')}`)
+  const input = JSON.parse(await readFile(filePath, 'utf8')) as unknown
   process.stdout.write(`${JSON.stringify(auditCurriculumPackage(input), null, 2)}\n`)
 }
