@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { syntheticWeekOne } from '@paper-english/generator'
-import { completeJob, type GenerationContext, type WorkerClient } from './pipeline.js'
+import { completeCurriculumJob, completeJob, type GenerationContext, type WorkerClient } from './pipeline.js'
 
 function setup() {
   const uploads: string[] = []
@@ -61,5 +61,13 @@ describe('completeJob', () => {
     })).rejects.toThrow('connection reset')
     expect(state.removals).toHaveLength(1)
     expect(state.rpc).not.toHaveBeenCalledWith('worker_fail_generation_job', expect.anything())
+  })
+})
+
+describe('completeCurriculumJob', () => {
+  it('rejects an invalid v2 package before touching storage', async () => {
+    const state = setup()
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: state.context, curriculumPackage: {} })).rejects.toThrow('Invalid curriculum package')
+    expect(state.uploads).toEqual([])
   })
 })

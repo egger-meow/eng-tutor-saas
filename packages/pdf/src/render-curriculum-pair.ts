@@ -5,6 +5,7 @@ import { renderPdf } from './render-pdf.js'
 import { renderCurriculumParentAnswerHtml, renderCurriculumStudentHtml } from './render-curriculum-package.js'
 
 export type CurriculumPdfPair = { studentPath: string; parentAnswerPath: string }
+export type CurriculumPdfBytes = { student: Uint8Array; parentAnswer: Uint8Array }
 
 function filename(pkg: CurriculumPackage, kind: 'student' | 'parent-answer'): string {
   const stem = pkg.metadata.jobId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -23,10 +24,7 @@ export async function renderCurriculumPackagePair(pkg: CurriculumPackage, output
   let publishedStudent = false
   let publishedParent = false
   try {
-    const student = await renderPdf(renderCurriculumStudentHtml(pkg))
-    const parentAnswer = await renderPdf(renderCurriculumParentAnswerHtml(pkg))
-    assertPdf(student, 'Student v2')
-    assertPdf(parentAnswer, 'Parent v2')
+    const { student, parentAnswer } = await renderCurriculumPackageBytes(pkg)
     const studentTemp = join(staging, 'student.pdf')
     const parentTemp = join(staging, 'parent-answer.pdf')
     await writeFile(studentTemp, student)
@@ -43,4 +41,12 @@ export async function renderCurriculumPackagePair(pkg: CurriculumPackage, output
   } finally {
     await rm(staging, { recursive: true, force: true })
   }
+}
+
+export async function renderCurriculumPackageBytes(pkg: CurriculumPackage): Promise<CurriculumPdfBytes> {
+  const student = await renderPdf(renderCurriculumStudentHtml(pkg))
+  const parentAnswer = await renderPdf(renderCurriculumParentAnswerHtml(pkg))
+  assertPdf(student, 'Student v2')
+  assertPdf(parentAnswer, 'Parent v2')
+  return { student, parentAnswer }
 }

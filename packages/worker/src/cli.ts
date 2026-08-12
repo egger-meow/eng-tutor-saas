@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
-import { claimJobs, completeJob, loadGenerationContext } from './pipeline.js'
+import { claimJobs, completeCurriculumJob, completeJob, loadGenerationContext } from './pipeline.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -44,7 +44,16 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|complete> --worker <id> [options]')
+  if (command === 'complete-v2') {
+    const jobId = option('job') ?? ''
+    const context = await loadGenerationContext(client, jobId, workerId)
+    const curriculumPackage = JSON.parse(await readFile(option('package') ?? '', 'utf8')) as unknown
+    const materialId = await completeCurriculumJob({ client, workerId, context, curriculumPackage })
+    process.stdout.write(`${JSON.stringify({ jobId, materialId, schema: '2.0.0' })}\n`)
+    return
+  }
+
+  throw new Error('Usage: worker <claim|context|complete|complete-v2> --worker <id> [options]')
 }
 
 main().catch((error: unknown) => {
