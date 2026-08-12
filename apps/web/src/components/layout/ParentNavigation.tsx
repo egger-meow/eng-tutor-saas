@@ -1,4 +1,6 @@
-import { handleInternalLink } from '../../app/use-route'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { handleInternalLink, useRoute } from '../../app/use-route'
 
 type ParentNavigationProps = {
   email?: string
@@ -7,19 +9,69 @@ type ParentNavigationProps = {
 }
 
 export function ParentNavigation({ email, activeChildId, onSignOut }: ParentNavigationProps) {
+  const route = useRoute()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const childPath = activeChildId ? `/children/${activeChildId}` : '/children/new'
+
+  const navItems = [
+    { href: '/dashboard', label: '本週教材', isActive: route.name === 'dashboard' },
+    {
+      href: childPath,
+      label: '孩子資料',
+      isActive: route.name === 'child-overview' || route.name === 'child-edit',
+    },
+    { href: '/children/new', label: '＋ 新增孩子', isActive: route.name === 'child-new' },
+    { href: '/billing', label: '訂閱', isActive: route.name === 'billing' },
+  ]
+
   return (
     <header className="site-header parent-header">
-      <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>紙屬英文</a>
-      <nav aria-label="家長功能">
-        <a href="/dashboard" onClick={handleInternalLink}>本週教材</a>
-        <a href={childPath} onClick={handleInternalLink}>孩子資料</a>
-        <a href="/children/new" onClick={handleInternalLink}>＋ 新增孩子</a>
-        <a href="/billing" onClick={handleInternalLink}>訂閱</a>
-      </nav>
-      <div className="account-menu">
-        {email && <span title={email}>{email}</span>}
-        <button className="button button-quiet" type="button" onClick={onSignOut}>登出</button>
+      <div className="header-inner">
+        <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>
+          紙屬英文
+        </a>
+
+        <button
+          className="mobile-menu-toggle"
+          type="button"
+          aria-expanded={mobileMenuOpen}
+          aria-label="選單Toggle"
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+        >
+          <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />
+        </button>
+
+        <div className={`parent-nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          <nav aria-label="家長功能" className="site-nav">
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`nav-link ${item.isActive ? 'active' : ''}`}
+                onClick={(e) => {
+                  setMobileMenuOpen(false)
+                  handleInternalLink(e)
+                }}
+              >
+                {item.isActive && (
+                  <motion.span
+                    layoutId="parentNavActive"
+                    className="nav-active-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="nav-link-text">{item.label}</span>
+              </a>
+            ))}
+          </nav>
+
+          <div className="account-menu">
+            {email && <span className="user-email" title={email}>{email}</span>}
+            <button className="button button-quiet" type="button" onClick={onSignOut}>
+              登出
+            </button>
+          </div>
+        </div>
       </div>
     </header>
   )

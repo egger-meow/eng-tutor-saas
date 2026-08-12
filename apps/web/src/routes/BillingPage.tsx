@@ -4,6 +4,8 @@ import { navigate } from '../app/use-route'
 import { ChildSubscription } from '../components/billing/ChildSubscription'
 import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
+import { PageTransition } from '../components/motion/PageTransition'
+import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { listChildren, type Child } from '../lib/children'
 import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
 import { prepareCheckout } from '../lib/subscriptions'
@@ -80,37 +82,82 @@ export function BillingPage({ session }: { session: Session }) {
       .finally(() => setLoading(false))
   }, [])
 
-  return <AppShell header={<ParentNavigation email={session.user.email} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
-    <header className="page-heading">
-      <p className="eyebrow">帳戶設定</p>
-      <h1>每位孩子的訂閱</h1>
-      <p>方案與交付週期彼此獨立。此頁目前只顯示由後端確認的狀態，不會在瀏覽器直接變更付款。</p>
-    </header>
-    {loading && <p role="status">正在讀取訂閱…</p>}
-    {error && <p className="notice notice-error" role="alert">{error}</p>}
-    {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
-    {!loading && children.length === 0 && <div className="empty-state"><h2>先新增孩子</h2><p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p><button className="button" type="button" onClick={() => navigate('/children/new')}>＋ 新增孩子</button></div>}
-    <div className="billing-layout">
-      <div className="subscription-list">
-      {children.map((child) => <ChildSubscription key={child.id} child={child} subscription={subscriptions.find((item) => item.childId === child.id)} busy={checkoutChildId === child.id} activationPending={activatingChildId === child.id} onSubscribe={(childId) => void startCheckout(childId)} />)}
-      </div>
-      {activeCheckoutChildId && <aside className="checkout-panel" aria-label="安全付款">
-        <div className="checkout-panel-heading">
-          <div>
-            <p className="overline">安全付款</p>
-            <h2>為 {children.find((child) => child.id === activeCheckoutChildId)?.display_name} 開始訂閱</h2>
+  return (
+    <AppShell
+      header={
+        <ParentNavigation
+          email={session.user.email}
+          onSignOut={() => void getSupabaseClient().auth.signOut()}
+        />
+      }
+    >
+      <PageTransition>
+        <header className="page-heading">
+          <p className="eyebrow">帳戶設定</p>
+          <h1>每位孩子的訂閱</h1>
+          <p>方案與交付週期彼此獨立。此頁目前只顯示由後端確認的狀態，不會在瀏覽器直接變更付款。</p>
+        </header>
+
+        {loading && (
+          <div className="loading-state" role="status">
+            <div className="loading-spinner" />
+            <p>正在讀取訂閱…</p>
           </div>
-          <button className="button-link text-link" type="button" onClick={() => void closeCheckout()}>稍後再付</button>
+        )}
+
+        {error && <p className="notice notice-error" role="alert">{error}</p>}
+        {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
+
+        {!loading && children.length === 0 && (
+          <div className="empty-state">
+            <h2>先新增孩子</h2>
+            <p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p>
+            <button className="button" type="button" onClick={() => navigate('/children/new')}>
+              ＋ 新增孩子
+            </button>
+          </div>
+        )}
+
+        <div className="billing-layout">
+          <StaggerContainer className="subscription-list" staggerDelay={0.08}>
+            {children.map((child) => (
+              <StaggerItem key={child.id}>
+                <ChildSubscription
+                  child={child}
+                  subscription={subscriptions.find((item) => item.childId === child.id)}
+                  busy={checkoutChildId === child.id}
+                  activationPending={activatingChildId === child.id}
+                  onSubscribe={(childId) => void startCheckout(childId)}
+                />
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+
+          {activeCheckoutChildId && (
+            <aside className="checkout-panel" aria-label="安全付款">
+              <div className="checkout-panel-heading">
+                <div>
+                  <p className="overline">安全付款</p>
+                  <h2>為 {children.find((child) => child.id === activeCheckoutChildId)?.display_name} 開始訂閱</h2>
+                </div>
+                <button className="button-link text-link" type="button" onClick={() => void closeCheckout()}>
+                  稍後再付
+                </button>
+              </div>
+              <div className="checkout-plan-summary">
+                <span>紙屬英文月費</span>
+                <strong>NT$499 <small>／月</small></strong>
+                <p>符合 Founding 30 資格時，第一個付費月自動折為 NT$299。稅額由 Paddle 依付款資料計算。</p>
+              </div>
+              <div className="paddle-checkout-frame" />
+              <p className="checkout-security-note">付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。</p>
+            </aside>
+          )}
         </div>
-        <div className="checkout-plan-summary">
-          <span>紙屬英文月費</span>
-          <strong>NT$499 <small>／月</small></strong>
-          <p>符合 Founding 30 資格時，第一個付費月自動折為 NT$299。稅額由 Paddle 依付款資料計算。</p>
-        </div>
-        <div className="paddle-checkout-frame" />
-        <p className="checkout-security-note">付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。</p>
-      </aside>}
-    </div>
-    <p className="muted">付款由 Paddle 安全處理。訂閱狀態以伺服器收到的 Paddle 通知為準；需要取消或處理付款問題時，請透過聯絡管道協助。</p>
-  </AppShell>
+        <p className="muted">
+          付款由 Paddle 安全處理。訂閱狀態以伺服器收到的 Paddle 通知為準；需要取消或處理付款問題時，請透過聯絡管道協助。
+        </p>
+      </PageTransition>
+    </AppShell>
+  )
 }
