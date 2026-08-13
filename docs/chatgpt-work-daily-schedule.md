@@ -124,6 +124,8 @@ Write the final JSON to a private temporary file and run:
 
 pnpm audit:curriculum <package-file>
 
+This command is the early feedback loop for the author/critic repair cycle. `complete-v2` runs the same deterministic audit again and fails closed before rendering or Storage if any critical finding remains.
+
 Publication is allowed only when all of the following are true:
 
 - the command exits successfully and reports passed=true;
@@ -142,7 +144,7 @@ After the package passes every release gate, run exactly:
 
 pnpm worker complete-v2 --worker chatgpt-work-daily --job <job-id> --package <package-file>
 
-Never call legacy `complete`. Never manually upload PDFs or manually mark the job completed. `complete-v2` is responsible for final validation, deterministic Student/Parent PDF rendering, private Storage upload, transactional completion, creation of the next seven-day job, and curriculum-observation write-back.
+Never call legacy `complete`. Never manually upload PDFs or manually mark the job completed. `complete-v2` is responsible for final validation, the deterministic publish audit, Student/Parent PDF rendering and artifact inspection, immutable private Storage upload, transactional completion, creation of the next seven-day job, and curriculum-observation write-back. On retry it validates and reuses an already-uploaded pair; it never deletes or silently overwrites released evidence.
 
 Treat success only as the command returning the expected job ID, material ID, and schema 2.0.0. If the command fails, do not claim success and do not retry blindly. The pipeline records render/upload failures itself when it can do so safely. If failure occurs before `complete-v2` is invoked, use the supported `pnpm worker fail` command with a sanitized `GENERATION_FAILED` reason. Never mutate queue rows manually. Record TECHNICAL_FAILED and continue when safe.
 

@@ -17,6 +17,7 @@ export function createWorkerClient(): WorkerClient {
         const storage = client.storage.from(bucket)
         return {
           upload: async (path, body, options) => storage.upload(path, body, options),
+          download: async (path) => storage.download(path),
           remove: async (paths) => storage.remove(paths),
         }
       },

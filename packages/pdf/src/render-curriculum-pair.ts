@@ -1,7 +1,8 @@
 import type { CurriculumPackage } from '@paper-english/generator'
 import { mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { renderPdf } from './render-pdf.js'
+import { inspectCurriculumPdfPair } from './inspect-pdf.js'
+import { renderPdfBatch } from './render-pdf.js'
 import { renderCurriculumParentAnswerHtml, renderCurriculumStudentHtml } from './render-curriculum-package.js'
 
 export type CurriculumPdfPair = { studentPath: string; parentAnswerPath: string }
@@ -10,10 +11,6 @@ export type CurriculumPdfBytes = { student: Uint8Array; parentAnswer: Uint8Array
 function filename(pkg: CurriculumPackage, kind: 'student' | 'parent-answer'): string {
   const stem = pkg.metadata.jobId.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   return `${stem}-v2-${kind}.pdf`
-}
-
-function assertPdf(bytes: Uint8Array, label: string): void {
-  if (bytes.byteLength <= 4 || new TextDecoder().decode(bytes.subarray(0, 4)) !== '%PDF') throw new Error(`${label} renderer did not return a valid PDF`)
 }
 
 export async function renderCurriculumPackagePair(pkg: CurriculumPackage, outputDir: string): Promise<CurriculumPdfPair> {
@@ -44,9 +41,12 @@ export async function renderCurriculumPackagePair(pkg: CurriculumPackage, output
 }
 
 export async function renderCurriculumPackageBytes(pkg: CurriculumPackage): Promise<CurriculumPdfBytes> {
-  const student = await renderPdf(renderCurriculumStudentHtml(pkg))
-  const parentAnswer = await renderPdf(renderCurriculumParentAnswerHtml(pkg))
-  assertPdf(student, 'Student v2')
-  assertPdf(parentAnswer, 'Parent v2')
-  return { student, parentAnswer }
+  const [student, parentAnswer] = await renderPdfBatch([
+    renderCurriculumStudentHtml(pkg),
+    renderCurriculumParentAnswerHtml(pkg),
+  ])
+  if (!student || !parentAnswer) throw new Error('Curriculum renderer did not return both PDF artifacts')
+  const pair = { student, parentAnswer }
+  await inspectCurriculumPdfPair(pkg, pair)
+  return pair
 }

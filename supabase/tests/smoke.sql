@@ -6,6 +6,8 @@ declare
   visible_count integer;
   changed_count integer;
   blocked boolean := false;
+  observation_first boolean;
+  observation_second boolean;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
@@ -241,11 +243,11 @@ begin
     ('00000000-0000-0000-0000-000000000011', '{"display_name":"Family A"}'::jsonb),
     ('00000000-0000-0000-0000-000000000012', '{"display_name":"Family B"}'::jsonb);
 
-  insert into public.children (id, parent_id, display_name, grade)
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values
-    ('00000000-0000-0000-0000-000000000021', '00000000-0000-0000-0000-000000000011', 'Sibling A1', 7),
-    ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000011', 'Sibling A2', 8),
-    ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000012', 'Family B Child', 9);
+    ('00000000-0000-0000-0000-000000000021', '00000000-0000-0000-0000-000000000011', 'Sibling A1', 7, 'grade_7'),
+    ('00000000-0000-0000-0000-000000000022', '00000000-0000-0000-0000-000000000011', 'Sibling A2', 8, 'grade_8'),
+    ('00000000-0000-0000-0000-000000000023', '00000000-0000-0000-0000-000000000012', 'Family B Child', 9, 'grade_9');
 
   insert into public.materials (
     id, child_id, material_week, rule_version, input_snapshot,
@@ -261,6 +263,55 @@ begin
       '00000000-0000-0000-0000-000000000023', current_date, 'test-v1', '{}'::jsonb,
       'family-b/student.pdf', 'family-b/answer.pdf'
     );
+
+  update public.materials
+  set canonical_source = '{"studentLesson":{"vocabulary":[]},"learningPlan":{"targets":[]},"trackingDelta":{"hypothesesToVerify":[]},"qualityEvidence":{"feedbackApplied":[],"criticFindings":[]},"learnerSnapshot":{"feedbackSummary":"smoke"},"metadata":{"curriculumVersion":"test-v1"}}'::jsonb
+  where id = '00000000-0000-0000-0000-000000000031';
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, material_id, completed_at,
+    release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000051',
+    '00000000-0000-0000-0000-000000000021', current_date, 'test-v1',
+    'observation-idempotency-test', 'completed', now(), 'observation-test',
+    '00000000-0000-0000-0000-000000000031', now(),
+    now() + interval '24 hours', now() - interval '24 hours', now()
+  );
+
+  select public.worker_record_curriculum_observations(
+    '00000000-0000-0000-0000-000000000031', 'observation-test', '{}'::jsonb
+  ) into observation_first;
+  select public.worker_record_curriculum_observations(
+    '00000000-0000-0000-0000-000000000031', 'observation-test', '{}'::jsonb
+  ) into observation_second;
+  if observation_first is distinct from true or observation_second is distinct from false then
+    raise exception 'curriculum observations were not idempotent by material';
+  end if;
+  if (select observations_recorded_at from public.materials where id = '00000000-0000-0000-0000-000000000031') is null then
+    raise exception 'curriculum observation marker was not recorded';
+  end if;
+  if (select jsonb_array_length(compact_weekly_history) from public.child_learning_state where child_id = '00000000-0000-0000-0000-000000000021') <> 1 then
+    raise exception 'curriculum observation history was applied more than once';
+  end if;
+
+  update public.materials
+  set observations_recorded_at = null
+  where id = '00000000-0000-0000-0000-000000000031';
+  update public.materials as material
+  set observations_recorded_at = material.created_at
+  where material.id = '00000000-0000-0000-0000-000000000031'
+    and exists (
+      select 1
+      from public.child_learning_state as state
+      cross join lateral jsonb_array_elements(state.compact_weekly_history) as history(entry)
+      where state.child_id = material.child_id
+        and history.entry->>'materialId' = material.id::text
+    );
+  if (select observations_recorded_at from public.materials where id = '00000000-0000-0000-0000-000000000031') is null then
+    raise exception 'existing curriculum observation history was not backfilled';
+  end if;
 
   insert into public.feedback (id, child_id, material_id, completion_rate)
   values (
@@ -378,6 +429,13 @@ begin
   end if;
   if has_function_privilege('authenticated', 'public.worker_complete_generation_job(uuid,text,text,text,jsonb,jsonb,text,text,text)', 'execute') then
     raise exception 'authenticated role can execute worker completion RPC';
+  end if;
+  if has_function_privilege('anon', 'public.worker_completed_generation_context(uuid,text)', 'execute')
+    or has_function_privilege('authenticated', 'public.worker_completed_generation_context(uuid,text)', 'execute') then
+    raise exception 'browser roles can execute completed generation recovery RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.worker_completed_generation_context(uuid,text)', 'execute') then
+    raise exception 'service role cannot execute completed generation recovery RPC';
   end if;
   if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute')
     or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then

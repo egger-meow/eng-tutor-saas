@@ -6,6 +6,7 @@
   "exports": "./src/index.ts",
   "dependencies": {
     "@paper-english/generator": "workspace:*",
+    "pdfjs-dist": "5.4.149",
     "playwright": "^1.61.0"
   },
   "scripts": {
@@ -13,8 +14,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pdf:install": "playwright install chromium",
     "generate:synthetic": "tsx src/generate-synthetic.ts",
-    "generate:public-sample": "tsx src/generate-public-sample.ts"
-    ,"generate:curriculum-sample": "tsx src/generate-curriculum-sample.ts"
+    "generate:public-sample": "tsx src/generate-public-sample.ts",
+    "generate:curriculum-sample": "tsx src/generate-curriculum-sample.ts"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

@@ -1,15 +1,18 @@
 import { describe, expect, it, vi } from 'vitest'
-import { syntheticWeekOne } from '@paper-english/generator'
-import { completeCurriculumJob, completeJob, failClaimedJob, type GenerationContext, type WorkerClient } from './pipeline.js'
+import { syntheticWeekOne, type CurriculumPackage } from '@paper-english/generator'
+import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
+import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
+import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
 
 function setup() {
   const uploads: string[] = []
   const removals: string[][] = []
-  const rpc = vi.fn(async (name: string) => ({ data: name === 'worker_complete_generation_job' ? 'material-1' : true, error: null }))
+  const rpc = vi.fn<WorkerClient['rpc']>(async (name: string) => ({ data: name === 'worker_complete_generation_job' ? 'material-1' : true, error: null }))
   const client: WorkerClient = {
     rpc,
     storage: { from: () => ({
       upload: async (path) => { uploads.push(path); return { data: {}, error: null } },
+      download: async () => ({ data: null, error: { message: 'not found' } }),
       remove: async (paths) => { removals.push(paths); return { data: {}, error: null } },
     }) },
   }
@@ -37,6 +40,7 @@ describe('completeJob', () => {
     const state = setup()
     state.client.storage.from = () => ({
       upload: async () => ({ data: null, error: { message: 'storage unavailable' } }),
+      download: async () => ({ data: null, error: { message: 'not found' } }),
       remove: async (paths) => { state.removals.push(paths); return { data: {}, error: null } },
     })
     await expect(completeJob({
@@ -65,10 +69,164 @@ describe('completeJob', () => {
 })
 
 describe('completeCurriculumJob', () => {
+  const curriculumContext: GenerationContext = {
+    job: { id: 'kobe-week-2-v2', childId: 'kobe', materialWeek: '2026-08-18', ruleVersion: 'weekly-material/2.0.0' },
+  }
+  const pdfs = { student: new Uint8Array([1, 2, 3]), parentAnswer: new Uint8Array([4, 5, 6]) }
+  const inspect = async (_pkg: CurriculumPackage, pair: { student: Uint8Array; parentAnswer: Uint8Array }): Promise<CurriculumPdfPairInspection> => {
+    const result = (bytes: Uint8Array) => ({
+      pageCount: 1,
+      pageTexts: ['fixture'],
+      text: 'fixture',
+      title: 'fixture',
+      layoutFingerprint: Array.from(bytes).join('-'),
+    })
+    return { student: result(pair.student), parentAnswer: result(pair.parentAnswer) }
+  }
+
   it('rejects an invalid v2 package before touching storage', async () => {
     const state = setup()
     await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: state.context, curriculumPackage: {} })).rejects.toThrow('Invalid curriculum package')
     expect(state.uploads).toEqual([])
+    expect(state.rpc).toHaveBeenCalledWith('worker_fail_generation_job', expect.objectContaining({ p_error_code: 'QUALITY_REJECTED' }))
+  })
+
+  it('enforces the deterministic audit before rendering or storage', async () => {
+    const state = setup()
+    const rejected = structuredClone(curriculumSample) as CurriculumPackage
+    rejected.metadata.inputFingerprint = 'unknown'
+    const render = vi.fn(async () => pdfs)
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: rejected, render })).rejects.toThrow('Curriculum quality rejected')
+    expect(render).not.toHaveBeenCalled()
+    expect(state.uploads).toEqual([])
+  })
+
+  it('uploads and completes an audited v2 package', async () => {
+    const state = setup()
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')
+    expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+  })
+
+  it('records a technical failure without touching storage when rendering fails', async () => {
+    const state = setup()
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: curriculumSample,
+      render: async () => { throw new Error('chromium crashed') },
+      inspect,
+    })).rejects.toThrow('chromium crashed')
+    expect(state.uploads).toEqual([])
+    expect(state.removals).toEqual([])
+    expect(state.rpc).toHaveBeenCalledWith('worker_fail_generation_job', expect.objectContaining({ p_error_code: 'CURRICULUM_PIPELINE_FAILED' }))
+  })
+
+  it('does not remove pre-existing evidence after a first-upload failure', async () => {
+    const state = setup()
+    state.client.storage.from = () => ({
+      upload: async (path) => { state.uploads.push(path); return { data: null, error: { message: 'storage unavailable' } } },
+      download: async () => ({ data: null, error: { message: 'storage unavailable' } }),
+      remove: async (paths) => { state.removals.push(paths); return { data: {}, error: null } },
+    })
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).rejects.toThrow('storage unavailable')
+    expect(state.removals).toEqual([])
+  })
+
+  it('removes only the artifact created by this attempt after a partial upload failure', async () => {
+    const state = setup()
+    let uploadCount = 0
+    state.client.storage.from = () => ({
+      upload: async (path) => {
+        state.uploads.push(path)
+        uploadCount += 1
+        return uploadCount === 2 ? { data: null, error: { message: 'parent upload failed' } } : { data: {}, error: null }
+      },
+      download: async () => ({ data: null, error: { message: 'not found' } }),
+      remove: async (paths) => { state.removals.push(paths); return { data: {}, error: null } },
+    })
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).rejects.toThrow('parent upload failed')
+    expect(state.removals).toEqual([['kobe/kobe-week-2-v2/student.pdf']])
+  })
+
+  it('reuses an inspected immutable artifact pair on retry', async () => {
+    const state = setup()
+    state.client.storage.from = () => ({
+      upload: async () => ({ data: null, error: { message: 'already exists' } }),
+      download: async (path) => ({ data: new Blob([path.endsWith('student.pdf') ? pdfs.student : pdfs.parentAnswer]), error: null }),
+      remove: async (paths) => { state.removals.push(paths); return { data: {}, error: null } },
+    })
+    const render = vi.fn(async () => pdfs)
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render, inspect })).resolves.toBe('material-1')
+    expect(render).toHaveBeenCalledOnce()
+    expect(state.removals).toEqual([])
+  })
+
+  it('preserves and rejects a conflicting immutable artifact', async () => {
+    const state = setup()
+    state.client.storage.from = () => ({
+      upload: async () => ({ data: null, error: { message: 'already exists' } }),
+      download: async () => ({ data: new Blob([new Uint8Array([9])]), error: null }),
+      remove: async (paths) => { state.removals.push(paths); return { data: {}, error: null } },
+    })
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).rejects.toThrow('does not match the current canonical render')
+    expect(state.removals).toEqual([])
+  })
+
+  it('keeps uploaded v2 artifacts after an ambiguous completion transport failure', async () => {
+    const state = setup()
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_complete_generation_job') throw new Error('connection reset')
+      return { data: true, error: null }
+    })
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).rejects.toThrow('connection reset')
+    expect(state.removals).toEqual([])
+    expect(state.rpc).not.toHaveBeenCalledWith('worker_fail_generation_job', expect.anything())
+  })
+
+  it('recovers when completion committed but the first response was lost', async () => {
+    const state = setup()
+    const stored = new Map<string, Uint8Array>()
+    let completionCalls = 0
+    state.client.storage.from = () => ({
+      upload: async (path, body) => {
+        if (stored.has(path)) return { data: null, error: { message: 'already exists' } }
+        stored.set(path, Uint8Array.from(body))
+        return { data: {}, error: null }
+      },
+      download: async (path) => {
+        const bytes = stored.get(path)
+        return bytes ? { data: new Blob([Uint8Array.from(bytes).buffer]), error: null } : { data: null, error: { message: 'not found' } }
+      },
+      remove: async (paths) => { for (const path of paths) stored.delete(path); return { data: {}, error: null } },
+    })
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_complete_generation_job') {
+        completionCalls += 1
+        if (completionCalls === 1) throw new Error('connection reset after commit')
+        return { data: 'material-1', error: null }
+      }
+      if (name === 'worker_generation_context') return { data: null, error: { message: 'job is not actively claimed by this worker' } }
+      if (name === 'worker_completed_generation_context') return { data: { job: curriculumContext.job, completedMaterialId: 'material-1' }, error: null }
+      if (name === 'worker_quality_trends') return { data: [], error: null }
+      return { data: true, error: null }
+    })
+
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).rejects.toThrow('connection reset after commit')
+    const recoveryContext = await loadGenerationContext(state.client, curriculumContext.job.id, 'worker-1')
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: recoveryContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')
+    expect(stored.size).toBe(2)
+    expect(completionCalls).toBe(2)
+  })
+
+  it('does not fail completion when observation recording fails', async () => {
+    const state = setup()
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_complete_generation_job') return { data: 'material-1', error: null }
+      if (name === 'worker_record_curriculum_observations') return { data: null, error: { message: 'observation unavailable' } }
+      return { data: true, error: null }
+    })
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')
   })
 })
 
@@ -90,5 +248,22 @@ describe('failClaimedJob', () => {
     await expect(failClaimedJob(state.client, 'worker-1', 'synthetic-week-1', 'QUALITY_REJECTED', 'Rejected')).rejects.toThrow(
       'generation job was not actively claimed by this worker',
     )
+  })
+})
+
+describe('loadGenerationContext', () => {
+  it('falls back to a completed-job recovery context after an ambiguous completion', async () => {
+    const state = setup()
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_generation_context') return { data: null, error: { message: 'job is not actively claimed by this worker' } }
+      if (name === 'worker_completed_generation_context') return { data: { job: { id: 'synthetic-week-1', childId: 'synthetic-child', materialWeek: '2026-08-18', ruleVersion: 'weekly-material/1.0.0', recoveryCompleted: true } }, error: null }
+      if (name === 'worker_quality_trends') return { data: [], error: null }
+      return { data: null, error: { message: 'unexpected RPC' } }
+    })
+
+    await expect(loadGenerationContext(state.client, 'synthetic-week-1', 'worker-1')).resolves.toEqual(expect.objectContaining({
+      job: expect.objectContaining({ recoveryCompleted: true }),
+    }))
+    expect(state.rpc).toHaveBeenCalledWith('worker_completed_generation_context', { job_id: 'synthetic-week-1', worker_id: 'worker-1' })
   })
 })
