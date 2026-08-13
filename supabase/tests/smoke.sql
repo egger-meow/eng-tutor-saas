@@ -10,6 +10,9 @@ declare
   observation_second boolean;
   bridge_job_id uuid;
   bridge_child_id uuid;
+  bridge_claim_result jsonb;
+  bridge_context jsonb;
+  bridge_fingerprint text;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
@@ -223,17 +226,61 @@ begin
     raise exception 'daily generation limit mismatch';
   end if;
 
-  select id, child_id into bridge_job_id, bridge_child_id
-  from public.generation_jobs
-  where claimed_by = 'migration-test' and status = 'claimed'
-  order by created_at
-  limit 1;
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, scheduled_for,
+    release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000002',
+    current_date + 250,
+    'test-v1',
+    'bridge-fingerprint-test',
+    now() - interval '1 minute',
+    now() + interval '12 hours',
+    now() - interval '36 hours',
+    now() - interval '12 hours'
+  );
+
+  select private_generation.chatgpt_claim_generation_batch('bridge-smoke')
+  into bridge_claim_result;
+  bridge_context := bridge_claim_result #> '{claimed,0}';
+  bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
+  bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.1.0'
+    or bridge_fingerprint !~ '^sha256:[0-9a-f]{64}$' then
+    raise exception 'ChatGPT bridge did not return a server-owned SHA-256 fingerprint';
+  end if;
+  if bridge_fingerprint <> 'sha256:' || encode(
+    extensions.digest(convert_to((bridge_context - 'inputFingerprint')::text, 'UTF8'), 'sha256'),
+    'hex'
+  ) then
+    raise exception 'ChatGPT bridge fingerprint does not match the exact claimed context';
+  end if;
+
+  blocked := false;
+  begin
+    perform private_generation.chatgpt_submit_curriculum_package(
+      bridge_job_id,
+      'bridge-smoke',
+      jsonb_build_object('metadata', jsonb_build_object(
+        'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+        'childId', bridge_child_id::text, 'inputFingerprint', 'sha256:' || repeat('0', 64)
+      ))
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'ChatGPT bridge accepted a fabricated input fingerprint';
+  end if;
 
   perform private_generation.chatgpt_submit_curriculum_package(
     bridge_job_id,
-    'migration-test',
+    'bridge-smoke',
     jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text, 'childId', bridge_child_id::text
+      'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+      'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ))
   );
   if not exists (
