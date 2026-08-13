@@ -43,6 +43,12 @@ describe('curriculum package v2', () => {
     expect(result.success ? [] : result.issues).toEqual([])
   })
 
+  it('accepts all legitimate variants for an open response', () => {
+    const value = validPackage()
+    value.answers[0]!.acceptedAnswers = Array.from({ length: 12 }, (_, index) => `legitimate variant ${index + 1}`)
+    expect(validateCurriculumPackage(value).success).toBe(true)
+  })
+
   it.each([
     ['a missing gradual-release stage', (value: ReturnType<typeof validPackage>) => { value.studentLesson.practice = value.studentLesson.practice.filter((section) => section.stage !== 'guided') }],
     ['an unresolved critical review finding', (value: ReturnType<typeof validPackage>) => { value.qualityEvidence.criticFindings.push({ dimension: 'self-study', severity: 'critical', finding: 'No usable Chinese explanation.', resolution: null }) }],

@@ -59,7 +59,7 @@ export const CurriculumPackageSchema = z.strictObject({
     selfCheckZh: z.array(Text).min(2).max(8),
     homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
   }),
-  answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text).max(8), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
+  answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({ focusZh: Text, observeZh: z.array(Text).min(1).max(6), completionCheckZh: Text }),
   trackingDelta: z.strictObject({
     introducedVocabularyIds: z.array(StableId),
