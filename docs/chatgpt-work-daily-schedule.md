@@ -7,12 +7,14 @@ This document contains the production operating contract and the exact prompt fo
 - **Name:** `紙屬英文 — 每日教材生成與交付`
 - **Cadence:** every day at a consistent time in `Asia/Taipei`
 - **Destination:** a standalone Scheduled task attached to the `eng-tutor-saas` project
-- **Execution:** dedicated project worktree or equivalent isolated checkout of `main`
+- **Execution:** dedicated project worktree or equivalent isolated checkout of `main`, provided the scheduled environment injects the worker secrets; otherwise use the saved local project without modifying source
 - **Model:** strongest available general reasoning model; do not use a mini/fast model for production curriculum
 - **Reasoning:** high or the highest practical setting
 - **Notifications:** every failed run and every run that completes or rejects at least one job
 
 The machine and ChatGPT desktop app must remain available for local scheduled runs. Use a cloud run only if it has an equivalent repository checkout, shell, Node/pnpm runtime, Chromium, and authorized Supabase worker credentials.
+
+The worker reads `SUPABASE_URL` and `SUPABASE_SECRET_KEY` from the process environment. Merely storing them in a git-ignored `.env` does not guarantee a background task or new worktree will inherit them. Configure those two names in the Scheduled task's local environment configuration (or equivalent secret injection) and never copy the secret file into Git.
 
 ## Paste-ready Scheduled prompt
 
