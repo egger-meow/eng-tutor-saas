@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ChildWithProfile } from '../../hooks/use-parent-data'
-import type { Material } from '../../lib/materials'
+import { isMaterialReleased, type Material } from '../../lib/materials'
 import { handleInternalLink } from '../../app/use-route'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import { getDeliveryViewModel } from '../../lib/delivery'
@@ -14,14 +14,19 @@ interface ChildCardProps {
   child: ChildWithProfile
   materials: Material[]
   onRefresh: () => void
+  onLoadMoreMaterials: () => void
+  hasMoreMaterials: boolean
+  loadingMoreMaterials: boolean
   defaultExpanded?: boolean
 }
 
-export function ChildCard({ child, materials, onRefresh, defaultExpanded = false }: ChildCardProps) {
+export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, hasMoreMaterials, loadingMoreMaterials, defaultExpanded = false }: ChildCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const latestMaterial = materials[0] ?? null
-  const pastMaterials = materials.slice(1)
+  const releasedMaterials = materials.filter((material) => isMaterialReleased(material))
+  const latestMaterial = releasedMaterials[0] ?? null
+  const pastMaterials = releasedMaterials.slice(1)
+  const pendingMaterial = materials.find((material) => !isMaterialReleased(material)) ?? null
   const delivery = getDeliveryViewModel(child, latestMaterial)
 
   return (
@@ -72,6 +77,7 @@ export function ChildCard({ child, materials, onRefresh, defaultExpanded = false
           <WeeklyLearningPanel material={latestMaterial} childName={child.display_name} onFeedbackSaved={onRefresh} />
           
           <div className="dashboard-support">
+            {pendingMaterial?.release_at && <p className="notice">下一份教材已準備完成，將於 {new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(pendingMaterial.release_at))} 開放下載。</p>}
             <PersonalizationSummary material={latestMaterial} />
             <DeliveryStatus delivery={delivery} />
           </div>
@@ -96,7 +102,7 @@ export function ChildCard({ child, materials, onRefresh, defaultExpanded = false
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                     className="history-content-wrapper"
                   >
-                    <MaterialHistory materials={pastMaterials} childName={child.display_name} onFeedbackSaved={onRefresh} />
+                    <MaterialHistory materials={pastMaterials} childName={child.display_name} onFeedbackSaved={onRefresh} hasMore={hasMoreMaterials} loadingMore={loadingMoreMaterials} onLoadMore={onLoadMoreMaterials} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -113,9 +119,10 @@ export function ChildCard({ child, materials, onRefresh, defaultExpanded = false
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
           <div className="dashboard-support">
+            {pendingMaterial?.release_at && <p className="notice">教材已準備完成，將於 {new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(pendingMaterial.release_at))} 開放下載。</p>}
             <section className="empty-state">
-              <h2>第一份教材準備中</h2>
-              <p>完成學習資料後，每週教材會在此自動產出並提供下載。</p>
+              <h2>{pendingMaterial ? '下一份教材已準備完成' : '第一份教材準備中'}</h2>
+              <p>{pendingMaterial ? '內容已先完成準備，到了交付日期才會開放下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
             </section>
             <DeliveryStatus delivery={delivery} />
           </div>

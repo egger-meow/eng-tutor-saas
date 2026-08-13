@@ -64,6 +64,9 @@ export function DashboardPage({ session }: { session: Session }) {
                     child={child}
                     materials={data.getMaterialsForChild(child.id)}
                     onRefresh={() => void data.refresh()}
+                    onLoadMoreMaterials={() => void data.loadMoreMaterials(child.id)}
+                    hasMoreMaterials={Boolean(data.materialHasMore[child.id])}
+                    loadingMoreMaterials={Boolean(data.loadingMoreMaterials[child.id])}
                     defaultExpanded={index === 0}
                   />
                 </StaggerItem>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getDeliveryViewModel } from './delivery'
 import type { Child } from './children'
-import type { Material } from './materials'
+import { isMaterialReleased, type Material } from './materials'
 
 const child: Child = {
   id: 'child', display_name: '安安', grade: 7, grade_stage: 'grade_7', is_active: true, timezone: 'Asia/Taipei', delivery_weekday: 1,
@@ -30,5 +30,18 @@ describe('getDeliveryViewModel', () => {
     const view = getDeliveryViewModel(child, material(false), new Date('2026-08-16T00:00:00Z'))
     expect(view.feedbackState).toBe('closed')
     expect(view.detail).toContain('仍會')
+  })
+})
+
+describe('isMaterialReleased', () => {
+  it('keeps prepared material locked before its release time', () => {
+    const prepared = material(false)
+    prepared.release_at = '2026-08-17T01:00:00Z'
+    expect(isMaterialReleased(prepared, new Date('2026-08-16T23:59:59Z'))).toBe(false)
+    expect(isMaterialReleased(prepared, new Date('2026-08-17T01:00:00Z'))).toBe(true)
+  })
+
+  it('treats legacy materials without a release timestamp as available', () => {
+    expect(isMaterialReleased(material(false), new Date('2026-08-14T00:00:00Z'))).toBe(true)
   })
 })

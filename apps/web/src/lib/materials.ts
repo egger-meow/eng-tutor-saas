@@ -26,7 +26,18 @@ export type Material = {
   parent_answer_pdf_path: string
   generation_summary: Record<string, unknown>
   created_at: string
+  release_at?: string | null
   feedback: MaterialFeedback | null
+}
+
+export type MaterialPage = {
+  materials: Material[]
+  hasMoreByChild: Record<string, boolean>
+}
+
+export type MaterialPageOptions = {
+  limit?: number
+  offset?: number
 }
 
 export function readGenerationSummary(summary: Record<string, unknown>): GenerationSummary {
@@ -47,22 +58,50 @@ export type FeedbackInput = {
   parent_comments: string
 }
 
-export async function listMaterials(childIds: string[]): Promise<Material[]> {
-  if (childIds.length === 0) return []
+export async function listMaterials(childIds: string[], options: MaterialPageOptions = {}): Promise<MaterialPage> {
+  if (childIds.length === 0) return { materials: [], hasMoreByChild: {} }
   const client = getSupabaseClient()
-  const [{ data: materials, error: materialsError }, { data: feedback, error: feedbackError }] = await Promise.all([
-    client.from('materials').select('id, child_id, material_week, revision, student_pdf_path, parent_answer_pdf_path, generation_summary, created_at').in('child_id', childIds).order('material_week', { ascending: false }),
-    client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds),
+  const limit = options.limit ?? 5
+  const offset = options.offset ?? 0
+  const pages = await Promise.all(childIds.map(async (childId) => {
+    const { data, error } = await client
+      .from('materials')
+      .select('id, child_id, material_week, revision, student_pdf_path, parent_answer_pdf_path, generation_summary, created_at')
+      .eq('child_id', childId)
+      .order('material_week', { ascending: false })
+      .order('revision', { ascending: false })
+      .range(offset, offset + limit - 1)
+    if (error) throw error
+    return { childId, rows: data ?? [] }
+  }))
+  const materials = pages.flatMap((page) => page.rows)
+  const materialIds = materials.map((material) => material.id)
+  const [{ data: feedback, error: feedbackError }, { data: jobs, error: jobsError }] = await Promise.all([
+    client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds),
+    materialIds.length === 0
+      ? Promise.resolve({ data: [], error: null })
+      : client.from('generation_jobs').select('material_id, child_id, release_at').in('child_id', childIds).in('material_id', materialIds),
   ])
-  if (materialsError) throw materialsError
   if (feedbackError) throw feedbackError
+  if (jobsError) throw jobsError
 
   const feedbackByMaterial = new Map((feedback ?? []).map((item) => [item.material_id, item]))
-  return (materials ?? []).map((material) => ({
+  const releaseByMaterial = new Map((jobs ?? []).map((job) => [job.material_id, job.release_at as string]))
+  return {
+    materials: materials.map((material) => ({
     ...material,
     generation_summary: material.generation_summary as Record<string, unknown>,
+    release_at: releaseByMaterial.get(material.id) ?? null,
     feedback: feedbackByMaterial.get(material.id) ?? null,
-  })) as Material[]
+    })) as Material[],
+    hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, page.rows.length === limit])),
+  }
+}
+
+export function isMaterialReleased(material: Material, now = new Date()): boolean {
+  if (!material.release_at) return true
+  const releaseAt = new Date(material.release_at)
+  return !Number.isNaN(releaseAt.getTime()) && releaseAt <= now
 }
 
 export async function openMaterialDownload(path: string, filename: string): Promise<void> {

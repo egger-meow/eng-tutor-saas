@@ -12,6 +12,9 @@ export function chooseOwnedChild(children: ChildWithProfile[], requestedId: stri
 export function useParentData() {
   const [children, setChildren] = useState<ChildWithProfile[]>([])
   const [materials, setMaterials] = useState<Material[]>([])
+  const [materialOffsets, setMaterialOffsets] = useState<Record<string, number>>({})
+  const [materialHasMore, setMaterialHasMore] = useState<Record<string, boolean>>({})
+  const [loadingMoreMaterials, setLoadingMoreMaterials] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -23,9 +26,12 @@ export function useParentData() {
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
       const joined = childRows.map((child) => ({ ...child, profile: profileMap.get(child.id) ?? null }))
-      const allMaterials = joined.length > 0 ? await listMaterials(joined.map((c) => c.id)) : []
+      const childIds = joined.map((c) => c.id)
+      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {} }
       setChildren(joined)
-      setMaterials(allMaterials)
+      setMaterials(page.materials)
+      setMaterialOffsets(Object.fromEntries(childIds.map((childId) => [childId, 5])))
+      setMaterialHasMore(page.hasMoreByChild)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '無法讀取家長資料，請稍後再試。')
     } finally {
@@ -42,5 +48,18 @@ export function useParentData() {
     [materials]
   )
 
-  return { children, materials, loading, error, getMaterialsForChild, refresh }
+  const loadMoreMaterials = useCallback(async (childId: string) => {
+    if (!materialHasMore[childId] || loadingMoreMaterials[childId]) return
+    setLoadingMoreMaterials((current) => ({ ...current, [childId]: true }))
+    try {
+      const page = await listMaterials([childId], { offset: materialOffsets[childId] ?? 0 })
+      setMaterials((current) => [...current, ...page.materials])
+      setMaterialOffsets((current) => ({ ...current, [childId]: (current[childId] ?? 0) + 5 }))
+      setMaterialHasMore((current) => ({ ...current, ...page.hasMoreByChild }))
+    } finally {
+      setLoadingMoreMaterials((current) => ({ ...current, [childId]: false }))
+    }
+  }, [loadingMoreMaterials, materialHasMore, materialOffsets])
+
+  return { children, materials, loading, error, getMaterialsForChild, loadMoreMaterials, loadingMoreMaterials, materialHasMore, refresh }
 }
