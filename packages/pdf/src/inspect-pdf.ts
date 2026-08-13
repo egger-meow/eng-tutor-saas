@@ -17,7 +17,7 @@ export type PdfInspection = {
 export type CurriculumPdfPairInspection = { student: PdfInspection; parentAnswer: PdfInspection }
 
 function normalized(value: string): string {
-  return value.replace(/\s+/gu, ' ').trim()
+  return value.normalize('NFKC').replace(/\s+/gu, ' ').trim()
 }
 
 export async function inspectPdf(bytes: Uint8Array, label: string): Promise<PdfInspection> {
@@ -88,8 +88,8 @@ function allQuestions(pkg: CurriculumPackage) {
 }
 
 function requireText(haystack: string, needles: readonly string[], label: string): void {
-  const compactHaystack = haystack.replace(/\s+/gu, '')
-  const missing = [...new Set(needles.filter((needle) => !compactHaystack.includes(needle.replace(/\s+/gu, ''))))]
+  const compactHaystack = normalized(haystack).replace(/\s+/gu, '')
+  const missing = [...new Set(needles.filter((needle) => !compactHaystack.includes(normalized(needle).replace(/\s+/gu, ''))))]
   if (missing.length > 0) throw new Error(`${label} PDF is missing required content: ${missing.join(', ')}`)
 }
 

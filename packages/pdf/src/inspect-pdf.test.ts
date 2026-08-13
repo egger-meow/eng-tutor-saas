@@ -26,4 +26,12 @@ describe('PDF artifact inspection', () => {
     overflowPackage.studentLesson.practice[0]!.questions[0]!.prompt = 'OVERFLOW'.repeat(300)
     await expect(renderCurriculumPackageBytes(overflowPackage)).rejects.toThrow('missing required content')
   }, 30_000)
+
+  it('preserves mixed Traditional Chinese and English question prompts', async () => {
+    const mixedLanguagePackage = structuredClone(curriculumSample)
+    mixedLanguagePackage.studentLesson.practice[0]!.questions[0]!.prompt =
+      '綠色 signal 出現時，代表 study room 是什麼狀態？用中文或簡短英文回答。'
+
+    await expect(renderCurriculumPackageBytes(mixedLanguagePackage)).resolves.toBeDefined()
+  }, 30_000)
 })
