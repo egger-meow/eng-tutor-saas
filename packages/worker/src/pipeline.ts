@@ -45,6 +45,22 @@ export async function claimJobs(client: WorkerClient, workerId: string): Promise
   return unwrap(result, 'claim jobs') as ClaimedJob[]
 }
 
+export async function failClaimedJob(
+  client: WorkerClient,
+  workerId: string,
+  jobId: string,
+  errorCode: string,
+  errorMessage: string,
+): Promise<void> {
+  const failed = unwrap(await client.rpc('worker_fail_generation_job', {
+    job_id: jobId,
+    worker_id: workerId,
+    p_error_code: errorCode.slice(0, 100),
+    p_error_message: errorMessage.slice(0, 2000),
+  }), 'fail generation job') as boolean
+  if (!failed) throw new Error('generation job was not actively claimed by this worker')
+}
+
 export async function loadGenerationContext(client: WorkerClient, jobId: string, workerId: string): Promise<GenerationContext> {
   const result = await client.rpc('worker_generation_context', { job_id: jobId, worker_id: workerId })
   const context = unwrap(result, 'load generation context') as GenerationContext

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { syntheticWeekOne } from '@paper-english/generator'
-import { completeCurriculumJob, completeJob, type GenerationContext, type WorkerClient } from './pipeline.js'
+import { completeCurriculumJob, completeJob, failClaimedJob, type GenerationContext, type WorkerClient } from './pipeline.js'
 
 function setup() {
   const uploads: string[] = []
@@ -69,5 +69,26 @@ describe('completeCurriculumJob', () => {
     const state = setup()
     await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: state.context, curriculumPackage: {} })).rejects.toThrow('Invalid curriculum package')
     expect(state.uploads).toEqual([])
+  })
+})
+
+describe('failClaimedJob', () => {
+  it('records a sanitized pre-completion quality rejection', async () => {
+    const state = setup()
+    await failClaimedJob(state.client, 'worker-1', 'synthetic-week-1', 'QUALITY_REJECTED', 'Unresolved answer ambiguity')
+    expect(state.rpc).toHaveBeenCalledWith('worker_fail_generation_job', {
+      job_id: 'synthetic-week-1',
+      worker_id: 'worker-1',
+      p_error_code: 'QUALITY_REJECTED',
+      p_error_message: 'Unresolved answer ambiguity',
+    })
+  })
+
+  it('fails loudly when the worker no longer owns the claim', async () => {
+    const state = setup()
+    state.rpc.mockResolvedValueOnce({ data: false, error: null })
+    await expect(failClaimedJob(state.client, 'worker-1', 'synthetic-week-1', 'QUALITY_REJECTED', 'Rejected')).rejects.toThrow(
+      'generation job was not actively claimed by this worker',
+    )
   })
 })

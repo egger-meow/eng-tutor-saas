@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
-import { claimJobs, completeCurriculumJob, completeJob, loadGenerationContext } from './pipeline.js'
+import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext } from './pipeline.js'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
 
 function option(name: string, required = true): string | undefined {
@@ -34,6 +34,15 @@ async function main(): Promise<void> {
     return
   }
 
+  if (command === 'fail') {
+    const jobId = option('job') ?? ''
+    const errorCode = option('code') ?? ''
+    const errorMessage = option('message') ?? ''
+    await failClaimedJob(client, workerId, jobId, errorCode, errorMessage)
+    process.stdout.write(`${JSON.stringify({ jobId, status: 'failed', errorCode })}\n`)
+    return
+  }
+
   if (command === 'complete') {
     const jobId = option('job') ?? ''
     const context = await loadGenerationContext(client, jobId, workerId)
@@ -60,7 +69,7 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|prompt-v2|complete|complete-v2> --worker <id> [options]')
+  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2> --worker <id> [options]')
 }
 
 main().catch((error: unknown) => {
