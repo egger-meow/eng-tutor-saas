@@ -14,9 +14,11 @@ interface ChildCardProps {
   child: ChildWithProfile
   materials: Material[]
   onRefresh: () => void
+  defaultExpanded?: boolean
 }
 
-export function ChildCard({ child, materials, onRefresh }: ChildCardProps) {
+export function ChildCard({ child, materials, onRefresh, defaultExpanded = false }: ChildCardProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
   const [historyOpen, setHistoryOpen] = useState(false)
   const latestMaterial = materials[0] ?? null
   const pastMaterials = materials.slice(1)
@@ -38,6 +40,16 @@ export function ChildCard({ child, materials, onRefresh }: ChildCardProps) {
           </p>
         </div>
         <div className="child-card-actions">
+          <button
+            className="child-card-toggle"
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={`child-card-content-${child.id}`}
+            onClick={() => setExpanded((open) => !open)}
+          >
+            <span>{expanded ? '收起' : '展開本週內容'}</span>
+            <span className={`toggle-arrow ${expanded ? 'expanded' : ''}`} aria-hidden="true">⌄</span>
+          </button>
           <a className="button button-secondary button-sm" href={`/children/${child.id}`} onClick={handleInternalLink}>
             學習資料
           </a>
@@ -47,8 +59,16 @@ export function ChildCard({ child, materials, onRefresh }: ChildCardProps) {
         </div>
       </header>
 
-      {latestMaterial ? (
-        <div className="child-card-body">
+      <AnimatePresence initial={false}>
+        {expanded && (latestMaterial ? (
+          <motion.div
+            id={`child-card-content-${child.id}`}
+            className="child-card-body"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
           <WeeklyLearningPanel material={latestMaterial} childName={child.display_name} onFeedbackSaved={onRefresh} />
           
           <div className="dashboard-support">
@@ -82,9 +102,16 @@ export function ChildCard({ child, materials, onRefresh }: ChildCardProps) {
               </AnimatePresence>
             </div>
           )}
-        </div>
-      ) : (
-        <div className="child-card-body empty-child-body">
+          </motion.div>
+        ) : (
+          <motion.div
+            id={`child-card-content-${child.id}`}
+            className="child-card-body empty-child-body"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
           <div className="dashboard-support">
             <section className="empty-state">
               <h2>第一份教材準備中</h2>
@@ -92,8 +119,9 @@ export function ChildCard({ child, materials, onRefresh }: ChildCardProps) {
             </section>
             <DeliveryStatus delivery={delivery} />
           </div>
-        </div>
-      )}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </motion.article>
   )
 }

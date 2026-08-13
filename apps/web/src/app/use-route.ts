@@ -5,10 +5,20 @@ const routeChangeEvent = 'paper-english:route-change'
 
 export function navigate(path: string) {
   const browserPath = addBasePath(path, import.meta.env.BASE_URL)
-  if (window.location.pathname === browserPath) return
-  window.history.pushState({}, '', browserPath)
-  window.dispatchEvent(new Event(routeChangeEvent))
-  window.scrollTo({ top: 0, behavior: 'auto' })
+  const nextUrl = new URL(browserPath, window.location.origin)
+  const currentUrl = new URL(window.location.href)
+  const sameDocument = currentUrl.pathname === nextUrl.pathname && currentUrl.search === nextUrl.search
+
+  if (currentUrl.pathname + currentUrl.search + currentUrl.hash !== nextUrl.pathname + nextUrl.search + nextUrl.hash) {
+    window.history.pushState({}, '', browserPath)
+    window.dispatchEvent(new Event(routeChangeEvent))
+  }
+
+  if (nextUrl.hash) {
+    window.requestAnimationFrame(() => document.getElementById(decodeURIComponent(nextUrl.hash.slice(1)))?.scrollIntoView({ block: 'start' }))
+  } else if (!sameDocument) {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }
 }
 
 export function useRoute(): Route {

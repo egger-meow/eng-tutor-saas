@@ -5,7 +5,7 @@ type InterestKey = 'favoriteStories' | 'favoriteGames' | 'favoriteMusic' | 'acti
 
 const fields: Array<{ key: InterestKey; title: string; hint: string }> = [
   { key: 'favoriteStories', title: '最近喜歡的動漫、電影、書或頻道', hint: '例如：排球少年、葬送的芙莉蓮、Kurzgesagt；可一行寫一個' },
-  { key: 'favoriteGames', title: '喜歡玩的遊戲', hint: '例如：Minecraft 生存模式、Roblox Doors、寶可夢對戰' },
+  { key: 'favoriteGames', title: '喜歡玩的遊戲', hint: '例如：解謎遊戲、運動遊戲、合作冒險' },
   { key: 'favoriteMusic', title: '喜歡的音樂、歌手或樂器', hint: '例如：YOASOBI、周杰倫、正在學爵士鼓' },
   { key: 'activities', title: '正在學或常做的活動', hint: '例如：跆拳道藍帶、籃球校隊、畫電繪、自己組電腦' },
   { key: 'currentFascinations', title: '最近特別著迷或一直在研究的事', hint: '越具體越好，例如：F1 賽車進站策略、黑洞、養守宮' },

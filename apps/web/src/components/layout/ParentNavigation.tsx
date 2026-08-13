@@ -29,7 +29,7 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
           className="mobile-menu-toggle"
           type="button"
           aria-expanded={mobileMenuOpen}
-          aria-label="選單"
+          aria-label={mobileMenuOpen ? '關閉家長選單' : '開啟家長選單'}
           onClick={() => setMobileMenuOpen((prev) => !prev)}
         >
           <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />

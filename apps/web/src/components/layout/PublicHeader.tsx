@@ -6,7 +6,7 @@ const links = [
   { href: '/sample', label: '查看範例', routeName: 'sample' },
   { href: '/guide', label: '學習方法', routeName: 'guide' },
   { href: '/about', label: '關於作者', routeName: 'about' },
-  { href: '/billing', label: '方案', routeName: 'billing' },
+  { href: '/#pricing', label: '方案', routeName: 'billing' },
 ]
 
 export function PublicHeader() {
@@ -24,7 +24,7 @@ export function PublicHeader() {
           className="mobile-menu-toggle"
           type="button"
           aria-expanded={mobileMenuOpen}
-          aria-label="選單Toggle"
+          aria-label={mobileMenuOpen ? '關閉導覽選單' : '開啟導覽選單'}
           onClick={() => setMobileMenuOpen((prev) => !prev)}
         >
           <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />

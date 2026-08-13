@@ -16,7 +16,7 @@ export function DashboardPage({ session }: { session: Session }) {
       header={
         <ParentNavigation
           email={session.user.email}
-          childHref={data.children.length === 1 ? `/children/${data.children[0].id}` : '/dashboard'}
+          childHref={data.children[0] ? `/children/${data.children[0].id}` : '/children/new'}
           onSignOut={() => void getSupabaseClient().auth.signOut()}
         />
       }
@@ -57,13 +57,14 @@ export function DashboardPage({ session }: { session: Session }) {
               </button>
             </header>
 
-            <StaggerContainer className="children-cards-list" staggerDelay={0.1}>
-              {data.children.map((child) => (
+            <StaggerContainer className="children-cards-list" staggerDelay={0.08} id="children">
+              {data.children.map((child, index) => (
                 <StaggerItem key={child.id}>
                   <ChildCard
                     child={child}
                     materials={data.getMaterialsForChild(child.id)}
                     onRefresh={() => void data.refresh()}
+                    defaultExpanded={index === 0}
                   />
                 </StaggerItem>
               ))}

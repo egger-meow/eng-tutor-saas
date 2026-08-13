@@ -9,6 +9,7 @@ describe('hosted route paths', () => {
   it('adds the repository prefix when navigating in production', () => {
     expect(addBasePath('/billing', '/eng-tutor-saas/')).toBe('/eng-tutor-saas/billing')
     expect(addBasePath('/billing', '/')).toBe('/billing')
+    expect(addBasePath('/#pricing', '/eng-tutor-saas/')).toBe('/eng-tutor-saas/#pricing')
   })
 
   it('keeps the public sample route addressable', () => {
