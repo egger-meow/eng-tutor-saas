@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
 import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext } from './pipeline.js'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
+import { processCurriculumSubmissions } from './submission-processor.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -12,8 +13,21 @@ function option(name: string, required = true): string | undefined {
 
 async function main(): Promise<void> {
   const command = process.argv[2]
-  const workerId = option('worker') ?? ''
   const client = createWorkerClient()
+
+  if (command === 'process-submissions') {
+    const processorId = option('processor') ?? ''
+    const claimLimit = Number(option('limit', false) ?? '5')
+    if (!Number.isInteger(claimLimit) || claimLimit < 1 || claimLimit > 25) {
+      throw new Error('--limit must be an integer between 1 and 25')
+    }
+    const results = await processCurriculumSubmissions(client, processorId, claimLimit)
+    process.stdout.write(`${JSON.stringify({ claimed: results.length, results }, null, 2)}\n`)
+    if (results.some((result) => result.status !== 'completed')) process.exitCode = 1
+    return
+  }
+
+  const workerId = option('worker') ?? ''
 
   if (command === 'claim') {
     const jobs = await claimJobs(client, workerId)
@@ -69,7 +83,7 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2> --worker <id> [options]')
+  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2|process-submissions> [options]')
 }
 
 main().catch((error: unknown) => {

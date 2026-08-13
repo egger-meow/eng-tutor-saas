@@ -8,6 +8,8 @@ declare
   blocked boolean := false;
   observation_first boolean;
   observation_second boolean;
+  bridge_job_id uuid;
+  bridge_child_id uuid;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
@@ -219,6 +221,39 @@ begin
     where key = 'daily_generation_limit'
   ) <> 15 then
     raise exception 'daily generation limit mismatch';
+  end if;
+
+  select id, child_id into bridge_job_id, bridge_child_id
+  from public.generation_jobs
+  where claimed_by = 'migration-test' and status = 'claimed'
+  order by created_at
+  limit 1;
+
+  perform private_generation.chatgpt_submit_curriculum_package(
+    bridge_job_id,
+    'migration-test',
+    jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text, 'childId', bridge_child_id::text
+    ))
+  );
+  if not exists (
+    select 1 from private_generation.curriculum_submissions
+    where job_id = bridge_job_id and status = 'pending'
+  ) then
+    raise exception 'ChatGPT bridge did not persist a pending curriculum submission';
+  end if;
+
+  perform public.worker_claim_curriculum_submissions('smoke-finisher', 5);
+  if not exists (
+    select 1 from private_generation.curriculum_submissions
+    where job_id = bridge_job_id and status = 'processing' and processor_id = 'smoke-finisher'
+  ) then
+    raise exception 'deterministic finisher could not claim the curriculum submission';
+  end if;
+  if not public.worker_finish_curriculum_submission(
+    bridge_job_id, 'smoke-finisher', 'technical_failed', 'SMOKE_ONLY', 'rollback fixture'
+  ) then
+    raise exception 'deterministic finisher could not record the submission outcome';
   end if;
 
   if not exists (
@@ -436,6 +471,16 @@ begin
   end if;
   if not has_function_privilege('service_role', 'public.worker_completed_generation_context(uuid,text)', 'execute') then
     raise exception 'service role cannot execute completed generation recovery RPC';
+  end if;
+  if has_function_privilege('anon', 'public.worker_claim_curriculum_submissions(text,integer)', 'execute')
+    or has_function_privilege('authenticated', 'public.worker_claim_curriculum_submissions(text,integer)', 'execute') then
+    raise exception 'browser roles can execute curriculum submission claim RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.worker_claim_curriculum_submissions(text,integer)', 'execute') then
+    raise exception 'service role cannot claim curriculum submissions';
+  end if;
+  if has_function_privilege('service_role', 'private_generation.chatgpt_submit_curriculum_package(uuid,text,jsonb)', 'execute') then
+    raise exception 'service role can bypass the app-only ChatGPT bridge';
   end if;
   if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute')
     or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then
