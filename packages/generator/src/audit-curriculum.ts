@@ -29,6 +29,31 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))
   const covered = new Set(questions.flatMap((question) => question.targetIds))
   for (const targetId of targetIds) if (!covered.has(targetId)) add('alignment', 'critical', `學習目標 ${targetId} 沒有任何可觀察題目。`)
+  const targetStages = new Map<string, Set<string>>()
+  for (const section of pkg.studentLesson.practice) {
+    if (cjk(section.instructionsZh) < 4) add('self-study', 'critical', `${section.id} 缺少足以讓孩子獨立執行的中文任務說明。`)
+    for (const question of section.questions) {
+      for (const targetId of question.targetIds) {
+        const stages = targetStages.get(targetId) ?? new Set<string>()
+        stages.add(section.stage)
+        targetStages.set(targetId, stages)
+      }
+    }
+  }
+  for (const question of pkg.studentLesson.homework.questions) {
+    for (const targetId of question.targetIds) {
+      const stages = targetStages.get(targetId) ?? new Set<string>()
+      stages.add('homework')
+      targetStages.set(targetId, stages)
+    }
+  }
+  for (const targetId of targetIds) {
+    const stages = targetStages.get(targetId) ?? new Set<string>()
+    if (stages.size < 2) add('evidence-plan', 'critical', `學習目標 ${targetId} 只在單一階段出現，無法比較提示前後的表現。`)
+    if (![...stages].some((stage) => ['independent', 'cap-transfer', 'production', 'retrieval', 'homework'].includes(stage))) {
+      add('evidence-plan', 'critical', `學習目標 ${targetId} 沒有無提示、轉移或延遲提取證據。`)
+    }
+  }
   const stageNames = new Set(pkg.studentLesson.practice.map((stage) => stage.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('self-study', 'critical', `缺少 ${stage} 階段。`)
 
@@ -38,6 +63,9 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   if (pkg.qualityEvidence.feedbackApplied.length === 0) add('feedback-loop', 'critical', '沒有記錄本週如何使用回饋。')
   if (pkg.trackingDelta.hypothesesToVerify.length === 0) add('tracking', 'critical', '沒有下一週待驗證假設。')
   if (pkg.metadata.inputFingerprint === 'unknown') add('provenance', 'critical', '缺少可重現的 input fingerprint。')
+  if (pkg.answers.some((answer) => cjk(answer.explanationZh) < 4)) add('answer-integrity', 'critical', '每個答案都需要能協助孩子自行訂正的簡短中文理由。')
+  const followUpCount = pkg.answers.filter((answer) => answer.followUpZh !== null).length
+  if (followUpCount > Math.max(2, Math.ceil(pkg.answers.length / 4))) add('parent-burden', 'warning', `有 ${followUpCount} 題要求額外追問；家長答案應以核對答案為主。`)
 
   const tokenEfficiencySignals = [pkg.learnerSnapshot.recurringMistakes.length > 12, pkg.learnerSnapshot.reviewDue.length > 20, pkg.learnerSnapshot.specificInterests.length > 12, questions.length > 50].filter(Boolean).length
   if (tokenEfficiencySignals >= 2) add('token-efficiency', 'warning', `context 有 ${tokenEfficiencySignals} 個過長訊號，應改用摘要與穩定 ID。`)

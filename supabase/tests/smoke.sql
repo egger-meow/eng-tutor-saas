@@ -519,6 +519,13 @@ begin
   if not has_function_privilege('service_role', 'public.worker_completed_generation_context(uuid,text)', 'execute') then
     raise exception 'service role cannot execute completed generation recovery RPC';
   end if;
+  if has_function_privilege('anon', 'public.worker_record_curriculum_observations(uuid,text,jsonb)', 'execute')
+    or has_function_privilege('authenticated', 'public.worker_record_curriculum_observations(uuid,text,jsonb)', 'execute') then
+    raise exception 'browser roles can record curriculum observations';
+  end if;
+  if not has_function_privilege('service_role', 'public.worker_record_curriculum_observations(uuid,text,jsonb)', 'execute') then
+    raise exception 'service role cannot record compact curriculum evidence';
+  end if;
   if has_function_privilege('anon', 'public.worker_claim_curriculum_submissions(text,integer)', 'execute')
     or has_function_privilege('authenticated', 'public.worker_claim_curriculum_submissions(text,integer)', 'execute') then
     raise exception 'browser roles can execute curriculum submission claim RPC';

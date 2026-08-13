@@ -22,7 +22,7 @@
 
 ## Memory Boundaries
 
-Stable parent-provided context belongs in `child_profiles`; generator-owned observations belong in the progress and learning-state tables. Weekly history stays compact instead of storing prompt transcripts. Curriculum definitions remain versioned in Git—the database stores only stable curriculum IDs and each child's progress.
+Stable parent-provided context belongs in `child_profiles`; generator-owned observations belong in the progress and learning-state tables. Weekly history stays compact instead of storing prompt transcripts. Each new history entry preserves the reading theme, measurable targets, a stable question/stage evidence map, next-review candidates, applied feedback, and concrete week-over-week improvements. This lets a later generator compare supported, independent, transfer, and delayed-retrieval evidence without reopening old PDFs. Curriculum definitions remain versioned in Git—the database stores only stable curriculum IDs and each child's progress.
 
 Parents may read all records belonging to their children and edit profiles and feedback. Children are archived with `is_active = false`; browser hard deletion is denied so materials and learning history remain intact. Service-role workers maintain progress, learning state, materials, subscriptions, and generation jobs.
 

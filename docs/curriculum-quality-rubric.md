@@ -8,7 +8,7 @@ This is the review contract for every weekly package. It distills the teaching r
 - A coherent reading uses the learner's actual level and detailed interests as a meaningful situation. Interest never replaces the learning need, and the same hook is not copied week after week.
 - The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
 - Reading practice covers detail, main idea, inference, and context clues over time. Difficulty comes from evidence and reasoning, not trivia or hidden words.
-- Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, accepted variants, misconception, and recovery prompt.
+- Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
 
@@ -21,7 +21,9 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## Feedback and process improvement
 
-Feedback about the child changes the next lesson's targets and difficulty. Feedback about the packet changes explanation, layout, task order, or rubric decisions. Repeated packet-quality signals become reviewed rubric candidates; one anecdote must not silently mutate production prompts. Keep weekly history as compact structured summaries and stable IDs so quality improves without linear token growth.
+Feedback about the child changes the next lesson's targets and difficulty. Feedback about the packet changes explanation, layout, task order, or rubric decisions. A quality dimension observed at least twice must be explicitly applied or explicitly rejected with a context-specific reason in the next plan. Repeated cross-child signals become reviewed rubric candidates; one anecdote must not silently mutate production prompts. Keep weekly history as compact structured summaries and stable question/target IDs so quality improves without linear token growth.
+
+The Parent Answer PDF is intentionally narrow: answers, short reasons, legitimate alternatives, and only high-value misconception notes. Personalization rationale, internal tracking hypotheses, critic evidence, and routine follow-up prompts remain in structured production data rather than becoming parent homework.
 
 ## Release bar
 

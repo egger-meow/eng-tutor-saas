@@ -107,12 +107,12 @@ export async function inspectCurriculumPdfPair(
   requireText(student.text, [pkg.metadata.title, pkg.studentLesson.reading.title, ...questionIds, ...questionContent], 'Student')
   requireText(parentAnswer.text, [
     pkg.metadata.title,
-    '答案與簡短說明',
+    '答案',
     ...questionIds,
-    ...questions.map((question) => question.prompt),
+    ...pkg.answers.map((answer) => answer.answer),
   ], 'Parent answer')
 
-  if (student.text.replace(/\s+/gu, '').includes('答案與簡短說明')) throw new Error('Student PDF leaks the Parent answer section')
+  if (student.text.replace(/\s+/gu, '').includes('家長只需要做一件事')) throw new Error('Student PDF leaks the Parent answer section')
   if (!student.title?.endsWith(' - Student')) throw new Error('Student PDF metadata does not identify the Student projection')
   if (!parentAnswer.title?.endsWith(' - Parent Answers')) throw new Error('Parent answer PDF metadata does not identify the Parent projection')
   return { student, parentAnswer }

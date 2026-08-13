@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateCurriculumPackage, type CurriculumPackage, type CurriculumQuestion } from './index.js'
+import { auditCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumQuestion } from './index.js'
 
 function validPackage(): CurriculumPackage {
   const paragraphs = [
@@ -8,7 +8,7 @@ function validPackage(): CurriculumPackage {
     'The team still finds two mistakes. Instead of calling the project a failure, they compare both test records. They discover that shiny covers reflect the classroom light. Their next goal is to design a simple shade for the camera.',
     'Mina learns that careful improvement is not about making random changes. A useful experiment keeps most conditions the same, examines clear evidence, and changes one important factor. The robot improves because the team learns from each result.',
   ]
-  const question = (id: string, itemType: CurriculumQuestion['itemType'] = 'short-response'): CurriculumQuestion => ({ id, targetIds: ['reading-inference'], itemType, prompt: `請根據文章回答第 ${id} 題。`, options: itemType === 'inference' ? ['選項 A', '選項 B', '選項 C', '選項 D'] : undefined, writingLines: itemType === 'inference' ? 0 : 2, difficulty: 'on-level' })
+  const question = (id: string, itemType: CurriculumQuestion['itemType'] = 'short-response'): CurriculumQuestion => ({ id, targetIds: ['reading-inference', 'grammar-do-does', 'vocab-experiment'], itemType, prompt: `請根據文章回答第 ${id} 題。`, options: itemType === 'inference' ? ['選項 A', '選項 B', '選項 C', '選項 D'] : undefined, writingLines: itemType === 'inference' ? 0 : 2, difficulty: 'on-level' })
   const practice: CurriculumPackage['studentLesson']['practice'] = [
     { id: 'guided-reading', stage: 'guided', titleZh: '跟著線索讀', instructionsZh: '先圈出文章中的證據。', hintZh: '答案在第二段。', questions: [question('G1'), question('G2'), question('G3')] },
     { id: 'independent-reading', stage: 'independent', titleZh: '自己試試看', instructionsZh: '不看提示完成。', hintZh: null, questions: [question('I1'), question('I2'), question('I3')] },
@@ -47,6 +47,20 @@ describe('curriculum package v2', () => {
     const value = validPackage()
     value.answers[0]!.acceptedAnswers = Array.from({ length: 12 }, (_, index) => `legitimate variant ${index + 1}`)
     expect(validateCurriculumPackage(value).success).toBe(true)
+  })
+
+  it('requires evidence for every target across more than one learning stage', () => {
+    const value = validPackage()
+    for (const stage of value.studentLesson.practice) {
+      for (const question of stage.questions) question.targetIds = ['reading-inference']
+    }
+    for (const question of value.studentLesson.homework.questions) question.targetIds = ['reading-inference']
+
+    const report = auditCurriculumPackage(value)
+    expect(report.passed).toBe(false)
+    expect(report.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ dimension: 'evidence-plan', severity: 'critical' }),
+    ]))
   })
 
   it.each([

@@ -1,13 +1,13 @@
 import { readFile } from 'node:fs/promises'
 import type { GenerationContext } from './pipeline.js'
 
-const promptRoot = new URL('../../generator/prompts/2.0.0/', import.meta.url)
+const promptRoot = new URL('../../generator/prompts/2.0.1/', import.meta.url)
 const promptFiles = ['01-plan.md', '02-author.md', '03-critic.md', '04-repair.md']
 
 export async function buildCurriculumPromptBundle(context: GenerationContext): Promise<string> {
   const prompts = await Promise.all(promptFiles.map(async (file) => ({ file, content: await readFile(new URL(file, promptRoot), 'utf8') })))
   return [
-    '# 紙屬英文 Curriculum Package 2.0.0 · ChatGPT Work bundle',
+    '# 紙屬英文 Curriculum Package 2.0.0 · Prompt 2.0.1 · ChatGPT Work bundle',
     '',
     '這是一個 production generation context。只產出符合 `CurriculumPackageSchema` 的 JSON；不要輸出 Markdown、PDF、解釋文字或另一位孩子的資料。',
     '流程固定為：plan → author → deterministic validation → independent critic → targeted repair → deterministic validation。',

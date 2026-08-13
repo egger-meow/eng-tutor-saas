@@ -21,9 +21,12 @@ describe('curriculum package PDF HTML', () => {
     expect(html).not.toContain('A robot.')
   })
 
-  it('renders parent answers and tracking hypotheses', () => {
+  it('renders a compact answer-first parent projection without assigning teaching work', () => {
     const html = renderCurriculumParentAnswerHtml(pkg)
     expect(html).toContain('A robot.')
-    expect(html).toContain('能否獨立完成')
+    expect(html).toContain('您不需要講課，也不需要逐題追問')
+    expect(html).not.toContain('能否獨立完成')
+    expect(html).not.toContain('這份教材為什麼這樣安排')
+    expect(html).not.toContain('可追問')
   })
 })

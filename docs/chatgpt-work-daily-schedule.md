@@ -38,7 +38,7 @@ Read these files from the current main branch and record its Git SHA:
 - packages/generator/src/curriculum-package-schema.ts
 - packages/generator/src/validate-curriculum-package.ts
 - packages/generator/src/audit-curriculum.ts
-- every file in packages/generator/prompts/2.0.0
+- every file in packages/generator/prompts/2.0.1
 
 Do not read egger-meow/eng-tutor during a production run. It is research upstream, not runtime input. If GitHub is unavailable, required files cannot be read, or the checked-out SHA cannot be identified, claim nothing and report PRECHECK_BLOCKED.
 
@@ -80,13 +80,15 @@ Author a self-study-first packet:
 - 7–15 meaningful core words with hidden-difficulty control across passage, directions, options, examples, and homework;
 - natural, age-appropriate English and authentic CAP-style evidence questions;
 - stable unique question IDs, real target mappings, usable writing space, and exact one-to-one Parent answers;
-- complete Parent reasoning, accepted variants, likely misconceptions, and follow-up checks;
+- compact Parent answers with short reasoning, genuine accepted variants, and only useful misconception notes; `followUpZh` is normally null because the parent is not the tutor;
 - truthful tracking hypotheses and concrete feedback/improvement evidence;
 - metadata using the claimed job/child, actual grade stage, current timestamp, repository versions, actual model identifier, and the claimed `inputFingerprint` copied byte-for-byte. The fingerprint is already a `sha256:<64 lowercase hex>` value owned by Supabase; do not compute it locally. Never use unknown, latest, placeholders, or invented IDs.
 
 INDEPENDENT CRITIC AND REPAIR
 
 Switch to a strict independent critic stance. Simulate a tired junior-high learner studying alone. Inspect self-study continuity, gradual release, CAP authenticity, vocabulary ceiling, grammar accuracy, question-answer integrity, distractors, personalization depth, feedback/school/history use, cognitive load, print usability, tracking provenance, and every claimed improvement.
+
+Treat any `qualityTrends` dimension with count >= 2 as repeated evidence: require a concrete response in this packet or a context-specific reason for not applying it. Also reject any Parent projection that expects routine teaching, diagnosis, or follow-up interviewing from the parent.
 
 Missing or ambiguous answers, answer leakage, unsupported jumps, insufficient Chinese scaffolding, fake personalization, ignored recurring mistakes, hidden difficult vocabulary, invented mastery, or unusable print structure are critical.
 
