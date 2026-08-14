@@ -10,6 +10,7 @@ export type RouteName =
   | 'child-edit'
   | 'child-materials'
   | 'feedback'
+  | 'parent-guide-feedback'
   | 'billing'
 
 export type Route = {
@@ -25,6 +26,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/sample', 'sample'],
   ['/waitlist', 'waitlist'],
   ['/dashboard', 'dashboard'],
+  ['/parent-guide-feedback', 'parent-guide-feedback'],
   ['/children/new', 'child-new'],
   ['/billing', 'billing'],
 ])

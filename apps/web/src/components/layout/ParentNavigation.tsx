@@ -17,6 +17,7 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
   const navItems = [
     { href: '/dashboard', label: '本週教材', isActive: route.name === 'dashboard' },
     { href: childHref, label: '孩子資料', isActive: route.name === 'child-overview' || route.name === 'child-edit' },
+    { href: '/parent-guide-feedback', label: '使用說明與回饋', isActive: route.name === 'parent-guide-feedback' },
     { href: '/billing', label: '訂閱', isActive: route.name === 'billing' },
   ]
 

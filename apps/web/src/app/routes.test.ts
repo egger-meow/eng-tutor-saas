@@ -15,4 +15,9 @@ describe('hosted route paths', () => {
   it('keeps the public sample route addressable', () => {
     expect(parseRoute('/sample')).toMatchObject({ name: 'sample', path: '/sample' })
   })
+
+  it('keeps the parent guide and feedback route addressable', () => {
+    expect(parseRoute('/parent-guide-feedback')).toMatchObject({ name: 'parent-guide-feedback', path: '/parent-guide-feedback' })
+    expect(parseRoute(stripBasePath('/eng-tutor-saas/parent-guide-feedback', '/eng-tutor-saas/'))).toMatchObject({ name: 'parent-guide-feedback' })
+  })
 })

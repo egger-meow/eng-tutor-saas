@@ -427,6 +427,30 @@ begin
     raise exception 'family A should see exactly its two siblings, saw %', visible_count;
   end if;
 
+  insert into public.product_feedback (parent_id, category, message)
+  values ('00000000-0000-0000-0000-000000000011', 'flow', 'Smoke feedback');
+  select count(*) into visible_count from public.product_feedback;
+  if visible_count <> 1 then
+    raise exception 'family A should see its own product feedback, saw %', visible_count;
+  end if;
+
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000012', true);
+  select count(*) into visible_count from public.product_feedback;
+  if visible_count <> 0 then
+    raise exception 'family B could read family A product feedback';
+  end if;
+  blocked := false;
+  begin
+    insert into public.product_feedback (parent_id, category, message)
+    values ('00000000-0000-0000-0000-000000000011', 'bug', 'Cross-family feedback');
+  exception when insufficient_privilege then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'family B could submit product feedback as family A';
+  end if;
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000011', true);
+
   select count(*) into visible_count from public.child_profiles;
   if visible_count <> 2 then
     raise exception 'family A should see exactly two child profiles, saw %', visible_count;
