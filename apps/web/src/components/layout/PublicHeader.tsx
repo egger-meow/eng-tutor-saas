@@ -3,11 +3,11 @@ import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 
 const links = [
-  { href: '/#samples', label: '查看範例' },
+  { href: '/#personalization', label: '如何調整' },
+  { href: '/#samples', label: '教材範例' },
   { href: '/#method', label: '學習方法' },
-  { href: '/#founder', label: '關於創作者' },
   { href: '/#pricing', label: '方案' },
-  { href: '/#login', label: '登入' },
+  { href: '/#login', label: '免費取得第一週' },
 ]
 
 export function PublicHeader() {
@@ -37,7 +37,7 @@ export function PublicHeader() {
               <a
                 key={link.href}
                 href={link.href}
-                className={`nav-link ${link.href === '/#login' ? 'nav-login' : ''}`}
+                className={`nav-link ${link.href === '/#login' ? 'nav-login nav-primary-cta' : ''}`}
                 onClick={(e) => {
                   setMobileMenuOpen(false)
                   handleInternalLink(e)

@@ -25,13 +25,13 @@ export function AuthPanel() {
 
   return (
     <section className="auth-panel" aria-labelledby="auth-title">
-      <p className="overline">家長登入</p>
-      <h2 id="auth-title">從 Email 繼續</h2>
-      <p className="muted">不用記密碼。我們會寄一封安全登入連結到你的信箱。</p>
+      <p className="overline">第一步：家長 Email</p>
+      <h2 id="auth-title">建立資料或繼續登入</h2>
+      <p className="muted">不用設定密碼。我們會寄一封安全連結，點開後就能填寫孩子資料。</p>
       <form onSubmit={submit}>
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-        <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄送登入連結'}</button>
+        <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄送安全連結，繼續填寫'}</button>
       </form>
       {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
     </section>

@@ -7,13 +7,17 @@ import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
 
-const memorySignals = [
-  ['程度', '真正讀得懂多少，而不只是年級'],
-  ['學校進度', '課本版本、單元與最近開始的文法'],
-  ['單字記憶', '學過、忘記、反覆答錯與正在熟悉的字'],
-  ['文法與錯誤', '持續追蹤 do / does、時態等錯誤模式'],
-  ['每週結果', '完成度，以及內容太簡單、適當或太難'],
-  ['孩子近況', '家長回饋、目前興趣與剛改變的新興趣'],
+const abilityBenefits = [
+  ['願意開始讀', '先用孩子有興趣的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
+  ['練得到能力', '單字、文法、閱讀理解與推理，都以國中英文與會考能力為長期方向。'],
+  ['家長不用備課', '每週直接拿到學生教材與家長解答，不必自己找文章、出題或判斷難度。'],
+] as const
+
+const weeklyContents = [
+  '約 8–12 頁、可在家列印的 Student PDF',
+  '閱讀、核心單字、文法提示、理解與應用練習',
+  '獨立的 Parent Answer PDF，附完整答案與觀察重點',
+  '依程度、學校進度、錯誤與回饋調整的下一週教材',
 ] as const
 
 export function LandingPage() {
@@ -22,299 +26,136 @@ export function LandingPage() {
       <PageTransition>
         <section className="landing-hero">
           <FadeInUp duration={0.4} className="hero-copy">
-            <p className="eyebrow">每週個人化英文教材</p>
+            <p className="eyebrow">給國小高年級到國中生的每週紙本英文教材</p>
             <h1>
-              每週一份，<em>只屬於你孩子</em>的英文教材。
+              孩子願意讀，<br /><em>英文能力真的練得到。</em>
             </h1>
-            <p className="hero-audience">為國小高年級到國中階段設計，以國中英文能力與會考為長期目標。</p>
-            <p className="lede">用孩子願意讀的內容，練出能帶進學校、段考與會考的單字、文法與閱讀能力。程度、學校進度、上週錯題與家長回饋，都會真正改變下一份教材。</p>
+            <p className="lede">紙屬英文每週依孩子的程度、學校進度與學習狀況，製作一套個人化英文教材。從有興趣的內容開始，練出能帶進學校、段考與會考的單字、文法與閱讀能力。</p>
+            <ul className="hero-benefits" aria-label="紙屬英文重點">
+              <li>每週 Student PDF + Parent Answer PDF</li>
+              <li>孩子用紙筆閱讀、作答與思考</li>
+              <li>家長不用找教材、備課或出題</li>
+            </ul>
             <div className="hero-actions">
-              <a className="button hero-cta" href="#login">
-                免費產生第一週
-              </a>
-              <a className="text-link" href="#samples">
-                直接看教材範例 ↓
-              </a>
+              <a className="button hero-cta" href="#login">免費取得第一週教材</a>
+              <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
-            <p className="hero-note">前 30 位孩子第一週免費，不需先綁定付費。</p>
+            <p className="hero-note">前 30 位孩子第一週免費；第一個付費月 NT$299，之後每月 NT$499。</p>
           </FadeInUp>
 
-          <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="紙屬英文個人化概念">
-            <span className="edition-mark">WEEKLY · 01</span>
-            <p>參考書是為幾萬個孩子寫的。</p>
-            <strong>
-              紙屬英文，<br />
-              是為你家這一個孩子寫的。
-            </strong>
+          <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
+            <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
+            <p>不是聊天機器人，也不是線上家教。</p>
+            <strong>是一套每週更新、<br />可以直接印出來學的<br />個人化英文教材。</strong>
             <div className="paper-rule" />
-            <small>閱讀內容與下一步練習，同時因孩子而變。</small>
+            <small>AI 在背後記憶與調整；孩子在紙上完成真正的學習。</small>
           </FadeInUp>
         </section>
 
-        <section className="public-section reference-section" id="personalization">
-          <FadeInUp className="section-heading">
-            <p className="overline">標準內容，與持續適應</p>
-            <h2>
-              參考書提供一條共同的路。<br />
-              紙屬英文知道孩子現在走到哪裡。
-            </h2>
-          </FadeInUp>
-
-          <StaggerContainer className="comparison-layout" staggerDelay={0.12}>
-            <StaggerItem className="reference-book">
-              <span>普通參考書</span>
-              <strong>同一本內容</strong>
-              <p>給幾萬個孩子</p>
-              <ul>
-                <li>不知道孩子已經會什麼</li>
-                <li>看不見反覆答錯的地方</li>
-                <li>無法因上週太簡單而重寫</li>
-                <li>不會跟著學校與興趣變化</li>
-              </ul>
-            </StaggerItem>
-
-            <div className="comparison-arrow" aria-hidden="true">
-              ≠
-            </div>
-
-            <StaggerItem className="adaptive-book">
-              <span>紙屬英文</span>
-              <strong>每週重新判斷</strong>
-              <p>只服務這一位孩子</p>
-              <ul>
-                <li>記住已學、未熟與反覆犯錯</li>
-                <li>銜接學校正在教的內容</li>
-                <li>依真實難度調整閱讀與練習</li>
-                <li>讓新的興趣進入適合的題材</li>
-              </ul>
-            </StaggerItem>
-          </StaggerContainer>
-
-          <FadeInUp delay={0.1} className="editorial-quote">
-            教材主題、難度與練習重點，都會跟著孩子每週的狀態調整。<br />
-            <span>但個人化不只是換主題——孩子讀什麼，與孩子下一步需要練什麼，每週都會動態調整。</span>
-          </FadeInUp>
+        <section className="outcome-strip" aria-label="孩子與家長得到的價值">
+          {abilityBenefits.map(([title, body], index) => (
+            <article key={title}><span>0{index + 1}</span><h2>{title}</h2><p>{body}</p></article>
+          ))}
         </section>
 
-        <section className="public-section memory-section">
+        <section className="public-section week-story" id="personalization">
           <FadeInUp className="section-heading">
-            <p className="overline">不是一次性的 Prompt</p>
-            <h2>它會記得，一本參考書與一個空白聊天室記不住的事。</h2>
-            <p>每週教材建立在孩子持續累積的學習記憶上，而不是每次重新猜測。</p>
-          </FadeInUp>
-
-          <StaggerContainer className="memory-ledger" staggerDelay={0.06}>
-            {memorySignals.map(([title, body], index) => (
-              <StaggerItem key={title} className="memory-item">
-                <article>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{body}</p>
-                  </div>
-                </article>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </section>
-
-        <section className="public-section week-story">
-          <FadeInUp className="section-heading">
-            <p className="overline">Week N → Week N+1</p>
-            <h2>回饋不是問卷。它會進到下一週的教材裡。</h2>
+            <p className="overline">這週的狀況，會改變下週</p>
+            <h2>個人化不是換個故事主題。<br />是孩子下一步練什麼，真的會變。</h2>
+            <p>家長只要回報難度、完成度與卡住的地方，系統就把這些訊號放進下一週的教材設計。</p>
           </FadeInUp>
 
           <FadeInUp delay={0.1} className="week-flow">
             <div className="week-sheet">
               <span>這週觀察</span>
-              <ul>
-                <li>閱讀明顯太簡單</li>
-                <li>do / does 再次答錯</li>
-                <li>學校開始現在進行式</li>
-                <li>最近開始看新的動漫</li>
-              </ul>
+              <ul><li>閱讀明顯太簡單</li><li>do / does 再次答錯</li><li>學校開始現在進行式</li><li>最近開始喜歡籃球</li></ul>
             </div>
-            <div className="flow-line" aria-label="因此產生下一週">
-              下一週真的跟著改 <b>→</b>
-            </div>
+            <div className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></div>
             <div className="week-sheet next-week">
               <span>下週調整</span>
-              <ul>
-                <li>閱讀難度提高一級</li>
-                <li>do / does 安排間隔複習</li>
-                <li>銜接現在進行式的提示與題目</li>
-                <li>以新興趣承載適合程度的閱讀</li>
-              </ul>
+              <ul><li>閱讀難度提高一級</li><li>安排 do / does 間隔複習</li><li>銜接現在進行式的提示與題目</li><li>用籃球情境承載適合程度的閱讀</li></ul>
             </div>
+          </FadeInUp>
+
+          <FadeInUp delay={0.15} className="inline-objection">
+            <p className="overline">只讀興趣主題，對考試真的有用嗎？</p>
+            <h3>興趣是入口，不是能力的邊界。</h3>
+            <p>主題先讓孩子願意讀；學習目標仍由國中英文能力決定。孩子練的是能轉移到不同文章的單字、文法、上下文理解、細節判讀與推理，不是只會看某一種故事。</p>
           </FadeInUp>
         </section>
 
         <section className="public-section deliverables-section" id="samples">
           <FadeInUp className="section-heading">
-            <p className="overline">每週兩份 PDF</p>
-            <h2>孩子能獨立做，家長不用先備課。</h2>
+            <p className="overline">先看每週實際拿到什麼</p>
+            <h2>兩份 PDF：孩子能自己做，家長看得懂怎麼陪。</h2>
+            <ul className="weekly-contents">{weeklyContents.map((item) => <li key={item}>{item}</li>)}</ul>
           </FadeInUp>
 
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
-            <StaggerItem>
-              <article className="pdf-preview-card">
-                <p className="document-label">Student PDF</p>
-                <h3>一份留給孩子思考的教材</h3>
-                <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf`} target="_blank" rel="noreferrer" aria-label="放大查看學生教材 PDF">
-                  <iframe title="Student PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0`} />
-                  <span>點擊放大查看</span>
-                </a>
-                <ul className="preview-notes"><li>孩子直接閱讀、作答</li><li>自然閱讀、單字、文法與理解練習</li></ul>
-              </article>
-            </StaggerItem>
-            <StaggerItem>
-              <article className="pdf-preview-card">
-                <p className="document-label">Parent Answer PDF</p>
-                <h3>一份讓家長看懂重點的解答</h3>
-                <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf`} target="_blank" rel="noreferrer" aria-label="放大查看家長解答 PDF">
-                  <iframe title="Parent Answer PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0`} />
-                  <span>點擊放大查看</span>
-                </a>
-                <ul className="preview-notes"><li>家長不需要備課，附完整答案與簡短引導</li><li>每週內容依孩子狀況重新生成</li></ul>
-              </article>
-            </StaggerItem>
+            <StaggerItem><article className="pdf-preview-card">
+              <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
+              <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf`} target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
+                <iframe title="Student PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0`} /><span>放大查看真實教材 ↗</span>
+              </a>
+              <ul className="preview-notes"><li>清楚告訴孩子每一區怎麼做</li><li>自然閱讀、單字、文法、理解與回想練習</li></ul>
+            </article></StaggerItem>
+            <StaggerItem><article className="pdf-preview-card">
+              <p className="document-label">Parent Answer PDF</p><h3>完整答案分開放，家長不用先備課</h3>
+              <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf`} target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
+                <iframe title="Parent Answer PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0`} /><span>放大查看真實解答 ↗</span>
+              </a>
+              <ul className="preview-notes"><li>完整答案、簡短解釋與觀察重點</li><li>不用會教英文，也知道孩子卡在哪裡</li></ul>
+            </article></StaggerItem>
           </StaggerContainer>
         </section>
 
         <section className="public-section philosophy-section">
-          <FadeInUp>
-            <p className="overline">Paper × Intelligence</p>
-            <h2>
-              AI 負責記憶、分析、調整。<br />
-              孩子負責閱讀、寫字、思考。
-            </h2>
-          </FadeInUp>
-          <FadeInUp delay={0.1}>
-            <p>
-              紙本不是拒絕科技，而是讓科技待在最有價值的位置。孩子不必再多看一個學習
-              App；真正學習時，面前只有紙、筆，以及自己的推理。
-            </p>
-          </FadeInUp>
+          <FadeInUp><p className="overline">為什麼選紙本？</p><h2>讓科技做它擅長的事，<br />讓孩子完成不能外包的思考。</h2></FadeInUp>
+          <FadeInUp delay={0.1}><p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p></FadeInUp>
         </section>
 
         <section className="public-section ai-section" id="method">
           <FadeInUp className="section-heading">
-            <p className="overline">學習方法</p>
-            <h2>
-              AI 在背後持續調整，<br />
-              真正的閱讀與思考由孩子完成。
-            </h2>
-            <p>這不是請 AI 隨機生成一篇文章，而是一個每週依學習目標、實際表現與回饋重新設計的循環。</p>
+            <p className="overline">AI 是教材背後的機制，不是替孩子作答的人</p>
+            <h2>先自己讀、自己答；<br />真的不懂，再請 AI 解釋為什麼。</h2>
+            <p>每週學習仍從孩子的閱讀與作答開始。AI 可以在卡住時當解釋與延伸練習工具，但不是完成作業的捷徑。</p>
           </FadeInUp>
-
           <StaggerContainer className="learning-sequence" staggerDelay={0.08}>
-            <StaggerItem tag="li"><span>01</span>孩子的程度、興趣與回饋</StaggerItem>
-            <StaggerItem tag="li"><span>02</span>AI 分析目前狀況</StaggerItem>
-            <StaggerItem tag="li"><span>03</span>依國中英文目標設計教材</StaggerItem>
-            <StaggerItem tag="li"><span>04</span>孩子閱讀、寫作與推理</StaggerItem>
-            <StaggerItem tag="li"><span>05</span>每週回饋，再調整下一週</StaggerItem>
+            <StaggerItem tag="li"><span>01</span>先完整讀過文章</StaggerItem><StaggerItem tag="li"><span>02</span>圈出不懂的字句</StaggerItem><StaggerItem tag="li"><span>03</span>自己完成作答</StaggerItem><StaggerItem tag="li"><span>04</span>對答案、找出錯因</StaggerItem><StaggerItem tag="li"><span>05</span>需要時請 AI 解釋，再做一題</StaggerItem>
           </StaggerContainer>
-
           <FadeInUp delay={0.1} className="why-not-gpt" id="chatgpt-difference">
-            <p className="overline">那為什麼不直接用 GPT？</p>
-            <h3>因為聊天工具能回答當下；紙屬英文負責設計一段持續發生的學習。</h3>
-            <p>
-              一個新聊天室不知道孩子的課本進度、哪些字已經學過、同一個文法錯了幾週，也不會固定交付分級教材、把答案與學生卷分開，或在收到家長回饋後重排下週內容。紙屬英文把
-              AI 放進有課程邊界、有學習記憶、有每週交付責任的完整系統裡。
-            </p>
-            <strong>GPT 是一個強大的工具；紙屬英文把工具變成真正跟得上孩子的學習流程。</strong>
+            <p className="overline">那直接用 ChatGPT 不就好了？</p>
+            <h3>ChatGPT 解決一次提問；紙屬英文維持一段學習。</h3>
+            <div className="comparison-compact">
+              <p><strong>一般聊天工具</strong><span>需要家長反覆說明程度、寫提示、控制難度、整理成可印教材。</span></p>
+              <p><strong>紙屬英文</strong><span>持續記住課程進度、學過的字、錯誤、主題與回饋，並負責每週交付完整教材。</span></p>
+            </div>
+            <p className="comparison-conclusion">差別不只是一個 Prompt，而是學習記憶、課程邊界與每週持續調整。</p>
           </FadeInUp>
         </section>
 
         <section className="public-section parent-role">
-          <FadeInUp>
-            <p className="overline">家長不必成為英文老師</p>
-            <h2>每週只要列印、觀察、回饋。</h2>
-            <p>
-              看看難度是否合適、完成了多少、哪一區反覆卡住。幾個簡短選項就能提供有效訊號；即使這週來不及回饋，也不會中斷下一次交付。
-            </p>
-          </FadeInUp>
+          <FadeInUp><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
+          <a className="button mid-page-cta" href="#login">免費取得孩子的第一週教材</a>
         </section>
 
-        <FadeInUp>
-          <FounderSummary />
-        </FadeInUp>
+        <FadeInUp><FounderSummary /></FadeInUp>
+        <FadeInUp><PricingSection /></FadeInUp>
 
-        <FadeInUp>
-          <PricingSection />
-        </FadeInUp>
-
-        <section className="public-section faq">
-          <FadeInUp className="section-heading">
-            <p className="overline">FAQ</p>
-            <h2>開始之前，家長常問的事。</h2>
-          </FadeInUp>
-
+        <section className="public-section faq" id="faq">
+          <FadeInUp className="section-heading"><p className="overline">FAQ</p><h2>決定之前，你可能還想確認。</h2></FadeInUp>
           <StaggerContainer staggerDelay={0.06}>
-            <StaggerItem>
-              <details>
-                <summary>那我直接叫孩子用 ChatGPT 不就好了？</summary>
-                <p>聊天工具擅長回答眼前的一個問題；紙屬英文持續記住孩子的程度、學習狀況與回饋，設計下一週真正適合他的內容。<br /><a href="#chatgpt-difference">看看兩者差在哪裡 ↑</a></p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>一直讀孩子喜歡的主題，考試遇到其他文章怎麼辦？</summary>
-                <p>興趣是學習的入口，不是能力的邊界。孩子在喜歡的題材裡建立的單字、文法直覺、閱讀速度、上下文理解與推理能力，都能轉移到科學、生活、人物與會考文章。興趣讓孩子願意學；系統確保他學到能帶走的英文能力。</p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>這適合幾年級的孩子？</summary>
-                <p>目前主要為國小高年級到國中生設計，目標是建立國中階段需要的英文能力，逐步銜接段考與會考；不是高中英文產品。難度不按年級死切，而會依單字量、閱讀能力、文法程度、作答表現與家長回饋調整。</p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>這和一般參考書最根本的差別是什麼？</summary>
-                <p>
-                  參考書提供可靠的標準內容；紙屬英文則以孩子的程度、學校進度、錯誤、難度反應與回饋，持續改寫下一週。兩者不是誰取代誰，而是解決不同問題。
-                </p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>有興趣主題，就算個人化嗎？</summary>
-                <p>
-                  不只。興趣決定「用什麼內容吸引孩子讀」，學習記憶則決定「下一步真正需要練什麼」。兩者會同時影響教材。
-                </p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>一定要讓孩子使用 AI 嗎？</summary>
-                <p>
-                  不用。AI
-                  是選擇性的解釋與練習工具。核心順序始終是孩子先作答、先發現問題，再在需要時請 AI 解釋。
-                </p>
-              </details>
-            </StaggerItem>
-            <StaggerItem>
-              <details>
-                <summary>100 位額滿後會怎麼樣？</summary>
-                <p>
-                  新孩子會先進入候補，既有家庭照常收到教材。我們不會用假倒數製造急迫感；第一階段只服務 100
-                  位，是為了先把每週品質真正顧好。
-                </p>
-              </details>
-            </StaggerItem>
+            <StaggerItem><details><summary>這適合幾年級的孩子？</summary><p>目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。</p></details></StaggerItem>
+            <StaggerItem><details><summary>第一週怎麼判斷孩子程度？</summary><p>會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。</p></details></StaggerItem>
+            <StaggerItem><details><summary>一定要讓孩子使用 AI 嗎？</summary><p>不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。</p></details></StaggerItem>
+            <StaggerItem><details><summary>每個孩子都要各自付費嗎？</summary><p>是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子每月計費。</p></details></StaggerItem>
+            <StaggerItem><details><summary>100 位額滿後會怎麼樣？</summary><p>新孩子會先進入候補，既有家庭照常收到教材。第一階段上限是真實的服務容量，不會用隨機數字或假倒數製造急迫感。</p></details></StaggerItem>
           </StaggerContainer>
         </section>
 
         <section className="public-section login-section" id="login">
-          <FadeInUp>
-            <p className="overline">開始第一週</p>
-            <h2>先讓教材認識你的孩子。</h2>
-            <p>建立家長帳號後，填寫孩子目前的程度、學校進度與興趣。第一週同時也是校準的開始。</p>
-          </FadeInUp>
-          <FadeInUp delay={0.15}>
-            <AuthPanel />
-          </FadeInUp>
+          <FadeInUp><p className="overline">免費取得第一週教材</p><h2>先讓教材認識你的孩子。</h2><p>從家長 Email 登入，再填寫孩子目前的程度、學校進度與興趣。第一週會依這些資料製作，也作為後續調整的起點。</p><ul className="login-expectations"><li>建立家長帳號</li><li>填寫一位孩子的學習狀況</li><li>等待第一週個人化教材完成</li></ul></FadeInUp>
+          <FadeInUp delay={0.15}><AuthPanel /></FadeInUp>
         </section>
       </PageTransition>
     </AppShell>
