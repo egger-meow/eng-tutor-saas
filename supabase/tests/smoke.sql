@@ -362,6 +362,18 @@ begin
     now() + interval '24 hours', now() - interval '24 hours', now()
   );
 
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, material_id, completed_at,
+    release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000052',
+    '00000000-0000-0000-0000-000000000023', current_date, 'test-v1',
+    'family-b-release-schedule', 'completed', now(), 'ownership-test',
+    '00000000-0000-0000-0000-000000000032', now(),
+    now() + interval '24 hours', now() - interval '24 hours', now()
+  );
+
   select public.worker_record_curriculum_observations(
     '00000000-0000-0000-0000-000000000031', 'observation-test', '{}'::jsonb
   ) into observation_first;
@@ -418,6 +430,16 @@ begin
   select count(*) into visible_count from public.child_profiles;
   if visible_count <> 2 then
     raise exception 'family A should see exactly two child profiles, saw %', visible_count;
+  end if;
+
+  select count(*) into visible_count
+  from public.generation_jobs
+  where material_id in (
+    '00000000-0000-0000-0000-000000000031',
+    '00000000-0000-0000-0000-000000000032'
+  );
+  if visible_count <> 1 then
+    raise exception 'family A should see exactly one owned material release schedule, saw %', visible_count;
   end if;
 
   select count(*) into visible_count
@@ -502,6 +524,27 @@ rollback;
 
 do $$
 begin
+  if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
+    or not has_column_privilege('authenticated', 'public.generation_jobs', 'child_id', 'select')
+    or not has_column_privilege('authenticated', 'public.generation_jobs', 'release_at', 'select') then
+    raise exception 'authenticated parents cannot read the safe material release schedule';
+  end if;
+  if has_column_privilege('authenticated', 'public.generation_jobs', 'status', 'select')
+    or has_column_privilege('authenticated', 'public.generation_jobs', 'error_message', 'select')
+    or has_column_privilege('authenticated', 'public.generation_jobs', 'claimed_by', 'select') then
+    raise exception 'authenticated parents can read server-only generation job state';
+  end if;
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'generation_jobs'
+      and policyname = 'generation_jobs_owner_release_select'
+      and cmd = 'SELECT'
+      and roles = array['authenticated']::name[]
+  ) then
+    raise exception 'generation job release schedule ownership policy is missing';
+  end if;
   if has_function_privilege('anon', 'public.worker_claim_generation_jobs(text)', 'execute')
     or has_function_privilege('authenticated', 'public.worker_claim_generation_jobs(text)', 'execute') then
     raise exception 'browser roles can execute worker claim RPC';
