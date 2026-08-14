@@ -17,7 +17,13 @@ export type PdfInspection = {
 export type CurriculumPdfPairInspection = { student: PdfInspection; parentAnswer: PdfInspection }
 
 function normalized(value: string): string {
-  return value.normalize('NFKC').replace(/\s+/gu, ' ').trim()
+  return value
+    .normalize('NFKC')
+    // PDF font extraction may substitute one dash glyph for another even
+    // though the rendered sentence is unchanged.
+    .replace(/[‐‑‒–—―]/gu, '-')
+    .replace(/\s+/gu, ' ')
+    .trim()
 }
 
 export async function inspectPdf(bytes: Uint8Array, label: string): Promise<PdfInspection> {

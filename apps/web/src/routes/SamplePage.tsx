@@ -20,9 +20,9 @@ export function SamplePage() {
               <p className="overline">一個孩子的資料，如何變成一週教材</p>
               <h1>先看輸入，再看真正的產出。</h1>
               <p className="lede">
-                這不是通用講義換上一個孩子喜歡的主題。程度、學校進度、練習需求與興趣，一起決定文章難度、文法重點、題型與家長觀察方向。
+                這不是通用講義換上一個孩子喜歡的主題。程度、學校進度、已知卡點與興趣，一起決定文章難度、文法重點、題型與家長觀察方向。
               </p>
-              <p className="sample-disclaimer">以下人物與資料完全虛構，專供產品示範與系統測試。</p>
+              <p className="sample-disclaimer">以下人物與資料完全虛構；這份 Week 1 已走過正式產生、審稿與 PDF pipeline，專供產品示範。</p>
             </FadeInUp>
           </header>
 
@@ -72,17 +72,17 @@ export function SamplePage() {
               <StaggerItem tag="article">
                 <span>01</span>
                 <h3>讀什麼</h3>
-                <p>以屋頂花園實驗寫成自然閱讀，而不是只把名字塞進制式文章。</p>
+                <p>以 Minecraft 紅石自動門的測試情境寫成閱讀，而不是只把 Minecraft 這個詞塞進制式文章。</p>
               </StaggerItem>
               <StaggerItem tag="article">
                 <span>02</span>
                 <h3>練什麼</h3>
-                <p>主旨、細節與推論搭配 do / does，正好承接學校進度與已知弱點。</p>
+                <p>主旨、細節與推論搭配 do / does，正好承接學校進度，以及「Does 後動詞容易加 s」的已知弱點。</p>
               </StaggerItem>
               <StaggerItem tag="article">
                 <span>03</span>
                 <h3>怎麼觀察</h3>
-                <p>家長解答會提示本週要留意的卡點，回饋再成為下一週的調整依據。</p>
+                <p>家長解答會提示長句跳讀、證據定位與隔天提取等本週觀察點，回饋再成為下一週的調整依據。</p>
               </StaggerItem>
             </StaggerContainer>
           </section>
@@ -92,7 +92,7 @@ export function SamplePage() {
               <div>
                 <p className="overline">Actual output</p>
                 <h2 id="sample-downloads-title">下載完整的第一週範例</h2>
-                <p>兩份檔案都由正式 PDF pipeline 從同一份結構化教材產生。</p>
+                <p>兩份檔案都由同一份結構化教材，經正式審稿與 PDF pipeline 產生。</p>
               </div>
             </FadeInUp>
 
