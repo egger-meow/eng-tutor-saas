@@ -83,8 +83,6 @@
 .empty-state { padding: var(--space-8); border: 1px dashed var(--color-rule-strong); color: var(--color-muted); text-align: center; }
 @media (max-width: 43rem) {
   .site-header { min-height: 4rem; gap: var(--space-4); }
-  .site-header nav { order: 3; position: fixed; z-index: 20; right: 0; bottom: 0; left: 0; justify-content: space-around; gap: 0; padding: var(--space-2) max(var(--space-2), env(safe-area-inset-right)) max(var(--space-2), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-rule); background: var(--color-paper); }
-  .site-header nav a { display: grid; min-height: 2.75rem; place-items: center; padding-inline: var(--space-3); }
   .page-shell { padding-bottom: 6rem; }
   .account-menu span { display: none; }
   .child-identity { align-items: start; flex-direction: column; }
