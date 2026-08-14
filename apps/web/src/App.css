@@ -170,6 +170,15 @@
 .profile-header h1 { font-size: clamp(2rem, 4vw, 3.5rem); }
 .profile-note { max-width: 45rem; padding: var(--space-4); border-left: .25rem solid var(--color-action); background: var(--color-paper); }
 .profile-summary { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-12); margin-top: var(--space-12); }
+.all-child-profiles { margin-top: var(--space-10); }
+.child-profile-section { padding-block: var(--space-8); }
+.child-profile-section:first-child { padding-top: 0; }
+.child-profile-heading { display: flex; align-items: end; justify-content: space-between; gap: var(--space-6); }
+.child-profile-heading h2 { margin: var(--space-2) 0 0; font-size: clamp(1.7rem, 3vw, 2.5rem); }
+.child-profile-heading p { margin-bottom: 0; }
+.child-profile-divider { border-top: 2px solid var(--color-ink); margin-top: var(--space-8); }
+.history-toggle-btn > span:first-child { display: none; }
+.history-toggle-btn::before { content: attr(data-history-label); }
 .profile-section { padding-top: var(--space-4); border-top: 2px solid var(--color-ink); }
 .profile-section:last-child { grid-column: 1 / -1; }
 .profile-section dl { margin-bottom: 0; }
@@ -186,6 +195,7 @@
   .field-grid, .profile-summary { grid-template-columns: 1fr; }
   .profile-section:last-child { grid-column: auto; }
   .profile-header { align-items: start; flex-direction: column; }
+  .child-profile-heading { align-items: start; flex-direction: column; }
   .landing-hero, .feature-grid, .split-section, .statement-section, .pricing-grid, .login-section, .memory-section, .philosophy-section, .founder-summary, .sample-profile, .sample-downloads { grid-template-columns: 1fr; }
   .landing-hero { min-height: auto; }
   .hero-editorial { box-shadow: .75rem .75rem 0 rgb(40 79 62 / 10%); }

@@ -87,6 +87,9 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
               <button
                 className="button-link text-link history-toggle-btn"
                 type="button"
+                aria-expanded={historyOpen}
+                aria-label={historyOpen ? '收起過往教材' : `查看過往教材，共 ${pastMaterials.length} 筆`}
+                data-history-label={historyOpen ? '收起過往教材' : `查看過往教材（${pastMaterials.length} 筆）`}
                 onClick={() => setHistoryOpen((prev) => !prev)}
               >
                 <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${pastMaterials.length} 份)`}</span>
