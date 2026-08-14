@@ -35,7 +35,7 @@ export function PublicHeader() {
               <a
                 key={link.href}
                 href={link.href}
-                className="nav-link"
+                className={`nav-link ${link.href === '/#login' ? 'nav-login' : ''}`}
                 onClick={(e) => {
                   setMobileMenuOpen(false)
                   handleInternalLink(e)
