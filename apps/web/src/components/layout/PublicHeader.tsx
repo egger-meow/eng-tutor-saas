@@ -7,6 +7,7 @@ const links = [
   { href: '/guide', label: '學習方法', routeName: 'guide' },
   { href: '/about', label: '關於作者', routeName: 'about' },
   { href: '/#pricing', label: '方案', routeName: 'billing' },
+  { href: '/#login', label: '登入', routeName: 'login' },
 ]
 
 export function PublicHeader() {

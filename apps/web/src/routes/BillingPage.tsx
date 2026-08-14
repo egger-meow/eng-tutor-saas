@@ -7,8 +7,7 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { listChildren, type Child } from '../lib/children'
-import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
-import { prepareCheckout } from '../lib/subscriptions'
+import { cancelSubscription, listOwnedSubscriptions, prepareCheckout, type SubscriptionView } from '../lib/subscriptions'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 
@@ -21,6 +20,7 @@ export function BillingPage({ session }: { session: Session }) {
   const [activeCheckoutChildId, setActiveCheckoutChildId] = useState<string | null>(null)
   const [activatingChildId, setActivatingChildId] = useState<string | null>(null)
   const [checkoutNotice, setCheckoutNotice] = useState('')
+  const [cancelingChildId, setCancelingChildId] = useState<string | null>(null)
 
   async function refreshSubscriptions() {
     const nextSubscriptions = await listOwnedSubscriptions()
@@ -70,6 +70,21 @@ export function BillingPage({ session }: { session: Session }) {
   async function closeCheckout() {
     await closePaddleCheckout()
     setActiveCheckoutChildId(null)
+  }
+
+  async function cancelChildSubscription(childId: string, reason: string) {
+    setCancelingChildId(childId)
+    setError('')
+    setCheckoutNotice('')
+    try {
+      await cancelSubscription(childId, reason)
+      await refreshSubscriptions()
+      setCheckoutNotice('已取消續訂。本期結束前仍可使用教材，之後歡迎隨時回來續訂。')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '取消訂閱時發生問題，請稍後再試。')
+    } finally {
+      setCancelingChildId(null)
+    }
   }
 
   useEffect(() => {
@@ -125,9 +140,10 @@ export function BillingPage({ session }: { session: Session }) {
                 <ChildSubscription
                   child={child}
                   subscription={subscriptions.find((item) => item.childId === child.id)}
-                  busy={checkoutChildId === child.id}
+                  busy={checkoutChildId === child.id || cancelingChildId === child.id}
                   activationPending={activatingChildId === child.id}
                   onSubscribe={(childId) => void startCheckout(childId)}
+                  onCancel={(childId, reason) => void cancelChildSubscription(childId, reason)}
                 />
               </StaggerItem>
             ))}

@@ -1,22 +1,60 @@
+import { useState } from 'react'
 import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
 
 const labels = {
-  trialing: ['第一週體驗中', '第一週教材免費；體驗結束前不會在這個頁面直接扣款。'],
-  active: ['訂閱進行中', '教材會依每位孩子自己的七天週期持續準備。'],
-  past_due: ['付款需要處理', '付款狀態尚未完成，請聯絡我們協助確認。'],
-  paused: ['訂閱已暫停', '暫停期間不會建立新的付費週次。'],
+  trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
+  active: ['訂閱中', '每週教材會依照孩子目前的學習狀態持續準備。'],
+  past_due: ['付款需要處理', '請確認付款方式，避免後續教材服務中斷。'],
+  paused: ['訂閱暫停', '訂閱目前暫停中，處理完成後服務會恢復。'],
   canceled: ['訂閱已取消', '已完成的教材仍會保留在孩子的歷史紀錄。'],
 } as const
 
-function formatDate(value: string | null) { return value ? new Intl.DateTimeFormat('zh-TW', { dateStyle: 'medium', timeZone: 'Asia/Taipei' }).format(new Date(value)) : null }
+function formatDate(value: string | null) {
+  return value ? new Intl.DateTimeFormat('zh-TW', { dateStyle: 'medium', timeZone: 'Asia/Taipei' }).format(new Date(value)) : null
+}
 
-export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe }: { child: Child; subscription?: SubscriptionView; busy?: boolean; activationPending?: boolean; onSubscribe: (childId: string) => void }) {
+type Props = {
+  child: Child
+  subscription?: SubscriptionView
+  busy?: boolean
+  activationPending?: boolean
+  onSubscribe: (childId: string) => void
+  onCancel: (childId: string, reason: string) => void
+}
+
+export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe, onCancel }: Props) {
+  const [confirmingCancel, setConfirmingCancel] = useState(false)
+  const [reason, setReason] = useState('')
+
   if (!subscription) return <article className="subscription-card"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></article>
-  if (activationPending) return <article className="subscription-card"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果。完成後這個頁面會自動更新，不需要重新付款或重新整理。</p></article>
+  if (activationPending) return <article className="subscription-card"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p></article>
+
   const [title, description] = labels[subscription.status]
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
-  return <article className="subscription-card"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className={`status-label status-${subscription.status}`}>{title}</span></p><p>{description}</p>{subscription.priceTwd !== null && <p><strong>目前方案：</strong>每月 NT${subscription.priceTwd}</p>}{periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}{subscription.cancelAtPeriodEnd && <p className="notice">本期結束後不再續訂。</p>}{canSubscribe && <div className="subscription-action"><p>每月 NT$499；符合 Founding 30 資格時，第一個付費月自動折為 NT$299。</p><button className="button" type="button" disabled={busy} onClick={() => onSubscribe(child.id)}>{busy ? '正在準備安全付款…' : '開始訂閱'}</button></div>}</article>
+  const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
+
+  return <article className="subscription-card">
+    <div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div>
+    <p><span className={`status-label status-${subscription.status}`}>{title}</span></p>
+    <p>{description}</p>
+    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>每月 NT${subscription.priceTwd}</p>}
+    {periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}
+    {subscription.cancelAtPeriodEnd && <p className="notice">已取消續訂；本期結束前仍可使用。歡迎之後隨時回來續訂。</p>}
+    {canCancel && <div className="subscription-action">
+      <button className="button-link text-link" type="button" disabled={busy} onClick={() => setConfirmingCancel((current) => !current)}>
+        {confirmingCancel ? '先不要取消' : '取消續訂'}
+      </button>
+      {confirmingCancel && <div className="cancel-confirmation">
+        <p><strong>確定要取消續訂嗎？</strong></p>
+        <p>不會再產生下一期扣款，本期教材與權益會保留到{periodEnd ?? '本期結束'}。之後想回來時，隨時都可以重新續訂。</p>
+        <label htmlFor={`cancel-reason-${child.id}`}>想告訴我們原因嗎？（選填）</label>
+        <textarea id={`cancel-reason-${child.id}`} rows={3} maxLength={1000} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="例如：先暫停一陣子、孩子最近比較忙…" />
+        <button className="button secondary" type="button" disabled={busy} onClick={() => onCancel(child.id, reason)}>{busy ? '正在取消續訂…' : '確認取消續訂'}</button>
+      </div>}
+    </div>}
+    {canSubscribe && <div className="subscription-action"><p>每月 NT$499；符合 Founding 30 資格時，第一個付費月自動折為 NT$299。</p><button className="button" type="button" disabled={busy} onClick={() => onSubscribe(child.id)}>{busy ? '正在準備安全付款…' : '開始訂閱'}</button></div>}
+  </article>
 }
