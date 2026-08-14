@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { handleInternalLink, useRoute } from '../../app/use-route'
+import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 
 type ParentNavigationProps = {
   email?: string
@@ -11,6 +12,7 @@ type ParentNavigationProps = {
 export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }: ParentNavigationProps) {
   const route = useRoute()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navVisible = useScrollNavVisibility()
 
   const navItems = [
     { href: '/dashboard', label: '本週教材', isActive: route.name === 'dashboard' },
@@ -19,7 +21,7 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
   ]
 
   return (
-    <header className="site-header parent-header">
+    <header className={`site-header parent-header ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>
           紙屬英文

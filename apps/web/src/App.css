@@ -224,6 +224,18 @@
   transition: box-shadow var(--transition-fast), background var(--transition-fast);
 }
 
+.site-header-hidden {
+  transform: translateY(calc(-100% - 1px));
+  transition: transform 180ms ease, box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header-hidden {
+    transition: none;
+  }
+}
+
 .route-stage { min-height: 100vh; }
 .page-transition-content { width: 100%; }
 

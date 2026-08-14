@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { handleInternalLink } from '../../app/use-route'
+import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 
 const links = [
   { href: '/#samples', label: '查看範例' },
@@ -11,9 +12,10 @@ const links = [
 
 export function PublicHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navVisible = useScrollNavVisibility()
 
   return (
-    <header className="site-header public-header">
+    <header className={`site-header public-header ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/" onClick={handleInternalLink}>
           紙屬英文
