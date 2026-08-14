@@ -19,7 +19,7 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
         <div className="all-child-profiles">{data.children.map((child, index) => <section className="child-profile-section" key={child.id}>
           <header className="child-profile-heading"><div><p className="overline">孩子資料</p><h2>{child.display_name}</h2><p>{gradeStageLabel(child)}</p></div><button className="button" type="button" onClick={() => navigate(`/children/${child.id}/edit`)}>編輯 {child.display_name} 資料</button></header>
           <ProfileSummary child={child} />
-          {index < data.children.length - 1 && <div className="child-profile-divider" aria-hidden="true" />}
+          {index < data.children.length - 1 && <div className="child-profile-divider" aria-hidden="true"><span>下一位孩子</span></div>}
         </section>)}</div>
       </>}
     </PageTransition>

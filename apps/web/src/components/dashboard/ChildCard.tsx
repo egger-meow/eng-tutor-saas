@@ -82,35 +82,34 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             <DeliveryStatus delivery={delivery} />
           </div>
 
-          {pastMaterials.length > 0 && (
-            <div className="history-toggle-section">
-              <button
-                className="button-link text-link history-toggle-btn"
-                type="button"
-                aria-expanded={historyOpen}
-                aria-label={historyOpen ? '收起過往教材' : `查看過往教材，共 ${pastMaterials.length} 筆`}
-                data-history-label={historyOpen ? '收起過往教材' : `查看過往教材（${pastMaterials.length} 筆）`}
-                onClick={() => setHistoryOpen((prev) => !prev)}
-              >
-                <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${pastMaterials.length} 份)`}</span>
-                <span className={`toggle-arrow ${historyOpen ? 'expanded' : ''}`}>▼</span>
-              </button>
+          <div className="history-toggle-section">
+            <button
+              className="button-link text-link history-toggle-btn"
+              type="button"
+              disabled={pastMaterials.length === 0}
+              aria-expanded={historyOpen}
+              aria-label={pastMaterials.length === 0 ? '目前沒有過往教材' : historyOpen ? '收起過往教材' : `查看過往教材，共 ${pastMaterials.length} 筆`}
+              data-history-label={pastMaterials.length === 0 ? '過往教材：目前還沒有' : historyOpen ? '收起過往教材' : `查看過往教材（${pastMaterials.length} 筆）`}
+              onClick={() => setHistoryOpen((prev) => !prev)}
+            >
+              <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${pastMaterials.length} 份)`}</span>
+              {pastMaterials.length > 0 && <span className={`toggle-arrow ${historyOpen ? 'expanded' : ''}`}>▼</span>}
+            </button>
 
-              <AnimatePresence>
-                {historyOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                    className="history-content-wrapper"
-                  >
-                    <MaterialHistory materials={pastMaterials} childName={child.display_name} onFeedbackSaved={onRefresh} hasMore={hasMoreMaterials} loadingMore={loadingMoreMaterials} onLoadMore={onLoadMoreMaterials} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+            <AnimatePresence>
+              {historyOpen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                  className="history-content-wrapper"
+                >
+                  <MaterialHistory materials={pastMaterials} childName={child.display_name} onFeedbackSaved={onRefresh} hasMore={hasMoreMaterials} loadingMore={loadingMoreMaterials} onLoadMore={onLoadMoreMaterials} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           </motion.div>
         ) : (
           <motion.div
