@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { isMaterialReleased, openMaterialDownload, type Material } from '../../lib/materials'
+import { isMaterialReleased, materialDownloadFilename, openMaterialDownload, type Material } from '../../lib/materials'
 
 type MaterialActionsProps = { material: Material; childName: string }
 
@@ -12,8 +12,7 @@ export function MaterialActions({ material, childName }: MaterialActionsProps) {
     setBusy(kind)
     setError('')
     const path = kind === 'student' ? material.student_pdf_path : material.parent_answer_pdf_path
-    const suffix = kind === 'student' ? '學生教材' : '家長解答'
-    try { await openMaterialDownload(path, `${childName}-${material.material_week}-${suffix}.pdf`) }
+    try { await openMaterialDownload(path, materialDownloadFilename(childName, material.material_week, kind, material.week_number ?? null)) }
     catch (caught) { setError(caught instanceof Error ? caught.message : '下載失敗，請稍後再試。') }
     finally { setBusy(null) }
   }
