@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AuthPanel } from '../components/auth/AuthPanel'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicHeader } from '../components/layout/PublicHeader'
@@ -20,7 +21,17 @@ const weeklyContents = [
   '依程度、學校進度、錯誤與回饋調整的下一週教材',
 ] as const
 
+const faqItems = [
+  ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
+  ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。'],
+  ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
+  ['每個孩子都要各自付費嗎？', '是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子每月計費。'],
+  ['100 位額滿後會怎麼樣？', '新孩子會先進入候補，既有家庭照常收到教材。第一階段上限是真實的服務容量，不會用隨機數字或假倒數製造急迫感。'],
+] as const
+
 export function LandingPage() {
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+
   return (
     <AppShell className="landing-page" header={<PublicHeader />}>
       <PageTransition>
@@ -145,11 +156,25 @@ export function LandingPage() {
         <section className="public-section faq" id="faq">
           <FadeInUp className="section-heading"><p className="overline">FAQ</p><h2>決定之前，你可能還想確認。</h2></FadeInUp>
           <StaggerContainer staggerDelay={0.06}>
-            <StaggerItem><details><summary>這適合幾年級的孩子？</summary><p>目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。</p></details></StaggerItem>
-            <StaggerItem><details><summary>第一週怎麼判斷孩子程度？</summary><p>會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。</p></details></StaggerItem>
-            <StaggerItem><details><summary>一定要讓孩子使用 AI 嗎？</summary><p>不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。</p></details></StaggerItem>
-            <StaggerItem><details><summary>每個孩子都要各自付費嗎？</summary><p>是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子每月計費。</p></details></StaggerItem>
-            <StaggerItem><details><summary>100 位額滿後會怎麼樣？</summary><p>新孩子會先進入候補，既有家庭照常收到教材。第一階段上限是真實的服務容量，不會用隨機數字或假倒數製造急迫感。</p></details></StaggerItem>
+            {faqItems.map(([question, answer], index) => {
+              const isOpen = openFaqIndex === index
+              return (
+                <StaggerItem key={question}>
+                  <article className="faq-item">
+                    <button
+                      type="button"
+                      className="faq-trigger"
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${index}`}
+                      onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    >
+                      <span>{question}</span><span className="faq-icon" aria-hidden="true">{isOpen ? '−' : '+'}</span>
+                    </button>
+                    {isOpen && <p id={`faq-answer-${index}`}>{answer}</p>}
+                  </article>
+                </StaggerItem>
+              )
+            })}
           </StaggerContainer>
         </section>
 

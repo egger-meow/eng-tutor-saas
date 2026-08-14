@@ -165,10 +165,10 @@
 .founding-offer span { color: var(--color-muted); font-size: .85rem; }
 .pricing-cta { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; padding-inline: var(--space-8); text-decoration: none; }
 .capacity-explainer { max-width: 48rem; color: var(--color-muted); font-size: .9rem; }
-.faq details { padding-block: var(--space-6); border-bottom: 1px solid var(--color-rule); }
-.faq summary { color: var(--color-ink); cursor: pointer; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
-.faq summary::marker { color: var(--color-accent); }
-.faq details p { max-width: 48rem; color: var(--color-muted); }
+.faq-item { padding-block: var(--space-6); border-bottom: 1px solid var(--color-rule); }
+.faq-trigger { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0; border: 0; background: transparent; color: var(--color-ink); cursor: pointer; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; text-align: left; }
+.faq-icon { flex: 0 0 auto; color: var(--color-accent); font-family: var(--font-body); font-size: 1.5rem; line-height: 1; }
+.faq-item p { max-width: 48rem; color: var(--color-muted); }
 .login-section .auth-panel { max-width: 30rem; }
 .login-expectations { display: grid; gap: var(--space-2); margin-top: var(--space-6); padding-left: 1.25rem; color: var(--color-ink); }
 .guide-page, .founder-pending { max-width: 50rem; margin-inline: auto; }
