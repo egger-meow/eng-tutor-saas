@@ -25,9 +25,9 @@ export function AuthPanel() {
 
   return (
     <section className="auth-panel" aria-labelledby="auth-title">
-      <p className="overline">第一步：家長 Email</p>
-      <h2 id="auth-title">建立資料或繼續登入</h2>
-      <p className="muted">不用設定密碼。我們會寄一封安全連結，點開後就能填寫孩子資料。</p>
+      <p className="overline">家長 Email</p>
+      <h2 id="auth-title">建立帳號或登入</h2>
+      <p className="muted">第一次使用：輸入 Email 建立家長帳號。已有帳號：輸入原本 Email，我們會寄送登入連結，不需要密碼。</p>
       <form onSubmit={submit}>
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />

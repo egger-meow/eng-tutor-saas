@@ -7,6 +7,7 @@ import { PricingSection } from '../components/public/PricingSection'
 import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
+import { getEnrollmentCta, useEnrollmentState } from '../lib/enrollment'
 
 const abilityBenefits = [
   ['願意開始讀', '先用孩子有興趣的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
@@ -31,6 +32,8 @@ const faqItems = [
 
 export function LandingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const { state: enrollment } = useEnrollmentState()
+  const cta = getEnrollmentCta(enrollment)
 
   return (
     <AppShell className="landing-page" header={<PublicHeader />}>
@@ -48,10 +51,10 @@ export function LandingPage() {
               <li>家長不用找教材、備課或出題</li>
             </ul>
             <div className="hero-actions">
-              <a className="button hero-cta" href="#login">免費取得第一週教材</a>
+              <a className="button hero-cta" href={cta.href}>{cta.label}</a>
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
-            <p className="hero-note">前 30 位孩子第一週免費；第一個付費月 NT$299，之後每月 NT$499。</p>
+            <p className="hero-note">{cta.label === '免費取得第一週教材' ? '前 30 位孩子第一週免費；第一個付費月 NT$299，之後每月 NT$499。' : cta.isWaitlist ? '目前服務名額已滿；候補不會先收費。' : '創始前 30 位優惠已滿；目前方案為每月 NT$499。'}</p>
           </FadeInUp>
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
@@ -147,7 +150,7 @@ export function LandingPage() {
 
         <section className="public-section parent-role">
           <FadeInUp><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
-          <a className="button mid-page-cta" href="#login">免費取得孩子的第一週教材</a>
+          <a className="button mid-page-cta" href={cta.href}>{cta.label}</a>
         </section>
 
         <FadeInUp><FounderSummary /></FadeInUp>
@@ -179,8 +182,8 @@ export function LandingPage() {
         </section>
 
         <section className="public-section login-section" id="login">
-          <FadeInUp><p className="overline">免費取得第一週教材</p><h2>先讓教材認識你的孩子。</h2><p>從家長 Email 登入，再填寫孩子目前的程度、學校進度與興趣。第一週會依這些資料製作，也作為後續調整的起點。</p><ul className="login-expectations"><li>建立家長帳號</li><li>填寫一位孩子的學習狀況</li><li>等待第一週個人化教材完成</li></ul></FadeInUp>
-          <FadeInUp delay={0.15}><AuthPanel /></FadeInUp>
+          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{!cta.isWaitlist && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>等待第一週個人化教材完成</li></ul>}</FadeInUp>
+          <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
       </PageTransition>
     </AppShell>

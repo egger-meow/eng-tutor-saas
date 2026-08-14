@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react'
 import { navigate } from '../../app/use-route'
-import { getEnrollmentState, type EnrollmentState } from '../../lib/enrollment'
+import { useEnrollmentState } from '../../lib/enrollment'
 
 export function CapacityStatus() {
-  const [state, setState] = useState<EnrollmentState | null>(null)
-  const [error, setError] = useState(false)
-  useEffect(() => { void getEnrollmentState().then(setState).catch(() => setError(true)) }, [])
+  const { state, error } = useEnrollmentState()
   if (error) return <p className="muted" role="status">目前無法讀取即時名額，仍可登入留下聯絡方式。</p>
   if (!state) return <p className="muted" role="status">正在確認目前名額…</p>
   if (state.status === 'open' && state.remaining > 0) return <div className="capacity-status status-open"><strong>目前開放加入</strong><span>已有 {state.activeCount} 位孩子加入，還剩 {state.remaining} 個名額（上限 {state.capacity} 位孩子）</span></div>
