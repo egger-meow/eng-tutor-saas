@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登入紙屬英文</title>
+  </head>
+  <body style="margin:0;background:#f4f0e6;color:#24382f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">使用安全連結登入紙屬英文。</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f0e6;padding:32px 16px;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fffdf7;border:1px solid #ded7c7;border-radius:16px;overflow:hidden;">
+          <tr><td style="background:#173f35;padding:24px 32px;color:#fffdf7;font-family:Georgia,'Noto Serif TC',serif;font-size:26px;font-weight:700;">紙屬英文</td></tr>
+          <tr><td style="padding:36px 32px;">
+            <h1 style="margin:0 0 16px;font-size:24px;line-height:1.4;">你的登入連結已準備好</h1>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.8;">你收到這封信，是因為你或家人剛在紙屬英文輸入這個 Email，要求取得安全登入連結。</p>
+            <p style="margin:28px 0;text-align:center;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#c96c43;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 26px;border-radius:999px;">登入紙屬英文</a></p>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#617068;">這個連結會在一小時後失效，且只能使用一次。若按鈕無法使用，請複製以下連結到瀏覽器：<br><a href="{{ .ConfirmationURL }}" style="color:#246451;word-break:break-all;">{{ .ConfirmationURL }}</a></p>
+            <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e5dfd2;font-size:14px;line-height:1.7;color:#617068;">如果你沒有要求登入紙屬英文，不需要進行任何操作，直接忽略這封信即可。</p>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>
