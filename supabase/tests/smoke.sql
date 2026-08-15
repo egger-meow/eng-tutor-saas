@@ -428,6 +428,21 @@ begin
     raise exception 'max_attempts allowed a fourth authoring attempt';
   end if;
 
+  if exists (
+    select 1
+    from public.generation_jobs as legacy_job
+    join private_generation.curriculum_submissions as legacy_submission
+      on legacy_submission.job_id = legacy_job.id
+    where legacy_job.status = 'failed'
+      and legacy_job.error_code = 'QUALITY_REJECTED'
+      and legacy_job.attempt_count < legacy_job.max_attempts
+      and legacy_job.completed_at is null
+      and legacy_job.material_id is null
+      and legacy_submission.status = 'quality_rejected'
+  ) then
+    raise exception 'retryable legacy quality rejection was not recovered by migration';
+  end if;
+
   if not exists (
     select 1 from public.enrollment_settings
     where key = 'default' and status = 'open' and capacity = 100 and founding_limit = 30
