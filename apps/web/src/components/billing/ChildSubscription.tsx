@@ -63,11 +63,34 @@ export function ChildSubscription({ child, subscription, busy, activationPending
         <legend>選擇付款週期</legend>
         <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
           <input type="radio" name={`billing-plan-${child.id}`} value="annual" checked={selectedPlan === 'annual'} onChange={() => setSelectedPlan('annual')} />
-          <span><strong>年繳 NT${billingPlans.annual.priceTwd}</strong><small>平均每月約 NT${annualMonthlyEquivalentTwd}，一年省 NT${annualSavingsTwd}</small></span>
+          <span>
+            <strong className="plan-price-line">
+              年繳 NT${billingPlans.annual.priceTwd}
+              <span className="badge badge-savings">省 NT${annualSavingsTwd}</span>
+            </strong>
+            <small>平均每月約 NT${annualMonthlyEquivalentTwd}，相較月繳一年省 NT${annualSavingsTwd}</small>
+          </span>
         </label>
         <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
           <input type="radio" name={`billing-plan-${child.id}`} value="monthly" checked={selectedPlan === 'monthly'} onChange={() => setSelectedPlan('monthly')} />
-          <span><strong>月繳 NT${billingPlans.monthly.priceTwd}</strong><small>Founding 30 第一個付費月可自動折為 NT$299</small></span>
+          <span>
+            <strong className="plan-price-line">
+              月繳 {subscription.foundingStatus === 'eligible' ? (
+                <>
+                  <del className="strike-price">NT${billingPlans.monthly.priceTwd}</del>
+                  <ins className="highlight-price">NT$299</ins>
+                  <span className="badge badge-discount">創始早鳥優惠</span>
+                </>
+              ) : (
+                <>NT${billingPlans.monthly.priceTwd}</>
+              )}
+            </strong>
+            <small>
+              {subscription.foundingStatus === 'eligible'
+                ? 'Founding 30 創始優惠：第一個付費月折為 NT$299，第二個付費月起 NT$499／月'
+                : '每月自動續訂；可隨時取消下一期續訂'}
+            </small>
+          </span>
         </label>
       </fieldset>
       <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>

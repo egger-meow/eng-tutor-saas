@@ -89,6 +89,11 @@
 .billing-plan-selector input { margin-top: .25rem; accent-color: var(--color-action); }
 .billing-plan-selector span { display: grid; gap: var(--space-1); }
 .billing-plan-selector small { color: var(--color-muted); line-height: 1.5; }
+.plan-price-line { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.strike-price { color: var(--color-muted); text-decoration: line-through; font-weight: 500; font-size: .95em; }
+.highlight-price { text-decoration: none; color: var(--color-action); font-weight: 700; }
+.badge-discount { display: inline-flex; align-items: center; padding: .125rem .45rem; font-size: .75rem; font-weight: 700; border-radius: 999px; background: var(--color-success-soft); color: var(--color-success); }
+.badge-savings { display: inline-flex; align-items: center; padding: .125rem .45rem; font-size: .75rem; font-weight: 700; border-radius: 999px; background: #e0f2fe; color: #0369a1; }
 .cancel-confirmation { display: grid; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-5); border: 1px solid var(--color-rule); border-radius: var(--radius-surface); background: var(--color-paper-deep); }
 .cancel-confirmation p { margin: 0; }
 .cancel-confirmation p:first-child strong { color: var(--color-ink); font-size: 1.05rem; }
