@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
-import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
+import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
 const labels = {
   trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
@@ -43,7 +43,7 @@ export function ChildSubscription({ child, subscription, busy, activationPending
     <div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div>
     <p><span className={`status-label status-${subscription.status}`}>{title}</span></p>
     <p>{description}</p>
-    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>{currentPlan.label}・{currentPlan.cadenceLabel} NT${subscription.priceTwd}</p>}
+    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>{currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(subscription.priceTwd)}</p>}
     {periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}
     {subscription.cancelAtPeriodEnd && <p className="notice">已取消續訂；本期結束前仍可使用。歡迎之後隨時回來續訂。</p>}
     {canCancel && <div className="subscription-action">
@@ -65,10 +65,10 @@ export function ChildSubscription({ child, subscription, busy, activationPending
           <input type="radio" name={`billing-plan-${child.id}`} value="annual" checked={selectedPlan === 'annual'} onChange={() => setSelectedPlan('annual')} />
           <span>
             <strong className="plan-price-line">
-              年繳 NT${billingPlans.annual.priceTwd}
-              <span className="badge badge-savings">省 NT${annualSavingsTwd}</span>
+              年繳 NT${formatPrice(billingPlans.annual.priceTwd)}
+              <span className="badge badge-savings">省 NT${formatPrice(annualSavingsTwd)}</span>
             </strong>
-            <small>平均每月約 NT${annualMonthlyEquivalentTwd}，相較月繳一年省 NT${annualSavingsTwd}</small>
+            <small>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}</small>
           </span>
         </label>
         <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
@@ -77,12 +77,12 @@ export function ChildSubscription({ child, subscription, busy, activationPending
             <strong className="plan-price-line">
               月繳 {subscription.foundingStatus === 'eligible' ? (
                 <>
-                  <del className="strike-price">NT${billingPlans.monthly.priceTwd}</del>
+                  <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
                   <ins className="highlight-price">NT$299</ins>
                   <span className="badge badge-discount">創始早鳥優惠</span>
                 </>
               ) : (
-                <>NT${billingPlans.monthly.priceTwd}</>
+                <>NT${formatPrice(billingPlans.monthly.priceTwd)}</>
               )}
             </strong>
             <small>

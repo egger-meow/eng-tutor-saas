@@ -10,7 +10,7 @@ import { listChildren, type Child } from '../lib/children'
 import { cancelSubscription, listOwnedSubscriptions, prepareCheckout, type SubscriptionView } from '../lib/subscriptions'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
-import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, type BillingPlan } from '../lib/billing-plans'
+import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
 
 export function BillingPage({ session }: { session: Session }) {
   const [children, setChildren] = useState<Child[]>([])
@@ -166,9 +166,9 @@ export function BillingPage({ session }: { session: Session }) {
               </div>
               <div className="checkout-plan-summary">
                 <span>紙屬英文{activeCheckout.plan === 'annual' ? '年繳' : '月繳'}方案</span>
-                <strong>NT${activeCheckout.checkoutPriceTwd ?? billingPlans[activeCheckout.plan].priceTwd} <small>／{activeCheckout.plan === 'annual' ? '年' : activeCheckout.foundingApplies ? '第一個付費月' : '月'}</small></strong>
+                <strong>NT${formatPrice(activeCheckout.checkoutPriceTwd ?? billingPlans[activeCheckout.plan].priceTwd)} <small>／{activeCheckout.plan === 'annual' ? '年' : activeCheckout.foundingApplies ? '第一個付費月' : '月'}</small></strong>
                 {activeCheckout.plan === 'annual'
-                  ? <p>平均每月約 NT${annualMonthlyEquivalentTwd}，相較月繳一年省 NT${annualSavingsTwd}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。</p>
+                  ? <p>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。</p>
                   : activeCheckout.foundingApplies
                     ? <p>Founding 30 優惠已套用：第一個付費月 NT$299，第二個付費月起 NT$499／月。稅額由 Paddle 依付款資料計算。</p>
                     : <p>每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。</p>}

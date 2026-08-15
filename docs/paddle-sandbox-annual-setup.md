@@ -79,7 +79,7 @@ Supabase secrets 儲存方式與更新後立即生效的行為見 [Edge Function
 ## 6. Sandbox 驗收
 
 1. 用一位尚未訂閱的測試孩子選「年繳」，確認 checkout 顯示 NT$4,999／年且沒有 NT$299 discount。
-2. 完成 Sandbox 付款後，確認訂閱頁顯示「年繳方案・每年 NT$4999」，本期結束時間約一年後。
+2. 完成 Sandbox 付款後，確認訂閱頁顯示「年繳方案・每年 NT$4,999」，本期結束時間約一年後。
 3. 用另一位測試孩子選「月繳」，確認一般價格 NT$499；若仍符合 Founding 30，checkout 第一個付費期才是 NT$299。
 4. 在 Paddle notification delivery logs 確認 webhook 回 HTTP 200；在 Supabase logs 確認沒有 `processing_failed`。
 5. 分別取消月繳與年繳，確認 UI 顯示「使用至」當期末，且不會立即失去已付款權益。

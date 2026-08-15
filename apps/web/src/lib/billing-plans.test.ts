@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { annualMonthlyEquivalentTwd, annualSavingsPercent, annualSavingsTwd, planForSubscription } from './billing-plans'
+import { annualMonthlyEquivalentTwd, annualSavingsPercent, annualSavingsTwd, formatPrice, planForSubscription } from './billing-plans'
 
 describe('billing plan presentation', () => {
   it('computes the annual value from canonical prices', () => {
@@ -11,5 +11,10 @@ describe('billing plan presentation', () => {
   it('maps stored subscription data to the correct cadence', () => {
     expect(planForSubscription('standard_annual', 'year').key).toBe('annual')
     expect(planForSubscription('standard_monthly', 'month').key).toBe('monthly')
+  })
+
+  it('formats amounts with comma separator', () => {
+    expect(formatPrice(4999)).toBe('4,999')
+    expect(formatPrice(499)).toBe('499')
   })
 })

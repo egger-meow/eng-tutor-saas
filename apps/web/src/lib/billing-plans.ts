@@ -24,6 +24,10 @@ export const annualSavingsTwd = billingPlans.monthly.priceTwd * 12 - billingPlan
 export const annualMonthlyEquivalentTwd = Math.round(billingPlans.annual.priceTwd / 12)
 export const annualSavingsPercent = Math.round(annualSavingsTwd / (billingPlans.monthly.priceTwd * 12) * 1000) / 10
 
+export function formatPrice(amount: number): string {
+  return amount.toLocaleString('en-US')
+}
+
 export function planForSubscription(planCode: string | null, interval: BillingInterval | null) {
   if (planCode === billingPlans.annual.planCode || interval === 'year') return billingPlans.annual
   return billingPlans.monthly
