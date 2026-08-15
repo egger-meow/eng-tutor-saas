@@ -105,6 +105,69 @@ export function LandingPage() {
             <ul className="weekly-contents">{weeklyContents.map((item) => <li key={item}>{item}</li>)}</ul>
           </FadeInUp>
 
+          <FadeInUp delay={0.1} className="sample-personalization-explainer">
+            <div className="sample-context-card">
+              <div className="sample-context-header">
+                <span className="sample-context-badge">範例拆解</span>
+                <h3 className="sample-context-title">這份教材為什麼是 Minecraft？</h3>
+              </div>
+
+              <p className="sample-context-meta">
+                <strong>範例學生</strong>：國一 ｜ 喜歡 <strong>Minecraft、科技</strong> ｜ 依目前程度與本週學習目標設計
+              </p>
+              <p className="sample-context-narrative">
+                因此這週以 Minecraft 的紅石自動門作為閱讀情境，練習真正需要累積的單字、文法與閱讀理解。
+              </p>
+
+              <div className="sample-flow-strip" aria-label="個人化教材生成流程">
+                <div className="sample-flow-node">
+                  <span className="node-label">孩子的興趣</span>
+                  <div className="node-tags">
+                    <span className="tag-pill tag-accent">Minecraft</span>
+                    <span className="tag-pill tag-accent">科技</span>
+                  </div>
+                </div>
+
+                <span className="flow-plus" aria-hidden="true">＋</span>
+
+                <div className="sample-flow-node">
+                  <span className="node-label">目前程度</span>
+                  <div className="node-tags">
+                    <span className="tag-pill">國一</span>
+                  </div>
+                </div>
+
+                <span className="flow-plus" aria-hidden="true">＋</span>
+
+                <div className="sample-flow-node">
+                  <span className="node-label">學習目標</span>
+                  <div className="node-tags">
+                    <span className="tag-pill">閱讀理解</span>
+                    <span className="tag-pill">核心單字</span>
+                    <span className="tag-pill">文法</span>
+                  </div>
+                </div>
+
+                <span className="flow-arrow" aria-hidden="true">→</span>
+
+                <div className="sample-flow-node node-output">
+                  <span className="node-label">本週教材</span>
+                  <strong className="output-title">The Redstone Door Test</strong>
+                  <span className="output-subtitle">Minecraft 紅石自動門情境閱讀</span>
+                </div>
+              </div>
+
+              <div className="sample-context-footer">
+                <p className="footer-message">
+                  <strong>孩子喜歡什麼，決定我們怎麼帶他進入英文；他最後學會的，仍然是能帶去學校、段考與會考的英文能力。</strong>
+                </p>
+                <p className="footer-subtext">
+                  主題是引導閱讀的興趣載體，累積的單字、文法、上下文理解與推論能力皆能跨題材轉移。
+                </p>
+              </div>
+            </div>
+          </FadeInUp>
+
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
             <StaggerItem><article className="pdf-preview-card">
               <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
