@@ -97,8 +97,8 @@ grant execute on function public.worker_record_curriculum_observations(uuid, tex
 create or replace function public.worker_fail_generation_job(
   job_id uuid,
   worker_id text,
-  p_error_code text,
-  p_error_message text
+  error_code text,
+  error_message text
 )
 returns boolean
 language plpgsql
@@ -109,8 +109,8 @@ begin
   update public.generation_jobs as job
   set status = 'failed',
       lease_expires_at = null,
-      error_code = left(p_error_code, 100),
-      error_message = left(p_error_message, 2000)
+      error_code = left($3, 100),
+      error_message = left($4, 2000)
   where job.id = $1
     and job.status = 'claimed'
     and job.claimed_by = $2;

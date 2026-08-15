@@ -478,12 +478,14 @@ begin
     (
       '00000000-0000-0000-0000-000000000031',
       '00000000-0000-0000-0000-000000000021', current_date, 'test-v1', '{}'::jsonb,
-      'family-a/student.pdf', 'family-a/answer.pdf'
+      '00000000-0000-0000-0000-000000000021/student.pdf',
+      '00000000-0000-0000-0000-000000000021/answer.pdf'
     ),
     (
       '00000000-0000-0000-0000-000000000032',
       '00000000-0000-0000-0000-000000000023', current_date, 'test-v1', '{}'::jsonb,
-      'family-b/student.pdf', 'family-b/answer.pdf'
+      '00000000-0000-0000-0000-000000000023/student.pdf',
+      '00000000-0000-0000-0000-000000000023/answer.pdf'
     );
 
   update public.materials
@@ -497,9 +499,9 @@ begin
   ) values (
     '00000000-0000-0000-0000-000000000051',
     '00000000-0000-0000-0000-000000000021', current_date, 'test-v1',
-    'observation-idempotency-test', 'completed', now(), 'observation-test',
+    'observation-idempotency-test', 'completed', now() - interval '4 days', 'observation-test',
     '00000000-0000-0000-0000-000000000031', now(),
-    now() + interval '24 hours', now() - interval '24 hours', now()
+    now() - interval '1 minute', now() - interval '48 hours 1 minute', now() - interval '24 hours 1 minute'
   );
 
   insert into public.generation_jobs (
@@ -556,8 +558,8 @@ begin
 
   insert into storage.objects (bucket_id, name)
   values
-    ('weekly-materials', 'family-a/student.pdf'),
-    ('weekly-materials', 'family-b/student.pdf');
+    ('weekly-materials', '00000000-0000-0000-0000-000000000021/student.pdf'),
+    ('weekly-materials', '00000000-0000-0000-0000-000000000023/student.pdf');
 
   perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000011', true);
   perform set_config('role', 'authenticated', true);

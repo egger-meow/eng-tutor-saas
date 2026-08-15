@@ -1,4 +1,6 @@
-create or replace function public.get_enrollment_state()
+drop function if exists public.get_enrollment_state();
+
+create function public.get_enrollment_state()
 returns table (status text, capacity integer, active_count integer, remaining integer, founding_limit integer, founding_count integer)
 language sql stable security definer set search_path = ''
 as $$
