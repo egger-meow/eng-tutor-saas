@@ -42,9 +42,9 @@ export function LandingPage() {
           <FadeInUp duration={0.4} className="hero-copy">
             <p className="eyebrow">給國小高年級到國中生的每週紙本英文教材</p>
             <h1>
-              孩子願意讀，<br /><em>英文能力真的練得到。</em>
+              每週一份，<br /><em>只屬於你孩子的英文教材。</em>
             </h1>
-            <p className="lede">紙屬英文每週依孩子的程度、學校進度與學習狀況，製作一套個人化英文教材。從有興趣的內容開始，練出能帶進學校、段考與會考的單字、文法與閱讀能力。</p>
+            <p className="lede"><strong>先讓孩子願意讀，再把英文能力真的練起來。</strong>紙屬英文依孩子的程度、學校進度、興趣與上週表現，每週重新調整內容。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
               <li>每週 Student PDF + Parent Answer PDF</li>
               <li>孩子用紙筆閱讀、作答與思考</li>
@@ -60,7 +60,7 @@ export function LandingPage() {
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
             <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
             <p>不是聊天機器人，也不是線上家教。</p>
-            <strong>是一套每週更新、<br />可以直接印出來學的<br />個人化英文教材。</strong>
+            <strong>是一套每週更新、可以直接印出來學的個人化英文教材。</strong>
             <div className="paper-rule" />
             <small>AI 在背後記憶與調整；孩子在紙上完成真正的學習。</small>
           </FadeInUp>

@@ -1,7 +1,7 @@
 # Product Marketing Context
 
-**Document version:** v1
-**Last updated:** 2026-08-14
+**Document version:** v2
+**Last updated:** 2026-08-15
 
 ## Product Overview
 
@@ -84,7 +84,11 @@
 
 ## Customer Language
 
-**Words to use:** 孩子願意讀、真的練得到、每週教材、學校進度、段考、會考、家長不用備課、下一週真的會變。
+**How they describe us:**
+
+- 「每週一份，只屬於你孩子的英文教材。」— 核心品牌主張；網站、社群與廣告應優先保留，再依渠道補上結果承諾。
+
+**Words to use:** 每週一份、只屬於你孩子、孩子願意讀、真的練得到、每週教材、學校進度、段考、會考、家長不用備課、下一週真的會變。
 
 **Words to avoid:** AI 革命、顛覆教育、神奇提升、保證成績、AI 家教、無痛學習。
 
@@ -129,4 +133,5 @@
 
 ## Changelog
 
+- v2 (2026-08-15) — 將「每週一份，只屬於你孩子的英文教材」確立為跨網站、社群與廣告保留的核心品牌主張。
 - v1 (2026-08-14) — Initial context drafted from the repository specification and current product implementation for the landing-page conversion redesign.
