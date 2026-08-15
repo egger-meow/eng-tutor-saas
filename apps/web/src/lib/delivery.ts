@@ -21,15 +21,19 @@ export function formatTaipeiDate(date: Date): string {
 }
 
 export function getDeliveryViewModel(
-  _child: Child | null,
+  child: Child | null,
   currentMaterial: Material | null,
   nextPreparedMaterial?: Material | null | Date,
   nextJobReleaseAtOrNow?: string | null | Date,
   nowInput?: Date,
+  hasPastDueJobInput?: boolean,
 ): DeliveryViewModel {
   let nextPrepared: Material | null = null
   let nextJobReleaseAt: string | null = null
   let now = new Date()
+  let hasPastDueJob = typeof hasPastDueJobInput === 'boolean'
+    ? hasPastDueJobInput
+    : Boolean((child as { has_past_due_job?: boolean } | null)?.has_past_due_job)
 
   if (nextPreparedMaterial instanceof Date) {
     now = nextPreparedMaterial
@@ -75,6 +79,20 @@ export function getDeliveryViewModel(
     const releaseAt = new Date(nextJobReleaseAt)
     if (!Number.isNaN(releaseAt.getTime())) {
       const isPreWeek1 = !currentMaterial
+
+      // Stale-date fallback: if the expected delivery has already passed
+      // but no material exists (quality rejection or delayed authoring),
+      // show a truthful preparation state instead of a stale promise.
+      if (releaseAt <= now && !currentMaterial && !nextPrepared) {
+        return {
+          nextDeliveryAt: null,
+          feedbackCutoffAt: null,
+          feedbackState: 'waiting',
+          headline: '第一份教材準備中',
+          detail: '教材正在完成最後檢查，準備完成後即可下載。',
+        }
+      }
+
       const feedbackCutoffAt = new Date(releaseAt.getTime() - (2 * day))
       const feedbackState = currentMaterial?.feedback
         ? 'received'
@@ -98,8 +116,8 @@ export function getDeliveryViewModel(
     }
   }
 
-  // If neither a prepared material release_at nor an owned future generation_jobs.release_at
-  // is available, show a neutral schedule-confirmation state instead of guessing from operational worker state.
+  // Precedence 3: If neither a prepared material release_at nor an owned future generation_jobs.release_at
+  // is available, distinguish whether a past-due unmaterialized job exists (under retry/preparation) vs no job at all.
   return {
     nextDeliveryAt: null,
     feedbackCutoffAt: null,
@@ -107,6 +125,8 @@ export function getDeliveryViewModel(
     headline: currentMaterial ? '下一份教材排程確認中' : '第一份教材準備中',
     detail: currentMaterial
       ? '排程確認後會在這裡顯示下一次交付日期。'
-      : '完成孩子資料後，我們會開始準備第一份教材。',
+      : hasPastDueJob
+        ? '教材正在完成最後檢查，準備完成後即可下載。'
+        : '完成孩子資料後，我們會開始準備第一份教材。',
   }
 }

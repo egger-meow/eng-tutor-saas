@@ -20,7 +20,20 @@ pnpm worker process-submissions --processor github-actions-finisher --limit 5
 
 The finisher claims only packages already submitted by ChatGPT Work. It validates all relationships and critical quality checks, renders and inspects both PDFs, uploads them under `weekly-materials/<child-id>/<job-id>/`, and calls the transactional completion RPC. A rendering, upload, or completion failure records a sanitized failure. A package that has not passed independent critique and repository-owned audit is never publishable.
 
+## Week 1 Initial Scheduling
+
+When a child's subscription is first created (trialing or active), a trigger creates the initial generation job with:
+
+* `release_at` = next calendar day at 00:00 in the child's timezone (local date anchor, not the registration moment);
+* `scheduled_for` = now (immediately eligible for the next 00:15 Scheduled authoring run);
+* `generation_due_at` = `release_at - 24 hours` (per the existing schedule constraint);
+* `feedback_cutoff_at` = `release_at - 48 hours` (invariant-derived placeholder; not an actionable feedback deadline since Week 1 has no prior material);
+* `material_week` = next calendar day date in the child's timezone.
+
+This gives the Scheduled authoring task at least one 00:15 window before the parent's expected delivery date. If the material is quality-rejected and re-authored, the `release_at` remains unchanged; the parent-facing UI falls back to a neutral preparation state once the expected date has passed without material, while cases without an owned job display the pre-onboarding expectation.
+
 ## Daily Run
+
 
 1. ChatGPT Scheduled Work reads the current production branch through the GitHub app and the required versioned rules.
 2. It connects to the authorized Supabase project through the Supabase app and only the `private_generation.chatgpt_*` bridge functions.

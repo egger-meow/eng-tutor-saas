@@ -34,6 +34,7 @@
 .hero-cta { display: inline-flex; align-items: center; margin-top: 0; padding-inline: var(--space-6); text-decoration: none; }
 .text-link { color: var(--color-ink); font-weight: 700; text-decoration-thickness: 1px; }
 .hero-note { margin-top: var(--space-4); color: var(--color-muted); font-size: .82rem; }
+.hero-delivery-note { margin-top: var(--space-2); color: var(--color-muted); font-size: .82rem; }
 .hero-benefits { display: grid; gap: var(--space-2); margin: var(--space-6) 0 0; padding: 0; color: var(--color-ink); list-style: none; }
 .hero-benefits li::before { content: '✓'; margin-right: var(--space-3); color: var(--color-action); font-weight: 900; }
 .hero-editorial { position: relative; padding: clamp(2rem, 3.5vw, 3.75rem); border: 1px solid var(--color-rule-strong); background: var(--color-paper); box-shadow: 1.25rem 1.25rem 0 rgb(40 79 62 / 10%); }
@@ -189,6 +190,7 @@
 .founding-offer .status-label { grid-row: 1 / 3; }
 .founding-offer span { color: var(--color-muted); font-size: .85rem; }
 .pricing-cta { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; padding-inline: var(--space-8); text-decoration: none; }
+.pricing-delivery-note { grid-column: 1 / -1; margin: var(--space-2) 0 0; color: var(--color-muted); font-size: .85rem; }
 .capacity-explainer { max-width: 48rem; color: var(--color-muted); font-size: .9rem; }
 .faq-item { padding-block: var(--space-6); border-bottom: 1px solid var(--color-rule); }
 .faq-trigger { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0; border: 0; background: transparent; color: var(--color-ink); cursor: pointer; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; text-align: left; }

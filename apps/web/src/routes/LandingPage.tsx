@@ -22,9 +22,10 @@ const weeklyContents = [
   '依程度、學校進度、錯誤與回饋調整的下一週教材',
 ] as const
 
-const faqItems = [
+export const faqItems = [
   ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
   ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。'],
+  ['多久可以拿到第一份教材？', '完成孩子資料後，第一份專屬教材預計於隔天開放下載。之後每週依固定節奏提供新的個人化教材。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
   ['每個孩子都要各自付費嗎？', '是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子計費，可選月繳 NT$499 或年繳 NT$4,999。'],
   ['100 位額滿後會怎麼樣？', '新孩子會先進入候補，既有家庭照常收到教材。第一階段上限是真實的服務容量，不會用隨機數字或假倒數製造急迫感。'],
@@ -55,6 +56,7 @@ export function LandingPage() {
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
             <p className="hero-note">{cta.label === '免費取得第一週教材' ? '前 30 位孩子第一週免費；月繳第一個付費月 NT$299，之後每月 NT$499；也可選年繳 NT$4,999。' : cta.isWaitlist ? '目前服務名額已滿；候補不會先收費。' : '目前可選月繳 NT$499 或年繳 NT$4,999。'}</p>
+            <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
           </FadeInUp>
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
@@ -245,7 +247,7 @@ export function LandingPage() {
         </section>
 
         <section className="public-section login-section" id="login">
-          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{!cta.isWaitlist && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>等待第一週個人化教材完成</li></ul>}</FadeInUp>
+          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{!cta.isWaitlist && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
           <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
       </PageTransition>

@@ -669,7 +669,7 @@ Create child
 ↓
 Complete profile
 ↓
-Week 1 generation
+Week 1 generation (next-day delivery expectation)
 ↓
 Download
 ↓
@@ -685,6 +685,22 @@ The goal is to allow a parent to evaluate:
 > the actual personalized product.
 
 Not merely screenshots or demo copy.
+
+## Week 1 Delivery Timing
+
+Week 1 is not generated immediately upon onboarding completion. The sole curriculum author (ChatGPT Scheduled Work) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
+
+Therefore:
+
+* the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
+* for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
+* the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
+* expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
+* if the first delivery date passes without successful material completion (e.g. past-due unmaterialized job under retry), the UI falls back to a neutral `第一份教材準備中` state with detail `教材正在完成最後檢查，準備完成後即可下載。` instead of showing a stale date or false delivery claim;
+* when no generation job exists yet (prior to completing onboarding/child setup), the fallback truthfully states `完成孩子資料後，我們會開始準備第一份教材。`;
+* `generation_jobs.release_at` remains the canonical parent-facing delivery timestamp.
+
+The initial job's `scheduled_for` is set to the registration moment so it is immediately eligible for the next 00:15 Scheduled authoring run.
 
 ---
 

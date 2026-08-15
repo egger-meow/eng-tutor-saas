@@ -130,7 +130,7 @@ export function BillingPage({ session }: { session: Session }) {
         {!loading && children.length === 0 && (
           <div className="empty-state">
             <h2>先新增孩子</h2>
-            <p>方案以每位孩子為單位。建立孩子資料後，就能產生第一週教材並測試付款。</p>
+            <p>方案以每位孩子為單位。完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
             <button className="button" type="button" onClick={() => navigate('/children/new')}>
               ＋ 新增孩子
             </button>

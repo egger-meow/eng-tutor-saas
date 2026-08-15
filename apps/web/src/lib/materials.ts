@@ -36,6 +36,7 @@ export type MaterialPage = {
   materials: Material[]
   hasMoreByChild: Record<string, boolean>
   nextJobReleaseAtByChild: Record<string, string | null>
+  hasPastDueUnmaterializedJobByChild: Record<string, boolean>
 }
 
 export type MaterialPageOptions = {
@@ -222,7 +223,7 @@ export type FeedbackInput = {
 }
 
 export async function listMaterials(childIds: string[], options: MaterialPageOptions = {}, now = new Date()): Promise<MaterialPage> {
-  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {} }
+  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
   const client = getSupabaseClient()
   const limit = options.limit ?? 5
   const offset = options.offset ?? 0
@@ -263,9 +264,17 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
   const firstMaterialWeekByChild = new Map(pages.map((page) => [page.childId, page.firstMaterialWeek]))
 
   const nextJobReleaseAtByChild: Record<string, string | null> = {}
+  const hasPastDueUnmaterializedJobByChild: Record<string, boolean> = {}
+  const nowMs = now.getTime()
   for (const childId of childIds) {
     const childJobs = (jobs ?? []).filter((j) => j.child_id === childId)
     nextJobReleaseAtByChild[childId] = findNextFutureJobReleaseAt(childJobs, now)
+    hasPastDueUnmaterializedJobByChild[childId] = childJobs.some((j) => {
+      if (j.material_id) return false
+      if (!j.release_at) return true
+      const jobTime = Date.parse(j.release_at)
+      return Number.isNaN(jobTime) || jobTime <= nowMs
+    })
   }
 
   return {
@@ -278,6 +287,7 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
     })) as Material[],
     hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, page.rows.length === limit])),
     nextJobReleaseAtByChild,
+    hasPastDueUnmaterializedJobByChild,
   }
 }
 

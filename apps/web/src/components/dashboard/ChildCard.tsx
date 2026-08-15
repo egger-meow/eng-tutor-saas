@@ -29,7 +29,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
   const unreleasedMaterials = materials.filter((material) => !isMaterialReleased(material))
   // The immediate next prepared material is the earliest unreleased one
   const nextPreparedMaterial = unreleasedMaterials[unreleasedMaterials.length - 1] ?? null
-  const delivery = getDeliveryViewModel(child, latestMaterial, nextPreparedMaterial, child.next_job_release_at)
+  const delivery = getDeliveryViewModel(child, latestMaterial, nextPreparedMaterial, child.next_job_release_at, undefined, child.has_past_due_job)
 
   return (
     <motion.article

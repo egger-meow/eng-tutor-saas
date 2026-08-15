@@ -25,6 +25,7 @@ export function PricingSection() {
         <div className="founding-offer"><p className="status-label">目前不開放創始優惠</p><strong>月繳 NT${formatPrice(productConfig.standardPrice)}・年繳 NT${formatPrice(productConfig.annualPrice)}</strong><span>{enrollment?.status === 'open' ? '新加入的孩子不適用創始前 30 位優惠。' : '服務名額開放後，會以當時方案為準。'}</span></div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
+      <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
     </article>
     <CapacityStatus />
     <p className="capacity-explainer">前 100 位是第一階段服務容量。計數以孩子為單位，不是 Email 或家長帳戶；額滿後既有家庭仍會正常收到教材。</p>
