@@ -1,6 +1,6 @@
 import { access, readFile } from 'node:fs/promises'
 import { isAbsolute, resolve } from 'node:path'
-import { validateCurriculumPackage } from './validate-curriculum-package.js'
+import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from './validate-curriculum-package.js'
 import type { CurriculumPackage } from './curriculum-package-schema.js'
 
 export type CurriculumAuditFinding = { dimension: string; severity: 'info' | 'warning' | 'critical'; message: string }
@@ -66,6 +66,15 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   if (pkg.answers.some((answer) => cjk(answer.explanationZh) < 4)) add('answer-integrity', 'critical', '每個答案都需要能協助孩子自行訂正的簡短中文理由。')
   const followUpCount = pkg.answers.filter((answer) => answer.followUpZh !== null).length
   if (followUpCount > Math.max(2, Math.ceil(pkg.answers.length / 4))) add('parent-burden', 'warning', `有 ${followUpCount} 題要求額外追問；家長答案應以核對答案為主。`)
+
+  if (pkg.parentSummary.personalizationZh) {
+    for (const reason of pkg.parentSummary.personalizationZh) {
+      const jargon = findForbiddenPersonalizationJargon(reason)
+      if (jargon) {
+        add('parent-personalization', 'critical', `parentSummary.personalizationZh 含有內部引擎專有名詞或量測術語 ("${jargon}")，必須以家長視角的正體中文撰寫。`)
+      }
+    }
+  }
 
   const tokenEfficiencySignals = [pkg.learnerSnapshot.recurringMistakes.length > 12, pkg.learnerSnapshot.reviewDue.length > 20, pkg.learnerSnapshot.specificInterests.length > 12, questions.length > 50].filter(Boolean).length
   if (tokenEfficiencySignals >= 2) add('token-efficiency', 'warning', `context 有 ${tokenEfficiencySignals} 個過長訊號，應改用摘要與穩定 ID。`)

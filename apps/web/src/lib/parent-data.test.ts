@@ -110,10 +110,10 @@ describe('readGenerationSummary', () => {
     expect(result.learningFocus).toBe('推論證據與 do / does')
   })
 
-  it('extracts structured personalization reasons from curriculum summary output', () => {
+  it('extracts structured personalization reasons from clean fallback summary output', () => {
     const summary = {
       title: 'One Change at a Time',
-      improvementComparedToPrevious: ['本週加入中文策略示範，並將推論題改為有證據可回查的 CAP 題型。'],
+      improvementComparedToPrevious: ['本週加入中文策略示範，並將推論題改為有證據可回查的題型。'],
       feedbackApplied: ['提升閱讀篇幅與推論深度', '加入完整中文解說'],
       personalizationStrategy: '以機器人實驗承載推論與證據練習，沒有降低語言難度。',
     }
@@ -136,12 +136,41 @@ describe('readGenerationSummary', () => {
     expect(result.personalizationReasons).toHaveLength(0)
   })
 
+  it('filters out forbidden internal engine jargon and replaces with clean parent-friendly copy', () => {
+    const leakedJargonSummary = {
+      title: 'Smart Rooms, Small Changes',
+      learningFocus: '推論證據與現在式問句',
+      personalizationReasons: [
+        'Week 1 無前一份 production packet 可比較；本週建立閱讀取證、字彙提取與因果產出的可觀察基線，供下一週依實際回饋調整。',
+        '本週沒有前週回饋；依 feedback-missing 規則採保守校準，不把 silence 當 mastery。',
+      ],
+      improvementComparedToPrevious: [
+        'Week 1 沒有上一份教材可比較；本週建立可量測基準：同一目標跨 guided、independent、CAP、production、retrieval 與 homework 留下提示前後證據。',
+      ],
+      learningAdjustmentSummary: '本輪為 Week 1 且 feedbackMissing=true；沒有把沉默視為掌握，依學習資料與學校進度採保守校準。',
+    }
+
+    // For Week 1: forbidden jargon is stripped, and clean parent calibration explanation is provided
+    const resultWeek1 = readGenerationSummary(leakedJargonSummary, 1)
+    expect(resultWeek1.personalizationReasons).toHaveLength(1)
+    expect(resultWeek1.personalizationReasons[0]).toBe('這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。')
+    expect(resultWeek1.learningAdjustmentSummary).toBe('這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。')
+    expect(resultWeek1.learningAdjustmentSummary).not.toContain('production packet')
+    expect(resultWeek1.learningAdjustmentSummary).not.toContain('feedbackMissing')
+    expect(resultWeek1.learningAdjustmentSummary).not.toContain('silence')
+    expect(resultWeek1.learningAdjustmentSummary).not.toContain('可觀察基線')
+
+    // For later weeks: forbidden jargon is stripped and replaced with topic-focused parent explanation
+    const resultWeek2 = readGenerationSummary(leakedJargonSummary, 2)
+    expect(resultWeek2.personalizationReasons[0]).toBe('本週重點加強推論證據與現在式問句，透過生活化情境與循序練習幫助孩子掌握。')
+  })
+
   it('provides Week 1 calibration fallback when specific reasons are absent', () => {
     const result = readGenerationSummary({
       title: 'The Rooftop Garden Challenge',
     }, 1)
 
-    expect(result.learningAdjustmentSummary).toContain('校準教材')
-    expect(result.personalizationReasons[0]).toContain('校準教材')
+    expect(result.learningAdjustmentSummary).toContain('第一週教材')
+    expect(result.personalizationReasons[0]).toContain('第一週教材')
   })
 })

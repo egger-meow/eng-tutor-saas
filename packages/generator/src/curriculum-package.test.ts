@@ -69,9 +69,29 @@ describe('curriculum package v2', () => {
     ['a dishonest reading word count', (value: ReturnType<typeof validPackage>) => { value.studentLesson.reading.wordCount += 50 }],
     ['an answer gap', (value: ReturnType<typeof validPackage>) => { value.answers.pop() }],
     ['an unknown learning target', (value: ReturnType<typeof validPackage>) => { value.studentLesson.practice[0]!.questions[0]!.targetIds = ['missing-target'] }],
+    ['forbidden engine terminology in parentSummary.personalizationZh (production packet)', (value: ReturnType<typeof validPackage>) => {
+      value.parentSummary.personalizationZh = ['Week 1 無前一份 production packet 可比較；本週建立閱讀取證、字彙提取與因果產出的可觀察基線']
+    }],
+    ['forbidden debug/measurement jargon in parentSummary.personalizationZh (observable baseline)', (value: ReturnType<typeof validPackage>) => {
+      value.parentSummary.personalizationZh = ['本週建立可量測基準：同一目標跨 guided、independent、CAP、production、retrieval 與 homework 留下提示前後證據。']
+    }],
+    ['forbidden silence-mastery trope in parentSummary.personalizationZh', (value: ReturnType<typeof validPackage>) => {
+      value.parentSummary.personalizationZh = ['本輪為 Week 1 且 feedbackMissing=true；沒有把沉默視為掌握，採保守校準。']
+    }],
   ])('rejects %s', (_, mutate) => {
     const value = validPackage()
     mutate(value)
     expect(validateCurriculumPackage(value).success).toBe(false)
+  })
+
+  it('accepts clean parent-facing personalizationZh answering parent questions', () => {
+    const value = validPackage()
+    value.parentSummary.personalizationZh = [
+      '上週閱讀偏簡單，本週提高推論深度，並加入中文策略示範引導找證據。',
+      '針對容易混淆的 do / does 加入複習題，確認第三人稱單數動詞用法。',
+      '結合孩子感興趣的機器人實驗主題，提高閱讀動機。',
+    ]
+    const result = validateCurriculumPackage(value)
+    expect(result.success).toBe(true)
   })
 })

@@ -16,7 +16,8 @@ Mark `critical` when any of these occur:
 - recurring mistakes, due review, school progress, or material feedback were ignored;
 - personalization is generic, fabricated, repetitive, or changes only names;
 - tracking asserts mastery without evidence;
-- layout intent would create dense walls, unusable writing space, or sparse padding.
+- layout intent would create dense walls, unusable writing space, or sparse padding;
+- `parentSummary.personalizationZh` contains internal/engine jargon, field names, measurement/debug language, or AI meta-reasoning instead of parent-facing Traditional Chinese answering what needs strengthening, what was adjusted, and why.
 
 # Rubric dimensions
 

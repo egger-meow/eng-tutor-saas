@@ -1,4 +1,4 @@
-import { auditCurriculumPackage, parseWeeklyLesson, validateCurriculumPackage, type CurriculumPackage, type WeeklyLesson } from '@paper-english/generator'
+import { auditCurriculumPackage, findForbiddenPersonalizationJargon, parseWeeklyLesson, validateCurriculumPackage, type CurriculumPackage, type WeeklyLesson } from '@paper-english/generator'
 import { inspectCurriculumPdfPair, renderCurriculumPackageBytes, renderLessonPdfBytes, type CurriculumPdfBytes, type CurriculumPdfPairInspection, type LessonPdfBytes } from '@paper-english/pdf'
 
 const BUCKET = 'weekly-materials'
@@ -127,14 +127,32 @@ function assertLessonMatchesContext(lesson: WeeklyLesson, context: GenerationCon
   if (metadata.ruleVersion !== context.job.ruleVersion) throw new Error('lesson ruleVersion does not match claimed job')
 }
 
+function cleanPersonalizationReasons(reasons: unknown[]): string[] {
+  return reasons
+    .filter((r): r is string => typeof r === 'string' && Boolean(r.trim()))
+    .map((r) => r.trim())
+    .filter((r) => !findForbiddenPersonalizationJargon(r))
+}
+
 function buildSummary(lesson: WeeklyLesson): Record<string, unknown> {
-  const reasons: string[] = []
-  if (Array.isArray(lesson.personalization.personalizationZh)) {
-    reasons.push(...lesson.personalization.personalizationZh)
+  const canonicalReasons = Array.isArray(lesson.personalization.personalizationZh)
+    ? cleanPersonalizationReasons(lesson.personalization.personalizationZh)
+    : []
+
+  let reasons = canonicalReasons
+  if (reasons.length === 0) {
+    if (lesson.metadata.weekNumber === 1) {
+      reasons = [
+        '這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。',
+      ]
+    } else if (typeof lesson.personalization.rationale === 'string' && !findForbiddenPersonalizationJargon(lesson.personalization.rationale)) {
+      const isEnglishRationale = /^[A-Za-z\s,.'"-]{20,}/.test(lesson.personalization.rationale) &&
+        !/[\u4e00-\u9fa5]/.test(lesson.personalization.rationale)
+      if (!isEnglishRationale) {
+        reasons = [lesson.personalization.rationale.trim()]
+      }
+    }
   }
-  const isEnglishRationale = typeof lesson.personalization.rationale === 'string' &&
-    /^[A-Za-z\s,.'"-]{20,}/.test(lesson.personalization.rationale) &&
-    !/[\u4e00-\u9fa5]/.test(lesson.personalization.rationale)
 
   return {
     title: lesson.metadata.title,
@@ -142,7 +160,7 @@ function buildSummary(lesson: WeeklyLesson): Record<string, unknown> {
     grammarTopic: lesson.grammar.topic,
     coreVocabulary: lesson.vocabulary.map((item) => item.word),
     focusAreas: lesson.personalization.focusAreas,
-    learningAdjustmentSummary: reasons.join('；') || (isEnglishRationale ? null : lesson.personalization.rationale),
+    learningAdjustmentSummary: reasons.join('；') || null,
     personalizationReasons: reasons,
   }
 }
@@ -211,21 +229,37 @@ function assertCurriculumMatchesContext(pkg: CurriculumPackage, context: Generat
 }
 
 function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
-  const reasons: string[] = []
-  if (Array.isArray(pkg.parentSummary?.personalizationZh) && pkg.parentSummary.personalizationZh.length > 0) {
-    reasons.push(...pkg.parentSummary.personalizationZh)
-  }
-  if (Array.isArray(pkg.qualityEvidence?.improvementComparedToPrevious)) {
-    reasons.push(...pkg.qualityEvidence.improvementComparedToPrevious)
-  }
-  if (Array.isArray(pkg.qualityEvidence?.feedbackApplied)) {
-    reasons.push(...pkg.qualityEvidence.feedbackApplied)
-  }
-  if (pkg.learningPlan?.personalizationStrategy) {
-    reasons.push(pkg.learningPlan.personalizationStrategy)
+  const canonicalReasons = Array.isArray(pkg.parentSummary?.personalizationZh)
+    ? cleanPersonalizationReasons(pkg.parentSummary.personalizationZh)
+    : []
+
+  let finalReasons: string[] = []
+
+  if (canonicalReasons.length > 0) {
+    finalReasons = canonicalReasons
+  } else {
+    const fallback = [
+      ...cleanPersonalizationReasons(pkg.qualityEvidence?.improvementComparedToPrevious ?? []),
+      ...cleanPersonalizationReasons(pkg.qualityEvidence?.feedbackApplied ?? []),
+    ]
+    if (typeof pkg.learningPlan?.personalizationStrategy === 'string' && !findForbiddenPersonalizationJargon(pkg.learningPlan.personalizationStrategy)) {
+      fallback.push(pkg.learningPlan.personalizationStrategy.trim())
+    }
+    finalReasons = Array.from(new Set(fallback.filter(Boolean)))
   }
 
-  const uniqueReasons = Array.from(new Set(reasons.filter(Boolean)))
+  if (finalReasons.length === 0) {
+    if (pkg.metadata.weekNumber === 1) {
+      finalReasons = [
+        '這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。',
+      ]
+    } else {
+      const focus = pkg.parentSummary?.focusZh || pkg.studentLesson.reading.title
+      finalReasons = [
+        `本週重點加強${focus}，透過生活化情境與循序練習幫助孩子掌握。`,
+      ]
+    }
+  }
 
   return {
     title: pkg.metadata.title,
@@ -237,9 +271,9 @@ function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
     improvementComparedToPrevious: pkg.qualityEvidence.improvementComparedToPrevious,
     trackingHypotheses: pkg.trackingDelta.hypothesesToVerify,
     personalizationStrategy: pkg.learningPlan.personalizationStrategy,
-    learningAdjustmentSummary: uniqueReasons.join('；') || pkg.learningPlan.personalizationStrategy,
+    learningAdjustmentSummary: finalReasons.join('；'),
     learningFocus: pkg.parentSummary?.focusZh ?? null,
-    personalizationReasons: uniqueReasons,
+    personalizationReasons: finalReasons,
   }
 }
 

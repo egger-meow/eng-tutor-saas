@@ -1,5 +1,6 @@
 import { ZodError } from 'zod'
 import { WeeklyLessonSchema, type WeeklyLesson } from './lesson-schema.js'
+import { findForbiddenPersonalizationJargon } from './validate-curriculum-package.js'
 
 export type LessonValidationIssue = {
   path: string
@@ -43,6 +44,18 @@ function relationshipIssues(lesson: WeeklyLesson): LessonValidationIssue[] {
   }
   for (const id of answerSet) {
     if (!questionSet.has(id)) issues.push({ path: 'answers', message: `Answer has no matching question ID: ${id}` })
+  }
+
+  if (lesson.personalization.personalizationZh) {
+    for (const [index, reason] of lesson.personalization.personalizationZh.entries()) {
+      const jargon = findForbiddenPersonalizationJargon(reason)
+      if (jargon) {
+        issues.push({
+          path: `personalization.personalizationZh.${index}`,
+          message: `Contains forbidden internal/curriculum-engine terminology ("${jargon}"). Must be written for a Taiwanese parent in plain Traditional Chinese without engine or debug jargon.`,
+        })
+      }
+    }
   }
 
   return issues

@@ -11,6 +11,9 @@ export const syntheticWeekOne = parseWeeklyLesson({
     focusAreas: ['main ideas', 'present simple questions'],
     priorFeedbackSummary: 'Calibration week: no prior family feedback is available.',
     rationale: 'The science-project theme supports the learner’s interests while Week 1 checks reading detail and present-simple control.',
+    personalizationZh: [
+      '這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。',
+    ],
   },
   objectives: [
     'Find the main idea and supporting details in a short project story.',

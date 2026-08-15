@@ -19,7 +19,7 @@ export type { LessonValidationIssue, LessonValidationResult } from './validate-l
 export { syntheticWeekOne } from './fixtures/synthetic-week-1.js'
 export { CurriculumPackageSchema } from './curriculum-package-schema.js'
 export type { CurriculumPackage, CurriculumQuestion } from './curriculum-package-schema.js'
-export { validateCurriculumPackage } from './validate-curriculum-package.js'
+export { validateCurriculumPackage, findForbiddenPersonalizationJargon, FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS } from './validate-curriculum-package.js'
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport } from './audit-curriculum.js'

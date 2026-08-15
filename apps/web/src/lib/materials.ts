@@ -57,6 +57,68 @@ export function findNextFutureJobReleaseAt(
   return futureJobs[0]?.release_at ?? null
 }
 
+export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
+  // Implementation / field names
+  /\bfeedbackMissing\b/i,
+  /\bruleVersion\b/i,
+  /\binputFingerprint\b/i,
+  /\b[a-zA-Z_]+=(?:true|false|\d+)\b/,
+
+  // English curriculum-engine terminology
+  /\bproduction packet\b/i,
+  /\bguided\b/i,
+  /\bindependent\b/i,
+  /\bcap-transfer\b/i,
+  /\bCAP\b/,
+  /\bretrieval\b/i,
+  /\bproduction\b/i,
+  /\bscaffolding\b/i,
+  /\bbaseline\b/i,
+  /\bpacket\b/i,
+  /\btoken\b/i,
+
+  // Specification / rule terminology
+  /feedback-missing/i,
+  /fallback rule/i,
+  /rule version/i,
+  /規格規則/i,
+
+  // Measurement / debug language
+  /observable baseline/i,
+  /instrumentation/i,
+  /evidence pipeline/i,
+  /可量測基準/i,
+  /可觀察基線/i,
+  /量測基準/i,
+  /觀察基線/i,
+  /提示前後證據/i,
+  /留下提示前後證據/i,
+  /可觀察證據/i,
+
+  // Scheduler / generator logic statements
+  /\bscheduler\b/i,
+  /\bgenerator\b/i,
+  /\bworker\b/i,
+  /排程器/i,
+  /產生器/i,
+  /生成管線/i,
+  /佇列/i,
+
+  // Silence-mastery tropes / AI meta reasoning
+  /silence is not mastery/i,
+  /不把\s*silence\s*當\s*mastery/i,
+  /沒有把沉默視為掌握/i,
+  /不把沉默當作掌握/i,
+  /不把沉默當成掌握/i,
+  /不把沉默視為掌握/i,
+  /不把沉默當作學會/i,
+  /沒有把沉默當作掌握/i,
+]
+
+export function hasForbiddenPersonalizationJargon(text: string): boolean {
+  return FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS.some((pattern) => pattern.test(text))
+}
+
 export function readGenerationSummary(
   summary: Record<string, unknown> | null | undefined,
   weekNumber?: number | null,
@@ -72,6 +134,7 @@ export function readGenerationSummary(
 
   const stringOrNull = (value: unknown) => typeof value === 'string' && value.trim() ? value.trim() : null
   const arrayOrEmpty = (value: unknown) => Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && Boolean(v.trim())).map(v => v.trim()) : []
+  const cleanArray = (value: unknown) => arrayOrEmpty(value).filter((v) => !hasForbiddenPersonalizationJargon(v))
 
   const parentSummary = typeof summary.parentSummary === 'object' && summary.parentSummary !== null
     ? summary.parentSummary as Record<string, unknown>
@@ -83,10 +146,10 @@ export function readGenerationSummary(
     stringOrNull(summary.theme)
 
   // 1. Canonical source of truth: parentSummary.personalizationZh or top-level personalizationZh
-  const canonicalPersonalization = arrayOrEmpty(summary.personalizationZh).length > 0
-    ? arrayOrEmpty(summary.personalizationZh)
-    : parentSummary && arrayOrEmpty(parentSummary.personalizationZh).length > 0
-      ? arrayOrEmpty(parentSummary.personalizationZh)
+  const canonicalPersonalization = cleanArray(summary.personalizationZh).length > 0
+    ? cleanArray(summary.personalizationZh)
+    : parentSummary && cleanArray(parentSummary.personalizationZh).length > 0
+      ? cleanArray(parentSummary.personalizationZh)
       : []
 
   const collectedReasons: string[] = []
@@ -96,40 +159,48 @@ export function readGenerationSummary(
   } else {
     // Compatibility / projection layers fallback only when canonical personalizationZh is absent
     if (Array.isArray(summary.personalizationReasons)) {
-      collectedReasons.push(...arrayOrEmpty(summary.personalizationReasons))
+      collectedReasons.push(...cleanArray(summary.personalizationReasons))
     }
     if (Array.isArray(summary.improvementComparedToPrevious)) {
-      collectedReasons.push(...arrayOrEmpty(summary.improvementComparedToPrevious))
+      collectedReasons.push(...cleanArray(summary.improvementComparedToPrevious))
     }
     if (Array.isArray(summary.feedbackApplied)) {
-      collectedReasons.push(...arrayOrEmpty(summary.feedbackApplied))
+      collectedReasons.push(...cleanArray(summary.feedbackApplied))
     }
-    if (typeof summary.personalizationStrategy === 'string' && summary.personalizationStrategy.trim()) {
+    if (typeof summary.personalizationStrategy === 'string' && summary.personalizationStrategy.trim() && !hasForbiddenPersonalizationJargon(summary.personalizationStrategy)) {
       collectedReasons.push(summary.personalizationStrategy.trim())
     }
   }
 
   const rawAdjustment = stringOrNull(summary.learningAdjustmentSummary)
-  // Defensive filter against raw internal English LLM rationale / prompt trace leakage
+  // Defensive filter against raw internal English LLM rationale / prompt trace leakage or forbidden jargon
   const isEnglishPromptTrace = rawAdjustment ? /^[A-Za-z\s,.'"-]{20,}/.test(rawAdjustment) && !/[\u4e00-\u9fa5]/.test(rawAdjustment) : false
+  const isForbiddenJargon = rawAdjustment ? hasForbiddenPersonalizationJargon(rawAdjustment) : false
 
-  let learningAdjustmentSummary = isEnglishPromptTrace ? null : rawAdjustment
+  let learningAdjustmentSummary = isEnglishPromptTrace || isForbiddenJargon ? null : rawAdjustment
 
   const uniqueReasons = Array.from(new Set(collectedReasons))
 
   if (uniqueReasons.length === 0 && learningAdjustmentSummary) {
-    const parts = learningAdjustmentSummary.split(/[；;]+/u).map(p => p.trim()).filter(Boolean)
+    const parts = learningAdjustmentSummary
+      .split(/[；;]+/u)
+      .map(p => p.trim())
+      .filter(p => Boolean(p) && !hasForbiddenPersonalizationJargon(p))
     if (parts.length > 0) {
       uniqueReasons.push(...parts)
     }
   }
 
   const isWeek1 = weekNumber === 1 || summary.weekNumber === 1
-  if (uniqueReasons.length === 0 && isWeek1) {
-    const calibReason = '這是第一週的校準教材，先以基礎句型與核心單字建立學習基準，並透過文章主題觀察閱讀理解與文法掌握程度。'
-    uniqueReasons.push(calibReason)
-    if (!learningAdjustmentSummary) {
+  if (uniqueReasons.length === 0) {
+    if (isWeek1) {
+      const calibReason = '這是第一週教材，先用適中的難度了解孩子目前的閱讀、字彙與文法程度，再依這週的學習情況調整之後的內容。'
+      uniqueReasons.push(calibReason)
       learningAdjustmentSummary = calibReason
+    } else if (learningFocus) {
+      const focusReason = `本週重點加強${learningFocus}，透過生活化情境與循序練習幫助孩子掌握。`
+      uniqueReasons.push(focusReason)
+      learningAdjustmentSummary = focusReason
     }
   }
 

@@ -8,6 +8,72 @@ function countWords(paragraphs: string[]): number {
   return paragraphs.join(' ').trim().split(/\s+/u).filter(Boolean).length
 }
 
+export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
+  // Implementation / field names
+  /\bfeedbackMissing\b/i,
+  /\bruleVersion\b/i,
+  /\binputFingerprint\b/i,
+  /\b[a-zA-Z_]+=(?:true|false|\d+)\b/,
+
+  // English curriculum-engine terminology
+  /\bproduction packet\b/i,
+  /\bguided\b/i,
+  /\bindependent\b/i,
+  /\bcap-transfer\b/i,
+  /\bCAP\b/,
+  /\bretrieval\b/i,
+  /\bproduction\b/i,
+  /\bscaffolding\b/i,
+  /\bbaseline\b/i,
+  /\bpacket\b/i,
+  /\btoken\b/i,
+
+  // Specification / rule terminology
+  /feedback-missing/i,
+  /fallback rule/i,
+  /rule version/i,
+  /規格規則/i,
+
+  // Measurement / debug language
+  /observable baseline/i,
+  /instrumentation/i,
+  /evidence pipeline/i,
+  /可量測基準/i,
+  /可觀察基線/i,
+  /量測基準/i,
+  /觀察基線/i,
+  /提示前後證據/i,
+  /留下提示前後證據/i,
+  /可觀察證據/i,
+
+  // Scheduler / generator logic statements
+  /\bscheduler\b/i,
+  /\bgenerator\b/i,
+  /\bworker\b/i,
+  /排程器/i,
+  /產生器/i,
+  /生成管線/i,
+  /佇列/i,
+
+  // Silence-mastery tropes / AI meta reasoning
+  /silence is not mastery/i,
+  /不把\s*silence\s*當\s*mastery/i,
+  /沒有把沉默視為掌握/i,
+  /不把沉默當作掌握/i,
+  /不把沉默當成掌握/i,
+  /不把沉默視為掌握/i,
+  /不把沉默當作學會/i,
+  /沒有把沉默當作掌握/i,
+]
+
+export function findForbiddenPersonalizationJargon(text: string): string | null {
+  for (const pattern of FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS) {
+    const match = text.match(pattern)
+    if (match) return match[0]
+  }
+  return null
+}
+
 function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   const issues: LessonValidationIssue[] = []
   const targets = new Set(value.learningPlan.targets.map((target) => target.id))
@@ -29,6 +95,18 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   for (const question of questions) {
     for (const targetId of question.targetIds) if (!targets.has(targetId)) issues.push({ path: `questions.${question.id}.targetIds`, message: `Unknown learning target: ${targetId}` })
     if (question.itemType === 'short-response' && question.writingLines === 0) issues.push({ path: `questions.${question.id}.writingLines`, message: 'Written responses require writing space' })
+  }
+
+  if (value.parentSummary.personalizationZh) {
+    for (const [index, reason] of value.parentSummary.personalizationZh.entries()) {
+      const jargon = findForbiddenPersonalizationJargon(reason)
+      if (jargon) {
+        issues.push({
+          path: `parentSummary.personalizationZh.${index}`,
+          message: `Contains forbidden internal/curriculum-engine terminology ("${jargon}"). Must be written for a Taiwanese parent in plain Traditional Chinese without engine or debug jargon.`,
+        })
+      }
+    }
   }
 
   const actualWords = countWords(value.studentLesson.reading.paragraphs)
