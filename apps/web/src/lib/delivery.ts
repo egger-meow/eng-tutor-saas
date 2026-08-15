@@ -13,41 +13,100 @@ const day = 24 * 60 * 60 * 1000
 
 export function formatTaipeiDate(date: Date): string {
   return new Intl.DateTimeFormat('zh-TW', {
-    timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', weekday: 'short',
+    timeZone: 'Asia/Taipei',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
   }).format(date)
 }
 
-export function getDeliveryViewModel(child: Child, latestMaterial: Material | null, now = new Date()): DeliveryViewModel {
-  if (!child.next_generation_at) {
-    return {
-      nextDeliveryAt: null,
-      feedbackCutoffAt: null,
-      feedbackState: latestMaterial?.feedback ? 'received' : 'waiting',
-      headline: latestMaterial ? '下一週教材排程確認中' : '第一週教材準備中',
-      detail: latestMaterial ? '排程確認後會在這裡顯示下一次交付日期。' : '完成孩子資料後，我們會開始準備第一份教材。',
+export function getDeliveryViewModel(
+  _child: Child | null,
+  currentMaterial: Material | null,
+  nextPreparedMaterial?: Material | null | Date,
+  nextJobReleaseAtOrNow?: string | null | Date,
+  nowInput?: Date,
+): DeliveryViewModel {
+  let nextPrepared: Material | null = null
+  let nextJobReleaseAt: string | null = null
+  let now = new Date()
+
+  if (nextPreparedMaterial instanceof Date) {
+    now = nextPreparedMaterial
+    nextPrepared = null
+  } else {
+    nextPrepared = nextPreparedMaterial ?? null
+  }
+
+  if (nextJobReleaseAtOrNow instanceof Date) {
+    now = nextJobReleaseAtOrNow
+  } else if (typeof nextJobReleaseAtOrNow === 'string') {
+    nextJobReleaseAt = nextJobReleaseAtOrNow
+  }
+
+  if (nowInput instanceof Date) {
+    now = nowInput
+  }
+
+  // Precedence 1: An unreleased prepared material has an authoritative release_at timestamp
+  if (nextPrepared?.release_at) {
+    const releaseAt = new Date(nextPrepared.release_at)
+    if (!Number.isNaN(releaseAt.getTime())) {
+      const isPreWeek1 = !currentMaterial
+      const feedbackReceived = Boolean(currentMaterial?.feedback)
+      return {
+        nextDeliveryAt: releaseAt,
+        feedbackCutoffAt: null,
+        feedbackState: feedbackReceived ? 'received' : 'waiting',
+        headline: isPreWeek1
+          ? `第一份教材將於 ${formatTaipeiDate(releaseAt)} 開放下載`
+          : `預計 ${formatTaipeiDate(releaseAt)} 開放下一份教材`,
+        detail: feedbackReceived
+          ? '本週回饋已收到。'
+          : isPreWeek1
+            ? '內容已先完成準備，到了開放日期即可下載。'
+            : '隨時填寫本週回饋，我們會接續安排在後續教材。',
+      }
     }
   }
 
-  const generationAt = new Date(child.next_generation_at)
-  if (Number.isNaN(generationAt.getTime())) return getDeliveryViewModel({ ...child, next_generation_at: null }, latestMaterial, now)
-  const nextDeliveryAt = new Date(generationAt.getTime() + day)
-  const feedbackCutoffAt = new Date(nextDeliveryAt.getTime() - (2 * day))
-  const feedbackState = latestMaterial?.feedback
-    ? 'received'
-    : now < feedbackCutoffAt
-      ? 'open'
-      : 'closed'
+  // Precedence 2: The canonical next release timestamp from the owned generation_job record
+  if (nextJobReleaseAt) {
+    const releaseAt = new Date(nextJobReleaseAt)
+    if (!Number.isNaN(releaseAt.getTime())) {
+      const isPreWeek1 = !currentMaterial
+      const feedbackCutoffAt = new Date(releaseAt.getTime() - (2 * day))
+      const feedbackState = currentMaterial?.feedback
+        ? 'received'
+        : now < feedbackCutoffAt
+          ? 'open'
+          : 'closed'
 
+      return {
+        nextDeliveryAt: releaseAt,
+        feedbackCutoffAt,
+        feedbackState,
+        headline: isPreWeek1
+          ? `預計 ${formatTaipeiDate(releaseAt)} 交付第一份教材`
+          : `預計 ${formatTaipeiDate(releaseAt)} 交付下一週教材`,
+        detail: feedbackState === 'received'
+          ? '本週回饋已收到。'
+          : feedbackState === 'open'
+            ? `請盡量在 ${formatTaipeiDate(feedbackCutoffAt)} 前填寫回饋。`
+            : '回饋時間已截止；下一份教材仍會依照既有進度繼續準備。',
+      }
+    }
+  }
+
+  // If neither a prepared material release_at nor an owned future generation_jobs.release_at
+  // is available, show a neutral schedule-confirmation state instead of guessing from operational worker state.
   return {
-    nextDeliveryAt,
-    feedbackCutoffAt,
-    feedbackState,
-    headline: `預計 ${formatTaipeiDate(nextDeliveryAt)} 交付下一週教材`,
-    detail: feedbackState === 'received'
-      ? '本週回饋已收到，會用於下一份教材。'
-      : feedbackState === 'open'
-        ? `請盡量在 ${formatTaipeiDate(feedbackCutoffAt)} 前填寫回饋。`
-        : '回饋時間已截止；下一份教材仍會依照既有進度繼續準備。',
+    nextDeliveryAt: null,
+    feedbackCutoffAt: null,
+    feedbackState: currentMaterial?.feedback ? 'received' : 'waiting',
+    headline: currentMaterial ? '下一份教材排程確認中' : '第一份教材準備中',
+    detail: currentMaterial
+      ? '排程確認後會在這裡顯示下一次交付日期。'
+      : '完成孩子資料後，我們會開始準備第一份教材。',
   }
 }
-

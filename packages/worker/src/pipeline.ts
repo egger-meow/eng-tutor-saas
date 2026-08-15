@@ -128,13 +128,22 @@ function assertLessonMatchesContext(lesson: WeeklyLesson, context: GenerationCon
 }
 
 function buildSummary(lesson: WeeklyLesson): Record<string, unknown> {
+  const reasons: string[] = []
+  if (Array.isArray(lesson.personalization.personalizationZh)) {
+    reasons.push(...lesson.personalization.personalizationZh)
+  }
+  const isEnglishRationale = typeof lesson.personalization.rationale === 'string' &&
+    /^[A-Za-z\s,.'"-]{20,}/.test(lesson.personalization.rationale) &&
+    !/[\u4e00-\u9fa5]/.test(lesson.personalization.rationale)
+
   return {
     title: lesson.metadata.title,
     theme: lesson.reading.title,
     grammarTopic: lesson.grammar.topic,
     coreVocabulary: lesson.vocabulary.map((item) => item.word),
     focusAreas: lesson.personalization.focusAreas,
-    learningAdjustmentSummary: lesson.personalization.rationale,
+    learningAdjustmentSummary: reasons.join('；') || (isEnglishRationale ? null : lesson.personalization.rationale),
+    personalizationReasons: reasons,
   }
 }
 
@@ -202,6 +211,22 @@ function assertCurriculumMatchesContext(pkg: CurriculumPackage, context: Generat
 }
 
 function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
+  const reasons: string[] = []
+  if (Array.isArray(pkg.parentSummary?.personalizationZh) && pkg.parentSummary.personalizationZh.length > 0) {
+    reasons.push(...pkg.parentSummary.personalizationZh)
+  }
+  if (Array.isArray(pkg.qualityEvidence?.improvementComparedToPrevious)) {
+    reasons.push(...pkg.qualityEvidence.improvementComparedToPrevious)
+  }
+  if (Array.isArray(pkg.qualityEvidence?.feedbackApplied)) {
+    reasons.push(...pkg.qualityEvidence.feedbackApplied)
+  }
+  if (pkg.learningPlan?.personalizationStrategy) {
+    reasons.push(pkg.learningPlan.personalizationStrategy)
+  }
+
+  const uniqueReasons = Array.from(new Set(reasons.filter(Boolean)))
+
   return {
     title: pkg.metadata.title,
     theme: pkg.studentLesson.reading.title,
@@ -211,6 +236,10 @@ function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
     feedbackApplied: pkg.qualityEvidence.feedbackApplied,
     improvementComparedToPrevious: pkg.qualityEvidence.improvementComparedToPrevious,
     trackingHypotheses: pkg.trackingDelta.hypothesesToVerify,
+    personalizationStrategy: pkg.learningPlan.personalizationStrategy,
+    learningAdjustmentSummary: uniqueReasons.join('；') || pkg.learningPlan.personalizationStrategy,
+    learningFocus: pkg.parentSummary?.focusZh ?? null,
+    personalizationReasons: uniqueReasons,
   }
 }
 

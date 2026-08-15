@@ -2470,6 +2470,9 @@ or equivalent scheduled-job logic.
 
 The system should distribute generation workload rather than accidentally scheduling all 100 students at one exact moment when avoidable.
 
+`next_generation_at` is an operational state representing an internal generation deadline. It is not automatically a parent-facing delivery date; its meaning must be interpreted according to the current material and job state. If an unreleased prepared material already exists, that material's `release_at` is the authoritative parent-visible delivery date rather than an advanced generation deadline for a subsequent cycle.
+
+
 ---
 
 # 117. MVP Generation Worker
@@ -3298,12 +3301,23 @@ Jonathan
 家長答案
 [下載答案]
 
-下一份教材
-8/16
+下一次交付
+8月19日（三）開放下一份教材
 
-[填寫本週回饋]
+本週回饋已收到。
+
 [編輯孩子資料]
 ```
+
+## Temporal Horizon Invariant
+
+The parent dashboard has a maximum temporal horizon of the **current learning state plus exactly one immediate next parent-visible event**.
+
+* The dashboard displays the current released material (Week N) and the immediate next delivery (Week N+1). It must never expose `Week N+2` or subsequent internal queue cycles while the parent is operating on Week N.
+* When an unreleased prepared material exists, its `release_at` is the authoritative next-delivery date.
+* Later queued cycles, queue jobs, and generation deadlines are internal operational state and must not leak into the parent card.
+* When a prepared material exists alongside a released current material, there is exactly one unified next-delivery surface rendered in the card.
+* Feedback copy must remain neutral and factual (e.g. `本週回饋已收到。`) without asserting unprovable causal promises about already-generated materials.
 
 ---
 
@@ -3316,10 +3330,11 @@ Each shows:
 * grade;
 * subscription status;
 * current week;
-* next generation;
+* immediate next parent-visible delivery;
 * feedback status.
 
 Never make the parent guess which child a PDF belongs to.
+
 
 ---
 

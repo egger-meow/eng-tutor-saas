@@ -15,6 +15,7 @@ export type GenerationSummary = {
   title: string | null
   learningFocus: string | null
   learningAdjustmentSummary: string | null
+  personalizationReasons: string[]
 }
 
 export type Material = {
@@ -34,6 +35,7 @@ export type Material = {
 export type MaterialPage = {
   materials: Material[]
   hasMoreByChild: Record<string, boolean>
+  nextJobReleaseAtByChild: Record<string, string | null>
 }
 
 export type MaterialPageOptions = {
@@ -41,12 +43,101 @@ export type MaterialPageOptions = {
   offset?: number
 }
 
-export function readGenerationSummary(summary: Record<string, unknown>): GenerationSummary {
-  const stringOrNull = (value: unknown) => typeof value === 'string' && value.trim() ? value : null
+export function findNextFutureJobReleaseAt(
+  jobs: Array<{ release_at?: string | null }>,
+  now = new Date(),
+): string | null {
+  const nowMs = now.getTime()
+  const futureJobs = jobs
+    .filter((j): j is { release_at: string } => typeof j.release_at === 'string' && Boolean(j.release_at.trim()))
+    .map((j) => ({ release_at: j.release_at.trim(), time: Date.parse(j.release_at.trim()) }))
+    .filter((j) => !Number.isNaN(j.time) && j.time > nowMs)
+    .sort((a, b) => a.time - b.time)
+
+  return futureJobs[0]?.release_at ?? null
+}
+
+export function readGenerationSummary(
+  summary: Record<string, unknown> | null | undefined,
+  weekNumber?: number | null,
+): GenerationSummary {
+  if (!summary || typeof summary !== 'object') {
+    return {
+      title: null,
+      learningFocus: null,
+      learningAdjustmentSummary: null,
+      personalizationReasons: [],
+    }
+  }
+
+  const stringOrNull = (value: unknown) => typeof value === 'string' && value.trim() ? value.trim() : null
+  const arrayOrEmpty = (value: unknown) => Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && Boolean(v.trim())).map(v => v.trim()) : []
+
+  const parentSummary = typeof summary.parentSummary === 'object' && summary.parentSummary !== null
+    ? summary.parentSummary as Record<string, unknown>
+    : null
+
+  const title = stringOrNull(summary.title)
+  const learningFocus = stringOrNull(summary.learningFocus) ??
+    (parentSummary ? stringOrNull(parentSummary.focusZh) : null) ??
+    stringOrNull(summary.theme)
+
+  // 1. Canonical source of truth: parentSummary.personalizationZh or top-level personalizationZh
+  const canonicalPersonalization = arrayOrEmpty(summary.personalizationZh).length > 0
+    ? arrayOrEmpty(summary.personalizationZh)
+    : parentSummary && arrayOrEmpty(parentSummary.personalizationZh).length > 0
+      ? arrayOrEmpty(parentSummary.personalizationZh)
+      : []
+
+  const collectedReasons: string[] = []
+
+  if (canonicalPersonalization.length > 0) {
+    collectedReasons.push(...canonicalPersonalization)
+  } else {
+    // Compatibility / projection layers fallback only when canonical personalizationZh is absent
+    if (Array.isArray(summary.personalizationReasons)) {
+      collectedReasons.push(...arrayOrEmpty(summary.personalizationReasons))
+    }
+    if (Array.isArray(summary.improvementComparedToPrevious)) {
+      collectedReasons.push(...arrayOrEmpty(summary.improvementComparedToPrevious))
+    }
+    if (Array.isArray(summary.feedbackApplied)) {
+      collectedReasons.push(...arrayOrEmpty(summary.feedbackApplied))
+    }
+    if (typeof summary.personalizationStrategy === 'string' && summary.personalizationStrategy.trim()) {
+      collectedReasons.push(summary.personalizationStrategy.trim())
+    }
+  }
+
+  const rawAdjustment = stringOrNull(summary.learningAdjustmentSummary)
+  // Defensive filter against raw internal English LLM rationale / prompt trace leakage
+  const isEnglishPromptTrace = rawAdjustment ? /^[A-Za-z\s,.'"-]{20,}/.test(rawAdjustment) && !/[\u4e00-\u9fa5]/.test(rawAdjustment) : false
+
+  let learningAdjustmentSummary = isEnglishPromptTrace ? null : rawAdjustment
+
+  const uniqueReasons = Array.from(new Set(collectedReasons))
+
+  if (uniqueReasons.length === 0 && learningAdjustmentSummary) {
+    const parts = learningAdjustmentSummary.split(/[；;]+/u).map(p => p.trim()).filter(Boolean)
+    if (parts.length > 0) {
+      uniqueReasons.push(...parts)
+    }
+  }
+
+  const isWeek1 = weekNumber === 1 || summary.weekNumber === 1
+  if (uniqueReasons.length === 0 && isWeek1) {
+    const calibReason = '這是第一週的校準教材，先以基礎句型與核心單字建立學習基準，並透過文章主題觀察閱讀理解與文法掌握程度。'
+    uniqueReasons.push(calibReason)
+    if (!learningAdjustmentSummary) {
+      learningAdjustmentSummary = calibReason
+    }
+  }
+
   return {
-    title: stringOrNull(summary.title),
-    learningFocus: stringOrNull(summary.learningFocus),
-    learningAdjustmentSummary: stringOrNull(summary.learningAdjustmentSummary),
+    title,
+    learningFocus,
+    learningAdjustmentSummary: uniqueReasons.length > 0 ? uniqueReasons.join('；') : learningAdjustmentSummary,
+    personalizationReasons: uniqueReasons,
   }
 }
 
@@ -59,8 +150,8 @@ export type FeedbackInput = {
   parent_comments: string
 }
 
-export async function listMaterials(childIds: string[], options: MaterialPageOptions = {}): Promise<MaterialPage> {
-  if (childIds.length === 0) return { materials: [], hasMoreByChild: {} }
+export async function listMaterials(childIds: string[], options: MaterialPageOptions = {}, now = new Date()): Promise<MaterialPage> {
+  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {} }
   const client = getSupabaseClient()
   const limit = options.limit ?? 5
   const offset = options.offset ?? 0
@@ -88,26 +179,34 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
   const materials = pages.flatMap((page) => page.rows)
   const materialIds = materials.map((material) => material.id)
   const [{ data: feedback, error: feedbackError }, { data: jobs, error: jobsError }] = await Promise.all([
-    client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds),
     materialIds.length === 0
       ? Promise.resolve({ data: [], error: null })
-      : client.from('generation_jobs').select('material_id, child_id, release_at').in('child_id', childIds).in('material_id', materialIds),
+      : client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds),
+    client.from('generation_jobs').select('material_id, child_id, release_at').in('child_id', childIds),
   ])
   if (feedbackError) throw feedbackError
   if (jobsError) throw jobsError
 
   const feedbackByMaterial = new Map((feedback ?? []).map((item) => [item.material_id, item]))
-  const releaseByMaterial = new Map((jobs ?? []).map((job) => [job.material_id, job.release_at as string]))
+  const releaseByMaterial = new Map((jobs ?? []).filter((job) => job.material_id).map((job) => [job.material_id, job.release_at as string]))
   const firstMaterialWeekByChild = new Map(pages.map((page) => [page.childId, page.firstMaterialWeek]))
+
+  const nextJobReleaseAtByChild: Record<string, string | null> = {}
+  for (const childId of childIds) {
+    const childJobs = (jobs ?? []).filter((j) => j.child_id === childId)
+    nextJobReleaseAtByChild[childId] = findNextFutureJobReleaseAt(childJobs, now)
+  }
+
   return {
     materials: materials.map((material) => ({
-    ...material,
-    generation_summary: material.generation_summary as Record<string, unknown>,
-    release_at: releaseByMaterial.get(material.id) ?? null,
-    week_number: materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
-    feedback: feedbackByMaterial.get(material.id) ?? null,
+      ...material,
+      generation_summary: material.generation_summary as Record<string, unknown>,
+      release_at: releaseByMaterial.get(material.id) ?? null,
+      week_number: materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
+      feedback: feedbackByMaterial.get(material.id) ?? null,
     })) as Material[],
     hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, page.rows.length === limit])),
+    nextJobReleaseAtByChild,
   }
 }
 

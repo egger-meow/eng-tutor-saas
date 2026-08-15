@@ -3,7 +3,7 @@ import { listChildProfiles, type ChildProfile } from '../lib/child-profiles'
 import { listChildren, type Child } from '../lib/children'
 import { listMaterials, type Material } from '../lib/materials'
 
-export type ChildWithProfile = Child & { profile: ChildProfile | null }
+export type ChildWithProfile = Child & { profile: ChildProfile | null; next_job_release_at?: string | null }
 
 export function chooseOwnedChild(children: ChildWithProfile[], requestedId: string | null): ChildWithProfile | null {
   return children.find((child) => child.id === requestedId) ?? children[0] ?? null
@@ -25,9 +25,13 @@ export function useParentData() {
       const childRows = await listChildren()
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
-      const joined = childRows.map((child) => ({ ...child, profile: profileMap.get(child.id) ?? null }))
-      const childIds = joined.map((c) => c.id)
-      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {} }
+      const childIds = childRows.map((c) => c.id)
+      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {} }
+      const joined = childRows.map((child) => ({
+        ...child,
+        profile: profileMap.get(child.id) ?? null,
+        next_job_release_at: page.nextJobReleaseAtByChild[child.id] ?? null,
+      }))
       setChildren(joined)
       setMaterials(page.materials)
       setMaterialOffsets(Object.fromEntries(childIds.map((childId) => [childId, 5])))

@@ -18,6 +18,7 @@ const PersonalizationSchema = z.strictObject({
   focusAreas: z.array(RequiredText).min(1).max(8),
   priorFeedbackSummary: RequiredText,
   rationale: RequiredText,
+  personalizationZh: z.array(RequiredText).min(1).max(6).optional(),
 })
 
 const VocabularyItemSchema = z.strictObject({
