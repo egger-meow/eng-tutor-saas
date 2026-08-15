@@ -42,7 +42,7 @@ export function LandingPage() {
           <FadeInUp duration={0.4} className="hero-copy">
             <p className="eyebrow">給國小高年級到國中生的每週紙本英文教材</p>
             <h1>
-              每週一份，<br /><em>只屬於你孩子的英文教材。</em>
+              每週一份，<br /><em>只屬</em>於你孩子的英文教材。
             </h1>
             <p className="lede"><strong>先讓孩子願意讀，再把英文能力真的練起來。</strong>紙屬英文依孩子的程度、學校進度、興趣與上週表現，每週重新調整內容。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
