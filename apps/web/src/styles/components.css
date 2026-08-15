@@ -82,8 +82,16 @@
 .subscription-card h2 { margin-bottom: var(--space-2); }
 .subscription-action { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-rule); }
 .subscription-action .button { margin-top: var(--space-2); }
-.cancel-confirmation { display: grid; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-rule); background: var(--color-paper-deep); }
-.cancel-confirmation textarea { width: 100%; resize: vertical; }
+.cancel-confirmation { display: grid; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-5); border: 1px solid var(--color-rule); border-radius: var(--radius-surface); background: var(--color-paper-deep); }
+.cancel-confirmation p { margin: 0; }
+.cancel-confirmation p:first-child strong { color: var(--color-ink); font-size: 1.05rem; }
+.cancel-confirmation p:nth-child(2) { color: var(--color-muted); font-size: .9rem; line-height: 1.6; }
+.cancel-confirmation label { margin-top: var(--space-1); color: var(--color-ink); font-size: .875rem; font-weight: 600; }
+.cancel-confirmation textarea { width: 100%; min-height: 5.5rem; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-rule-strong); border-radius: var(--radius-control); background: var(--color-paper); color: var(--color-ink); font-family: inherit; font-size: .92rem; line-height: 1.6; resize: vertical; transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast); }
+.cancel-confirmation textarea::placeholder { color: var(--color-muted); opacity: .75; }
+.cancel-confirmation textarea:hover { border-color: var(--color-ink); }
+.cancel-confirmation textarea:focus { outline: none; border-color: var(--color-action); box-shadow: 0 0 0 3px rgb(40 79 62 / 12%); background: #ffffff; }
+.cancel-confirmation .button { justify-self: start; margin-top: var(--space-1); }
 .checkout-panel { min-width: 0; overflow: hidden; border: 1px solid var(--color-rule); background: var(--color-paper); box-shadow: 1rem 1rem 0 rgb(40 79 62 / 8%); }
 .checkout-panel-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); padding: var(--space-6); border-bottom: 1px solid var(--color-rule); }
 .checkout-panel-heading h2 { margin: 0; font-size: clamp(1.35rem, 3vw, 2rem); }
