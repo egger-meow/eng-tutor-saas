@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
+import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
 const labels = {
   trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
@@ -20,13 +21,14 @@ type Props = {
   subscription?: SubscriptionView
   busy?: boolean
   activationPending?: boolean
-  onSubscribe: (childId: string) => void
+  onSubscribe: (childId: string, plan: BillingPlan) => void
   onCancel: (childId: string, reason: string) => void
 }
 
 export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe, onCancel }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('annual')
 
   if (!subscription) return <article className="subscription-card"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></article>
   if (activationPending) return <article className="subscription-card"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p></article>
@@ -35,12 +37,13 @@ export function ChildSubscription({ child, subscription, busy, activationPending
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
   const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
+  const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
 
   return <article className="subscription-card">
     <div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div>
     <p><span className={`status-label status-${subscription.status}`}>{title}</span></p>
     <p>{description}</p>
-    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>每月 NT${subscription.priceTwd}</p>}
+    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>{currentPlan.label}・{currentPlan.cadenceLabel} NT${subscription.priceTwd}</p>}
     {periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}
     {subscription.cancelAtPeriodEnd && <p className="notice">已取消續訂；本期結束前仍可使用。歡迎之後隨時回來續訂。</p>}
     {canCancel && <div className="subscription-action">
@@ -55,6 +58,20 @@ export function ChildSubscription({ child, subscription, busy, activationPending
         <button className="button secondary" type="button" disabled={busy} onClick={() => onCancel(child.id, reason)}>{busy ? '正在取消續訂…' : '確認取消續訂'}</button>
       </div>}
     </div>}
-    {canSubscribe && <div className="subscription-action"><p>每月 NT$499；符合 Founding 30 資格時，第一個付費月自動折為 NT$299。</p><button className="button" type="button" disabled={busy} onClick={() => onSubscribe(child.id)}>{busy ? '正在準備安全付款…' : '開始訂閱'}</button></div>}
+    {canSubscribe && <div className="subscription-action">
+      <fieldset className="billing-plan-selector">
+        <legend>選擇付款週期</legend>
+        <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
+          <input type="radio" name={`billing-plan-${child.id}`} value="annual" checked={selectedPlan === 'annual'} onChange={() => setSelectedPlan('annual')} />
+          <span><strong>年繳 NT${billingPlans.annual.priceTwd}</strong><small>平均每月約 NT${annualMonthlyEquivalentTwd}，一年省 NT${annualSavingsTwd}</small></span>
+        </label>
+        <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
+          <input type="radio" name={`billing-plan-${child.id}`} value="monthly" checked={selectedPlan === 'monthly'} onChange={() => setSelectedPlan('monthly')} />
+          <span><strong>月繳 NT${billingPlans.monthly.priceTwd}</strong><small>Founding 30 第一個付費月可自動折為 NT$299</small></span>
+        </label>
+      </fieldset>
+      <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
+      <button className="button" type="button" disabled={busy} onClick={() => onSubscribe(child.id, selectedPlan)}>{busy ? '正在準備安全付款…' : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}</button>
+    </div>}
   </article>
 }

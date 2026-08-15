@@ -1,6 +1,9 @@
+import { billingPlans } from '../lib/billing-plans'
+
 export const productConfig = {
   name: '紙屬英文',
-  standardPrice: 499,
+  standardPrice: billingPlans.monthly.priceTwd,
+  annualPrice: billingPlans.annual.priceTwd,
   foundingPrice: 299,
   foundingLimit: 30,
   capacity: 100,

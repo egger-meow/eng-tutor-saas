@@ -1,5 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
+import { getCheckoutPlan, validateFoundingDiscount } from '../_shared/paddle-plans.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -25,11 +26,12 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const paddleApiKey = Deno.env.get('PADDLE_API_KEY')
-  const priceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
+  const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
+  const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
   const foundingDiscountId = Deno.env.get('PADDLE_FOUNDING_DISCOUNT_ID')
 
   if (!authHeader?.startsWith('Bearer ')) return jsonResponse(401, { error: 'authentication_required' })
-  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !priceId || !foundingDiscountId) {
+  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !monthlyPriceId || !annualPriceId || !foundingDiscountId) {
     console.error('Paddle checkout server configuration is incomplete')
     return jsonResponse(503, { error: 'server_not_configured' })
   }
@@ -42,15 +44,41 @@ Deno.serve(async (request) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token)
     if (userError || !user) return jsonResponse(401, { error: 'invalid_session' })
 
-    const body = await request.json() as { child_id?: unknown }
+    const body = await request.json() as { child_id?: unknown; plan?: unknown }
     if (typeof body.child_id !== 'string') return jsonResponse(400, { error: 'child_id_required' })
+    let plan
+    try {
+      plan = getCheckoutPlan(body.plan, { monthly: monthlyPriceId, annual: annualPriceId })
+    } catch {
+      return jsonResponse(400, { error: 'invalid_plan' })
+    }
 
     const { data: eligibility, error: eligibilityError } = await supabase
-      .rpc('prepare_paddle_checkout', { p_user_id: user.id, p_child_id: body.child_id })
+      .rpc('prepare_paddle_checkout', {
+        p_user_id: user.id,
+        p_child_id: body.child_id,
+        p_plan_code: plan.planCode,
+      })
       .single()
     if (eligibilityError) throw eligibilityError
 
     const foundingApplies = eligibility.founding_applies === true
+    if (foundingApplies) {
+      const discountResponse = await fetch(`https://sandbox-api.paddle.com/discounts/${foundingDiscountId}`, {
+        headers: { authorization: `Bearer ${paddleApiKey}` },
+      })
+      const discountBody = await discountResponse.json()
+      if (!discountResponse.ok) {
+        console.error('Paddle founding discount lookup failed', discountResponse.status, discountBody)
+        return jsonResponse(503, { error: 'paddle_discount_not_verifiable' })
+      }
+      try {
+        validateFoundingDiscount(discountBody?.data)
+      } catch (error) {
+        console.error('Paddle founding discount is misconfigured', errorMessage(error))
+        return jsonResponse(503, { error: 'paddle_discount_misconfigured' })
+      }
+    }
     const paddleResponse = await fetch('https://sandbox-api.paddle.com/transactions', {
       method: 'POST',
       headers: {
@@ -58,9 +86,9 @@ Deno.serve(async (request) => {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        items: [{ price_id: priceId, quantity: 1 }],
+        items: [{ price_id: plan.priceId, quantity: 1 }],
         collection_mode: 'automatic',
-        custom_data: { child_id: body.child_id, parent_id: user.id },
+        custom_data: { child_id: body.child_id, parent_id: user.id, plan: plan.key },
         ...(foundingApplies ? { discount_id: foundingDiscountId } : {}),
       }),
     })
@@ -78,8 +106,11 @@ Deno.serve(async (request) => {
 
     return jsonResponse(200, {
       transaction_id: paddleBody?.data?.id,
+      plan: plan.key,
+      billing_interval: plan.billingInterval,
+      price_twd: plan.priceTwd,
       founding_applies: foundingApplies,
-      first_month_price_twd: foundingApplies ? 299 : 499,
+      checkout_price_twd: foundingApplies ? 299 : plan.priceTwd,
     })
   } catch (error) {
     console.error('Paddle checkout preparation failed', errorMessage(error))

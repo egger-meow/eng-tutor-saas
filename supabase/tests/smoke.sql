@@ -43,7 +43,8 @@ begin
 
   perform public.prepare_paddle_checkout(
     '00000000-0000-0000-0000-000000000001',
-    '00000000-0000-0000-0000-000000000002'
+    '00000000-0000-0000-0000-000000000002',
+    'standard_monthly'
   );
   if (
     select founding_status from public.subscriptions
@@ -56,6 +57,7 @@ begin
     'evt_checkout_smoke', 'subscription.created', now(),
     '00000000-0000-0000-0000-000000000002',
     'sub_checkout_smoke', 'ctm_checkout_smoke', 'active',
+    'standard_monthly', 'month', 499,
     now(), now() + interval '1 month', false
   );
   if not exists (
@@ -67,6 +69,94 @@ begin
   ) then
     raise exception 'Paddle webhook did not activate and redeem founding subscription';
   end if;
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000004',
+    '00000000-0000-0000-0000-000000000001',
+    'Annual Test Student',
+    8,
+    'grade_8'
+  );
+
+  perform public.prepare_paddle_checkout(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000004',
+    'standard_annual'
+  );
+  if (
+    select founding_status from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000004'
+  ) <> 'none' then
+    raise exception 'annual checkout incorrectly reserved founding eligibility';
+  end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_annual_smoke', 'subscription.created', now(),
+    '00000000-0000-0000-0000-000000000004',
+    'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+    'standard_annual', 'year', 4999,
+    now(), now() + interval '1 year', false
+  );
+  if not exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000004'
+      and plan_code = 'standard_annual'
+      and billing_interval = 'year'
+      and price_twd = 4999
+      and founding_status = 'none'
+  ) then
+    raise exception 'annual Paddle webhook did not persist canonical plan data';
+  end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_annual_smoke', 'subscription.created', now(),
+    '00000000-0000-0000-0000-000000000004',
+    'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+    'standard_annual', 'year', 4999,
+    now(), now() + interval '1 year', false
+  );
+  if (
+    select count(*) from public.billing_webhook_events
+    where event_id = 'evt_annual_smoke'
+  ) <> 1 then
+    raise exception 'duplicate Paddle event was not idempotent';
+  end if;
+
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_second_subscription_smoke', 'subscription.created', now(),
+      '00000000-0000-0000-0000-000000000004',
+      'sub_annual_duplicate', 'ctm_checkout_smoke', 'active',
+      'standard_annual', 'year', 4999,
+      now(), now() + interval '1 year', false
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'second active Paddle subscription replaced the child subscription';
+  end if;
+
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_invalid_annual_smoke', 'subscription.updated', now(),
+      '00000000-0000-0000-0000-000000000004',
+      'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+      'standard_annual', 'month', 499,
+      now(), now() + interval '1 month', false
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Paddle webhook RPC accepted mismatched annual plan data';
+  end if;
+
+  delete from public.children
+  where id = '00000000-0000-0000-0000-000000000004';
 
   if not exists (
     select 1 from public.child_profiles
@@ -745,12 +835,30 @@ begin
   if has_function_privilege('service_role', 'private_generation.chatgpt_submit_curriculum_package(uuid,text,jsonb)', 'execute') then
     raise exception 'service role can bypass the app-only ChatGPT bridge';
   end if;
-  if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute')
-    or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then
+  if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute')
+    or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute') then
     raise exception 'browser roles can execute Paddle checkout preparation RPC';
   end if;
-  if not has_function_privilege('service_role', 'public.prepare_paddle_checkout(uuid,uuid)', 'execute') then
+  if not has_function_privilege('service_role', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute') then
     raise exception 'service role cannot prepare Paddle checkout';
+  end if;
+  if has_function_privilege(
+    'anon',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'execute'
+  ) or has_function_privilege(
+    'authenticated',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'execute'
+  ) then
+    raise exception 'browser roles can execute Paddle webhook processing RPC';
+  end if;
+  if not has_function_privilege(
+    'service_role',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'execute'
+  ) then
+    raise exception 'service role cannot execute Paddle webhook processing RPC';
   end if;
 end;
 $$;

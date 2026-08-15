@@ -6,7 +6,7 @@
 > Primary customer: Parents of junior-high students
 > Primary learner: Junior-high students, with optional entry from Grade 6 before junior high
 > Long-term academic target: Taiwan junior-high English and CAP / 國中教育會考 capability
-> Standard price: **NT$499 / child / month**
+> Standard prices: **NT$499 / child / month** or **NT$4,999 / child / year**
 
 ---
 
@@ -562,7 +562,7 @@ Billing is per child.
 
 Standard pricing:
 
-> **NT$499 / month / child**
+> **NT$499 / month / child** or **NT$4,999 / year / child**
 
 Example:
 
@@ -571,7 +571,7 @@ Parent
 ├── Jonathan
 │   └── NT$499/month
 └── Emily
-    └── NT$499/month
+    └── NT$4,999/year
 ```
 
 Do not model the entire family as one generic subscription in MVP.
@@ -613,6 +613,8 @@ After first paid month:
 NT$499/month
 ```
 
+The Founding 30 paid discount applies only when the child chooses the monthly plan. The annual plan remains NT$4,999/year and does not consume or redeem a founding discount.
+
 Founding status belongs to the child, not merely the parent account.
 
 Example:
@@ -638,6 +640,8 @@ Unless explicitly changed later:
 From the second paid month:
 
 > NT$499/month.
+
+Annual billing is not a discounted founding period. It is a separate standard plan at NT$4,999/year.
 
 The founding offer is designed to:
 
@@ -2904,6 +2908,7 @@ Do not scatter price numbers across components.
 Maintain centralized product configuration for:
 
 * standard monthly price;
+* standard annual price;
 * founding first-month price;
 * founding cohort size;
 * capacity.
@@ -2912,6 +2917,7 @@ Initial values:
 
 ```text
 standard_monthly_price = 499 TWD
+standard_annual_price = 4999 TWD
 founding_first_month_price = 299 TWD
 founding_child_limit = 30
 service_child_capacity = 100
@@ -3893,6 +3899,8 @@ then:
 * Child B stops generating when entitlement ends;
 * histories remain independent.
 
+For either monthly or annual checkout, the browser chooses only a semantic plan. The backend maps that plan to an allowlisted Paddle price, and a verified webhook must validate the price, currency, amount, and billing interval before granting entitlement.
+
 ---
 
 # 196. Definition of Done: Founding Offer
@@ -3906,6 +3914,8 @@ First paid month 299
 ↓
 Following paid months 499
 ```
+
+If the child chooses annual billing, the charge is 4,999/year and founding eligibility is neither applied nor redeemed by that annual checkout.
 
 The transition must be traceable and not depend on manual memory.
 
@@ -4023,7 +4033,6 @@ After validation, possible features include:
 * exam review packs;
 * winter / summer packs;
 * sibling discount;
-* annual plan;
 * LINE notifications;
 * Google login;
 * short placement assessment;
@@ -4118,6 +4127,7 @@ one or more children
 each child has independent subscription
 ↓
 499 TWD / month / child
+or 4,999 TWD / year / child
 ```
 
 Founding cohort:

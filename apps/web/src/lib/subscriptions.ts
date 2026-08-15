@@ -1,20 +1,21 @@
 import { getSupabaseClient } from './supabase'
+import type { BillingInterval, BillingPlan } from './billing-plans'
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled'
-export type SubscriptionView = { id: string; childId: string; status: SubscriptionStatus; planCode: string | null; priceTwd: number | null; currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; foundingStatus: 'none' | 'eligible' | 'redeemed' }
-type SubscriptionRow = { id: string; child_id: string; status: SubscriptionStatus; plan_code: string | null; price_twd: number | null; current_period_end: string | null; cancel_at_period_end: boolean; founding_status: SubscriptionView['foundingStatus'] }
+export type SubscriptionView = { id: string; childId: string; status: SubscriptionStatus; planCode: string | null; billingInterval: BillingInterval | null; priceTwd: number | null; currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; foundingStatus: 'none' | 'eligible' | 'redeemed' }
+type SubscriptionRow = { id: string; child_id: string; status: SubscriptionStatus; plan_code: string | null; billing_interval: BillingInterval | null; price_twd: number | null; current_period_end: string | null; cancel_at_period_end: boolean; founding_status: SubscriptionView['foundingStatus'] }
 
-export type CheckoutPreparation = { transactionId: string; foundingApplies: boolean; firstMonthPriceTwd: number }
+export type CheckoutPreparation = { transactionId: string; plan: BillingPlan; billingInterval: BillingInterval; priceTwd: number; foundingApplies: boolean; checkoutPriceTwd: number }
 
 export async function listOwnedSubscriptions(): Promise<SubscriptionView[]> {
-  const { data, error } = await getSupabaseClient().from('subscriptions').select('id, child_id, status, plan_code, price_twd, current_period_end, cancel_at_period_end, founding_status')
+  const { data, error } = await getSupabaseClient().from('subscriptions').select('id, child_id, status, plan_code, billing_interval, price_twd, current_period_end, cancel_at_period_end, founding_status')
   if (error) throw error
-  return (data as SubscriptionRow[]).map((row) => ({ id: row.id, childId: row.child_id, status: row.status, planCode: row.plan_code, priceTwd: row.price_twd, currentPeriodEnd: row.current_period_end, cancelAtPeriodEnd: row.cancel_at_period_end, foundingStatus: row.founding_status }))
+  return (data as SubscriptionRow[]).map((row) => ({ id: row.id, childId: row.child_id, status: row.status, planCode: row.plan_code, billingInterval: row.billing_interval, priceTwd: row.price_twd, currentPeriodEnd: row.current_period_end, cancelAtPeriodEnd: row.cancel_at_period_end, foundingStatus: row.founding_status }))
 }
 
-export async function prepareCheckout(childId: string): Promise<CheckoutPreparation> {
+export async function prepareCheckout(childId: string, plan: BillingPlan): Promise<CheckoutPreparation> {
   const { data, error } = await getSupabaseClient().functions.invoke('paddle-checkout', {
-    body: { child_id: childId },
+    body: { child_id: childId, plan },
   })
   if (error) {
     let code = ''
@@ -29,13 +30,22 @@ export async function prepareCheckout(childId: string): Promise<CheckoutPreparat
     if (code === 'paddle_api_key_forbidden') {
       throw new Error('Paddle API key 缺少 Transactions 的讀取或建立權限，請更新 Sandbox API key 後再試。')
     }
+    if (code === 'paddle_discount_not_verifiable' || code === 'paddle_discount_misconfigured') {
+      throw new Error('Founding 30 優惠設定尚未通過驗證，請先確認 Paddle 折扣金額與適用期數。')
+    }
     throw new Error('目前無法開啟安全付款，請稍後再試。')
   }
   if (!data?.transaction_id) throw new Error('付款交易未成功建立，請稍後再試。')
+  if (data.plan !== plan || (data.billing_interval !== 'month' && data.billing_interval !== 'year')) {
+    throw new Error('付款方案驗證失敗，請重新選擇方案。')
+  }
   return {
     transactionId: data.transaction_id as string,
+    plan,
+    billingInterval: data.billing_interval,
+    priceTwd: Number(data.price_twd),
     foundingApplies: data.founding_applies === true,
-    firstMonthPriceTwd: Number(data.first_month_price_twd),
+    checkoutPriceTwd: Number(data.checkout_price_twd),
   }
 }
 

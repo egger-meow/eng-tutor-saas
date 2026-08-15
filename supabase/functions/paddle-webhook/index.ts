@@ -1,10 +1,14 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
+import { getWebhookPlan, type PaddleSubscriptionItem } from '../_shared/paddle-plans.ts'
 
 const SIGNATURE_TOLERANCE_SECONDS = 300
 const SUBSCRIPTION_EVENTS = new Set([
   'subscription.created',
+  'subscription.activated',
+  'subscription.trialing',
   'subscription.updated',
+  'subscription.past_due',
   'subscription.canceled',
   'subscription.paused',
   'subscription.resumed',
@@ -19,6 +23,7 @@ type PaddleEvent = {
     customer_id?: string
     status?: string
     custom_data?: Record<string, unknown> | null
+    items?: PaddleSubscriptionItem[]
     current_billing_period?: { starts_at?: string; ends_at?: string } | null
     scheduled_change?: { action?: string } | null
   }
@@ -74,7 +79,9 @@ Deno.serve(async (request) => {
   const webhookSecret = Deno.env.get('PADDLE_WEBHOOK_SECRET')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (!webhookSecret || !supabaseUrl || !serviceRoleKey) {
+  const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
+  const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
+  if (!webhookSecret || !supabaseUrl || !serviceRoleKey || !monthlyPriceId || !annualPriceId) {
     console.error('Paddle webhook server configuration is incomplete')
     return jsonResponse(503, { error: 'server_not_configured' })
   }
@@ -103,6 +110,10 @@ Deno.serve(async (request) => {
     const subscription = event.data
     const childId = subscription?.custom_data?.child_id
     if (typeof childId !== 'string') throw new Error('Missing custom_data.child_id')
+    const plan = getWebhookPlan(subscription?.items, { monthly: monthlyPriceId, annual: annualPriceId })
+    if (subscription?.custom_data?.plan !== undefined && subscription.custom_data.plan !== plan.key) {
+      throw new Error('Paddle custom_data.plan does not match subscription price')
+    }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -115,6 +126,9 @@ Deno.serve(async (request) => {
       p_provider_subscription_id: subscription?.id,
       p_provider_customer_id: subscription?.customer_id,
       p_status: mapStatus(subscription?.status),
+      p_plan_code: plan.planCode,
+      p_billing_interval: plan.billingInterval,
+      p_price_twd: plan.priceTwd,
       p_current_period_start: subscription?.current_billing_period?.starts_at ?? null,
       p_current_period_end: subscription?.current_billing_period?.ends_at ?? null,
       p_cancel_at_period_end: subscription?.scheduled_change?.action === 'cancel',
