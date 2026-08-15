@@ -61,9 +61,11 @@ The returned JSON is authoritative. It already enforces entitlement, feedback el
 
 If claimed is empty, report NO_ELIGIBLE_JOBS and stop. Process claimed contexts in returned order and never mix information between children.
 
+For a retry claim, `retryContext` is authoritative and contains the immutable previous attempt, its canonical package, and structured deterministic findings. Perform a targeted repair: do not regenerate the whole lesson unless a dependency change requires it; preserve approved content, stable question IDs, and target mappings where possible; change only rejected sections and dependent fragments; update Parent answers and tracking references whenever a question changes; and do not repeat plan/author work that remains valid.
+
 PACKAGE AUTHORING
 
-For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.0.0. Use only the returned context plus the current repository rules.
+For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.0.0. Use only the returned context plus the current repository rules. A retry submission is a new immutable authoring attempt; never overwrite or omit the prior package from the audit trail.
 
 Plan before authoring:
 
@@ -113,11 +115,11 @@ select private_generation.chatgpt_submit_curriculum_package(
   $curriculum$<the complete JSON object>$curriculum$::jsonb
 ) as result;
 
-Before executing, ensure the JSON does not contain the delimiter $curriculum$. Do not print the SQL or JSON in chat. Submission is idempotent only when the same package is retried. A different package for the same job must fail closed.
+Before executing, ensure the JSON does not contain the delimiter $curriculum$. Do not print the SQL or JSON in chat. Submission is idempotent only when the same package is retried for the same authoring attempt. A targeted repaired package is accepted only after a new retry claim increments the authoring attempt; a different package within one attempt must fail closed.
 
 The bridge rejects packages whose `metadata.inputFingerprint` is absent or differs from the snapshot returned for that job. Treat such a rejection as `TECHNICAL_FAILED`; never repair it with a fabricated hash.
 
-The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently validates, audits, renders, inspects, privately uploads, and transactionally completes the job.
+The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently validates, audits, renders, inspects, privately uploads, and transactionally completes the job. A finisher technical failure retries this same immutable submission and must not trigger LLM re-authoring. A deterministic quality rejection returns the job to a new authoring claim only while `attempt_count < max_attempts`; otherwise report HUMAN_REVIEW_REQUIRED.
 
 You may check one submitted job without exposing its package by executing:
 

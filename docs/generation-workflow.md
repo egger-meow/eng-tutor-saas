@@ -33,7 +33,7 @@ The finisher claims only packages already submitted by ChatGPT Work. It validate
 8. Submit the canonical JSON to the private bridge. GitHub Actions independently validates it with `CurriculumPackageSchema` and repository-owned quality gates, renders and inspects the separate Student and Parent PDFs, and rejects the pair on any structure, answer-consistency, identifier, learning-stage, hidden-difficulty, critique, or rendering failure.
 9. GitHub Actions uploads both PDFs to private Storage and transactionally records the material and completed job. Completion creates the next job from the existing release anchor with `release_at + 7 days`, `feedback_cutoff_at = release_at - 48 hours`, and `generation_due_at = release_at - 24 hours`.
 10. After completion, call `worker_record_curriculum_observations` with the canonical package. It records vocabulary exposure, grammar targets, compact weekly history, verification hypotheses, and critic observations. This write-back must never silently claim mastery.
-11. On failure, store a sanitized error, release or expire the lease according to retry policy, and continue with other claimed jobs.
+11. On deterministic quality rejection, preserve the immutable submission plus structured findings. If authoring attempts remain, return the job to the Scheduled task with the prior package and exact repair context; otherwise mark it HUMAN_REVIEW_REQUIRED. On rendering, upload, or completion failure, retry the same submission in the deterministic finisher without spending another LLM authoring attempt.
 12. End with a concise run report: waiting for feedback, mandatory/overdue, claimed, completed, failed, deferred, observation-write failures, and oldest outstanding deadline.
 
 ## Guardrails

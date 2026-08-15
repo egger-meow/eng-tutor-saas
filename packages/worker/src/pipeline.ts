@@ -221,6 +221,25 @@ export type CompleteCurriculumInput = {
   curriculumPackage: unknown
   render?: (pkg: CurriculumPackage) => Promise<CurriculumPdfBytes>
   inspect?: (pkg: CurriculumPackage, pair: CurriculumPdfBytes) => Promise<CurriculumPdfPairInspection>
+  recordJobFailure?: boolean
+}
+
+export type CurriculumFailureEvidence = {
+  failureType: 'QUALITY_REJECTED'
+  findings: Array<{ source: 'validation' | 'audit'; path?: string; dimension: string; message: string }>
+}
+
+export class CurriculumQualityError extends Error {
+  readonly evidence: CurriculumFailureEvidence
+
+  constructor(evidence: CurriculumFailureEvidence) {
+    const label = evidence.findings.every((finding) => finding.source === 'validation')
+      ? 'Invalid curriculum package'
+      : 'Curriculum quality rejected'
+    super(`${label}:\n${evidence.findings.map((finding) => `${finding.path ?? finding.dimension}: ${finding.message}`).join('\n')}`)
+    this.name = 'CurriculumQualityError'
+    this.evidence = evidence
+  }
 }
 
 function assertMatchingPdfPair(
@@ -245,13 +264,21 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
   let completionStarted = false
   try {
     const parsed = validateCurriculumPackage(input.curriculumPackage)
-    if (!parsed.success) throw new Error(`Invalid curriculum package:\n${parsed.issues.map((issue) => `${issue.path}: ${issue.message}`).join('\n')}`)
+    if (!parsed.success) throw new CurriculumQualityError({
+      failureType: 'QUALITY_REJECTED',
+      findings: parsed.issues.map((issue) => ({
+        source: 'validation', path: issue.path, dimension: 'deterministic-validation', message: issue.message,
+      })),
+    })
     const pkg = parsed.curriculumPackage
     assertCurriculumMatchesContext(pkg, input.context)
     const audit = auditCurriculumPackage(pkg)
     if (!audit.passed) {
       const findings = audit.findings.filter((finding) => finding.severity === 'critical')
-      throw new Error(`Curriculum quality rejected:\n${findings.map((finding) => `${finding.dimension}: ${finding.message}`).join('\n')}`)
+      throw new CurriculumQualityError({
+        failureType: 'QUALITY_REJECTED',
+        findings: findings.map((finding) => ({ source: 'audit', dimension: finding.dimension, message: finding.message })),
+      })
     }
 
     const inspect = input.inspect ?? inspectCurriculumPdfPair
@@ -295,11 +322,10 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
   } catch (error) {
     if (!completionStarted) {
       if (createdPaths.length > 0) await storage.remove(createdPaths)
-      const message = error instanceof Error ? error.message : String(error)
-      const errorCode = message.startsWith('Invalid curriculum package:') || message.startsWith('Curriculum quality rejected:')
-        ? 'QUALITY_REJECTED'
-        : 'CURRICULUM_PIPELINE_FAILED'
-      await recordPipelineFailure(input.client, input.workerId, input.context.job.id, errorCode, error)
+      if (input.recordJobFailure !== false) {
+        const errorCode = error instanceof CurriculumQualityError ? 'QUALITY_REJECTED' : 'CURRICULUM_PIPELINE_FAILED'
+        await recordPipelineFailure(input.client, input.workerId, input.context.job.id, errorCode, error)
+      }
     }
     throw error
   }

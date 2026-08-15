@@ -1,7 +1,8 @@
-import { completeCurriculumJob, loadGenerationContext, type WorkerClient } from './pipeline.js'
+import { CurriculumQualityError, completeCurriculumJob, loadGenerationContext, type CurriculumFailureEvidence, type WorkerClient } from './pipeline.js'
 
 export type CurriculumSubmission = {
   job_id: string
+  authoring_attempt: number
   generation_worker_id: string
   canonical_source: unknown
 }
@@ -21,11 +22,10 @@ function unwrap<T>(result: { data: T | null; error: { message: string } | null }
   return result.data
 }
 
-function classifyFailure(error: unknown): Pick<CurriculumSubmissionResult, 'status' | 'errorCode'> {
+function classifyFailure(error: unknown): Pick<CurriculumSubmissionResult, 'status' | 'errorCode'> & { evidence?: CurriculumFailureEvidence } {
   const message = error instanceof Error ? error.message : String(error)
-  const quality = message.startsWith('Invalid curriculum package:') || message.startsWith('Curriculum quality rejected:')
-  return quality
-    ? { status: 'quality_rejected', errorCode: 'QUALITY_REJECTED' }
+  return error instanceof CurriculumQualityError
+    ? { status: 'quality_rejected', errorCode: 'QUALITY_REJECTED', evidence: error.evidence }
     : { status: 'technical_failed', errorCode: 'CURRICULUM_PIPELINE_FAILED' }
 }
 
@@ -49,6 +49,7 @@ export async function processCurriculumSubmissions(
         workerId: item.generation_worker_id,
         context,
         curriculumPackage: item.canonical_source,
+        recordJobFailure: false,
       })
     })
 
@@ -56,6 +57,7 @@ export async function processCurriculumSubmissions(
       const materialId = await completeOne(submission)
       const finished = unwrap(await client.rpc('worker_finish_curriculum_submission', {
         job_id: submission.job_id,
+        authoring_attempt: submission.authoring_attempt,
         processor_id: processorId,
         outcome: 'completed',
         error_code: null,
@@ -68,13 +70,15 @@ export async function processCurriculumSubmissions(
       const message = error instanceof Error ? error.message : String(error)
       const finished = unwrap(await client.rpc('worker_finish_curriculum_submission', {
         job_id: submission.job_id,
+        authoring_attempt: submission.authoring_attempt,
         processor_id: processorId,
         outcome: failure.status,
         error_code: failure.errorCode,
         error_message: message.slice(0, 2000),
+        failure_evidence: failure.evidence ?? null,
       }), 'record curriculum submission failure') as boolean
       if (!finished) throw new Error(`curriculum submission lease was lost after ${failure.errorCode}`)
-      results.push({ jobId: submission.job_id, ...failure })
+      results.push({ jobId: submission.job_id, status: failure.status, errorCode: failure.errorCode })
     }
   }
 

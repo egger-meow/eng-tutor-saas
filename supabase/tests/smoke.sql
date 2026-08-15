@@ -13,6 +13,9 @@ declare
   bridge_claim_result jsonb;
   bridge_context jsonb;
   bridge_fingerprint text;
+  first_package jsonb;
+  second_package jsonb;
+  completed_material_id uuid;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
@@ -247,7 +250,7 @@ begin
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
 
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.1.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
     or bridge_fingerprint !~ '^sha256:[0-9a-f]{64}$' then
     raise exception 'ChatGPT bridge did not return a server-owned SHA-256 fingerprint';
   end if;
@@ -275,14 +278,11 @@ begin
     raise exception 'ChatGPT bridge accepted a fabricated input fingerprint';
   end if;
 
-  perform private_generation.chatgpt_submit_curriculum_package(
-    bridge_job_id,
-    'bridge-smoke',
-    jsonb_build_object('metadata', jsonb_build_object(
+  first_package := jsonb_build_object('metadata', jsonb_build_object(
       'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
-    ))
-  );
+    ));
+  perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', first_package);
   if not exists (
     select 1 from private_generation.curriculum_submissions
     where job_id = bridge_job_id and status = 'pending'
@@ -298,9 +298,134 @@ begin
     raise exception 'deterministic finisher could not claim the curriculum submission';
   end if;
   if not public.worker_finish_curriculum_submission(
-    bridge_job_id, 'smoke-finisher', 'technical_failed', 'SMOKE_ONLY', 'rollback fixture'
+    bridge_job_id, 1, 'smoke-finisher', 'technical_failed', 'SMOKE_ONLY', 'rollback fixture',
+    jsonb_build_object('failureType', 'TECHNICAL_FAILURE')
   ) then
     raise exception 'deterministic finisher could not record the submission outcome';
+  end if;
+  if exists (
+    select 1 from private_generation.claim_due_generation_jobs('must-not-reauthor-technical')
+    where id = bridge_job_id
+  ) then
+    raise exception 'technical finisher failure became an unnecessary LLM authoring claim';
+  end if;
+
+  perform public.worker_claim_curriculum_submissions('smoke-finisher-retry', 5);
+  if not exists (
+    select 1 from private_generation.curriculum_submissions
+    where job_id = bridge_job_id and authoring_attempt = 1
+      and status = 'processing' and processor_id = 'smoke-finisher-retry'
+  ) then
+    raise exception 'technical failure incorrectly required LLM re-authoring';
+  end if;
+
+  if not public.worker_finish_curriculum_submission(
+    bridge_job_id, 1, 'smoke-finisher-retry', 'quality_rejected', 'QUALITY_REJECTED',
+    'reading.answer: deterministic mismatch',
+    jsonb_build_object('failureType', 'QUALITY_REJECTED', 'findings', jsonb_build_array(
+      jsonb_build_object('source', 'validation', 'path', 'reading.answer',
+        'dimension', 'answer-integrity', 'message', 'deterministic mismatch')
+    ))
+  ) then
+    raise exception 'quality rejection was not recorded';
+  end if;
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = bridge_job_id and status = 'pending' and attempt_count = 1
+  ) then
+    raise exception 'retryable quality rejection did not return to the authoring queue';
+  end if;
+
+  select private_generation.chatgpt_claim_generation_batch('bridge-smoke') into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = bridge_job_id::text;
+  if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
+    or bridge_context #>> '{retryContext,findings,0,path}' <> 'reading.answer'
+    or bridge_context #> '{retryContext,previousCanonicalPackage}' <> first_package then
+    raise exception 'retry claim omitted the immutable package or exact failure evidence';
+  end if;
+
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+  second_package := jsonb_build_object('metadata', jsonb_build_object(
+    'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+    'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint,
+    'repairMarker', 'targeted-attempt-2'
+  ));
+  perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', second_package);
+  if (select canonical_source from private_generation.curriculum_submissions
+      where job_id = bridge_job_id and authoring_attempt = 1) <> first_package then
+    raise exception 'attempt 1 was mutated while submitting attempt 2';
+  end if;
+
+  perform public.worker_claim_curriculum_submissions('smoke-finisher-2', 5);
+  select count(*) into claimed_count
+  from public.worker_claim_curriculum_submissions('concurrent-finisher', 5)
+  where job_id = bridge_job_id and authoring_attempt = 2;
+  if claimed_count <> 0 then
+    raise exception 'concurrent finisher claimed the same immutable attempt twice';
+  end if;
+  select public.worker_complete_generation_job(
+    bridge_job_id, 'bridge-smoke',
+    bridge_child_id::text || '/' || bridge_job_id::text || '/student.pdf',
+    bridge_child_id::text || '/' || bridge_job_id::text || '/parent-answer.pdf',
+    second_package, '{}'::jsonb, 'test-prompt', 'test-generator', 'test-model'
+  ) into completed_material_id;
+  if public.worker_complete_generation_job(
+    bridge_job_id, 'bridge-smoke',
+    bridge_child_id::text || '/' || bridge_job_id::text || '/student.pdf',
+    bridge_child_id::text || '/' || bridge_job_id::text || '/parent-answer.pdf',
+    second_package, '{}'::jsonb, 'test-prompt', 'test-generator', 'test-model'
+  ) <> completed_material_id then
+    raise exception 'idempotent completion returned a duplicate material';
+  end if;
+  if (select count(*) from public.materials where id = completed_material_id) <> 1 then
+    raise exception 'attempt 2 did not complete exactly one material';
+  end if;
+  perform public.worker_finish_curriculum_submission(
+    bridge_job_id, 2, 'smoke-finisher-2', 'completed', null, null, null
+  );
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000071', bridge_child_id, current_date + 300,
+    'test-v1', 'max-authoring-attempts', 'pending', now() - interval '1 minute', 2, 3,
+    now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+  );
+  select private_generation.chatgpt_claim_generation_batch('max-attempt-smoke') into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = '00000000-0000-0000-0000-000000000071';
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+  perform private_generation.chatgpt_submit_curriculum_package(
+    '00000000-0000-0000-0000-000000000071', 'max-attempt-smoke',
+    jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.0.0', 'jobId', '00000000-0000-0000-0000-000000000071',
+      'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
+    ))
+  );
+  perform public.worker_claim_curriculum_submissions('max-attempt-finisher', 5);
+  perform public.worker_finish_curriculum_submission(
+    '00000000-0000-0000-0000-000000000071', 3, 'max-attempt-finisher',
+    'quality_rejected', 'QUALITY_REJECTED', 'sanitized final rejection',
+    jsonb_build_object('failureType', 'QUALITY_REJECTED', 'findings', jsonb_build_array(
+      jsonb_build_object('path', 'studentLesson.reading', 'dimension', 'quality', 'message', 'sanitized')
+    ))
+  );
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = '00000000-0000-0000-0000-000000000071'
+      and status = 'failed' and attempt_count = 3 and error_code = 'HUMAN_REVIEW_REQUIRED'
+  ) then
+    raise exception 'max attempts did not produce permanent human review failure';
+  end if;
+  if exists (
+    select 1 from private_generation.claim_due_generation_jobs('forbidden-fourth-attempt')
+    where id = '00000000-0000-0000-0000-000000000071'
+  ) then
+    raise exception 'max_attempts allowed a fourth authoring attempt';
   end if;
 
   if not exists (
