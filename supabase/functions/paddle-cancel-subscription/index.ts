@@ -33,7 +33,9 @@ Deno.serve(async (request) => {
     const paddleBody = await paddleResponse.json()
     if (!paddleResponse.ok) { console.error('Paddle subscription cancellation failed', paddleResponse.status, paddleBody); return jsonResponse(502, { error: 'paddle_cancellation_failed' }) }
     const { error: updateError } = await supabase.from('subscriptions').update({ cancel_at_period_end: true, cancellation_reason: reason }).eq('id', subscription.id)
-    if (updateError) throw updateError
+    if (updateError) {
+      console.warn('Local database update failed after Paddle cancel succeeded. Webhook will reconcile state.', updateError)
+    }
     return jsonResponse(200, { cancel_at_period_end: true, current_period_end: subscription.current_period_end, paddle_status: paddleBody?.data?.status ?? null })
   } catch (error) { console.error('Paddle subscription cancellation failed', error instanceof Error ? error.message : error); return jsonResponse(400, { error: 'cancellation_not_available' }) }
 })

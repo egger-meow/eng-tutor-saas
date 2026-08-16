@@ -79,7 +79,9 @@ Deno.serve(async (request) => {
       .from('subscriptions')
       .update({ cancel_at_period_end: false, cancellation_reason: null })
       .eq('id', subscription.id)
-    if (updateError) throw updateError
+    if (updateError) {
+      console.warn('Local database update failed after Paddle resume succeeded. Webhook will reconcile state.', updateError)
+    }
 
     return jsonResponse(200, {
       cancel_at_period_end: false,
