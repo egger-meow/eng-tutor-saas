@@ -6,6 +6,7 @@ import {
   computeFrozen201Hashes,
   computeFrozen210Hashes,
   computeFrozen220Hashes,
+  computeFrozen230Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
@@ -16,9 +17,9 @@ describe('bundle-compiler', () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
-    expect(freshBundle.metadata.schemaVersion).toBe('2.1.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.3.0')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.3.0-prod')
+    expect(freshBundle.metadata.schemaVersion).toBe('2.2.0')
+    expect(freshBundle.metadata.promptVersion).toBe('2.4.0')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.4.0-prod')
     expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(7)
   })
 
@@ -49,6 +50,16 @@ describe('bundle-compiler', () => {
       'packages/generator/prompts/2.2.0/02-author.md': '8c0e5f1ecedc8b46d400ab722e1fa260dacf67b3c7f2d67939cc59e5d711c839',
       'packages/generator/prompts/2.2.0/03-critic.md': '84012691fb93653988582e14f410aa533eb123196bcd818e4cca01814c0ad88b',
       'packages/generator/prompts/2.2.0/04-repair.md': 'e32889d085e1c7c87fed7b7f1ff415b84f63da97de363bd86598a152d0878e5f',
+    })
+  })
+
+  it('verifies that prompts/2.3.0 baseline remains byte-for-byte frozen', async () => {
+    const frozenHashes = await computeFrozen230Hashes(REPO_ROOT)
+    expect(frozenHashes).toEqual({
+      'packages/generator/prompts/2.3.0/01-plan.md': 'ae0be587f56872f21d328105d2af85fb066a4977b38412abefbb7a06e853ed9b',
+      'packages/generator/prompts/2.3.0/02-author.md': '9e23182a87c863f8d28ee98b176bb95b5ec67c7c0317952f75fe9236bdf1291a',
+      'packages/generator/prompts/2.3.0/03-critic.md': '0aa7812f7cc8d163123cf2b98cb926f151bb22156aab9db7c775011d147638e6',
+      'packages/generator/prompts/2.3.0/04-repair.md': 'd3165f6d70dbd12abc9ec08e7f72c811a02ad6324c1dbf25ca086824789dcd28',
     })
   })
 

@@ -1,0 +1,22 @@
+{
+  "curriculumStandard": "Taiwan 12-Year Basic Education Curriculum Guidelines (108 課綱)",
+  "issuingAuthority": "National Academy for Educational Research (NAER) / Ministry of Education (MOE), Taiwan",
+  "provenance": {
+    "vocabulary": {
+      "name": "國民中小學九年一貫課程綱要英語科常用 2,000 字詞表（國中基本 1,200 字 + 延伸 800 字）",
+      "officialSource": "https://www.naer.edu.tw",
+      "totalWords": 2000,
+      "core1200Count": 1200,
+      "extension800Count": 800
+    },
+    "grammar": {
+      "name": "十二年國民基本教育英語文課程綱要 附錄六：國民中學英語文基礎文法句構參考表",
+      "officialSource": "https://www.naer.edu.tw/PageSyllabus?fid=19"
+    },
+    "communication": {
+      "name": "十二年國民基本教育英語文課程綱要 附錄四：英語文溝通功能參考表",
+      "officialSource": "https://www.naer.edu.tw/PageSyllabus?fid=19"
+    }
+  },
+  "annotationPolicy": "Official reference data in official/ is immutable. All pedagogical additions (grade-level sequence, theme groupings, dialogue scaffolds) reside in derived/ and are marked with annotationSource: 'paper-english-derived'."
+}

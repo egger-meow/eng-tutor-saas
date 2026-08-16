@@ -1,0 +1,114 @@
+[
+  {
+    "id": "cf-greetings-leave-taking",
+    "officialCategory": "Social Conventions (社交慣用語)",
+    "officialLabelZh": "問候、自我介紹與道別",
+    "officialLabelEn": "Greetings, Introductions and Leave-taking",
+    "typicalExponents": ["Hello", "How do you do?", "Nice to meet you", "Goodbye", "See you tomorrow"]
+  },
+  {
+    "id": "cf-making-requests",
+    "officialCategory": "Social Conventions & Getting Things Done (社交與行事互動)",
+    "officialLabelZh": "提出請求與委託",
+    "officialLabelEn": "Making Requests",
+    "typicalExponents": ["Could you help me?", "Would you please pass the salt?", "Please wait a moment"]
+  },
+  {
+    "id": "cf-asking-permission",
+    "officialCategory": "Social Conventions & Permissions (徵詢許可)",
+    "officialLabelZh": "徵詢與給予許可",
+    "officialLabelEn": "Asking for, Giving and Refusing Permission",
+    "typicalExponents": ["May I leave early?", "Can I use your pen?", "Sure, go ahead", "I'm afraid not"]
+  },
+  {
+    "id": "cf-apologizing",
+    "officialCategory": "Attitudes & Social Responses (態度與社交回應)",
+    "officialLabelZh": "致歉與回應致歉",
+    "officialLabelEn": "Apologizing and Forgiving",
+    "typicalExponents": ["I'm terribly sorry", "Sorry about that", "Never mind", "That's quite all right", "No worries"]
+  },
+  {
+    "id": "cf-expressing-gratitude",
+    "officialCategory": "Social Conventions (社交慣用語)",
+    "officialLabelZh": "表達感謝與回應",
+    "officialLabelEn": "Expressing Gratitude and Responding",
+    "typicalExponents": ["Thank you so much", "I really appreciate it", "You're welcome", "My pleasure", "Don't mention it"]
+  },
+  {
+    "id": "cf-agreement-disagreement",
+    "officialCategory": "Expressing Opinions & Attitudes (表達意見與態度)",
+    "officialLabelZh": "贊同、部分贊同與委婉異議",
+    "officialLabelEn": "Agreeing and Disagreeing Politely",
+    "typicalExponents": ["I agree with you", "Exactly", "I see what you mean, but...", "I'm not so sure about that"]
+  },
+  {
+    "id": "cf-asking-giving-directions",
+    "officialCategory": "Exchanging Information: Location & Movement (資訊交換：位置與方位)",
+    "officialLabelZh": "問路與指引方向",
+    "officialLabelEn": "Asking for and Giving Directions",
+    "typicalExponents": ["How can I get to the train station?", "Go straight and turn left at the corner", "It is on your right"]
+  },
+  {
+    "id": "cf-telephoning",
+    "officialCategory": "Media & Remote Communication (通訊與電話溝通)",
+    "officialLabelZh": "電話應答與留言",
+    "officialLabelEn": "Telephoning and Leaving Messages",
+    "typicalExponents": ["May I speak to Alex, please?", "This is John speaking", "Could I leave a message?", "Hold on, please"]
+  },
+  {
+    "id": "cf-invitations",
+    "officialCategory": "Social Conventions: Events & Activities (社交活動與邀約)",
+    "officialLabelZh": "提出邀請、接受與婉拒",
+    "officialLabelEn": "Inviting, Accepting and Declining Invitations",
+    "typicalExponents": ["Would you like to come to my party?", "I'd love to, thank you", "I'd like to, but I have other plans"]
+  },
+  {
+    "id": "cf-suggestions-advice",
+    "officialCategory": "Influencing Action & Decisions (建議與行動決策)",
+    "officialLabelZh": "提議、給予建議與勸告",
+    "officialLabelEn": "Making Suggestions and Giving Advice",
+    "typicalExponents": ["Why don't we try this first?", "How about having pizza?", "You should see a doctor", "You'd better check the map"]
+  },
+  {
+    "id": "cf-shopping-ordering-paying",
+    "officialCategory": "Transactions & Daily Services (日常交易與服務)",
+    "officialLabelZh": "詢問價錢、點餐與結帳",
+    "officialLabelEn": "Shopping, Inquiring Prices, Ordering and Paying",
+    "typicalExponents": ["How much is this shirt?", "May I take your order?", "I'd like a chicken sandwich", "Could we have the bill?"]
+  },
+  {
+    "id": "cf-expressing-feelings-opinions",
+    "officialCategory": "Expressing Personal State & Thoughts (個人感受與看法)",
+    "officialLabelZh": "表達情緒感受與發表看法",
+    "officialLabelEn": "Expressing Feelings, Emotions and Stating Opinions",
+    "typicalExponents": ["I feel excited about the trip", "In my opinion, this plan is better", "I believe we can do it"]
+  },
+  {
+    "id": "cf-describing-problems-troubleshooting",
+    "officialCategory": "Problem Solving & Inquiry (問題陳述與排查)",
+    "officialLabelZh": "陳述問題與尋求解決方案",
+    "officialLabelEn": "Describing Problems and Seeking Solutions",
+    "typicalExponents": ["What seems to be wrong?", "The machine is not working", "Let's check the connection", "We need to fix this"]
+  },
+  {
+    "id": "cf-checking-understanding-clarification",
+    "officialCategory": "Communication Repair (溝通確認與澄清)",
+    "officialLabelZh": "確認理解與請求重述",
+    "officialLabelEn": "Checking Understanding, Asking for Clarification and Repetition",
+    "typicalExponents": ["Pardon me?", "Could you say that again?", "Do you mean that we should start now?", "Are you following me?"]
+  },
+  {
+    "id": "cf-talking-about-plans-intentions",
+    "officialCategory": "Future Actions & Intentions (未來行動與意圖)",
+    "officialLabelZh": "表達計畫與意圖",
+    "officialLabelEn": "Talking About Plans and Intentions",
+    "typicalExponents": ["I'm planning to visit Japan this summer", "We are going to hold a meeting tomorrow", "I intend to finish it today"]
+  },
+  {
+    "id": "cf-expressing-ability-obligation",
+    "officialCategory": "Modal Concepts (能力與義務)",
+    "officialLabelZh": "表達能力、必須與禁令",
+    "officialLabelEn": "Expressing Ability, Obligation and Prohibition",
+    "typicalExponents": ["Can you swim?", "You must wear a helmet", "Students are not allowed to run in the hallway"]
+  }
+]

@@ -41,11 +41,18 @@ export const FROZEN_220_FILES = [
   'packages/generator/prompts/2.2.0/04-repair.md',
 ] as const
 
-export const SOURCE_FILES = [
+export const FROZEN_230_FILES = [
   'packages/generator/prompts/2.3.0/01-plan.md',
   'packages/generator/prompts/2.3.0/02-author.md',
   'packages/generator/prompts/2.3.0/03-critic.md',
   'packages/generator/prompts/2.3.0/04-repair.md',
+] as const
+
+export const SOURCE_FILES = [
+  'packages/generator/prompts/2.4.0/01-plan.md',
+  'packages/generator/prompts/2.4.0/02-author.md',
+  'packages/generator/prompts/2.4.0/03-critic.md',
+  'packages/generator/prompts/2.4.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'docs/curriculum-quality-rubric.md',
   'docs/product-rules.md',
@@ -91,25 +98,35 @@ export async function computeFrozen220Hashes(repoRoot: string = REPO_ROOT): Prom
   return hashes
 }
 
+export async function computeFrozen230Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+  const hashes: Record<string, string> = {}
+  for (const relativePath of FROZEN_230_FILES) {
+    const fullPath = resolve(repoRoot, relativePath)
+    const content = await readFile(fullPath, 'utf8')
+    hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
+  }
+  return hashes
+}
+
 export async function compileProductionBundle(
   repoRoot: string = REPO_ROOT,
   fixedDate?: string,
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
-  const plan = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.3.0/01-plan.md'), 'utf8')
-  const author = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.3.0/02-author.md'), 'utf8')
-  const critic = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.3.0/03-critic.md'), 'utf8')
-  const repair = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.3.0/04-repair.md'), 'utf8')
+  const plan = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
+  const author = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
+  const critic = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
+  const repair = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/04-repair.md'), 'utf8')
   const schema = await readFile(resolve(repoRoot, 'packages/generator/src/curriculum-package-schema.ts'), 'utf8')
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
 
-  const generatedAt = fixedDate ?? '2026-08-16T23:55:00.000Z'
+  const generatedAt = fixedDate ?? '2026-08-17T00:30:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.3.0-prod',
-    schemaVersion: '2.1.0',
-    promptVersion: '2.3.0',
+    bundleVersion: '2.4.0-prod',
+    schemaVersion: '2.2.0',
+    promptVersion: '2.4.0',
     sourceHashes: hashes,
     generatedAt,
   }
@@ -137,28 +154,27 @@ export async function compileProductionBundle(
     '## 2. Curriculum Quality Rubric',
     rubric.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 3. Curriculum Package Schema 2.0.0',
+    '## 3. Curriculum Package Schema',
     '```typescript',
     schema.trim().replace(/\r\n/g, '\n'),
     '```',
     '',
-    '## 4. Phase 1 — Diagnostic Learning Plan',
+    '## 4. Prompt 01: Planning Engine',
     plan.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 5. Phase 2 — Lesson & Parent Answer Authoring',
+    '## 5. Prompt 02: Authoring Engine',
     author.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 6. Phase 3 — Adversarial Semantic Critic',
+    '## 6. Prompt 03: Critic Engine',
     critic.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 7. Phase 4 — Targeted Repair Protocol',
+    '## 7. Prompt 04: Repair Specialist',
     repair.trim().replace(/\r\n/g, '\n'),
+    '',
   ].join('\n')
-
-  const content = `${frontmatter}\n\n${body}\n`
 
   return {
     metadata,
-    content,
+    content: `${frontmatter}\n\n${body}`,
   }
 }

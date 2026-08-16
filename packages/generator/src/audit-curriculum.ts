@@ -94,7 +94,7 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('semantic-critical', 'self-study', 'critical', `缺少 ${stage} 階段。`)
 
   const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
-  const lessonText = JSON.stringify({ title: pkg.studentLesson.reading.title, context: pkg.studentLesson.reading.contextZh, paragraphs: pkg.studentLesson.reading.paragraphs, strategy: pkg.learningPlan.personalizationStrategy }).toLocaleLowerCase()
+  const lessonText = JSON.stringify({ title: pkg.studentLesson.reading.title, context: pkg.studentLesson.reading.contextZh, blocks: pkg.studentLesson.reading.blocks, strategy: pkg.learningPlan.personalizationStrategy }).toLocaleLowerCase()
   if (interestText && !interestText.split(/[,，、;；\s]+/u).filter((term) => term.length >= 2).some((term) => lessonText.includes(term))) add('semantic-critical', 'personalization', 'warning', '具體興趣沒有在教材情境或個人化策略留下可追溯證據。')
   if (pkg.qualityEvidence.feedbackApplied.length === 0) add('semantic-critical', 'feedback-loop', 'critical', '沒有記錄本週如何使用回饋。')
   if (pkg.trackingDelta.hypothesesToVerify.length === 0) add('semantic-critical', 'tracking', 'critical', '沒有下一週待驗證假設。')

@@ -1,0 +1,156 @@
+[
+  {
+    "id": "og-be-verbs-pronouns",
+    "officialSection": "1. 句子基本結構與主詞 (Basic Sentence Structure & Subject-Verb Agreement)",
+    "topicZh": "be 動詞現在式與代名詞主格/受格/所有格",
+    "topicEn": "Be-verbs (Present) and Personal Pronouns",
+    "exemplarStructures": ["I am / You are / He is", "Subject + be + complement"]
+  },
+  {
+    "id": "og-present-simple",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Present Simple)",
+    "topicZh": "現在簡單式（第三人稱單數動詞加 s/es、一般動詞問答、do/does）",
+    "topicEn": "Present Simple Tense (Third-Person Singular, Do/Does Questions)",
+    "exemplarStructures": ["He plays tennis.", "Does she like music?", "They do not live here."]
+  },
+  {
+    "id": "og-present-continuous",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Present Continuous)",
+    "topicZh": "現在進行式（be + V-ing、此時此刻正在進行的動作）",
+    "topicEn": "Present Continuous Tense (Be + V-ing)",
+    "exemplarStructures": ["She is reading a book.", "Are they studying now?"]
+  },
+  {
+    "id": "og-imperatives",
+    "officialSection": "1. 句子基本結構 (Sentence Types: Imperatives)",
+    "topicZh": "祈使句與指示指令（原形動詞開頭、Please、Don't）",
+    "topicEn": "Imperative Sentences (Instructions, Commands, Requests)",
+    "exemplarStructures": ["Open the door, please.", "Don't touch that button."]
+  },
+  {
+    "id": "og-there-is-are",
+    "officialSection": "1. 句子基本結構 (Existential Sentences)",
+    "topicZh": "There is / There are 存在句與數量修飾",
+    "topicEn": "Existential 'There is / There are'",
+    "exemplarStructures": ["There is a park near my house.", "Are there any students in the room?"]
+  },
+  {
+    "id": "og-prepositions-time-place",
+    "officialSection": "3. 介系詞與修飾語 (Prepositions of Time and Place)",
+    "topicZh": "時間與地點介系詞 (at / on / in / under / next to / between)",
+    "topicEn": "Prepositions of Time and Place",
+    "exemplarStructures": ["at 8:00", "on Sunday", "in July", "next to the library"]
+  },
+  {
+    "id": "og-wh-questions",
+    "officialSection": "1. 疑問句 (Wh- Information Questions)",
+    "topicZh": "Wh- 疑問句 (What / Who / Where / When / Why / How)",
+    "topicEn": "Information Questions with Wh-words",
+    "exemplarStructures": ["Where do you live?", "Why is he late?", "How much does it cost?"]
+  },
+  {
+    "id": "og-modals-ability-permission",
+    "officialSection": "4. 助動詞 (Modal Auxiliaries: Can / May)",
+    "topicZh": "情態助動詞（can 表示能力/許可、may 表示徵詢/推測）",
+    "topicEn": "Modals: Can (Ability/Permission), May (Possibility/Permission)",
+    "exemplarStructures": ["He can play the guitar.", "May I ask a question?"]
+  },
+  {
+    "id": "og-past-simple",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Past Simple)",
+    "topicZh": "過去簡單式（規則動詞 -ed、不規則動詞三態、did 問答）",
+    "topicEn": "Past Simple Tense (Regular/Irregular Verbs, Did Questions)",
+    "exemplarStructures": ["She visited Kyoto last year.", "Did you finish your homework?"]
+  },
+  {
+    "id": "og-past-continuous",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Past Continuous)",
+    "topicZh": "過去進行式（was/were + V-ing，與過去某特定時間或 when 子句連用）",
+    "topicEn": "Past Continuous Tense (Was/Were + V-ing)",
+    "exemplarStructures": ["I was sleeping when you called.", "They were playing basketball at 4 PM."]
+  },
+  {
+    "id": "og-future-tense",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Future)",
+    "topicZh": "未來式（will + 原形動詞 / be going to + 原形動詞）",
+    "topicEn": "Future Tense (Will / Be going to)",
+    "exemplarStructures": ["It will rain tomorrow.", "We are going to visit grandma this weekend."]
+  },
+  {
+    "id": "og-modals-obligation-advice",
+    "officialSection": "4. 助動詞 (Modal Auxiliaries: Must / Should / Have to)",
+    "topicZh": "義務與建議助動詞（must / should / have to / had better）",
+    "topicEn": "Modals: Must / Have to (Obligation), Should (Advice)",
+    "exemplarStructures": ["You must wear a seatbelt.", "You should drink more water."]
+  },
+  {
+    "id": "og-adverbial-clauses-time-reason",
+    "officialSection": "5. 連接詞與複合句 (Subordinating Conjunctions: Time & Reason)",
+    "topicZh": "時間與原因副詞子句 (before / after / when / while / because / although)",
+    "topicEn": "Adverbial Clauses (Time: when/before/after; Reason/Concession: because/although)",
+    "exemplarStructures": ["Wash your hands before you eat.", "Although it was raining, they went hiking."]
+  },
+  {
+    "id": "og-gerunds-infinitives",
+    "officialSection": "6. 動名詞與不定詞 (Non-finite Verbs: Gerunds and Infinitives)",
+    "topicZh": "動名詞 (V-ing) 與不定詞 (to + V) 當主詞/受詞",
+    "topicEn": "Gerunds (V-ing) and Infinitives (to + V) as Subjects and Objects",
+    "exemplarStructures": ["Reading books is fun.", "She decided to study abroad.", "Enjoy listening to music."]
+  },
+  {
+    "id": "og-comparatives-superlatives",
+    "officialSection": "7. 形容詞與副詞比較 (Comparison of Adjectives and Adverbs)",
+    "topicZh": "形容詞與副詞之原級、比較級 (-er / more) 與最高級 (-est / most)",
+    "topicEn": "Comparative and Superlative Degrees of Adjectives and Adverbs",
+    "exemplarStructures": ["He is taller than his brother.", "This is the most exciting movie I have ever seen."]
+  },
+  {
+    "id": "og-sense-causative-verbs",
+    "officialSection": "8. 感官動詞與使役動詞 (Sensory and Causative Verbs)",
+    "topicZh": "感官動詞 (see/hear/watch/feel) 與使役動詞 (make/have/let)",
+    "topicEn": "Sensory Verbs (see/hear + V/V-ing) and Causative Verbs (make/let/have + V)",
+    "exemplarStructures": ["Mom made me clean my room.", "I heard someone singing in the park."]
+  },
+  {
+    "id": "og-present-perfect",
+    "officialSection": "2. 動詞時態 (Verb Tenses: Present Perfect)",
+    "topicZh": "現在完成式（have/has + p.p.、經驗/持續/完成、since/for/already/yet）",
+    "topicEn": "Present Perfect Tense (Have/Has + Past Participle)",
+    "exemplarStructures": ["I have lived here for five years.", "Has he finished the report yet?"]
+  },
+  {
+    "id": "og-passive-voice",
+    "officialSection": "9. 被動語態 (Passive Voice)",
+    "topicZh": "被動語態（be + p.p.、主動轉被動、by 動作執行者）",
+    "topicEn": "Passive Voice (Be + Past Participle)",
+    "exemplarStructures": ["The cake was made by my sister.", "English is spoken all over the world."]
+  },
+  {
+    "id": "og-noun-clauses",
+    "officialSection": "5. 名詞子句 (Noun Clauses)",
+    "topicZh": "名詞子句（that 引導之陳述名詞子句、whether/if 引導之是否子句）",
+    "topicEn": "Noun Clauses (That-clauses, Whether/If-clauses)",
+    "exemplarStructures": ["I know that honesty is important.", "I wonder whether she will come."]
+  },
+  {
+    "id": "og-indirect-questions",
+    "officialSection": "5. 間接問句 (Indirect Questions)",
+    "topicZh": "間接問句（Wh- 疑問詞 + 主詞 + 動詞，語序不倒裝）",
+    "topicEn": "Indirect Questions (Wh-word + Subject + Verb)",
+    "exemplarStructures": ["Do you know where the post office is?", "Please tell me what happened."]
+  },
+  {
+    "id": "og-relative-clauses",
+    "officialSection": "10. 關係子句 (Relative Clauses)",
+    "topicZh": "關係子句與關係代名詞 (who / which / that / whose)",
+    "topicEn": "Relative Clauses with Relative Pronouns (Who / Which / That)",
+    "exemplarStructures": ["The boy who won the race is my cousin.", "This is the book that I bought yesterday."]
+  },
+  {
+    "id": "og-conditionals",
+    "officialSection": "5. 條件句 (Conditional Sentences)",
+    "topicZh": "條件子句（If 現在式，主要子句未來式 will / can）",
+    "topicEn": "First Conditional (If + Present Simple, Will/Can + Base Verb)",
+    "exemplarStructures": ["If it rains tomorrow, we will stay at home."]
+  }
+]

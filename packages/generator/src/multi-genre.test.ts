@@ -26,13 +26,13 @@ describe('Wave 4: Schema 2.1.0 Multi-Genre Reading Blocks & Upgrade Layer', () =
     const result = validateCurriculumPackage(pkg)
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.curriculumPackage.metadata.schemaVersion).toBe('2.1.0')
+      expect(result.curriculumPackage.metadata.schemaVersion).toBe('2.2.0')
       expect(result.curriculumPackage.studentLesson.reading.genre).toBe('dialogue')
       expect(result.curriculumPackage.studentLesson.reading.blocks.length).toBe(6)
     }
   })
 
-  it('transparently upgrades legacy Schema 2.0.0 package to 2.1.0', () => {
+  it('transparently upgrades legacy Schema 2.0.0 package to 2.2.0', () => {
     const legacyV20 = validPackage() // has schemaVersion: 2.0.0 and paragraphs[]
     expect(legacyV20.metadata.schemaVersion).toBe('2.0.0')
     expect(legacyV20.studentLesson.reading.paragraphs).toBeDefined()
@@ -40,7 +40,7 @@ describe('Wave 4: Schema 2.1.0 Multi-Genre Reading Blocks & Upgrade Layer', () =
     const result = validateCurriculumPackage(legacyV20)
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.curriculumPackage.metadata.schemaVersion).toBe('2.1.0')
+      expect(result.curriculumPackage.metadata.schemaVersion).toBe('2.2.0')
       expect(result.curriculumPackage.studentLesson.reading.genre).toBe('article')
       expect(result.curriculumPackage.studentLesson.reading.blocks.length).toBe(legacyV20.studentLesson.reading.paragraphs.length)
       expect(result.curriculumPackage.studentLesson.reading.blocks[0]).toEqual({
