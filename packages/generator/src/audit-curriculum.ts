@@ -27,22 +27,50 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   if (!w || /^\d+$/u.test(w) || w.length <= 2) return true
   if (taughtWords.has(w) || canonicalVocabSet.has(w)) return true
 
-  // Common basic contractions / auxiliaries
-  if (['don', 't', 'doesn', 'didn', 'won', 'can', 'isn', 'aren', 'wasn', 'weren', 'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 's', 're', 've', 'll', 'd', 'm'].includes(w)) {
+  // Common basic contractions / auxiliaries / compounds
+  if (['cannot', 'don', 't', 'doesn', 'didn', 'won', 'can', 'not', 'isn', 'aren', 'wasn', 'weren', 'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 's', 're', 've', 'll', 'd', 'm'].includes(w)) {
     return true
   }
 
-  // Common inflections & stems
-  if (w.endsWith('s') && canonicalVocabSet.has(w.slice(0, -1))) return true
-  if (w.endsWith('es') && canonicalVocabSet.has(w.slice(0, -2))) return true
-  if (w.endsWith('ies') && canonicalVocabSet.has(w.slice(0, -3) + 'y')) return true
-  if (w.endsWith('ed') && (canonicalVocabSet.has(w.slice(0, -2)) || canonicalVocabSet.has(w.slice(0, -1)))) return true
-  if (w.endsWith('ied') && canonicalVocabSet.has(w.slice(0, -3) + 'y')) return true
-  if (w.endsWith('ing') && (canonicalVocabSet.has(w.slice(0, -3)) || canonicalVocabSet.has(w.slice(0, -3) + 'e'))) return true
-  if (w.endsWith('ly') && canonicalVocabSet.has(w.slice(0, -2))) return true
-  if (w.endsWith('er') && canonicalVocabSet.has(w.slice(0, -2))) return true
-  if (w.endsWith('est') && canonicalVocabSet.has(w.slice(0, -3))) return true
+  // Common inflections & stems (against both official 2000 vocabulary and weekly taught words)
+  const isBase = (stem: string) => taughtWords.has(stem) || canonicalVocabSet.has(stem)
 
+  if (w.endsWith('s') && isBase(w.slice(0, -1))) return true
+  if (w.endsWith('es') && isBase(w.slice(0, -2))) return true
+  if (w.endsWith('ies') && isBase(w.slice(0, -3) + 'y')) return true
+  if (w.endsWith('ed') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
+  if (w.endsWith('ied') && isBase(w.slice(0, -3) + 'y')) return true
+  if (w.endsWith('ing') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e') || isBase(w.slice(0, -4)))) return true
+  if (w.endsWith('ly') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
+  if (w.endsWith('y') && isBase(w.slice(0, -1))) return true // e.g. shine -> shiny
+  if (w.endsWith('er') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
+  if (w.endsWith('est') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -2)))) return true
+  if (w.endsWith('ty') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
+  if (w.endsWith('ion') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e') || isBase(w.slice(0, -4)) || isBase(w.slice(0, -4) + 'e') || isBase(w.slice(0, -5)))) return true
+
+  return false
+}
+
+function wordAppearsInText(word: string, text: string): boolean {
+  const cleanWord = word.toLowerCase().trim()
+  if (!cleanWord) return true
+  const lowerText = text.toLowerCase()
+  if (lowerText.includes(cleanWord)) return true
+
+  // Check stems if word has endings
+  const stems = [
+    cleanWord,
+    cleanWord.replace(/s$/u, ''),
+    cleanWord.replace(/es$/u, ''),
+    cleanWord.replace(/ed$/u, ''),
+    cleanWord.replace(/ing$/u, ''),
+    cleanWord.replace(/ies$/u, 'y'),
+    cleanWord.replace(/ied$/u, 'y'),
+  ].filter((s) => s.length >= 3)
+
+  for (const stem of stems) {
+    if (lowerText.includes(stem)) return true
+  }
   return false
 }
 
@@ -91,13 +119,27 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
 
   const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
 
-  // Passage-First Lexical Contract & Lexical Ceiling Lint
-  const taughtVocab = new Set(pkg.studentLesson.vocabulary.map((v) => v.word.toLowerCase()))
+  // 1. Passage-First Lexical Anchor Check (Core words must be in the reading passage)
   const rawPassageText = blockTexts.join(' ')
-  const passageTokens = rawPassageText.split(/\s+/u).filter(Boolean)
+  const taughtVocab = new Set(pkg.studentLesson.vocabulary.map((v) => v.word.toLowerCase()))
+
+  for (const vocab of pkg.studentLesson.vocabulary) {
+    if (!wordAppearsInText(vocab.word, rawPassageText)) {
+      add('semantic-critical', 'lexical-anchor', 'critical', `核心單字 "${vocab.word}" 未出現在閱讀文章中。文章是單字學習的語境錨點，核心單字必須來自文章。`)
+    }
+  }
+
+  // 2. Comprehensive Lexical Ceiling & Hidden Difficulty Scan
+  // Scan across reading, worked examples, practice prompts/options, and homework
+  const studentFacingTexts: string[] = [
+    rawPassageText,
+    ...pkg.studentLesson.instruction.flatMap((inst) => inst.workedExamples.map((ex) => ex.example)),
+    ...questions.map((q) => `${q.prompt} ${(q.options ?? []).join(' ')}`),
+  ]
+  const allStudentTokens = studentFacingTexts.join(' ').split(/\s+/u).filter(Boolean)
 
   const unapprovedWords: string[] = []
-  for (const token of passageTokens) {
+  for (const token of allStudentTokens) {
     const clean = token.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
     if (!clean) continue
     if (isApprovedWord(clean, taughtVocab)) continue
@@ -109,8 +151,11 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
     unapprovedWords.push(clean)
   }
 
-  if (unapprovedWords.length > 12) {
-    add('semantic-critical', 'lexical-ceiling', 'warning', `閱讀文章中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${Array.from(new Set(unapprovedWords)).slice(0, 4).join(', ')})，請確認是否加入核心單字或替換為常用字。`)
+  const uniqueUnapproved = Array.from(new Set(unapprovedWords))
+  if (uniqueUnapproved.length > 3) {
+    add('semantic-critical', 'lexical-ceiling', 'critical', `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，違反國中會考難度上限。請將其替換為課綱單字或加入核心單字教學。`)
+  } else if (uniqueUnapproved.length >= 1) {
+    add('semantic-critical', 'lexical-ceiling', 'warning', `教材中出現少數超綱且未說明的單字 (${uniqueUnapproved.join(', ')})。`)
   }
 
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))

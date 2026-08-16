@@ -51,11 +51,10 @@ The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a 
 {
   "genre": "dialogue",
   "blocks": [
-    { "type": "paragraph", "text": "In the robotics lab, Mina and Jay encounter a sensor failure right before the county science fair judging begins." },
-    { "type": "dialogue", "speaker": "Jay", "text": "Should we replace every single cable right now to be completely safe?" },
-    { "type": "dialogue", "speaker": "Mina", "text": "No. If we change everything at once, we will never know which part caused the short circuit." },
-    { "type": "notice", "heading": "SAFETY PROTOCOL", "text": "Inspect the optical sensor voltage before reconnecting the lithium battery." },
-    { "type": "schedule-row", "timeOrStep": "14:00", "event": "Calibrate light sensor", "detail": "Test under natural sunlight" }
+    { "type": "paragraph", "text": "In the robotics lab, Mina and Jay encounter a sensor failure right before judging begins." },
+    { "type": "dialogue", "speaker": "Jay", "text": "Should we replace every cable right now?" },
+    { "type": "dialogue", "speaker": "Mina", "text": "No. If we change everything at once, we will never know which part failed." },
+    { "type": "notice", "heading": "SAFETY PROTOCOL", "text": "Inspect the sensor voltage before reconnecting the battery." }
   ]
 }
 ```

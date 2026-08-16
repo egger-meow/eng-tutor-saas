@@ -17,34 +17,50 @@ describe('curriculum audit & lexical contract', () => {
     expect(auditCurriculumPackage({}).passed).toBe(false)
   })
 
-  it('passes for a valid canonical package adhering to lexical ceiling and multi-genre blocks', () => {
+  it('passes for a valid canonical package adhering to lexical anchor, ceiling, and multi-genre blocks', () => {
     const pkg = canonicalPackage()
     const report = auditCurriculumPackage(pkg)
+    console.log('Valid canonical test findings:', report.findings)
     expect(report.passed).toBe(true)
+    expect(report.findings.filter((f) => f.severity === 'critical')).toEqual([])
   })
 
-  it('detects and warns on excessive untaught high-difficulty words above 2000 ceiling', () => {
+  it('enforces lexical anchor: rejects package when core vocabulary is absent from reading passage', () => {
     const pkg = canonicalPackage()
-    // Inject multiple obscure high-school / GRE words not in 2000 vocabulary or taught vocab with >= 120 words
-    pkg.studentLesson.reading.blocks = [
-      {
-        type: 'paragraph',
-        text: 'The ubiquitous dichotomy of the esoteric nomenclature presents an insurmountable juxtaposed paradigm across multiple disciplinary domains. The quintessential anomaly and its pedagogical pervasiveness exacerbate bureaucratic obfuscation throughout kaleidoscopic infrastructure. Furthermore, the serendipitous juxtaposition demonstrates an idiosyncratic manifestation of philosophical jurisprudence.',
-      },
-      {
-        type: 'paragraph',
-        text: 'The magnanimous protagonist endeavors to elucidate the unprecedented epistemological quandary with profound intellectual veracity. Every subtle nuance of the theoretical apparatus exhibits an enigmatic propensity that completely bewilders conventional analytical methodology. Through comprehensive hermeneutic interrogation, the researchers continuously grapple with the existential ramifications of this transcendental theoretical divergence in academic discourse.',
-      },
-      {
-        type: 'paragraph',
-        text: 'In addition to these intricate conceptual dilemmas, the overarching systemic hierarchy continues to perpetuate anomalous incongruities among various pedagogical paradigms. Consequently, the scholars remain deeply divided regarding the ontological validity and hermeneutic significance of these extraordinary empirical discoveries.',
-      },
+    // Inject a core vocabulary word that never appears anywhere in the reading passage
+    pkg.studentLesson.vocabulary.push({
+      id: 'vocab-unrelated',
+      word: 'astronomy',
+      partOfSpeech: 'n.',
+      meaningZh: '天文學',
+      pronunciationHint: null,
+      exampleEn: 'Astronomy is the study of stars.',
+      exampleZh: '天文學是研究星星的科學。',
+      status: 'new',
+    })
+
+    const report = auditCurriculumPackage(pkg)
+    const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor')
+    expect(anchorFinding).toBeDefined()
+    expect(anchorFinding?.severity).toBe('critical')
+    expect(anchorFinding?.message).toContain('astronomy')
+  })
+
+  it('enforces comprehensive lexical ceiling: detects untaught high-difficulty words across options and practice', () => {
+    const pkg = canonicalPackage()
+    // Inject multiple obscure words into question prompt and options
+    pkg.studentLesson.practice[0].questions[0].prompt = 'Does the ephemeral juxtaposition cause ubiquitous dichotomy in empirical methodology?'
+    pkg.studentLesson.practice[0].questions[0].options = [
+      'The transcendent epistemology obfuscates the paradigm.',
+      'Normal robot operation continues.',
+      'None of the above.',
+      'All of the above.',
     ]
 
     const report = auditCurriculumPackage(pkg)
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
     expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('warning')
+    expect(lexicalFinding?.severity).toBe('critical')
   })
 
   it('flags genre-block mismatch when dialogue genre lacks dialogue blocks', () => {

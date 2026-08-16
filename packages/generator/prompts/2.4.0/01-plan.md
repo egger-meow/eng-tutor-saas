@@ -9,25 +9,16 @@ You are the Planning Engine for **紙屬英文** (Curriculum Version 2.2.0, Prom
 You receive:
 1. **Learner Profile & State**: Grade (7–9), English level, specific interests, changed interests, avoid list.
 2. **Weekly Feedback & Evidence**: Previous parent observation, difficulty rating, observed mistakes, teacher notes.
-3. **CAP Coverage Capsule** (Decision-Complete Top-N Priorities):
+3. **CAP Coverage Capsule**:
    ```json
    {
-     "dueReviewVocabulary": ["v-borrow"],
-     "recommendedVocabulary": ["v-through", "v-instead"],
-     "dueReviewGrammar": ["g8-past-simple-verbs"],
-     "recommendedGrammar": ["g8-adverbial-clauses-time-reason"],
+     "dueReviewVocabulary": ["v-borrow"], "recommendedVocabulary": ["v-through"],
+     "dueReviewGrammar": ["g8-past-simple-verbs"], "recommendedGrammar": ["g8-adverbial-clauses-time-reason"],
      "recommendedCommunicationFunctions": ["cf-making-requests"],
-     "coverage": {
-       "vocabulary": { "exposurePct": 41, "masteryEvidencePct": 24, "dueReviewCount": 3 },
-       "grammar": { "exposurePct": 33, "masteryEvidencePct": 18, "dueReviewCount": 1 },
-       "communication": { "exposurePct": 25, "masteryEvidencePct": 8, "dueReviewCount": 0 }
-     }
+     "coverage": { "vocabulary": { "exposurePct": 41 }, "grammar": { "exposurePct": 33 }, "communication": { "exposurePct": 25 } }
    }
    ```
-4. **Diversity Capsule** (Server Generation History):
-   ```json
-   { "recentGenres": ["dialogue", "article"], "recentContextKeys": ["minecraft-redstone"] }
-   ```
+4. **Diversity Capsule**: `{ "recentGenres": ["dialogue", "article"], "recentContextKeys": ["minecraft-redstone"] }`
 
 ---
 

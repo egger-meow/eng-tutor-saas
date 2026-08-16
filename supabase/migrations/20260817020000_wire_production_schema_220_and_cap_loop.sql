@@ -1,7 +1,7 @@
 -- Migration: 20260817020000_wire_production_schema_220_and_cap_loop.sql
 -- Wave 4.2: Production Schema 2.2.0 Wiring, Context Capsule CAP Metrics, and Closed Exposure Loop
 
--- 1. Update submit bridge to accept Schema 2.2.0 (alongside backward-compatible 2.0.0 and 2.1.0)
+-- 1. Update submit bridge to accept Schema 2.2.0 with strict immutable idempotency and valid enum status
 create or replace function private_generation.chatgpt_submit_curriculum_package(
   job_id uuid, worker_id text, canonical_source jsonb
 )
@@ -45,29 +45,42 @@ begin
     raise exception 'curriculum package input fingerprint does not match the claimed context';
   end if;
 
+  -- Immutable Idempotency Check: Same attempt + worker + payload returns existing submission; conflicting payload errors
   select * into existing_submission
   from private_generation.curriculum_submissions as submission
   where submission.job_id = $1 and submission.authoring_attempt = claimed_job.attempt_count;
+
   if existing_submission.job_id is not null then
-    return jsonb_build_object('jobId', $1, 'status', existing_submission.status, 'authoringAttempt', existing_submission.authoring_attempt);
+    if existing_submission.generation_worker_id <> $2
+       or existing_submission.canonical_source <> $3 then
+      raise exception 'a different immutable curriculum submission already exists for this authoring attempt';
+    end if;
+
+    return jsonb_build_object(
+      'jobId', $1,
+      'status', existing_submission.status,
+      'authoringAttempt', existing_submission.authoring_attempt,
+      'schemaVersion', schema_ver,
+      'deduplicated', true
+    );
   end if;
 
   insert into private_generation.curriculum_submissions (
-    job_id, authoring_attempt, generation_worker_id, canonical_source, status
+    job_id, authoring_attempt, generation_worker_id, canonical_source, input_fingerprint, status
   ) values (
-    $1, claimed_job.attempt_count, $2, $3, 'submitted'
+    $1, claimed_job.attempt_count, $2, $3, claim_snapshot.input_fingerprint, 'pending'
   );
 
   return jsonb_build_object(
     'jobId', $1,
-    'status', 'submitted',
+    'status', 'pending',
     'authoringAttempt', claimed_job.attempt_count,
     'schemaVersion', schema_ver
   );
 end;
 $$;
 
--- 2. Update context builder to include communicationCapsule and compact capCoverageCapsule
+-- 2. Update context builder to include communicationCapsule and factual, decision-complete capCoverageCapsule
 create or replace function public.worker_generation_context(job_id uuid, worker_id text)
 returns jsonb
 language plpgsql
@@ -85,10 +98,21 @@ declare
   v_grammar_due jsonb;
   v_grammar_weak jsonb;
   v_grammar_uncertain jsonb;
+  v_grammar_mastered jsonb;
   v_grammar_count integer;
   v_comm_due jsonb;
   v_comm_weak jsonb;
+  v_comm_mastered jsonb;
   v_comm_count integer;
+  v_vocab_exp_count integer;
+  v_vocab_mastered_count integer;
+  v_vocab_due_count integer;
+  v_grammar_exp_count integer;
+  v_grammar_mastered_count integer;
+  v_grammar_due_count integer;
+  v_comm_exp_count integer;
+  v_comm_mastered_count integer;
+  v_comm_due_count integer;
 begin
   select * into claimed_job
   from public.generation_jobs as job
@@ -117,19 +141,34 @@ begin
     coalesce(jsonb_agg(grammar_id) filter (where status = 'reviewing' or (last_seen_at < now() - interval '6 days' and status != 'mastered')), '[]'::jsonb),
     coalesce(jsonb_agg(grammar_id) filter (where (mastery_score is not null and mastery_score < 60) or (exposure_count > 1 and correct_count < exposure_count / 2)), '[]'::jsonb),
     coalesce(jsonb_agg(grammar_id) filter (where status in ('new', 'learning')), '[]'::jsonb),
+    coalesce(jsonb_agg(grammar_id) filter (where status = 'mastered'), '[]'::jsonb),
     count(*)
-  into v_grammar_due, v_grammar_weak, v_grammar_uncertain, v_grammar_count
+  into v_grammar_due, v_grammar_weak, v_grammar_uncertain, v_grammar_mastered, v_grammar_count
   from public.child_grammar_progress
   where child_id = claimed_job.child_id;
 
-  -- Distill communication functions into decision categories
+  -- Distill communication functions into decision categories (using status column)
   select
-    coalesce(jsonb_agg(communication_function_id) filter (where mastery_status = 'reviewing' or (last_seen_at < now() - interval '14 days' and mastery_status != 'mastered')), '[]'::jsonb),
-    coalesce(jsonb_agg(communication_function_id) filter (where (exposure_count > 1 and miss_count > 0) or mastery_status = 'learning'), '[]'::jsonb),
+    coalesce(jsonb_agg(communication_function_id) filter (where status = 'reviewing' or (last_seen_at < now() - interval '14 days' and status != 'mastered')), '[]'::jsonb),
+    coalesce(jsonb_agg(communication_function_id) filter (where (exposure_count > 1 and miss_count > 0) or status = 'learning'), '[]'::jsonb),
+    coalesce(jsonb_agg(communication_function_id) filter (where status = 'mastered'), '[]'::jsonb),
     count(*)
-  into v_comm_due, v_comm_weak, v_comm_count
+  into v_comm_due, v_comm_weak, v_comm_mastered, v_comm_count
   from public.child_communication_progress
   where child_id = claimed_job.child_id;
+
+  -- Factual counts
+  v_vocab_exp_count := coalesce(v_vocab_count, 0);
+  v_vocab_mastered_count := jsonb_array_length(coalesce(v_vocab_mastered, '[]'::jsonb));
+  v_vocab_due_count := jsonb_array_length(coalesce(v_vocab_due, '[]'::jsonb));
+
+  v_grammar_exp_count := coalesce(v_grammar_count, 0);
+  v_grammar_mastered_count := jsonb_array_length(coalesce(v_grammar_mastered, '[]'::jsonb));
+  v_grammar_due_count := jsonb_array_length(coalesce(v_grammar_due, '[]'::jsonb));
+
+  v_comm_exp_count := coalesce(v_comm_count, 0);
+  v_comm_mastered_count := jsonb_array_length(coalesce(v_comm_mastered, '[]'::jsonb));
+  v_comm_due_count := jsonb_array_length(coalesce(v_comm_due, '[]'::jsonb));
 
   select jsonb_build_object(
     'job', jsonb_build_object(
@@ -149,34 +188,50 @@ begin
       'weakRecent', v_vocab_weak,
       'uncertain', v_vocab_uncertain,
       'recentlyMastered', v_vocab_mastered,
-      'historicalCount', coalesce(v_vocab_count, 0)
+      'historicalCount', v_vocab_exp_count
     ),
     'grammarCapsule', jsonb_build_object(
       'dueForReview', v_grammar_due,
       'weakRecent', v_grammar_weak,
       'uncertain', v_grammar_uncertain,
-      'historicalCount', coalesce(v_grammar_count, 0)
+      'recentlyMastered', v_grammar_mastered,
+      'historicalCount', v_grammar_exp_count
     ),
     'communicationCapsule', jsonb_build_object(
-      'dueForReview', coalesce(v_comm_due, '[]'::jsonb),
-      'weakRecent', coalesce(v_comm_weak, '[]'::jsonb),
-      'historicalCount', coalesce(v_comm_count, 0)
+      'dueForReview', v_comm_due,
+      'weakRecent', v_comm_weak,
+      'recentlyMastered', v_comm_mastered,
+      'historicalCount', v_comm_exp_count
     ),
     'capCoverageCapsule', jsonb_build_object(
-      'vocabulary', jsonb_build_object(
-        'exposurePct', least(100, round((coalesce(v_vocab_count, 0)::numeric / 2000.0) * 100)),
-        'masteryEvidencePct', least(100, round((jsonb_array_length(coalesce(v_vocab_mastered, '[]'::jsonb))::numeric / 2000.0) * 100)),
-        'dueReviewCount', jsonb_array_length(coalesce(v_vocab_due, '[]'::jsonb))
-      ),
-      'grammar', jsonb_build_object(
-        'exposurePct', least(100, round((coalesce(v_grammar_count, 0)::numeric / 24.0) * 100)),
-        'masteryEvidencePct', least(100, round((coalesce(v_grammar_count, 0)::numeric / 24.0) * 40)),
-        'dueReviewCount', jsonb_array_length(coalesce(v_grammar_due, '[]'::jsonb))
-      ),
-      'communication', jsonb_build_object(
-        'exposurePct', least(100, round((coalesce(v_comm_count, 0)::numeric / 16.0) * 100)),
-        'masteryEvidencePct', 0,
-        'dueReviewCount', jsonb_array_length(coalesce(v_comm_due, '[]'::jsonb))
+      'dueReviewVocabulary', v_vocab_due,
+      'dueReviewGrammar', v_grammar_due,
+      'dueReviewCommunication', v_comm_due,
+      'coverage', jsonb_build_object(
+        'vocabulary', jsonb_build_object(
+          'totalUniverse', 2000,
+          'exposedCount', v_vocab_exp_count,
+          'masteredCount', v_vocab_mastered_count,
+          'dueReviewCount', v_vocab_due_count,
+          'exposurePct', round((v_vocab_exp_count::numeric / 2000.0) * 100.0, 1),
+          'masteryPct', round((v_vocab_mastered_count::numeric / 2000.0) * 100.0, 1)
+        ),
+        'grammar', jsonb_build_object(
+          'totalUniverse', 24,
+          'exposedCount', v_grammar_exp_count,
+          'masteredCount', v_grammar_mastered_count,
+          'dueReviewCount', v_grammar_due_count,
+          'exposurePct', round((v_grammar_exp_count::numeric / 24.0) * 100.0, 1),
+          'masteryPct', round((v_grammar_mastered_count::numeric / 24.0) * 100.0, 1)
+        ),
+        'communication', jsonb_build_object(
+          'totalUniverse', 16,
+          'exposedCount', v_comm_exp_count,
+          'masteredCount', v_comm_mastered_count,
+          'dueReviewCount', v_comm_due_count,
+          'exposurePct', round((v_comm_exp_count::numeric / 16.0) * 100.0, 1),
+          'masteryPct', round((v_comm_mastered_count::numeric / 16.0) * 100.0, 1)
+        )
       )
     ),
     'sourceMaterial', case when source_material.id is null then null else jsonb_build_object(
@@ -199,7 +254,7 @@ begin
 end;
 $$;
 
--- 3. Update observation recording to close the exposure loop across vocab, grammar, and communication
+-- 3. Update observation recording to strictly use canonical trackingDelta IDs (no namespace pollution)
 create or replace function public.worker_record_curriculum_observations(
   material_id uuid,
   worker_id text,
@@ -216,8 +271,7 @@ declare
   child_id_value uuid;
   vocabulary_item jsonb;
   vocab_id_text text;
-  target_id text;
-  target_domain text;
+  grammar_target_id text;
   comm_func_id text;
   quality_item jsonb;
   history_entry jsonb;
@@ -263,15 +317,14 @@ begin
         updated_at = now();
   end loop;
 
-  -- 2. Grammar target exposure recording
-  for target_id, target_domain in
-    select target->>'id', target->>'domain'
-    from jsonb_array_elements(coalesce(source #> '{learningPlan,targets}', '[]'::jsonb)) as target
+  -- 2. Grammar target exposure recording (Strictly from trackingDelta canonical IDs)
+  for grammar_target_id in
+    select jsonb_array_elements_text(coalesce(source #> '{trackingDelta,exposedGrammarTargetIds}', '[]'::jsonb))
   loop
-    if target_domain = 'grammar' then
+    if grammar_target_id is not null and length(grammar_target_id) > 0 then
       insert into public.child_grammar_progress (
         child_id, grammar_id, status, exposure_count, last_seen_at, last_material_id
-      ) values (child_id_value, left(target_id, 160), 'learning', 1, now(), $1)
+      ) values (child_id_value, left(grammar_target_id, 160), 'learning', 1, now(), $1)
       on conflict (child_id, grammar_id) do update
       set exposure_count = public.child_grammar_progress.exposure_count + 1,
           last_seen_at = now(),
@@ -280,17 +333,13 @@ begin
     end if;
   end loop;
 
-  -- 3. Communication function exposure recording (Hard Invariant: Exposure does NOT grant mastery)
+  -- 3. Communication function exposure recording (Strictly from trackingDelta canonical IDs; Exposure NEVER grants mastery)
   for comm_func_id in
     select jsonb_array_elements_text(coalesce(source #> '{trackingDelta,exposedCommunicationFunctionIds}', '[]'::jsonb))
-    union
-    select target->>'id'
-    from jsonb_array_elements(coalesce(source #> '{learningPlan,targets}', '[]'::jsonb)) as target
-    where target->>'domain' = 'communication'
   loop
     if comm_func_id is not null and length(comm_func_id) > 0 then
       insert into public.child_communication_progress (
-        child_id, communication_function_id, mastery_status, exposure_count, last_seen_at, last_material_id
+        child_id, communication_function_id, status, exposure_count, last_seen_at, last_material_id
       ) values (
         child_id_value, left(comm_func_id, 160), 'learning', 1, now(), $1
       )

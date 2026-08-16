@@ -4,9 +4,9 @@ schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
 generatedAt: "2026-08-17T00:30:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "1723de56c507fd453d078cc7b7e4bbe6a63b89d9304d64fedfd56960abac0a3b"
-  "packages/generator/prompts/2.4.0/02-author.md": "fb0eda443825b9b8b0a297c03c101ce7d0cf233a0a9203c1061e5765c221a55d"
-  "packages/generator/prompts/2.4.0/03-critic.md": "793a0d8358ae1d72bc0e377fa631817c3e8af53a30a1e6fac38de4e75cd93864"
+  "packages/generator/prompts/2.4.0/01-plan.md": "df20614ba62e2a7ddb674a9041030ca7a8137e24f92a4ca98c507e7ef56d82ba"
+  "packages/generator/prompts/2.4.0/02-author.md": "85a7ff656801b9aa99d027cef792802d67286d85567b82dedaca796605e293ba"
+  "packages/generator/prompts/2.4.0/03-critic.md": "edaf6220403384522f0d709d608dbe8cb73801cd761f5e3e70fe19bab6971239"
   "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
   "packages/generator/src/curriculum-package-schema.ts": "cbd1bc97d24d39f3c4624b8302f55d6e447f7d9a93663f0cd130e9b632384b20"
   "docs/curriculum-quality-rubric.md": "3eb158e373d52fa029446f0d14edbc1e73b4df95363b8bc3ae6095e232c7fcb0"
@@ -370,25 +370,16 @@ You are the Planning Engine for **紙屬英文** (Curriculum Version 2.2.0, Prom
 You receive:
 1. **Learner Profile & State**: Grade (7–9), English level, specific interests, changed interests, avoid list.
 2. **Weekly Feedback & Evidence**: Previous parent observation, difficulty rating, observed mistakes, teacher notes.
-3. **CAP Coverage Capsule** (Decision-Complete Top-N Priorities):
+3. **CAP Coverage Capsule**:
    ```json
    {
-     "dueReviewVocabulary": ["v-borrow"],
-     "recommendedVocabulary": ["v-through", "v-instead"],
-     "dueReviewGrammar": ["g8-past-simple-verbs"],
-     "recommendedGrammar": ["g8-adverbial-clauses-time-reason"],
+     "dueReviewVocabulary": ["v-borrow"], "recommendedVocabulary": ["v-through"],
+     "dueReviewGrammar": ["g8-past-simple-verbs"], "recommendedGrammar": ["g8-adverbial-clauses-time-reason"],
      "recommendedCommunicationFunctions": ["cf-making-requests"],
-     "coverage": {
-       "vocabulary": { "exposurePct": 41, "masteryEvidencePct": 24, "dueReviewCount": 3 },
-       "grammar": { "exposurePct": 33, "masteryEvidencePct": 18, "dueReviewCount": 1 },
-       "communication": { "exposurePct": 25, "masteryEvidencePct": 8, "dueReviewCount": 0 }
-     }
+     "coverage": { "vocabulary": { "exposurePct": 41 }, "grammar": { "exposurePct": 33 }, "communication": { "exposurePct": 25 } }
    }
    ```
-4. **Diversity Capsule** (Server Generation History):
-   ```json
-   { "recentGenres": ["dialogue", "article"], "recentContextKeys": ["minecraft-redstone"] }
-   ```
+4. **Diversity Capsule**: `{ "recentGenres": ["dialogue", "article"], "recentContextKeys": ["minecraft-redstone"] }`
 
 ---
 
@@ -536,11 +527,10 @@ The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a 
 {
   "genre": "dialogue",
   "blocks": [
-    { "type": "paragraph", "text": "In the robotics lab, Mina and Jay encounter a sensor failure right before the county science fair judging begins." },
-    { "type": "dialogue", "speaker": "Jay", "text": "Should we replace every single cable right now to be completely safe?" },
-    { "type": "dialogue", "speaker": "Mina", "text": "No. If we change everything at once, we will never know which part caused the short circuit." },
-    { "type": "notice", "heading": "SAFETY PROTOCOL", "text": "Inspect the optical sensor voltage before reconnecting the lithium battery." },
-    { "type": "schedule-row", "timeOrStep": "14:00", "event": "Calibrate light sensor", "detail": "Test under natural sunlight" }
+    { "type": "paragraph", "text": "In the robotics lab, Mina and Jay encounter a sensor failure right before judging begins." },
+    { "type": "dialogue", "speaker": "Jay", "text": "Should we replace every cable right now?" },
+    { "type": "dialogue", "speaker": "Mina", "text": "No. If we change everything at once, we will never know which part failed." },
+    { "type": "notice", "heading": "SAFETY PROTOCOL", "text": "Inspect the sensor voltage before reconnecting the battery." }
   ]
 }
 ```
@@ -660,43 +650,47 @@ Output one single, valid JSON object starting with `{` and ending with `}`, conf
 ## 6. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.4.0)
 
-You are the Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
 
 ---
 
-## 1. Audit Dimensions & Rubric
+## 1. Adversarial Review Stance
 
-Evaluate the authored curriculum package against the **Wave 2–4.2 Gold Standard**:
+Simulate a tired junior-high student studying alone at night after school.
+Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever any of these failure modes occur:
 
-1. **Long-Term CAP Curriculum Alignment**:
-   - Are the targets derived from legitimate junior-high syllabus, student weakness, or CAP gaps?
-   - Did the plan avoid unrealistic grade jumps (e.g. teaching Grade 9 relative clauses to Grade 7 learners)?
-2. **Pedagogical Integrity & Self-Study Readiness**:
-   - Are there clear Chinese explanations, worked examples, and mistake contrasts (`commonMistakes`) for every new instruction?
-   - Are there at least 12 answerable items across `guided`, `independent`, `cap-transfer` (with 4 options), `production`, and `retrieval`?
-3. **Weak, Silly, or Unprincipled Distractors**:
-   - Are 4-option distractors built on plausible student misconceptions (partial evidence, reversed relationship, scope mismatch) rather than absurd options?
-   - Does every distractor reflect authentic diagnostic student reasoning?
-4. **Circular or Tautological Explanations**:
-   - Reject empty explanations such as 「答案是 C，因為根據文章內容 C 正確」.
-   - Explanations must provide the textual evidence sentence and student misconception diagnosis (`likelyMisconceptionZh`).
-5. **Passage-First Lexical Contract & Lexical Ceiling**:
-   - Core vocabulary items must be the actual difficult words taught in the reading passage.
-   - Reject untaught, obscure high-school words above Taiwan's 2,000 junior-high vocabulary ceiling.
-6. **Genre-Block Structural Consistency**:
-   - If genre is `dialogue`, does it contain `dialogue` speaker blocks?
-   - If genre is `notice`, does it contain `notice` blocks?
-   - If genre is `schedule`, does it contain `schedule-row` blocks?
-7. **Target Evidence Invariant**:
-   - Every learning target in `learningPlan.targets` must be exercised across at least 2 distinct practice/homework stages.
-8. **Separation of Exposure vs Mastery**:
-   - Confirm `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
+1. **Self-Study Blockers & Tired Learner Friction**:
+   A student working independently cannot understand a concept or task without human tutor intervention.
+2. **Insufficient Chinese Scaffolding & Architecture Leakage**:
+   English-only explanations where concise Traditional Chinese mental models are required, or mechanical exposure of template labels ("Trigger", "Pattern", "Trap", "Try").
+3. **Quiz-Heavy Imbalance**:
+   The packet tests substantially more than it teaches (missing worked examples or decision rules before testing).
+4. **Childish or Incoherent Reading**:
+   Passage is trivial, unnatural, factually unsafe, or mismatched with junior-high maturity.
+5. **Weak, Silly, or Unprincipled Distractors**:
+   Multiple-choice options have obvious giveaways or test trivial keyword search instead of comprehension. Distractors must reflect diagnostic student reasoning errors (`partial evidence`, `reversed relationship`, `scope mismatch`).
+6. **Circular or Tautological Explanations & Empty Misconceptions**:
+   Explanations merely state 「因為根據文章內容此項正確」 or repeat translations without citing specific textual evidence. `likelyMisconceptionZh` must diagnose why a tempting distractor looked plausible.
+7. **Superficial Personalization**:
+   Interests are merely pasted as name/noun swaps without creating a meaningful problem context.
+8. **Answer Integrity & Leakage**:
+   Answers are ambiguous, unsupported by the text, leaked in the lesson, or question IDs don't match answer objects.
+9. **Parent Burden & Internal Engine Jargon**:
+   Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
+10. **Passage-First Lexical Contract & Lexical Ceiling**:
+    Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
+11. **Genre-Block Structural Consistency**:
+    `reading.blocks` must structurally match `genre` (`dialogue` must contain `dialogue` speaker blocks; `schedule` must contain `schedule-row`; `notice` must contain `notice`).
+12. **Target Evidence Invariant**:
+    Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
+13. **Separation of Exposure vs Mastery**:
+    `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 
 ---
 
-## 2. Output Format
+## 2. Output Contract
 
-Output a JSON object conforming to `CurriculumAuditReport`:
+Output a valid JSON object conforming to `CurriculumAuditReport`:
 ```json
 {
   "passed": true,

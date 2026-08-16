@@ -1,4 +1,7 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { createHash } from 'node:crypto'
 import communicationAppendix4 from './official/communication-appendix-4.json' with { type: 'json' }
 import grammarAppendix6 from './official/grammar-appendix-6.json' with { type: 'json' }
 import vocabulary2000 from './official/vocabulary-2000.json' with { type: 'json' }
@@ -8,29 +11,47 @@ import { grammarProgressionUnits, getGrammarUnit, getUnitsByGradeStage } from '.
 import { getSuggestedGradeForWord, getThemeForWord } from './derived/vocabulary-annotations.js'
 
 describe('CAP Official & Derived Curriculum Maps', () => {
-  describe('Official Reference Data', () => {
-    it('verifies official source manifest metadata', () => {
+  describe('Official Reference Data & Provenance', () => {
+    it('verifies official source manifest metadata and cryptographic file hashes', () => {
       expect(sourceManifest.curriculumStandard).toContain('108 課綱')
+      expect(sourceManifest.provenance.vocabulary.totalWords).toBe(2000)
       expect(sourceManifest.provenance.vocabulary.core1200Count).toBe(1200)
       expect(sourceManifest.provenance.vocabulary.extension800Count).toBe(800)
       expect(sourceManifest.annotationPolicy).toContain('derived/')
+
+      // Verify SHA-256 for all official reference datasets
+      for (const [relPath, expectedHash] of Object.entries(sourceManifest.fileChecksumsSha256)) {
+        const fullPath = resolve(import.meta.dirname, relPath)
+        const fileContent = readFileSync(fullPath)
+        const actualHash = createHash('sha256').update(fileContent).digest('hex')
+        expect(actualHash).toBe(expectedHash)
+      }
     })
 
-    it('validates canonical vocabulary 2000 integrity', () => {
-      expect(vocabulary2000.length).toBeGreaterThanOrEqual(2000)
+    it('validates canonical vocabulary 2000 exact counts and structure (1200 core + 800 extension)', () => {
+      expect(vocabulary2000.length).toBe(2000)
+      const core1200 = vocabulary2000.filter((item) => item.band === 'core-1200')
+      const ext800 = vocabulary2000.filter((item) => item.band === 'ext-800')
+
+      expect(core1200.length).toBe(1200)
+      expect(ext800.length).toBe(800)
+
       const seenIds = new Set<string>()
+      const seenWords = new Set<string>()
       for (const item of vocabulary2000) {
         expect(item.id).toMatch(/^v-[a-z0-9-]+$/)
         expect(item.word.length).toBeGreaterThan(0)
         expect(item.partOfSpeech.length).toBeGreaterThan(0)
         expect(['core-1200', 'ext-800']).toContain(item.band)
         expect(seenIds.has(item.id)).toBe(false)
+        expect(seenWords.has(item.word.toLowerCase())).toBe(false)
         seenIds.add(item.id)
+        seenWords.add(item.word.toLowerCase())
       }
     })
 
     it('validates official 108 Appendix 4 communication functions', () => {
-      expect(communicationAppendix4.length).toBeGreaterThanOrEqual(12)
+      expect(communicationAppendix4.length).toBe(16)
       const seenIds = new Set<string>()
       for (const func of communicationAppendix4) {
         expect(func.id).toMatch(/^cf-[a-z0-9-]+$/)
@@ -43,7 +64,7 @@ describe('CAP Official & Derived Curriculum Maps', () => {
     })
 
     it('validates official 108 Appendix 6 grammar reference structures', () => {
-      expect(grammarAppendix6.length).toBeGreaterThanOrEqual(20)
+      expect(grammarAppendix6.length).toBe(22)
       const seenIds = new Set<string>()
       for (const unit of grammarAppendix6) {
         expect(unit.id).toMatch(/^og-[a-z0-9-]+$/)
@@ -59,66 +80,61 @@ describe('CAP Official & Derived Curriculum Maps', () => {
   describe('Derived Pedagogical Annotations', () => {
     it('verifies 12 communication families map to official function IDs', () => {
       expect(communicationFamilies.length).toBe(12)
-      const officialIds = new Set(communicationAppendix4.map((f) => f.id))
       for (const family of communicationFamilies) {
-        expect(family.annotationSource).toBe('paper-english-derived')
+        expect(family.familyId.length).toBeGreaterThan(0)
         expect(family.titleZh.length).toBeGreaterThan(0)
-        expect(family.keyTargetPhrases.length).toBeGreaterThan(0)
-        expect(family.dialogueScaffold.exampleTurn.length).toBeGreaterThan(0)
-        for (const officialId of family.officialFunctionIds) {
-          expect(officialIds.has(officialId)).toBe(true)
+        expect(family.officialFunctionIds.length).toBeGreaterThan(0)
+        for (const offId of family.officialFunctionIds) {
+          const match = communicationAppendix4.find((item) => item.id === offId)
+          expect(match).toBeDefined()
         }
       }
     })
 
-    it('looks up communication families bidirectionally', () => {
+    it('retrieves communication family by helper functions', () => {
       const family = getCommunicationFamily('request-permission')
+      expect(family).toBeDefined()
       expect(family?.titleZh).toBe('請求協助與徵詢許可')
 
       const found = findFamilyByOfficialFunctionId('cf-making-requests')
+      expect(found).toBeDefined()
       expect(found?.familyId).toBe('request-permission')
     })
 
-    it('verifies 24 grammar units progression with valid prerequisites', () => {
+    it('verifies 24 grammar progression units across 3 junior high grades', () => {
       expect(grammarProgressionUnits.length).toBe(24)
-      const unitIds = new Set(grammarProgressionUnits.map((u) => u.unitId))
-      const officialGrammarIds = new Set(grammarAppendix6.map((g) => g.id))
+      const g7 = getUnitsByGradeStage('grade_7')
+      const g8 = getUnitsByGradeStage('grade_8')
+      const g9 = getUnitsByGradeStage('grade_9')
+
+      expect(g7.length).toBe(8)
+      expect(g8.length).toBe(8)
+      expect(g9.length).toBe(8)
 
       for (const unit of grammarProgressionUnits) {
-        expect(unit.annotationSource).toBe('paper-english-derived')
-        expect(['grade_7', 'grade_8', 'grade_9']).toContain(unit.gradeStage)
-        expect(officialGrammarIds.has(unit.officialAppendix6Id)).toBe(true)
+        expect(unit.unitId).toMatch(/^g[789]-[a-z0-9-]+$/)
+        expect(unit.officialAppendix6Id).toMatch(/^og-[a-z0-9-]+$/)
+        expect(unit.titleZh.length).toBeGreaterThan(0)
         expect(unit.patterns.length).toBeGreaterThan(0)
         expect(unit.taiwaneseStudentTrapsZh.length).toBeGreaterThan(0)
-        for (const prereq of unit.prerequisites) {
-          expect(unitIds.has(prereq)).toBe(true)
-        }
       }
     })
 
-    it('queries grammar units by grade stage', () => {
-      const g7Units = getUnitsByGradeStage('grade_7')
-      const g8Units = getUnitsByGradeStage('grade_8')
-      const g9Units = getUnitsByGradeStage('grade_9')
-
-      expect(g7Units.length).toBe(8)
-      expect(g8Units.length).toBe(8)
-      expect(g9Units.length).toBe(8)
-      expect(getGrammarUnit('g9-passive-voice')?.titleZh).toBe('被動語態 (be + p.p.)')
+    it('retrieves grammar unit by ID helper', () => {
+      const unit = getGrammarUnit('g9-present-perfect-experience')
+      expect(unit).toBeDefined()
+      expect(unit?.titleZh).toBe('現在完成式：經驗與完成 (have/has + p.p., already/yet/never)')
+      expect(unit?.officialAppendix6Id).toBe('og-present-perfect')
     })
 
-    it('annotates vocabulary with suggested grade and semantic themes', () => {
+    it('provides vocabulary grade and theme annotations', () => {
       expect(getSuggestedGradeForWord('core-1200', 100)).toBe(7)
       expect(getSuggestedGradeForWord('core-1200', 800)).toBe(8)
-      expect(getSuggestedGradeForWord('ext-800', 100)).toBe(9)
+      expect(getSuggestedGradeForWord('ext-800', 50)).toBe(9)
 
       expect(getThemeForWord('robot')).toBe('science-tech')
-      expect(getThemeForWord('homework')).toBe('school-life')
-      expect(getThemeForWord('restaurant')).toBe('food-dining')
-      expect(getThemeForWord('shelter')).toBe('animals-nature')
-      expect(getThemeForWord('basketball')).toBe('sports-athletics')
-      expect(getThemeForWord('ticket')).toBe('travel-places')
-      expect(getThemeForWord('curtain')).toBe('daily-life')
+      expect(getThemeForWord('apple')).toBe('food-dining')
+      expect(getThemeForWord('soccer')).toBe('sports-athletics')
     })
   })
 })

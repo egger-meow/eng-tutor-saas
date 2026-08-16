@@ -14,32 +14,32 @@ const question = (id: string, prompt: string, options?: string[]) => ({
   difficulty: 'on-level' as const,
 })
 const paragraphs = [
-  'Mina joins a school robotics club because she wants to build a machine that can sort books. The first design moves quickly, but its small camera often mistakes blue covers for green ones during the test.',
+  'Mina joins a school robotics club because she wants to build a machine to help sort books. The first design moves quickly, but its small camera often mistakes blue covers for green ones during the test.',
   'Her partner Jay suggests changing every part at once. Mina disagrees. She records one problem, changes the light above the camera, and repeats the same test. This time the robot sorts most of the books correctly.',
-  'The team still finds two mistakes. Instead of calling the project a failure, they compare both test records. They discover that shiny covers reflect the classroom light. Their next goal is to design a simple shade for the camera.',
-  'Mina learns that careful improvement is not about making random changes. A useful experiment keeps most conditions the same, examines clear evidence, and changes one important factor. The robot improves because the team learns from each result.',
+  'The team still finds two mistakes. Instead of calling the test a failure, they compare both test records. They discover that bright light from the window enters the camera. Their next goal is to design a simple cover for the camera.',
+  'Mina learns that careful improvement is not about making quick changes. A useful test keeps most conditions the same, examines clear evidence, and changes one important step. The robot improves because the team learns from each result.',
 ]
 const guided = [question('G1', 'What problem does the camera have?'), question('G2', 'What does Mina change first?')]
-const independent = [question('I1', 'Why does Mina repeat the same test?'), question('I2', 'What evidence do the team compare?')]
+const independent = [question('I1', 'Why does Mina repeat the same test?'), question('I2', 'What do the two members compare?')]
 const cap = [
-  question('C1', 'What can the reader infer about Mina?', [
-    'She changes one factor to understand the result.',
+  question('C1', 'What can we learn about Mina from the story?', [
+    'She changes one thing to understand the result.',
     'She never records any result.',
-    'She wants to stop the project.',
-    'She changes every part randomly.',
+    'She wants to stop the work.',
+    'She changes every part without a plan.',
   ]),
-  question('C2', 'What is the main lesson of the passage?', [
-    'Careful evidence helps improve an experiment.',
-    'Robots always sort every book perfectly.',
+  question('C2', 'What is the lesson of the story?', [
+    'Careful testing helps improve a machine.',
+    'Robots always sort every book well.',
     'Partners should never disagree.',
-    'A camera cannot work in a classroom.',
+    'A camera does not work in a classroom.',
   ]),
 ]
 const production = [question('P1', 'Write one sentence explaining a change you would test.', undefined)]
-const retrieval = [question('R1', 'Without looking back, explain when to use does.'), question('R2', 'Recall one core word and use it in a sentence.')]
+const retrieval = [question('R1', 'Without looking back, explain when to use does.'), question('R2', 'Recall one new word and use it in a sentence.')]
 const homework = [
-  question('H1', 'Use the word evidence in a sentence.'),
-  question('H2', 'Explain why Mina keeps most conditions the same.'),
+  question('H1', 'Use the word camera in a sentence.'),
+  question('H2', 'Explain why Mina keeps most parts the same.'),
   question('H3', 'Write one do or does question about a robot.'),
 ]
 const all = [...guided, ...independent, ...cap, ...production, ...retrieval, ...homework]
@@ -63,7 +63,7 @@ export const curriculumSample: CurriculumPackage = {
   },
   learnerSnapshot: {
     schoolProgress: '現在進行式',
-    specificInterests: ['機器人與實驗'],
+    specificInterests: ['robotics', '機器人與實驗'],
     changedInterests: [],
     avoid: [],
     recentDifficulty: 'too-easy',
@@ -110,11 +110,11 @@ export const curriculumSample: CurriculumPackage = {
     },
     vocabulary: Array.from({ length: 7 }, (_, index) => ({
       id: `vocab-${index}`,
-      word: ['experiment', 'evidence', 'camera', 'mistake', 'compare', 'factor', 'improve'][index]!,
+      word: ['partner', 'suggest', 'sort', 'camera', 'repeat', 'result', 'mistake'][index]!,
       partOfSpeech: 'n.',
-      meaningZh: ['實驗', '證據', '相機', '錯誤', '比較', '因素', '改善'][index]!,
+      meaningZh: ['夥伴', '建議', '分類', '相機', '重複', '結果', '錯誤'][index]!,
       pronunciationHint: null,
-      exampleEn: `The team uses ${['an experiment', 'evidence', 'a camera', 'a mistake', 'a chart to compare', 'one factor', 'a plan to improve'][index]}.`,
+      exampleEn: `The team works with ${['a partner', 'a suggestion', 'a machine to sort', 'a camera', 'a plan to repeat', 'a clear result', 'a mistake'][index]}.`,
       exampleZh: '這是放進語境的例句。',
       status: index === 1 ? 'repeated-miss' : 'new',
     })),

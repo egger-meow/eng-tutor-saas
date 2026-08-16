@@ -73,7 +73,7 @@ For a retry claim, `retryContext` is authoritative and contains the immutable pr
 
 PACKAGE AUTHORING
 
-For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.0.0. Use only the returned context plus the current repository rules. A retry submission is a new immutable authoring attempt; never overwrite or omit the prior package from the audit trail.
+For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.2.0. Use only the returned context plus the current repository rules. A retry submission is a new immutable authoring attempt; never overwrite or omit the prior package from the audit trail.
 
 Plan before authoring:
 
@@ -115,7 +115,7 @@ Continue only if the function returns true. Otherwise report LEASE_LOST.
 
 SUBMIT — DO NOT RENDER OR COMPLETE
 
-For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.0.0, submit it with exactly one call:
+For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.2.0, submit it with exactly one call:
 
 select private_generation.chatgpt_submit_curriculum_package(
   '<job-uuid>'::uuid,
