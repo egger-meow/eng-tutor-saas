@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
@@ -31,6 +31,11 @@ export function ChildSubscription({ child, subscription, busy, activationPending
   const [reason, setReason] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('annual')
 
+  useEffect(() => {
+    setConfirmingCancel(false)
+    setReason('')
+  }, [subscription?.cancelAtPeriodEnd, subscription?.status])
+
   if (!subscription) return <article className="subscription-card"><div className="subscription-card-body"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></div></article>
   if (activationPending) return <article className="subscription-card"><div className="subscription-card-body"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p></div></article>
 
@@ -61,11 +66,19 @@ export function ChildSubscription({ child, subscription, busy, activationPending
         <p>不會再產生下一期扣款，本期教材與權益會保留到{periodEnd ?? '本期結束'}。之後想回來時，隨時都可以重新續訂。</p>
         <label htmlFor={`cancel-reason-${child.id}`}>想告訴我們原因嗎？（選填）</label>
         <textarea id={`cancel-reason-${child.id}`} rows={3} maxLength={1000} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="例如：先暫停一陣子、孩子最近比較忙…" />
-        <button className="button secondary" type="button" disabled={busy} onClick={() => onCancel(child.id, reason)}>{busy ? '正在取消續訂…' : '確認取消續訂'}</button>
+        <button className="button secondary" type="button" disabled={busy} onClick={() => {
+          setConfirmingCancel(false)
+          setReason('')
+          onCancel(child.id, reason)
+        }}>{busy ? '正在取消續訂…' : '確認取消續訂'}</button>
       </div>}
     </div>}
     {canResume && <div className="subscription-action">
-      <button className="button" type="button" disabled={busy} onClick={() => onResume(child.id)}>
+      <button className="button" type="button" disabled={busy} onClick={() => {
+        setConfirmingCancel(false)
+        setReason('')
+        onResume(child.id)
+      }}>
         {busy ? '正在恢復續訂…' : '恢復自動續訂'}
       </button>
       <p className="muted">隨時可恢復每週專屬教材的自動交付，次期將依原方案持續為孩子準備。</p>
