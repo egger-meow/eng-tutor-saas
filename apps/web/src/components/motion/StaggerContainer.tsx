@@ -49,8 +49,7 @@ export function StaggerContainer({
     <Component
       variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-30px' }}
+      animate="visible"
       custom={staggerDelay}
       className={className}
       {...props}
