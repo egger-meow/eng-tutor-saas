@@ -4,8 +4,8 @@
 .skip-link { position: fixed; z-index: 100; top: var(--space-3); left: var(--space-3); padding: var(--space-3) var(--space-4); transform: translateY(-180%); border-radius: var(--radius-control); background: var(--color-ink); color: white; }
 .skip-link:focus { transform: translateY(0); }
 .site-header { display: flex; min-height: 5.25rem; align-items: center; gap: var(--space-8); border-bottom: 1px solid var(--color-rule); }
-.wordmark { display: inline-flex; align-items: center; gap: 0; color: var(--color-ink); font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; white-space: nowrap; }
-.brand-icon { width: 1.85rem; height: 1.85rem; object-fit: contain; flex-shrink: 0; display: block; transform: translateY(1px); margin-left: -0.15rem; margin-right: -0.15rem; }
+.wordmark { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-ink); font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; white-space: nowrap; }
+.brand-icon { width: 1.85rem; height: 1.85rem; object-fit: contain; flex-shrink: 0; display: block; transform: translateY(1px); }
 .site-header nav { display: flex; align-items: center; gap: var(--space-6); }
 .site-header nav a { color: var(--color-text); font-size: .9375rem; text-decoration: none; }
 .site-header nav a:hover { color: var(--color-action); }
