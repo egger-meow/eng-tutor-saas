@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { addBasePath } from '../../app/routes'
 import { handleInternalLink, useRoute } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 
@@ -25,7 +26,14 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
     <header className={`site-header parent-header ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>
-          紙屬英文
+          <img
+            src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
+            alt=""
+            className="brand-icon"
+            width={28}
+            height={28}
+          />
+          <span>紙屬英文</span>
         </a>
 
         <button

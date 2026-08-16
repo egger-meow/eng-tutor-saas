@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { addBasePath } from '../../app/routes'
 import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
@@ -20,7 +21,14 @@ export function PublicHeader() {
     <header className={`site-header public-header ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/" onClick={handleInternalLink}>
-          紙屬英文
+          <img
+            src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
+            alt=""
+            className="brand-icon"
+            width={28}
+            height={28}
+          />
+          <span>紙屬英文</span>
         </a>
 
         <button
