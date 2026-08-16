@@ -212,7 +212,9 @@ export function BillingPage({ session }: { session: Session }) {
                     : <p>每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。</p>}
               </div>
               <div className="paddle-checkout-frame" />
-              <p className="checkout-security-note">付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。</p>
+              <p className="checkout-security-note">
+                付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。完成付款即代表同意 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
+              </p>
             </aside>
           )}
         </div>

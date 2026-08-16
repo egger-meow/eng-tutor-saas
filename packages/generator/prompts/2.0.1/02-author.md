@@ -19,6 +19,9 @@ Write with these qualities:
 
 # Content rules
 
+- **Originality & Copyright Compliance:** Every reading passage, sentence, question, worked example, and explanation must be 100% original. Never copy or closely paraphrase proprietary school textbook stories (e.g., Kang Hsuan, Han Lin, Nani), commercial exam booklets, or third-party copyrighted materials. Target syllabus vocabulary and grammar points provide the curricular scope, but all expressive prose must be freshly authored.
+- **Privacy & Child Protection:** Never include real student personal identifiers (full legal name, school name, class, city/district, home address) in any generated text. Use only the provided nickname for greeting.
+- **Nominative Trademark Fair Use:** When incorporating child interests (such as Minecraft, coding, sports), treat them purely as realistic situational context or creative themes; never imply official partnership, licensing, or endorsement by trademark owners.
 - Personalize both what the child reads and what the child needs to practise. Do not perform gimmicky name/topic substitution.
 - Reading must be age-appropriate, internally coherent, and long enough for the planned skill. CAP items require plausible distractors based on common misunderstandings.
 - The hardest meaningful vocabulary across passage, instructions, options, examples, and homework should normally be declared core vocabulary, already-known vocabulary, or necessary proper nouns.

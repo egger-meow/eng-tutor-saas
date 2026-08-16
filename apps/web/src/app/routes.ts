@@ -12,6 +12,8 @@ export type RouteName =
   | 'feedback'
   | 'parent-guide-feedback'
   | 'billing'
+  | 'privacy'
+  | 'terms'
 
 export type Route = {
   name: RouteName
@@ -29,6 +31,8 @@ const staticRoutes = new Map<string, RouteName>([
   ['/parent-guide-feedback', 'parent-guide-feedback'],
   ['/children/new', 'child-new'],
   ['/billing', 'billing'],
+  ['/privacy', 'privacy'],
+  ['/terms', 'terms'],
 ])
 
 export function stripBasePath(pathname: string, basePath: string): string {

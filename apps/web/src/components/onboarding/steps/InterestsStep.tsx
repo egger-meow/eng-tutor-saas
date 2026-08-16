@@ -14,7 +14,10 @@ const fields: Array<{ key: InterestKey; title: string; hint: string }> = [
 
 export function InterestsStep({ draft, update }: OnboardingStepProps) {
   return <>
-    <div className="interest-intro"><strong>不用全部填。</strong><p>寫一兩項孩子真的會聊的東西就很有幫助；興趣負責讓內容好讀，程度與錯題才決定要練什麼。</p></div>
+    <div className="interest-intro">
+      <strong>不用全部填。</strong>
+      <p>寫一兩項孩子真的會聊的東西就很有幫助；建議填寫通用主題（如籃球、動漫），請勿填寫住址或敏感個人隱私。</p>
+    </div>
     {fields.map((field) => <label key={field.key}>{field.title} <span className="optional">選填</span><textarea maxLength={1200} placeholder={field.hint} value={draft[field.key]} onChange={(event) => update({ [field.key]: event.target.value } as Partial<ProfileDraft>)} /></label>)}
     <label>不喜歡、害怕或希望避免的內容 <span className="optional">選填</span><textarea maxLength={1200} placeholder="例如：不要恐怖圖片、暫時避免寵物死亡情節" value={draft.dislikedTopics} onChange={(event) => update({ dislikedTopics: event.target.value })} /></label>
   </>

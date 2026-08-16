@@ -903,5 +903,15 @@ begin
   ) then
     raise exception 'service role cannot execute Paddle webhook processing RPC';
   end if;
+  if has_function_privilege('anon', 'public.accept_legal_terms(text,text)', 'execute') then
+    raise exception 'anon role can execute accept_legal_terms RPC';
+  end if;
+  if not has_function_privilege('authenticated', 'public.accept_legal_terms(text,text)', 'execute') then
+    raise exception 'authenticated role cannot execute accept_legal_terms RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.accept_legal_terms(text,text)', 'execute') then
+    raise exception 'service role cannot execute accept_legal_terms RPC';
+  end if;
 end;
 $$;
+

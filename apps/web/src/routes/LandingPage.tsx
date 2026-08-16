@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AuthPanel } from '../components/auth/AuthPanel'
 import { AppShell } from '../components/layout/AppShell'
+import { PublicFooter } from '../components/layout/PublicFooter'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { FounderSummary } from '../components/public/FounderSummary'
 import { PricingSection } from '../components/public/PricingSection'
@@ -251,6 +252,7 @@ export function LandingPage() {
           <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
       </PageTransition>
+      <PublicFooter />
     </AppShell>
   )
 }

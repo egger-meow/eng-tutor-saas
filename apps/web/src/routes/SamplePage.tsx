@@ -1,5 +1,6 @@
 import { addBasePath } from '../app/routes'
 import { AppShell } from '../components/layout/AppShell'
+import { PublicFooter } from '../components/layout/PublicFooter'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { sampleChild, samplePdfFiles } from '../content/sample-child'
 import { PageTransition } from '../components/motion/PageTransition'
@@ -127,6 +128,7 @@ export function SamplePage() {
           </section>
         </main>
       </PageTransition>
+      <PublicFooter />
     </AppShell>
   )
 }
