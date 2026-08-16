@@ -115,23 +115,7 @@ Continue only if the function returns true. Otherwise report LEASE_LOST.
 
 SUBMIT — DO NOT RENDER OR COMPLETE
 
-Before submission, perform a final deterministic audit against the current
-CurriculumPackageSchema and audit-curriculum.ts.
-
-Do not submit until all are true:
-
-- generatedAt is a valid ISO 8601 datetime.
-- commonMistakes uses exactly: wrong, corrected, whyZh.
-- every question difficulty is exactly supported, on-level, or stretch.
-- every itemType belongs to the schema enum.
-- homework contains at least 3 questions.
-- every learning target is mapped to at least one observable question.
-- every learning target appears across at least 2 distinct evidence stages.
-- every target has at least one independent, cap-transfer, production,
-  retrieval, or homework observation.
-- every answer explanationZh contains at least 4 CJK characters.
-
-For a package that passes the critic, submit it with exactly one call:
+For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.0.0, submit it with exactly one call:
 
 select private_generation.chatgpt_submit_curriculum_package(
   '<job-uuid>'::uuid,
