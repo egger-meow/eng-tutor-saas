@@ -275,6 +275,22 @@
             ],
             "writingLines": 0,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-i2",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "detail",
+            "prompt": "What does Alex connect to the iron doors?",
+            "options": [
+              "Redstone dust",
+              "Water buckets",
+              "Wooden sticks",
+              "Diamond tools"
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -300,6 +316,22 @@
             ],
             "writingLines": 0,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-c2",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "inference",
+            "prompt": "What can we infer about building redstone machines in Minecraft?",
+            "options": [
+              "It requires careful connection of materials.",
+              "Machines always fail in caves.",
+              "Redstone only works under trees.",
+              "You never need iron doors."
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -319,6 +351,16 @@
             "prompt": "用 The machine 和 is 描述它運作順利。",
             "writingLines": 2,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-p2",
+            "targetIds": [
+              "retrieval-pronouns"
+            ],
+            "itemType": "sentence-production",
+            "prompt": "用 They are 描述方塊很堅固。",
+            "writingLines": 2,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -336,6 +378,16 @@
             ],
             "itemType": "short-response",
             "prompt": "看到主詞是 Alex（單數）時，be 動詞要用哪一個？",
+            "writingLines": 1,
+            "difficulty": "supported"
+          },
+          {
+            "id": "q-r2",
+            "targetIds": [
+              "retrieval-pronouns"
+            ],
+            "itemType": "short-response",
+            "prompt": "看到主詞是 They（複數）時，be 動詞要用哪一個？",
             "writingLines": 1,
             "difficulty": "supported"
           }
@@ -415,11 +467,27 @@
       "followUpZh": null
     },
     {
+      "questionId": "q-i2",
+      "answer": "Redstone dust",
+      "acceptedAnswers": [],
+      "explanationZh": "第 2 段說明 Alex 仔細連接紅石粉至鐵門。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
       "questionId": "q-c1",
       "answer": "His redstone circuit successfully opened the iron doors.",
       "acceptedAnswers": [],
       "explanationZh": "第 3 段指出當他踩上壓力板時門順利開啟，驗證機關成功，故選 B。",
       "likelyMisconceptionZh": "容易選 C：因為文章第 1 段確實提到 inventory，但那是準備階段，並非結尾開心的原因。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-c2",
+      "answer": "It requires careful connection of materials.",
+      "acceptedAnswers": [],
+      "explanationZh": "文章強調仔細連接紅石粉與材料方能成功運作。",
+      "likelyMisconceptionZh": "容易選 B：文章並未說機器總是失敗，結尾證明能成功。",
       "followUpZh": null
     },
     {
@@ -434,12 +502,32 @@
       "followUpZh": null
     },
     {
+      "questionId": "q-p2",
+      "answer": "They are strong blocks.",
+      "acceptedAnswers": [
+        "They are solid."
+      ],
+      "explanationZh": "複數代名詞 They 正確搭配 are。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
       "questionId": "q-r1",
       "answer": "is",
       "acceptedAnswers": [
         "Alex is"
       ],
       "explanationZh": "Alex 是第三人稱單數，搭配 is。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-r2",
+      "answer": "are",
+      "acceptedAnswers": [
+        "They are"
+      ],
+      "explanationZh": "They 是複數，搭配 are。",
       "likelyMisconceptionZh": null,
       "followUpZh": null
     },

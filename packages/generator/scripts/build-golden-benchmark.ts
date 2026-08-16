@@ -145,6 +145,7 @@ const caseA_201: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-i1', targetIds: ['lang-be-verb'], itemType: 'grammar', prompt: 'Two iron doors _____ next to the wall.', options: ['are', 'is', 'am', 'be'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'q-i2', targetIds: ['read-redstone-steps'], itemType: 'detail', prompt: 'Why does Alex collect iron ingots?', options: ['To build iron doors', 'To make a bed', 'To feed animals', 'To plant trees'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -155,6 +156,7 @@ const caseA_201: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-c1', targetIds: ['read-redstone-steps'], itemType: 'inference', prompt: 'What can we infer about Alex?', options: ['He successfully built a working door.', 'He lost his inventory.', 'He dislikes redstone.', 'He wants to sleep in the cave.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'q-c2', targetIds: ['read-redstone-steps'], itemType: 'inference', prompt: 'What is the main topic of the passage?', options: ['Building a secret redstone door', 'Mining diamonds with friends', 'Fighting monsters in a cave', 'Making golden apples'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -165,6 +167,7 @@ const caseA_201: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-p1', targetIds: ['lang-be-verb'], itemType: 'sentence-production', prompt: '用 The machine 和 is 寫出一個句子。', writingLines: 2, difficulty: 'on-level' },
+          { id: 'q-p2', targetIds: ['retrieval-pronouns'], itemType: 'sentence-production', prompt: '用 They are 寫出一個句子。', writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -175,6 +178,7 @@ const caseA_201: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-r1', targetIds: ['retrieval-pronouns'], itemType: 'short-response', prompt: 'He 搭配的 be 動詞是哪一個？', writingLines: 1, difficulty: 'supported' },
+          { id: 'q-r2', targetIds: ['retrieval-pronouns'], itemType: 'short-response', prompt: 'They 搭配的 be 動詞是哪一個？', writingLines: 1, difficulty: 'supported' },
         ],
       },
     ],
@@ -193,9 +197,13 @@ const caseA_201: CurriculumPackage = {
     { questionId: 'q-g1', answer: 'On the floor', acceptedAnswers: [], explanationZh: '選 A，文章第 2 段有寫。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-g2', answer: 'is', acceptedAnswers: [], explanationZh: '選 A，主詞是單數所以用 is。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-i1', answer: 'are', acceptedAnswers: [], explanationZh: '選 A，Two iron doors 是複數所以用 are。', likelyMisconceptionZh: null, followUpZh: null },
+    { questionId: 'q-i2', answer: 'To build iron doors', acceptedAnswers: [], explanationZh: '第 1 段提到需要鐵做門。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-c1', answer: 'He successfully built a working door.', acceptedAnswers: [], explanationZh: '選 A，因為門打開了他很開心。', likelyMisconceptionZh: null, followUpZh: null },
+    { questionId: 'q-c2', answer: 'Building a secret redstone door', acceptedAnswers: [], explanationZh: '文章主要描述 Alex 製作紅石暗門。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-p1', answer: 'The machine is new.', acceptedAnswers: ['The machine is fast.'], explanationZh: '主詞 The machine 為單數，接 is + 形容詞。', likelyMisconceptionZh: null, followUpZh: null },
+    { questionId: 'q-p2', answer: 'They are strong.', acceptedAnswers: [], explanationZh: '複數代名詞 They 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-r1', answer: 'is', acceptedAnswers: [], explanationZh: 'He 是第三人稱單數，搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
+    { questionId: 'q-r2', answer: 'are', acceptedAnswers: [], explanationZh: 'They 是複數，搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-h1', answer: 'is', acceptedAnswers: [], explanationZh: 'My friend 是單數，選 is。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-h2', answer: 'A secret door.', acceptedAnswers: ['A secret door machine.'], explanationZh: 'Alex 建造了一扇自動暗門。', likelyMisconceptionZh: null, followUpZh: null },
     { questionId: 'q-h3', answer: 'The doors are strong.', acceptedAnswers: [], explanationZh: '複數主詞接 are strong。', likelyMisconceptionZh: null, followUpZh: null },
@@ -284,6 +292,7 @@ const caseA_210: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-i1', targetIds: ['lang-be-verb'], itemType: 'grammar', prompt: 'Two iron doors in the secret room _____ strong.', options: ['is', 'are', 'am', 'be'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'q-i2', targetIds: ['read-redstone-steps'], itemType: 'detail', prompt: 'What does Alex connect to the iron doors?', options: ['Redstone dust', 'Water buckets', 'Wooden sticks', 'Diamond tools'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -294,6 +303,7 @@ const caseA_210: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-c1', targetIds: ['read-redstone-steps'], itemType: 'inference', prompt: 'Why is Alex happy at the end of the story?', options: ['He found diamonds in the cave.', 'His redstone circuit successfully opened the iron doors.', 'He collected every tool in his inventory.', 'The cave became completely safe.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'q-c2', targetIds: ['read-redstone-steps'], itemType: 'inference', prompt: 'What can we infer about building redstone machines in Minecraft?', options: ['It requires careful connection of materials.', 'Machines always fail in caves.', 'Redstone only works under trees.', 'You never need iron doors.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -304,6 +314,7 @@ const caseA_210: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-p1', targetIds: ['lang-be-verb'], itemType: 'sentence-production', prompt: '用 The machine 和 is 描述它運作順利。', writingLines: 2, difficulty: 'on-level' },
+          { id: 'q-p2', targetIds: ['retrieval-pronouns'], itemType: 'sentence-production', prompt: '用 They are 描述方塊很堅固。', writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -314,6 +325,7 @@ const caseA_210: CurriculumPackage = {
         hintZh: null,
         questions: [
           { id: 'q-r1', targetIds: ['retrieval-pronouns'], itemType: 'short-response', prompt: '看到主詞是 Alex（單數）時，be 動詞要用哪一個？', writingLines: 1, difficulty: 'supported' },
+          { id: 'q-r2', targetIds: ['retrieval-pronouns'], itemType: 'short-response', prompt: '看到主詞是 They（複數）時，be 動詞要用哪一個？', writingLines: 1, difficulty: 'supported' },
         ],
       },
     ],
@@ -353,11 +365,27 @@ const caseA_210: CurriculumPackage = {
       followUpZh: null,
     },
     {
+      questionId: 'q-i2',
+      answer: 'Redstone dust',
+      acceptedAnswers: [],
+      explanationZh: '第 2 段說明 Alex 仔細連接紅石粉至鐵門。',
+      likelyMisconceptionZh: null,
+      followUpZh: null,
+    },
+    {
       questionId: 'q-c1',
       answer: 'His redstone circuit successfully opened the iron doors.',
       acceptedAnswers: [],
       explanationZh: '第 3 段指出當他踩上壓力板時門順利開啟，驗證機關成功，故選 B。',
       likelyMisconceptionZh: '容易選 C：因為文章第 1 段確實提到 inventory，但那是準備階段，並非結尾開心的原因。',
+      followUpZh: null,
+    },
+    {
+      questionId: 'q-c2',
+      answer: 'It requires careful connection of materials.',
+      acceptedAnswers: [],
+      explanationZh: '文章強調仔細連接紅石粉與材料方能成功運作。',
+      likelyMisconceptionZh: '容易選 B：文章並未說機器總是失敗，結尾證明能成功。',
       followUpZh: null,
     },
     {
@@ -369,10 +397,26 @@ const caseA_210: CurriculumPackage = {
       followUpZh: null,
     },
     {
+      questionId: 'q-p2',
+      answer: 'They are strong blocks.',
+      acceptedAnswers: ['They are solid.'],
+      explanationZh: '複數代名詞 They 正確搭配 are。',
+      likelyMisconceptionZh: null,
+      followUpZh: null,
+    },
+    {
       questionId: 'q-r1',
       answer: 'is',
       acceptedAnswers: ['Alex is'],
       explanationZh: 'Alex 是第三人稱單數，搭配 is。',
+      likelyMisconceptionZh: null,
+      followUpZh: null,
+    },
+    {
+      questionId: 'q-r2',
+      answer: 'are',
+      acceptedAnswers: ['They are'],
+      explanationZh: 'They 是複數，搭配 are。',
       likelyMisconceptionZh: null,
       followUpZh: null,
     },

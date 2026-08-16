@@ -11,32 +11,32 @@
     "A": {
       "name": "Case A: Incoming G7 + Weak Grammar + Minecraft",
       "contextHash": "965a5914265da39ca861960d4d150a7e7237779c07577162b4844bd268b7240b",
-      "baselineOutputHash": "12481dc946e320aad45187873969992f08c6e4656424c677ce8b95c4a6bf1a51",
-      "candidateOutputHash": "0987fcb450a0dff4f51600a4b00dae4bd0ae78f4726e324aac0938255c87ad70"
+      "baselineOutputHash": "56b8d156b154e85841c91047adacff7c0069a483abedd01eb308ab1d16102567",
+      "candidateOutputHash": "3b83126a9c99204206e9d76bded38f99b3baa59738d0a08e9a8aa99edd44cf73"
     },
     "B": {
       "name": "Case B: G7 + Strong Reading + Basketball",
       "contextHash": "51cf85e604895d2fccb6e99c6c8b3870dc5ff9de819d67484fc244d417e3588b",
-      "baselineOutputHash": "3e6ddfe6f3c4e2decfa0898b8067970b2968e0db83fb125d62998a2879796947",
-      "candidateOutputHash": "0b4f0a22f901e2f14d8b701be45b2ae7427bf7caa4b761adfb10221cbd7e8e7c"
+      "baselineOutputHash": "3b9788fb35be6635181454dcb966a667ab54a59529ce8df020b09a8631f9ff79",
+      "candidateOutputHash": "acc679c7eeb8d313d874572c46cf689cce1214cca237f2fff15e72a07ccfad0c"
     },
     "C": {
       "name": "Case C: G8 + Recurring Grammar Mistake + Low Completion",
       "contextHash": "83d5cb3011b942abf1c60b2ef3d9299110a9cde377b47b6f990cb5ef7d913e11",
-      "baselineOutputHash": "4fa91cbd1a179a54d5613169b8ae5465756f5557f57382db136b971441e75ff6",
-      "candidateOutputHash": "9809c5ca04ada79ed159d14366ec78174772b05ecd862ab9d7b8c418bb310365"
+      "baselineOutputHash": "132d5f06453499231f612973b18ed947c40e99b2f7f03c2eb60646483eb6d4a1",
+      "candidateOutputHash": "86fe007496e6b69c435c3b4486d9674a160d962fecf35a665196054d1b013439"
     },
     "D": {
       "name": "Case D: Feedback Missing Baseline",
       "contextHash": "af22a34bd8034fd7dbb291df1b06245250d22612fc66220eb6ba65aa9c21a327",
-      "baselineOutputHash": "d966606c33612f68239e5100d04396f39343664a06feca0757479f36c8d6c5ca",
-      "candidateOutputHash": "20a258ef7a912d9927eb78e63701bc0f203f60d3a9da7b0b46ce3f383a790f17"
+      "baselineOutputHash": "045529fc793289ac644e3bebd993704ad45c675812138fbb70f885da796929e0",
+      "candidateOutputHash": "b263bbfa474f8974dc38eca012b6502fd331ae182425c1cf060ec27d40c76ba8"
     },
     "E": {
       "name": "Case E: Retry After Semantic Quality Rejection",
       "contextHash": "695b7124551d8e5f3b66bccdba2b37df083fb8e16f6f97b7071fba59bb1b870d",
-      "baselineOutputHash": "f76166331440a2f100701605ccd081a6ca25449041d3d9a15f4ddb05154428bc",
-      "candidateOutputHash": "b114860caf51bd65a99c0f775f9b11139c966ed18e4575d571641ffd862939b3"
+      "baselineOutputHash": "b5e5b77a628fc59c13b14855c6144f618716ba9d52b84c52f1e2e2df910195c9",
+      "candidateOutputHash": "5179b61e87dc0fee1ebf2c19667b24298757a55e3c2058fd64c358c1c2e0d884"
     }
   }
 }

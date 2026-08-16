@@ -51,4 +51,28 @@ describe('Wave 2 Pedagogy & Contract Invariants', () => {
     expect(bundle).not.toContain('finisherAutoHeal')
     expect(bundle).not.toContain('guided-box-css')
   })
+
+  it('enforces Prompt 2.2.0 low-model authoring scaffolds (few-shot, local Q&A, evidence recipes)', async () => {
+    const plan220 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.2.0/01-plan.md'), 'utf8')
+    const author220 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.2.0/02-author.md'), 'utf8')
+
+    // Simple Target Evidence Recipes
+    expect(plan220).toContain('Minimum Target Evidence Recipes')
+    expect(plan220).toContain('guided attempt ➔ independent attempt ➔ one later retrieval / homework check')
+    expect(plan220).toContain('independent detail/inference attempt ➔ CAP-transfer application')
+
+    // Micro Contrastive Few-Shot
+    expect(author220).toContain('Micro Contrastive Few-Shot (BAD ➔ GOOD)')
+    expect(author220).toContain('Mina has lived here _____ 2024.')
+    expect(author220).toContain('Why did the team change its plan?')
+    expect(author220).toContain('unsupported reasonable inference')
+
+    // Local Q&A Authoring Protocol
+    expect(author220).toContain('Local Question-Answer Authoring Protocol')
+    expect(author220).toContain('Local Thought Sequencing')
+    expect(author220).toContain('Deterministic Projection')
+
+    // Server-Side Deterministic Normalization Notice
+    expect(author220).toContain('Server-Side Deterministic Normalization Notice')
+  })
 })

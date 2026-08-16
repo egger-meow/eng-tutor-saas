@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "2.0.0",
+  "promptVersion": "2.2.0",
+  "bundleVersion": "2.2.0-prod",
+  "evaluatorModel": "adversarial-golden-rubric-v3",
+  "generatedAt": "2026-08-16T23:15:00.000Z",
+  "manifestHash": "d833ee0bf13806f98b4bc2145ebfe2777e5c014b18868bc73d342d59e16895b8",
+  "results": [
+    {
+      "variantId": "v1-baseline",
+      "variantName": "2.1.0 Baseline",
+      "tierKey": "strong",
+      "tierName": "Strong",
+      "models": [
+        "gpt-4o",
+        "claude-3-5-sonnet-20241022"
+      ],
+      "firstPassPassRate": 88,
+      "repairRate": 12,
+      "semanticQualityScore": 33.2,
+      "structuralFailuresPer100": 6,
+      "costPerPackageUsd": 0.04821,
+      "qualityPerDollarIndex": 6.9
+    },
+    {
+      "variantId": "v2-normalize-only",
+      "variantName": "+ Normalization Only",
+      "tierKey": "strong",
+      "tierName": "Strong",
+      "models": [
+        "gpt-4o",
+        "claude-3-5-sonnet-20241022"
+      ],
+      "firstPassPassRate": 94,
+      "repairRate": 6,
+      "semanticQualityScore": 33.2,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.0471,
+      "qualityPerDollarIndex": 7
+    },
+    {
+      "variantId": "v3-few-shot",
+      "variantName": "+ Micro Contrastive Few-Shot",
+      "tierKey": "strong",
+      "tierName": "Strong",
+      "models": [
+        "gpt-4o",
+        "claude-3-5-sonnet-20241022"
+      ],
+      "firstPassPassRate": 96,
+      "repairRate": 4,
+      "semanticQualityScore": 34,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.04674,
+      "qualityPerDollarIndex": 7.3
+    },
+    {
+      "variantId": "v4-local-qa",
+      "variantName": "+ Local Q&A Protocol",
+      "tierKey": "strong",
+      "tierName": "Strong",
+      "models": [
+        "gpt-4o",
+        "claude-3-5-sonnet-20241022"
+      ],
+      "firstPassPassRate": 98,
+      "repairRate": 2,
+      "semanticQualityScore": 34.2,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.04637,
+      "qualityPerDollarIndex": 7.4
+    },
+    {
+      "variantId": "v5-full-wave3",
+      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "tierKey": "strong",
+      "tierName": "Strong",
+      "models": [
+        "gpt-4o",
+        "claude-3-5-sonnet-20241022"
+      ],
+      "firstPassPassRate": 100,
+      "repairRate": 0,
+      "semanticQualityScore": 34.8,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.046,
+      "qualityPerDollarIndex": 7.6
+    },
+    {
+      "variantId": "v1-baseline",
+      "variantName": "2.1.0 Baseline",
+      "tierKey": "medium",
+      "tierName": "Medium",
+      "models": [
+        "gpt-4o-mini",
+        "claude-3-5-haiku-20241022"
+      ],
+      "firstPassPassRate": 52,
+      "repairRate": 38,
+      "semanticQualityScore": 27.4,
+      "structuralFailuresPer100": 28,
+      "costPerPackageUsd": 0.00318,
+      "qualityPerDollarIndex": 86.2
+    },
+    {
+      "variantId": "v2-normalize-only",
+      "variantName": "+ Normalization Only",
+      "tierKey": "medium",
+      "tierName": "Medium",
+      "models": [
+        "gpt-4o-mini",
+        "claude-3-5-haiku-20241022"
+      ],
+      "firstPassPassRate": 68,
+      "repairRate": 24,
+      "semanticQualityScore": 27.4,
+      "structuralFailuresPer100": 14,
+      "costPerPackageUsd": 0.00302,
+      "qualityPerDollarIndex": 90.7
+    },
+    {
+      "variantId": "v3-few-shot",
+      "variantName": "+ Micro Contrastive Few-Shot",
+      "tierKey": "medium",
+      "tierName": "Medium",
+      "models": [
+        "gpt-4o-mini",
+        "claude-3-5-haiku-20241022"
+      ],
+      "firstPassPassRate": 80,
+      "repairRate": 16,
+      "semanticQualityScore": 31,
+      "structuralFailuresPer100": 10,
+      "costPerPackageUsd": 0.00294,
+      "qualityPerDollarIndex": 105.4
+    },
+    {
+      "variantId": "v4-local-qa",
+      "variantName": "+ Local Q&A Protocol",
+      "tierKey": "medium",
+      "tierName": "Medium",
+      "models": [
+        "gpt-4o-mini",
+        "claude-3-5-haiku-20241022"
+      ],
+      "firstPassPassRate": 90,
+      "repairRate": 8,
+      "semanticQualityScore": 31.8,
+      "structuralFailuresPer100": 2,
+      "costPerPackageUsd": 0.00285,
+      "qualityPerDollarIndex": 111.6
+    },
+    {
+      "variantId": "v5-full-wave3",
+      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "tierKey": "medium",
+      "tierName": "Medium",
+      "models": [
+        "gpt-4o-mini",
+        "claude-3-5-haiku-20241022"
+      ],
+      "firstPassPassRate": 96,
+      "repairRate": 4,
+      "semanticQualityScore": 33.1,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.0028,
+      "qualityPerDollarIndex": 118.2
+    },
+    {
+      "variantId": "v1-baseline",
+      "variantName": "2.1.0 Baseline",
+      "tierKey": "cheap",
+      "tierName": "Cheap",
+      "models": [
+        "gemini-1.5-flash",
+        "llama-3.1-70b-instruct"
+      ],
+      "firstPassPassRate": 34,
+      "repairRate": 52,
+      "semanticQualityScore": 21.8,
+      "structuralFailuresPer100": 48,
+      "costPerPackageUsd": 0.00167,
+      "qualityPerDollarIndex": 130.5
+    },
+    {
+      "variantId": "v2-normalize-only",
+      "variantName": "+ Normalization Only",
+      "tierKey": "cheap",
+      "tierName": "Cheap",
+      "models": [
+        "gemini-1.5-flash",
+        "llama-3.1-70b-instruct"
+      ],
+      "firstPassPassRate": 54,
+      "repairRate": 36,
+      "semanticQualityScore": 21.8,
+      "structuralFailuresPer100": 30,
+      "costPerPackageUsd": 0.00158,
+      "qualityPerDollarIndex": 138
+    },
+    {
+      "variantId": "v3-few-shot",
+      "variantName": "+ Micro Contrastive Few-Shot",
+      "tierKey": "cheap",
+      "tierName": "Cheap",
+      "models": [
+        "gemini-1.5-flash",
+        "llama-3.1-70b-instruct"
+      ],
+      "firstPassPassRate": 70,
+      "repairRate": 22,
+      "semanticQualityScore": 27.6,
+      "structuralFailuresPer100": 20,
+      "costPerPackageUsd": 0.0015,
+      "qualityPerDollarIndex": 184
+    },
+    {
+      "variantId": "v4-local-qa",
+      "variantName": "+ Local Q&A Protocol",
+      "tierKey": "cheap",
+      "tierName": "Cheap",
+      "models": [
+        "gemini-1.5-flash",
+        "llama-3.1-70b-instruct"
+      ],
+      "firstPassPassRate": 82,
+      "repairRate": 14,
+      "semanticQualityScore": 28.5,
+      "structuralFailuresPer100": 6,
+      "costPerPackageUsd": 0.00146,
+      "qualityPerDollarIndex": 195.2
+    },
+    {
+      "variantId": "v5-full-wave3",
+      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "tierKey": "cheap",
+      "tierName": "Cheap",
+      "models": [
+        "gemini-1.5-flash",
+        "llama-3.1-70b-instruct"
+      ],
+      "firstPassPassRate": 92,
+      "repairRate": 8,
+      "semanticQualityScore": 30.8,
+      "structuralFailuresPer100": 0,
+      "costPerPackageUsd": 0.00142,
+      "qualityPerDollarIndex": 216.9
+    }
+  ]
+}

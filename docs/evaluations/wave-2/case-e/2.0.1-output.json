@@ -275,6 +275,22 @@
             ],
             "writingLines": 0,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-i2",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "detail",
+            "prompt": "Why does Alex collect iron ingots?",
+            "options": [
+              "To build iron doors",
+              "To make a bed",
+              "To feed animals",
+              "To plant trees"
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -300,6 +316,22 @@
             ],
             "writingLines": 0,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-c2",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "inference",
+            "prompt": "What is the main topic of the passage?",
+            "options": [
+              "Building a secret redstone door",
+              "Mining diamonds with friends",
+              "Fighting monsters in a cave",
+              "Making golden apples"
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -319,6 +351,16 @@
             "prompt": "用 The machine 和 is 寫出一個句子。",
             "writingLines": 2,
             "difficulty": "on-level"
+          },
+          {
+            "id": "q-p2",
+            "targetIds": [
+              "retrieval-pronouns"
+            ],
+            "itemType": "sentence-production",
+            "prompt": "用 They are 寫出一個句子。",
+            "writingLines": 2,
+            "difficulty": "on-level"
           }
         ]
       },
@@ -336,6 +378,16 @@
             ],
             "itemType": "short-response",
             "prompt": "He 搭配的 be 動詞是哪一個？",
+            "writingLines": 1,
+            "difficulty": "supported"
+          },
+          {
+            "id": "q-r2",
+            "targetIds": [
+              "retrieval-pronouns"
+            ],
+            "itemType": "short-response",
+            "prompt": "They 搭配的 be 動詞是哪一個？",
             "writingLines": 1,
             "difficulty": "supported"
           }
@@ -415,10 +467,26 @@
       "followUpZh": null
     },
     {
+      "questionId": "q-i2",
+      "answer": "To build iron doors",
+      "acceptedAnswers": [],
+      "explanationZh": "第 1 段提到需要鐵做門。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
       "questionId": "q-c1",
       "answer": "He successfully built a working door.",
       "acceptedAnswers": [],
       "explanationZh": "選 A，因為門打開了他很開心。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-c2",
+      "answer": "Building a secret redstone door",
+      "acceptedAnswers": [],
+      "explanationZh": "文章主要描述 Alex 製作紅石暗門。",
       "likelyMisconceptionZh": null,
       "followUpZh": null
     },
@@ -433,10 +501,26 @@
       "followUpZh": null
     },
     {
+      "questionId": "q-p2",
+      "answer": "They are strong.",
+      "acceptedAnswers": [],
+      "explanationZh": "複數代名詞 They 搭配 are。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
       "questionId": "q-r1",
       "answer": "is",
       "acceptedAnswers": [],
       "explanationZh": "He 是第三人稱單數，搭配 is。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-r2",
+      "answer": "are",
+      "acceptedAnswers": [],
+      "explanationZh": "They 是複數，搭配 are。",
       "likelyMisconceptionZh": null,
       "followUpZh": null
     },

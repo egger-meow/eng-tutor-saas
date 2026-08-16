@@ -1,12 +1,9 @@
 import { ZodError } from 'zod'
 import { CurriculumPackageSchema, type CurriculumPackage } from './curriculum-package-schema.js'
+import { countWords, normalizeCurriculumPackage } from './normalize-curriculum-package.js'
 import type { LessonValidationIssue } from './validate-lesson.js'
 
 export type CurriculumValidationResult = { success: true; curriculumPackage: CurriculumPackage } | { success: false; issues: LessonValidationIssue[] }
-
-function countWords(paragraphs: string[]): number {
-  return paragraphs.join(' ').trim().split(/\s+/u).filter(Boolean).length
-}
 
 export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
   // Implementation / field names
@@ -97,20 +94,6 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
     if (question.itemType === 'short-response' && question.writingLines === 0) issues.push({ path: `questions.${question.id}.writingLines`, message: 'Written responses require writing space' })
   }
 
-  if (value.parentSummary.personalizationZh) {
-    for (const [index, reason] of value.parentSummary.personalizationZh.entries()) {
-      const jargon = findForbiddenPersonalizationJargon(reason)
-      if (jargon) {
-        issues.push({
-          path: `parentSummary.personalizationZh.${index}`,
-          message: `Contains forbidden internal/curriculum-engine terminology ("${jargon}"). Must be written for a Taiwanese parent in plain Traditional Chinese without engine or debug jargon.`,
-        })
-      }
-    }
-  }
-
-  const actualWords = countWords(value.studentLesson.reading.paragraphs)
-  if (Math.abs(actualWords - value.studentLesson.reading.wordCount) > 3) issues.push({ path: 'studentLesson.reading.wordCount', message: `Declared ${value.studentLesson.reading.wordCount} words but found ${actualWords}` })
   const stages = new Set(value.studentLesson.practice.map((section) => section.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production'] as const) if (!stages.has(stage)) issues.push({ path: 'studentLesson.practice', message: `Missing required learning stage: ${stage}` })
   if (questions.length < 12) issues.push({ path: 'studentLesson.practice', message: 'A weekly package requires at least 12 answerable items' })
@@ -126,7 +109,8 @@ function schemaIssues(error: ZodError): LessonValidationIssue[] {
 }
 
 export function validateCurriculumPackage(input: unknown): CurriculumValidationResult {
-  const parsed = CurriculumPackageSchema.safeParse(input)
+  const normalized = normalizeCurriculumPackage(input)
+  const parsed = CurriculumPackageSchema.safeParse(normalized)
   if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
   const issues = relationshipIssues(parsed.data)
   return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage: parsed.data }

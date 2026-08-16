@@ -63,25 +63,39 @@ describe('curriculum package v2', () => {
     ]))
   })
 
+  it('auto-normalizes declared reading word count to actual word count', () => {
+    const value = validPackage()
+    value.studentLesson.reading.wordCount = 999
+    const result = validateCurriculumPackage(value)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      const actualWords = value.studentLesson.reading.paragraphs.join(' ').trim().split(/\s+/u).length
+      expect(result.curriculumPackage.studentLesson.reading.wordCount).toBe(actualWords)
+    }
+  })
+
   it.each([
     ['a missing gradual-release stage', (value: ReturnType<typeof validPackage>) => { value.studentLesson.practice = value.studentLesson.practice.filter((section) => section.stage !== 'guided') }],
     ['an unresolved critical review finding', (value: ReturnType<typeof validPackage>) => { value.qualityEvidence.criticFindings.push({ dimension: 'self-study', severity: 'critical', finding: 'No usable Chinese explanation.', resolution: null }) }],
-    ['a dishonest reading word count', (value: ReturnType<typeof validPackage>) => { value.studentLesson.reading.wordCount += 50 }],
     ['an answer gap', (value: ReturnType<typeof validPackage>) => { value.answers.pop() }],
     ['an unknown learning target', (value: ReturnType<typeof validPackage>) => { value.studentLesson.practice[0]!.questions[0]!.targetIds = ['missing-target'] }],
-    ['forbidden engine terminology in parentSummary.personalizationZh (production packet)', (value: ReturnType<typeof validPackage>) => {
-      value.parentSummary.personalizationZh = ['Week 1 無前一份 production packet 可比較；本週建立閱讀取證、字彙提取與因果產出的可觀察基線']
-    }],
-    ['forbidden debug/measurement jargon in parentSummary.personalizationZh (observable baseline)', (value: ReturnType<typeof validPackage>) => {
-      value.parentSummary.personalizationZh = ['本週建立可量測基準：同一目標跨 guided、independent、CAP、production、retrieval 與 homework 留下提示前後證據。']
-    }],
-    ['forbidden silence-mastery trope in parentSummary.personalizationZh', (value: ReturnType<typeof validPackage>) => {
-      value.parentSummary.personalizationZh = ['本輪為 Week 1 且 feedbackMissing=true；沒有把沉默視為掌握，採保守校準。']
-    }],
-  ])('rejects %s', (_, mutate) => {
+  ])('rejects structural defect: %s', (_, mutate) => {
     const value = validPackage()
     mutate(value)
     expect(validateCurriculumPackage(value).success).toBe(false)
+  })
+
+  it.each([
+    ['production packet', 'Week 1 無前一份 production packet 可比較；本週建立閱讀取證與因果產出的可觀察基線'],
+    ['observable baseline', '本週建立可量測基準：同一目標跨 guided、independent、CAP 留下提示前後證據。'],
+    ['silence-mastery trope', '本輪為 Week 1 且 feedbackMissing=true；沒有把沉默視為掌握，採保守校準。'],
+  ])('rejects semantic jargon in parentSummary.personalizationZh: %s', (_, jargonSentence) => {
+    const value = validPackage()
+    value.parentSummary.personalizationZh = [jargonSentence]
+    const audit = auditCurriculumPackage(value)
+    expect(audit.passed).toBe(false)
+    const semanticFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'parent-personalization')
+    expect(semanticFinding).toBeDefined()
   })
 
   it('accepts clean parent-facing personalizationZh answering parent questions', () => {
