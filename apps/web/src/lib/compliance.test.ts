@@ -12,8 +12,10 @@ describe('Legal & Compliance Configuration & Invariants', () => {
   })
 
   it('enforces valid company information and contact channels', () => {
-    expect(legalConfig.companyName).toBe('Egg & Cat Co. (紙屬英文)')
-    expect(legalConfig.contactEmail).toBe('support@paperenglish.tw')
+    expect(legalConfig.companyName).toBe('jjmow (侯均頲)')
+    expect(legalConfig.representative).toBe('jjmow (侯均頲)')
+    expect(legalConfig.contactEmail).toBe('jjmow.cs15@nycu.edu.tw')
+    expect(legalConfig.companyAddress).toBe('台灣新竹市')
   })
 
   it('supports recurring subscription mode by default with safety switch capability', () => {

@@ -124,9 +124,9 @@ export function PrivacyPage() {
               </p>
               <div className="operator-card">
                 <p><strong>服務名稱：</strong>紙屬英文（Paper English）</p>
-                <p><strong>營運團隊：</strong>{legalConfig.companyName || '紙屬英文營運團隊'}</p>
+                <p><strong>營運團隊：</strong>{legalConfig.companyName || 'jjmow (侯均頲)'}</p>
                 <p><strong>客服與個資專用 Email：</strong><a href={`mailto:${legalConfig.contactEmail}`}>{legalConfig.contactEmail}</a></p>
-                <p><strong>通訊地址：</strong>{legalConfig.companyAddress || '台灣（請以官方 Email 聯繫以獲得即時回覆）'}</p>
+                <p><strong>通訊地址：</strong>{legalConfig.companyAddress || '台灣新竹市'}</p>
               </div>
             </section>
           </article>

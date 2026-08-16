@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { addBasePath } from '../../app/routes'
 import { buildAuthRedirectUrl } from '../../lib/auth-redirect'
 import { getSupabaseClient } from '../../lib/supabase'
 import { clearPendingLegalAcceptance, recordPendingLegalAcceptance } from '../../lib/legal-acceptance'
@@ -37,7 +38,7 @@ export function AuthPanel() {
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
         <p className="auth-legal-consent">
-          點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
+          點擊送出即代表您已審閱並同意紙屬英文的 <a href={addBasePath('/terms', import.meta.env.BASE_URL)} target="_blank" rel="noreferrer">服務條款</a> 與 <a href={addBasePath('/privacy', import.meta.env.BASE_URL)} target="_blank" rel="noreferrer">隱私權政策</a>。
         </p>
         <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄送安全連結，繼續填寫'}</button>
       </form>

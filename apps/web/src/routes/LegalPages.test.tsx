@@ -78,12 +78,12 @@ describe('Legal & Compliance Pages Rendering', () => {
       expect(html).toContain('嚴禁將教材用於補習班教學、商業轉售、大量重製、出租或公開散布')
     })
 
-    it('renders governing law and Taipei District Court jurisdiction', () => {
+    it('renders governing law and court jurisdiction', () => {
       const html = renderToStaticMarkup(<TermsPage />)
 
       expect(html).toContain('準據法與管轄法院')
       expect(html).toContain('中華民國法律')
-      expect(html).toContain('臺灣臺北地方法院')
+      expect(html).toContain('臺灣新竹地方法院')
     })
   })
 })

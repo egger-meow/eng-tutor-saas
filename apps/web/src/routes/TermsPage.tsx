@@ -1,3 +1,5 @@
+import { addBasePath } from '../app/routes'
+import { handleInternalLink } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicFooter } from '../components/layout/PublicFooter'
 import { PublicHeader } from '../components/layout/PublicHeader'
@@ -142,7 +144,7 @@ export function TermsPage() {
             <section>
               <h2>第八條（個人資料保護與安全）</h2>
               <p>
-                本公司蒐集、處理及利用家長與學生個人資料之詳細規範，請參閱本網站公告之《<a href="/privacy">隱私權政策</a>》，該隱私權政策構成本契約之一部分。
+                本公司蒐集、處理及利用家長與學生個人資料之詳細規範，請參閱本網站公告之《<a href={addBasePath('/privacy', import.meta.env.BASE_URL)} onClick={handleInternalLink}>隱私權政策</a>》，該隱私權政策構成本契約之一部分。
               </p>
             </section>
 
@@ -153,7 +155,7 @@ export function TermsPage() {
                   本契約之解釋、效力及履行均以<strong>中華民國法律</strong>為準據法。
                 </li>
                 <li>
-                  因本契約所生之一切爭議，雙方應先秉持誠信原則協商解決；如涉訟時，雙方同意以<strong>臺灣臺北地方法院</strong>為第一審管轄法院。但法律另有專屬管轄規定（如《消費者保護法》第 47 條小額消費訴訟管轄）者，從其規定。
+                  因本契約所生之一切爭議，雙方應先秉持誠信原則協商解決；如涉訟時，雙方同意以<strong>臺灣新竹地方法院</strong>或消費者住所地地方法院為第一審管轄法院。但法律另有專屬管轄規定（如《消費者保護法》第 47 條小額消費訴訟管轄）者，從其規定。
                 </li>
               </ol>
             </section>
@@ -162,11 +164,10 @@ export function TermsPage() {
               <h2>第十條（企業經營者法定資訊）</h2>
               <div className="operator-card">
                 <p><strong>服務名稱：</strong>紙屬英文（Paper English）</p>
-                <p><strong>營運主體：</strong>{legalConfig.companyName || '紙屬英文營運團隊'}</p>
-                <p><strong>負責人：</strong>{legalConfig.representative || '依法登記代表人'}</p>
-                <p><strong>統一編號：</strong>{legalConfig.taxId || '辦理中 / 依法揭露'}</p>
-                <p><strong>客服信箱：</strong><a href={`mailto:${legalConfig.contactEmail}`}>{legalConfig.contactEmail}</a></p>
-                <p><strong>營業地址：</strong>{legalConfig.companyAddress || '台灣（請以官方客服 Email 聯繫）'}</p>
+                <p><strong>營運團隊：</strong>{legalConfig.companyName || 'jjmow (侯均頲)'}</p>
+                <p><strong>負責人：</strong>{legalConfig.representative || 'jjmow (侯均頲)'}</p>
+                <p><strong>客服與個資專用 Email：</strong><a href={`mailto:${legalConfig.contactEmail}`}>{legalConfig.contactEmail}</a></p>
+                <p><strong>通訊地址：</strong>{legalConfig.companyAddress || '台灣新竹市'}</p>
               </div>
             </section>
           </article>
