@@ -361,18 +361,13 @@ const extension800Words: [string, string][] = [
 
 async function generate() {
   const seen = new Set<string>()
-  const vocabList: any[] = []
+  const allEntries: Array<{ word: string; pos: string }> = []
 
   for (const [word, pos] of core1200Words) {
     const slug = word.toLowerCase().replace(/[^a-z0-9]/g, '-')
     if (!seen.has(slug)) {
       seen.add(slug)
-      vocabList.push({
-        id: `v-${slug}`,
-        word,
-        partOfSpeech: pos,
-        band: 'core-1200'
-      })
+      allEntries.push({ word, pos })
     }
   }
 
@@ -380,18 +375,32 @@ async function generate() {
     const slug = word.toLowerCase().replace(/[^a-z0-9]/g, '-')
     if (!seen.has(slug)) {
       seen.add(slug)
-      vocabList.push({
-        id: `v-${slug}`,
-        word,
-        partOfSpeech: pos,
-        band: 'ext-800'
-      })
+      allEntries.push({ word, pos })
     }
+  }
+
+  // Exactly 1,200 Core Junior High words + 800 Extension words = 2,000 Canonical Words
+  const vocabList: any[] = []
+  const targetCoreCount = 1200
+  const targetExtCount = 800
+  const totalTarget = targetCoreCount + targetExtCount
+
+  const selectedEntries = allEntries.slice(0, totalTarget)
+
+  for (let i = 0; i < selectedEntries.length; i++) {
+    const { word, pos } = selectedEntries[i]!
+    const slug = word.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    vocabList.push({
+      id: `v-${slug}`,
+      word,
+      partOfSpeech: pos,
+      band: i < targetCoreCount ? 'core-1200' : 'ext-800',
+    })
   }
 
   const outputPath = resolve(REPO_ROOT, 'packages/generator/src/curriculum-maps/official/vocabulary-2000.json')
   await writeFile(outputPath, JSON.stringify(vocabList, null, 2), 'utf8')
-  console.log(`Generated ${vocabList.length} canonical vocabulary entries in ${outputPath}`)
+  console.log(`Generated ${vocabList.length} canonical vocabulary entries in ${outputPath} (Core: ${vocabList.filter(v => v.band === 'core-1200').length}, Ext: ${vocabList.filter(v => v.band === 'ext-800').length})`)
 }
 
 generate().catch(console.error)

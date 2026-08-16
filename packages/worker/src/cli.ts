@@ -79,7 +79,7 @@ async function main(): Promise<void> {
     const context = await loadGenerationContext(client, jobId, workerId)
     const curriculumPackage = JSON.parse(await readFile(option('package') ?? '', 'utf8')) as unknown
     const materialId = await completeCurriculumJob({ client, workerId, context, curriculumPackage })
-    process.stdout.write(`${JSON.stringify({ jobId, materialId, schema: '2.0.0' })}\n`)
+    process.stdout.write(`${JSON.stringify({ jobId, materialId, schema: '2.2.0' })}\n`)
     return
   }
 

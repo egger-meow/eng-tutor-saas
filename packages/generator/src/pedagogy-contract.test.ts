@@ -8,35 +8,93 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Wave 2–4.1 Pedagogy & Contract Invariants', () => {
-  it('enforces Trigger → Pattern → Trap → Try mental model without rigid template labels in author prompt', async () => {
-    const authorPrompt = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.1.0/02-author.md'), 'utf8')
+describe('Wave 4.2 Active Prompt Invariant Contract (v2.4.0 Strict Inheritance)', () => {
+  it('enforces active Prompt 2.4.0 Wave 2 pedagogy invariants (Trigger-Pattern-Trap-Try, distractor reasoning, non-tautological explanations)', async () => {
+    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
+    const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
 
-    expect(authorPrompt).toContain('Trigger → Pattern → Trap → Try')
-    expect(authorPrompt).toContain('Do NOT mechanically copy-paste or expose the literal labels')
-    expect(authorPrompt).toContain('commonMistakes')
+    // Operational mental model & mistake contrasting
+    expect(author240).toContain('Trigger → Pattern → Trap → Try')
+    expect(author240).toContain('Do NOT mechanically copy-paste or expose the literal labels')
+    expect(author240).toContain('commonMistakes')
+
+    // Diagnostic distractor design
+    expect(author240).toContain('What flawed student reasoning would lead them to choose this?')
+    expect(author240).toContain('partial evidence')
+    expect(author240).toContain('reversed relationship')
+    expect(critic240).toContain('Weak, Silly, or Unprincipled Distractors')
+
+    // Non-tautological explanations
+    expect(author240).toContain('Tautological explanations (e.g. 「答案 C，因為根據文章內容 C 正確」) are strictly forbidden.')
+    expect(author240).toContain('likelyMisconceptionZh')
+    expect(critic240).toContain('Circular or Tautological Explanations')
   })
 
-  it('enforces the student-reasoning distractor invariant in author and critic prompts', async () => {
-    const authorPrompt = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.1.0/02-author.md'), 'utf8')
-    const criticPrompt = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.1.0/03-critic.md'), 'utf8')
+  it('enforces active Prompt 2.4.0 Wave 3 low-model authoring scaffolds (micro few-shot, local Q&A protocol, deterministic normalization)', async () => {
+    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
 
-    expect(authorPrompt).toContain('What flawed student reasoning would lead them to choose this?')
-    expect(authorPrompt).toContain('partial evidence')
-    expect(authorPrompt).toContain('reversed relationship')
-    expect(criticPrompt).toContain('Weak, Silly, or Unprincipled Distractors')
+    // Micro contrastive few-shot
+    expect(author240).toContain('Micro Contrastive Few-Shot (BAD ➔ GOOD)')
+    expect(author240).toContain('Mina and Jay encounter a sensor failure')
+    expect(author240).toContain('do / does 疑問句的動詞還原規則')
+
+    // Local Q&A Authoring Protocol
+    expect(author240).toContain('Local Question-Answer Authoring Protocol')
+    expect(author240).toContain('author the question and its corresponding answer object')
+
+    // Server-Side Deterministic Normalization Notice
+    expect(author240).toContain('Server-Side Deterministic Normalization Notice')
   })
 
-  it('explicitly forbids tautological parent answer explanations', async () => {
-    const authorPrompt = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.1.0/02-author.md'), 'utf8')
-    const criticPrompt = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.1.0/03-critic.md'), 'utf8')
+  it('enforces active Prompt 2.4.0 Wave 4 deep situational personalization and multi-genre blocks', async () => {
+    const plan240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
+    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
+    const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
 
-    expect(authorPrompt).toContain('Tautological explanations (e.g. 「答案 C，因為根據文章內容 C 正確」) are strictly forbidden.')
-    expect(criticPrompt).toContain('Circular or Tautological Explanations')
-    expect(authorPrompt).toContain('likelyMisconceptionZh')
+    // Hierarchy & Matrix
+    expect(plan240).toContain('The Golden Hierarchy: Target ➔ Genre ➔ Interest')
+    expect(plan240).toContain('Genre Alignment Matrix')
+    expect(plan240).toContain('Deep Situational Personalization (No Superficial Skinning)')
+    expect(plan240).toContain('Pedagogy Over Novelty')
+
+    // Multi-Genre Reading Blocks
+    expect(author240).toContain('Schema 2.2.0 Multi-Genre Reading Blocks')
+    expect(author240).toContain('schedule-row')
+    expect(author240).toContain('Item-Type Rotation (Taiwan CAP Competency Distribution)')
+    expect(critic240).toContain('Genre-Block Structural Consistency')
   })
 
-  it('preserves CurriculumPackageSchema 2.2.0 canonical, V21 legacy, and V20 legacy', () => {
+  it('enforces active Prompt 2.4.0 Wave 4.1 CAP curriculum foundation & strict exposure invariants', async () => {
+    const plan240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
+    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
+    const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
+
+    // Planning Priority & Capsule
+    expect(plan240).toContain('The Strict Planning Priority Order')
+    expect(plan240).toContain('CAP Coverage Capsule')
+
+    // Exposure Invariant
+    expect(author240).toContain('records **EXPOSURE ONLY**. Exposure is not evidence of mastery.')
+    expect(author240).toContain('exposedGrammarTargetIds')
+    expect(author240).toContain('exposedCommunicationFunctionIds')
+    expect(critic240).toContain('Separation of Exposure vs Mastery')
+  })
+
+  it('enforces active Prompt 2.4.0 Wave 4.2 passage-first lexical contract & ceiling', async () => {
+    const plan240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
+    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
+    const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
+
+    expect(plan240).toContain('Passage-First Lexical Integration')
+    expect(author240).toContain('Passage-First Lexical Contract & Ceiling')
+    expect(author240).toContain('Vocabulary is Curriculum Anchor, Not Insertion Queue')
+    expect(author240).toContain('Lexical Ceiling Invariant')
+    expect(critic240).toContain('Passage-First Lexical Contract & Lexical Ceiling')
+  })
+
+  it('preserves CurriculumPackageSchema 2.2.0 canonical, V21 legacy, and V20 legacy schemas', async () => {
+    const bundle = await readFile(resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+
     // Assert schema target domain enum includes communication in 2.2.0
     const targetDomainEnum = CurriculumPackageSchema.shape.learningPlan.shape.targets.element.shape.domain.options
     expect(targetDomainEnum).toEqual(['vocabulary', 'grammar', 'reading', 'writing', 'communication', 'review'])
@@ -50,49 +108,9 @@ describe('Wave 2–4.1 Pedagogy & Contract Invariants', () => {
 
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.0.0').success).toBe(true)
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
-  })
 
-  it('enforces Prompt 2.4.0 Wave 4.1 CAP curriculum foundation, multi-genre, and trajectory diversity invariants', async () => {
-    const plan240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
-    const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
-    const bundle = await readFile(resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
-
-    // Planning Priority & Target ➔ Genre Hierarchy
-    expect(plan240).toContain('The Strict Planning Priority Order')
-    expect(plan240).toContain('The Golden Hierarchy: Target ➔ Genre ➔ Interest')
-    expect(plan240).toContain('Genre Alignment Matrix')
-
-    // Exposure Invariant in Authoring
-    expect(author240).toContain('Exposure is not evidence of mastery.')
-    expect(author240).toContain('trackingDelta: Exposure Only (Schema 2.2.0)')
-    expect(author240).toContain('Schema 2.2.0')
-
-    // Bundle compiled with 2.4.0
+    // Bundle compiled with 2.4.0-prod and schema 2.2.0
     expect(bundle).toContain('bundleVersion: "2.4.0-prod"')
     expect(bundle).toContain('schemaVersion: "2.2.0"')
-  })
-
-  it('enforces Prompt 2.2.0 low-model authoring scaffolds (few-shot, local Q&A, evidence recipes)', async () => {
-    const plan220 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.2.0/01-plan.md'), 'utf8')
-    const author220 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.2.0/02-author.md'), 'utf8')
-
-    // Simple Target Evidence Recipes
-    expect(plan220).toContain('Minimum Target Evidence Recipes')
-    expect(plan220).toContain('guided attempt ➔ independent attempt ➔ one later retrieval / homework check')
-    expect(plan220).toContain('independent detail/inference attempt ➔ CAP-transfer application')
-
-    // Micro Contrastive Few-Shot
-    expect(author220).toContain('Micro Contrastive Few-Shot (BAD ➔ GOOD)')
-    expect(author220).toContain('Mina has lived here _____ 2024.')
-    expect(author220).toContain('Why did the team change its plan?')
-    expect(author220).toContain('unsupported reasonable inference')
-
-    // Local Q&A Authoring Protocol
-    expect(author220).toContain('Local Question-Answer Authoring Protocol')
-    expect(author220).toContain('Local Thought Sequencing')
-    expect(author220).toContain('Deterministic Projection')
-
-    // Server-Side Deterministic Normalization Notice
-    expect(author220).toContain('Server-Side Deterministic Normalization Notice')
   })
 })

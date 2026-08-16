@@ -14,6 +14,7 @@ export function validPackage(): CurriculumPackageV20 {
     { id: 'independent-reading', stage: 'independent', titleZh: '自己試試看', instructionsZh: '不看提示完成。', hintZh: null, questions: [question('I1'), question('I2'), question('I3')] },
     { id: 'cap-reading', stage: 'cap-transfer', titleZh: '會考型閱讀', instructionsZh: '比較四個選項。', hintZh: null, questions: [question('C1', 'inference'), question('C2', 'inference'), question('C3', 'inference')] },
     { id: 'production', stage: 'production', titleZh: '寫出你的想法', instructionsZh: '使用本週句型。', hintZh: null, questions: [question('P1', 'sentence-production')] },
+    { id: 'retrieval', stage: 'retrieval', titleZh: '延遲提取', instructionsZh: '隔天完成提取練習。', hintZh: null, questions: [question('R1')] },
   ]
   const homeworkQuestions = [question('H1'), question('H2'), question('H3')]
   const allQuestions = [...practice.flatMap((section) => section.questions), ...homeworkQuestions]

@@ -7,7 +7,7 @@ import { renderCurriculumPackagePair } from './render-curriculum-pair.js'
 const question = (id: string, prompt: string, options?: string[]) => ({
   id,
   targetIds: ['reading-inference', 'grammar-do-does', 'vocab-experiment'],
-  itemType: options ? 'inference' : 'short-response',
+  itemType: (options ? 'inference' : 'short-response') as 'inference' | 'short-response',
   prompt,
   options,
   writingLines: options ? 0 : 2,

@@ -3,6 +3,7 @@ import { isAbsolute, resolve } from 'node:path'
 import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from './validate-curriculum-package.js'
 import type { CurriculumPackage } from './curriculum-package-schema.js'
 import { extractBlockTexts } from './normalize-curriculum-package.js'
+import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -17,6 +18,32 @@ export type CurriculumAuditReport = {
   passed: boolean
   findings: CurriculumAuditFinding[]
   summary: { questions: number; words: number; targets: number; tokenEfficiencySignals: number }
+}
+
+const canonicalVocabSet = new Set(vocabulary2000.map((v) => v.word.toLowerCase()))
+
+function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
+  const w = word.toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
+  if (!w || /^\d+$/u.test(w) || w.length <= 2) return true
+  if (taughtWords.has(w) || canonicalVocabSet.has(w)) return true
+
+  // Common basic contractions / auxiliaries
+  if (['don', 't', 'doesn', 'didn', 'won', 'can', 'isn', 'aren', 'wasn', 'weren', 'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 's', 're', 've', 'll', 'd', 'm'].includes(w)) {
+    return true
+  }
+
+  // Common inflections & stems
+  if (w.endsWith('s') && canonicalVocabSet.has(w.slice(0, -1))) return true
+  if (w.endsWith('es') && canonicalVocabSet.has(w.slice(0, -2))) return true
+  if (w.endsWith('ies') && canonicalVocabSet.has(w.slice(0, -3) + 'y')) return true
+  if (w.endsWith('ed') && (canonicalVocabSet.has(w.slice(0, -2)) || canonicalVocabSet.has(w.slice(0, -1)))) return true
+  if (w.endsWith('ied') && canonicalVocabSet.has(w.slice(0, -3) + 'y')) return true
+  if (w.endsWith('ing') && (canonicalVocabSet.has(w.slice(0, -3)) || canonicalVocabSet.has(w.slice(0, -3) + 'e'))) return true
+  if (w.endsWith('ly') && canonicalVocabSet.has(w.slice(0, -2))) return true
+  if (w.endsWith('er') && canonicalVocabSet.has(w.slice(0, -2))) return true
+  if (w.endsWith('est') && canonicalVocabSet.has(w.slice(0, -3))) return true
+
+  return false
 }
 
 function words(value: string): number { return value.trim().split(/\s+/u).filter(Boolean).length }
@@ -62,6 +89,30 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
     add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為公告 (notice)，但內容未包含任何 notice blocks。')
   }
 
+  const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
+
+  // Passage-First Lexical Contract & Lexical Ceiling Lint
+  const taughtVocab = new Set(pkg.studentLesson.vocabulary.map((v) => v.word.toLowerCase()))
+  const rawPassageText = blockTexts.join(' ')
+  const passageTokens = rawPassageText.split(/\s+/u).filter(Boolean)
+
+  const unapprovedWords: string[] = []
+  for (const token of passageTokens) {
+    const clean = token.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
+    if (!clean) continue
+    if (isApprovedWord(clean, taughtVocab)) continue
+
+    // Allow proper names / interest terms
+    if (/^[A-Z][a-z]+$/u.test(clean)) continue
+    if (interestText.includes(clean.toLowerCase())) continue
+
+    unapprovedWords.push(clean)
+  }
+
+  if (unapprovedWords.length > 12) {
+    add('semantic-critical', 'lexical-ceiling', 'warning', `閱讀文章中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${Array.from(new Set(unapprovedWords)).slice(0, 4).join(', ')})，請確認是否加入核心單字或替換為常用字。`)
+  }
+
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))
   const covered = new Set(questions.flatMap((question) => question.targetIds))
   for (const targetId of targetIds) if (!covered.has(targetId)) add('semantic-critical', 'alignment', 'critical', `學習目標 ${targetId} 沒有任何可觀察題目。`)
@@ -93,7 +144,6 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   const stageNames = new Set(pkg.studentLesson.practice.map((stage) => stage.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('semantic-critical', 'self-study', 'critical', `缺少 ${stage} 階段。`)
 
-  const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
   const lessonText = JSON.stringify({ title: pkg.studentLesson.reading.title, context: pkg.studentLesson.reading.contextZh, blocks: pkg.studentLesson.reading.blocks, strategy: pkg.learningPlan.personalizationStrategy }).toLocaleLowerCase()
   if (interestText && !interestText.split(/[,，、;；\s]+/u).filter((term) => term.length >= 2).some((term) => lessonText.includes(term))) add('semantic-critical', 'personalization', 'warning', '具體興趣沒有在教材情境或個人化策略留下可追溯證據。')
   if (pkg.qualityEvidence.feedbackApplied.length === 0) add('semantic-critical', 'feedback-loop', 'critical', '沒有記錄本週如何使用回饋。')

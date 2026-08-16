@@ -4,10 +4,10 @@ schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
 generatedAt: "2026-08-17T00:30:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "a6291b9535bed35bc561afef234eda2269555d29c510ab17850a897a5918b93b"
-  "packages/generator/prompts/2.4.0/02-author.md": "c88da50c080145d7208d2cfbfc00ae2c663a89d86e966b0ef8f421a1eec0902d"
-  "packages/generator/prompts/2.4.0/03-critic.md": "bdfec3c7c00c39a43889d96d05720306e672f1f35e997a8d06c6c2171c3412b0"
-  "packages/generator/prompts/2.4.0/04-repair.md": "0031b2250175844723c6bd8808bd9c9792aa989f52432d9a7577d131a403a22c"
+  "packages/generator/prompts/2.4.0/01-plan.md": "1723de56c507fd453d078cc7b7e4bbe6a63b89d9304d64fedfd56960abac0a3b"
+  "packages/generator/prompts/2.4.0/02-author.md": "fb0eda443825b9b8b0a297c03c101ce7d0cf233a0a9203c1061e5765c221a55d"
+  "packages/generator/prompts/2.4.0/03-critic.md": "793a0d8358ae1d72bc0e377fa631817c3e8af53a30a1e6fac38de4e75cd93864"
+  "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
   "packages/generator/src/curriculum-package-schema.ts": "cbd1bc97d24d39f3c4624b8302f55d6e447f7d9a93663f0cd130e9b632384b20"
   "docs/curriculum-quality-rubric.md": "3eb158e373d52fa029446f0d14edbc1e73b4df95363b8bc3ae6095e232c7fcb0"
   "docs/product-rules.md": "0fd7c373e33f67f439db6df73ca6fb0225d8f0655eba2be1ac02f207557e3540"
@@ -373,7 +373,7 @@ You receive:
 3. **CAP Coverage Capsule** (Decision-Complete Top-N Priorities):
    ```json
    {
-     "dueReviewVocabulary": ["v-borrow", "v-experience"],
+     "dueReviewVocabulary": ["v-borrow"],
      "recommendedVocabulary": ["v-through", "v-instead"],
      "dueReviewGrammar": ["g8-past-simple-verbs"],
      "recommendedGrammar": ["g8-adverbial-clauses-time-reason"],
@@ -385,13 +385,9 @@ You receive:
      }
    }
    ```
-4. **Diversity Capsule** (Server-Owned Generation History):
+4. **Diversity Capsule** (Server Generation History):
    ```json
-   {
-     "recentGenres": ["dialogue", "narrative", "article"],
-     "recentContextKeys": ["minecraft-redstone-troubleshooting", "basketball-defense-timeout"],
-     "recentItemFamilies": ["inference-heavy", "detail-heavy"]
-   }
+   { "recentGenres": ["dialogue", "article"], "recentContextKeys": ["minecraft-redstone"] }
    ```
 
 ---
@@ -401,7 +397,7 @@ You receive:
 When selecting targets for this week, follow this exact sequence:
 
 1. **Demonstrated Weakness & Missing Prerequisites**:
-   If recurring mistakes or prior feedback indicate a foundational gap (e.g., `do/does` verb un-inflection), prioritize repairing this prerequisite.
+   If recurring mistakes or prior feedback indicate a foundational gap (e.g., `do/does` verb un-inflection), prioritize repairing this prerequisite first.
 2. **Actual School Syllabus & Upcoming Exam Progress**:
    Align the primary grammar and vocabulary targets with current school progression.
 3. **Due Spaced Review**:
@@ -435,9 +431,21 @@ Step 3: Instantiate in Authentic Interest Situation & Problem Context
 | **Sequence, Process & Problem Solving** | `instructions`, `schedule` | `schedule-row`, `paragraph` |
 | **Viewpoints & Comparison** | `mini-report`, `article` | `paragraph`, `notice` |
 
+### Repetition Pressure & Rotation Rules:
+- **Pedagogy Over Novelty**: If the student failed a prerequisite last week, keep the required target and change only the scenario/item format.
+- **Rotation When Equivalent**: If multiple genres/topics equally support the target, choose one not used in the last 2 weeks (`recentGenres`).
+- **Diversity ≠ Randomness**: Never select an awkward genre (e.g. schedule for descriptive narrative) just to satisfy diversity.
+
 ---
 
-## 4. Learning Plan Output Format (Schema 2.2.0)
+## 4. Deep Situational Personalization (No Superficial Skinning)
+
+- **Authentic Engineering & Hobby Situations**: Embed targets into real problems (e.g., debugging a redstone repeater delay, calibrating optical sensors, planning tournament rotations), rather than skin-deep mentions like "Alex likes robots".
+- **Passage-First Lexical Integration**: Core vocabulary targets must be the actual difficult words essential to the reading passage, never artificial random insertions.
+
+---
+
+## 5. Learning Plan Output Format (Schema 2.2.0)
 
 Output a JSON object matching `learningPlan`:
 ```json
@@ -448,107 +456,204 @@ Output a JSON object matching `learningPlan`:
     {
       "id": "target-reading-inference",
       "domain": "reading",
-      "description": "根據文本中的因果轉折詞 (because, instead) 進行上下文推論。",
-      "evidence": [{ "source": "feedback", "detail": "上週推論題容易只看單一字面意思。" }],
-      "successCriteria": "能為答案在文中圈出至少一處依據句。"
+      "description": "根據因果轉折詞 (because, instead) 進行上下文推論。",
+      "evidence": [{ "source": "feedback", "detail": "上週推論題只看字面。" }],
+      "successCriteria": "圈出文中依據句。"
     },
     {
       "id": "target-grammar-time-clause",
       "domain": "grammar",
-      "description": "掌握 before / after 時間副詞子句與主要子句時態一致性。",
-      "evidence": [{ "source": "school", "detail": "學校進度進入第二冊 Unit 4。" }],
-      "successCriteria": "完成四題練習並能訂正時態錯誤。"
+      "description": "掌握 before / after 時間副詞子句時態一致性。",
+      "evidence": [{ "source": "school", "detail": "進度進入 Unit 4。" }],
+      "successCriteria": "完成練習並訂正錯誤。"
     },
     {
       "id": "target-comm-polite-request",
       "domain": "communication",
-      "description": "使用 Could you please...? 提出委託並進行社交應答。",
-      "evidence": [{ "source": "curriculum", "detail": "CAP 課綱溝通功能推薦補強 (cf-making-requests)。" }],
-      "successCriteria": "能辨識並運用禮貌請求句型完成問答。"
+      "description": "使用 Could you please...? 提出委託應答。",
+      "evidence": [{ "source": "curriculum", "detail": "CAP 課綱推薦 (cf-making-requests)。" }],
+      "successCriteria": "能辨識並運用禮貌句型。"
     }
   ],
-  "prerequisites": ["一般過去式動詞變化"],
-  "reviewStrategy": ["在引導階段先複習上週過去式動詞，再進入時間副詞子句。"],
-  "personalizationStrategy": "以機器人團隊分工情境承載請求委託與時間子句，保持語言難度並激發動機。",
-  "exclusions": ["本週不引入複雜被動語態"]
+  "prerequisites": ["過去式動詞"],
+  "reviewStrategy": ["引導階段先複習過去式。"],
+  "personalizationStrategy": "機器人團隊情境承載請求委託與時間子句。",
+  "exclusions": ["不引入被動語態"]
 }
 ```
 
 ## 5. Prompt 02: Authoring Engine
-# Prompt 02: Authoring (v2.4.0)
+# Prompt 02: Material Authoring (v2.4.0)
 
-You are the Authoring Engine for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
-
----
-
-## 1. Core Mission & Invariants
-
-You author a complete, self-study-friendly, print-ready weekly English curriculum package conforming to **Schema 2.2.0**.
-
-### Non-Negotiable Invariants:
-1. **Schema 2.2.0 Compliance**:
-   - `metadata.schemaVersion` must be `"2.2.0"`.
-   - `studentLesson.reading.blocks` is the **only** source of truth for reading passages.
-   - `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
-2. **Pedagogy & Scaffolding**:
-   - Every weekly packet must contain at least 12 answerable questions across 5 stages: `guided`, `independent`, `cap-transfer` (with 4 options), `production`, and `retrieval`.
-   - Clear Chinese explanations (`walkthroughZh`) and worked examples for all instructions.
-3. **Natural Communicative Functions**:
-   - When dialogues or notices are authored, incorporate authentic communicative functions (requests, apologies, agreement/disagreement, directions, ordering, advice) without artificial robot phrasing.
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
 
 ---
 
-## 2. Multi-Genre Reading Blocks Schema
+## 1. Schema 2.2.0 Multi-Genre Reading Blocks
 
-The reading passage is structured as typed blocks matching `studentLesson.reading.genre`:
+The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a `paragraphs` array.
 
 ```json
 {
-  "reading": {
-    "title": "The Community Makerspace Rules",
-    "contextZh": "社區創客空間發布了設備借用與安全指引，請閱讀並注意預約條件。",
-    "genre": "notice",
-    "blocks": [
-      {
-        "type": "notice",
-        "heading": "IMPORTANT SAFETY NOTICE",
-        "text": "All members must complete the 3D-printer safety orientation before reserving machines."
-      },
-      {
-        "type": "paragraph",
-        "text": "The workshop provides three laser cutters and four soldering stations for student projects."
-      }
-    ],
-    "wordCount": 185,
-    "readingTipsZh": ["先閱讀粗體標題與關鍵要求，再對照題目中的限制條件。"],
-    "sourceNote": null
-  }
+  "genre": "dialogue",
+  "blocks": [
+    { "type": "paragraph", "text": "Alex and Steve meet in their workshop to fix a sorting machine." },
+    { "type": "dialogue", "speaker": "Alex", "text": "Why does the hopper stop moving iron ingots?" },
+    { "type": "dialogue", "speaker": "Steve", "text": "The redstone torch below locks the hopper." },
+    { "type": "notice", "heading": "RULE", "text": "Test repeater delay before loading items." },
+    { "type": "schedule-row", "timeOrStep": "Step 1", "event": "Break redstone line", "detail": "Reset hopper" }
+  ]
 }
 ```
 
+### The 4 Allowed Block Types:
+1. `paragraph`: `{ "type": "paragraph", "text": "..." }`
+2. `dialogue`: `{ "type": "dialogue", "speaker": "Name", "text": "..." }`
+3. `notice`: `{ "type": "notice", "heading": "OPTIONAL_HEADING", "text": "..." }`
+4. `schedule-row`: `{ "type": "schedule-row", "timeOrStep": "09:00 or Step 1", "event": "Action/Event", "detail": "Optional extra detail" }`
+
+* **Word Count Normalization**: Passage text across all blocks must total $\ge 120$ words ($\le 900$ words). The server deterministically computes `wordCount`, so never fabricate or round it artificially.
+
 ---
 
-## 3. trackingDelta: Exposure Only (Schema 2.2.0)
+## 2. Micro Contrastive Few-Shot (BAD ➔ GOOD)
 
-`trackingDelta` records which curriculum items were introduced or reviewed this week so that the server-side spaced repetition system can track long-term exposures.
+### Example 1: Multi-Genre Reading Blocks & Deep Situational Immersion
 
+❌ **BAD (Superficial Noun Skinning & Monolithic Block)**:
+```json
+{
+  "genre": "dialogue",
+  "blocks": [
+    { "type": "paragraph", "text": "Alex plays Minecraft. Alex says I like redstone. Steve says redstone is cool. Alex builds a machine. They are happy." }
+  ]
+}
+```
+*Pedagogical Flaws*: Noun-swapping without a real problem, fake dialogue inside a single paragraph block, no cognitive demand.
+
+✅ **GOOD (Deep Situational Task with Native Multi-Genre Blocks)**:
+```json
+{
+  "genre": "dialogue",
+  "blocks": [
+    { "type": "paragraph", "text": "In the robotics lab, Mina and Jay encounter a sensor failure right before the county science fair judging begins." },
+    { "type": "dialogue", "speaker": "Jay", "text": "Should we replace every single cable right now to be completely safe?" },
+    { "type": "dialogue", "speaker": "Mina", "text": "No. If we change everything at once, we will never know which part caused the short circuit." },
+    { "type": "notice", "heading": "SAFETY PROTOCOL", "text": "Inspect the optical sensor voltage before reconnecting the lithium battery." },
+    { "type": "schedule-row", "timeOrStep": "14:00", "event": "Calibrate light sensor", "detail": "Test under natural sunlight" }
+  ]
+}
+```
+*Pedagogy*: Real scientific troubleshooting problem, clear information distribution, genuine dialogue block usage.
+
+---
+
+### Example 2: Grammar Mental Model (Trigger → Pattern → Trap → Try)
+
+❌ **BAD (Abstract Definition & Trivial Rule)**:
+```text
+titleZh: "do 和 does"
+explanationZh: "do 用於複數，does 用於第三人稱單數。記住加 s。"
+```
+
+✅ **GOOD (Operational Mental Model with Concrete Decision Tree)**:
+```text
+titleZh: "do / does 疑問句的動詞還原規則"
+explanationZh: "【第1步看主詞】問句開頭如果看到 does，代表第三人稱單數的標記已經被 does 拿走了。➔ 【第2步動詞歸位】後面的主要動詞一律回到『原形動詞』，絕對不能再加 s 或 es。"
+patterns: ["Does + he/she/it/單數名詞 + 原形動詞...?"]
+commonMistakes: [{
+  "wrong": "Does your robot recognizes different colors?",
+  "corrected": "Does your robot recognize different colors?",
+  "whyZh": "【常見陷阱】前面已有 Does 吸收了第三人稱標記，後面的主要動作 recognize 必須打回原形，不能再寫 recognizes！"
+}]
+```
+*Do NOT mechanically copy-paste or expose the literal labels "Trigger", "Pattern", "Trap", "Try" in student-facing text; let the instructional logic breathe naturally through step-by-step guidance.*
+
+---
+
+### Example 3: CAP 4-Option Reasoning & Misconception Diagnosis
+
+❌ **BAD (Surface Word Search & Empty Explanation)**:
+```text
+prompt: "What does Mina test?"
+options: ["A robot", "A cat", "A car", "A house"]
+explanationZh: "答案是 A，因為根據文章內容 A 正確。"
+```
+*Tautological explanations (e.g. 「答案 C，因為根據文章內容 C 正確」) are strictly forbidden.*
+
+✅ **GOOD (Inference Reasoning with Diagnostic Distractors)**:
+```text
+prompt: "Why does Mina refuse Jay's suggestion to change all components at once?"
+options: [
+  "She wants to isolate the single variable causing the error.",
+  "She does not have enough replacement cables in the laboratory.",
+  "She plans to quit the competition before the judging begins.",
+  "She believes the optical sensor never needs calibration."
+]
+answer: "A"
+explanationZh: "第 3 句 Mina 明確指出『若一次更換所有零件，將無法釐清真正引發短路的元件』，符合科學實驗控制單一變因原則。"
+likelyMisconceptionZh: "選 B 者常因看見文中提及材料庫存而過度推論 (partial evidence)；選 C 者誤解其謹慎態度為放棄 (reversed relationship)。"
+```
+*Distractor Design Rule: For every wrong option, ask yourself: What flawed student reasoning would lead them to choose this? Include partial evidence, reversed relationship, or extreme scope errors.*
+
+---
+
+## 3. Passage-First Lexical Contract & Ceiling
+
+1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
+   Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+2. **Lexical Ceiling Invariant**:
+   All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words (e.g. *ubiquitous*, *dichotomy*) into reading blocks.
+3. **Proper Nouns & Domain Terms**:
+   Capitalized situational proper nouns (e.g. *Minecraft*, *Arduino*, *Alex*) are permitted when contextualized clearly.
+
+---
+
+## 4. Local Question-Answer Authoring Protocol
+
+To eliminate orphan IDs, missing answers, and answer key mismatches:
+1. Always author the question and its corresponding answer object **atomically in the same conceptual block**.
+2. Question ID `q` in practice/homework MUST match `answers[].questionId` identically.
+3. Every learning target ID referenced in `questions[].targetIds` MUST match a defined target in `learningPlan.targets`.
+4. Target Evidence Invariant: Every target in `learningPlan.targets` must appear in at least 2 distinct stages (guided attempt ➔ independent attempt ➔ one later retrieval / homework check).
+
+---
+
+## 5. Item-Type Rotation (Taiwan CAP Competency Distribution)
+
+Each weekly practice set should balance:
+* **1 Macro Item**: Main idea, author's purpose, or broad title inference.
+* **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
+* **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
+
+---
+
+## 6. trackingDelta: Exposure Only (Schema 2.2.0)
+
+`trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
 ```json
 {
   "trackingDelta": {
-    "introducedVocabularyIds": ["v-experience", "v-borrow", "v-measure", "v-result"],
-    "reviewedVocabularyIds": ["v-shade", "v-notice"],
+    "introducedVocabularyIds": ["v-experience", "v-borrow"],
+    "reviewedVocabularyIds": ["v-notice"],
     "exposedGrammarTargetIds": ["g8-adverbial-clauses-time-reason"],
     "exposedReadingTargetIds": ["target-reading-inference"],
     "exposedCommunicationFunctionIds": ["cf-making-requests"],
-    "hypothesesToVerify": ["學生在時間副詞子句與主要子句的時態一致性上能正確判斷。"],
-    "nextReviewCandidates": ["before/after 時間子句", "v-experience"]
+    "hypothesesToVerify": ["學生能正確判斷時間副詞子句時態。"],
+    "nextReviewCandidates": ["before/after 時間子句"]
   }
 }
 ```
 
 ---
 
-## 4. Output Contract (Strict JSON Only)
+## 7. Server-Side Deterministic Normalization Notice
+
+The server automatically computes and normalizes `wordCount`, target counts, and canonical formatting. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
+
+---
+
+## 8. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
 
@@ -561,22 +666,31 @@ You are the Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.
 
 ## 1. Audit Dimensions & Rubric
 
-Evaluate the authored curriculum package against the **Wave 4.1 Gold Standard**:
+Evaluate the authored curriculum package against the **Wave 2–4.2 Gold Standard**:
 
 1. **Long-Term CAP Curriculum Alignment**:
    - Are the targets derived from legitimate junior-high syllabus, student weakness, or CAP gaps?
    - Did the plan avoid unrealistic grade jumps (e.g. teaching Grade 9 relative clauses to Grade 7 learners)?
 2. **Pedagogical Integrity & Self-Study Readiness**:
-   - Are there clear Chinese explanations, worked examples, and mistake contrasts for every new instruction?
+   - Are there clear Chinese explanations, worked examples, and mistake contrasts (`commonMistakes`) for every new instruction?
    - Are there at least 12 answerable items across `guided`, `independent`, `cap-transfer` (with 4 options), `production`, and `retrieval`?
-3. **Genre-Block Structural Consistency**:
+3. **Weak, Silly, or Unprincipled Distractors**:
+   - Are 4-option distractors built on plausible student misconceptions (partial evidence, reversed relationship, scope mismatch) rather than absurd options?
+   - Does every distractor reflect authentic diagnostic student reasoning?
+4. **Circular or Tautological Explanations**:
+   - Reject empty explanations such as 「答案是 C，因為根據文章內容 C 正確」.
+   - Explanations must provide the textual evidence sentence and student misconception diagnosis (`likelyMisconceptionZh`).
+5. **Passage-First Lexical Contract & Lexical Ceiling**:
+   - Core vocabulary items must be the actual difficult words taught in the reading passage.
+   - Reject untaught, obscure high-school words above Taiwan's 2,000 junior-high vocabulary ceiling.
+6. **Genre-Block Structural Consistency**:
    - If genre is `dialogue`, does it contain `dialogue` speaker blocks?
    - If genre is `notice`, does it contain `notice` blocks?
    - If genre is `schedule`, does it contain `schedule-row` blocks?
-4. **Authentic Communicative Functions**:
-   - If dialogue or notice genres are used, do speakers employ realistic communicative exponents (requests, apologies, directions, agreements) rather than robotic troubleshooting lines?
-5. **Separation of Exposure vs Mastery**:
-   - Confirm `trackingDelta` records exposure IDs accurately.
+7. **Target Evidence Invariant**:
+   - Every learning target in `learningPlan.targets` must be exercised across at least 2 distinct practice/homework stages.
+8. **Separation of Exposure vs Mastery**:
+   - Confirm `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 
 ---
 
@@ -603,16 +717,21 @@ You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curricul
 
 ---
 
-## 1. Repair Directives
+## 1. Targeted Repair Directives
 
 When fixing validation or critic findings in a curriculum package:
-1. **Preserve Valid Educational Content**: Only modify the specific fields flagged in `issues` or `findings`.
-2. **Schema 2.2.0 Invariant**: Keep `schemaVersion: '2.2.0'` and `reading.blocks: ReadingBlock[]`.
-3. **Preserve Exposure Semantics**: Ensure `trackingDelta` contains `exposedGrammarTargetIds`, `exposedReadingTargetIds`, and `exposedCommunicationFunctionIds`.
-4. **Never Invent Pedagogy**: Fix schema alignments without breaking pedagogical continuity.
+1. **Preserve Valid Educational Content**: Only modify the specific fields flagged in validation `issues` or critic `findings`.
+2. **Schema 2.2.0 Invariants**: Maintain `schemaVersion: "2.2.0"` and typed `reading.blocks: ReadingBlock[]`.
+3. **Pedagogical Repair**:
+   - For silly distractors, supply plausible student misconceptions (`partial evidence`, `reversed relationship`).
+   - For circular explanations, add textual evidence and `likelyMisconceptionZh`.
+   - For incomplete instruction, add decision trees and `commonMistakes`.
+   - For untaught off-target words, replace with canonical words or add to `vocabulary`.
+4. **Preserve Exposure Semantics**: Ensure `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
+5. **ID & Atomic Q&A Integrity**: Guarantee question IDs match answer objects and targets exist in `learningPlan.targets`.
 
 ---
 
 ## 2. Output Contract
 
-Output the complete, corrected `CurriculumPackage` JSON object.
+Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.2.0).
