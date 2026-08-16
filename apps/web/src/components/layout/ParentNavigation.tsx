@@ -30,8 +30,8 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
             src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
             alt=""
             className="brand-icon"
-            width={60}
-            height={60}
+            width={30}
+            height={30}
           />
           <span>紙屬英文</span>
         </a>
