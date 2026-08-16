@@ -25,9 +25,13 @@ const curriculumStyles = `
   .vocab-grid { margin-top: 3mm; }
   .word { font-size: 13pt; font-weight: 800; }
   .pos { color: #8a7c6c; font-size: 9pt; }
-  .example { color: #4e473f; margin-bottom: 0; }
-  .reading { font-family: Georgia, "Noto Serif TC", serif; font-size: 11.5pt; line-height: 1.85; }
+  .example { color: #4e473f; margin-bott  .reading { font-family: Georgia, "Noto Serif TC", serif; font-size: 11.5pt; line-height: 1.85; }
   .reading p { margin-bottom: 4mm; }
+  .reading-dialogue { margin-bottom: 2.5mm; }
+  .reading-dialogue strong { color: #173e37; }
+  .reading-notice { border-left: 3px solid #765d42; background: #fbf8f2; padding: 2.5mm 3.5mm; margin: 3mm 0; }
+  .reading-schedule-row { margin-bottom: 2mm; font-family: "Noto Sans TC", sans-serif; }
+  .reading-schedule-row code { font-family: monospace; font-weight: bold; background: #eef1e9; padding: 0.5mm 1.5mm; border-radius: 2px; }
   .reading-note { color: #6b6256; font-size: 9.5pt; }
   .instruction { border-top: 3px solid #173e37; padding-top: 3mm; break-inside: avoid; }
   .pattern { background: #eef1e9; padding: 2mm 3mm; margin: 2mm 0; font-family: Georgia, serif; }
@@ -73,13 +77,36 @@ function stageLabel(stage: string): string {
   return ({ guided: '跟著示範', independent: '自己完成', 'cap-transfer': '會考型轉移', production: '寫出自己的答案', retrieval: '隔天提取' } as Record<string, string>)[stage] ?? stage
 }
 
+function renderReadingBlocksHtml(reading: any): string {
+  if (!reading) return ''
+  if (Array.isArray(reading.blocks)) {
+    return reading.blocks.map((block: any) => {
+      switch (block.type) {
+        case 'paragraph':
+          return `<p>${h(block.text)}</p>`
+        case 'dialogue':
+          return `<p class="reading-dialogue"><strong>${h(block.speaker)}:</strong> ${h(block.text)}</p>`
+        case 'notice':
+          return `<div class="reading-notice">${block.heading ? `<strong>[${h(block.heading)}]</strong> ` : ''}${h(block.text)}</div>`
+        case 'schedule-row':
+          return `<p class="reading-schedule-row"><code>${h(block.timeOrStep)}</code> ${h(block.event)}${block.detail ? ` <span class="small">(${h(block.detail)})</span>` : ''}</p>`
+        default:
+          return `<p>${h(block.text ?? '')}</p>`
+      }
+    }).join('')
+  }
+  if (Array.isArray(reading.paragraphs)) {
+    return reading.paragraphs.map((paragraph: string) => `<p>${h(paragraph)}</p>`).join('')
+  }
+  return ''
+}
+
 export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   const lesson = pkg.studentLesson
   const body = `${header(pkg, '學生教材')}
     <section class="callout"><div class="kicker">這週要帶走的能力</div>${list(lesson.opening.goalsZh)}<p>${h(lesson.opening.howToUseZh)}</p></section>
     <section><h2>先想一想</h2><p>${h(lesson.opening.warmUp)}</p>${lines(2)}</section>
-    <section><h2>本週核心單字</h2><div class="vocab-grid">${lesson.vocabulary.map((item) => `<article class="vocab"><div><span class="word">${h(item.word)}</span> <span class="pos">${h(item.partOfSpeech)} · ${h(item.status)}</span></div><p>${h(item.meaningZh)}</p><p class="example">${h(item.exampleEn)}</p><p class="small">${h(item.exampleZh)}</p></article>`).join('')}</div></section>
-    <section><h2>閱讀：${h(lesson.reading.title)}</h2><p>${h(lesson.reading.contextZh)}</p><p class="reading-note">讀法提示：${h(lesson.reading.readingTipsZh.join('；'))}</p><div class="reading">${lesson.reading.paragraphs.map((paragraph) => `<p>${h(paragraph)}</p>`).join('')}</div></section>
+    <section><h2>閱讀：${h(lesson.reading.title)}</h2><p>${h(lesson.reading.contextZh)}</p><p class="reading-note">讀法提示：${h(lesson.reading.readingTipsZh.join('；'))}</p><div class="reading">${renderReadingBlocksHtml(lesson.reading)}</div></section>
     ${lesson.instruction.map((instruction) => `<section class="instruction"><h2>${h(instruction.titleZh)}</h2><p>${h(instruction.explanationZh)}</p>${instruction.patterns.map((pattern) => `<div class="pattern">${h(pattern)}</div>`).join('')}<h3>看一個完整例子</h3>${instruction.workedExamples.map((example) => `<article class="worked"><strong>${h(example.example)}</strong><p>${h(example.walkthroughZh)}</p></article>`).join('')}<h3>容易踩到的地方</h3>${instruction.commonMistakes.map((mistake) => `<article class="mistake"><p class="wrong">${h(mistake.wrong)}</p><p class="correct">${h(mistake.corrected)}</p><p>${h(mistake.whyZh)}</p></article>`).join('')}</section>`).join('')}
     ${lesson.practice.map((stage) => `<section class="stage"><span class="stage-label">${h(stageLabel(stage.stage))}</span><h2>${h(stage.titleZh)}</h2><p>${h(stage.instructionsZh)}</p>${stage.hintZh ? `<div class="callout">提示：${h(stage.hintZh)}</div>` : ''}${stage.questions.map(questionHtml).join('')}</section>`).join('')}
     <section><h2>自己檢查</h2>${list(lesson.selfCheckZh)}${lines(3)}</section>

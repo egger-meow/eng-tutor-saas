@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { REPO_ROOT } from './bundle-compiler.js'
-import { CurriculumPackageSchema } from './curriculum-package-schema.js'
+import { CurriculumPackageV20Schema } from './curriculum-package-schema.js'
+import { validateCurriculumPackage } from './validate-curriculum-package.js'
 
 function sha256(content: string): string {
   return createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
@@ -37,7 +38,7 @@ describe('Wave 2 Golden Benchmark Harness', () => {
     }
   })
 
-  it('validates that all golden output packages strictly parse against CurriculumPackageSchema 2.0.0', async () => {
+  it('validates that all golden output packages strictly parse against CurriculumPackageV20Schema and validateCurriculumPackage', async () => {
     const cases = ['a', 'b', 'c', 'd', 'e']
     for (const c of cases) {
       const v201Raw = await readFile(resolve(evalDir, `case-${c}/2.0.1-output.json`), 'utf8')
@@ -46,8 +47,11 @@ describe('Wave 2 Golden Benchmark Harness', () => {
       const v201Json = JSON.parse(v201Raw)
       const v210Json = JSON.parse(v210Raw)
 
-      expect(() => CurriculumPackageSchema.parse(v201Json)).not.toThrow()
-      expect(() => CurriculumPackageSchema.parse(v210Json)).not.toThrow()
+      expect(() => CurriculumPackageV20Schema.parse(v201Json)).not.toThrow()
+      expect(() => CurriculumPackageV20Schema.parse(v210Json)).not.toThrow()
+
+      expect(validateCurriculumPackage(v201Json).success).toBe(true)
+      expect(validateCurriculumPackage(v210Json).success).toBe(true)
     }
   })
 })

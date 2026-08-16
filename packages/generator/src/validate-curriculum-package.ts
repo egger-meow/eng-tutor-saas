@@ -1,6 +1,7 @@
 import { ZodError } from 'zod'
-import { CurriculumPackageSchema, type CurriculumPackage } from './curriculum-package-schema.js'
+import { CurriculumPackageSchema, CurriculumPackageV20Schema, type CurriculumPackage } from './curriculum-package-schema.js'
 import { countWords, normalizeCurriculumPackage } from './normalize-curriculum-package.js'
+import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import type { LessonValidationIssue } from './validate-lesson.js'
 
 export type CurriculumValidationResult = { success: true; curriculumPackage: CurriculumPackage } | { success: false; issues: LessonValidationIssue[] }
@@ -109,7 +110,21 @@ function schemaIssues(error: ZodError): LessonValidationIssue[] {
 }
 
 export function validateCurriculumPackage(input: unknown): CurriculumValidationResult {
-  const normalized = normalizeCurriculumPackage(input)
+  let normalized = normalizeCurriculumPackage(input)
+
+  if (normalized && typeof normalized === 'object' && !Array.isArray(normalized)) {
+    const raw = normalized as Record<string, any>
+    if (
+      raw.metadata?.schemaVersion === '2.0.0' ||
+      (raw.studentLesson?.reading && Array.isArray(raw.studentLesson.reading.paragraphs) && !raw.studentLesson.reading.blocks)
+    ) {
+      const parsedV20 = CurriculumPackageV20Schema.safeParse(normalized)
+      if (parsedV20.success) {
+        normalized = normalizeCurriculumPackage(upgradeV20ToV21(parsedV20.data))
+      }
+    }
+  }
+
   const parsed = CurriculumPackageSchema.safeParse(normalized)
   if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
   const issues = relationshipIssues(parsed.data)

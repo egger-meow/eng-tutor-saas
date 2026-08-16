@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { auditCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumQuestion } from './index.js'
+import { auditCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumPackageV20, type CurriculumQuestion } from './index.js'
 
-function validPackage(): CurriculumPackage {
+export function validPackage(): CurriculumPackageV20 {
   const paragraphs = [
     'Mina joins a school robotics club because she wants to build a machine that can sort books. The first design moves quickly, but its small camera often mistakes blue covers for green ones during the test.',
     'Her partner Jay suggests changing every part at once. Mina disagrees. She records one problem, changes the light above the camera, and repeats the same test. This time the robot sorts most of the books correctly.',

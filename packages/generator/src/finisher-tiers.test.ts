@@ -94,4 +94,46 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(jargonFinding).toBeDefined()
     expect(jargonFinding?.message).toContain('baseline')
   })
+
+  it('Tier 3 (SEMANTIC CRITICAL): fails closed when dialogue genre lacks dialogue blocks', () => {
+    const mutated = structuredClone(samplePackage)
+    mutated.metadata.schemaVersion = '2.1.0'
+    delete mutated.studentLesson.reading.paragraphs
+    mutated.studentLesson.reading.genre = 'dialogue'
+    // Contains only paragraph blocks with >= 120 words
+    mutated.studentLesson.reading.blocks = [
+      { type: 'paragraph', text: 'Mina joins a school robotics club because she wants to build a machine that can sort library books quickly without human assistance.' },
+      { type: 'paragraph', text: 'Her partner Jay suggests changing every single sensor before the final competition tomorrow morning so that we do not encounter unexpected recognition errors.' },
+      { type: 'paragraph', text: 'Mina disagrees with this suggestion. She believes that changing only one component at a time will provide clear evidence about which part is causing the problem.' },
+      { type: 'paragraph', text: 'The teacher comes by to inspect their progress and agrees with Mina. Testing one variable under controlled conditions is the foundation of scientific inquiry.' },
+      { type: 'paragraph', text: 'Jay agrees to record baseline readings for the optical camera sensor while Mina connects the power cables and adjusts the light source.' },
+      { type: 'paragraph', text: 'By following this systematic procedure, both teammates successfully fixed the optical recognition error and prepared the sorting robot for the science competition.' },
+    ]
+
+    const audit = auditCurriculumPackage(mutated)
+    expect(audit.passed).toBe(false)
+    const genreFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'alignment' && f.message.includes('dialogue'))
+    expect(genreFinding).toBeDefined()
+  })
+
+  it('Tier 3 (SEMANTIC CRITICAL): fails closed when schedule genre lacks schedule-row blocks', () => {
+    const mutated = structuredClone(samplePackage)
+    mutated.metadata.schemaVersion = '2.1.0'
+    delete mutated.studentLesson.reading.paragraphs
+    mutated.studentLesson.reading.genre = 'schedule'
+    // Contains only paragraph blocks with >= 120 words
+    mutated.studentLesson.reading.blocks = [
+      { type: 'paragraph', text: 'Mina joins a school robotics club because she wants to build a machine that can sort library books quickly without human assistance.' },
+      { type: 'paragraph', text: 'Her partner Jay suggests changing every single sensor before the final competition tomorrow morning so that we do not encounter unexpected recognition errors.' },
+      { type: 'paragraph', text: 'Mina disagrees with this suggestion. She believes that changing only one component at a time will provide clear evidence about which part is causing the problem.' },
+      { type: 'paragraph', text: 'The teacher comes by to inspect their progress and agrees with Mina. Testing one variable under controlled conditions is the foundation of scientific inquiry.' },
+      { type: 'paragraph', text: 'Jay agrees to record baseline readings for the optical camera sensor while Mina connects the power cables and adjusts the light source.' },
+      { type: 'paragraph', text: 'By following this systematic procedure, both teammates successfully fixed the optical recognition error and prepared the sorting robot for the science competition.' },
+    ]
+
+    const audit = auditCurriculumPackage(mutated)
+    expect(audit.passed).toBe(false)
+    const genreFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'alignment' && f.message.includes('schedule'))
+    expect(genreFinding).toBeDefined()
+  })
 })

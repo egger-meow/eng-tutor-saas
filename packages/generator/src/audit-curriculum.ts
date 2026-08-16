@@ -2,6 +2,7 @@ import { access, readFile } from 'node:fs/promises'
 import { isAbsolute, resolve } from 'node:path'
 import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from './validate-curriculum-package.js'
 import type { CurriculumPackage } from './curriculum-package-schema.js'
+import { extractBlockTexts } from './normalize-curriculum-package.js'
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -38,16 +39,28 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   }
   const pkg: CurriculumPackage = parsed.curriculumPackage
   const questions = [...pkg.studentLesson.practice.flatMap((stage) => stage.questions), ...pkg.studentLesson.homework.questions]
-  const passageWords = pkg.studentLesson.reading.paragraphs.reduce((total, paragraph) => total + words(paragraph), 0)
+  const blockTexts = extractBlockTexts(pkg.studentLesson.reading.blocks)
+  const passageWords = blockTexts.reduce((total, text) => total + words(text), 0)
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
   if (pkg.studentLesson.opening.goalsZh.length < 2 || cjk(pkg.studentLesson.opening.howToUseZh) < 8) add('semantic-critical', 'self-study', 'critical', '開場沒有足夠的中文目標或使用說明。')
   if (pkg.studentLesson.instruction.some((section) => section.workedExamples.length < 2 || section.commonMistakes.length < 1)) add('semantic-critical', 'self-study', 'critical', '每個新概念都需要至少兩個 worked examples 與一個錯誤對照。')
-  if (pkg.studentLesson.reading.paragraphs.length < 3 || passageWords < 180) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
+  if (pkg.studentLesson.reading.blocks.length < 2 || passageWords < 120) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
   if (pkg.studentLesson.vocabulary.length > 15) add('semantic-critical', 'cognitive-load', 'critical', '核心單字超過 15 個，可能造成不必要負擔。')
   if (!pkg.studentLesson.practice.some((stage) => stage.stage === 'retrieval')) add('semantic-critical', 'retrieval', 'critical', '缺少隔天或延遲提取練習。')
   if (questions.length > 70) add('auto-derived', 'token-efficiency', 'warning', '題目超過 70 題；請刪除重複題並保留能區分學習狀態的證據。')
+
+  // Genre-Block Structural & Semantic Consistency
+  if (pkg.studentLesson.reading.genre === 'dialogue' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'dialogue')) {
+    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為對話 (dialogue)，但內容未包含任何 dialogue blocks。')
+  }
+  if (pkg.studentLesson.reading.genre === 'schedule' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'schedule-row')) {
+    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為時刻表/日程 (schedule)，但內容未包含任何 schedule-row blocks。')
+  }
+  if (pkg.studentLesson.reading.genre === 'notice' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'notice')) {
+    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為公告 (notice)，但內容未包含任何 notice blocks。')
+  }
 
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))
   const covered = new Set(questions.flatMap((question) => question.targetIds))
