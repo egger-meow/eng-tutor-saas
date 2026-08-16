@@ -398,3 +398,132 @@ describe('Week 1 Delivery Timing — Retry and Pre-Onboarding States', () => {
     expect(view.nextDeliveryAt).toBeNull()
   })
 })
+
+describe('Subscription Gating for Delivery Status', () => {
+  it('shows subscription requirement and CTA to /billing when trialing child has completed Week 1', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const trialingChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'trialing' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: null,
+        currentPeriodEnd: '2026-08-21T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'eligible' as const,
+      },
+    }
+
+    const view = getDeliveryViewModel(trialingChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toBe('需訂閱以開啟下一週教材')
+    expect(view.detail).toContain('第 1 週體驗教材已開放下載')
+    expect(view.detail).toContain('8月21日')
+    expect(view.action).toEqual({
+      label: '前往選擇方案訂閱',
+      href: '/billing',
+    })
+  })
+
+  it('shows feedback acknowledged in subscription prompt when feedback has been submitted', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: true })
+    const trialingChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'trialing' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: null,
+        currentPeriodEnd: '2026-08-21T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'eligible' as const,
+      },
+    }
+
+    const view = getDeliveryViewModel(trialingChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toBe('需訂閱以開啟下一週教材')
+    expect(view.detail).toContain('本週回饋已收到！完成訂閱後')
+    expect(view.action?.href).toBe('/billing')
+  })
+
+  it('shows expired status and reactivation CTA when subscription is canceled', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const canceledChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'canceled' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-08-14T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'none' as const,
+      },
+    }
+
+    const view = getDeliveryViewModel(canceledChild, currentWeek1, null, null, now)
+    expect(view.headline).toBe('訂閱已到期')
+    expect(view.detail).toContain('已完成的教材仍可隨時下載複習')
+    expect(view.action).toEqual({
+      label: '重新啟用訂閱',
+      href: '/billing',
+    })
+  })
+
+  it('preserves normal delivery schedule for active subscribers', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const activeChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-09-14T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'none' as const,
+      },
+    }
+
+    const view = getDeliveryViewModel(activeChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toContain('預計 8月21日')
+    expect(view.action).toBeUndefined()
+  })
+
+  it('allows free Week 1 delivery for trialing child who has NO prior materials', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const trialingChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'trialing' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: null,
+        currentPeriodEnd: '2026-08-21T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'eligible' as const,
+      },
+    }
+
+    // Pre-Week 1 (currentMaterial is null)
+    const view = getDeliveryViewModel(trialingChild, null, null, '2026-08-17T16:00:00Z', now)
+    expect(view.headline).toContain('預計')
+    expect(view.headline).toContain('第一份教材')
+    expect(view.action).toBeUndefined()
+  })
+})
+

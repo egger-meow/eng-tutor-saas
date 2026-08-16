@@ -2,8 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { listChildProfiles, type ChildProfile } from '../lib/child-profiles'
 import { listChildren, type Child } from '../lib/children'
 import { listMaterials, type Material } from '../lib/materials'
+import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
 
-export type ChildWithProfile = Child & { profile: ChildProfile | null; next_job_release_at?: string | null; has_past_due_job?: boolean }
+export type ChildWithProfile = Child & {
+  profile: ChildProfile | null
+  subscription?: SubscriptionView | null
+  next_job_release_at?: string | null
+  has_past_due_job?: boolean
+}
 
 export function chooseOwnedChild(children: ChildWithProfile[], requestedId: string | null): ChildWithProfile | null {
   return children.find((child) => child.id === requestedId) ?? children[0] ?? null
@@ -22,7 +28,11 @@ export function useParentData() {
     setLoading(true)
     setError('')
     try {
-      const childRows = await listChildren()
+      const [childRows, subscriptions] = await Promise.all([
+        listChildren(),
+        listOwnedSubscriptions().catch(() => [] as SubscriptionView[]),
+      ])
+      const subscriptionMap = new Map(subscriptions.map((sub) => [sub.childId, sub]))
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
       const childIds = childRows.map((c) => c.id)
@@ -30,6 +40,7 @@ export function useParentData() {
       const joined = childRows.map((child) => ({
         ...child,
         profile: profileMap.get(child.id) ?? null,
+        subscription: subscriptionMap.get(child.id) ?? null,
         next_job_release_at: page.nextJobReleaseAtByChild[child.id] ?? null,
         has_past_due_job: Boolean(page.hasPastDueUnmaterializedJobByChild[child.id]),
       }))

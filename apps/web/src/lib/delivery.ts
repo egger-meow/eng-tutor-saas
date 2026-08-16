@@ -1,5 +1,11 @@
 import type { Child } from './children'
 import type { Material } from './materials'
+import type { SubscriptionView } from './subscriptions'
+
+export type DeliveryAction = {
+  label: string
+  href: string
+}
 
 export type DeliveryViewModel = {
   nextDeliveryAt: Date | null
@@ -7,6 +13,7 @@ export type DeliveryViewModel = {
   feedbackState: 'received' | 'open' | 'closed' | 'waiting'
   headline: string
   detail: string
+  action?: DeliveryAction | null
 }
 
 const day = 24 * 60 * 60 * 1000
@@ -50,6 +57,81 @@ export function getDeliveryViewModel(
 
   if (nowInput instanceof Date) {
     now = nowInput
+  }
+
+  const subscription = (child as { subscription?: SubscriptionView | null } | null)?.subscription
+
+  // If a child has completed Week 1 (or has existing released materials) and is not actively subscribed,
+  // subsequent generation requires an active subscription.
+  if (currentMaterial && subscription !== undefined) {
+    const isUnsubscribed = !subscription || subscription.status === 'trialing'
+    const isCanceled = subscription?.status === 'canceled'
+    const isPastDue = subscription?.status === 'past_due'
+    const isPaused = subscription?.status === 'paused'
+
+    if (isUnsubscribed) {
+      const releaseAt = nextPrepared?.release_at
+        ? new Date(nextPrepared.release_at)
+        : nextJobReleaseAt
+          ? new Date(nextJobReleaseAt)
+          : null
+      const feedbackReceived = Boolean(currentMaterial.feedback)
+      return {
+        nextDeliveryAt: releaseAt,
+        feedbackCutoffAt: releaseAt ? new Date(releaseAt.getTime() - (2 * day)) : null,
+        feedbackState: feedbackReceived ? 'received' : 'open',
+        headline: '需訂閱以開啟下一週教材',
+        detail: feedbackReceived
+          ? `本週回饋已收到！完成訂閱後，系統將依回饋${releaseAt ? `於 ${formatTaipeiDate(releaseAt)}` : ''} 交付下一份專屬教材。`
+          : `第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋${releaseAt ? `於 ${formatTaipeiDate(releaseAt)}` : ''} 繼續為孩子準備專屬教材。`,
+        action: {
+          label: '前往選擇方案訂閱',
+          href: '/billing',
+        },
+      }
+    }
+
+    if (isCanceled) {
+      return {
+        nextDeliveryAt: null,
+        feedbackCutoffAt: null,
+        feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
+        headline: '訂閱已到期',
+        detail: '已完成的教材仍可隨時下載複習。若想繼續接收每週個人化教材，請重新啟用訂閱。',
+        action: {
+          label: '重新啟用訂閱',
+          href: '/billing',
+        },
+      }
+    }
+
+    if (isPastDue) {
+      return {
+        nextDeliveryAt: nextJobReleaseAt ? new Date(nextJobReleaseAt) : null,
+        feedbackCutoffAt: null,
+        feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
+        headline: '付款需要處理',
+        detail: '請至帳戶設定確認付款方式，避免後續每週教材服務中斷。',
+        action: {
+          label: '處理付款方式',
+          href: '/billing',
+        },
+      }
+    }
+
+    if (isPaused) {
+      return {
+        nextDeliveryAt: null,
+        feedbackCutoffAt: null,
+        feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
+        headline: '訂閱暫停中',
+        detail: '訂閱目前暫停中，處理完成後每週教材會繼續交付。',
+        action: {
+          label: '管理訂閱',
+          href: '/billing',
+        },
+      }
+    }
   }
 
   // Precedence 1: An unreleased prepared material has an authoritative release_at timestamp

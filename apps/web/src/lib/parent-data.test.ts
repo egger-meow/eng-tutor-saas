@@ -13,6 +13,7 @@ const child = (id: string): ChildWithProfile => ({
   next_generation_at: null,
   created_at: '2026-08-12T00:00:00Z',
   profile: null,
+  subscription: null,
 })
 
 describe('chooseOwnedChild', () => {

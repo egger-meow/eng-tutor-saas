@@ -40,7 +40,21 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
     >
       <header className="child-card-header">
         <div className="child-card-identity">
-          <span className="child-badge">{gradeStageLabel(child)}</span>
+          <div className="child-badge-group" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span className="child-badge">{gradeStageLabel(child)}</span>
+            {child.subscription?.status === 'trialing' && (
+              <span className="status-label status-trialing">體驗期</span>
+            )}
+            {child.subscription?.status === 'canceled' && (
+              <span className="status-label status-canceled">已到期</span>
+            )}
+            {child.subscription?.status === 'active' && child.subscription.cancelAtPeriodEnd && (
+              <span className="status-label status-paused">已取消續訂</span>
+            )}
+            {child.subscription?.status === 'active' && !child.subscription.cancelAtPeriodEnd && (
+              <span className="status-label status-active">訂閱中</span>
+            )}
+          </div>
           <h2>{child.display_name} 的英文學習</h2>
           <p className="child-subtitle">
             {child.textbook_version ? `課本：${child.textbook_version}` : '自訂課本版本'}
