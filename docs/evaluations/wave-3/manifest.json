@@ -1,10 +1,13 @@
 {
+  "isSimulation": true,
+  "evaluationType": "modeled-reliability-projection",
+  "disclaimer": "NOT empirical model results. Values are engineering hypotheses used to design the benchmark harness and estimate expected directionality. They must not be used for production model selection.",
   "schemaVersion": "2.0.0",
   "promptVersion": "2.2.0",
   "bundleVersion": "2.2.0-prod",
-  "evaluatorModel": "adversarial-golden-rubric-v3",
+  "evaluatorModel": "engineering-hypothesis-harness-v3",
   "generatedAt": "2026-08-16T23:15:00.000Z",
-  "manifestHash": "d833ee0bf13806f98b4bc2145ebfe2777e5c014b18868bc73d342d59e16895b8",
+  "manifestHash": "dfb7fe022717061b6745004bbfe052032cbfe62d7e66037daab88bc8de43ab55",
   "results": [
     {
       "variantId": "v1-baseline",
@@ -24,7 +27,7 @@
     },
     {
       "variantId": "v2-normalize-only",
-      "variantName": "+ Normalization Only",
+      "variantName": "Cumulative: + Normalization",
       "tierKey": "strong",
       "tierName": "Strong",
       "models": [
@@ -40,7 +43,7 @@
     },
     {
       "variantId": "v3-few-shot",
-      "variantName": "+ Micro Contrastive Few-Shot",
+      "variantName": "Cumulative: + Micro Few-Shot",
       "tierKey": "strong",
       "tierName": "Strong",
       "models": [
@@ -56,7 +59,7 @@
     },
     {
       "variantId": "v4-local-qa",
-      "variantName": "+ Local Q&A Protocol",
+      "variantName": "Cumulative: + Local Q&A Protocol",
       "tierKey": "strong",
       "tierName": "Strong",
       "models": [
@@ -72,7 +75,7 @@
     },
     {
       "variantId": "v5-full-wave3",
-      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "variantName": "Cumulative: Full Wave 3 (Prompt 2.2.0)",
       "tierKey": "strong",
       "tierName": "Strong",
       "models": [
@@ -104,7 +107,7 @@
     },
     {
       "variantId": "v2-normalize-only",
-      "variantName": "+ Normalization Only",
+      "variantName": "Cumulative: + Normalization",
       "tierKey": "medium",
       "tierName": "Medium",
       "models": [
@@ -120,7 +123,7 @@
     },
     {
       "variantId": "v3-few-shot",
-      "variantName": "+ Micro Contrastive Few-Shot",
+      "variantName": "Cumulative: + Micro Few-Shot",
       "tierKey": "medium",
       "tierName": "Medium",
       "models": [
@@ -136,7 +139,7 @@
     },
     {
       "variantId": "v4-local-qa",
-      "variantName": "+ Local Q&A Protocol",
+      "variantName": "Cumulative: + Local Q&A Protocol",
       "tierKey": "medium",
       "tierName": "Medium",
       "models": [
@@ -152,7 +155,7 @@
     },
     {
       "variantId": "v5-full-wave3",
-      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "variantName": "Cumulative: Full Wave 3 (Prompt 2.2.0)",
       "tierKey": "medium",
       "tierName": "Medium",
       "models": [
@@ -184,7 +187,7 @@
     },
     {
       "variantId": "v2-normalize-only",
-      "variantName": "+ Normalization Only",
+      "variantName": "Cumulative: + Normalization",
       "tierKey": "cheap",
       "tierName": "Cheap",
       "models": [
@@ -200,7 +203,7 @@
     },
     {
       "variantId": "v3-few-shot",
-      "variantName": "+ Micro Contrastive Few-Shot",
+      "variantName": "Cumulative: + Micro Few-Shot",
       "tierKey": "cheap",
       "tierName": "Cheap",
       "models": [
@@ -216,7 +219,7 @@
     },
     {
       "variantId": "v4-local-qa",
-      "variantName": "+ Local Q&A Protocol",
+      "variantName": "Cumulative: + Local Q&A Protocol",
       "tierKey": "cheap",
       "tierName": "Cheap",
       "models": [
@@ -232,7 +235,7 @@
     },
     {
       "variantId": "v5-full-wave3",
-      "variantName": "Full Wave 3 (Prompt 2.2.0)",
+      "variantName": "Cumulative: Full Wave 3 (Prompt 2.2.0)",
       "tierKey": "cheap",
       "tierName": "Cheap",
       "models": [

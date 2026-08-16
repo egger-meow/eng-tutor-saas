@@ -48,7 +48,7 @@ export const ABLATION_VARIANTS: AblationVariant[] = [
   {
     id: 'v1-baseline',
     name: '2.1.0 Baseline',
-    description: 'Frozen Prompt 2.1.0 with raw wordCount arithmetic checks',
+    description: 'Frozen Prompt 2.1.0 baseline without wordCount normalization or authoring scaffolds',
     hasNormalization: false,
     hasMicroFewShot: false,
     hasLocalQAProtocol: false,
@@ -56,8 +56,8 @@ export const ABLATION_VARIANTS: AblationVariant[] = [
   },
   {
     id: 'v2-normalize-only',
-    name: '+ Normalization Only',
-    description: 'Server auto-derives wordCount = countWords(paragraphs)',
+    name: 'Cumulative: + Normalization',
+    description: 'Adds server auto-derivation of wordCount = countWords(paragraphs)',
     hasNormalization: true,
     hasMicroFewShot: false,
     hasLocalQAProtocol: false,
@@ -65,8 +65,8 @@ export const ABLATION_VARIANTS: AblationVariant[] = [
   },
   {
     id: 'v3-few-shot',
-    name: '+ Micro Contrastive Few-Shot',
-    description: 'Adds BAD->GOOD examples for Trigger-Pattern-Trap-Try and CAP distractor reasoning',
+    name: 'Cumulative: + Micro Few-Shot',
+    description: 'Adds micro contrastive BAD->GOOD examples (on top of normalization)',
     hasNormalization: true,
     hasMicroFewShot: true,
     hasLocalQAProtocol: false,
@@ -74,8 +74,8 @@ export const ABLATION_VARIANTS: AblationVariant[] = [
   },
   {
     id: 'v4-local-qa',
-    name: '+ Local Q&A Protocol',
-    description: 'Questions and answers authored locally in working memory before projection',
+    name: 'Cumulative: + Local Q&A Protocol',
+    description: 'Adds internal local Q&A thought sequencing (on top of normalization + few-shot)',
     hasNormalization: true,
     hasMicroFewShot: true,
     hasLocalQAProtocol: true,
@@ -83,8 +83,8 @@ export const ABLATION_VARIANTS: AblationVariant[] = [
   },
   {
     id: 'v5-full-wave3',
-    name: 'Full Wave 3 (Prompt 2.2.0)',
-    description: 'Full 4-pillar system with normalization, few-shot, local Q&A, and simple target evidence recipes',
+    name: 'Cumulative: Full Wave 3 (Prompt 2.2.0)',
+    description: 'Full 4-pillar system: normalization + few-shot + local Q&A + simple target evidence recipes',
     hasNormalization: true,
     hasMicroFewShot: true,
     hasLocalQAProtocol: true,

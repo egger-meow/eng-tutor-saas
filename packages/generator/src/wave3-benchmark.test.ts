@@ -11,7 +11,10 @@ describe('Wave 3 Multi-Model & Ablation Benchmark Suite', () => {
     manifest = JSON.parse(raw)
   })
 
-  it('validates Wave 3 manifest schema and versioning provenance', () => {
+  it('validates Wave 3 manifest schema and versioning provenance with simulation labeling', () => {
+    expect(manifest.isSimulation).toBe(true)
+    expect(manifest.evaluationType).toBe('modeled-reliability-projection')
+    expect(manifest.disclaimer).toContain('NOT empirical model results')
     expect(manifest.schemaVersion).toBe('2.0.0')
     expect(manifest.promptVersion).toBe('2.2.0')
     expect(manifest.bundleVersion).toBe('2.2.0-prod')
