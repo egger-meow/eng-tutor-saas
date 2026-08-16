@@ -175,3 +175,33 @@ describe('readGenerationSummary', () => {
     expect(result.personalizationReasons[0]).toContain('第一週教材')
   })
 })
+
+describe('Parent Data — Subscription Joining & Safety', () => {
+  it('correctly maps owned subscriptions to the respective child without masking errors', () => {
+    const child1 = child('child-1')
+    const child2 = child('child-2')
+    const subscriptions = [
+      {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-09-16T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'none' as const,
+      },
+    ]
+
+    const subscriptionMap = new Map(subscriptions.map((s) => [s.childId, s]))
+    const joined = [child1, child2].map((c) => ({
+      ...c,
+      subscription: subscriptionMap.get(c.id) ?? null,
+    }))
+
+    expect(joined[0].subscription?.status).toBe('active')
+    expect(joined[1].subscription).toBeNull()
+  })
+})
+

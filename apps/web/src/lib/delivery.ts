@@ -68,6 +68,7 @@ export function getDeliveryViewModel(
     const isCanceled = subscription?.status === 'canceled'
     const isPastDue = subscription?.status === 'past_due'
     const isPaused = subscription?.status === 'paused'
+    const isCanceledAutoRenew = Boolean(subscription?.status === 'active' && subscription.cancelAtPeriodEnd)
 
     if (isUnsubscribed) {
       const releaseAt = nextPrepared?.release_at
@@ -130,6 +131,32 @@ export function getDeliveryViewModel(
           label: '管理訂閱',
           href: '/billing',
         },
+      }
+    }
+
+    if (isCanceledAutoRenew) {
+      const periodEnd = subscription?.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null
+      const candidateReleaseAt = nextPrepared?.release_at
+        ? new Date(nextPrepared.release_at)
+        : nextJobReleaseAt
+          ? new Date(nextJobReleaseAt)
+          : null
+
+      // If the candidate delivery falls strictly after the current period end, we cannot promise delivery.
+      if (!candidateReleaseAt || !periodEnd || candidateReleaseAt.getTime() > periodEnd.getTime()) {
+        return {
+          nextDeliveryAt: null,
+          feedbackCutoffAt: null,
+          feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
+          headline: '已取消自動續訂',
+          detail: periodEnd
+            ? `目前方案仍可使用至 ${formatTaipeiDate(periodEnd)}。到期後將停止準備新的每週教材；隨時歡迎恢復自動續訂。`
+            : '已取消自動續訂。本期結束後將停止準備新的每週教材；隨時歡迎恢復自動續訂。',
+          action: {
+            label: '恢復自動續訂',
+            href: '/billing',
+          },
+        }
       }
     }
   }

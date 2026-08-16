@@ -502,6 +502,76 @@ describe('Subscription Gating for Delivery Status', () => {
     expect(view.action).toBeUndefined()
   })
 
+  it('active + cancelAtPeriodEnd: delivers normally when next delivery is within current paid period', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const activeCanceledChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-08-25T00:00:00Z', // Expires Aug 25
+        cancelAtPeriodEnd: true,
+        foundingStatus: 'none' as const,
+      },
+    }
+
+    // Next delivery is Aug 21 (<= Aug 25 period end)
+    const view = getDeliveryViewModel(activeCanceledChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toContain('預計 8月21日')
+    expect(view.action).toBeUndefined()
+  })
+
+  it('active + cancelAtPeriodEnd: does NOT promise delivery when next delivery falls beyond current paid period', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const activeCanceledChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-08-20T00:00:00Z', // Expires Aug 20
+        cancelAtPeriodEnd: true,
+        foundingStatus: 'none' as const,
+      },
+    }
+
+    // Next delivery would have been Aug 21 (> Aug 20 period end)
+    const view = getDeliveryViewModel(activeCanceledChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toBe('已取消自動續訂')
+    expect(view.detail).toContain('目前方案仍可使用至')
+    expect(view.detail).toContain('8月20日')
+    expect(view.detail).toContain('到期後將停止準備新的每週教材')
+    expect(view.action).toEqual({
+      label: '恢復自動續訂',
+      href: '/billing',
+    })
+  })
+
+  it('no subscription (null) + Week 1 finished: requires subscription with CTA to /billing', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const unsubscribedChild = {
+      ...baseChild,
+      subscription: null,
+    }
+
+    const view = getDeliveryViewModel(unsubscribedChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toBe('需訂閱以開啟下一週教材')
+    expect(view.action).toEqual({
+      label: '前往選擇方案訂閱',
+      href: '/billing',
+    })
+  })
+
   it('allows free Week 1 delivery for trialing child who has NO prior materials', () => {
     const now = new Date('2026-08-16T07:00:00Z')
     const trialingChild = {

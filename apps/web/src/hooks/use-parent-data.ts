@@ -30,7 +30,7 @@ export function useParentData() {
     try {
       const [childRows, subscriptions] = await Promise.all([
         listChildren(),
-        listOwnedSubscriptions().catch(() => [] as SubscriptionView[]),
+        listOwnedSubscriptions(),
       ])
       const subscriptionMap = new Map(subscriptions.map((sub) => [sub.childId, sub]))
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
