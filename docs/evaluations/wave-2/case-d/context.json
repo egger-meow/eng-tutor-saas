@@ -1,0 +1,67 @@
+{
+  "id": "golden-case-d-feedback-missing",
+  "name": "Case D: Feedback Missing (Calibration Baseline)",
+  "description": "Regular Grade 7 student whose family did not submit feedback before cutoff. Engine must proceed with stable continuation without assuming total mastery.",
+  "child": {
+    "grade": 7,
+    "gradeStage": "grade_7",
+    "textbookVersion": "Kang Hsuan Book 2",
+    "preferences": {
+      "interests": [
+        "drawing webcomics",
+        "space science"
+      ],
+      "avoidTopics": []
+    }
+  },
+  "profile": {
+    "nickname": "Sam",
+    "targetGoals": [
+      "Continuous steady reading & grammar rhythm"
+    ]
+  },
+  "learningState": {
+    "schoolProgress": "Unit 4: There is / There are & Prepositions",
+    "recentDifficulty": "unknown",
+    "feedbackSummary": "上週未收到家長回饋，維持正常教學節奏與適度複習。",
+    "recurringMistakes": [
+      "confusing there is with there are for plural nouns"
+    ],
+    "reviewDue": [
+      "prepositions of place (between, behind, next to)"
+    ]
+  },
+  "vocabularyCapsule": {
+    "dueForReview": [
+      "planet",
+      "telescope"
+    ],
+    "weakRecent": [
+      "galaxy",
+      "distance"
+    ],
+    "uncertain": [
+      "character",
+      "sketch"
+    ],
+    "recentlyMastered": [
+      "star",
+      "moon",
+      "draw"
+    ],
+    "historicalCount": 40
+  },
+  "grammarCapsule": {
+    "dueForReview": [
+      "there-is-there-are"
+    ],
+    "weakRecent": [
+      "prepositions-of-place"
+    ],
+    "uncertain": [
+      "any-vs-some"
+    ],
+    "historicalCount": 12
+  },
+  "feedback": null
+}

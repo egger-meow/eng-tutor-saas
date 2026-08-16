@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "2.0.0",
+  "baselinePromptVersion": "2.0.1",
+  "candidatePromptVersion": "2.1.0",
+  "baselineBundleHash": "ef21353e08423180dcafc5d2bc4e515cdc1935e8ecb4834115a96a2dbf29c847",
+  "candidateBundleHash": "65649043a1ee55f7f9e5c14597904878936ce776c2ee46a88474e861c9626c64",
+  "generationModel": "gpt-4o / Claude 3.5 Sonnet",
+  "evaluatorModel": "Antigravity Curriculum Evaluator",
+  "rubricVersion": "wave-2-v1",
+  "cases": {
+    "A": {
+      "name": "Case A: Incoming G7 + Weak Grammar + Minecraft",
+      "contextHash": "965a5914265da39ca861960d4d150a7e7237779c07577162b4844bd268b7240b",
+      "baselineOutputHash": "12481dc946e320aad45187873969992f08c6e4656424c677ce8b95c4a6bf1a51",
+      "candidateOutputHash": "0987fcb450a0dff4f51600a4b00dae4bd0ae78f4726e324aac0938255c87ad70"
+    },
+    "B": {
+      "name": "Case B: G7 + Strong Reading + Basketball",
+      "contextHash": "51cf85e604895d2fccb6e99c6c8b3870dc5ff9de819d67484fc244d417e3588b",
+      "baselineOutputHash": "3e6ddfe6f3c4e2decfa0898b8067970b2968e0db83fb125d62998a2879796947",
+      "candidateOutputHash": "0b4f0a22f901e2f14d8b701be45b2ae7427bf7caa4b761adfb10221cbd7e8e7c"
+    },
+    "C": {
+      "name": "Case C: G8 + Recurring Grammar Mistake + Low Completion",
+      "contextHash": "83d5cb3011b942abf1c60b2ef3d9299110a9cde377b47b6f990cb5ef7d913e11",
+      "baselineOutputHash": "4fa91cbd1a179a54d5613169b8ae5465756f5557f57382db136b971441e75ff6",
+      "candidateOutputHash": "9809c5ca04ada79ed159d14366ec78174772b05ecd862ab9d7b8c418bb310365"
+    },
+    "D": {
+      "name": "Case D: Feedback Missing Baseline",
+      "contextHash": "af22a34bd8034fd7dbb291df1b06245250d22612fc66220eb6ba65aa9c21a327",
+      "baselineOutputHash": "d966606c33612f68239e5100d04396f39343664a06feca0757479f36c8d6c5ca",
+      "candidateOutputHash": "20a258ef7a912d9927eb78e63701bc0f203f60d3a9da7b0b46ce3f383a790f17"
+    },
+    "E": {
+      "name": "Case E: Retry After Semantic Quality Rejection",
+      "contextHash": "695b7124551d8e5f3b66bccdba2b37df083fb8e16f6f97b7071fba59bb1b870d",
+      "baselineOutputHash": "f76166331440a2f100701605ccd081a6ca25449041d3d9a15f4ddb05154428bc",
+      "candidateOutputHash": "b114860caf51bd65a99c0f775f9b11139c966ed18e4575d571641ffd862939b3"
+    }
+  }
+}

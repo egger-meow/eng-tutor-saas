@@ -1,0 +1,80 @@
+{
+  "id": "golden-case-c-g8-recurring-grammar",
+  "name": "Case C: G8 + Recurring Grammar Mistake + Low Completion",
+  "description": "Grade 8 student struggling with Past Simple vs Present Perfect, showing low completion and fatigue when overwhelmed with text.",
+  "child": {
+    "grade": 8,
+    "gradeStage": "grade_8",
+    "textbookVersion": "Nani Book 3",
+    "preferences": {
+      "interests": [
+        "badminton",
+        "cooking videos"
+      ],
+      "avoidTopics": [
+        "politics",
+        "horror stories"
+      ]
+    }
+  },
+  "profile": {
+    "nickname": "Kelly",
+    "targetGoals": [
+      "Differentiate since/for triggers",
+      "Rebuild self-study momentum with digestible steps"
+    ],
+    "diagnosticNotes": "Freezes when seeing long grammar rules. Needs intuitive trigger-pattern pairs."
+  },
+  "learningState": {
+    "schoolProgress": "Unit 2: Present Perfect & Life Experiences",
+    "recentDifficulty": "too-hard",
+    "feedbackSummary": "看到 since 和 for 就頭暈，上週作業只寫了一半就放棄。需要更清楚的中文解題心法。",
+    "recurringMistakes": [
+      "confusing since + starting point with for + duration",
+      "using base verb instead of p.p."
+    ],
+    "reviewDue": [
+      "irregular past participles"
+    ]
+  },
+  "vocabularyCapsule": {
+    "dueForReview": [
+      "experience",
+      "already",
+      "yet"
+    ],
+    "weakRecent": [
+      "recipe",
+      "tournament"
+    ],
+    "uncertain": [
+      "participate",
+      "delicious"
+    ],
+    "recentlyMastered": [
+      "cook",
+      "match"
+    ],
+    "historicalCount": 88
+  },
+  "grammarCapsule": {
+    "dueForReview": [
+      "present-perfect-since-for"
+    ],
+    "weakRecent": [
+      "past-participle-forms"
+    ],
+    "uncertain": [
+      "have-gone-vs-have-been"
+    ],
+    "historicalCount": 22
+  },
+  "feedback": {
+    "completionScore": 50,
+    "difficultyRating": "too-hard",
+    "parentNote": "上次份量有點多，而且文法解說太抽象，孩子看不太懂為什麼要用 have been。"
+  },
+  "qualityTrends": {
+    "cognitiveOverload": 2
+  }
+}

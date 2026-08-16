@@ -1,0 +1,80 @@
+{
+  "id": "golden-case-e-semantic-retry",
+  "name": "Case E: Retry After Semantic Quality Rejection",
+  "description": "A job retrying attempt 2 after Critic rejected attempt 1 due to tautological explanations and silly distractors.",
+  "child": {
+    "grade": 8,
+    "gradeStage": "grade_8",
+    "textbookVersion": "Han Lin Book 4",
+    "preferences": {
+      "interests": [
+        "climate change",
+        "ocean conservation",
+        "scuba diving"
+      ],
+      "avoidTopics": []
+    }
+  },
+  "profile": {
+    "nickname": "Mia",
+    "targetGoals": [
+      "Master passive voice reading and CAP analysis"
+    ]
+  },
+  "learningState": {
+    "schoolProgress": "Unit 1: Passive Voice in Environment News",
+    "recentDifficulty": "appropriate",
+    "feedbackSummary": "想多練習閱讀中出現被動語態的句子理解。",
+    "recurringMistakes": [
+      "confusing passive subject with the doer"
+    ],
+    "reviewDue": [
+      "past participles with by-phrase"
+    ]
+  },
+  "vocabularyCapsule": {
+    "dueForReview": [
+      "protect",
+      "damage"
+    ],
+    "weakRecent": [
+      "coral",
+      "temperature"
+    ],
+    "uncertain": [
+      "species",
+      "threaten"
+    ],
+    "recentlyMastered": [
+      "ocean",
+      "plastic",
+      "recycle"
+    ],
+    "historicalCount": 95
+  },
+  "grammarCapsule": {
+    "dueForReview": [
+      "passive-voice-present-simple"
+    ],
+    "weakRecent": [
+      "passive-voice-past-simple"
+    ],
+    "uncertain": [
+      "by-agent-omission"
+    ],
+    "historicalCount": 26
+  },
+  "feedback": {
+    "completionScore": 85,
+    "difficultyRating": "appropriate",
+    "parentNote": "上次解析寫得太隨便，只寫「因為選C所以選C」，希望解析可以真正說明錯誤選項為什麼錯。"
+  },
+  "retryContext": {
+    "previousAttemptNumber": 1,
+    "failureType": "QUALITY_REJECTED",
+    "findings": [
+      "Question C1 options A, B, D contained obvious silly giveaways rather than plausible student reasoning traps.",
+      "Answer C1 explanationZh was circular (\"答案 C，因為文章最後說 C 是對的\") without citing paragraph evidence or de-biasing Option B."
+    ]
+  }
+}

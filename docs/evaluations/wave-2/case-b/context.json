@@ -1,0 +1,78 @@
+{
+  "id": "golden-case-b-g7-reading-basketball",
+  "name": "Case B: G7 + Strong Reading + Basketball",
+  "description": "Grade 7 student with higher reading speed and confidence. Needs deeper CAP reading inference and distractor challenge beyond surface word searching.",
+  "child": {
+    "grade": 7,
+    "gradeStage": "grade_7",
+    "textbookVersion": "Han Lin Book 1",
+    "preferences": {
+      "interests": [
+        "basketball",
+        "NBA analytics",
+        "team tactics"
+      ],
+      "avoidTopics": [
+        "fashion",
+        "celebrity gossip"
+      ]
+    }
+  },
+  "profile": {
+    "nickname": "Leo",
+    "targetGoals": [
+      "Train CAP inference skills",
+      "Avoid falling for surface keyword traps"
+    ],
+    "diagnosticNotes": "Reads fast but often picks choices that share matching keywords without checking the whole sentence."
+  },
+  "learningState": {
+    "schoolProgress": "Unit 3: Daily routines & Sports",
+    "recentDifficulty": "too-easy",
+    "feedbackSummary": "上週閱讀太容易，一兩分鐘就做完。題目太像單純找字，希望有更多需要推論因果的會考題。",
+    "recurringMistakes": [
+      "surface keyword match trap",
+      "ignoring qualifying words like rarely/often"
+    ],
+    "reviewDue": [
+      "adverbs of frequency"
+    ]
+  },
+  "vocabularyCapsule": {
+    "dueForReview": [
+      "practice",
+      "strategy"
+    ],
+    "weakRecent": [
+      "opponent",
+      "advantage"
+    ],
+    "uncertain": [
+      "decision",
+      "assist"
+    ],
+    "recentlyMastered": [
+      "score",
+      "court",
+      "team"
+    ],
+    "historicalCount": 52
+  },
+  "grammarCapsule": {
+    "dueForReview": [
+      "frequency-adverb-placement"
+    ],
+    "weakRecent": [
+      "present-simple-third-person-s"
+    ],
+    "uncertain": [
+      "question-word-how-often"
+    ],
+    "historicalCount": 14
+  },
+  "feedback": {
+    "completionScore": 100,
+    "difficultyRating": "too-easy",
+    "parentNote": "題目太簡單了，小孩想要更有挑戰性的閱讀思考題。"
+  }
+}

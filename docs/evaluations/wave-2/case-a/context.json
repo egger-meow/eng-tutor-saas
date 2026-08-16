@@ -1,0 +1,77 @@
+{
+  "id": "golden-case-a-g7-minecraft",
+  "name": "Case A: Incoming G7 + Weak Grammar Foundation + Minecraft",
+  "description": "Incoming Grade 7 learner transitioning from elementary. Grammar foundation on be-verbs and singular/plural is shaky. Passionate about Minecraft crafting and redstone.",
+  "child": {
+    "grade": 7,
+    "gradeStage": "incoming_grade_7",
+    "textbookVersion": "Kang Hsuan Book 1",
+    "preferences": {
+      "interests": [
+        "Minecraft",
+        "building redstone machines",
+        "crafting"
+      ],
+      "avoidTopics": [
+        "fairy tales",
+        "babysitting"
+      ]
+    }
+  },
+  "profile": {
+    "nickname": "Alex",
+    "targetGoals": [
+      "Build solid junior-high grammar base",
+      "Overcome confusion between is/are/am"
+    ],
+    "diagnosticNotes": "Often writes \"He are\" or forgets be-verbs in sentences like \"The block red\"."
+  },
+  "learningState": {
+    "schoolProgress": "Starter Unit: Pronouns & Be-verbs",
+    "recentDifficulty": "appropriate",
+    "feedbackSummary": "剛升國一，對長篇英文有點排斥，但如果有麥塊情境會願意讀。be 動詞單複數常搞混。",
+    "recurringMistakes": [
+      "be-verb agreement with singular subjects",
+      "omitting be-verbs before adjectives"
+    ],
+    "reviewDue": [
+      "pronouns (he/she/they)"
+    ]
+  },
+  "vocabularyCapsule": {
+    "dueForReview": [
+      "block",
+      "tool"
+    ],
+    "weakRecent": [
+      "build",
+      "machine"
+    ],
+    "uncertain": [
+      "material",
+      "inventory"
+    ],
+    "recentlyMastered": [
+      "craft",
+      "mine"
+    ],
+    "historicalCount": 24
+  },
+  "grammarCapsule": {
+    "dueForReview": [
+      "subject-pronoun-matching"
+    ],
+    "weakRecent": [
+      "be-verb-singular-plural"
+    ],
+    "uncertain": [
+      "be-verb-questions"
+    ],
+    "historicalCount": 6
+  },
+  "feedback": {
+    "completionScore": 80,
+    "difficultyRating": "appropriate",
+    "parentNote": "希望能把 is/are 的觀念講得更簡單清楚，不要只有死背文法名詞。"
+  }
+}

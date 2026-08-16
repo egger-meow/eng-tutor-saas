@@ -1,0 +1,528 @@
+{
+  "metadata": {
+    "schemaVersion": "2.0.0",
+    "jobId": "golden-case-a-g7-minecraft",
+    "childId": "alex-g7",
+    "weekNumber": 1,
+    "grade": 7,
+    "gradeStage": "incoming_grade_7",
+    "title": "Building with Redstone",
+    "generatedAt": "2026-08-16T22:00:00.000Z",
+    "curriculumVersion": "curriculum/2.0.0",
+    "promptVersion": "2.1.0",
+    "rubricVersion": "rubric/2.0.0",
+    "rendererVersion": "renderer/2.0.0",
+    "model": "gpt-4o-wave2",
+    "inputFingerprint": "sha256:case-a-fingerprint"
+  },
+  "learnerSnapshot": {
+    "schoolProgress": "Starter Unit: Pronouns & Be-verbs",
+    "specificInterests": [
+      "Minecraft",
+      "building redstone machines"
+    ],
+    "changedInterests": [],
+    "avoid": [
+      "fairy tales"
+    ],
+    "recentDifficulty": "appropriate",
+    "feedbackSummary": "剛升國一，對長篇英文有點排斥，但如果有麥塊情境會願意讀。be 動詞單複數常搞混。",
+    "recurringMistakes": [
+      "be-verb agreement with singular subjects"
+    ],
+    "reviewDue": [
+      "pronouns (he/she/they)"
+    ]
+  },
+  "learningPlan": {
+    "estimatedMinutes": 60,
+    "difficultyBand": "國一先修入門",
+    "targets": [
+      {
+        "id": "lang-be-verb",
+        "domain": "grammar",
+        "description": "辨析主詞單複數並正確選用 is 與 are",
+        "evidence": [
+          {
+            "source": "feedback",
+            "detail": "be 動詞單複數常搞混"
+          }
+        ],
+        "successCriteria": "四題文法練習題答對三題以上"
+      },
+      {
+        "id": "read-redstone-steps",
+        "domain": "reading",
+        "description": "讀懂麥塊紅石裝置的組裝步驟與因果關係",
+        "evidence": [
+          {
+            "source": "profile",
+            "detail": "喜愛麥塊紅石主題"
+          }
+        ],
+        "successCriteria": "能根據文章回答兩題閱讀細節與推論題"
+      },
+      {
+        "id": "retrieval-pronouns",
+        "domain": "review",
+        "description": "提取代名詞與單字記憶",
+        "evidence": [
+          {
+            "source": "learning-state",
+            "detail": "複習人稱代名詞"
+          }
+        ],
+        "successCriteria": "能無提示寫出代名詞與單字"
+      }
+    ],
+    "prerequisites": [
+      "人稱代名詞 I/You/He/She/They"
+    ],
+    "reviewStrategy": [
+      "在閱讀與練習中複習代名詞"
+    ],
+    "personalizationStrategy": "以紅石機關建置為情境，降低文法焦慮感",
+    "exclusions": [
+      "現在完成式",
+      "被動語態"
+    ]
+  },
+  "studentLesson": {
+    "opening": {
+      "goalsZh": [
+        "學會 is 和 are 的用法",
+        "讀懂簡單的紅石組裝故事"
+      ],
+      "howToUseZh": "先看左邊單字，再讀短文，最後完成練習題。",
+      "warmUp": "你在麥塊裡做過最酷的紅石機關是什麼？"
+    },
+    "vocabulary": [
+      {
+        "id": "v-block",
+        "word": "block",
+        "partOfSpeech": "n.",
+        "meaningZh": "方塊",
+        "pronunciationHint": null,
+        "exampleEn": "Place one redstone block on the ground.",
+        "exampleZh": "在地上放置一個紅石方塊。",
+        "status": "new"
+      },
+      {
+        "id": "v-tool",
+        "word": "tool",
+        "partOfSpeech": "n.",
+        "meaningZh": "工具",
+        "pronunciationHint": null,
+        "exampleEn": "Use a good tool to mine stone.",
+        "exampleZh": "使用好工具來採礦。",
+        "status": "new"
+      },
+      {
+        "id": "v-build",
+        "word": "build",
+        "partOfSpeech": "v.",
+        "meaningZh": "建造",
+        "pronunciationHint": null,
+        "exampleEn": "We build a secret door today.",
+        "exampleZh": "我們今天建造一扇暗門。",
+        "status": "new"
+      },
+      {
+        "id": "v-machine",
+        "word": "machine",
+        "partOfSpeech": "n.",
+        "meaningZh": "機器",
+        "pronunciationHint": null,
+        "exampleEn": "The machine opens the door automatically.",
+        "exampleZh": "這台機器會自動開門。",
+        "status": "new"
+      },
+      {
+        "id": "v-material",
+        "word": "material",
+        "partOfSpeech": "n.",
+        "meaningZh": "材料",
+        "pronunciationHint": null,
+        "exampleEn": "Collect every material first.",
+        "exampleZh": "先收集所有材料。",
+        "status": "new"
+      },
+      {
+        "id": "v-inventory",
+        "word": "inventory",
+        "partOfSpeech": "n.",
+        "meaningZh": "物品欄",
+        "pronunciationHint": null,
+        "exampleEn": "Keep the dust in your inventory.",
+        "exampleZh": "把紅石粉放在你的物品欄。",
+        "status": "new"
+      },
+      {
+        "id": "v-craft",
+        "word": "craft",
+        "partOfSpeech": "v.",
+        "meaningZh": "製作",
+        "pronunciationHint": null,
+        "exampleEn": "Craft two torches for the circuit.",
+        "exampleZh": "為電路製作兩支火把。",
+        "status": "new"
+      }
+    ],
+    "reading": {
+      "title": "Alex Builds a Secret Door",
+      "contextZh": "Alex 想要用紅石做一扇自動門，讓我們看看他怎麼做。",
+      "paragraphs": [
+        "Alex enters a large underground cave in his Minecraft world to collect materials for a new redstone machine. He needs redstone dust, iron ingots, and smooth stone blocks to build an automatic secret door.",
+        "First, Alex places the redstone block on the stone floor. He attaches two iron doors next to the cave wall. Then he carefully connects redstone dust between the power source and the heavy iron doors.",
+        "When Alex steps on the stone pressure plate, the redstone signal activates immediately and the two doors open smoothly. Alex smiles because his machine works perfectly without making any noise.",
+        "He puts the extra redstone dust back into his inventory. Building working machines in the cave gives Alex great confidence to explore deeper underground tunnels with his friends tomorrow."
+      ],
+      "wordCount": 128,
+      "readingTipsZh": [
+        "注意 Alex 使用了哪些材料。"
+      ],
+      "sourceNote": null
+    },
+    "instruction": [
+      {
+        "id": "ins-be-verb",
+        "titleZh": "be 動詞判斷三步反射心法",
+        "explanationZh": "看到句子先找主詞：一個物品（單數）或 he/she/it ➔ 立即配 is；兩個以上（複數）或 they/we ➔ 立即配 are。小心別被後面的名詞騙了！",
+        "patterns": [
+          "【觸發訊號】主詞是 1 個（單數 / he / she / it） ➔ 配 is",
+          "【觸發訊號】主詞是 2 個以上（複數 / we / they） ➔ 配 are"
+        ],
+        "workedExamples": [
+          {
+            "example": "The redstone block is on the floor.",
+            "walkthroughZh": "【第1步找主詞】The redstone block 是 1 個方塊（單數）➔ 【第2步選動詞】配 is。"
+          },
+          {
+            "example": "Two iron doors are next to the wall.",
+            "walkthroughZh": "【第1步找主詞】Two iron doors 是 2 扇門（複數）➔ 【第2步選動詞】配 are。"
+          }
+        ],
+        "commonMistakes": [
+          {
+            "wrong": "The block with two torches are red.",
+            "corrected": "The block with two torches is red.",
+            "whyZh": "【陷阱】眼睛不要只看前面的 torches！真正的主詞是 The block（單數），所以一定要用 is。"
+          }
+        ]
+      }
+    ],
+    "practice": [
+      {
+        "id": "stg-guided",
+        "stage": "guided",
+        "titleZh": "步驟引導試一試",
+        "instructionsZh": "先圈出主詞是單數還是複數，再選出正確答案。",
+        "hintZh": "請看文章第 2 段第一句話。",
+        "questions": [
+          {
+            "id": "q-g1",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "detail",
+            "prompt": "Where does Alex place the first redstone block?",
+            "options": [
+              "Under the dark cave",
+              "On the floor",
+              "Next to the iron doors",
+              "Inside his inventory"
+            ],
+            "writingLines": 0,
+            "difficulty": "supported"
+          },
+          {
+            "id": "q-g2",
+            "targetIds": [
+              "lang-be-verb"
+            ],
+            "itemType": "grammar",
+            "prompt": "The redstone block with red dust _____ on the floor.",
+            "options": [
+              "is",
+              "are",
+              "am",
+              "be"
+            ],
+            "writingLines": 0,
+            "difficulty": "supported"
+          }
+        ]
+      },
+      {
+        "id": "stg-independent",
+        "stage": "independent",
+        "titleZh": "自己試試看",
+        "instructionsZh": "運用三步心法找出正確的 be 動詞。",
+        "hintZh": null,
+        "questions": [
+          {
+            "id": "q-i1",
+            "targetIds": [
+              "lang-be-verb"
+            ],
+            "itemType": "grammar",
+            "prompt": "Two iron doors in the secret room _____ strong.",
+            "options": [
+              "is",
+              "are",
+              "am",
+              "be"
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
+          }
+        ]
+      },
+      {
+        "id": "stg-cap",
+        "stage": "cap-transfer",
+        "titleZh": "會考閱讀推理轉移",
+        "instructionsZh": "仔細閱讀細節與因果，選出最佳推論。",
+        "hintZh": null,
+        "questions": [
+          {
+            "id": "q-c1",
+            "targetIds": [
+              "read-redstone-steps"
+            ],
+            "itemType": "inference",
+            "prompt": "Why is Alex happy at the end of the story?",
+            "options": [
+              "He found diamonds in the cave.",
+              "His redstone circuit successfully opened the iron doors.",
+              "He collected every tool in his inventory.",
+              "The cave became completely safe."
+            ],
+            "writingLines": 0,
+            "difficulty": "on-level"
+          }
+        ]
+      },
+      {
+        "id": "stg-production",
+        "stage": "production",
+        "titleZh": "寫出你的想法",
+        "instructionsZh": "用 The machine 和 is 寫出一個完整句子。",
+        "hintZh": null,
+        "questions": [
+          {
+            "id": "q-p1",
+            "targetIds": [
+              "lang-be-verb"
+            ],
+            "itemType": "sentence-production",
+            "prompt": "用 The machine 和 is 描述它運作順利。",
+            "writingLines": 2,
+            "difficulty": "on-level"
+          }
+        ]
+      },
+      {
+        "id": "stg-retrieval",
+        "stage": "retrieval",
+        "titleZh": "隔天大腦提取",
+        "instructionsZh": "不看前頁，快速寫出答案。",
+        "hintZh": null,
+        "questions": [
+          {
+            "id": "q-r1",
+            "targetIds": [
+              "retrieval-pronouns"
+            ],
+            "itemType": "short-response",
+            "prompt": "看到主詞是 Alex（單數）時，be 動詞要用哪一個？",
+            "writingLines": 1,
+            "difficulty": "supported"
+          }
+        ]
+      }
+    ],
+    "selfCheckZh": [
+      "我知道單數主詞搭配 is。",
+      "我知道複數主詞搭配 are。"
+    ],
+    "homework": {
+      "purposeZh": "隔一天再提取本週核心心法與單字。",
+      "estimatedMinutes": 15,
+      "questions": [
+        {
+          "id": "q-h1",
+          "targetIds": [
+            "lang-be-verb"
+          ],
+          "itemType": "grammar",
+          "prompt": "The machine with many redstone parts _____ ready.",
+          "options": [
+            "is",
+            "are",
+            "am",
+            "be"
+          ],
+          "writingLines": 0,
+          "difficulty": "on-level"
+        },
+        {
+          "id": "q-h2",
+          "targetIds": [
+            "read-redstone-steps"
+          ],
+          "itemType": "short-response",
+          "prompt": "Why did Alex connect the redstone dust to the doors?",
+          "writingLines": 2,
+          "difficulty": "on-level"
+        },
+        {
+          "id": "q-h3",
+          "targetIds": [
+            "retrieval-pronouns"
+          ],
+          "itemType": "sentence-production",
+          "prompt": "Write a sentence with \"Two machines are\".",
+          "writingLines": 2,
+          "difficulty": "on-level"
+        }
+      ]
+    }
+  },
+  "answers": [
+    {
+      "questionId": "q-g1",
+      "answer": "On the floor",
+      "acceptedAnswers": [],
+      "explanationZh": "第 2 段第 1 句明確指出 \"The first redstone block is on the floor\"，故選 B。",
+      "likelyMisconceptionZh": "容易選 C：因為文章提到鐵門（iron doors），但那是放在牆邊（next to the wall），不是放紅石方塊的位置。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-g2",
+      "answer": "is",
+      "acceptedAnswers": [],
+      "explanationZh": "主詞是 The redstone block（單數），故使用 is。",
+      "likelyMisconceptionZh": "容易選 B（are）：因為看到介系詞片語中的 red dust 誤以為是複數名詞，但真正主詞只有一個 block。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-i1",
+      "answer": "are",
+      "acceptedAnswers": [],
+      "explanationZh": "主詞是 Two iron doors（複數兩扇門），故選 are。",
+      "likelyMisconceptionZh": "容易選 A（is）：因為看到 room 是單數而混淆，應認清主詞核心是 doors。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-c1",
+      "answer": "His redstone circuit successfully opened the iron doors.",
+      "acceptedAnswers": [],
+      "explanationZh": "第 3 段指出當他踩上壓力板時門順利開啟，驗證機關成功，故選 B。",
+      "likelyMisconceptionZh": "容易選 C：因為文章第 1 段確實提到 inventory，但那是準備階段，並非結尾開心的原因。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-p1",
+      "answer": "The machine is working well.",
+      "acceptedAnswers": [
+        "The machine is ready.",
+        "The machine is good."
+      ],
+      "explanationZh": "單數主詞 The machine 正確搭配 is 與形容詞/副詞。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-r1",
+      "answer": "is",
+      "acceptedAnswers": [
+        "Alex is"
+      ],
+      "explanationZh": "Alex 是第三人稱單數，搭配 is。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-h1",
+      "answer": "is",
+      "acceptedAnswers": [],
+      "explanationZh": "主詞是 The machine（單數），故選 is。",
+      "likelyMisconceptionZh": "容易選 B（are）：被介系詞片語 parts 誤導。",
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-h2",
+      "answer": "To open the doors automatically.",
+      "acceptedAnswers": [
+        "To make the secret door work."
+      ],
+      "explanationZh": "Alex 連接紅石粉是為了讓壓力板能觸發開門。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    },
+    {
+      "questionId": "q-h3",
+      "answer": "Two machines are ready.",
+      "acceptedAnswers": [
+        "Two machines are big."
+      ],
+      "explanationZh": "複數主詞 Two machines 正確搭配 are。",
+      "likelyMisconceptionZh": null,
+      "followUpZh": null
+    }
+  ],
+  "parentSummary": {
+    "focusZh": "be 動詞單複數（is / are）",
+    "observeZh": [
+      "孩子是否能辨認單數名詞搭配 is",
+      "是否理解複數名詞搭配 are"
+    ],
+    "completionCheckZh": "確認所有題目皆有作答。",
+    "personalizationZh": [
+      "剛升國一先以基礎 be 動詞為主，建立英文信心。",
+      "結合麥塊紅石機關情境，提升閱讀意願。",
+      "透過單複數對照練習，釐清 is 與 are 的差別。"
+    ]
+  },
+  "trackingDelta": {
+    "introducedVocabularyIds": [
+      "v-block",
+      "v-tool",
+      "v-build",
+      "v-machine",
+      "v-material",
+      "v-inventory",
+      "v-craft"
+    ],
+    "reviewedVocabularyIds": [],
+    "grammarTargets": [
+      "lang-be-verb"
+    ],
+    "readingTargets": [
+      "read-redstone-steps"
+    ],
+    "hypothesesToVerify": [
+      "以麥塊情境引導能順利完成 60 分鐘練習"
+    ],
+    "nextReviewCandidates": [
+      "is / are agreement"
+    ]
+  },
+  "qualityEvidence": {
+    "feedbackApplied": [
+      "以麥塊情境設計入門教材"
+    ],
+    "improvementComparedToPrevious": [
+      "第一週校準教材，建立初始基線。"
+    ],
+    "criticalChecks": [
+      {
+        "id": "self-study",
+        "passed": true,
+        "evidence": "包含中文解說與例句對照。"
+      }
+    ],
+    "criticFindings": []
+  }
+}
