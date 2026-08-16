@@ -25,8 +25,8 @@ export function PublicHeader() {
             src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
             alt=""
             className="brand-icon"
-            width={28}
-            height={28}
+            width={46}
+            height={46}
           />
           <span>紙屬英文</span>
         </a>
