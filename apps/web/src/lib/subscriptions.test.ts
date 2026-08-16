@@ -54,10 +54,14 @@ describe('subscription checkout boundary', () => {
 
   it('invokes paddle-cancel-subscription with child_id and reason', async () => {
     invoke.mockResolvedValue({
-      data: { cancel_at_period_end: true },
+      data: { cancel_at_period_end: true, current_period_end: '2026-09-01T00:00:00Z', reconciliation_pending: false },
       error: null,
     })
-    await expect(cancelSubscription('child-1', 'taking a break')).resolves.toBeUndefined()
+    await expect(cancelSubscription('child-1', 'taking a break')).resolves.toEqual({
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: '2026-09-01T00:00:00Z',
+      reconciliationPending: false,
+    })
     expect(invoke).toHaveBeenCalledWith('paddle-cancel-subscription', {
       body: { child_id: 'child-1', reason: 'taking a break' },
     })
@@ -65,10 +69,14 @@ describe('subscription checkout boundary', () => {
 
   it('invokes paddle-update-subscription with action resume', async () => {
     invoke.mockResolvedValue({
-      data: { cancel_at_period_end: false },
+      data: { cancel_at_period_end: false, current_period_end: '2026-09-01T00:00:00Z', reconciliation_pending: true },
       error: null,
     })
-    await expect(resumeSubscription('child-1')).resolves.toBeUndefined()
+    await expect(resumeSubscription('child-1')).resolves.toEqual({
+      cancelAtPeriodEnd: false,
+      currentPeriodEnd: '2026-09-01T00:00:00Z',
+      reconciliationPending: true,
+    })
     expect(invoke).toHaveBeenCalledWith('paddle-update-subscription', {
       body: { child_id: 'child-1', action: 'resume' },
     })

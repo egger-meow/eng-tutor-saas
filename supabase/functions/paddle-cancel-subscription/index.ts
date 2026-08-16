@@ -27,8 +27,7 @@ Deno.serve(async (request) => {
     if (!child) return jsonResponse(404, { error: 'child_not_found' })
     const { data: subscription, error: subscriptionError } = await supabase.from('subscriptions').select('id, provider, provider_subscription_id, status, current_period_end, cancel_at_period_end').eq('child_id', body.child_id).maybeSingle()
     if (subscriptionError) throw subscriptionError
-    if (!subscription || subscription.provider !== 'paddle' || !subscription.provider_subscription_id || !['active', 'past_due', 'paused', 'trialing'].includes(subscription.status)) return jsonResponse(409, { error: 'subscription_not_cancellable' })
-    if (subscription.cancel_at_period_end) return jsonResponse(200, { cancel_at_period_end: true, current_period_end: subscription.current_period_end })
+    if (subscription.cancel_at_period_end) return jsonResponse(200, { cancel_at_period_end: true, current_period_end: subscription.current_period_end, reconciliation_pending: false })
     const paddleResponse = await fetch(`${paddleApiBaseUrl}/subscriptions/${subscription.provider_subscription_id}/cancel`, { method: 'POST', headers: { authorization: `Bearer ${paddleApiKey}`, 'content-type': 'application/json' }, body: JSON.stringify({ effective_from: 'next_billing_period' }) })
     const paddleBody = await paddleResponse.json()
     if (!paddleResponse.ok) { console.error('Paddle subscription cancellation failed', paddleResponse.status, paddleBody); return jsonResponse(502, { error: 'paddle_cancellation_failed' }) }
@@ -36,6 +35,11 @@ Deno.serve(async (request) => {
     if (updateError) {
       console.warn('Local database update failed after Paddle cancel succeeded. Webhook will reconcile state.', updateError)
     }
-    return jsonResponse(200, { cancel_at_period_end: true, current_period_end: subscription.current_period_end, paddle_status: paddleBody?.data?.status ?? null })
+    return jsonResponse(200, {
+      cancel_at_period_end: true,
+      current_period_end: subscription.current_period_end,
+      paddle_status: paddleBody?.data?.status ?? null,
+      reconciliation_pending: Boolean(updateError),
+    })
   } catch (error) { console.error('Paddle subscription cancellation failed', error instanceof Error ? error.message : error); return jsonResponse(400, { error: 'cancellation_not_available' }) }
 })

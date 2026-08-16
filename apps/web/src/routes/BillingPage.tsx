@@ -77,14 +77,30 @@ export function BillingPage({ session }: { session: Session }) {
     setActiveCheckout(null)
   }
 
+  async function waitForSubscriptionReconciliation(childId: string, expectedCancelAtPeriodEnd: boolean) {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, 1500))
+      const nextSubscriptions = await refreshSubscriptions()
+      const current = nextSubscriptions.find((sub) => sub.childId === childId)
+      if (current && current.cancelAtPeriodEnd === expectedCancelAtPeriodEnd) {
+        return
+      }
+    }
+  }
+
   async function cancelChildSubscription(childId: string, reason: string) {
     setCancelingChildId(childId)
     setError('')
     setCheckoutNotice('')
     try {
-      await cancelSubscription(childId, reason)
-      await refreshSubscriptions()
+      const result = await cancelSubscription(childId, reason)
+      setSubscriptions((current) => current.map((sub) => sub.childId === childId ? { ...sub, cancelAtPeriodEnd: result.cancelAtPeriodEnd } : sub))
       setCheckoutNotice('已取消續訂。本期結束前仍可使用教材，之後歡迎隨時回來續訂。')
+      if (result.reconciliationPending) {
+        void waitForSubscriptionReconciliation(childId, result.cancelAtPeriodEnd).catch(() => {})
+      } else {
+        await refreshSubscriptions()
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '取消訂閱時發生問題，請稍後再試。')
     } finally {
@@ -97,9 +113,14 @@ export function BillingPage({ session }: { session: Session }) {
     setError('')
     setCheckoutNotice('')
     try {
-      await resumeSubscription(childId)
-      await refreshSubscriptions()
+      const result = await resumeSubscription(childId)
+      setSubscriptions((current) => current.map((sub) => sub.childId === childId ? { ...sub, cancelAtPeriodEnd: result.cancelAtPeriodEnd } : sub))
       setCheckoutNotice('已恢復自動續訂。將於下個計費週期持續為孩子準備每週專屬教材。')
+      if (result.reconciliationPending) {
+        void waitForSubscriptionReconciliation(childId, result.cancelAtPeriodEnd).catch(() => {})
+      } else {
+        await refreshSubscriptions()
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '恢復續訂時發生問題，請稍後再試。')
     } finally {

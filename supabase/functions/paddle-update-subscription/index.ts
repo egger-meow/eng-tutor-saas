@@ -58,7 +58,11 @@ Deno.serve(async (request) => {
     }
 
     if (!subscription.cancel_at_period_end) {
-      return jsonResponse(200, { cancel_at_period_end: false, current_period_end: subscription.current_period_end })
+      return jsonResponse(200, {
+        cancel_at_period_end: false,
+        current_period_end: subscription.current_period_end,
+        reconciliation_pending: false,
+      })
     }
 
     const paddleResponse = await fetch(`${paddleApiBaseUrl}/subscriptions/${subscription.provider_subscription_id}`, {
@@ -87,6 +91,7 @@ Deno.serve(async (request) => {
       cancel_at_period_end: false,
       current_period_end: subscription.current_period_end,
       paddle_status: paddleBody?.data?.status ?? null,
+      reconciliation_pending: Boolean(updateError),
     })
   } catch (error) {
     console.error('Paddle subscription update failed', error instanceof Error ? error.message : error)

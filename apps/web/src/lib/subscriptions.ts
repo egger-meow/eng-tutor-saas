@@ -49,7 +49,13 @@ export async function prepareCheckout(childId: string, plan: BillingPlan): Promi
   }
 }
 
-export async function cancelSubscription(childId: string, reason?: string): Promise<void> {
+export type SubscriptionActionResult = {
+  cancelAtPeriodEnd: boolean
+  currentPeriodEnd: string | null
+  reconciliationPending: boolean
+}
+
+export async function cancelSubscription(childId: string, reason?: string): Promise<SubscriptionActionResult> {
   const { data, error } = await getSupabaseClient().functions.invoke('paddle-cancel-subscription', {
     body: { child_id: childId, reason: reason?.trim() || undefined },
   })
@@ -64,9 +70,14 @@ export async function cancelSubscription(childId: string, reason?: string): Prom
     throw new Error('取消訂閱時發生問題，訂閱狀態尚未變更，請稍後再試。')
   }
   if (data?.cancel_at_period_end !== true) throw new Error('取消訂閱時發生問題，請稍後再試。')
+  return {
+    cancelAtPeriodEnd: true,
+    currentPeriodEnd: (data.current_period_end as string | null) ?? null,
+    reconciliationPending: data.reconciliation_pending === true,
+  }
 }
 
-export async function resumeSubscription(childId: string): Promise<void> {
+export async function resumeSubscription(childId: string): Promise<SubscriptionActionResult> {
   const { data, error } = await getSupabaseClient().functions.invoke('paddle-update-subscription', {
     body: { child_id: childId, action: 'resume' },
   })
@@ -81,5 +92,11 @@ export async function resumeSubscription(childId: string): Promise<void> {
     throw new Error('恢復續訂時發生問題，請稍後再試。')
   }
   if (data?.cancel_at_period_end !== false) throw new Error('恢復續訂時發生問題，請稍後再試。')
+  return {
+    cancelAtPeriodEnd: false,
+    currentPeriodEnd: (data.current_period_end as string | null) ?? null,
+    reconciliationPending: data.reconciliation_pending === true,
+  }
 }
+
 
