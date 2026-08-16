@@ -266,4 +266,78 @@ describe('loadGenerationContext', () => {
     }))
     expect(state.rpc).toHaveBeenCalledWith('worker_completed_generation_context', { job_id: 'synthetic-week-1', worker_id: 'worker-1' })
   })
+
+  it('hydrates diversityCapsule from recentHistory in generation context', async () => {
+    const state = setup()
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_generation_context') {
+        return {
+          data: {
+            job: { id: 'synthetic-week-1', childId: 'child-101', materialWeek: '2026-W34', ruleVersion: 'weekly-material/2.0.0' },
+            child: { grade: 7, gradeStage: 'grade_7' },
+            recentHistory: [
+              { materialWeek: '2026-W32', genre: 'article', contextKey: 'marine-life', itemFamilies: ['f-nature-animals'] },
+              { materialWeek: '2026-W33', genre: 'dialogue', contextKey: 'space-travel', itemFamilies: ['f-tech-science'] },
+            ],
+          },
+          error: null,
+        }
+      }
+      if (name === 'worker_quality_trends') return { data: [], error: null }
+      return { data: null, error: { message: 'unexpected RPC' } }
+    })
+
+    const context = await loadGenerationContext(state.client, 'synthetic-week-1', 'worker-1')
+    expect(context.diversityCapsule).toBeDefined()
+    expect(context.diversityCapsule?.recentGenres).toEqual(['article', 'dialogue'])
+    expect(context.diversityCapsule?.recentContextKeys).toEqual(['marine-life', 'space-travel'])
+    expect(context.diversityCapsule?.recentItemFamilies).toEqual(['f-nature-animals', 'f-tech-science'])
+  })
+
+  it('guarantees capCoverageCapsule provides recommendedVocabulary, recommendedGrammar, and recommendedCommunicationFunctions', async () => {
+    const state = setup()
+    state.rpc.mockImplementation(async (name: string) => {
+      if (name === 'worker_generation_context') {
+        return {
+          data: {
+            job: { id: 'synthetic-week-1', childId: 'child-101', materialWeek: '2026-W34', ruleVersion: 'weekly-material/2.0.0' },
+            child: { grade: 7, gradeStage: 'grade_7' },
+            vocabularyCapsule: {
+              dueForReview: ['v-borrow'],
+              weakRecent: [],
+              uncertain: [],
+              recentlyMastered: ['v-through'],
+              historicalCount: 2,
+            },
+            grammarCapsule: {
+              dueForReview: ['g7-do-does-questions'],
+              weakRecent: [],
+              uncertain: [],
+              recentlyMastered: [],
+              historicalCount: 1,
+            },
+            communicationCapsule: {
+              dueForReview: ['cf-making-requests'],
+              weakRecent: [],
+              recentlyMastered: [],
+              historicalCount: 1,
+            },
+          },
+          error: null,
+        }
+      }
+      if (name === 'worker_quality_trends') return { data: [], error: null }
+      return { data: null, error: { message: 'unexpected RPC' } }
+    })
+
+    const context = await loadGenerationContext(state.client, 'synthetic-week-1', 'worker-1')
+    expect(context.capCoverageCapsule).toBeDefined()
+    const cap = context.capCoverageCapsule as any
+    expect(cap.recommendedVocabulary).toBeDefined()
+    expect(cap.recommendedVocabulary.length).toBeGreaterThan(0)
+    expect(cap.recommendedGrammar).toBeDefined()
+    expect(cap.recommendedGrammar.length).toBeGreaterThan(0)
+    expect(cap.recommendedCommunicationFunctions).toBeDefined()
+    expect(cap.recommendedCommunicationFunctions.length).toBeGreaterThan(0)
+  })
 })

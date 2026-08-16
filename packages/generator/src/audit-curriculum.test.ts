@@ -77,4 +77,103 @@ describe('curriculum audit & lexical contract', () => {
     expect(alignmentFinding).toBeDefined()
     expect(alignmentFinding?.severity).toBe('critical')
   })
+
+  it('enforces token-boundary morphology: car != carry (does not match substring in carry)', () => {
+    const pkg = canonicalPackage()
+    // Passage has "carry" / "carrying" / "carries" and is 130+ words, but never contains the word "car"
+    pkg.studentLesson.reading.blocks = [
+      { type: 'paragraph', text: 'Mia and Alex carry the heavy robot parts across the workshop to the main workbench. They are carrying extra batteries and testing instruments carefully before the regional robotics tournament begins tomorrow morning.' },
+      { type: 'paragraph', text: 'The entire team works together after school every Tuesday in Taipei to calibrate each optical sensor and inspect the aluminum chassis. When unexpected circuit problems happen during testing, they record the exact error code, discuss possible solutions calmly with their teacher, and test each component step by step. Everyone agrees that careful preparation and good teamwork help them achieve excellent results in the competition. They check every screw and verify all electrical connections to ensure complete safety. By keeping detailed logs and testing repeatedly, the students build strong confidence for the big tournament match.' },
+    ]
+    pkg.studentLesson.reading.wordCount = 135
+    pkg.studentLesson.vocabulary = [
+      {
+        id: 'v-car',
+        word: 'car',
+        partOfSpeech: 'n.',
+        meaningZh: '車子',
+        pronunciationHint: null,
+        exampleEn: 'He drives a car.',
+        exampleZh: '他開車。',
+        status: 'new',
+      },
+      ...['workshop', 'team', 'sensor', 'error', 'prepare', 'result', 'tournament'].map((word, i) => ({
+        id: `v-${word}`,
+        word,
+        partOfSpeech: 'n.',
+        meaningZh: `意思 ${i}`,
+        pronunciationHint: null,
+        exampleEn: `Example for ${word}.`,
+        exampleZh: `例句 ${i}。`,
+        status: 'new' as const,
+      })),
+    ]
+
+    const report = auditCurriculumPackage(pkg)
+    const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('car'))
+    expect(anchorFinding).toBeDefined()
+    expect(anchorFinding?.severity).toBe('critical')
+  })
+
+  it('accepts valid morphological variants: carry is anchored by carries or carrying', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.reading.blocks = [
+      { type: 'paragraph', text: 'Mia carries the heavy robot parts across the workshop to the main test table. They are carrying extra batteries and instruments to ensure proper sensor calibration before the big robotics match.' },
+      { type: 'paragraph', text: 'The entire team works together after school every Tuesday in Taipei to calibrate each optical sensor and inspect the aluminum chassis. When unexpected circuit problems happen during testing, they record the exact error code, discuss possible solutions calmly with their teacher, and test each component step by step. Everyone agrees that careful preparation and good teamwork help them achieve excellent results in the competition. They check every screw and verify all electrical connections to ensure complete safety. By keeping detailed logs and testing repeatedly, the students build strong confidence for the big tournament match.' },
+    ]
+    pkg.studentLesson.reading.wordCount = 135
+    pkg.studentLesson.vocabulary = [
+      {
+        id: 'v-carry',
+        word: 'carry',
+        partOfSpeech: 'v.',
+        meaningZh: '攜帶；搬運',
+        pronunciationHint: null,
+        exampleEn: 'She carries a box.',
+        exampleZh: '她搬著一個箱子。',
+        status: 'new',
+      },
+      ...['workshop', 'team', 'sensor', 'error', 'prepare', 'result', 'tournament'].map((word, i) => ({
+        id: `v-${word}`,
+        word,
+        partOfSpeech: 'n.',
+        meaningZh: `意思 ${i}`,
+        pronunciationHint: null,
+        exampleEn: `Example for ${word}.`,
+        exampleZh: `例句 ${i}。`,
+        status: 'new' as const,
+      })),
+    ]
+
+    const report = auditCurriculumPackage(pkg)
+    const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('carry'))
+    expect(anchorFinding).toBeUndefined()
+  })
+
+  it('rejects capitalized advanced non-allowlist words without unconditional bypass', () => {
+    const pkg = canonicalPackage()
+    // Inject capitalized obscure words that are not in the approved vocab, not dialogue speakers, and not interests
+    pkg.studentLesson.reading.blocks[0] = {
+      type: 'paragraph',
+      text: 'Sophisticated Quantum Epistemology Obfuscates our daily robot testing procedures in the workshop today.',
+    }
+    const report = auditCurriculumPackage(pkg)
+    const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
+    expect(lexicalFinding).toBeDefined()
+    expect(lexicalFinding?.severity).toBe('critical')
+  })
+
+  it('allows dialogue speakers, child interests, and standard educational proper nouns without warning', () => {
+    const pkg = canonicalPackage()
+    pkg.learnerSnapshot.specificInterests = ['Minecraft', 'Robotics']
+    pkg.studentLesson.reading.genre = 'dialogue'
+    pkg.studentLesson.reading.blocks = [
+      { type: 'dialogue', speaker: 'Alex', text: 'Hello Mia, let us meet on Monday in Taipei for the robotics exhibition.' },
+      { type: 'dialogue', speaker: 'Mia', text: 'Sure Alex, I will bring our Minecraft redstone simulation notes tomorrow.' },
+      { type: 'paragraph', text: 'Both Alex and Mia work together every Tuesday after school in Taipei to prepare for their robotics presentation.' },
+    ]
+    const report = auditCurriculumPackage(pkg)
+    const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
+    expect(lexicalFinding).toBeUndefined()
+  })
 })

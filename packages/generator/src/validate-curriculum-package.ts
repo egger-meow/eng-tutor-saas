@@ -5,6 +5,10 @@ import {
   CurriculumPackageV21Schema,
   type CurriculumPackage,
 } from './curriculum-package-schema.js'
+import {
+  VALID_GRAMMAR_UNIT_IDS,
+  VALID_COMMUNICATION_FUNCTION_IDS,
+} from './curriculum-maps/student-curriculum-tracker.js'
 import { normalizeCurriculumPackage } from './normalize-curriculum-package.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
@@ -130,6 +134,31 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
     })
   if (value.qualityEvidence.criticFindings.some((finding) => finding.severity === 'critical' && !finding.resolution))
     issues.push({ path: 'qualityEvidence.criticFindings', message: 'Unresolved critical critic finding' })
+
+  // Validate trackingDelta canonical IDs fail-closed
+  if (value.trackingDelta) {
+    if (Array.isArray(value.trackingDelta.exposedGrammarTargetIds)) {
+      for (const id of value.trackingDelta.exposedGrammarTargetIds) {
+        if (!VALID_GRAMMAR_UNIT_IDS.has(id)) {
+          issues.push({
+            path: 'trackingDelta.exposedGrammarTargetIds',
+            message: `Unknown canonical grammar target ID: "${id}". Must be one of the 24 derived grammar progression units.`,
+          })
+        }
+      }
+    }
+    if (Array.isArray(value.trackingDelta.exposedCommunicationFunctionIds)) {
+      for (const id of value.trackingDelta.exposedCommunicationFunctionIds) {
+        if (!VALID_COMMUNICATION_FUNCTION_IDS.has(id)) {
+          issues.push({
+            path: 'trackingDelta.exposedCommunicationFunctionIds',
+            message: `Unknown canonical communication function ID: "${id}". Must be one of the 16 official communication function IDs.`,
+          })
+        }
+      }
+    }
+  }
+
   return issues
 }
 

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { auditCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumPackageV20, type CurriculumQuestion } from './index.js'
+import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
+import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
 
 export function validPackage(): CurriculumPackageV20 {
   const paragraphs = [
@@ -108,5 +110,31 @@ describe('curriculum package v2', () => {
     ]
     const result = validateCurriculumPackage(value)
     expect(result.success).toBe(true)
+  })
+
+  it('enforces fail-closed canonical grammar IDs: rejects arbitrary grammar ID in trackingDelta', () => {
+    const value = validPackage()
+    const v21 = upgradeV20ToV21(value as any)
+    const v22 = upgradeV21ToV22(v21)
+    v22.trackingDelta.exposedGrammarTargetIds = ['g7-fake-unregistered-grammar-id']
+
+    const result = validateCurriculumPackage(v22)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.issues.some((issue) => issue.path.includes('exposedGrammarTargetIds') && issue.message.includes('24 derived grammar'))).toBe(true)
+    }
+  })
+
+  it('enforces fail-closed canonical communication function IDs: rejects arbitrary communication ID in trackingDelta', () => {
+    const value = validPackage()
+    const v21 = upgradeV20ToV21(value as any)
+    const v22 = upgradeV21ToV22(v21)
+    v22.trackingDelta.exposedCommunicationFunctionIds = ['cf-fake-invented-function']
+
+    const result = validateCurriculumPackage(v22)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.issues.some((issue) => issue.path.includes('exposedCommunicationFunctionIds') && issue.message.includes('16 official communication'))).toBe(true)
+    }
   })
 })

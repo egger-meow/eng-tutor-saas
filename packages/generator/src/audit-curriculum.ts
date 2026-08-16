@@ -27,8 +27,13 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   if (!w || /^\d+$/u.test(w) || w.length <= 2) return true
   if (taughtWords.has(w) || canonicalVocabSet.has(w)) return true
 
-  // Common basic contractions / auxiliaries / compounds
-  if (['cannot', 'don', 't', 'doesn', 'didn', 'won', 'can', 'not', 'isn', 'aren', 'wasn', 'weren', 'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 's', 're', 've', 'll', 'd', 'm'].includes(w)) {
+  // Common basic contractions / auxiliaries / compounds / test instructional terms
+  if ([
+    'cannot', 'don', 't', 'doesn', 'didn', 'won', 'can', 'could', 'not', 'isn', 'aren', 'wasn', 'weren',
+    'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 'should', 'would', 'might', 'must',
+    's', 're', 've', 'll', 'd', 'm',
+    'option', 'opt', 'recall', 'blank', 'item', 'choice', 'passage', 'sentence', 'statement', 'question',
+  ].includes(w)) {
     return true
   }
 
@@ -51,27 +56,114 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   return false
 }
 
+function getValidWordVariants(word: string): Set<string> {
+  const w = word.toLowerCase().trim().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
+  const variants = new Set<string>([w])
+  if (!w || w.length < 2) return variants
+
+  // Controlled inflection rules
+  // 1. Plural / 3rd person singular s/es/ies
+  if (w.endsWith('y') && !/[aeiou]y$/u.test(w)) {
+    variants.add(w.slice(0, -1) + 'ies')
+    variants.add(w.slice(0, -1) + 'ied')
+  } else if (/(?:s|sh|ch|x|z|o)$/u.test(w)) {
+    variants.add(w + 'es')
+  } else if (w.endsWith('e')) {
+    variants.add(w + 's')
+    variants.add(w + 'd')
+    variants.add(w.slice(0, -1) + 'ing')
+  } else {
+    variants.add(w + 's')
+  }
+
+  // 2. Past tense & participles ed / ing
+  if (!w.endsWith('e')) {
+    variants.add(w + 'ed')
+    variants.add(w + 'ing')
+    if (/[bcdfghjklmnpqrstvwxyz][aeiou][bcdfghjklmnprstvz]$/u.test(w) && w.length >= 3) {
+      const lastChar = w.slice(-1)
+      variants.add(w + lastChar + 'ed')
+      variants.add(w + lastChar + 'ing')
+      variants.add(w + lastChar + 'er')
+    }
+  }
+
+  // 3. Adverb / adjective / comparative
+  variants.add(w + 'ly')
+  variants.add(w + 'er')
+  variants.add(w + 'est')
+
+  // 4. Reverse stem (in case target word in vocab list is already inflected)
+  if (w.endsWith('ies') && w.length > 4) variants.add(w.slice(0, -3) + 'y')
+  if (w.endsWith('ied') && w.length > 4) variants.add(w.slice(0, -3) + 'y')
+  if (w.endsWith('ing') && w.length > 4) {
+    variants.add(w.slice(0, -3))
+    variants.add(w.slice(0, -3) + 'e')
+  }
+  if (w.endsWith('ed') && w.length > 3) {
+    variants.add(w.slice(0, -2))
+    variants.add(w.slice(0, -1))
+  }
+  if (w.endsWith('es') && w.length > 3) {
+    variants.add(w.slice(0, -2))
+  }
+  if (w.endsWith('s') && w.length > 2) {
+    variants.add(w.slice(0, -1))
+  }
+
+  return variants
+}
+
 function wordAppearsInText(word: string, text: string): boolean {
-  const cleanWord = word.toLowerCase().trim()
+  const cleanWord = word.toLowerCase().trim().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
   if (!cleanWord) return true
-  const lowerText = text.toLowerCase()
-  if (lowerText.includes(cleanWord)) return true
-
-  // Check stems if word has endings
-  const stems = [
-    cleanWord,
-    cleanWord.replace(/s$/u, ''),
-    cleanWord.replace(/es$/u, ''),
-    cleanWord.replace(/ed$/u, ''),
-    cleanWord.replace(/ing$/u, ''),
-    cleanWord.replace(/ies$/u, 'y'),
-    cleanWord.replace(/ied$/u, 'y'),
-  ].filter((s) => s.length >= 3)
-
-  for (const stem of stems) {
-    if (lowerText.includes(stem)) return true
+  const tokens = text.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/gu) ?? []
+  const tokenSet = new Set(tokens)
+  const variants = getValidWordVariants(cleanWord)
+  for (const variant of variants) {
+    if (tokenSet.has(variant)) return true
   }
   return false
+}
+
+const STANDARD_EDUCATIONAL_PROPER_NOUNS = [
+  // Days of the week
+  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  // Months
+  'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
+  // Common educational character names in Taiwanese junior-high textbooks
+  'alex', 'allen', 'amy', 'andy', 'ann', 'bella', 'ben', 'chris', 'cindy', 'david', 'diana', 'emma', 'eric', 'ethan', 'eva', 'gary', 'grace', 'hank', 'helen', 'jack', 'jay', 'jerry', 'john', 'jonathan', 'kelly', 'ken', 'kevin', 'kobe', 'leo', 'lisa', 'lucy', 'mary', 'max', 'may', 'mia', 'mike', 'mina', 'patty', 'paul', 'peggy', 'peter', 'ross', 'roy', 'sam', 'sara', 'sarah', 'tom', 'tony', 'vicky', 'willy', 'zoe',
+  // Common geographical names in curriculum
+  'taiwan', 'taipei', 'kaohsiung', 'taichung', 'tainan', 'taitung', 'hualien', 'yilan', 'japan', 'tokyo', 'america', 'usa', 'uk', 'london', 'canada', 'australia', 'china', 'asia', 'europe',
+]
+
+function buildAllowedEntitiesSet(pkg: CurriculumPackage): Set<string> {
+  const allowed = new Set<string>(STANDARD_EDUCATIONAL_PROPER_NOUNS)
+
+  // 1. Dialogue speakers
+  for (const block of pkg.studentLesson.reading.blocks) {
+    if (block.type === 'dialogue' && block.speaker) {
+      for (const token of block.speaker.toLowerCase().match(/[a-z0-9]+/gu) ?? []) {
+        if (token.length >= 2) allowed.add(token)
+      }
+    }
+  }
+
+  // 2. Child interests & profile identifiers
+  const interestSources = [
+    ...pkg.learnerSnapshot.specificInterests,
+    ...pkg.learnerSnapshot.changedInterests,
+    pkg.metadata.childId,
+  ]
+  for (const source of interestSources) {
+    if (typeof source === 'string') {
+      for (const token of source.toLowerCase().match(/[a-z0-9]+/gu) ?? []) {
+        if (token.length >= 2) allowed.add(token)
+      }
+    }
+  }
+
+  return allowed
 }
 
 function words(value: string): number { return value.trim().split(/\s+/u).filter(Boolean).length }
@@ -118,6 +210,7 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   }
 
   const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
+  const allowedEntities = buildAllowedEntitiesSet(pkg)
 
   // 1. Passage-First Lexical Anchor Check (Core words must be in the reading passage)
   const rawPassageText = blockTexts.join(' ')
@@ -143,10 +236,7 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
     const clean = token.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
     if (!clean) continue
     if (isApprovedWord(clean, taughtVocab)) continue
-
-    // Allow proper names / interest terms
-    if (/^[A-Z][a-z]+$/u.test(clean)) continue
-    if (interestText.includes(clean.toLowerCase())) continue
+    if (allowedEntities.has(clean.toLowerCase())) continue
 
     unapprovedWords.push(clean)
   }

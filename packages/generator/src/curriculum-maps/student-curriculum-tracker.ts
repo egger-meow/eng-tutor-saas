@@ -1,3 +1,7 @@
+import { grammarProgressionUnits } from './derived/grammar-progression.js'
+import communicationAppendix4 from './official/communication-appendix-4.json' with { type: 'json' }
+import vocabulary2000 from './official/vocabulary-2000.json' with { type: 'json' }
+
 export interface CurriculumEvidenceRecord {
   id: string
   exposureCount: number
@@ -15,6 +19,23 @@ export interface StudentCurriculumStore {
   vocabRecords: Record<string, CurriculumEvidenceRecord>
   grammarRecords: Record<string, CurriculumEvidenceRecord>
   communicationRecords: Record<string, CurriculumEvidenceRecord>
+}
+
+export const VALID_GRAMMAR_UNIT_IDS = new Set<string>(grammarProgressionUnits.map((u) => u.unitId))
+export const VALID_COMMUNICATION_FUNCTION_IDS = new Set<string>(communicationAppendix4.map((c) => c.id))
+
+const canonicalVocabIdSet = new Set<string>(vocabulary2000.map((v) => v.id))
+const canonicalVocabWordMap = new Map<string, string>(vocabulary2000.map((v) => [v.word.toLowerCase(), v.id]))
+
+export function mapToCanonicalVocabId(wordOrId: string): string | null {
+  const clean = wordOrId.trim()
+  if (canonicalVocabIdSet.has(clean)) return clean
+  const stripped = clean.toLowerCase().replace(/^v-/u, '')
+  const byWord = canonicalVocabWordMap.get(stripped)
+  if (byWord) return byWord
+  const directWord = canonicalVocabWordMap.get(clean.toLowerCase())
+  if (directWord) return directWord
+  return null
 }
 
 export function createEmptyStudentCurriculumStore(studentId: string, grade: number): StudentCurriculumStore {
@@ -45,6 +66,9 @@ function getOrInitRecord(recordMap: Record<string, CurriculumEvidenceRecord>, id
  * Hard System Invariant:
  * trackingDelta records EXPOSURE ONLY.
  * Exposure is NOT evidence of mastery.
+ *
+ * Fail-closed: Only canonical CAP IDs enter store.
+ * Domain words (e.g. Minecraft, sensors) do NOT enter CAP 2000 denominator/store.
  */
 export function recordExposureFromTrackingDelta(
   store: StudentCurriculumStore,
@@ -57,9 +81,14 @@ export function recordExposureFromTrackingDelta(
   },
   timestamp: string = new Date().toISOString(),
 ): void {
-  // Vocabulary Exposure
-  for (const vocabId of [...delta.introducedVocabularyIds, ...delta.reviewedVocabularyIds]) {
-    const record = getOrInitRecord(store.vocabRecords, vocabId)
+  // Vocabulary Exposure: Only record canonical CAP 2000 items
+  for (const vocabIdOrWord of [...delta.introducedVocabularyIds, ...delta.reviewedVocabularyIds]) {
+    const canonicalId = mapToCanonicalVocabId(vocabIdOrWord)
+    if (!canonicalId) {
+      // Domain word -> taught in lesson, but does NOT pollute CAP 2000 progress
+      continue
+    }
+    const record = getOrInitRecord(store.vocabRecords, canonicalId)
     record.exposureCount += 1
     record.lastSeenAt = timestamp
     if (record.masteryStatus === 'not_started') {
@@ -67,8 +96,9 @@ export function recordExposureFromTrackingDelta(
     }
   }
 
-  // Grammar Exposure
+  // Grammar Exposure: Only record valid derived progression units
   for (const grammarId of delta.exposedGrammarTargetIds) {
+    if (!VALID_GRAMMAR_UNIT_IDS.has(grammarId)) continue
     const record = getOrInitRecord(store.grammarRecords, grammarId)
     record.exposureCount += 1
     record.lastSeenAt = timestamp
@@ -77,9 +107,10 @@ export function recordExposureFromTrackingDelta(
     }
   }
 
-  // Communication Functions Exposure
+  // Communication Functions Exposure: Only record valid official function IDs
   if (delta.exposedCommunicationFunctionIds) {
     for (const funcId of delta.exposedCommunicationFunctionIds) {
+      if (!VALID_COMMUNICATION_FUNCTION_IDS.has(funcId)) continue
       const record = getOrInitRecord(store.communicationRecords, funcId)
       record.exposureCount += 1
       record.lastSeenAt = timestamp

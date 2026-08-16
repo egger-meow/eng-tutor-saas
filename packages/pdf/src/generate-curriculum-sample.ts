@@ -181,7 +181,7 @@ export const curriculumSample: CurriculumPackage = {
   trackingDelta: {
     introducedVocabularyIds: Array.from({ length: 7 }, (_, index) => `vocab-${index}`),
     reviewedVocabularyIds: [],
-    exposedGrammarTargetIds: ['grammar-do-does'],
+    exposedGrammarTargetIds: ['g7-do-does-questions'],
     exposedReadingTargetIds: ['reading-inference'],
     exposedCommunicationFunctionIds: [],
     hypothesesToVerify: ['提高閱讀難度後仍能在時間內完成'],

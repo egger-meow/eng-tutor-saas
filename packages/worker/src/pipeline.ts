@@ -1,4 +1,18 @@
-import { auditCurriculumPackage, findForbiddenPersonalizationJargon, parseWeeklyLesson, validateCurriculumPackage, type CurriculumPackage, type WeeklyLesson } from '@paper-english/generator'
+import {
+  auditCurriculumPackage,
+  buildCapCoverageCapsule,
+  buildDiversityCapsule,
+  createEmptyStudentCurriculumStore,
+  findForbiddenPersonalizationJargon,
+  parseWeeklyLesson,
+  recordExposureFromTrackingDelta,
+  validateCurriculumPackage,
+  type CapCoverageCapsule,
+  type CurriculumPackage,
+  type DiversityCapsule,
+  type HistoricalPackageSummary,
+  type WeeklyLesson,
+} from '@paper-english/generator'
 import { inspectCurriculumPdfPair, renderCurriculumPackageBytes, renderLessonPdfBytes, type CurriculumPdfBytes, type CurriculumPdfPairInspection, type LessonPdfBytes } from '@paper-english/pdf'
 
 const BUCKET = 'weekly-materials'
@@ -31,6 +45,23 @@ export type GenerationContext = {
     uncertain: string[]
     historicalCount: number
   }
+  communicationCapsule?: {
+    dueForReview: string[]
+    weakRecent: string[]
+    recentlyMastered: string[]
+    historicalCount: number
+  }
+  capCoverageCapsule?: CapCoverageCapsule | {
+    dueReviewVocabulary: string[]
+    dueReviewGrammar: string[]
+    dueReviewCommunication: string[]
+    recommendedVocabulary?: string[]
+    recommendedGrammar?: string[]
+    recommendedCommunicationFunctions?: string[]
+    coverage: unknown
+  }
+  diversityCapsule?: DiversityCapsule
+  recentHistory?: HistoricalPackageSummary[]
   [key: string]: unknown
 }
 
@@ -130,6 +161,70 @@ export async function loadGenerationContext(client: WorkerClient, jobId: string,
       context.qualityTrends = []
     }
   }
+
+  // 1. Build Diversity Capsule from recent history
+  if (Array.isArray(context.recentHistory)) {
+    context.diversityCapsule = buildDiversityCapsule(context.recentHistory as HistoricalPackageSummary[], 4)
+  } else if (!context.diversityCapsule) {
+    context.diversityCapsule = {
+      recentGenres: [],
+      recentContextKeys: [],
+      recentItemFamilies: [],
+    }
+  }
+
+  // 2. Guarantee CAP Gap recommendations are populated in capCoverageCapsule
+  if (!context.capCoverageCapsule || !(context.capCoverageCapsule as any).recommendedVocabulary) {
+    const gradeStage = ((context.child as any)?.gradeStage ?? 'grade_7') as 'grade_7' | 'grade_8' | 'grade_9'
+    const grade = (context.child as any)?.grade ?? 7
+    const store = createEmptyStudentCurriculumStore(context.job.childId ?? 'anonymous', grade)
+
+    if (context.vocabularyCapsule) {
+      const vocabDue = (context.vocabularyCapsule as any).dueForReview ?? []
+      const vocabWeak = (context.vocabularyCapsule as any).weakRecent ?? []
+      const vocabMastered = (context.vocabularyCapsule as any).recentlyMastered ?? []
+      recordExposureFromTrackingDelta(store, {
+        introducedVocabularyIds: [...vocabDue, ...vocabWeak, ...vocabMastered],
+        reviewedVocabularyIds: [],
+        exposedGrammarTargetIds: [],
+      })
+    }
+    if (context.grammarCapsule) {
+      const grammarDue = (context.grammarCapsule as any).dueForReview ?? []
+      const grammarWeak = (context.grammarCapsule as any).weakRecent ?? []
+      const grammarMastered = (context.grammarCapsule as any).recentlyMastered ?? []
+      recordExposureFromTrackingDelta(store, {
+        introducedVocabularyIds: [],
+        reviewedVocabularyIds: [],
+        exposedGrammarTargetIds: [...grammarDue, ...grammarWeak, ...grammarMastered],
+      })
+    }
+    if (context.communicationCapsule) {
+      const commDue = (context.communicationCapsule as any).dueForReview ?? []
+      const commWeak = (context.communicationCapsule as any).weakRecent ?? []
+      const commMastered = (context.communicationCapsule as any).recentlyMastered ?? []
+      recordExposureFromTrackingDelta(store, {
+        introducedVocabularyIds: [],
+        reviewedVocabularyIds: [],
+        exposedGrammarTargetIds: [],
+        exposedCommunicationFunctionIds: [...commDue, ...commWeak, ...commMastered],
+      })
+    }
+
+    const calculatedCapsule = buildCapCoverageCapsule(store, { gradeStage })
+    if (context.capCoverageCapsule && typeof context.capCoverageCapsule === 'object') {
+      context.capCoverageCapsule = {
+        ...calculatedCapsule,
+        ...context.capCoverageCapsule,
+        recommendedVocabulary: calculatedCapsule.recommendedVocabulary,
+        recommendedGrammar: calculatedCapsule.recommendedGrammar,
+        recommendedCommunicationFunctions: calculatedCapsule.recommendedCommunicationFunctions,
+      }
+    } else {
+      context.capCoverageCapsule = calculatedCapsule
+    }
+  }
+
   return context
 }
 

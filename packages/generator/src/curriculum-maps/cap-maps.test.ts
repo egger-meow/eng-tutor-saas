@@ -19,8 +19,9 @@ describe('CAP Official & Derived Curriculum Maps', () => {
       expect(sourceManifest.provenance.vocabulary.extension800Count).toBe(800)
       expect(sourceManifest.annotationPolicy).toContain('derived/')
 
-      // Verify SHA-256 for all official reference datasets
-      for (const [relPath, expectedHash] of Object.entries(sourceManifest.fileChecksumsSha256)) {
+      // Verify SHA-256 canonical asset integrity for all checked-in curriculum reference datasets
+      expect(sourceManifest.canonicalAssetIntegritySha256).toBeDefined()
+      for (const [relPath, expectedHash] of Object.entries(sourceManifest.canonicalAssetIntegritySha256)) {
         const fullPath = resolve(import.meta.dirname, relPath)
         const fileContent = readFileSync(fullPath)
         const actualHash = createHash('sha256').update(fileContent).digest('hex')

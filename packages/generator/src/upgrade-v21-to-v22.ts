@@ -1,11 +1,21 @@
 import type { CurriculumPackage, CurriculumPackageV21 } from './curriculum-package-schema.js'
 
+const LEGACY_GRAMMAR_MAP: Record<string, string> = {
+  'grammar-do-does': 'g7-do-does-questions',
+  'do-does': 'g7-do-does-questions',
+  'be-verbs': 'g7-be-verbs-pronouns',
+  'lang-be-verb': 'g7-be-verbs-pronouns',
+  'present-simple': 'g7-present-simple-verbs',
+  'lang-present-simple': 'g7-present-simple-verbs',
+}
+
 export function upgradeV21ToV22(pkgV21: CurriculumPackageV21 | any): CurriculumPackage {
   const raw = typeof pkgV21 === 'object' && pkgV21 !== null ? JSON.parse(JSON.stringify(pkgV21)) : {}
 
   const trackingDeltaRaw = raw.trackingDelta || {}
-  const exposedGrammarTargetIds =
+  const rawGrammarIds =
     trackingDeltaRaw.exposedGrammarTargetIds || trackingDeltaRaw.grammarTargets || []
+  const exposedGrammarTargetIds = rawGrammarIds.map((id: string) => LEGACY_GRAMMAR_MAP[id] || id)
   const exposedReadingTargetIds =
     trackingDeltaRaw.exposedReadingTargetIds || trackingDeltaRaw.readingTargets || []
   const exposedCommunicationFunctionIds =

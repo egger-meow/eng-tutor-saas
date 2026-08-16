@@ -99,4 +99,26 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
     expect(capsule.recommendedGrammar.length).toBeLessThanOrEqual(2)
     expect(capsule.recommendedCommunicationFunctions.length).toBeLessThanOrEqual(2)
   })
+
+  it('maps weekly vocabulary to official 2000 and excludes non-CAP domain words from store', () => {
+    const store = createEmptyStudentCurriculumStore('child-102', 7)
+
+    recordExposureFromTrackingDelta(store, {
+      introducedVocabularyIds: ['borrow', 'through', 'minecraft', 'redstone', 'sensor'],
+      reviewedVocabularyIds: [],
+      exposedGrammarTargetIds: ['g7-be-verbs-pronouns'],
+    })
+
+    // Canonical CAP 2000 words mapped to canonical IDs and recorded
+    expect(store.vocabRecords['v-borrow']).toBeDefined()
+    expect(store.vocabRecords['v-through']).toBeDefined()
+    expect(store.vocabRecords['v-borrow']?.exposureCount).toBe(1)
+
+    // Domain words (Minecraft, redstone, sensor) are NOT written into CAP store / denominator
+    expect(store.vocabRecords['minecraft']).toBeUndefined()
+    expect(store.vocabRecords['redstone']).toBeUndefined()
+    expect(store.vocabRecords['sensor']).toBeUndefined()
+    expect(store.vocabRecords['v-minecraft']).toBeUndefined()
+    expect(Object.keys(store.vocabRecords).length).toBe(2)
+  })
 })

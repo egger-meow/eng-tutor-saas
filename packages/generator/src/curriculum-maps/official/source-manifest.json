@@ -18,6 +18,14 @@
       "officialSource": "https://www.naer.edu.tw/PageSyllabus?fid=19"
     }
   },
+  "canonicalAssetIntegritySha256": {
+    "official/vocabulary-2000.json": "dc5f224cc54989caf062fcddf767be139a784c0ac6fe2fc3bbe792c5c5cc7f2d",
+    "official/grammar-appendix-6.json": "6e9b5cf1d71a32cfd2c3b4ffe753e727e9f016745b210688a7316c6268d4d5e2",
+    "official/communication-appendix-4.json": "8cb23dd778bd75f57f531a2051a3289ddbecd2f99c6ee085606306527fee3755",
+    "derived/communication-families.ts": "a0fb6db1ef7fa5bc78a9428f26a18cec081684ee4f453d182548415540ad4f8a",
+    "derived/grammar-progression.ts": "751198b7935c11060d3805f28b44843fbf8470f608bf9f21eac3e9d1736926c6",
+    "derived/vocabulary-annotations.ts": "a08732f66fa48ae518242d85af1279d3075080b2eb78fdaabf5bb35596798504"
+  },
   "fileChecksumsSha256": {
     "official/vocabulary-2000.json": "dc5f224cc54989caf062fcddf767be139a784c0ac6fe2fc3bbe792c5c5cc7f2d",
     "official/grammar-appendix-6.json": "6e9b5cf1d71a32cfd2c3b4ffe753e727e9f016745b210688a7316c6268d4d5e2",
