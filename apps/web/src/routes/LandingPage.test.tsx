@@ -43,4 +43,15 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).not.toContain('generation_jobs')
     expect(html).not.toContain('00:15')
   })
+
+  it('includes printed paper delivery FAQ with clean PDF expectation', () => {
+    const deliveryFaq = faqItems.find(([q]) => q === '可以直接把紙本教材寄到家嗎？')
+    expect(deliveryFaq).toBeDefined()
+    expect(deliveryFaq?.[1]).toBe(
+      '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'
+    )
+
+    const html = renderToStaticMarkup(<LandingPage />)
+    expect(html).toContain('可以直接把紙本教材寄到家嗎？')
+  })
 })

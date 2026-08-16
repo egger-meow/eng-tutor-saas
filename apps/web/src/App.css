@@ -196,6 +196,12 @@
 .faq-trigger { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0; border: 0; background: transparent; color: var(--color-ink); cursor: pointer; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; text-align: left; }
 .faq-icon { flex: 0 0 auto; color: var(--color-accent); font-family: var(--font-body); font-size: 1.5rem; line-height: 1; }
 .faq-item p { max-width: 48rem; color: var(--color-muted); }
+.faq-demand-cta { margin-top: var(--space-4); }
+.faq-demand-btn { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 0; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.faq-demand-confirmed { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: 0; color: var(--color-accent); font-weight: 600; font-size: 0.875rem; }
+.feedback-demand-option { padding: var(--space-3) var(--space-4); border: 1px dashed var(--color-rule-strong); border-radius: var(--radius-control); background: var(--color-paper); }
+.choice-checkbox-label { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--color-ink); font-size: 0.875rem; font-weight: 600; cursor: pointer; user-select: none; }
+.choice-checkbox-label input[type="checkbox"] { width: 1.125rem; height: 1.125rem; accent-color: var(--color-accent); cursor: pointer; }
 .login-section .auth-panel { max-width: 30rem; }
 .login-expectations { display: grid; gap: var(--space-2); margin-top: var(--space-6); padding-left: 1.25rem; color: var(--color-ink); }
 .guide-page, .founder-pending { max-width: 50rem; margin-inline: auto; }
