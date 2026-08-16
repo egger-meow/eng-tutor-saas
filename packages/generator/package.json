@@ -6,8 +6,9 @@
   "exports": "./src/index.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-    ,"audit:curriculum": "tsx src/audit-curriculum.ts"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "compile:bundle": "tsx scripts/compile-production-bundle.ts",
+    "audit:curriculum": "tsx src/audit-curriculum.ts"
   },
   "dependencies": {
     "zod": "^4.0.1"

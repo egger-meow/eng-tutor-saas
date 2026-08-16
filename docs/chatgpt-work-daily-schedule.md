@@ -10,6 +10,16 @@ This is the production contract and paste-ready prompt for the cloud Scheduled t
 - **Apps:** grant read access to `egger-meow/eng-tutor-saas` and the intended Supabase project; allow the exact reviewed Supabase database actions below without interactive approval
 - **Notifications:** every failure and every run that submits or rejects work
 
+## Production contract
+
+The intended production Supabase project is:
+
+- project name: eng-tutor
+- project ref: ykzszjrqynrhgdhoeovo
+
+Use this exact project ref for all authorized Supabase bridge calls.
+Do not infer or select another Supabase project.
+
 GitHub Actions is a separate deterministic finisher. It never authors curriculum. It checks submitted canonical JSON hourly (and supports manual dispatch), reruns repository-owned validation, renders both PDFs, inspects them, uploads them privately, and transactionally completes the job.
 
 ## Paste-ready prompt
@@ -22,25 +32,23 @@ You have exactly two authorized production inputs:
 1. the connected GitHub app, used read-only for egger-meow/eng-tutor-saas;
 2. the connected Supabase app, used only for the exact private_generation bridge calls in this prompt.
 
+The intended production Supabase project is:
+
+- project name: eng-tutor
+- project ref: ykzszjrqynrhgdhoeovo
+
+Use this exact project ref for all authorized Supabase bridge calls.
+Do not infer or select another Supabase project.
+
 Never write source code, commit files, create pull requests, upload child data to GitHub, or call arbitrary Supabase tables. Never expose names, raw feedback, child context, generated package JSON, tokens, or URLs in the final report.
 
 CURRENT RULES — READ BEFORE CLAIM
 
-Read these files from the current main branch and record its Git SHA:
+Read this single compiled bundle from the current main branch and record its Git SHA:
 
-- AGENTS.md
-- docs/SPEC-TOC.md (complete)
-- docs/SPEC.md sections 46–87, 109–132, 172–181, 187–188, 193–194, 199–200, 204, 205, and 210 only
-- docs/product-rules.md
-- docs/generation-workflow.md
-- docs/curriculum-quality-rubric.md
-- docs/chatgpt-work-daily-schedule.md
-- packages/generator/src/curriculum-package-schema.ts
-- packages/generator/src/validate-curriculum-package.ts
-- packages/generator/src/audit-curriculum.ts
-- every file in packages/generator/prompts/2.0.1
+- packages/generator/bundles/production-authoring-bundle.md
 
-Do not read egger-meow/eng-tutor during a production run. It is research upstream, not runtime input. If GitHub is unavailable, required files cannot be read, or the checked-out SHA cannot be identified, claim nothing and report PRECHECK_BLOCKED.
+This bundle is the authoritative, deterministically compiled production ruleset containing all product rules, rubric criteria, schema definitions, planning, authoring, critic, and repair instructions with cryptographic source hashes. Do not read raw source files, SPEC chunks, or egger-meow/eng-tutor during a production run. If GitHub is unavailable, the required bundle cannot be read, or the checked-out SHA cannot be identified, claim nothing and report PRECHECK_BLOCKED.
 
 BRIDGE PREFLIGHT AND AUTHORITATIVE CLAIM
 
@@ -106,6 +114,22 @@ select private_generation.chatgpt_fail_generation_job(
 Continue only if the function returns true. Otherwise report LEASE_LOST.
 
 SUBMIT — DO NOT RENDER OR COMPLETE
+
+Before submission, perform a final deterministic audit against the current
+CurriculumPackageSchema and audit-curriculum.ts.
+
+Do not submit until all are true:
+
+- generatedAt is a valid ISO 8601 datetime.
+- commonMistakes uses exactly: wrong, corrected, whyZh.
+- every question difficulty is exactly supported, on-level, or stretch.
+- every itemType belongs to the schema enum.
+- homework contains at least 3 questions.
+- every learning target is mapped to at least one observable question.
+- every learning target appears across at least 2 distinct evidence stages.
+- every target has at least one independent, cap-transfer, production,
+  retrieval, or homework observation.
+- every answer explanationZh contains at least 4 CJK characters.
 
 For a package that passes the critic, submit it with exactly one call:
 

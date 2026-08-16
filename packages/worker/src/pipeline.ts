@@ -18,6 +18,19 @@ export type GenerationContext = {
     materialWeek: string
     ruleVersion: string
   }
+  vocabularyCapsule?: {
+    dueForReview: string[]
+    weakRecent: string[]
+    uncertain: string[]
+    recentlyMastered: string[]
+    historicalCount: number
+  }
+  grammarCapsule?: {
+    dueForReview: string[]
+    weakRecent: string[]
+    uncertain: string[]
+    historicalCount: number
+  }
   [key: string]: unknown
 }
 

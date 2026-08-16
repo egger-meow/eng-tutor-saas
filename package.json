@@ -16,6 +16,7 @@
     "generate:synthetic": "pnpm --filter @paper-english/pdf generate:synthetic",
     "generate:public-sample": "pnpm --filter @paper-english/pdf generate:public-sample",
     "audit:curriculum": "pnpm --filter @paper-english/generator audit:curriculum --",
+    "compile:bundle": "pnpm --filter @paper-english/generator compile:bundle",
     "worker": "pnpm --filter @paper-english/worker worker"
   },
   "devDependencies": {
