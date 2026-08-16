@@ -6,7 +6,7 @@ vi.mock('./supabase', () => ({
   getSupabaseClient: () => ({ functions: { invoke } }),
 }))
 
-import { prepareCheckout } from './subscriptions'
+import { cancelSubscription, prepareCheckout, resumeSubscription } from './subscriptions'
 
 describe('subscription checkout boundary', () => {
   beforeEach(() => invoke.mockReset())
@@ -51,4 +51,27 @@ describe('subscription checkout boundary', () => {
 
     await expect(prepareCheckout('child-1', 'annual')).rejects.toThrow('付款方案驗證失敗')
   })
+
+  it('invokes paddle-cancel-subscription with child_id and reason', async () => {
+    invoke.mockResolvedValue({
+      data: { cancel_at_period_end: true },
+      error: null,
+    })
+    await expect(cancelSubscription('child-1', 'taking a break')).resolves.toBeUndefined()
+    expect(invoke).toHaveBeenCalledWith('paddle-cancel-subscription', {
+      body: { child_id: 'child-1', reason: 'taking a break' },
+    })
+  })
+
+  it('invokes paddle-update-subscription with action resume', async () => {
+    invoke.mockResolvedValue({
+      data: { cancel_at_period_end: false },
+      error: null,
+    })
+    await expect(resumeSubscription('child-1')).resolves.toBeUndefined()
+    expect(invoke).toHaveBeenCalledWith('paddle-update-subscription', {
+      body: { child_id: 'child-1', action: 'resume' },
+    })
+  })
 })
+

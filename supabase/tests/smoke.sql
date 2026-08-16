@@ -79,17 +79,18 @@ begin
     'grade_8'
   );
 
+  if (
+    select founding_status from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000004'
+  ) <> 'eligible' then
+    raise exception 'new trial student was not allocated founding eligibility when under limit';
+  end if;
+
   perform public.prepare_paddle_checkout(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000004',
     'standard_annual'
   );
-  if (
-    select founding_status from public.subscriptions
-    where child_id = '00000000-0000-0000-0000-000000000004'
-  ) <> 'none' then
-    raise exception 'annual checkout incorrectly reserved founding eligibility';
-  end if;
 
   perform public.process_paddle_subscription_event(
     'evt_annual_smoke', 'subscription.created', now(),
@@ -104,7 +105,7 @@ begin
       and plan_code = 'standard_annual'
       and billing_interval = 'year'
       and price_twd = 4999
-      and founding_status = 'none'
+      and founding_status = 'eligible'
   ) then
     raise exception 'annual Paddle webhook did not persist canonical plan data';
   end if;
@@ -151,9 +152,51 @@ begin
   exception when others then
     blocked := true;
   end;
-  if not blocked then
-    raise exception 'Paddle webhook RPC accepted mismatched annual plan data';
+  perform public.process_paddle_subscription_event(
+    'evt_cancel_smoke', 'subscription.updated', now(),
+    '00000000-0000-0000-0000-000000000004',
+    'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+    'standard_annual', 'year', 4999,
+    now(), now() + interval '1 year', true
+  );
+  if (
+    select cancel_at_period_end from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000004'
+  ) <> true then
+    raise exception 'cancel webhook did not set cancel_at_period_end to true';
   end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_resume_smoke', 'subscription.updated', now(),
+    '00000000-0000-0000-0000-000000000004',
+    'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+    'standard_annual', 'year', 4999,
+    now(), now() + interval '1 year', false
+  );
+  if (
+    select cancel_at_period_end from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000004'
+  ) <> false then
+    raise exception 'resume webhook did not reset cancel_at_period_end to false';
+  end if;
+
+  update public.enrollment_settings set founding_limit = 2 where key = 'default';
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000005',
+    '00000000-0000-0000-0000-000000000001',
+    'Over Limit Student',
+    7,
+    'grade_7'
+  );
+  if (
+    select founding_status from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000005'
+  ) <> 'none' then
+    raise exception 'student created after founding limit reached was incorrectly marked eligible';
+  end if;
+  delete from public.children where id = '00000000-0000-0000-0000-000000000005';
+  update public.enrollment_settings set founding_limit = 30 where key = 'default';
 
   delete from public.children
   where id = '00000000-0000-0000-0000-000000000004';

@@ -76,11 +76,13 @@
 .capacity-status span { color: var(--color-muted); }
 .capacity-status .button { margin-left: auto; }
 .status-waitlist { border-left-color: var(--color-warning); }
-.billing-layout { display: grid; grid-template-columns: minmax(18rem, .8fr) minmax(24rem, 1.2fr); gap: clamp(var(--space-8), 6vw, var(--space-16)); align-items: start; margin-block: var(--space-8); }
-.subscription-list { display: grid; gap: var(--space-6); }
-.subscription-card { padding: var(--space-6); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper); }
-.subscription-card h2 { margin-bottom: var(--space-2); }
-.subscription-action { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-rule); }
+.billing-layout { display: grid; grid-template-columns: 1fr; gap: clamp(var(--space-8), 5vw, var(--space-12)); align-items: start; margin-block: var(--space-8); }
+.billing-layout.has-active-checkout { grid-template-columns: minmax(20rem, 1fr) minmax(22rem, 1.2fr); }
+.subscription-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: var(--space-6); align-items: stretch; }
+.subscription-card { display: flex; flex-direction: column; justify-content: space-between; padding: var(--space-6); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+.subscription-card-body { display: flex; flex-direction: column; gap: var(--space-3); }
+.subscription-card h2 { margin-top: var(--space-1); margin-bottom: var(--space-2); }
+.subscription-action { margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--color-rule); }
 .subscription-action .button { margin-top: var(--space-2); }
 .billing-plan-selector { display: grid; gap: var(--space-3); min-width: 0; margin: 0 0 var(--space-4); padding: 0; border: 0; }
 .billing-plan-selector legend { margin-bottom: var(--space-2); color: var(--color-ink); font-weight: 700; }

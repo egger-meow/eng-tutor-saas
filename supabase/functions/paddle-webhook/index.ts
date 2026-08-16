@@ -111,9 +111,6 @@ Deno.serve(async (request) => {
     const childId = subscription?.custom_data?.child_id
     if (typeof childId !== 'string') throw new Error('Missing custom_data.child_id')
     const plan = getWebhookPlan(subscription?.items, { monthly: monthlyPriceId, annual: annualPriceId })
-    if (subscription?.custom_data?.plan !== undefined && subscription.custom_data.plan !== plan.key) {
-      throw new Error('Paddle custom_data.plan does not match subscription price')
-    }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },

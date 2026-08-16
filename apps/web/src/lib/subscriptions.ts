@@ -65,3 +65,21 @@ export async function cancelSubscription(childId: string, reason?: string): Prom
   }
   if (data?.cancel_at_period_end !== true) throw new Error('取消訂閱時發生問題，請稍後再試。')
 }
+
+export async function resumeSubscription(childId: string): Promise<void> {
+  const { data, error } = await getSupabaseClient().functions.invoke('paddle-update-subscription', {
+    body: { child_id: childId, action: 'resume' },
+  })
+  if (error) {
+    let code = ''
+    try {
+      const response = error.context as Response | undefined
+      const body = response ? await response.clone().json() as { error?: string } : null
+      code = body?.error ?? ''
+    } catch { /* Fall through to the generic message. */ }
+    if (code === 'subscription_not_resumable') throw new Error('這個訂閱目前無法恢復，請重新整理後再試。')
+    throw new Error('恢復續訂時發生問題，請稍後再試。')
+  }
+  if (data?.cancel_at_period_end !== false) throw new Error('恢復續訂時發生問題，請稍後再試。')
+}
+

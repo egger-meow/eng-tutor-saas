@@ -23,29 +23,35 @@ type Props = {
   activationPending?: boolean
   onSubscribe: (childId: string, plan: BillingPlan) => void
   onCancel: (childId: string, reason: string) => void
+  onResume: (childId: string) => void
 }
 
-export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe, onCancel }: Props) {
+export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('annual')
 
-  if (!subscription) return <article className="subscription-card"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></article>
-  if (activationPending) return <article className="subscription-card"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p></article>
+  if (!subscription) return <article className="subscription-card"><div className="subscription-card-body"><h2>{child.display_name}</h2><p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p></div></article>
+  if (activationPending) return <article className="subscription-card"><div className="subscription-card-body"><div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div><p><span className="status-label status-success">付款成功・訂閱啟用中</span></p><p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p></div></article>
 
-  const [title, description] = labels[subscription.status]
+  const [title, description] = subscription.cancelAtPeriodEnd && subscription.status === 'active'
+    ? ['已取消續訂', '本期教材與權益仍可完整使用。期間結束前隨時可一鍵恢復自動續訂。']
+    : labels[subscription.status]
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
   const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
+  const canResume = ['active', 'past_due', 'paused'].includes(subscription.status) && subscription.cancelAtPeriodEnd
   const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
 
   return <article className="subscription-card">
-    <div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div>
-    <p><span className={`status-label status-${subscription.status}`}>{title}</span></p>
-    <p>{description}</p>
-    {subscription.priceTwd !== null && <p><strong>目前方案：</strong>{currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(subscription.priceTwd)}</p>}
-    {periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}
-    {subscription.cancelAtPeriodEnd && <p className="notice">已取消續訂；本期結束前仍可使用。歡迎之後隨時回來續訂。</p>}
+    <div className="subscription-card-body">
+      <div><p className="overline">{gradeStageLabel(child)}</p><h2>{child.display_name}</h2></div>
+      <p><span className={`status-label status-${subscription.cancelAtPeriodEnd ? 'paused' : subscription.status}`}>{title}</span></p>
+      <p>{description}</p>
+      {subscription.priceTwd !== null && <p><strong>目前方案：</strong>{currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(subscription.priceTwd)}</p>}
+      {periodEnd && <p><strong>{subscription.cancelAtPeriodEnd ? '使用至' : '本期至'}：</strong>{periodEnd}</p>}
+      {subscription.cancelAtPeriodEnd && <p className="notice">已取消續訂；本期結束前仍可使用。歡迎隨時恢復自動續訂。</p>}
+    </div>
     {canCancel && <div className="subscription-action">
       <button className="button-link text-link" type="button" disabled={busy} onClick={() => setConfirmingCancel((current) => !current)}>
         {confirmingCancel ? '先不要取消' : '取消續訂'}
@@ -57,6 +63,12 @@ export function ChildSubscription({ child, subscription, busy, activationPending
         <textarea id={`cancel-reason-${child.id}`} rows={3} maxLength={1000} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="例如：先暫停一陣子、孩子最近比較忙…" />
         <button className="button secondary" type="button" disabled={busy} onClick={() => onCancel(child.id, reason)}>{busy ? '正在取消續訂…' : '確認取消續訂'}</button>
       </div>}
+    </div>}
+    {canResume && <div className="subscription-action">
+      <button className="button" type="button" disabled={busy} onClick={() => onResume(child.id)}>
+        {busy ? '正在恢復續訂…' : '恢復自動續訂'}
+      </button>
+      <p className="muted">隨時可恢復每週專屬教材的自動交付，次期將依原方案持續為孩子準備。</p>
     </div>}
     {canSubscribe && <div className="subscription-action">
       <fieldset className="billing-plan-selector">
@@ -98,3 +110,4 @@ export function ChildSubscription({ child, subscription, busy, activationPending
     </div>}
   </article>
 }
+

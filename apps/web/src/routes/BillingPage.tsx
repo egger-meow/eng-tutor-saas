@@ -7,7 +7,7 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { listChildren, type Child } from '../lib/children'
-import { cancelSubscription, listOwnedSubscriptions, prepareCheckout, type SubscriptionView } from '../lib/subscriptions'
+import { cancelSubscription, listOwnedSubscriptions, prepareCheckout, resumeSubscription, type SubscriptionView } from '../lib/subscriptions'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
@@ -22,6 +22,7 @@ export function BillingPage({ session }: { session: Session }) {
   const [activatingChildId, setActivatingChildId] = useState<string | null>(null)
   const [checkoutNotice, setCheckoutNotice] = useState('')
   const [cancelingChildId, setCancelingChildId] = useState<string | null>(null)
+  const [resumingChildId, setResumingChildId] = useState<string | null>(null)
 
   async function refreshSubscriptions() {
     const nextSubscriptions = await listOwnedSubscriptions()
@@ -91,6 +92,21 @@ export function BillingPage({ session }: { session: Session }) {
     }
   }
 
+  async function resumeChildSubscription(childId: string) {
+    setResumingChildId(childId)
+    setError('')
+    setCheckoutNotice('')
+    try {
+      await resumeSubscription(childId)
+      await refreshSubscriptions()
+      setCheckoutNotice('已恢復自動續訂。將於下個計費週期持續為孩子準備每週專屬教材。')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '恢復續訂時發生問題，請稍後再試。')
+    } finally {
+      setResumingChildId(null)
+    }
+  }
+
   useEffect(() => {
     void Promise.all([listChildren(), listOwnedSubscriptions()])
       .then(([nextChildren, nextSubscriptions]) => {
@@ -137,17 +153,18 @@ export function BillingPage({ session }: { session: Session }) {
           </div>
         )}
 
-        <div className="billing-layout">
+        <div className={`billing-layout ${activeCheckout ? 'has-active-checkout' : ''}`}>
           <StaggerContainer className="subscription-list" staggerDelay={0.08}>
             {children.map((child) => (
               <StaggerItem key={child.id}>
                 <ChildSubscription
                   child={child}
                   subscription={subscriptions.find((item) => item.childId === child.id)}
-                  busy={checkoutChildId === child.id || cancelingChildId === child.id}
+                  busy={checkoutChildId === child.id || cancelingChildId === child.id || resumingChildId === child.id}
                   activationPending={activatingChildId === child.id}
                   onSubscribe={(childId, plan) => void startCheckout(childId, plan)}
                   onCancel={(childId, reason) => void cancelChildSubscription(childId, reason)}
+                  onResume={(childId) => void resumeChildSubscription(childId)}
                 />
               </StaggerItem>
             ))}
