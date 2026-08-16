@@ -68,5 +68,5 @@ export type { CommunicationFamily } from './curriculum-maps/derived/communicatio
 export { grammarProgressionUnits, getGrammarUnit, getUnitsByGradeStage } from './curriculum-maps/derived/grammar-progression.js'
 export type { GrammarProgressionUnit } from './curriculum-maps/derived/grammar-progression.js'
 export { getSuggestedGradeForWord, getThemeForWord } from './curriculum-maps/derived/vocabulary-annotations.js'
-export { buildDiversityCapsule } from './curriculum-maps/diversity-capsule.js'
+export { buildDiversityCapsule, extractHistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'
 export type { DiversityCapsule, HistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'

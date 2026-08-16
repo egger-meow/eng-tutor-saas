@@ -63,3 +63,37 @@ export function buildDiversityCapsule(
     recentItemFamilies,
   }
 }
+
+/**
+ * Extracts a deterministic historical summary from a completed CurriculumPackage:
+ * - genre: reading genre (article, dialogue, interview, announcement, schedule)
+ * - contextKey: reading scenario title / context identifier
+ * - itemFamilies: unique question itemTypes (e.g. inference, short-response) across practice and homework
+ */
+export function extractHistoricalPackageSummary(
+  pkg: {
+    studentLesson?: {
+      reading?: { genre?: string; title?: string }
+      practice?: Array<{ questions?: Array<{ itemType?: string }> }>
+      homework?: { questions?: Array<{ itemType?: string }> }
+    }
+    metadata?: { generatedAt?: string }
+  },
+  materialWeek?: string,
+): HistoricalPackageSummary {
+  const genre = pkg.studentLesson?.reading?.genre ?? 'article'
+  const contextKey = pkg.studentLesson?.reading?.title ?? 'general-scenario'
+  const practiceQuestions = pkg.studentLesson?.practice?.flatMap((s) => s.questions ?? []) ?? []
+  const homeworkQuestions = pkg.studentLesson?.homework?.questions ?? []
+  const allQuestions = [...practiceQuestions, ...homeworkQuestions]
+  const itemFamilies = Array.from(
+    new Set(allQuestions.map((q) => q?.itemType).filter((t): t is string => Boolean(t))),
+  )
+
+  return {
+    materialWeek: materialWeek ?? pkg.metadata?.generatedAt ?? 'unknown-week',
+    genre,
+    contextKey,
+    itemFamilies,
+  }
+}

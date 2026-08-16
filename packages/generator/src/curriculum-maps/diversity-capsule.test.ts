@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildDiversityCapsule,
+  extractHistoricalPackageSummary,
   type HistoricalPackageSummary,
   type DiversityCapsule,
 } from './diversity-capsule.js'
@@ -73,5 +74,38 @@ describe('Diversity Capsule (Multi-Week Diversity Memory)', () => {
       recentContextKeys: [],
       recentItemFamilies: [],
     })
+  })
+
+  it('extracts historical package summary from a completed package', () => {
+    const pkg = {
+      studentLesson: {
+        reading: {
+          genre: 'dialogue',
+          title: 'The Secret Redstone Door',
+        },
+        practice: [
+          {
+            stage: 'stage1',
+            questions: [
+              { id: 'q1', itemType: 'inference' },
+              { id: 'q2', itemType: 'short-response' },
+            ],
+          },
+        ],
+        homework: {
+          questions: [
+            { id: 'q3', itemType: 'multiple-choice' },
+            { id: 'q4', itemType: 'inference' },
+          ],
+        },
+      },
+      metadata: { generatedAt: '2026-W34' },
+    }
+
+    const summary = extractHistoricalPackageSummary(pkg, '2026-W34')
+    expect(summary.materialWeek).toBe('2026-W34')
+    expect(summary.genre).toBe('dialogue')
+    expect(summary.contextKey).toBe('The Secret Redstone Door')
+    expect(summary.itemFamilies).toEqual(['inference', 'short-response', 'multiple-choice'])
   })
 })
