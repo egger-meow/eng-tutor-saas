@@ -7,6 +7,7 @@ export type {
   ChildWeekTimeline,
   LifecycleEvent,
   AiExportDataset,
+  GrantRetryResult,
 } from '../server/admin-service.js'
 
 export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'export'

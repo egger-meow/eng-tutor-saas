@@ -2,6 +2,17 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { parse } from 'node:url'
 import { AdminService } from './admin-service.js'
 
+function readRequestBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let body = ''
+    req.on('data', (chunk) => {
+      body += chunk
+    })
+    req.on('end', () => resolve(body))
+    req.on('error', reject)
+  })
+}
+
 export async function handleApiRequest(
   req: IncomingMessage,
   res: ServerResponse,
@@ -30,7 +41,7 @@ export async function handleApiRequest(
     res.setHeader('Access-Control-Allow-Origin', origin)
   }
 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   if (req.method === 'OPTIONS') {
@@ -39,13 +50,45 @@ export async function handleApiRequest(
     return true
   }
 
-  if (req.method !== 'GET') {
-    res.statusCode = 405
-    res.end(JSON.stringify({ error: 'Method Not Allowed' }))
-    return true
-  }
-
   try {
+    // 1. Action POST endpoints
+    if (pathname === '/api/jobs/grant-retry') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const jobId = parsed?.jobId
+      if (!jobId || typeof jobId !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JOB_ID', message: 'jobId is required' }))
+        return true
+      }
+
+      const result = await service.grantJobRetry(jobId)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    // 2. Read GET endpoints
+    if (req.method !== 'GET') {
+      res.statusCode = 405
+      res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+      return true
+    }
+
     switch (pathname) {
       case '/api/health': {
         res.statusCode = 200

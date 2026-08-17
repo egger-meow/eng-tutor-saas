@@ -208,7 +208,12 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
                       <td>
                         <span className={`status-pill ${job.status}`}>{job.status}</span>
                       </td>
-                      <td>{job.attemptCount}</td>
+                      <td>
+                        <span style={{ fontWeight: 600 }}>{job.attemptCount} / {job.maxAttempts || 3}</span>
+                        {job.attemptCount >= (job.maxAttempts || 3) && (
+                          <div style={{ fontSize: '10px', color: 'var(--status-rose)', marginTop: '2px' }}>需人工審核</div>
+                        )}
+                      </td>
                       <td style={{ color: 'var(--status-amber)' }}>{job.stuckReason}</td>
                       <td>
                         <button

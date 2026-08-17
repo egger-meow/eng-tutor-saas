@@ -6,6 +6,7 @@ import type {
   ChildWeekTimeline,
   AiExportDataset,
   HealthState,
+  GrantRetryResult,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -15,6 +16,23 @@ async function fetchJson<T>(url: string): Promise<T> {
     throw new Error(`API Error [${res.status}]: ${errorText}`)
   }
   return res.json() as Promise<T>
+}
+
+async function postJson<T>(url: string, body: Record<string, unknown>): Promise<T> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const text = await res.text()
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    if (!res.ok) {
+      throw new Error(`API Error [${res.status}]: ${text}`)
+    }
+    return {} as T
+  }
 }
 
 export const adminApi = {
@@ -31,4 +49,5 @@ export const adminApi = {
     return fetchJson<ChildWeekTimeline>(`/api/timeline${qs ? `?${qs}` : ''}`)
   },
   getAiExport: () => fetchJson<AiExportDataset>('/api/export/ai-dataset'),
+  grantJobRetry: (jobId: string) => postJson<GrantRetryResult>('/api/jobs/grant-retry', { jobId }),
 }

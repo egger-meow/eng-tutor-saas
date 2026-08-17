@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import type { ChildWeekTimeline as ChildWeekTimelineType } from '../../client/types.js'
+import { adminApi } from '../../client/api.js'
 
 interface ChildWeekTimelineProps {
   data: ChildWeekTimelineType | null
@@ -18,6 +19,10 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
   const [inputWeek, setInputWeek] = useState(weekQuery)
   const [expandedStep, setExpandedStep] = useState<number | null>(null)
   const [showRawJson, setShowRawJson] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isGrantingRetry, setIsGrantingRetry] = useState(false)
+  const [grantSuccessMessage, setGrantSuccessMessage] = useState<string | null>(null)
+  const [grantErrorMessage, setGrantErrorMessage] = useState<string | null>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,9 +41,40 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
     subscriptionStatus,
     planCode,
     currentLearningSummary,
+    jobSummary,
     events,
     rawMetadata,
   } = data
+
+  const job = (rawMetadata?.job as any) || jobSummary
+  const isCompleted = job?.status === 'completed'
+  const attemptCount = Number(job?.attempt_count) || 0
+  const maxAttempts = Number(job?.max_attempts) || 3
+  const isHumanReviewRequired = !isCompleted && (attemptCount >= maxAttempts || job?.error_code === 'HUMAN_REVIEW_REQUIRED' || job?.status === 'failed')
+  const hasGrantedExtraRetry = !isCompleted && attemptCount < maxAttempts && maxAttempts > 3
+
+  const handleGrantRetryConfirm = async () => {
+    if (!job?.id) return
+    setIsGrantingRetry(true)
+    setGrantErrorMessage(null)
+    setGrantSuccessMessage(null)
+    try {
+      const res = await adminApi.grantJobRetry(job.id)
+      if (res.success) {
+        setGrantSuccessMessage(`已允許額外 1 次重試 (最大嘗試次數: ${res.previousMaxAttempts} → ${res.newMaxAttempts})`)
+        setShowConfirmModal(false)
+        onSearch(childId, targetWeek)
+      } else {
+        setGrantErrorMessage(res.message || res.error || '重試授權失敗')
+        setShowConfirmModal(false)
+      }
+    } catch (err) {
+      setGrantErrorMessage(err instanceof Error ? err.message : String(err))
+      setShowConfirmModal(false)
+    } finally {
+      setIsGrantingRetry(false)
+    }
+  }
 
   return (
     <div>
@@ -104,6 +140,110 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Human Review Required & Grant 1 Retry Banner */}
+      {job && isHumanReviewRequired && (
+        <div className="cockpit-card" style={{ marginBottom: '20px', border: '1px solid var(--status-rose)', background: 'rgba(244, 63, 94, 0.06)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <span className="status-pill failed" style={{ fontSize: '12px', padding: '3px 10px' }}>🚨 需人工審核 (HUMAN_REVIEW_REQUIRED)</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#f8fafc' }}>
+                  目前嘗試次數：{attemptCount} / {maxAttempts}
+                </span>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>
+                此任務嘗試次數已達上限，已自正常排程隔離。管理員可審閱下方各 Attempt 的品質退回原因，並決定是否賦予 1 次額外嘗試機會。
+              </p>
+            </div>
+            <div>
+              <button
+                type="button"
+                className="refresh-btn"
+                style={{ background: '#b91c1c', color: '#fff', borderColor: '#ef4444', padding: '8px 18px', fontWeight: 700, fontSize: '13px' }}
+                onClick={() => setShowConfirmModal(true)}
+                disabled={isGrantingRetry}
+              >
+                {isGrantingRetry ? '處理中...' : '允許再重試 1 次'}
+              </button>
+            </div>
+          </div>
+          {grantSuccessMessage && (
+            <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10b981', borderRadius: '4px', color: '#a7f3d0', fontSize: '12px' }}>
+              ✓ {grantSuccessMessage}
+            </div>
+          )}
+          {grantErrorMessage && (
+            <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', borderRadius: '4px', color: '#fca5a5', fontSize: '12px' }}>
+              ⚠️ {grantErrorMessage}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Extra Retry Granted Status Banner */}
+      {job && hasGrantedExtraRetry && (
+        <div className="cockpit-card" style={{ marginBottom: '20px', border: '1px solid var(--status-emerald)', background: 'rgba(16, 185, 129, 0.06)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <span className="status-pill active">已排程等待重試</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: '#f8fafc', marginLeft: '8px' }}>
+                目前嘗試次數：{attemptCount} / {maxAttempts}（已允許額外 1 次重試）
+              </span>
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              下次 ChatGPT Scheduled Work 將自動讀取歷史品質審核退回資料構建 retryContext 進行 Attempt #{attemptCount + 1} 生成。
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '24px',
+        }}>
+          <div className="cockpit-card" style={{ maxWidth: '520px', width: '100%', background: '#0f172a', border: '1px solid #334155', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', marginBottom: '12px' }}>
+              允許再重試 1 次？
+            </div>
+            <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '20px' }}>
+              這不會清除既有失敗紀錄，也不會重設嘗試次數。
+              系統只會將最大嘗試次數增加 1，讓這份教材可以再次進入正常產生流程。
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                type="button"
+                className="refresh-btn"
+                style={{ background: 'transparent', color: '#94a3b8', borderColor: '#475569' }}
+                onClick={() => setShowConfirmModal(false)}
+                disabled={isGrantingRetry}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                className="refresh-btn"
+                style={{ background: '#2563eb', color: '#fff', borderColor: '#3b82f6', fontWeight: 700 }}
+                onClick={handleGrantRetryConfirm}
+                disabled={isGrantingRetry}
+              >
+                {isGrantingRetry ? '處理中...' : '允許重試'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Child Summary Capsule */}
       <div className="kpi-grid">
@@ -178,50 +318,70 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
 
                 {event.error && (
                   <div style={{ fontSize: '12px', color: 'var(--status-rose)', marginTop: '4px', fontWeight: 600 }}>
-                    ⚠️ 異常退回: {event.error}
+                    ⚠️ {event.error}
                   </div>
                 )}
 
                 {/* Visual Attempts breakdown for Authoring & Finisher */}
                 {Array.isArray((event.details as any)?.attempts) && ((event.details as any).attempts as any[]).length > 0 && (
                   <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {((event.details as any).attempts as any[]).map((att: any, attIdx: number) => (
-                      <div
-                        key={attIdx}
-                        style={{
-                          background: 'var(--bg-elevated)',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          borderLeft: att.status === 'quality_rejected' ? '3px solid var(--status-rose)' : att.status === 'completed' ? '3px solid var(--status-emerald)' : '3px solid var(--status-amber)',
-                          fontSize: '12px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 600, color: '#f8fafc' }}>
-                            Attempt #{att.attempt || attIdx + 1}
-                          </span>
-                          <span className={`status-pill ${att.status}`}>{att.status}</span>
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
-                          提交時間: {att.submittedAt ? new Date(att.submittedAt).toLocaleString('zh-TW', { hour12: false }) : 'N/A'}
-                          {att.processorId ? ` | 處理 Finisher: ${att.processorId}` : ''}
-                        </div>
-                        {att.errorMessage && (
-                          <div style={{ color: 'var(--status-rose)', marginTop: '4px', fontSize: '11px' }}>
-                            ⚠️ {att.errorMessage}
+                    {((event.details as any).attempts as any[]).map((att: any, attIdx: number) => {
+                      const isNoSubmission = att.status === 'no_submission' || att.hasSubmission === false
+                      return (
+                        <div
+                          key={attIdx}
+                          style={{
+                            background: 'var(--bg-elevated)',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            borderLeft: att.status === 'quality_rejected'
+                              ? '3px solid var(--status-rose)'
+                              : att.status === 'completed'
+                              ? '3px solid var(--status-emerald)'
+                              : isNoSubmission
+                              ? '3px solid var(--status-amber)'
+                              : '3px solid #64748b',
+                            fontSize: '12px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 600, color: '#f8fafc' }}>
+                              Attempt #{att.attempt || attIdx + 1}
+                            </span>
+                            <span className={`status-pill ${isNoSubmission ? 'warning' : att.status}`}>
+                              {isNoSubmission ? 'NO SUBMISSION' : att.status}
+                            </span>
                           </div>
-                        )}
-                        {Array.isArray(att.findings) && att.findings.length > 0 && (
-                          <div style={{ marginTop: '4px', paddingLeft: '8px', borderLeft: '2px solid #ef4444' }}>
-                            {att.findings.map((f: any, fIdx: number) => (
-                              <div key={fIdx} style={{ fontSize: '11px', color: '#fca5a5' }}>
-                                • <strong>{f.rule || f.code}</strong>: {f.message || f.description}
+
+                          {isNoSubmission ? (
+                            <div style={{ color: 'var(--status-amber)', marginTop: '4px', fontSize: '11px' }}>
+                              ⚠️ Claimed but no curriculum submission (認領逾時 / 未提交封包)
+                            </div>
+                          ) : (
+                            <>
+                              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                                提交時間: {att.submittedAt ? new Date(att.submittedAt).toLocaleString('zh-TW', { hour12: false }) : 'N/A'}
+                                {att.processorId ? ` | 處理 Finisher: ${att.processorId}` : ''}
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                              {att.errorMessage && (
+                                <div style={{ color: 'var(--status-rose)', marginTop: '4px', fontSize: '11px' }}>
+                                  ⚠️ {att.errorMessage}
+                                </div>
+                              )}
+                              {Array.isArray(att.findings) && att.findings.length > 0 && (
+                                <div style={{ marginTop: '4px', paddingLeft: '8px', borderLeft: '2px solid #ef4444' }}>
+                                  {att.findings.map((f: any, fIdx: number) => (
+                                    <div key={fIdx} style={{ fontSize: '11px', color: '#fca5a5' }}>
+                                      • <strong>{f.rule || f.code}</strong>: {f.message || f.description}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
 
@@ -249,12 +409,13 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
       {/* Raw Joined Supabase Metadata Explorer */}
       <div className="cockpit-card">
         <div className="section-title">
-          <span>原始資料庫多表關聯快照 (Raw Joined Records)</span>
+          <span>底層 Supabase 資料表原始紀錄 (Raw Joined DB Rows)</span>
           <button
             className="refresh-btn"
+            style={{ fontSize: '12px' }}
             onClick={() => setShowRawJson(!showRawJson)}
           >
-            {showRawJson ? '▲ 收起 Raw JSON' : '▼ 展開完整多表 Raw JSON'}
+            {showRawJson ? '隱藏 JSON' : '檢視原始 JSON'}
           </button>
         </div>
 

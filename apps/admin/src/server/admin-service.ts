@@ -105,6 +105,7 @@ export interface OperationsOverview {
     leaseExpiresAt: string | null
     generationDueAt: string | null
     attemptCount: number
+    maxAttempts?: number
     stuckReason: string
   }>
   anomalies: string[]
@@ -273,6 +274,17 @@ export interface ChildWeekTimeline {
     difficultyTrend: string | null
     recurringMistakesCount: number
   }
+  jobSummary?: {
+    id: string
+    status: string
+    attemptCount: number
+    maxAttempts: number
+    isHumanReviewRequired: boolean
+    claimedBy: string | null
+    leaseExpiresAt: string | null
+    errorCode: string | null
+    errorMessage: string | null
+  } | null
   events: LifecycleEvent[]
   availableChildren: Array<{
     id: string
@@ -334,6 +346,18 @@ export interface AiExportDataset {
   }>
 }
 
+export interface GrantRetryResult {
+  success: boolean
+  jobId?: string
+  previousMaxAttempts?: number
+  newMaxAttempts?: number
+  attemptCount?: number
+  status?: string
+  timestamp?: string
+  error?: string
+  message?: string
+}
+
 export class AdminService {
   private client: SupabaseClient | null = null
 
@@ -357,6 +381,104 @@ export class AdminService {
 
   public getIsConnected(): boolean {
     return this.client !== null
+  }
+
+  public async grantJobRetry(jobId: string): Promise<GrantRetryResult> {
+    if (!jobId || typeof jobId !== 'string') {
+      return { success: false, error: 'INVALID_JOB_ID', message: 'Job ID is required' }
+    }
+
+    const client = this.ensureClient()
+
+    // 1. Try calling the dedicated atomic RPC admin_grant_job_retry
+    try {
+      const res = await client.rpc('admin_grant_job_retry', { p_job_id: jobId })
+      if (!res.error && res.data && typeof res.data === 'object' && 'success' in (res.data as any)) {
+        const data = res.data as GrantRetryResult
+        if (data.success) {
+          console.log('[AUDIT] generation_retry_granted:', {
+            jobId: data.jobId || jobId,
+            previousMaxAttempts: data.previousMaxAttempts,
+            newMaxAttempts: data.newMaxAttempts,
+            attemptCount: data.attemptCount,
+            timestamp: data.timestamp || new Date().toISOString(),
+          })
+        }
+        return data
+      }
+    } catch {}
+
+    // 2. Direct client fallback (for mock testing environments without RPC)
+    try {
+      const { data: job, error: fetchErr } = await client
+        .from('generation_jobs')
+        .select('*')
+        .eq('id', jobId)
+        .maybeSingle()
+
+      if (fetchErr || !job) {
+        return { success: false, error: 'JOB_NOT_FOUND', message: 'Generation job not found' }
+      }
+
+      if (job.status === 'completed') {
+        return { success: false, error: 'JOB_ALREADY_COMPLETED', message: 'Completed job cannot be reopened for retry' }
+      }
+
+      const now = new Date().toISOString()
+      if (job.status === 'claimed' && job.lease_expires_at && job.lease_expires_at > now) {
+        return {
+          success: false,
+          error: 'ACTIVE_LEASE_IN_PROGRESS',
+          message: 'Job currently has an active processing lease in progress. Please wait for lease expiry or worker completion.',
+        }
+      }
+
+      const previousMaxAttempts = Number(job.max_attempts) || 3
+      const newMaxAttempts = previousMaxAttempts + 1
+
+      const { error: updateErr } = await client
+        .from('generation_jobs')
+        .update({
+          max_attempts: newMaxAttempts,
+          status: 'pending',
+          claimed_by: null,
+          lease_expires_at: null,
+          error_code: null,
+          error_message: null,
+          updated_at: now,
+        })
+        .eq('id', jobId)
+
+      if (updateErr) {
+        return { success: false, error: 'DB_UPDATE_FAILED', message: updateErr.message }
+      }
+
+      const result: GrantRetryResult = {
+        success: true,
+        jobId,
+        previousMaxAttempts,
+        newMaxAttempts,
+        attemptCount: job.attempt_count,
+        status: 'pending',
+        timestamp: now,
+      }
+
+      console.log('[AUDIT] generation_retry_granted:', {
+        jobId,
+        previousMaxAttempts,
+        newMaxAttempts,
+        attemptCount: job.attempt_count,
+        timestamp: now,
+      })
+
+      return result
+    } catch (err) {
+      return {
+        success: false,
+        error: 'OPERATION_FAILED',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
   }
 
   private ensureClient(): SupabaseClient {
@@ -564,6 +686,7 @@ export class AdminService {
           leaseExpiresAt: job.lease_expires_at,
           generationDueAt: job.generation_due_at,
           attemptCount: job.attempt_count,
+          maxAttempts: job.max_attempts || 3,
           stuckReason: isLeaseExpired
             ? 'Claim lease expired without completion'
             : isPastDue
@@ -1471,17 +1594,44 @@ export class AdminService {
     const firstSubmission = sortedSubmissions[0]
     const latestSubmission = sortedSubmissions[sortedSubmissions.length - 1]
 
-    // Multi-attempt breakdown in ascending sequence for UI rendering
-    const attemptBreakdown = sortedSubmissions.map((s, idx) => ({
-      attempt: s.authoring_attempt || idx + 1,
-      status: s.status,
-      submittedAt: s.submitted_at,
-      processorId: s.processor_id,
-      processedAt: s.processed_at,
-      errorCode: s.error_code,
-      errorMessage: s.error_message,
-      findings: (s.failure_evidence?.findings || s.failure_evidence?.auditFindings || []) as any[],
-    }))
+    const isHumanReviewRequired = Boolean(
+      job &&
+      job.status !== 'completed' &&
+      ((Number(job.attempt_count) || 0) >= (Number(job.max_attempts) || 3) || job.error_code === 'HUMAN_REVIEW_REQUIRED' || job.status === 'failed')
+    )
+
+    // Multi-attempt breakdown in ascending sequence covering all recorded attempt numbers
+    const totalAttemptCount = Math.max(Number(job?.attempt_count) || 0, sortedSubmissions.length)
+    const submissionMap = new Map(sortedSubmissions.map((s) => [Number(s.authoring_attempt) || 1, s]))
+
+    const attemptBreakdown = Array.from({ length: totalAttemptCount }, (_, idx) => {
+      const attemptNum = idx + 1
+      const sub = submissionMap.get(attemptNum)
+      if (sub) {
+        return {
+          attempt: attemptNum,
+          status: sub.status,
+          hasSubmission: true,
+          submittedAt: sub.submitted_at,
+          processorId: sub.processor_id,
+          processedAt: sub.processed_at,
+          errorCode: sub.error_code,
+          errorMessage: sub.error_message,
+          findings: (sub.failure_evidence?.findings || sub.failure_evidence?.auditFindings || []) as any[],
+        }
+      }
+      return {
+        attempt: attemptNum,
+        status: 'no_submission',
+        hasSubmission: false,
+        submittedAt: null,
+        processorId: null,
+        processedAt: null,
+        errorCode: 'NO_SUBMISSION_PACKET',
+        errorMessage: 'Claimed but no curriculum submission (認領逾時 / 未提交封包)',
+        findings: [],
+      }
+    })
 
     const events: LifecycleEvent[] = [
       {
@@ -1517,31 +1667,37 @@ export class AdminService {
           claimedBy: job?.claimed_by,
           leaseExpiresAt: job?.lease_expires_at,
           attemptCount: job?.attempt_count,
+          maxAttempts: job?.max_attempts,
           idempotencyKey: job?.idempotency_key,
         },
       },
       {
         step: 'SUBMISSION_AUTHORING',
-        label: `ChatGPT 生成 Canonical 封包 (${sortedSubmissions.length || (job ? 1 : 0)} Attempts)`,
+        label: `ChatGPT 生成 Canonical 封包 (${attemptBreakdown.length || (job ? 1 : 0)} Attempts)`,
         status: sortedSubmissions.length > 0 || job?.status === 'completed' ? 'completed' : 'pending',
         timestamp: firstSubmission?.submitted_at || job?.updated_at,
         details: {
-          totalAuthoringAttempts: sortedSubmissions.length,
+          totalAuthoringAttempts: attemptBreakdown.length,
           attempts: attemptBreakdown,
         },
       },
       {
         step: 'FINISHER_AUDIT',
-        label: 'GitHub Actions Finisher 審核與驗證',
-        status: material ? 'completed' : latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed' ? 'failed' : latestSubmission?.status === 'completed' ? 'completed' : 'pending',
+        label: isHumanReviewRequired ? 'GitHub Actions Finisher 審核 (需人工審閱)' : 'GitHub Actions Finisher 審核與驗證',
+        status: material ? 'completed' : isHumanReviewRequired ? 'failed' : latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed' ? 'failed' : latestSubmission?.status === 'completed' ? 'completed' : 'pending',
         timestamp: latestSubmission?.processed_at || material?.created_at,
         details: {
-          lastOutcome: latestSubmission?.status || (material ? 'completed' : 'pending'),
+          lastOutcome: latestSubmission?.status || (material ? 'completed' : isHumanReviewRequired ? 'human_review_required' : 'pending'),
           rejectionCount: sortedSubmissions.filter((s) => s.status === 'quality_rejected').length,
           lastFailureEvidence: latestSubmission?.failure_evidence || null,
           attemptsHistory: attemptBreakdown,
+          isHumanReviewRequired,
         },
-        error: latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed' ? latestSubmission?.error_message : undefined,
+        error: isHumanReviewRequired
+          ? `已達嘗試次數上限 (${job.attempt_count}/${job.max_attempts})，需管理員審閱。`
+          : latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed'
+          ? latestSubmission?.error_message
+          : undefined,
       },
       {
         step: 'MATERIAL_STORED',
@@ -1585,6 +1741,18 @@ export class AdminService {
       },
     ]
 
+    const jobSummary = job ? {
+      id: job.id,
+      status: job.status,
+      attemptCount: Number(job.attempt_count) || 0,
+      maxAttempts: Number(job.max_attempts) || 3,
+      isHumanReviewRequired,
+      claimedBy: job.claimed_by || null,
+      leaseExpiresAt: job.lease_expires_at || null,
+      errorCode: job.error_code || null,
+      errorMessage: job.error_message || null,
+    } : null
+
     return {
       dataSources,
       childId: child.id,
@@ -1600,6 +1768,7 @@ export class AdminService {
         difficultyTrend: learningState?.difficulty_trend ?? null,
         recurringMistakesCount: Array.isArray(learningState?.recurring_mistakes) ? learningState.recurring_mistakes.length : 0,
       },
+      jobSummary,
       events,
       availableChildren,
       rawMetadata: {

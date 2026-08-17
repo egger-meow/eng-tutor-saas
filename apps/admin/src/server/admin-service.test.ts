@@ -7,13 +7,35 @@ function createMockSupabaseClient(tableData: Record<string, any[]>, tableErrors:
       const error = tableErrors[tableName] || null
       const rows = tableData[tableName] || []
       const builder: any = {
+        _filterCol: null as string | null,
+        _filterVal: null as any,
         select: () => builder,
         order: () => builder,
         limit: () => builder,
         or: () => builder,
         in: () => builder,
-        eq: () => builder,
-        maybeSingle: async () => ({ data: error ? null : rows[0] || null, error }),
+        eq: (col: string, val: any) => {
+          builder._filterCol = col
+          builder._filterVal = val
+          return builder
+        },
+        update: (payload: any) => {
+          return {
+            eq: (col: string, val: any) => {
+              const target = rows.find((r) => r[col] === val)
+              if (target) {
+                Object.assign(target, payload)
+              }
+              return Promise.resolve({ data: target ? [target] : [], error: null })
+            },
+          }
+        },
+        maybeSingle: async () => {
+          const match = builder._filterCol
+            ? rows.find((r) => r[builder._filterCol] === builder._filterVal)
+            : rows[0]
+          return { data: error ? null : match || null, error }
+        },
         then: (resolve: (res: { data: any[] | null; error: any }) => void) => {
           return Promise.resolve({ data: error ? null : rows, error }).then(resolve)
         },
@@ -27,8 +49,10 @@ function createMockSupabaseClient(tableData: Record<string, any[]>, tableErrors:
       if (fnName === 'admin_get_curriculum_submissions' && tableData.curriculum_submissions) {
         return { data: tableData.curriculum_submissions, error: null }
       }
-      const rows = tableData[fnName] || []
-      return { data: rows, error: null }
+      if (tableData[fnName]) {
+        return { data: tableData[fnName], error: null }
+      }
+      return { data: null, error: { message: `RPC ${fnName} not available in mock` } }
     },
   } as any
 }
@@ -346,5 +370,106 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(scrubbed).not.toContain('Kobe')
     expect(scrubbed).not.toContain('林大豪')
     expect(scrubbed).toContain('[NAME_REDACTED]')
+  })
+
+  describe('Grant 1 Retry (允許再重試 1 次) Operational Control', () => {
+    it('safely grants 1 additional attempt to a job with max attempts exhausted (3/3 -> 3/4) preserving attempt history and requeueing to pending', async () => {
+      const targetJob = {
+        id: 'job-stuck-3',
+        child_id: 'c-1',
+        material_week: '2026-08-17',
+        status: 'failed',
+        attempt_count: 3,
+        max_attempts: 3,
+        error_code: 'HUMAN_REVIEW_REQUIRED',
+        error_message: 'Max retry attempts exhausted',
+        claimed_by: 'worker-old',
+        lease_expires_at: '2020-01-01T00:00:00Z',
+      }
+
+      const mockClient = createMockSupabaseClient({
+        generation_jobs: [targetJob],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.grantJobRetry('job-stuck-3')
+
+      expect(result.success).toBe(true)
+      expect(result.jobId).toBe('job-stuck-3')
+      expect(result.previousMaxAttempts).toBe(3)
+      expect(result.newMaxAttempts).toBe(4)
+      expect(result.attemptCount).toBe(3)
+      expect(result.status).toBe('pending')
+
+      // Invariant: attempt_count is NEVER decremented, max_attempts is incremented by 1, and job is requeued
+      expect(targetJob.attempt_count).toBe(3)
+      expect(targetJob.max_attempts).toBe(4)
+      expect(targetJob.status).toBe('pending')
+      expect(targetJob.claimed_by).toBeNull()
+      expect(targetJob.lease_expires_at).toBeNull()
+    })
+
+    it('rejects granting retry if the target job is already completed', async () => {
+      const completedJob = {
+        id: 'job-completed',
+        child_id: 'c-1',
+        material_week: '2026-08-17',
+        status: 'completed',
+        attempt_count: 2,
+        max_attempts: 3,
+      }
+
+      const mockClient = createMockSupabaseClient({
+        generation_jobs: [completedJob],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.grantJobRetry('job-completed')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('JOB_ALREADY_COMPLETED')
+      expect(completedJob.max_attempts).toBe(3)
+    })
+
+    it('rejects granting retry if the target job has an active in-progress processing lease', async () => {
+      const activeLeaseJob = {
+        id: 'job-active-lease',
+        child_id: 'c-1',
+        material_week: '2026-08-17',
+        status: 'claimed',
+        attempt_count: 1,
+        max_attempts: 3,
+        claimed_by: 'chatgpt-worker-live',
+        lease_expires_at: new Date(Date.now() + 600000).toISOString(),
+      }
+
+      const mockClient = createMockSupabaseClient({
+        generation_jobs: [activeLeaseJob],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.grantJobRetry('job-active-lease')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('ACTIVE_LEASE_IN_PROGRESS')
+      expect(activeLeaseJob.max_attempts).toBe(3)
+      expect(activeLeaseJob.status).toBe('claimed')
+    })
+
+    it('rejects invalid or non-existent job IDs fail-closed', async () => {
+      const mockClient = createMockSupabaseClient({
+        generation_jobs: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+
+      const invalidResult = await service.grantJobRetry('')
+      expect(invalidResult.success).toBe(false)
+      expect(invalidResult.error).toBe('INVALID_JOB_ID')
+
+      const notFoundResult = await service.grantJobRetry('00000000-0000-0000-0000-000000000000')
+      expect(notFoundResult.success).toBe(false)
+      expect(notFoundResult.error).toBe('JOB_NOT_FOUND')
+    })
   })
 })
