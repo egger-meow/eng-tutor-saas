@@ -6,7 +6,7 @@ This is the production contract and paste-ready prompt for the cloud Scheduled t
 
 - **Name:** `紙屬英文｜每日教材生成`
 - **Cadence:** daily in `Asia/Taipei`
-- **Model:** strongest available reasoning model
+- **Model:** configured in ChatGPT Scheduled Workl
 - **Apps:** grant read access to `egger-meow/eng-tutor-saas` and the intended Supabase project; allow the exact reviewed Supabase database actions below without interactive approval
 - **Notifications:** every failure and every run that submits or rejects work
 
