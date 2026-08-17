@@ -27,13 +27,17 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
       <div className="kpi-grid">
         <div className="cockpit-card featured">
           <div className="card-header-sm">
-            <span>累計失敗 / 退回總數</span>
+            <span>累計異常 / 退回事件</span>
             <span className="status-pill failed">Failures</span>
           </div>
           <div className="kpi-value" style={{ color: totalFailures > 0 ? 'var(--status-rose)' : 'var(--text-main)' }}>
             {totalFailures}
           </div>
-          <div className="kpi-subtext">生成失敗率: {failureRatePercent}% (含品質退回重試)</div>
+          <div className="kpi-subtext" style={{ lineHeight: '1.4' }}>
+            <span>生成失敗率: <strong>{data.generationStats?.failureRatePercent ?? failureRatePercent}%</strong> ({data.generationStats?.failedJobs ?? 0} / {data.generationStats?.totalJobs ?? 0} jobs)</span>
+            <br />
+            <span>Finisher 退回率: <strong>{data.finisherStats?.rejectionRatePercent ?? 0}%</strong> ({data.finisherStats?.qualityRejectedSubmissions ?? 0} / {data.finisherStats?.totalSubmissions ?? 0} subs)</span>
+          </div>
         </div>
 
         <div className="cockpit-card">

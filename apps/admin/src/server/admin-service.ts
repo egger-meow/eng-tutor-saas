@@ -114,6 +114,19 @@ export interface FailureIntelligence {
   dataSources: DataSourceStatus[]
   totalFailures: number
   failureRatePercent: number
+  generationStats: {
+    totalJobs: number
+    completedJobs: number
+    failedJobs: number
+    failureRatePercent: number
+  }
+  finisherStats: {
+    totalSubmissions: number
+    completedSubmissions: number
+    qualityRejectedSubmissions: number
+    technicalFailedSubmissions: number
+    rejectionRatePercent: number
+  }
   stageBreakdown: Array<{
     stage: 'worker_claim' | 'chatgpt_authoring' | 'finisher_audit' | 'pdf_rendering' | 'storage_upload' | 'unknown'
     label: string
@@ -275,7 +288,8 @@ export interface ChildWeekTimeline {
 export interface AiExportDataset {
   schemaVersion: string
   taxonomyVersion: string
-  generatorVersion: string
+  generatorVersions: string[]
+  ruleVersions: string[]
   exportedAt: string
   timeWindow: {
     start: string | null
@@ -465,11 +479,11 @@ export class AdminService {
       enrollmentData,
       submissionsData,
     ] = await Promise.all([
-      this.safeQuery('children', () => client.from('children').select('id, display_name, is_active'), dataSources),
-      this.safeQuery('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
-      this.safeQuery('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery('materials', () => client.from('materials').select('id, child_id, material_week, revision, rule_version, model_name, student_pdf_path, parent_answer_pdf_path, created_at').order('created_at', { ascending: false }).limit(20), dataSources),
-      this.safeQuery('enrollment_settings', () => client.from('enrollment_settings').select('*').limit(1).maybeSingle(), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active'), dataSources),
+      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
+      this.safeQuery<any[]>('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('id, child_id, material_week, revision, rule_version, model_name, student_pdf_path, parent_answer_pdf_path, created_at').order('created_at', { ascending: false }).limit(20), dataSources),
+      this.safeQuery<any>('enrollment_settings', () => client.from('enrollment_settings').select('*').limit(1).maybeSingle(), dataSources),
       this.queryCurriculumSubmissions(undefined, 200, dataSources),
     ])
 
@@ -509,9 +523,9 @@ export class AdminService {
       }
     }
 
-    const jobs = jobsData || []
-    const materials = materialsData || []
-    const submissions = submissionsData || []
+    const jobs = (jobsData as any[]) || []
+    const materials = (materialsData as any[]) || []
+    const submissions = (submissionsData as any[]) || []
 
     const now = new Date().toISOString()
     const stuckJobs: OperationsOverview['stuckJobs'] = []
@@ -535,7 +549,7 @@ export class AdminService {
 
       if (isLeaseExpired || isPastDue || isExhausted) {
         overdueOrStuckCount++
-        const child = children.find((c) => c.id === job.child_id)
+        const child = children.find((c: any) => c.id === job.child_id)
         stuckJobs.push({
           id: job.id,
           childId: job.child_id,
@@ -589,8 +603,8 @@ export class AdminService {
       ? 'attention_needed'
       : 'healthy'
 
-    const childMap = new Map(children.map((c) => [c.id, c.display_name]))
-    const recentDeliveries = materials.map((m) => ({
+    const childMap = new Map(children.map((c: any) => [c.id, c.display_name]))
+    const recentDeliveries = materials.map((m: any) => ({
       id: m.id,
       childId: m.child_id,
       childPseudonym: this.maskName(childMap.get(m.child_id), m.child_id),
@@ -658,18 +672,19 @@ export class AdminService {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
-    const [failedJobsData, submissionsData, childrenData] = await Promise.all([
-      this.safeQuery('generation_jobs', () => client.from('generation_jobs').select('*').or('status.eq.failed,error_code.not.is.null').order('created_at', { ascending: false }).limit(150), dataSources),
+    const [allJobsData, submissionsData, childrenData] = await Promise.all([
+      this.safeQuery<any[]>('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
       this.queryCurriculumSubmissions(undefined, 200, dataSources),
-      this.safeQuery('children', () => client.from('children').select('id, display_name'), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name'), dataSources),
     ])
 
-    const failedJobs = (failedJobsData as any[]) || []
+    const allJobs = (allJobsData as any[]) || []
+    const failedJobs = allJobs.filter((j) => j.status === 'failed' || j.error_code != null)
     const submissions = (submissionsData as any[]) || []
     const failedSubmissions = submissions.filter((s) => s.status === 'quality_rejected' || s.status === 'technical_failed')
     const childMap = new Map(((childrenData as any[]) || []).map((c: any) => [c.id, c.display_name]))
 
-    return this.aggregateFailures(failedJobs, failedSubmissions, submissions, childMap, dataSources)
+    return this.aggregateFailures(allJobs, failedJobs, submissions, failedSubmissions, childMap, dataSources)
   }
 
   public async getFeedbackIntelligence(): Promise<ParentFeedbackIntelligence> {
@@ -677,29 +692,32 @@ export class AdminService {
     const dataSources: DataSourceStatus[] = []
 
     const [feedbackData, childrenData, materialsData] = await Promise.all([
-      this.safeQuery('feedback', () => client.from('feedback').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery('children', () => client.from('children').select('id, display_name'), dataSources),
-      this.safeQuery('materials', () => client.from('materials').select('id, material_week'), dataSources),
+      this.safeQuery<any[]>('feedback', () => client.from('feedback').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name'), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('id, material_week'), dataSources),
     ])
 
     const feedbackList = (feedbackData as any[]) || []
     const childMap = new Map(((childrenData as any[]) || []).map((c: any) => [c.id, c.display_name]))
     const materialMap = new Map(((materialsData as any[]) || []).map((m: any) => [m.id, m.material_week]))
+    const knownNames = Array.from(childMap.values()).filter(Boolean) as string[]
 
-    return this.aggregateFeedback(feedbackList, childMap, materialMap, dataSources)
+    return this.aggregateFeedback(feedbackList, childMap, materialMap, knownNames, dataSources)
   }
 
   public async getProductFeedbackIntelligence(): Promise<ProductFeedbackIntelligence> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
-    const [productFeedbackData, subsData] = await Promise.all([
-      this.safeQuery('product_feedback', () => client.from('product_feedback').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery('subscriptions', () => client.from('subscriptions').select('id, status, cancel_at_period_end'), dataSources),
+    const [productFeedbackData, subsData, childrenData] = await Promise.all([
+      this.safeQuery<any[]>('product_feedback', () => client.from('product_feedback').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
+      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, status, cancel_at_period_end'), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('display_name'), dataSources),
     ])
 
     const feedbackItems = (productFeedbackData as any[]) || []
     const subscriptions = (subsData as any[]) || []
+    const knownNames = ((childrenData as any[]) || []).map((c: any) => c.display_name).filter(Boolean)
 
     const totalFeedbackCount = feedbackItems.length
     const categoryCounts: Record<string, { count: number; messages: string[] }> = {
@@ -713,7 +731,7 @@ export class AdminService {
       const cat = item.category in categoryCounts ? item.category : 'other'
       categoryCounts[cat].count++
       if (categoryCounts[cat].messages.length < 5) {
-        categoryCounts[cat].messages.push(this.sanitizePiiText(item.message))
+        categoryCounts[cat].messages.push(this.sanitizePiiText(item.message, knownNames))
       }
     }
 
@@ -781,8 +799,8 @@ export class AdminService {
     const dataSources: DataSourceStatus[] = []
 
     const [allChildrenData, allSubsData] = await Promise.all([
-      this.safeQuery('children', () => client.from('children').select('id, display_name, grade, is_active').order('created_at', { ascending: false }), dataSources),
-      this.safeQuery('subscriptions', () => client.from('subscriptions').select('child_id, status'), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, grade, is_active').order('created_at', { ascending: false }), dataSources),
+      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('child_id, status'), dataSources),
     ])
 
     const allChildrenList = (allChildrenData as any[]) || []
@@ -804,10 +822,10 @@ export class AdminService {
     }
 
     const [childData, subData, jobsData, learningData] = await Promise.all([
-      this.safeQuery('child_single', () => client.from('children').select('*').eq('id', childId).maybeSingle(), dataSources),
-      this.safeQuery('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', childId).maybeSingle(), dataSources),
-      this.safeQuery('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', childId).order('created_at', { ascending: false }).limit(10), dataSources),
-      this.safeQuery('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', childId).maybeSingle(), dataSources),
+      this.safeQuery<any>('child_single', () => client.from('children').select('*').eq('id', childId).maybeSingle(), dataSources),
+      this.safeQuery<any>('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', childId).maybeSingle(), dataSources),
+      this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', childId).order('created_at', { ascending: false }).limit(10), dataSources),
+      this.safeQuery<any>('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', childId).maybeSingle(), dataSources),
     ])
 
     const child = childData as any
@@ -816,7 +834,7 @@ export class AdminService {
     }
 
     const jobs = (jobsData as any[]) || []
-    const selectedJob = (targetWeek ? jobs.find((j) => j.material_week === targetWeek) : jobs[0]) || jobs[0]
+    const selectedJob = (targetWeek ? jobs.find((j: any) => j.material_week === targetWeek) : jobs[0]) || jobs[0]
     const actualWeek = selectedJob?.material_week || targetWeek || new Date().toISOString().slice(0, 10)
 
     let submissions: any[] = []
@@ -826,9 +844,9 @@ export class AdminService {
     if (selectedJob) {
       const [submissionsRes, matData, fbData] = await Promise.all([
         this.queryCurriculumSubmissions(selectedJob.id, 20, dataSources),
-        selectedJob.material_id ? this.safeQuery('material_single', () => client.from('materials').select('*').eq('id', selectedJob.material_id).maybeSingle(), dataSources) : Promise.resolve(null),
+        selectedJob.material_id ? this.safeQuery<any>('material_single', () => client.from('materials').select('*').eq('id', selectedJob.material_id).maybeSingle(), dataSources) : Promise.resolve(null),
         selectedJob.material_id
-          ? this.safeQuery('feedback_single', () => client.from('feedback').select('*').eq('child_id', childId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
+          ? this.safeQuery<any>('feedback_single', () => client.from('feedback').select('*').eq('child_id', childId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
           : Promise.resolve(null),
       ])
       submissions = submissionsRes || []
@@ -851,11 +869,21 @@ export class AdminService {
   }
 
   public async getAiExportDataset(): Promise<AiExportDataset> {
-    const [overview, failures, feedback] = await Promise.all([
+    const client = this.ensureClient()
+    const dataSources: DataSourceStatus[] = []
+
+    const [overview, failures, feedback, materialsData, childrenData] = await Promise.all([
       this.getOperationsOverview(),
       this.getFailureIntelligence(),
       this.getFeedbackIntelligence(),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('rule_version, model_name'), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('display_name'), dataSources),
     ])
+
+    const materials = (materialsData as any[]) || []
+    const ruleVersions = Array.from(new Set(materials.map((m: any) => m.rule_version).filter(Boolean)))
+    const modelNames = Array.from(new Set(materials.map((m: any) => m.model_name).filter(Boolean)))
+    const knownNames = ((childrenData as any[]) || []).map((c: any) => c.display_name).filter(Boolean)
 
     const dominantFailure = failures.errorCodeClusters[0]?.errorCode || null
 
@@ -871,11 +899,11 @@ export class AdminService {
         attempt: rf.authoringAttempt,
         stage: rf.stage,
         errorCode: rf.errorCode,
-        errorMessage: this.sanitizePiiText(rf.errorMessage),
+        errorMessage: this.sanitizePiiText(rf.errorMessage, knownNames),
         findings: findings.map((f: any) => ({
           rule: f.rule || f.code,
-          message: this.sanitizePiiText(f.message || f.description || ''),
-          description: this.sanitizePiiText(f.description || ''),
+          message: this.sanitizePiiText(f.message || f.description || '', knownNames),
+          description: this.sanitizePiiText(f.description || '', knownNames),
         })),
         timestamp: rf.timestamp,
       }
@@ -889,7 +917,7 @@ export class AdminService {
         difficulty: fb.difficulty,
         completionRate: fb.completionRate,
         weakArea: fb.weakArea,
-        sanitizedFeedbackSnippet: this.sanitizePiiText(fullText),
+        sanitizedFeedbackSnippet: this.sanitizePiiText(fullText, knownNames),
         topicThemes: feedback.topicClusters.filter((t) => t.sampleQuotes.some((sq) => fullText.includes(sq))).map((t) => t.topic),
       }
     })
@@ -898,7 +926,7 @@ export class AdminService {
       ruleName: rule.rule,
       category: rule.category,
       violationCount: rule.count,
-      sampleFinding: this.sanitizePiiText(rule.sampleFinding),
+      sampleFinding: this.sanitizePiiText(rule.sampleFinding, knownNames),
     }))
 
     const totalEvidenceCount = generationFailureEvidence.length + parentFeedbackEvidence.length
@@ -906,7 +934,8 @@ export class AdminService {
     return {
       schemaVersion: '1.0.0',
       taxonomyVersion: 'cap-2.2.0',
-      generatorVersion: '2.2.0',
+      generatorVersions: modelNames.length > 0 ? modelNames : ['chatgpt-work-daily'],
+      ruleVersions: ruleVersions.length > 0 ? ruleVersions : ['2.2.0'],
       exportedAt: new Date().toISOString(),
       timeWindow: {
         start: startDate,
@@ -928,10 +957,10 @@ export class AdminService {
   }
 
   // ==========================================
-  // Deterministic PII Sanitizer & Aggregations
+  // Deterministic Best-Effort PII Sanitizer & Aggregations
   // ==========================================
 
-  public sanitizePiiText(text?: string | null): string {
+  public sanitizePiiText(text?: string | null, knownNames: string[] = []): string {
     if (!text) return ''
     let cleaned = text
     // 1. Phone numbers (Taiwan mobile & landline)
@@ -944,6 +973,13 @@ export class AdminService {
     // 4. Personal teacher names (e.g. Teacher Amy, 王老師)
     cleaned = cleaned.replace(/[\u4e00-\u9fa5]{1,2}(?:老師|主任|校長|教練)/g, '[TEACHER_REDACTED]')
     cleaned = cleaned.replace(/\b(?:Teacher\s+[A-Za-z]+)\b/gi, '[TEACHER_REDACTED]')
+    // 5. Dynamic known student/child names
+    for (const name of knownNames) {
+      if (name && name.trim().length >= 2) {
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        cleaned = cleaned.replace(new RegExp(escaped, 'gi'), '[NAME_REDACTED]')
+      }
+    }
     return cleaned
   }
 
@@ -957,9 +993,10 @@ export class AdminService {
   }
 
   private aggregateFailures(
+    allJobs: any[],
     failedJobs: any[],
-    failedSubmissions: any[],
     allSubmissions: any[],
+    failedSubmissions: any[],
     childMap: Map<string, string>,
     dataSources: DataSourceStatus[]
   ): FailureIntelligence {
@@ -1013,7 +1050,10 @@ export class AdminService {
         }
       }
       errorClusters[code].count++
-      errorClusters[code].affectedChildren.add(job.child_id)
+      if (job.child_id) {
+        errorClusters[code].affectedChildren.add(job.child_id)
+      }
+
       if (job.created_at > errorClusters[code].lastSeen) {
         errorClusters[code].lastSeen = job.created_at
         errorClusters[code].sampleMessage = msg
@@ -1036,7 +1076,7 @@ export class AdminService {
         id: job.id,
         jobId: job.id,
         childPseudonym: this.maskName(childMap.get(job.child_id), job.child_id),
-        materialWeek: job.material_week,
+        materialWeek: job.material_week || 'Week Cycle',
         stage,
         errorCode: code,
         errorMessage: msg,
@@ -1073,7 +1113,11 @@ export class AdminService {
         }
       }
       errorClusters[code].count++
-      errorClusters[code].affectedChildren.add(sub.job_id)
+      if (sub.child_id) {
+        errorClusters[code].affectedChildren.add(sub.child_id)
+      } else {
+        errorClusters[code].affectedChildren.add(sub.job_id)
+      }
 
       if (sub.failure_evidence && typeof sub.failure_evidence === 'object') {
         const evidence = sub.failure_evidence as any
@@ -1092,11 +1136,14 @@ export class AdminService {
         }
       }
 
+      const childDisplayName = sub.child_id ? childMap.get(sub.child_id) : null
+      const pseudonym = sub.child_id ? this.maskName(childDisplayName, sub.child_id) : `Job #${sub.job_id.slice(0, 6)}`
+
       recentFailuresList.push({
         id: `${sub.job_id}_${sub.authoring_attempt}`,
         jobId: sub.job_id,
-        childPseudonym: `Job #${sub.job_id.slice(0, 6)}`,
-        materialWeek: 'Week Cycle',
+        childPseudonym: pseudonym,
+        materialWeek: sub.material_week || 'Week Cycle',
         stage,
         errorCode: code,
         errorMessage: msg,
@@ -1106,10 +1153,20 @@ export class AdminService {
       })
     }
 
-    const totalFailures = stageCounts.worker_claim + stageCounts.chatgpt_authoring + stageCounts.finisher_audit + stageCounts.pdf_rendering + stageCounts.storage_upload + stageCounts.unknown
-    const completedCount = allSubmissions.filter((s) => s.status === 'completed').length
-    const totalAttempts = completedCount + totalFailures
-    const failureRatePercent = totalAttempts > 0 ? Number(((totalFailures / totalAttempts) * 100).toFixed(1)) : 0
+    // 1. Generation stats (from generation_jobs)
+    const completedJobsCount = allJobs.filter((j) => j.status === 'completed').length
+    const failedJobsCount = failedJobs.length
+    const totalJobsEvaluated = completedJobsCount + failedJobsCount
+    const generationFailureRatePercent = totalJobsEvaluated > 0 ? Number(((failedJobsCount / totalJobsEvaluated) * 100).toFixed(1)) : 0
+
+    // 2. Finisher stats (from curriculum_submissions)
+    const completedSubsCount = allSubmissions.filter((s) => s.status === 'completed').length
+    const qualityRejectedCount = allSubmissions.filter((s) => s.status === 'quality_rejected').length
+    const technicalFailedCount = allSubmissions.filter((s) => s.status === 'technical_failed').length
+    const totalSubsEvaluated = completedSubsCount + qualityRejectedCount + technicalFailedCount
+    const finisherRejectionRatePercent = totalSubsEvaluated > 0 ? Number((((qualityRejectedCount + technicalFailedCount) / totalSubsEvaluated) * 100).toFixed(1)) : 0
+
+    const totalFailures = failedJobsCount + qualityRejectedCount + technicalFailedCount
 
     const stageBreakdown: FailureIntelligence['stageBreakdown'] = [
       { stage: 'finisher_audit', label: 'Finisher 審核與品質驗證', count: stageCounts.finisher_audit, percentage: totalFailures > 0 ? Math.round((stageCounts.finisher_audit / totalFailures) * 100) : 0 },
@@ -1146,7 +1203,20 @@ export class AdminService {
     return {
       dataSources,
       totalFailures,
-      failureRatePercent,
+      failureRatePercent: generationFailureRatePercent, // Default backward compatible field
+      generationStats: {
+        totalJobs: totalJobsEvaluated,
+        completedJobs: completedJobsCount,
+        failedJobs: failedJobsCount,
+        failureRatePercent: generationFailureRatePercent,
+      },
+      finisherStats: {
+        totalSubmissions: totalSubsEvaluated,
+        completedSubmissions: completedSubsCount,
+        qualityRejectedSubmissions: qualityRejectedCount,
+        technicalFailedSubmissions: technicalFailedCount,
+        rejectionRatePercent: finisherRejectionRatePercent,
+      },
       stageBreakdown,
       errorCodeClusters,
       qualityRuleViolations,
@@ -1159,6 +1229,7 @@ export class AdminService {
     feedbackList: any[],
     childMap: Map<string, string>,
     materialMap: Map<string, string>,
+    knownNames: string[],
     dataSources: DataSourceStatus[]
   ): ParentFeedbackIntelligence {
     let easyCount = 0
@@ -1218,49 +1289,49 @@ export class AdminService {
       if (/太長|寫不完|耗時|篇幅/i.test(allText)) {
         keywordBuckets['太長 / 篇幅偏多'].count++
         if (keywordBuckets['太長 / 篇幅偏多'].quotes.length < 3 && fb.child_comments) {
-          keywordBuckets['太長 / 篇幅偏多'].quotes.push(this.sanitizePiiText(fb.child_comments))
+          keywordBuckets['太長 / 篇幅偏多'].quotes.push(this.sanitizePiiText(fb.child_comments, knownNames))
         }
       }
       if (/亂做|超爛|中文|沒中文|法克|三小|很爛|糟糕/i.test(allText)) {
         keywordBuckets['教材品質不滿 / 亂做 / 缺中文'].count++
         if (keywordBuckets['教材品質不滿 / 亂做 / 缺中文'].quotes.length < 3 && fb.parent_comments) {
-          keywordBuckets['教材品質不滿 / 亂做 / 缺中文'].quotes.push(this.sanitizePiiText(fb.parent_comments))
+          keywordBuckets['教材品質不滿 / 亂做 / 缺中文'].quotes.push(this.sanitizePiiText(fb.parent_comments, knownNames))
         }
       }
       if (/單字|生字|背不起來|太難|看不太懂/i.test(allText)) {
         keywordBuckets['單字難度過高'].count++
         if (keywordBuckets['單字難度過高'].quotes.length < 3 && fb.parent_comments) {
-          keywordBuckets['單字難度過高'].quotes.push(this.sanitizePiiText(fb.parent_comments))
+          keywordBuckets['單字難度過高'].quotes.push(this.sanitizePiiText(fb.parent_comments, knownNames))
         }
       }
       if (/文法|時態|句型|被動|關係詞/i.test(allText)) {
         keywordBuckets['文法觀念混淆'].count++
         if (keywordBuckets['文法觀念混淆'].quotes.length < 3 && fb.mistakes_text) {
-          keywordBuckets['文法觀念混淆'].quotes.push(this.sanitizePiiText(fb.mistakes_text))
+          keywordBuckets['文法觀念混淆'].quotes.push(this.sanitizePiiText(fb.mistakes_text, knownNames))
         }
       }
       if (/有趣|喜歡|好讀|精彩|進步/i.test(allText)) {
         keywordBuckets['閱讀很有趣 / 喜歡主題'].count++
         if (keywordBuckets['閱讀很有趣 / 喜歡主題'].quotes.length < 3 && fb.child_comments) {
-          keywordBuckets['閱讀很有趣 / 喜歡主題'].quotes.push(this.sanitizePiiText(fb.child_comments))
+          keywordBuckets['閱讀很有趣 / 喜歡主題'].quotes.push(this.sanitizePiiText(fb.child_comments, knownNames))
         }
       }
       if (/段考|月考|會考|模擬考|學校進度/i.test(allText)) {
         keywordBuckets['學校段考準備需求'].count++
         if (keywordBuckets['學校段考準備需求'].quotes.length < 3 && fb.school_progress_update) {
-          keywordBuckets['學校段考準備需求'].quotes.push(this.sanitizePiiText(fb.school_progress_update))
+          keywordBuckets['學校段考準備需求'].quotes.push(this.sanitizePiiText(fb.school_progress_update, knownNames))
         }
       }
       if (/主動|自己寫完|剛剛好|順暢/i.test(allText)) {
         keywordBuckets['主動完成 / 難度剛好'].count++
         if (keywordBuckets['主動完成 / 難度剛好'].quotes.length < 3 && fb.parent_comments) {
-          keywordBuckets['主動完成 / 難度剛好'].quotes.push(this.sanitizePiiText(fb.parent_comments))
+          keywordBuckets['主動完成 / 難度剛好'].quotes.push(this.sanitizePiiText(fb.parent_comments, knownNames))
         }
       }
       if (/恐龍|籃球|動漫|AI|太空|電玩|遊戲/i.test(allText)) {
         keywordBuckets['科技 / 動漫興趣'].count++
         if (keywordBuckets['科技 / 動漫興趣'].quotes.length < 3 && fb.interest_update) {
-          keywordBuckets['科技 / 動漫興趣'].quotes.push(this.sanitizePiiText(fb.interest_update))
+          keywordBuckets['科技 / 動漫興趣'].quotes.push(this.sanitizePiiText(fb.interest_update, knownNames))
         }
       }
 
@@ -1269,7 +1340,7 @@ export class AdminService {
 
       if (fb.child_comments) {
         childVoiceQuotesList.push({
-          quote: this.sanitizePiiText(fb.child_comments),
+          quote: this.sanitizePiiText(fb.child_comments, knownNames),
           materialWeek: week,
           childPseudonym: pseudonym,
           difficulty: fb.difficulty,
@@ -1285,11 +1356,11 @@ export class AdminService {
         difficulty: fb.difficulty === 1 || fb.difficulty === 2 ? 'too_easy' : fb.difficulty === 3 ? 'good' : 'too_hard',
         completionRate: fb.completion_rate,
         weakArea: fb.weak_area,
-        mistakesText: this.sanitizePiiText(fb.mistakes_text),
-        childComments: this.sanitizePiiText(fb.child_comments),
-        parentComments: this.sanitizePiiText(fb.parent_comments),
-        schoolProgressUpdate: this.sanitizePiiText(fb.school_progress_update),
-        interestUpdate: this.sanitizePiiText(fb.interest_update),
+        mistakesText: this.sanitizePiiText(fb.mistakes_text, knownNames),
+        childComments: this.sanitizePiiText(fb.child_comments, knownNames),
+        parentComments: this.sanitizePiiText(fb.parent_comments, knownNames),
+        schoolProgressUpdate: this.sanitizePiiText(fb.school_progress_update, knownNames),
+        interestUpdate: this.sanitizePiiText(fb.interest_update, knownNames),
         createdAt: fb.created_at,
       })
     }
@@ -1381,11 +1452,17 @@ export class AdminService {
     const { child, subscription, job, submissions, material, feedback, learningState, targetWeek, availableChildren, dataSources } = data
 
     const now = new Date().toISOString()
-    const isReleasedToParent = Boolean(material) && now >= `${targetWeek}T00:00:00Z`
+    const releaseAt = job?.release_at || null
+    const isReleasedToParent = Boolean(material) && Boolean(releaseAt) && now >= releaseAt
 
-    // Multi-attempt breakdown
-    const attemptBreakdown = submissions.map((s) => ({
-      attempt: s.authoring_attempt,
+    // Canonical Sort: always order submissions ascending by authoring_attempt (1 -> 2 -> 3)
+    const sortedSubmissions = [...submissions].sort((a, b) => (Number(a.authoring_attempt) || 0) - (Number(b.authoring_attempt) || 0))
+    const firstSubmission = sortedSubmissions[0]
+    const latestSubmission = sortedSubmissions[sortedSubmissions.length - 1]
+
+    // Multi-attempt breakdown in ascending sequence for UI rendering
+    const attemptBreakdown = sortedSubmissions.map((s, idx) => ({
+      attempt: s.authoring_attempt || idx + 1,
       status: s.status,
       submittedAt: s.submitted_at,
       processorId: s.processor_id,
@@ -1394,9 +1471,6 @@ export class AdminService {
       errorMessage: s.error_message,
       findings: (s.failure_evidence?.findings || s.failure_evidence?.auditFindings || []) as any[],
     }))
-
-    const lastSubmission = submissions[submissions.length - 1]
-    const hasQualityRejection = submissions.some((s) => s.status === 'quality_rejected')
 
     const events: LifecycleEvent[] = [
       {
@@ -1408,6 +1482,7 @@ export class AdminService {
           deliveryWeekday: child.delivery_weekday,
           scheduledFor: job?.scheduled_for,
           generationDueAt: job?.generation_due_at,
+          releaseAt: job?.release_at,
           timezone: child.timezone,
         },
       },
@@ -1436,26 +1511,26 @@ export class AdminService {
       },
       {
         step: 'SUBMISSION_AUTHORING',
-        label: `ChatGPT 生成 Canonical 封包 (${submissions.length || (job ? 1 : 0)} Attempts)`,
-        status: submissions.length > 0 || job?.status === 'completed' ? 'completed' : 'pending',
-        timestamp: submissions[0]?.submitted_at || job?.updated_at,
+        label: `ChatGPT 生成 Canonical 封包 (${sortedSubmissions.length || (job ? 1 : 0)} Attempts)`,
+        status: sortedSubmissions.length > 0 || job?.status === 'completed' ? 'completed' : 'pending',
+        timestamp: firstSubmission?.submitted_at || job?.updated_at,
         details: {
-          totalAuthoringAttempts: submissions.length,
+          totalAuthoringAttempts: sortedSubmissions.length,
           attempts: attemptBreakdown,
         },
       },
       {
         step: 'FINISHER_AUDIT',
         label: 'GitHub Actions Finisher 審核與驗證',
-        status: material ? 'completed' : hasQualityRejection ? 'failed' : 'pending',
-        timestamp: lastSubmission?.processed_at || material?.created_at,
+        status: material ? 'completed' : latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed' ? 'failed' : latestSubmission?.status === 'completed' ? 'completed' : 'pending',
+        timestamp: latestSubmission?.processed_at || material?.created_at,
         details: {
-          lastOutcome: lastSubmission?.status || (material ? 'completed' : 'pending'),
-          rejectionCount: submissions.filter((s) => s.status === 'quality_rejected').length,
-          lastFailureEvidence: lastSubmission?.failure_evidence || null,
+          lastOutcome: latestSubmission?.status || (material ? 'completed' : 'pending'),
+          rejectionCount: sortedSubmissions.filter((s) => s.status === 'quality_rejected').length,
+          lastFailureEvidence: latestSubmission?.failure_evidence || null,
           attemptsHistory: attemptBreakdown,
         },
-        error: lastSubmission?.error_message || undefined,
+        error: latestSubmission?.status === 'quality_rejected' || latestSubmission?.status === 'technical_failed' ? latestSubmission?.error_message : undefined,
       },
       {
         step: 'MATERIAL_STORED',
@@ -1475,12 +1550,12 @@ export class AdminService {
         step: 'DELIVERY_RELEASED',
         label: isReleasedToParent ? '家長端正式發行上線' : '等待發行排程時間',
         status: isReleasedToParent ? 'completed' : material ? 'pending' : 'pending',
-        timestamp: isReleasedToParent ? `${targetWeek}T00:00:00Z` : null,
+        timestamp: isReleasedToParent ? releaseAt : null,
         details: {
           materialWeek: targetWeek,
           accessibleToParent: isReleasedToParent,
           readyInStorage: Boolean(material),
-          releaseSchedule: `${targetWeek}T00:00:00Z`,
+          releaseAt: releaseAt,
         },
       },
       {
@@ -1518,7 +1593,7 @@ export class AdminService {
       availableChildren,
       rawMetadata: {
         job: job || null,
-        submissions,
+        submissions: sortedSubmissions,
         material: material || null,
         feedback: feedback || null,
       },

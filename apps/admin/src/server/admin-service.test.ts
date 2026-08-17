@@ -181,7 +181,8 @@ describe('AdminService Authoritative Truth Layer', () => {
     const failures = await service.getFailureIntelligence()
 
     expect(failures.totalFailures).toBe(2) // 1 job error + 1 submission rejection
-    expect(failures.failureRatePercent).toBe(66.7) // 2 failures / 3 total attempts = 66.7%
+    expect(failures.generationStats.failureRatePercent).toBe(100) // 1 failed / 1 job = 100%
+    expect(failures.finisherStats.rejectionRatePercent).toBe(50) // 1 rejected / 2 submissions = 50%
     expect(failures.stageBreakdown.length).toBe(5)
 
     const clipped = failures.errorCodeClusters.find((c) => c.errorCode === 'CANONICAL_PROMPT_CLIPPED')
@@ -238,12 +239,12 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(recent.parentComments).toContain('[PHONE_REDACTED]')
   })
 
-  it('constructs a unified Child / Week Lifecycle Timeline with authoring attempts and release schedule', async () => {
+  it('constructs a unified Child / Week Lifecycle Timeline and correctly handles newest-first descending RPC ordering', async () => {
     const mockClient = createMockSupabaseClient(
       {
         children: [{ id: 'c-1', display_name: '王小宇', grade: 8, delivery_weekday: 'Monday', timezone: 'Asia/Taipei', is_active: true }],
         subscriptions: [{ child_id: 'c-1', status: 'active', plan_code: 'standard_monthly' }],
-        generation_jobs: [{ id: 'job-1', child_id: 'c-1', material_week: '2026-08-17', status: 'completed', material_id: 'mat-1' }],
+        generation_jobs: [{ id: 'job-1', child_id: 'c-1', material_week: '2026-08-17', status: 'completed', material_id: 'mat-1', release_at: '2026-08-17T00:00:00Z' }],
         materials: [{ id: 'mat-1', child_id: 'c-1', material_week: '2026-08-17', revision: 1, student_pdf_path: 'path/student.pdf' }],
         feedback: [{ child_id: 'c-1', material_id: 'mat-1', difficulty: 3, completion_rate: 100 }],
         child_learning_state: [{ child_id: 'c-1', comprehension_accuracy: 0.85 }],
@@ -251,7 +252,14 @@ describe('AdminService Authoritative Truth Layer', () => {
       {},
       {
         admin_get_curriculum_submissions: async () => ({
+          // Production RPC returns descending: newest (Attempt 2) first, oldest (Attempt 1) last
           data: [
+            {
+              job_id: 'job-1',
+              authoring_attempt: 2,
+              status: 'completed',
+              submitted_at: '2026-08-17T02:00:00Z',
+            },
             {
               job_id: 'job-1',
               authoring_attempt: 1,
@@ -259,12 +267,6 @@ describe('AdminService Authoritative Truth Layer', () => {
               error_message: 'Lexical ceiling exceeded',
               failure_evidence: { findings: [{ rule: 'Ceiling Guard', message: 'hard word' }] },
               submitted_at: '2026-08-17T01:00:00Z',
-            },
-            {
-              job_id: 'job-1',
-              authoring_attempt: 2,
-              status: 'completed',
-              submitted_at: '2026-08-17T02:00:00Z',
             },
           ],
           error: null,
@@ -279,15 +281,24 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(timeline.childPseudonym).toBe('王*宇')
     expect(timeline.events.length).toBe(8)
 
-    // Authoring step details
+    // Authoring step details (canonical sorting orders Attempt 1 first, Attempt 2 second)
     const authoringEvent = timeline.events.find((e) => e.step === 'SUBMISSION_AUTHORING')
     expect(authoringEvent).toBeDefined()
     expect((authoringEvent?.details as any).totalAuthoringAttempts).toBe(2)
+    expect((authoringEvent?.details as any).attempts[0].attempt).toBe(1)
+    expect((authoringEvent?.details as any).attempts[1].attempt).toBe(2)
 
-    // Finisher step details
+    // Finisher step details: latest attempt (Attempt 2) is completed, so event status is completed, NOT failed!
     const finisherEvent = timeline.events.find((e) => e.step === 'FINISHER_AUDIT')
     expect(finisherEvent).toBeDefined()
+    expect(finisherEvent?.status).toBe('completed')
+    expect((finisherEvent?.details as any).lastOutcome).toBe('completed')
     expect((finisherEvent?.details as any).rejectionCount).toBe(1)
+
+    // Delivery release step uses authoritative release_at
+    const releaseEvent = timeline.events.find((e) => e.step === 'DELIVERY_RELEASED')
+    expect(releaseEvent).toBeDefined()
+    expect((releaseEvent?.details as any).releaseAt).toBe('2026-08-17T00:00:00Z')
   })
 
   it('produces structured, sanitized AI export dataset with provenance headers and zero subjective opinions', async () => {
@@ -295,7 +306,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       children: [{ id: 'c-1', display_name: '李小廷', is_active: true }],
       subscriptions: [{ id: 'sub-1', status: 'active' }],
       generation_jobs: [],
-      materials: [],
+      materials: [{ id: 'm-1', rule_version: '2.2.0', model_name: 'chatgpt-work-daily' }],
       enrollment_settings: [],
       curriculum_submissions: [],
       feedback: [],
@@ -307,17 +318,19 @@ describe('AdminService Authoritative Truth Layer', () => {
 
     expect(dataset.schemaVersion).toBe('1.0.0')
     expect(dataset.taxonomyVersion).toBe('cap-2.2.0')
-    expect(dataset.generatorVersion).toBe('2.2.0')
+    expect(dataset.ruleVersions).toContain('2.2.0')
+    expect(dataset.generatorVersions).toContain('chatgpt-work-daily')
     expect(dataset.exportedAt).toBeTruthy()
     expect(dataset.provenance.environment).toBe('production_database')
     expect(dataset.provenance.activeChildren).toBe(1)
     expect((dataset as any).actionableHypothesis).toBeUndefined()
   })
 
-  it('deterministic PII sanitizer scrubs phones, emails, schools, and teacher names', () => {
+  it('deterministic PII sanitizer scrubs phones, emails, schools, teacher names, and registered student names', () => {
     const service = new AdminService({ supabaseUrl: '', supabaseSecretKey: '' })
-    const raw = '我是光武國中的家長，小孩在看 Teacher Amy 的教材，有問題請寄到 parent@example.com 或打 0912-345-678 找王老師。'
-    const scrubbed = service.sanitizePiiText(raw)
+    const knownNames = ['林大豪', 'Kobe', 'Mina']
+    const raw = '我是光武國中的家長，小孩 Kobe 和林大豪在看 Teacher Amy 的教材，有問題請寄到 parent@example.com 或打 0912-345-678 找王老師。'
+    const scrubbed = service.sanitizePiiText(raw, knownNames)
 
     expect(scrubbed).not.toContain('光武國中')
     expect(scrubbed).toContain('[SCHOOL_REDACTED]')
@@ -328,5 +341,8 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(scrubbed).not.toContain('0912-345-678')
     expect(scrubbed).toContain('[PHONE_REDACTED]')
     expect(scrubbed).not.toContain('王老師')
+    expect(scrubbed).not.toContain('Kobe')
+    expect(scrubbed).not.toContain('林大豪')
+    expect(scrubbed).toContain('[NAME_REDACTED]')
   })
 })

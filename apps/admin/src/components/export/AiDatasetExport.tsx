@@ -102,7 +102,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
             <span className="status-pill active">Evidence</span>
           </div>
           <div className="kpi-value">{data.provenance.totalEvidenceCount}</div>
-          <div className="kpi-subtext">Taxonomy: {data.taxonomyVersion}</div>
+          <div className="kpi-subtext">Taxonomy: {data.taxonomyVersion} | Rule: {data.ruleVersions?.join(', ') || '2.2.0'}</div>
         </div>
       </div>
 
