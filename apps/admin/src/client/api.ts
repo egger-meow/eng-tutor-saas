@@ -7,12 +7,25 @@ import type {
   AiExportDataset,
   HealthState,
   GrantRetryResult,
+  GenerationTestModeStatus,
+  SetTestModeResult,
+  AdvanceTestWeekResult,
+  AdminTestFeedbackInput,
+  RecordTestFeedbackResult,
+  ResetTestChildResult,
+  TestPdfSignedUrlResult,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url)
   if (!res.ok) {
     const errorText = await res.text()
+    try {
+      const parsed = JSON.parse(errorText)
+      if (parsed && typeof parsed === 'object') {
+        return parsed as T
+      }
+    } catch {}
     throw new Error(`API Error [${res.status}]: ${errorText}`)
   }
   return res.json() as Promise<T>
@@ -50,4 +63,22 @@ export const adminApi = {
   },
   getAiExport: () => fetchJson<AiExportDataset>('/api/export/ai-dataset'),
   grantJobRetry: (jobId: string) => postJson<GrantRetryResult>('/api/jobs/grant-retry', { jobId }),
+
+  // Generation Test Mode API
+  getTestModeStatus: (childId: string) =>
+    fetchJson<GenerationTestModeStatus>(`/api/test-mode/status?childId=${encodeURIComponent(childId)}`),
+  enableTestMode: (childId: string, targetWeek = 9) =>
+    postJson<SetTestModeResult>('/api/test-mode/enable', { childId, targetWeek }),
+  disableTestMode: (childId: string, force = false) =>
+    postJson<SetTestModeResult>('/api/test-mode/disable', { childId, force }),
+  advanceTestWeek: (childId: string) =>
+    postJson<AdvanceTestWeekResult>('/api/test-mode/advance', { childId }),
+  recordTestFeedback: (input: AdminTestFeedbackInput) =>
+    postJson<RecordTestFeedbackResult>('/api/test-mode/feedback', input as unknown as Record<string, unknown>),
+  resetTestChildToOnboarding: (childId: string) =>
+    postJson<ResetTestChildResult>('/api/test-mode/reset', { childId, confirm: true }),
+  getTestPdfSignedUrl: (childId: string, materialId: string, type: 'student' | 'parent') =>
+    fetchJson<TestPdfSignedUrlResult>(
+      `/api/test-mode/pdf-url?childId=${encodeURIComponent(childId)}&materialId=${encodeURIComponent(materialId)}&type=${type}`
+    ),
 }

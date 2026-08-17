@@ -822,6 +822,17 @@ $$;
 rollback;
 
 do $$
+declare
+  test_mode_res jsonb;
+  test_advance_res jsonb;
+  test_feedback_res jsonb;
+  test_reset_res jsonb;
+  test_status_res jsonb;
+  test_job_id uuid;
+  test_mat_id uuid;
+  bridge_claim_result jsonb;
+  bridge_context jsonb;
+  bridge_fingerprint text;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
     or not has_column_privilege('authenticated', 'public.generation_jobs', 'child_id', 'select')
@@ -912,6 +923,232 @@ begin
   if not has_function_privilege('service_role', 'public.accept_legal_terms(text,text)', 'execute') then
     raise exception 'service role cannot execute accept_legal_terms RPC';
   end if;
+
+  -- =========================================================================
+  -- Longitudinal Generation Test Mode Operational Tests
+  -- =========================================================================
+
+  -- 1. Security & Privilege checks
+  if has_function_privilege('anon', 'public.admin_get_test_mode_status(uuid)', 'execute')
+    or has_function_privilege('authenticated', 'public.admin_get_test_mode_status(uuid)', 'execute') then
+    raise exception 'browser roles can execute admin_get_test_mode_status RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.admin_get_test_mode_status(uuid)', 'execute') then
+    raise exception 'service role cannot execute admin_get_test_mode_status RPC';
+  end if;
+
+  if has_function_privilege('anon', 'public.admin_set_test_mode(uuid,boolean,integer,boolean)', 'execute')
+    or has_function_privilege('authenticated', 'public.admin_set_test_mode(uuid,boolean,integer,boolean)', 'execute') then
+    raise exception 'browser roles can execute admin_set_test_mode RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.admin_set_test_mode(uuid,boolean,integer,boolean)', 'execute') then
+    raise exception 'service role cannot execute admin_set_test_mode RPC';
+  end if;
+
+  if has_function_privilege('anon', 'public.admin_advance_test_week(uuid)', 'execute')
+    or has_function_privilege('authenticated', 'public.admin_advance_test_week(uuid)', 'execute') then
+    raise exception 'browser roles can execute admin_advance_test_week RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.admin_advance_test_week(uuid)', 'execute') then
+    raise exception 'service role cannot execute admin_advance_test_week RPC';
+  end if;
+
+  if has_function_privilege('anon', 'public.admin_record_test_feedback(uuid,uuid,smallint,smallint,text,text,text,text,text,text,text,integer)', 'execute')
+    or has_function_privilege('authenticated', 'public.admin_record_test_feedback(uuid,uuid,smallint,smallint,text,text,text,text,text,text,text,integer)', 'execute') then
+    raise exception 'browser roles can execute admin_record_test_feedback RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.admin_record_test_feedback(uuid,uuid,smallint,smallint,text,text,text,text,text,text,text,integer)', 'execute') then
+    raise exception 'service role cannot execute admin_record_test_feedback RPC';
+  end if;
+
+  if has_function_privilege('anon', 'public.admin_reset_test_child_to_onboarding(uuid)', 'execute')
+    or has_function_privilege('authenticated', 'public.admin_reset_test_child_to_onboarding(uuid)', 'execute') then
+    raise exception 'browser roles can execute admin_reset_test_child_to_onboarding RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.admin_reset_test_child_to_onboarding(uuid)', 'execute') then
+    raise exception 'service role cannot execute admin_reset_test_child_to_onboarding RPC';
+  end if;
+
+  -- 2. Create test user and child
+  insert into auth.users (id, raw_user_meta_data)
+  values (
+    '00000000-0000-0000-0000-000000000001',
+    '{"display_name":"Migration Test"}'::jsonb
+  );
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage, textbook_version)
+  values (
+    '00000000-0000-0000-0000-000000000099',
+    '00000000-0000-0000-0000-000000000001',
+    'Longitudinal Test Child',
+    8,
+    'grade_8',
+    'hanlin'
+  );
+
+  -- 3. Check initial disabled status
+  test_status_res := public.admin_get_test_mode_status('00000000-0000-0000-0000-000000000099');
+  if (test_status_res->>'isEnabled')::boolean is not false then
+    raise exception 'new child had test mode enabled unexpectedly';
+  end if;
+  if (test_status_res->'advanceEligibility'->>'canAdvance')::boolean is not false then
+    raise exception 'non-test child was eligible to advance';
+  end if;
+
+  -- 4. Enable Test Mode with target week 8
+  test_mode_res := public.admin_set_test_mode('00000000-0000-0000-0000-000000000099', true, 8, false);
+  if (test_mode_res->>'success')::boolean is not true or (test_mode_res->>'targetWeek')::integer <> 8 then
+    raise exception 'failed to enable test mode: %', test_mode_res;
+  end if;
+
+  test_status_res := public.admin_get_test_mode_status('00000000-0000-0000-0000-000000000099');
+  if (test_status_res->>'isEnabled')::boolean is not true or (test_status_res->>'targetWeek')::integer <> 8 then
+    raise exception 'test mode status did not reflect enabled state';
+  end if;
+
+  -- 5. Advance Week 1 (accelerates initial pending job)
+  test_advance_res := public.admin_advance_test_week('00000000-0000-0000-0000-000000000099');
+  if (test_advance_res->>'success')::boolean is not true then
+    raise exception 'failed to advance week 1: %', test_advance_res;
+  end if;
+  test_job_id := (test_advance_res->>'jobId')::uuid;
+
+  -- Verify job schedule constraint is satisfied
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = test_job_id
+      and scheduled_for <= now()
+      and feedback_cutoff_at <= now()
+      and feedback_cutoff_at = release_at - interval '48 hours'
+      and generation_due_at = release_at - interval '24 hours'
+  ) then
+    raise exception 'accelerated job schedule violates ordering invariants';
+  end if;
+
+  -- 6. Claim accelerated job via production claim bridge
+  select private_generation.chatgpt_claim_generation_batch('chatgpt-test-worker') into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = test_job_id::text;
+
+  if bridge_context is null then
+    raise exception 'production claim bridge did not claim accelerated test job: %', bridge_claim_result;
+  end if;
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+
+  -- 7. Submit curriculum package and complete material
+  perform private_generation.chatgpt_submit_curriculum_package(
+    test_job_id,
+    'chatgpt-test-worker',
+    jsonb_build_object(
+      'metadata', jsonb_build_object(
+        'schemaVersion', '2.2.0',
+        'jobId', test_job_id::text,
+        'childId', '00000000-0000-0000-0000-000000000099',
+        'inputFingerprint', bridge_fingerprint
+      ),
+      'studentMaterial', jsonb_build_object(
+        'warmup', jsonb_build_object('activity', 'Vocab brainstorm', 'estimatedMinutes', 5),
+        'reading', jsonb_build_object('passage', 'Space is vast and mysterious...', 'lexile', '750L'),
+        'practice', jsonb_build_array(jsonb_build_object('type', 'multiple-choice', 'question', 'What is vast?'))
+      ),
+      'parentGuide', jsonb_build_object('tips', jsonb_build_array('Encourage asking questions')),
+      'learningObservations', jsonb_build_object(
+        'observedStrengths', jsonb_build_array('Astronomy vocabulary'),
+        'observedGaps', jsonb_build_array('Past participle irregular forms'),
+        'recommendedFocusNextWeek', 'Verbs in context'
+      )
+    )
+  );
+
+  -- Claim and complete the curriculum submission via Finisher
+  perform public.worker_claim_curriculum_submissions('chatgpt-test-finisher', 5);
+  perform public.worker_finish_curriculum_submission(
+    test_job_id, 1, 'chatgpt-test-finisher', 'completed', null, null, null
+  );
+
+  test_mat_id := '00000000-0000-0000-0000-000000000088'::uuid;
+  insert into public.materials (
+    id, child_id, material_week, revision, rule_version,
+    input_snapshot, student_pdf_path, parent_answer_pdf_path,
+    observations_recorded_at
+  ) values (
+    test_mat_id,
+    '00000000-0000-0000-0000-000000000099',
+    '2026-08-17',
+    1,
+    '2.2.0',
+    '{}'::jsonb,
+    '00000000-0000-0000-0000-000000000099/2026-08-17_student.pdf',
+    '00000000-0000-0000-0000-000000000099/2026-08-17_parent.pdf',
+    now()
+  );
+
+  update public.generation_jobs
+  set status = 'completed', material_id = test_mat_id
+  where id = test_job_id;
+
+  -- 8. Record test feedback
+  test_feedback_res := public.admin_record_test_feedback(
+    p_child_id := '00000000-0000-0000-0000-000000000099'::uuid,
+    p_material_id := test_mat_id,
+    p_difficulty := 4::smallint,
+    p_completion_rate := 100::smallint,
+    p_weak_area := 'vocabulary',
+    p_mistakes_text := 'Struggled with irregular verbs',
+    p_child_comments := 'Liked the space theme',
+    p_parent_comments := 'Needs gentle grammar review',
+    p_school_progress_update := 'Unit 3 started at school',
+    p_interest_update := 'Interested in rocketry'
+  );
+  if (test_feedback_res->>'success')::boolean is not true then
+    raise exception 'failed to record test feedback: %', test_feedback_res;
+  end if;
+
+  -- 9. Create next pending job for Week 2
+  insert into public.generation_jobs (
+    child_id, source_material_id, material_week, rule_version, idempotency_key, scheduled_for,
+    feedback_cutoff_at, generation_due_at, release_at, status
+  ) values (
+    '00000000-0000-0000-0000-000000000099',
+    test_mat_id,
+    '2026-08-24',
+    '2.2.0',
+    'test-child-week-2',
+    now() + interval '5 days',
+    now() + interval '5 days',
+    now() + interval '6 days',
+    now() + interval '7 days',
+    'pending'
+  );
+
+  -- 10. Advance Week 2
+  test_advance_res := public.admin_advance_test_week('00000000-0000-0000-0000-000000000099');
+  if (test_advance_res->>'success')::boolean is not true then
+    raise exception 'failed to advance week 2: %', test_advance_res;
+  end if;
+
+  -- 11. Test Reset to Onboarding
+  test_reset_res := public.admin_reset_test_child_to_onboarding('00000000-0000-0000-0000-000000000099');
+  if (test_reset_res->>'success')::boolean is not true then
+    raise exception 'failed to reset test child: %', test_reset_res;
+  end if;
+
+  -- Verify all history cleared but child profile preserved
+  if exists (select 1 from public.materials where child_id = '00000000-0000-0000-0000-000000000099') then
+    raise exception 'materials were not cleared on reset';
+  end if;
+  if exists (select 1 from public.feedback where child_id = '00000000-0000-0000-0000-000000000099') then
+    raise exception 'feedback was not cleared on reset';
+  end if;
+  if (select count(*) from public.generation_jobs where child_id = '00000000-0000-0000-0000-000000000099' and status = 'pending') <> 1 then
+    raise exception 'did not recreate exactly one fresh pending job on reset';
+  end if;
+  if not exists (select 1 from public.children where id = '00000000-0000-0000-0000-000000000099' and grade = 8 and textbook_version = 'hanlin') then
+    raise exception 'child profile data was corrupted on reset';
+  end if;
+
+  delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;
 $$;
 

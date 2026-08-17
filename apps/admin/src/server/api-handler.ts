@@ -82,6 +82,154 @@ export async function handleApiRequest(
       return true
     }
 
+    if (pathname === '/api/test-mode/enable') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childId = parsed?.childId
+      const targetWeek = typeof parsed?.targetWeek === 'number' ? parsed.targetWeek : 9
+      if (!childId || typeof childId !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CHILD_ID', message: 'childId is required' }))
+        return true
+      }
+
+      const result = await service.setTestMode(childId, true, targetWeek)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/test-mode/disable') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childId = parsed?.childId
+      const force = Boolean(parsed?.force)
+      if (!childId || typeof childId !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CHILD_ID', message: 'childId is required' }))
+        return true
+      }
+
+      const result = await service.setTestMode(childId, false, undefined, force)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/test-mode/advance') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childId = parsed?.childId
+      if (!childId || typeof childId !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CHILD_ID', message: 'childId is required' }))
+        return true
+      }
+
+      const result = await service.advanceTestWeek(childId)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/test-mode/feedback') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childId = parsed?.childId
+      const materialId = parsed?.materialId
+      if (!childId || !materialId) {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_PARAMETERS', message: 'childId and materialId are required' }))
+        return true
+      }
+
+      const result = await service.recordTestFeedback(parsed)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/test-mode/reset') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childId = parsed?.childId
+      if (!childId || typeof childId !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CHILD_ID', message: 'childId is required' }))
+        return true
+      }
+
+      const result = await service.resetTestChildToOnboarding(childId)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
     // 2. Read GET endpoints
     if (req.method !== 'GET') {
       res.statusCode = 405
@@ -90,6 +238,23 @@ export async function handleApiRequest(
     }
 
     switch (pathname) {
+      case '/api/test-mode/status': {
+        const childId = typeof parsedUrl.query.childId === 'string' ? parsedUrl.query.childId : ''
+        const data = await service.getTestModeStatus(childId)
+        res.statusCode = data.success ? 200 : 400
+        res.end(JSON.stringify(data))
+        return true
+      }
+
+      case '/api/test-mode/pdf-url': {
+        const childId = typeof parsedUrl.query.childId === 'string' ? parsedUrl.query.childId : ''
+        const materialId = typeof parsedUrl.query.materialId === 'string' ? parsedUrl.query.materialId : ''
+        const pdfType = parsedUrl.query.type === 'parent' ? 'parent' : 'student'
+        const data = await service.getTestPdfSignedUrl(childId, materialId, pdfType)
+        res.statusCode = data.success ? 200 : 400
+        res.end(JSON.stringify(data))
+        return true
+      }
       case '/api/health': {
         res.statusCode = 200
         res.end(JSON.stringify({

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import type { ChildWeekTimeline as ChildWeekTimelineType } from '../../client/types.js'
 import { adminApi } from '../../client/api.js'
+import { GenerationTestModePanel } from './GenerationTestModePanel.js'
 
 interface ChildWeekTimelineProps {
   data: ChildWeekTimelineType | null
@@ -244,6 +245,12 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
           </div>
         </div>
       )}
+
+      {/* Generation Test Mode Operational Control Panel */}
+      <GenerationTestModePanel
+        childId={childId}
+        onRefreshTimeline={() => onSearch(childId, targetWeek)}
+      />
 
       {/* Child Summary Capsule */}
       <div className="kpi-grid">

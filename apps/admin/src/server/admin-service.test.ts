@@ -1,43 +1,120 @@
 import { describe, expect, it } from 'vitest'
 import { AdminService } from './admin-service.js'
 
-function createMockSupabaseClient(tableData: Record<string, any[]>, tableErrors: Record<string, any> = {}, rpcHandlers: Record<string, any> = {}) {
+function createMockSupabaseClient(
+  tableData: Record<string, any[]>,
+  tableErrors: Record<string, any> = {},
+  rpcHandlers: Record<string, any> = {},
+  storageHandlers: Record<string, any> = {}
+) {
   return {
     from: (tableName: string) => {
       const error = tableErrors[tableName] || null
       const rows = tableData[tableName] || []
+      const filters: Array<(row: any) => boolean> = []
+
+      const getFilteredRows = () => {
+        let result = [...rows]
+        for (const f of filters) {
+          result = result.filter(f)
+        }
+        return result
+      }
+
       const builder: any = {
-        _filterCol: null as string | null,
-        _filterVal: null as any,
         select: () => builder,
         order: () => builder,
         limit: () => builder,
         or: () => builder,
-        in: () => builder,
-        eq: (col: string, val: any) => {
-          builder._filterCol = col
-          builder._filterVal = val
+        in: (col: string, vals: any[]) => {
+          filters.push((r) => Array.isArray(vals) && vals.includes(r[col]))
           return builder
+        },
+        eq: (col: string, val: any) => {
+          filters.push((r) => r[col] === val)
+          return builder
+        },
+        neq: (col: string, val: any) => {
+          filters.push((r) => r[col] !== val)
+          return builder
+        },
+        gte: (col: string, val: any) => {
+          filters.push((r) => r[col] >= val)
+          return builder
+        },
+        lte: (col: string, val: any) => {
+          filters.push((r) => r[col] <= val)
+          return builder
+        },
+        gt: (col: string, val: any) => {
+          filters.push((r) => r[col] > val)
+          return builder
+        },
+        lt: (col: string, val: any) => {
+          filters.push((r) => r[col] < val)
+          return builder
+        },
+        upsert: (payload: any) => {
+          const items = Array.isArray(payload) ? payload : [payload]
+          for (const item of items) {
+            const idx = rows.findIndex((r) => (r.child_id && r.child_id === item.child_id) || (r.id && r.id === item.id))
+            if (idx >= 0) {
+              rows[idx] = { ...rows[idx], ...item }
+            } else {
+              rows.push({ ...item })
+            }
+          }
+          return {
+            select: () => ({
+              single: async () => ({ data: items[0], error: null }),
+              maybeSingle: async () => ({ data: items[0], error: null }),
+            }),
+            then: (resolve: any) => Promise.resolve({ data: items, error: null }).then(resolve),
+          }
+        },
+        insert: (payload: any) => {
+          const items = Array.isArray(payload) ? payload : [payload]
+          rows.push(...items)
+          return {
+            select: () => ({
+              single: async () => ({ data: items[0], error: null }),
+              maybeSingle: async () => ({ data: items[0], error: null }),
+            }),
+            then: (resolve: any) => Promise.resolve({ data: items, error: null }).then(resolve),
+          }
         },
         update: (payload: any) => {
           return {
             eq: (col: string, val: any) => {
-              const target = rows.find((r) => r[col] === val)
-              if (target) {
-                Object.assign(target, payload)
+              const matched = rows.filter((r) => r[col] === val)
+              for (const r of matched) {
+                Object.assign(r, payload)
               }
-              return Promise.resolve({ data: target ? [target] : [], error: null })
+              return Promise.resolve({ data: matched, error: null })
             },
           }
         },
+        delete: () => {
+          return {
+            eq: (col: string, val: any) => {
+              const remaining = rows.filter((r) => r[col] !== val)
+              rows.length = 0
+              rows.push(...remaining)
+              return Promise.resolve({ data: null, error: null })
+            },
+          }
+        },
+        single: async () => {
+          const filtered = getFilteredRows()
+          return { data: error ? null : filtered[0] || null, error }
+        },
         maybeSingle: async () => {
-          const match = builder._filterCol
-            ? rows.find((r) => r[builder._filterCol] === builder._filterVal)
-            : rows[0]
-          return { data: error ? null : match || null, error }
+          const filtered = getFilteredRows()
+          return { data: error ? null : filtered[0] || null, error }
         },
         then: (resolve: (res: { data: any[] | null; error: any }) => void) => {
-          return Promise.resolve({ data: error ? null : rows, error }).then(resolve)
+          const filtered = getFilteredRows()
+          return Promise.resolve({ data: error ? null : filtered, error }).then(resolve)
         },
       }
       return builder
@@ -53,6 +130,25 @@ function createMockSupabaseClient(tableData: Record<string, any[]>, tableErrors:
         return { data: tableData[fnName], error: null }
       }
       return { data: null, error: { message: `RPC ${fnName} not available in mock` } }
+    },
+    storage: {
+      from: (bucketName: string) => ({
+        createSignedUrl: async (path: string, expiresIn: number) => {
+          if (storageHandlers.createSignedUrl) {
+            return storageHandlers.createSignedUrl(bucketName, path, expiresIn)
+          }
+          return {
+            data: { signedUrl: `https://example.supabase.co/storage/v1/signed/${bucketName}/${path}?token=mock` },
+            error: null,
+          }
+        },
+        remove: async (paths: string[]) => {
+          if (storageHandlers.remove) {
+            return storageHandlers.remove(bucketName, paths)
+          }
+          return { data: paths.map((p) => ({ name: p })), error: null }
+        },
+      }),
     },
   } as any
 }
@@ -472,4 +568,321 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(notFoundResult.error).toBe('JOB_NOT_FOUND')
     })
   })
+
+  describe('Longitudinal Generation Test Mode Operations', () => {
+    const testChildId = '11111111-1111-4111-8111-111111111111'
+    const normalChildId = '22222222-2222-4222-8222-222222222222'
+
+    it('returns fail-closed disabled status for ordinary non-test children', async () => {
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: normalChildId, display_name: '一般學員', is_active: true }],
+        generation_test_mode_sessions: [],
+        generation_jobs: [{ id: 'job-norm-1', child_id: normalChildId, material_week: '2026-08-17', status: 'pending', attempt_count: 0, max_attempts: 3 }],
+        materials: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const status = await service.getTestModeStatus(normalChildId)
+
+      expect(status.success).toBe(true)
+      expect(status.isEnabled).toBe(false)
+      expect(status.advanceEligibility.canAdvance).toBe(false)
+      expect(status.advanceEligibility.blockingCode).toBe('TEST_MODE_NOT_ENABLED')
+      expect(status.resetEligibility.canReset).toBe(false)
+    })
+
+    it('enables test mode with designated target week and returns active status', async () => {
+      const testSessions: any[] = []
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: testSessions,
+        generation_jobs: [
+          {
+            id: 'job-test-1',
+            child_id: testChildId,
+            material_week: '2026-08-17',
+            status: 'pending',
+            attempt_count: 0,
+            max_attempts: 3,
+            scheduled_for: '2026-08-20T00:00:00Z',
+            feedback_cutoff_at: '2026-08-22T00:00:00Z',
+            generation_due_at: '2026-08-23T00:00:00Z',
+            release_at: '2026-08-24T00:00:00Z',
+          },
+        ],
+        materials: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+
+      const enableRes = await service.setTestMode(testChildId, true, 8)
+      expect(enableRes.success).toBe(true)
+      expect(enableRes.targetWeek).toBe(8)
+      expect(testSessions.length).toBe(1)
+      expect(testSessions[0].is_enabled).toBe(true)
+      expect(testSessions[0].target_week).toBe(8)
+
+      const status = await service.getTestModeStatus(testChildId)
+      expect(status.isEnabled).toBe(true)
+      expect(status.targetWeek).toBe(8)
+      expect(status.completedWeeksCount).toBe(0)
+      expect(status.nextJob?.id).toBe('job-test-1')
+      expect(status.advanceEligibility.canAdvance).toBe(true)
+    })
+
+    it('prevents disabling test mode without reset if test materials already exist (unless force=true)', async () => {
+      const testSessions = [{ child_id: testChildId, is_enabled: true, target_week: 9 }]
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: testSessions,
+        materials: [{ id: 'mat-test-1', child_id: testChildId, material_week: '2026-08-17' }],
+      })
+
+      const service = new AdminService({ client: mockClient })
+
+      // Attempt normal disable -> should warn reset required
+      const disableAttempt = await service.setTestMode(testChildId, false, undefined, false)
+      expect(disableAttempt.success).toBe(false)
+      expect(disableAttempt.error).toBe('RESET_REQUIRED_BEFORE_END_TEST_MODE')
+
+      // Force disable -> succeeds
+      const forceDisable = await service.setTestMode(testChildId, false, undefined, true)
+      expect(forceDisable.success).toBe(true)
+      expect(testSessions[0].is_enabled).toBe(false)
+    })
+
+    it('blocks advance when previous material observations are not yet recorded', async () => {
+      const testSessions = [{ child_id: testChildId, is_enabled: true, target_week: 9 }]
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: testSessions,
+        materials: [
+          {
+            id: 'mat-test-1',
+            child_id: testChildId,
+            material_week: '2026-08-17',
+            revision: 1,
+            observations_recorded_at: null, // Observations not yet written back by Finisher
+          },
+        ],
+        generation_jobs: [
+          { id: 'job-test-2', child_id: testChildId, material_week: '2026-08-24', status: 'pending', attempt_count: 0, max_attempts: 3, scheduled_for: '2026-08-27T00:00:00Z', feedback_cutoff_at: '2026-08-29T00:00:00Z', generation_due_at: '2026-08-30T00:00:00Z', release_at: '2026-08-31T00:00:00Z' },
+        ],
+        curriculum_quality_observations: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const status = await service.getTestModeStatus(testChildId)
+
+      expect(status.advanceEligibility.canAdvance).toBe(false)
+      expect(status.advanceEligibility.blockingCode).toBe('OBSERVATIONS_NOT_RECORDED')
+
+      const advanceRes = await service.advanceTestWeek(testChildId)
+      expect(advanceRes.success).toBe(false)
+      expect(advanceRes.error).toBe('OBSERVATIONS_NOT_RECORDED')
+    })
+
+    it('accelerates the pending generation job on advanceTestWeek preserving schema & DB schedule invariants', async () => {
+      const testSessions = [{ child_id: testChildId, is_enabled: true, target_week: 9 }]
+      const pendingJob = {
+        id: 'job-test-2',
+        child_id: testChildId,
+        material_week: '2026-08-24',
+        status: 'pending',
+        attempt_count: 0,
+        max_attempts: 3,
+        source_material_id: 'mat-test-1',
+        scheduled_for: '2026-08-27T00:00:00Z',
+        feedback_cutoff_at: '2026-08-29T00:00:00Z',
+        generation_due_at: '2026-08-30T00:00:00Z',
+        release_at: '2026-08-31T00:00:00Z',
+      }
+      const materials = [
+        {
+          id: 'mat-test-1',
+          child_id: testChildId,
+          material_week: '2026-08-17',
+          revision: 1,
+          observations_recorded_at: '2026-08-18T00:00:00Z',
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: testSessions,
+        materials,
+        generation_jobs: [pendingJob],
+        curriculum_quality_observations: [{ material_id: 'mat-test-1', child_id: testChildId }],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const advanceRes = await service.advanceTestWeek(testChildId)
+
+      expect(advanceRes.success).toBe(true)
+      expect(advanceRes.jobId).toBe('job-test-2')
+      expect(advanceRes.materialWeek).toBe('2026-08-24')
+
+      // Verify that job timings satisfy DB schedule constraints
+      const sched = new Date(pendingJob.scheduled_for).getTime()
+      const cutoff = new Date(pendingJob.feedback_cutoff_at).getTime()
+      const due = new Date(pendingJob.generation_due_at).getTime()
+      const rel = new Date(pendingJob.release_at).getTime()
+
+      expect(cutoff).toBeLessThanOrEqual(sched + 1000)
+      expect(due - cutoff).toBe(24 * 60 * 60 * 1000)
+      expect(rel - cutoff).toBe(48 * 60 * 60 * 1000)
+      expect(rel - due).toBe(24 * 60 * 60 * 1000)
+      expect(pendingJob.source_material_id).toBe('mat-test-1')
+    })
+
+    it('records test feedback with production schema compatibility', async () => {
+      const feedbackRows: any[] = []
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: [{ child_id: testChildId, is_enabled: true, target_week: 9 }],
+        materials: [{ id: 'mat-test-1', child_id: testChildId, material_week: '2026-08-17' }],
+        feedback: feedbackRows,
+      }, {}, {
+        admin_record_test_feedback: (params: any) => {
+          feedbackRows.push({
+            id: 'fb-1',
+            child_id: params.p_child_id,
+            material_id: params.p_material_id,
+            difficulty: params.p_difficulty,
+            completion_rate: params.p_completion_rate,
+            weak_area: params.p_weak_area,
+          })
+          return { data: { success: true, feedback_id: 'fb-1' }, error: null }
+        },
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const res = await service.recordTestFeedback({
+        childId: testChildId,
+        materialId: 'mat-test-1',
+        difficulty: 4,
+        completionRate: 75,
+        weakArea: 'vocabulary',
+        mistakesText: 'Irregular verbs past tense confusion',
+        childComments: 'Enjoyed the article topic',
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.feedbackId).toBe('fb-1')
+      expect(feedbackRows.length).toBe(1)
+      expect(feedbackRows[0].difficulty).toBe(4)
+      expect(feedbackRows[0].completion_rate).toBe(75)
+    })
+
+    it('resets test child to onboarding state while calling Storage API and preserving profile/subscription', async () => {
+      let storageRemoveCalled = false
+      let removedPaths: string[] = []
+
+      const testJobs = [
+        { id: 'job-old-1', child_id: testChildId, material_week: '2026-08-17', status: 'completed' },
+        { id: 'job-old-2', child_id: testChildId, material_week: '2026-08-24', status: 'pending' },
+      ]
+      const testMaterials = [
+        {
+          id: 'mat-1',
+          child_id: testChildId,
+          material_week: '2026-08-17',
+          student_pdf_path: `${testChildId}/2026-08-17_student.pdf`,
+          parent_answer_pdf_path: `${testChildId}/2026-08-17_parent.pdf`,
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          children: [{ id: testChildId, display_name: '測試學員 A', is_active: true, grade: 7 }],
+          generation_test_mode_sessions: [{ child_id: testChildId, is_enabled: true, target_week: 9 }],
+          materials: testMaterials,
+          generation_jobs: testJobs,
+        },
+        {},
+        {
+          admin_reset_test_child_to_onboarding: (params: any) => {
+            return {
+              data: {
+                success: true,
+                child_id: params.p_child_id,
+                new_job_id: 'job-fresh-week-1',
+                material_week: '2026-08-17',
+                deleted_materials_count: 1,
+                deleted_jobs_count: 2,
+                deleted_feedback_count: 1,
+                deleted_observations_count: 1,
+                deleted_submissions_count: 1,
+                deleted_progress_records_count: 3,
+                pdf_paths_to_delete: [
+                  `${testChildId}/2026-08-17_student.pdf`,
+                  `${testChildId}/2026-08-17_parent.pdf`,
+                ],
+              },
+              error: null,
+            }
+          },
+        },
+        {
+          remove: (_bucket: string, paths: string[]) => {
+            storageRemoveCalled = true
+            removedPaths = paths
+            return { data: paths.map((p) => ({ name: p })), error: null }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const resetRes = await service.resetTestChildToOnboarding(testChildId)
+
+      expect(resetRes.success).toBe(true)
+      expect(resetRes.newJobId).toBe('job-fresh-week-1')
+      expect(resetRes.deletedMaterialsCount).toBe(1)
+      expect(storageRemoveCalled).toBe(true)
+      expect(removedPaths).toEqual([
+        `${testChildId}/2026-08-17_student.pdf`,
+        `${testChildId}/2026-08-17_parent.pdf`,
+      ])
+      expect(resetRes.storageCleanupWarning).toBe(false)
+    })
+
+    it('returns signed PDF preview URL for test child via service role Storage API', async () => {
+      const mockClient = createMockSupabaseClient(
+        {
+          children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+          generation_test_mode_sessions: [{ child_id: testChildId, is_enabled: true, target_week: 9 }],
+          materials: [
+            {
+              id: 'mat-1',
+              child_id: testChildId,
+              material_week: '2026-08-17',
+              student_pdf_path: `${testChildId}/2026-08-17_student.pdf`,
+              parent_answer_pdf_path: `${testChildId}/2026-08-17_parent.pdf`,
+            },
+          ],
+        },
+        {},
+        {},
+        {
+          createSignedUrl: (bucket: string, path: string, _expiry: number) => {
+            return {
+              data: { signedUrl: `https://mock.supabase.co/storage/v1/object/sign/${bucket}/${path}?token=signed_token_123` },
+              error: null,
+            }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+
+      const studentPdfRes = await service.getTestPdfSignedUrl(testChildId, 'mat-1', 'student')
+      expect(studentPdfRes.success).toBe(true)
+      expect(studentPdfRes.signedUrl).toContain(`${testChildId}/2026-08-17_student.pdf`)
+
+      const parentPdfRes = await service.getTestPdfSignedUrl(testChildId, 'mat-1', 'parent')
+      expect(parentPdfRes.success).toBe(true)
+      expect(parentPdfRes.signedUrl).toContain(`${testChildId}/2026-08-17_parent.pdf`)
+    })
+  })
 })
+

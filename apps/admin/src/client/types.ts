@@ -8,6 +8,13 @@ export type {
   LifecycleEvent,
   AiExportDataset,
   GrantRetryResult,
+  GenerationTestModeStatus,
+  SetTestModeResult,
+  AdvanceTestWeekResult,
+  AdminTestFeedbackInput,
+  RecordTestFeedbackResult,
+  ResetTestChildResult,
+  TestPdfSignedUrlResult,
 } from '../server/admin-service.js'
 
 export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'export'

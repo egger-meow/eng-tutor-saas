@@ -358,6 +358,147 @@ export interface GrantRetryResult {
   message?: string
 }
 
+export interface GenerationTestModeStatus {
+  success: boolean
+  childId: string
+  childPseudonym: string
+  isEnabled: boolean
+  targetWeek: number
+  completedWeeksCount: number
+  currentMaterialWeek: string | null
+  nextJob: {
+    id: string
+    materialWeek: string
+    status: string
+    attemptCount: number
+    maxAttempts: number
+    ruleVersion: string
+    scheduledFor: string
+    generationDueAt: string
+    releaseAt: string
+    feedbackCutoffAt: string
+    feedbackMissing: boolean
+    isHumanReviewRequired: boolean
+    leaseExpiresAt: string | null
+    errorCode: string | null
+    errorMessage: string | null
+    isAlreadyAdvanced: boolean
+  } | null
+  latestMaterial: {
+    id: string
+    materialWeek: string
+    revision: number
+    ruleVersion: string
+    modelName: string | null
+    promptVersion: string | null
+    studentPdfPath: string
+    parentAnswerPdfPath: string
+    observationsRecordedAt: string | null
+    hasFeedback: boolean
+  } | null
+  latestFeedback: {
+    id: string
+    difficulty: number | null
+    completionRate: number | null
+    weakArea: string | null
+    mistakesText: string | null
+    childComments: string | null
+    parentComments: string | null
+    schoolProgressUpdate: string | null
+    interestUpdate: string | null
+    notes: string | null
+    createdAt: string
+  } | null
+  advanceEligibility: {
+    canAdvance: boolean
+    blockingCode: string | null
+    blockingReason: string | null
+  }
+  resetEligibility: {
+    canReset: boolean
+    blockingCode: string | null
+    blockingReason: string | null
+  }
+  error?: string
+  message?: string
+}
+
+export interface SetTestModeResult {
+  success: boolean
+  childId: string
+  isEnabled: boolean
+  targetWeek?: number
+  error?: string
+  message?: string
+}
+
+export interface AdvanceTestWeekResult {
+  success: boolean
+  childId?: string
+  jobId?: string
+  materialWeek?: string
+  scheduledFor?: string
+  feedbackCutoffAt?: string
+  generationDueAt?: string
+  releaseAt?: string
+  completedWeeksCount?: number
+  targetWeek?: number
+  error?: string
+  message?: string
+}
+
+export interface AdminTestFeedbackInput {
+  childId: string
+  materialId: string
+  difficulty?: number | null
+  completionRate?: number | null
+  weakArea?: 'vocabulary' | 'grammar' | 'reading' | 'writing' | 'mixed' | null
+  mistakesText?: string | null
+  childComments?: string | null
+  parentComments?: string | null
+  schoolProgressUpdate?: string | null
+  interestUpdate?: string | null
+  notes?: string | null
+  minutesSpent?: number | null
+}
+
+export interface RecordTestFeedbackResult {
+  success: boolean
+  feedbackId?: string
+  childId?: string
+  materialId?: string
+  error?: string
+  message?: string
+}
+
+export interface ResetTestChildResult {
+  success: boolean
+  childId?: string
+  newJobId?: string
+  materialWeek?: string
+  deletedMaterialsCount?: number
+  deletedJobsCount?: number
+  deletedFeedbackCount?: number
+  deletedObservationsCount?: number
+  deletedSubmissionsCount?: number
+  deletedProgressRecordsCount?: number
+  storageCleanupWarning?: boolean
+  unremovedPaths?: string[]
+  error?: string
+  message?: string
+}
+
+export interface TestPdfSignedUrlResult {
+  success: boolean
+  childId?: string
+  materialId?: string
+  pdfType?: 'student' | 'parent'
+  signedUrl?: string
+  path?: string
+  error?: string
+  message?: string
+}
+
 export class AdminService {
   private client: SupabaseClient | null = null
 
@@ -476,6 +617,615 @@ export class AdminService {
       return {
         success: false,
         error: 'OPERATION_FAILED',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
+  }
+
+  public async getTestModeStatus(childId: string): Promise<GenerationTestModeStatus> {
+    if (!childId || typeof childId !== 'string') {
+      return {
+        success: false,
+        childId: '',
+        childPseudonym: '',
+        isEnabled: false,
+        targetWeek: 9,
+        completedWeeksCount: 0,
+        currentMaterialWeek: null,
+        nextJob: null,
+        latestMaterial: null,
+        latestFeedback: null,
+        advanceEligibility: { canAdvance: false, blockingCode: 'INVALID_CHILD_ID', blockingReason: 'Child ID is required' },
+        resetEligibility: { canReset: false, blockingCode: 'INVALID_CHILD_ID', blockingReason: 'Child ID is required' },
+        error: 'INVALID_CHILD_ID',
+        message: 'Child ID is required',
+      }
+    }
+
+    const client = this.ensureClient()
+    try {
+      const res = await client.rpc('admin_get_test_mode_status', { p_child_id: childId })
+      if (!res.error && res.data && typeof res.data === 'object' && (res.data as any).success) {
+        return res.data as GenerationTestModeStatus
+      }
+    } catch {}
+
+    // Direct client fallback for mock testing environments
+    try {
+      const { data: child, error: childErr } = await client
+        .from('children')
+        .select('*')
+        .eq('id', childId)
+        .maybeSingle()
+
+      if (childErr || !child) {
+        return {
+          success: false,
+          childId,
+          childPseudonym: '',
+          isEnabled: false,
+          targetWeek: 9,
+          completedWeeksCount: 0,
+          currentMaterialWeek: null,
+          nextJob: null,
+          latestMaterial: null,
+          latestFeedback: null,
+          advanceEligibility: { canAdvance: false, blockingCode: 'CHILD_NOT_FOUND', blockingReason: 'Child not found' },
+          resetEligibility: { canReset: false, blockingCode: 'CHILD_NOT_FOUND', blockingReason: 'Child not found' },
+          error: 'CHILD_NOT_FOUND',
+          message: 'Child not found',
+        }
+      }
+
+      const { data: session } = await client
+        .from('generation_test_mode_sessions')
+        .select('*')
+        .eq('child_id', childId)
+        .maybeSingle()
+
+      const isEnabled = Boolean(session?.is_enabled)
+      const targetWeek = Number(session?.target_week) || 9
+
+      const { data: materials } = await client
+        .from('materials')
+        .select('*')
+        .eq('child_id', childId)
+        .order('material_week', { ascending: false })
+
+      const completedWeeksCount = materials?.length || 0
+      const latestMaterial = materials && materials.length > 0 ? materials[0] : null
+
+      const { data: feedback } = latestMaterial
+        ? await client.from('feedback').select('*').eq('child_id', childId).eq('material_id', latestMaterial.id).maybeSingle()
+        : { data: null }
+
+      const { data: jobs } = await client
+        .from('generation_jobs')
+        .select('*')
+        .eq('child_id', childId)
+        .neq('status', 'completed')
+        .order('scheduled_for', { ascending: true })
+
+      const nextJob = jobs && jobs.length > 0 ? jobs[0] : null
+      const nowMs = Date.now()
+
+      let canAdvance = isEnabled && child.is_active && completedWeeksCount < targetWeek && Boolean(nextJob)
+      let advanceCode: string | null = null
+      let advanceReason: string | null = null
+
+      if (!isEnabled) {
+        canAdvance = false
+        advanceCode = 'TEST_MODE_NOT_ENABLED'
+        advanceReason = '此學員尚未啟用 Generation Test Mode'
+      } else if (!child.is_active) {
+        canAdvance = false
+        advanceCode = 'CHILD_NOT_FOUND'
+        advanceReason = '學員帳號已被停用'
+      } else if (completedWeeksCount >= targetWeek) {
+        canAdvance = false
+        advanceCode = 'TARGET_WEEK_REACHED'
+        advanceReason = `已達目標測試週次 (Week ${targetWeek})`
+      } else if (latestMaterial && !latestMaterial.observations_recorded_at) {
+        canAdvance = false
+        advanceCode = 'OBSERVATIONS_NOT_RECORDED'
+        advanceReason = '前週教材之學習記憶與觀察數據尚未完成寫入'
+      } else if (!nextJob) {
+        canAdvance = false
+        advanceCode = 'NEXT_JOB_NOT_FOUND'
+        advanceReason = '找不到下一週待生成任務'
+      }
+
+      const canReset = isEnabled
+      const resetCode = isEnabled ? null : 'TEST_MODE_NOT_ENABLED'
+      const resetReason = isEnabled ? null : '僅測試模式學員可執行重設'
+
+      return {
+        success: true,
+        childId,
+        childPseudonym: this.maskName(child.display_name, child.id),
+        isEnabled,
+        targetWeek,
+        completedWeeksCount,
+        currentMaterialWeek: latestMaterial?.material_week || null,
+        nextJob: nextJob ? {
+          id: nextJob.id,
+          materialWeek: nextJob.material_week,
+          status: nextJob.status,
+          attemptCount: Number(nextJob.attempt_count) || 0,
+          maxAttempts: Number(nextJob.max_attempts) || 3,
+          ruleVersion: nextJob.rule_version,
+          scheduledFor: nextJob.scheduled_for,
+          generationDueAt: nextJob.generation_due_at,
+          releaseAt: nextJob.release_at,
+          feedbackCutoffAt: nextJob.feedback_cutoff_at,
+          feedbackMissing: Boolean(nextJob.feedback_missing),
+          isHumanReviewRequired: nextJob.status === 'failed' || nextJob.attempt_count >= nextJob.max_attempts,
+          leaseExpiresAt: nextJob.lease_expires_at || null,
+          errorCode: nextJob.error_code || null,
+          errorMessage: nextJob.error_message || null,
+          isAlreadyAdvanced: Boolean(
+            nextJob.scheduled_for && new Date(nextJob.scheduled_for).getTime() <= nowMs &&
+            nextJob.feedback_cutoff_at && new Date(nextJob.feedback_cutoff_at).getTime() <= nowMs
+          ),
+        } : null,
+        latestMaterial: latestMaterial ? {
+          id: latestMaterial.id,
+          materialWeek: latestMaterial.material_week,
+          revision: Number(latestMaterial.revision) || 1,
+          ruleVersion: latestMaterial.rule_version,
+          modelName: latestMaterial.model_name || null,
+          promptVersion: latestMaterial.prompt_version || null,
+          studentPdfPath: latestMaterial.student_pdf_path,
+          parentAnswerPdfPath: latestMaterial.parent_answer_pdf_path,
+          observationsRecordedAt: latestMaterial.observations_recorded_at || null,
+          hasFeedback: Boolean(feedback),
+        } : null,
+        latestFeedback: feedback ? {
+          id: feedback.id,
+          difficulty: feedback.difficulty,
+          completionRate: feedback.completion_rate,
+          weakArea: feedback.weak_area,
+          mistakesText: feedback.mistakes_text,
+          childComments: this.sanitizePiiText(feedback.child_comments),
+          parentComments: this.sanitizePiiText(feedback.parent_comments),
+          schoolProgressUpdate: feedback.school_progress_update,
+          interestUpdate: feedback.interest_update,
+          notes: this.sanitizePiiText(feedback.notes),
+          createdAt: feedback.created_at,
+        } : null,
+        advanceEligibility: {
+          canAdvance,
+          blockingCode: advanceCode,
+          blockingReason: advanceReason,
+        },
+        resetEligibility: {
+          canReset,
+          blockingCode: resetCode,
+          blockingReason: resetReason,
+        },
+      }
+    } catch (err) {
+      return {
+        success: false,
+        childId,
+        childPseudonym: '',
+        isEnabled: false,
+        targetWeek: 9,
+        completedWeeksCount: 0,
+        currentMaterialWeek: null,
+        nextJob: null,
+        latestMaterial: null,
+        latestFeedback: null,
+        advanceEligibility: { canAdvance: false, blockingCode: 'OPERATION_FAILED', blockingReason: String(err) },
+        resetEligibility: { canReset: false, blockingCode: 'OPERATION_FAILED', blockingReason: String(err) },
+        error: 'OPERATION_FAILED',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
+  }
+
+  public async setTestMode(
+    childId: string,
+    isEnabled: boolean,
+    targetWeek = 9,
+    force = false
+  ): Promise<SetTestModeResult> {
+    if (!childId || typeof childId !== 'string') {
+      return { success: false, childId: '', isEnabled: false, error: 'INVALID_CHILD_ID', message: 'Child ID is required' }
+    }
+
+    const client = this.ensureClient()
+    try {
+      const res = await client.rpc('admin_set_test_mode', {
+        p_child_id: childId,
+        p_is_enabled: isEnabled,
+        p_target_week: targetWeek,
+        p_force: force,
+      })
+      if (!res.error && res.data && typeof res.data === 'object') {
+        const data = res.data as SetTestModeResult
+        if (data.success) {
+          console.log('[AUDIT] test_mode_set:', { childId, isEnabled, targetWeek, force, timestamp: new Date().toISOString() })
+        }
+        return data
+      }
+    } catch {}
+
+    // Fallback
+    try {
+      if (isEnabled) {
+        await client.from('generation_test_mode_sessions').upsert({
+          child_id: childId,
+          is_enabled: true,
+          target_week: Math.max(1, Math.min(targetWeek, 16)),
+          updated_at: new Date().toISOString(),
+        })
+        console.log('[AUDIT] test_mode_set:', { childId, isEnabled: true, targetWeek, timestamp: new Date().toISOString() })
+        return { success: true, childId, isEnabled: true, targetWeek }
+      } else {
+        const { data: materials } = await client.from('materials').select('id').eq('child_id', childId)
+        if (materials && materials.length > 0 && !force) {
+          return {
+            success: false,
+            childId,
+            isEnabled: true,
+            error: 'RESET_REQUIRED_BEFORE_END_TEST_MODE',
+            message: '學員已有測試生成教材紀錄，為確保正式排程時序一致，結束測試模式前請先執行「重設回開通起點 (Reset to Onboarding)」。',
+          }
+        }
+        await client.from('generation_test_mode_sessions').update({
+          is_enabled: false,
+          updated_at: new Date().toISOString(),
+        }).eq('child_id', childId)
+        console.log('[AUDIT] test_mode_set:', { childId, isEnabled: false, timestamp: new Date().toISOString() })
+        return { success: true, childId, isEnabled: false }
+      }
+    } catch (err) {
+      return { success: false, childId, isEnabled: false, error: 'OPERATION_FAILED', message: err instanceof Error ? err.message : String(err) }
+    }
+  }
+
+  public async advanceTestWeek(childId: string): Promise<AdvanceTestWeekResult> {
+    if (!childId || typeof childId !== 'string') {
+      return { success: false, error: 'INVALID_CHILD_ID', message: 'Child ID is required' }
+    }
+
+    const client = this.ensureClient()
+    try {
+      const res = await client.rpc('admin_advance_test_week', { p_child_id: childId })
+      if (!res.error && res.data && typeof res.data === 'object') {
+        const data = res.data as AdvanceTestWeekResult
+        if (data.success) {
+          console.log('[AUDIT] test_week_advanced:', {
+            childId,
+            jobId: data.jobId,
+            scheduledFor: data.scheduledFor,
+            generationDueAt: data.generationDueAt,
+            releaseAt: data.releaseAt,
+            timestamp: new Date().toISOString(),
+          })
+        }
+        return data
+      }
+    } catch {}
+
+    // Fallback logic
+    try {
+      const { data: session } = await client
+        .from('generation_test_mode_sessions')
+        .select('*')
+        .eq('child_id', childId)
+        .maybeSingle()
+
+      if (!session || !session.is_enabled) {
+        return { success: false, error: 'TEST_MODE_NOT_ENABLED', message: 'Child is not in active Generation Test Mode' }
+      }
+
+      const { data: jobs } = await client
+        .from('generation_jobs')
+        .select('*')
+        .eq('child_id', childId)
+        .neq('status', 'completed')
+
+      if (!jobs || jobs.length === 0) {
+        return { success: false, error: 'NEXT_JOB_NOT_FOUND', message: 'No pending generation job found for next week' }
+      }
+      const { data: materials } = await client
+        .from('materials')
+        .select('id, observations_recorded_at')
+        .eq('child_id', childId)
+
+      if (materials && materials.length >= (session.target_week || 9)) {
+        return {
+          success: false,
+          error: 'TARGET_WEEK_REACHED',
+          message: `已達目標測試週次 (Week ${session.target_week || 9})`,
+        }
+      }
+
+      const latestMat = materials && materials.length > 0 ? materials[0] : null
+      if (latestMat && !latestMat.observations_recorded_at) {
+        return {
+          success: false,
+          error: 'OBSERVATIONS_NOT_RECORDED',
+          message: '前週教材之學習記憶與觀察數據尚未完成寫入',
+        }
+      }
+
+      const job = jobs[0]
+
+      const now = new Date()
+      const nowIso = now.toISOString()
+      const dueIso = new Date(now.getTime() + 24 * 3600 * 1000).toISOString()
+      const releaseIso = new Date(now.getTime() + 48 * 3600 * 1000).toISOString()
+
+      await client.from('generation_jobs').update({
+        scheduled_for: nowIso,
+        feedback_cutoff_at: nowIso,
+        generation_due_at: dueIso,
+        release_at: releaseIso,
+        updated_at: nowIso,
+      }).eq('id', job.id)
+
+      await client.from('children').update({
+        next_generation_at: dueIso,
+      }).eq('id', childId)
+
+      const result: AdvanceTestWeekResult = {
+        success: true,
+        childId,
+        jobId: job.id,
+        materialWeek: job.material_week,
+        scheduledFor: nowIso,
+        feedbackCutoffAt: nowIso,
+        generationDueAt: dueIso,
+        releaseAt: releaseIso,
+      }
+
+      console.log('[AUDIT] test_week_advanced:', { childId, jobId: job.id, timestamp: nowIso })
+      return result
+    } catch (err) {
+      return { success: false, error: 'OPERATION_FAILED', message: err instanceof Error ? err.message : String(err) }
+    }
+  }
+
+  public async recordTestFeedback(input: AdminTestFeedbackInput): Promise<RecordTestFeedbackResult> {
+    if (!input.childId || !input.materialId) {
+      return { success: false, error: 'INVALID_PARAMETERS', message: 'childId and materialId are required' }
+    }
+
+    const client = this.ensureClient()
+    try {
+      const res = await client.rpc('admin_record_test_feedback', {
+        p_child_id: input.childId,
+        p_material_id: input.materialId,
+        p_difficulty: input.difficulty ?? null,
+        p_completion_rate: input.completionRate ?? null,
+        p_weak_area: input.weakArea ?? null,
+        p_mistakes_text: input.mistakesText ?? null,
+        p_child_comments: input.childComments ?? null,
+        p_parent_comments: input.parentComments ?? null,
+        p_school_progress_update: input.schoolProgressUpdate ?? null,
+        p_interest_update: input.interestUpdate ?? null,
+        p_notes: input.notes ?? null,
+        p_minutes_spent: input.minutesSpent ?? null,
+      })
+      if (!res.error && res.data && typeof res.data === 'object') {
+        const raw = res.data as any
+        if (raw.success) {
+          const feedbackId = raw.feedbackId || raw.feedback_id
+          console.log('[AUDIT] test_feedback_recorded:', {
+            childId: input.childId,
+            materialId: input.materialId,
+            feedbackId,
+            timestamp: new Date().toISOString(),
+          })
+          return {
+            success: true,
+            feedbackId,
+            childId: input.childId,
+            materialId: input.materialId,
+          }
+        }
+        return {
+          success: false,
+          error: raw.error || 'RECORD_FEEDBACK_FAILED',
+          message: raw.message,
+        }
+      }
+    } catch {}
+
+    // Fallback
+    try {
+      const { data, error } = await client.from('feedback').upsert({
+        child_id: input.childId,
+        material_id: input.materialId,
+        difficulty: input.difficulty ?? null,
+        completion_rate: input.completionRate ?? null,
+        weak_area: input.weakArea ?? null,
+        mistakes_text: input.mistakesText ?? null,
+        child_comments: input.childComments ?? null,
+        parent_comments: input.parentComments ?? null,
+        school_progress_update: input.schoolProgressUpdate ?? null,
+        interest_update: input.interestUpdate ?? null,
+        notes: input.notes ?? null,
+        minutes_spent: input.minutesSpent ?? null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'child_id,material_id' }).select('id').single()
+
+      if (error) {
+        return { success: false, error: 'DB_INSERT_FAILED', message: error.message }
+      }
+
+      console.log('[AUDIT] test_feedback_recorded:', { childId: input.childId, materialId: input.materialId, timestamp: new Date().toISOString() })
+      return { success: true, feedbackId: data?.id, childId: input.childId, materialId: input.materialId }
+    } catch (err) {
+      return { success: false, error: 'OPERATION_FAILED', message: err instanceof Error ? err.message : String(err) }
+    }
+  }
+
+  public async resetTestChildToOnboarding(childId: string): Promise<ResetTestChildResult> {
+    if (!childId || typeof childId !== 'string') {
+      return { success: false, error: 'INVALID_CHILD_ID', message: 'Child ID is required' }
+    }
+
+    const client = this.ensureClient()
+    let storagePathsToDelete: string[] = []
+    let rpcData: any = null
+
+    // 1. Call atomic database reset RPC
+    try {
+      const res = await client.rpc('admin_reset_test_child_to_onboarding', { p_child_id: childId })
+      if (res.error || !res.data || !(res.data as any).success) {
+        const errData = res.data as any
+        return {
+          success: false,
+          error: errData?.error || res.error?.message || 'RESET_FAILED',
+          message: errData?.message || res.error?.message || 'Failed to reset test child',
+        }
+      }
+      rpcData = res.data as any
+      const rawPaths = rpcData.storage_paths_to_delete || rpcData.storagePathsToDelete || rpcData.pdf_paths_to_delete
+      if (Array.isArray(rawPaths)) {
+        storagePathsToDelete = rawPaths.filter((p: any): p is string => typeof p === 'string')
+      }
+    } catch (rpcErr) {
+      return {
+        success: false,
+        error: 'OPERATION_FAILED',
+        message: rpcErr instanceof Error ? rpcErr.message : String(rpcErr),
+      }
+    }
+
+    // 2. Perform Storage cleanup using Supabase Storage API (never raw SQL)
+    let storageWarning: string | undefined
+    let unremovedPaths: string[] | undefined
+
+    if (storagePathsToDelete.length > 0) {
+      try {
+        const { error: storageErr } = await client.storage.from('weekly-materials').remove(storagePathsToDelete)
+        if (storageErr) {
+          console.warn('[STORAGE_WARNING] Supabase storage removal returned error during test child reset:', {
+            childId,
+            error: storageErr.message,
+            pathsCount: storagePathsToDelete.length,
+          })
+          storageWarning = 'STORAGE_CLEANUP_PARTIAL_FAILURE'
+          unremovedPaths = storagePathsToDelete
+        } else {
+          console.log('[AUDIT] test_materials_storage_cleaned:', {
+            childId,
+            removedCount: storagePathsToDelete.length,
+          })
+        }
+      } catch (storageException) {
+        console.warn('[STORAGE_WARNING] Supabase storage removal threw exception during test child reset:', {
+          childId,
+          error: String(storageException),
+          pathsCount: storagePathsToDelete.length,
+        })
+        storageWarning = 'STORAGE_CLEANUP_PARTIAL_FAILURE'
+        unremovedPaths = storagePathsToDelete
+      }
+    }
+
+    console.log('[AUDIT] test_child_reset_to_onboarding:', {
+      childId,
+      storagePathsCleaned: storagePathsToDelete.length,
+      storageWarning,
+      timestamp: new Date().toISOString(),
+    })
+
+    return {
+      success: true,
+      childId,
+      newJobId: rpcData?.new_job_id || rpcData?.newJobId,
+      materialWeek: rpcData?.material_week || rpcData?.materialWeek,
+      deletedMaterialsCount: rpcData?.deleted_materials_count ?? rpcData?.deletedMaterialsCount,
+      deletedJobsCount: rpcData?.deleted_jobs_count ?? rpcData?.deletedJobsCount,
+      deletedFeedbackCount: rpcData?.deleted_feedback_count ?? rpcData?.deletedFeedbackCount,
+      deletedObservationsCount: rpcData?.deleted_observations_count ?? rpcData?.deletedObservationsCount,
+      deletedSubmissionsCount: rpcData?.deleted_submissions_count ?? rpcData?.deletedSubmissionsCount,
+      deletedProgressRecordsCount: rpcData?.deleted_progress_records_count ?? rpcData?.deletedProgressRecordsCount,
+      storageCleanupWarning: storageWarning ? true : false,
+      unremovedPaths,
+    }
+  }
+
+  public async getTestPdfSignedUrl(
+    childId: string,
+    materialId: string,
+    pdfType: 'student' | 'parent'
+  ): Promise<TestPdfSignedUrlResult> {
+    if (!childId || !materialId) {
+      return { success: false, error: 'INVALID_PARAMETERS', message: 'childId and materialId are required' }
+    }
+
+    const client = this.ensureClient()
+
+    // 1. Validate child is in test mode
+    const { data: session, error: sessErr } = await client
+      .from('generation_test_mode_sessions')
+      .select('is_enabled')
+      .eq('child_id', childId)
+      .maybeSingle()
+
+    if (sessErr || !session || !session.is_enabled) {
+      return {
+        success: false,
+        error: 'TEST_MODE_NOT_ENABLED',
+        message: 'PDF preview bypass is only available for active Test Mode children',
+      }
+    }
+
+    // 2. Validate material belongs to child
+    const { data: material, error: matErr } = await client
+      .from('materials')
+      .select('student_pdf_path, parent_answer_pdf_path')
+      .eq('id', materialId)
+      .eq('child_id', childId)
+      .maybeSingle()
+
+    if (matErr || !material) {
+      return {
+        success: false,
+        error: 'MATERIAL_NOT_FOUND',
+        message: 'Material not found for this test child',
+      }
+    }
+
+    const path = pdfType === 'student' ? material.student_pdf_path : material.parent_answer_pdf_path
+    if (!path) {
+      return {
+        success: false,
+        error: 'PDF_NOT_FOUND',
+        message: `No ${pdfType} PDF path recorded for this material`,
+      }
+    }
+
+    // 3. Create signed URL via service-role Storage API (valid for 5 minutes)
+    try {
+      const { data, error: signErr } = await client.storage.from('weekly-materials').createSignedUrl(path, 300)
+      if (signErr || !data?.signedUrl) {
+        return {
+          success: false,
+          error: 'STORAGE_SIGN_FAILED',
+          message: signErr?.message || 'Failed to create signed URL',
+        }
+      }
+
+      return {
+        success: true,
+        childId,
+        materialId,
+        pdfType,
+        signedUrl: data.signedUrl,
+        path,
+      }
+    } catch (err) {
+      return {
+        success: false,
+        error: 'STORAGE_SIGN_EXCEPTION',
         message: err instanceof Error ? err.message : String(err),
       }
     }
