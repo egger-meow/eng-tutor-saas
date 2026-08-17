@@ -182,6 +182,49 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                   </div>
                 )}
 
+                {/* Visual Attempts breakdown for Authoring & Finisher */}
+                {Array.isArray((event.details as any)?.attempts) && ((event.details as any).attempts as any[]).length > 0 && (
+                  <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {((event.details as any).attempts as any[]).map((att: any, attIdx: number) => (
+                      <div
+                        key={attIdx}
+                        style={{
+                          background: 'var(--bg-elevated)',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          borderLeft: att.status === 'quality_rejected' ? '3px solid var(--status-rose)' : att.status === 'completed' ? '3px solid var(--status-emerald)' : '3px solid var(--status-amber)',
+                          fontSize: '12px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 600, color: '#f8fafc' }}>
+                            Attempt #{att.attempt || attIdx + 1}
+                          </span>
+                          <span className={`status-pill ${att.status}`}>{att.status}</span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                          提交時間: {att.submittedAt ? new Date(att.submittedAt).toLocaleString('zh-TW', { hour12: false }) : 'N/A'}
+                          {att.processorId ? ` | 處理 Finisher: ${att.processorId}` : ''}
+                        </div>
+                        {att.errorMessage && (
+                          <div style={{ color: 'var(--status-rose)', marginTop: '4px', fontSize: '11px' }}>
+                            ⚠️ {att.errorMessage}
+                          </div>
+                        )}
+                        {Array.isArray(att.findings) && att.findings.length > 0 && (
+                          <div style={{ marginTop: '4px', paddingLeft: '8px', borderLeft: '2px solid #ef4444' }}>
+                            {att.findings.map((f: any, fIdx: number) => (
+                              <div key={fIdx} style={{ fontSize: '11px', color: '#fca5a5' }}>
+                                • <strong>{f.rule || f.code}</strong>: {f.message || f.description}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div style={{ marginTop: '8px' }}>
                   <button
                     className="refresh-btn"

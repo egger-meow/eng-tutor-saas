@@ -15,7 +15,21 @@ export async function handleApiRequest(
   }
 
   res.setHeader('Content-Type', 'application/json')
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  
+  const origin = req.headers.origin
+  const allowedLoopbackOrigins = [
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'http://localhost:5175',
+    'http://127.0.0.1:5175',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ]
+
+  if (origin && allowedLoopbackOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 

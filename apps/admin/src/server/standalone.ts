@@ -14,7 +14,7 @@ const server = createServer(async (req, res) => {
   }
 })
 
-server.listen(PORT, () => {
-  console.log(`紙屬英文 Admin Console Backend running on http://localhost:${PORT}`)
+server.listen(PORT, '127.0.0.1', () => {
+  console.log(`紙屬英文 Admin Console Backend running on http://127.0.0.1:${PORT}`)
   console.log(`Database: ${service.getIsConnected() ? 'Connected to Supabase' : 'Supabase Disconnected (Set SUPABASE_SECRET_KEY in .env)'}`)
 })

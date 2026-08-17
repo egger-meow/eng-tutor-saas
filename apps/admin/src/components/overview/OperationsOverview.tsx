@@ -68,6 +68,63 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
         </div>
       </div>
 
+      {/* Data Source Truth & Health Inspector */}
+      {data.dataSources && data.dataSources.length > 0 && (
+        <div className="cockpit-card" style={{ marginBottom: '20px', borderLeft: data.systemHealth === 'degraded' ? '4px solid var(--status-rose)' : '4px solid var(--status-emerald)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: 600, fontSize: '14px' }}>📡 權威資料源狀態 (Data Source Telemetry)</span>
+              <span className={`status-pill ${data.systemHealth === 'degraded' ? 'critical' : data.systemHealth === 'attention_needed' ? 'warning' : 'active'}`}>
+                SYSTEM: {data.systemHealth.toUpperCase()}
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              {data.dataSources.filter((d) => d.status === 'healthy').length} / {data.dataSources.length} 正常連線
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+            {data.dataSources.map((ds) => (
+              <div
+                key={ds.source}
+                style={{
+                  background: 'var(--bg-elevated)',
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: ds.status === 'error' ? '1px solid var(--status-rose)' : '1px solid var(--border-subtle)',
+                  fontSize: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontWeight: 600, color: ds.status === 'error' ? 'var(--status-rose)' : '#e2e8f0' }}>{ds.source}</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      background: ds.status === 'healthy' ? '#064e3b' : ds.status === 'empty' ? '#1e293b' : '#881337',
+                      color: ds.status === 'healthy' ? '#34d399' : ds.status === 'empty' ? '#94a3b8' : '#fda4af',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {ds.status === 'healthy' ? `✓ ${ds.rowCount} rows` : ds.status === 'empty' ? '0 rows' : 'ERROR'}
+                  </span>
+                </div>
+                {ds.error ? (
+                  <div style={{ fontSize: '11px', color: '#fca5a5', wordBreak: 'break-word', marginTop: '4px' }}>
+                    ⚠️ {ds.error}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                    延遲: {ds.latencyMs}ms
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Two Column Section */}
       <div className="dashboard-grid-2">
         {/* Finisher Pipeline Activity */}

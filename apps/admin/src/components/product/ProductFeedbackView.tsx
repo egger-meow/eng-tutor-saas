@@ -98,34 +98,59 @@ export const ProductFeedbackView: React.FC<ProductFeedbackViewProps> = ({ data }
           </div>
         </div>
 
-        {/* Subscription Friction & Cancellation Reasons */}
+        {/* Subscription Friction & Cancellation Tracking */}
         <div className="cockpit-card">
           <div className="section-title">
-            <span>訂閱流失與摩擦分析 (Subscription Churn & Friction)</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Paddle Webhooks & Cancellation Reasons</span>
+            <span>訂閱流失與摩擦狀態 (Subscription Churn & Friction)</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Paddle Webhook Telemetry</span>
           </div>
 
           <div style={{ marginTop: '16px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '8px', fontWeight: 600 }}>家長退訂原因分佈</div>
-            {subscriptionFriction.cancellationReasons.length === 0 ? (
-              <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--status-emerald)' }}>
-                ✓ 目前無任何取消原因回報。
+            <div className="dist-bar-row">
+              <span className="dist-bar-label">正常付費訂閱 (Active)</span>
+              <div className="dist-bar-track">
+                <div className="dist-bar-fill emerald" style={{ width: `${subscriptionFriction.totalSubscriptions > 0 ? (subscriptionFriction.activeCount / subscriptionFriction.totalSubscriptions) * 100 : 0}%` }} />
               </div>
-            ) : (
-              subscriptionFriction.cancellationReasons.map((r, idx) => (
-                <div key={idx} className="dist-bar-row">
-                  <span className="dist-bar-label" style={{ width: '220px' }}>{r.reason}</span>
-                  <div className="dist-bar-track">
-                    <div className="dist-bar-fill amber" style={{ width: `${Math.min(100, r.count * 25)}%` }} />
-                  </div>
-                  <span className="dist-bar-count">{r.count} 筆</span>
-                </div>
-              ))
-            )}
+              <span className="dist-bar-count">{subscriptionFriction.activeCount} 位</span>
+            </div>
+
+            <div className="dist-bar-row">
+              <span className="dist-bar-label">體驗期中 (Trialing)</span>
+              <div className="dist-bar-track">
+                <div className="dist-bar-fill cyan" style={{ width: `${subscriptionFriction.totalSubscriptions > 0 ? (subscriptionFriction.trialingCount / subscriptionFriction.totalSubscriptions) * 100 : 0}%` }} />
+              </div>
+              <span className="dist-bar-count">{subscriptionFriction.trialingCount} 位</span>
+            </div>
+
+            <div className="dist-bar-row">
+              <span className="dist-bar-label">扣款失敗 (Past Due)</span>
+              <div className="dist-bar-track">
+                <div className="dist-bar-fill rose" style={{ width: `${subscriptionFriction.totalSubscriptions > 0 ? (subscriptionFriction.pastDueCount / subscriptionFriction.totalSubscriptions) * 100 : 0}%` }} />
+              </div>
+              <span className="dist-bar-count" style={{ color: subscriptionFriction.pastDueCount > 0 ? 'var(--status-rose)' : undefined }}>
+                {subscriptionFriction.pastDueCount} 位
+              </span>
+            </div>
+
+            <div className="dist-bar-row">
+              <span className="dist-bar-label">已取消 (Canceled)</span>
+              <div className="dist-bar-track">
+                <div className="dist-bar-fill amber" style={{ width: `${subscriptionFriction.totalSubscriptions > 0 ? (subscriptionFriction.canceledCount / subscriptionFriction.totalSubscriptions) * 100 : 0}%` }} />
+              </div>
+              <span className="dist-bar-count">{subscriptionFriction.canceledCount} 位</span>
+            </div>
+
+            <div className="dist-bar-row">
+              <span className="dist-bar-label">週期結束取消 (Canceling at Period End)</span>
+              <div className="dist-bar-track">
+                <div className="dist-bar-fill amber" style={{ width: `${subscriptionFriction.totalSubscriptions > 0 ? (subscriptionFriction.cancelingAtPeriodEndCount / subscriptionFriction.totalSubscriptions) * 100 : 0}%` }} />
+              </div>
+              <span className="dist-bar-count">{subscriptionFriction.cancelingAtPeriodEndCount} 位</span>
+            </div>
           </div>
 
           <div style={{ marginTop: '20px', padding: '12px', background: 'var(--bg-elevated)', borderRadius: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
-            💡 <strong>流失洞察：</strong>目前退訂的主要原因集中於「課業壓力或學校作息衝突」。可考慮未來提供「暫停出題 1~2 週」彈性機制以降低非自願流失。
+            💡 <strong>流失洞察：</strong>目前生產環境 subscriptions 表尚未包含獨立 cancellation_reason 欄位，已將其納入下方「待埋點指標」清單，避免以假資料誤導營運決策。
           </div>
         </div>
       </div>

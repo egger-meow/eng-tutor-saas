@@ -71,38 +71,38 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
       <div className="kpi-grid">
         <div className="cockpit-card">
           <div className="card-header-sm">
-            <span>失敗規律特徵數</span>
-            <span className="status-pill failed">Patterns</span>
+            <span>生成失敗證據數</span>
+            <span className="status-pill failed">Failures</span>
           </div>
-          <div className="kpi-value">{data.generationFailurePatterns.length} 組</div>
-          <div className="kpi-subtext">主要代碼: {data.summary.dominantFailureCode || '無'}</div>
+          <div className="kpi-value">{data.generationFailureEvidence.length} 件</div>
+          <div className="kpi-subtext">主要代碼: {data.provenance.dominantFailureCode || '無'}</div>
         </div>
 
         <div className="cockpit-card">
           <div className="card-header-sm">
-            <span>家長反饋聚類主題</span>
-            <span className="status-pill pending">Themes</span>
+            <span>家長反饋證據筆數</span>
+            <span className="status-pill pending">Feedback</span>
           </div>
-          <div className="kpi-value">{data.parentFeedbackThemes.length} 組</div>
-          <div className="kpi-subtext">最大痛點: {data.summary.dominantParentFrictionTopic || '無'}</div>
+          <div className="kpi-value">{data.parentFeedbackEvidence.length} 筆</div>
+          <div className="kpi-subtext">去識別化 Snippets</div>
         </div>
 
         <div className="cockpit-card">
           <div className="card-header-sm">
-            <span>品質審核防護指標</span>
+            <span>品質審核防護規則</span>
             <span className="status-pill quality_rejected">Rubrics</span>
           </div>
-          <div className="kpi-value">{data.qualityRejectionRules.length} 項</div>
+          <div className="kpi-value">{data.qualityRuleViolationSummary.length} 項</div>
           <div className="kpi-subtext">Deterministic Guardrails</div>
         </div>
 
         <div className="cockpit-card">
           <div className="card-header-sm">
-            <span>訂閱流失阻力特徵</span>
-            <span className="status-pill warning">Churn</span>
+            <span>總證據項 (Provenance)</span>
+            <span className="status-pill active">Evidence</span>
           </div>
-          <div className="kpi-value">{data.subscriptionFrictionPatterns.length} 類</div>
-          <div className="kpi-subtext">Paddle Churn Signals</div>
+          <div className="kpi-value">{data.provenance.totalEvidenceCount}</div>
+          <div className="kpi-subtext">Taxonomy: {data.taxonomyVersion}</div>
         </div>
       </div>
 
