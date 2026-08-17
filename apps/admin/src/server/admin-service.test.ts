@@ -182,6 +182,7 @@ describe('AdminService Authoritative Truth Layer', () => {
 
     expect(failures.totalFailures).toBe(2) // 1 job error + 1 submission rejection
     expect(failures.generationStats.failureRatePercent).toBe(100) // 1 failed / 1 job = 100%
+    expect(failures.generationStats.terminalJobs).toBe(1)
     expect(failures.finisherStats.rejectionRatePercent).toBe(50) // 1 rejected / 2 submissions = 50%
     expect(failures.stageBreakdown.length).toBe(5)
 
@@ -306,7 +307,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       children: [{ id: 'c-1', display_name: '李小廷', is_active: true }],
       subscriptions: [{ id: 'sub-1', status: 'active' }],
       generation_jobs: [],
-      materials: [{ id: 'm-1', rule_version: '2.2.0', model_name: 'chatgpt-work-daily' }],
+      materials: [{ id: 'm-1', rule_version: 'curriculum-rules/1.0.0', generator_version: 'pdf-page-break-fix', model_name: 'gpt-5.6-sol' }],
       enrollment_settings: [],
       curriculum_submissions: [],
       feedback: [],
@@ -318,8 +319,9 @@ describe('AdminService Authoritative Truth Layer', () => {
 
     expect(dataset.schemaVersion).toBe('1.0.0')
     expect(dataset.taxonomyVersion).toBe('cap-2.2.0')
-    expect(dataset.ruleVersions).toContain('2.2.0')
-    expect(dataset.generatorVersions).toContain('chatgpt-work-daily')
+    expect(dataset.ruleVersions).toContain('curriculum-rules/1.0.0')
+    expect(dataset.generatorVersions).toContain('pdf-page-break-fix')
+    expect(dataset.modelNames).toContain('gpt-5.6-sol')
     expect(dataset.exportedAt).toBeTruthy()
     expect(dataset.provenance.environment).toBe('production_database')
     expect(dataset.provenance.activeChildren).toBe(1)

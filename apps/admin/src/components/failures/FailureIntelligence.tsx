@@ -33,10 +33,16 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
           <div className="kpi-value" style={{ color: totalFailures > 0 ? 'var(--status-rose)' : 'var(--text-main)' }}>
             {totalFailures}
           </div>
-          <div className="kpi-subtext" style={{ lineHeight: '1.4' }}>
-            <span>生成失敗率: <strong>{data.generationStats?.failureRatePercent ?? failureRatePercent}%</strong> ({data.generationStats?.failedJobs ?? 0} / {data.generationStats?.totalJobs ?? 0} jobs)</span>
-            <br />
-            <span>Finisher 退回率: <strong>{data.finisherStats?.rejectionRatePercent ?? 0}%</strong> ({data.finisherStats?.qualityRejectedSubmissions ?? 0} / {data.finisherStats?.totalSubmissions ?? 0} subs)</span>
+          <div className="kpi-subtext" style={{ lineHeight: '1.5' }}>
+            <div>
+              生成失敗率: <strong>{data.generationStats?.failureRatePercent ?? failureRatePercent}%</strong> ({data.generationStats?.failedJobs ?? 0} failed / {data.generationStats?.terminalJobs ?? (data.generationStats?.completedJobs ?? 0)} terminal jobs)
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+              進行中排程: {data.generationStats?.pendingJobs ?? 0} pending, {data.generationStats?.claimedJobs ?? 0} claimed (總計 {data.generationStats?.totalJobs ?? 0} jobs)
+            </div>
+            <div>
+              Finisher 退回率: <strong>{data.finisherStats?.rejectionRatePercent ?? 0}%</strong> ({data.finisherStats?.qualityRejectedSubmissions ?? 0} rejected / {data.finisherStats?.totalSubmissions ?? 0} subs)
+            </div>
           </div>
         </div>
 

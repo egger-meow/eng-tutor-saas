@@ -116,8 +116,11 @@ export interface FailureIntelligence {
   failureRatePercent: number
   generationStats: {
     totalJobs: number
+    terminalJobs: number
     completedJobs: number
     failedJobs: number
+    pendingJobs: number
+    claimedJobs: number
     failureRatePercent: number
   }
   finisherStats: {
@@ -288,8 +291,9 @@ export interface ChildWeekTimeline {
 export interface AiExportDataset {
   schemaVersion: string
   taxonomyVersion: string
-  generatorVersions: string[]
   ruleVersions: string[]
+  generatorVersions: string[]
+  modelNames: string[]
   exportedAt: string
   timeWindow: {
     start: string | null
@@ -876,12 +880,13 @@ export class AdminService {
       this.getOperationsOverview(),
       this.getFailureIntelligence(),
       this.getFeedbackIntelligence(),
-      this.safeQuery<any[]>('materials', () => client.from('materials').select('rule_version, model_name'), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('rule_version, model_name, generator_version'), dataSources),
       this.safeQuery<any[]>('children', () => client.from('children').select('display_name'), dataSources),
     ])
 
     const materials = (materialsData as any[]) || []
     const ruleVersions = Array.from(new Set(materials.map((m: any) => m.rule_version).filter(Boolean)))
+    const generatorVersions = Array.from(new Set(materials.map((m: any) => m.generator_version).filter(Boolean)))
     const modelNames = Array.from(new Set(materials.map((m: any) => m.model_name).filter(Boolean)))
     const knownNames = ((childrenData as any[]) || []).map((c: any) => c.display_name).filter(Boolean)
 
@@ -934,8 +939,9 @@ export class AdminService {
     return {
       schemaVersion: '1.0.0',
       taxonomyVersion: 'cap-2.2.0',
-      generatorVersions: modelNames.length > 0 ? modelNames : ['chatgpt-work-daily'],
-      ruleVersions: ruleVersions.length > 0 ? ruleVersions : ['2.2.0'],
+      ruleVersions: ruleVersions.length > 0 ? ruleVersions : ['curriculum-rules/1.0.0'],
+      generatorVersions: generatorVersions.length > 0 ? generatorVersions : ['curriculum/2.0.0'],
+      modelNames: modelNames.length > 0 ? modelNames : ['gpt-5.6-sol'],
       exportedAt: new Date().toISOString(),
       timeWindow: {
         start: startDate,
@@ -1156,8 +1162,10 @@ export class AdminService {
     // 1. Generation stats (from generation_jobs)
     const completedJobsCount = allJobs.filter((j) => j.status === 'completed').length
     const failedJobsCount = failedJobs.length
-    const totalJobsEvaluated = completedJobsCount + failedJobsCount
-    const generationFailureRatePercent = totalJobsEvaluated > 0 ? Number(((failedJobsCount / totalJobsEvaluated) * 100).toFixed(1)) : 0
+    const pendingJobsCount = allJobs.filter((j) => j.status === 'pending').length
+    const claimedJobsCount = allJobs.filter((j) => j.status === 'claimed').length
+    const terminalJobsEvaluated = completedJobsCount + failedJobsCount
+    const generationFailureRatePercent = terminalJobsEvaluated > 0 ? Number(((failedJobsCount / terminalJobsEvaluated) * 100).toFixed(1)) : 0
 
     // 2. Finisher stats (from curriculum_submissions)
     const completedSubsCount = allSubmissions.filter((s) => s.status === 'completed').length
@@ -1205,9 +1213,12 @@ export class AdminService {
       totalFailures,
       failureRatePercent: generationFailureRatePercent, // Default backward compatible field
       generationStats: {
-        totalJobs: totalJobsEvaluated,
+        totalJobs: allJobs.length,
+        terminalJobs: terminalJobsEvaluated,
         completedJobs: completedJobsCount,
         failedJobs: failedJobsCount,
+        pendingJobs: pendingJobsCount,
+        claimedJobs: claimedJobsCount,
         failureRatePercent: generationFailureRatePercent,
       },
       finisherStats: {
