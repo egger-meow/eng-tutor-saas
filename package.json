@@ -17,6 +17,9 @@
     "generate:public-sample": "pnpm --filter @paper-english/pdf generate:public-sample",
     "audit:curriculum": "pnpm --filter @paper-english/generator audit:curriculum --",
     "compile:bundle": "pnpm --filter @paper-english/generator compile:bundle",
+    "admin": "pnpm --filter @paper-english/admin dev",
+    "admin:build": "pnpm --filter @paper-english/admin build",
+    "admin:start": "pnpm --filter @paper-english/admin start",
     "worker": "pnpm --filter @paper-english/worker worker"
   },
   "devDependencies": {
