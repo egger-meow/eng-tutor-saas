@@ -45,7 +45,7 @@ export async function inspectPdf(bytes: Uint8Array, label: string): Promise<PdfI
       const page = await document.getPage(pageNumber)
       const content = await page.getTextContent()
       const viewport = page.getViewport({ scale: 1 })
-      const textItems = content.items.filter((item) => 'str' in item)
+      const textItems = content.items.filter((item): item is Extract<(typeof content.items)[number], { str: string }> => 'str' in item && item.str.trim().length > 0)
       const outside = textItems.filter((item) => {
         const x = item.transform[4] ?? 0
         const y = item.transform[5] ?? 0

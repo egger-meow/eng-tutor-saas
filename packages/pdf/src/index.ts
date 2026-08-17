@@ -9,3 +9,5 @@ export { renderCurriculumParentAnswerHtml, renderCurriculumStudentHtml } from '.
 export type { CurriculumPdfKind } from './render-curriculum-package.js'
 export { renderCurriculumPackageBytes, renderCurriculumPackagePair } from './render-curriculum-pair.js'
 export type { CurriculumPdfBytes, CurriculumPdfPair } from './render-curriculum-pair.js'
+export * from './curriculum/index.js'
+
