@@ -14,6 +14,8 @@ import {
 } from './quality-profile-loader.js'
 import type { LessonValidationIssue } from './validate-lesson.js'
 
+import { CURRENT_ENGINE_VERSION } from './engine-version.js'
+
 export interface ModelQualityProfileOptions {
   modelName?: string
   profilesDir?: string
@@ -27,6 +29,7 @@ export interface ProfileProvenance {
   actualModel: string
   resolvedQualityProfile: string
   qualityProfileVersion: string
+  engineVersion: string
   profileName: string
   profileVersion: string
   isFallback: boolean
@@ -249,7 +252,7 @@ export async function applyModelQualityProfile(
     // 6. Record Provenance in Quality Evidence
     const profileCheckId = 'model-quality-profile'
     const checkIndex = pkg.qualityEvidence.criticalChecks.findIndex((c) => c.id === profileCheckId)
-    const checkEvidence = `actualModel=${modelQueried} | resolvedQualityProfile=${profile.name} | qualityProfileVersion=${profile.version}${profile.isFallback ? ' (fallback)' : ''}`
+    const checkEvidence = `actualModel=${modelQueried} | resolvedQualityProfile=${profile.name} | qualityProfileVersion=${profile.version} | engineVersion=${CURRENT_ENGINE_VERSION}${profile.isFallback ? ' (fallback)' : ''}`
 
     if (checkIndex >= 0) {
       pkg.qualityEvidence.criticalChecks[checkIndex] = {
@@ -265,10 +268,15 @@ export async function applyModelQualityProfile(
       })
     }
 
+    if (!pkg.metadata.engineVersion) {
+      pkg.metadata.engineVersion = CURRENT_ENGINE_VERSION
+    }
+
     const provenance: ProfileProvenance = {
       actualModel: modelQueried,
       resolvedQualityProfile: profile.name,
       qualityProfileVersion: profile.version,
+      engineVersion: CURRENT_ENGINE_VERSION,
       profileName: profile.name,
       profileVersion: profile.version,
       isFallback: profile.isFallback,

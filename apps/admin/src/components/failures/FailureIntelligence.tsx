@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { FailureIntelligence as FailureIntelligenceType, QualityEra } from '../../client/types.js'
+import { formatEngineEraLabel, type FailureIntelligence as FailureIntelligenceType, type QualityEra } from '../../client/types.js'
 
 interface FailureIntelligenceProps {
   data: FailureIntelligenceType | null
@@ -20,6 +20,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
   if (!data) return <div>讀取中...</div>
 
   const { totalFailures, failureRatePercent, stageBreakdown, errorCodeClusters, qualityRuleViolations, dailyTrend, recentFailures, eraBreakdown } = data
+  const currentEngineLabel = eraBreakdown?.currentEraName || 'Engine v1.0.1'
 
   const filteredFailures = stageFilter === 'all'
     ? recentFailures
@@ -36,13 +37,13 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                 品質世代篩選 (Quality Era Selection)
               </span>
               <span className={`status-pill ${currentEra === 'current' ? 'active' : currentEra === 'historical' ? 'warning' : 'pending'}`}>
-                {currentEra === 'current' ? '當前引擎 (Engine v1)' : currentEra === 'historical' ? '歷史封存 (Historical)' : '全部世代 (All Eras)'}
+                {currentEra === 'current' ? `當前引擎 (${currentEngineLabel})` : currentEra === 'historical' ? '歷史封存 (Historical)' : '全部世代 (All Eras)'}
               </span>
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
               {currentEra === 'current' ? (
                 <span>
-                  ⚡ 當前指標僅包含 <strong>Engine v1</strong> 證據（Schema 2.2.0 · Prompt 2.4.0 · Model Quality Profiles），已隔離早期實驗退回雜訊。
+                  ⚡ 當前指標僅包含 <strong>{currentEngineLabel}</strong> 證據（Schema 2.2.0 · Prompt 2.4.0 · Model Quality Profiles），已隔離早期實驗退回雜訊。
                 </span>
               ) : currentEra === 'historical' ? (
                 <span>
@@ -50,7 +51,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                 </span>
               ) : (
                 <span>
-                  🌐 全部世代全量合併統計當前 Engine v1 與所有歷史世代之異常事件。
+                  🌐 全部世代全量合併統計當前 {currentEngineLabel} 與所有歷史世代之異常事件。
                 </span>
               )}
             </div>
@@ -69,7 +70,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
               }}
               onClick={() => onSelectEra('current')}
             >
-              ⚡ Engine v1 (當前版本)
+              ⚡ {currentEngineLabel} (當前版本)
             </button>
             <button
               className={`refresh-btn ${currentEra === 'historical' ? 'active' : ''}`}
@@ -83,21 +84,21 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
               }}
               onClick={() => onSelectEra('historical')}
             >
-              📜 歷史版本 ({eraBreakdown?.historicalTotalFailures ?? 0})
+              📜 歷史封存 (Historical)
             </button>
             <button
               className={`refresh-btn ${currentEra === 'all' ? 'active' : ''}`}
               style={{
-                background: currentEra === 'all' ? '#1e3a8a' : 'rgba(255, 255, 255, 0.05)',
-                borderColor: currentEra === 'all' ? '#2563eb' : 'var(--border-subtle)',
-                color: currentEra === 'all' ? '#bfdbfe' : 'var(--text-muted)',
+                background: currentEra === 'all' ? '#1e293b' : 'rgba(255, 255, 255, 0.05)',
+                borderColor: currentEra === 'all' ? '#475569' : 'var(--border-subtle)',
+                color: currentEra === 'all' ? '#f8fafc' : 'var(--text-muted)',
                 fontWeight: currentEra === 'all' ? 700 : 500,
                 fontSize: '12px',
                 padding: '6px 14px',
               }}
               onClick={() => onSelectEra('all')}
             >
-              🌐 全部世代 ({eraBreakdown?.allTotalFailures ?? 0})
+              🌐 全部世代 (All Eras)
             </button>
           </div>
         </div>
@@ -107,7 +108,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
       <div className="kpi-grid">
         <div className="cockpit-card featured">
           <div className="card-header-sm">
-            <span>異常 / 退回事件 ({currentEra === 'current' ? 'Engine v1' : currentEra === 'historical' ? 'Historical' : 'All Eras'})</span>
+            <span>異常 / 退回事件 ({currentEra === 'current' ? currentEngineLabel : currentEra === 'historical' ? 'Historical' : 'All Eras'})</span>
             <span className="status-pill failed">Failures</span>
           </div>
           <div className="kpi-value" style={{ color: totalFailures > 0 ? 'var(--status-rose)' : 'var(--text-main)' }}>
@@ -265,7 +266,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                 <tr key={cluster.errorCode}>
                   <td>
                     <span className={`status-pill ${cluster.era === 'engine_v1' ? 'active' : 'warning'}`} style={{ fontSize: '10px' }}>
-                      {cluster.era === 'engine_v1' ? 'Engine v1' : 'Historical'}
+                      {formatEngineEraLabel(cluster.era, cluster.engineVersion)}
                     </span>
                   </td>
                   <td style={{ fontWeight: 600, fontFamily: 'monospace', color: 'var(--status-amber)' }}>
@@ -313,7 +314,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                 <tr key={q.rule}>
                   <td>
                     <span className={`status-pill ${q.era === 'engine_v1' ? 'active' : 'warning'}`} style={{ fontSize: '10px' }}>
-                      {q.era === 'engine_v1' ? 'Engine v1' : 'Historical'}
+                      {formatEngineEraLabel(q.era, q.engineVersion)}
                     </span>
                   </td>
                   <td style={{ fontWeight: 600 }}>{q.rule}</td>
@@ -361,11 +362,11 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                   </td>
                   <td>
                     <span className={`status-pill ${f.era === 'engine_v1' ? 'active' : 'warning'}`} style={{ fontSize: '10px' }}>
-                      {f.era === 'engine_v1' ? 'Engine v1' : 'Historical'}
+                      {formatEngineEraLabel(f.era, f.engineVersion)}
                     </span>
                   </td>
                   <td style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                    {f.schemaVersion ? `v${f.schemaVersion}` : '-'}{f.promptVersion ? ` / p${f.promptVersion}` : ''}
+                    {f.engineVersion ? `e${f.engineVersion} · ` : ''}{f.schemaVersion ? `v${f.schemaVersion}` : '-'}{f.promptVersion ? ` / p${f.promptVersion}` : ''}
                   </td>
                   <td style={{ fontWeight: 600 }}>{f.childPseudonym}</td>
                   <td>

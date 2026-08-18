@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { ChildWeekTimeline as ChildWeekTimelineType } from '../../client/types.js'
+import { formatEngineEraLabel, type ChildWeekTimeline as ChildWeekTimelineType } from '../../client/types.js'
 import { adminApi } from '../../client/api.js'
 import { GenerationTestModePanel } from './GenerationTestModePanel.js'
 
@@ -358,12 +358,12 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                               </span>
                               {!isNoSubmission && (
                                 <span className={`status-pill ${att.era === 'engine_v1' ? 'active' : 'warning'}`} style={{ fontSize: '10px' }}>
-                                  {att.era === 'engine_v1' ? 'Engine v1' : 'Historical'}
+                                  {formatEngineEraLabel(att.era, att.engineVersion)}
                                 </span>
                               )}
-                              {(att.schemaVersion || att.promptVersion) && (
+                              {(att.schemaVersion || att.promptVersion || att.engineVersion) && (
                                 <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
-                                  v{att.schemaVersion || '2.2.0'} / p{att.promptVersion || '2.4.0'}
+                                  {att.engineVersion ? `e${att.engineVersion} · ` : ''}v{att.schemaVersion || '2.2.0'} / p{att.promptVersion || '2.4.0'}
                                 </span>
                               )}
                             </div>

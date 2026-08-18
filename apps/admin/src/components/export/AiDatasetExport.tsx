@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { AiExportDataset as AiExportDatasetType, QualityEra } from '../../client/types.js'
+import { formatEngineVersion, CURRENT_ENGINE_VERSION, type AiExportDataset as AiExportDatasetType, type QualityEra } from '../../client/types.js'
 
 interface AiDatasetExportProps {
   data: AiExportDatasetType | null
@@ -16,6 +16,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
 
   if (!data) return <div>讀取中...</div>
 
+  const currentEngineLabel = data.provenance?.currentEraName || formatEngineVersion(CURRENT_ENGINE_VERSION)
   const jsonString = JSON.stringify(data, null, 2)
 
   const handleCopy = async () => {
@@ -52,12 +53,12 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
                   匯出資料集品質世代 (Export Era Scope)
                 </span>
                 <span className={`status-pill ${currentEra === 'current' ? 'active' : currentEra === 'historical' ? 'warning' : 'pending'}`}>
-                  {currentEra === 'current' ? 'Engine v1' : currentEra === 'historical' ? 'Historical' : 'All Eras'}
+                  {currentEra === 'current' ? currentEngineLabel : currentEra === 'historical' ? 'Historical' : 'All Eras'}
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
                 {currentEra === 'current' ? (
-                  <span>⚡ 匯出 <strong>Engine v1</strong> 證據（Schema 2.2.0 · Prompt 2.4.0 · Model Quality Profiles）</span>
+                  <span>⚡ 匯出 <strong>{currentEngineLabel}</strong> 證據（Schema 2.2.0 · Prompt 2.4.0 · Model Quality Profiles）</span>
                 ) : currentEra === 'historical' ? (
                   <span>📜 匯出歷史封存版本證據</span>
                 ) : (
@@ -79,7 +80,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
                 }}
                 onClick={() => onSelectEra('current')}
               >
-                ⚡ Engine v1
+                ⚡ {currentEngineLabel}
               </button>
               <button
                 className={`refresh-btn ${currentEra === 'historical' ? 'active' : ''}`}
@@ -181,9 +182,9 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
           </div>
           <div className="kpi-value">{data.provenance.totalEvidenceCount}</div>
           <div className="kpi-subtext" style={{ fontSize: '11px', lineHeight: '1.4' }}>
-            <span>Era: <strong>{data.provenance.currentEraName || 'Engine v1'}</strong> (v{data.provenance.currentSchemaVersion} / p{data.provenance.currentPromptVersion})</span>
+            <span>Era: <strong>{currentEngineLabel}</strong> (e{data.provenance.currentEngineVersion || CURRENT_ENGINE_VERSION} / v{data.provenance.currentSchemaVersion} / p{data.provenance.currentPromptVersion})</span>
             <br />
-            <span>Engine v1: <strong>{data.provenance.currentEvidenceCount}</strong> | 歷史: <strong>{data.provenance.historicalEvidenceCount}</strong></span>
+            <span>{currentEngineLabel}: <strong>{data.provenance.currentEvidenceCount}</strong> | 歷史: <strong>{data.provenance.historicalEvidenceCount}</strong></span>
           </div>
         </div>
       </div>

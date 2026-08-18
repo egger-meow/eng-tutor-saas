@@ -52,6 +52,7 @@ export const CurriculumPackageSchema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -130,6 +131,7 @@ export const CurriculumPackageV21Schema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -207,6 +209,7 @@ export const CurriculumPackageV20Schema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),

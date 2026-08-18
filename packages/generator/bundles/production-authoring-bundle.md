@@ -2,13 +2,14 @@
 bundleVersion: "2.4.0-prod"
 schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
+engineVersion: "1.0.1"
 generatedAt: "2026-08-17T00:30:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "be98af220c7db8bd726f64def4b2fd2b510e6f558160caa7d89c1a4853e18a25"
   "packages/generator/prompts/2.4.0/02-author.md": "4051b06eade5ee4ccb2e0903914c5cb4c47fa96bd6adcc40da44158cae045ef8"
   "packages/generator/prompts/2.4.0/03-critic.md": "cc632f99d83b15761f829022202f12ecce2924c88402ff822bee16e1dc670700"
   "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
-  "packages/generator/src/curriculum-package-schema.ts": "cbd1bc97d24d39f3c4624b8302f55d6e447f7d9a93663f0cd130e9b632384b20"
+  "packages/generator/src/curriculum-package-schema.ts": "d30352a33a94c4b42323d8e892d04a8d0001fe0e04a00f37ab7777f0b8566df1"
   "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
   "docs/product-rules.md": "0fd7c373e33f67f439db6df73ca6fb0225d8f0655eba2be1ac02f207557e3540"
 ---
@@ -148,6 +149,7 @@ export const CurriculumPackageSchema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -226,6 +228,7 @@ export const CurriculumPackageV21Schema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -303,6 +306,7 @@ export const CurriculumPackageV20Schema = z.strictObject({
     rendererVersion: Text,
     model: Text,
     inputFingerprint: StableId,
+    engineVersion: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),

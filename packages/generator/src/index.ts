@@ -90,3 +90,15 @@ export type {
   ProfileProvenance,
   PreSubmitResult,
 } from './model-quality-profile.js'
+
+// Canonical Central Engine Versioning
+export {
+  CURRENT_ENGINE_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ERA_TAG,
+  CURRENT_QUALITY_PROFILE_VERSION,
+  formatEngineEraLabel,
+  formatEngineVersion,
+} from './engine-version.js'
+export type { EraTag } from './engine-version.js'

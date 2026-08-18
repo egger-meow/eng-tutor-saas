@@ -19,6 +19,16 @@ export type {
   EraTag,
 } from '../server/admin-service.js'
 
+export {
+  CURRENT_ENGINE_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ERA_TAG,
+  CURRENT_QUALITY_PROFILE_VERSION,
+  formatEngineEraLabel,
+  formatEngineVersion,
+} from '../server/admin-service.js'
+
 export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'export'
 
 export interface HealthState {

@@ -57,3 +57,30 @@ Wave 4.2 completes the cross-wave pedagogical inheritance, active prompt invaria
   - `packages/pdf`: Done (Typecheck + TSC build clean)
   - `packages/worker`: Done (Typecheck + TSC build clean)
   - Lint: 0 errors
+
+---
+
+## 3. Central Engine Versioning (`CURRENT_ENGINE_VERSION = '1.0.1'`)
+
+1. **Centralized Engine Versioning**:
+   - Single source of truth in [engine-version.ts](file:///c:/IDEA/eng-tutor-saas/packages/generator/src/engine-version.ts):
+     - `CURRENT_ENGINE_VERSION = '1.0.1'`
+     - `CURRENT_SCHEMA_VERSION = '2.2.0'`
+     - `CURRENT_PROMPT_VERSION = '2.4.0'`
+     - `CURRENT_ERA_TAG = 'engine_v1'`
+     - `formatEngineEraLabel(era, engineVersion)`
+     - `formatEngineVersion(engineVersion)`
+2. **Provenance Persistence**:
+   - Stored in `CurriculumPackageSchema` metadata (`engineVersion?: string`), `ProfileProvenance`, `BundleMetadata`, and quality evidence check records.
+   - Populated deterministically during normalization in [normalize-curriculum-package.ts](file:///c:/IDEA/eng-tutor-saas/packages/generator/src/normalize-curriculum-package.ts).
+3. **Database Migration**:
+   - Migration [20260818040000_add_admin_submissions_engine_version.sql](file:///c:/IDEA/eng-tutor-saas/supabase/migrations/20260818040000_add_admin_submissions_engine_version.sql) updates `admin_get_curriculum_submissions` RPC to expose `engine_version`.
+4. **Admin UI & Observability**:
+   - Stable machine era key remains `'engine_v1'` / `'historical'`.
+   - UI display labels dynamically derive `Engine v1.0.1` (or historical per-submission versions `Engine v1.0.0`, etc.) using `formatEngineEraLabel` rather than static strings.
+   - Updated Timeline, Failure Intelligence, Operations Overview, and AI Dataset Export.
+5. **Verification**:
+   - `pnpm test`: 51/51 test files passed (324 tests).
+   - `pnpm typecheck`: 0 errors across all 5 workspace projects.
+   - `pnpm lint`: 0 errors.
+

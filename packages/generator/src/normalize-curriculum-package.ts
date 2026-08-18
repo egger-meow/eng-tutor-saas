@@ -1,3 +1,5 @@
+import { CURRENT_ENGINE_VERSION } from './engine-version.js'
+
 export function countWords(texts: string[]): number {
   return texts.join(' ').trim().split(/\s+/u).filter(Boolean).length
 }
@@ -155,6 +157,11 @@ export function normalizeCurriculumPackage(input: unknown): unknown {
   // Deterministically compute calibrated total lesson plan duration
   if (pkg.learningPlan && typeof pkg.learningPlan === 'object') {
     pkg.learningPlan.estimatedMinutes = computeDeterministicPlanMinutes(pkg)
+  }
+
+  // Ensure canonical engineVersion is present in metadata
+  if (pkg.metadata && typeof pkg.metadata === 'object' && !pkg.metadata.engineVersion) {
+    pkg.metadata.engineVersion = CURRENT_ENGINE_VERSION
   }
 
   return pkg

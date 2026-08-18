@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { AdminService, classifyQualityEra } from './admin-service.js'
+import {
+  AdminService,
+  classifyQualityEra,
+  CURRENT_ENGINE_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ERA_TAG,
+  formatEngineEraLabel,
+  formatEngineVersion,
+} from './admin-service.js'
 
 function createMockSupabaseClient(
   tableData: Record<string, any[]>,
@@ -970,6 +979,19 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(classifyQualityEra({ failureEvidence: { schemaVersion: '1.0.0' } })).toBe('historical')
       expect(classifyQualityEra({ ruleVersion: 'curriculum-rules/1.0.0' })).toBe('historical')
       expect(classifyQualityEra({})).toBe('historical')
+
+      // 4. Central Engine Versioning & Dynamic Label Formatting
+      expect(CURRENT_ENGINE_VERSION).toBe('1.0.1')
+      expect(CURRENT_SCHEMA_VERSION).toBe('2.2.0')
+      expect(CURRENT_PROMPT_VERSION).toBe('2.4.0')
+      expect(CURRENT_ERA_TAG).toBe('engine_v1')
+      expect(formatEngineVersion()).toBe('Engine v1.0.1')
+      expect(formatEngineVersion('1.0.0')).toBe('Engine v1.0.0')
+      expect(formatEngineEraLabel('engine_v1')).toBe('Engine v1.0.1')
+      expect(formatEngineEraLabel('engine_v1', '1.0.0')).toBe('Engine v1.0.0')
+      expect(formatEngineEraLabel('engine_v1', '1.0.1')).toBe('Engine v1.0.1')
+      expect(formatEngineEraLabel('historical')).toBe('Historical')
+      expect(formatEngineEraLabel('historical', '0.9.0')).toBe('Historical (v0.9.0)')
     })
 
     it('defaults Failure Intelligence to Engine v1 metrics while preserving legacy and pre-profile records under Historical', async () => {
@@ -1152,7 +1174,8 @@ describe('AdminService Authoritative Truth Layer', () => {
       const exportV1 = await service.getAiExportDataset('current')
       expect(exportV1.schemaVersion).toBe('2.2.0')
       expect(exportV1.provenance.era).toBe('current')
-      expect(exportV1.provenance.currentEraName).toBe('Engine v1')
+      expect(exportV1.provenance.currentEraName).toBe('Engine v1.0.1')
+      expect(exportV1.provenance.currentEngineVersion).toBe('1.0.1')
       expect(exportV1.provenance.currentSchemaVersion).toBe('2.2.0')
       expect(exportV1.provenance.currentPromptVersion).toBe('2.4.0')
       expect(exportV1.provenance.currentEvidenceCount).toBe(0)

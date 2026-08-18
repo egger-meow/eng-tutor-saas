@@ -1,5 +1,5 @@
 import React from 'react'
-import type { OperationsOverview as OperationsOverviewType } from '../../client/types.js'
+import { formatEngineVersion, CURRENT_ENGINE_VERSION, type OperationsOverview as OperationsOverviewType } from '../../client/types.js'
 
 interface OperationsOverviewProps {
   data: OperationsOverviewType | null
@@ -133,7 +133,7 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Finisher 審核管線狀態</span>
               <span className={`status-pill ${data.selectedEra === 'historical' ? 'warning' : data.selectedEra === 'all' ? 'info' : 'active'}`} style={{ fontSize: '10px' }}>
-                {data.selectedEra === 'historical' ? 'Historical' : data.selectedEra === 'all' ? 'All Eras' : 'Engine v1'}
+                {data.selectedEra === 'historical' ? 'Historical' : data.selectedEra === 'all' ? 'All Eras' : formatEngineVersion(CURRENT_ENGINE_VERSION)}
               </span>
             </div>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>GitHub Actions Finisher</span>
@@ -178,7 +178,7 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
           {finisherStats.eraBreakdown && (
             <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: '130px', padding: '8px 10px', background: 'var(--bg-elevated)', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.2)', fontSize: '11px' }}>
-                <div style={{ color: '#a7f3d0', fontWeight: 600, marginBottom: '2px' }}>⚡ Engine v1 (當前)</div>
+                <div style={{ color: '#a7f3d0', fontWeight: 600, marginBottom: '2px' }}>⚡ {formatEngineVersion(CURRENT_ENGINE_VERSION)} (當前)</div>
                 <div style={{ color: 'var(--text-muted)' }}>
                   通過: <strong>{finisherStats.eraBreakdown.engineV1.completed}</strong> | 退回: <strong style={{ color: finisherStats.eraBreakdown.engineV1.qualityRejected > 0 ? 'var(--status-rose)' : 'inherit' }}>{finisherStats.eraBreakdown.engineV1.qualityRejected}</strong> ({finisherStats.eraBreakdown.engineV1.rejectionRatePercent}%)
                 </div>

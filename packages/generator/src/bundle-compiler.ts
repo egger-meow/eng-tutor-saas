@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { CURRENT_ENGINE_VERSION } from './engine-version.js'
+
 const currentDir = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(currentDir, '../../..')
 export const GENERATOR_ROOT = resolve(currentDir, '..')
@@ -11,6 +13,7 @@ export interface BundleMetadata {
   bundleVersion: string
   schemaVersion: string
   promptVersion: string
+  engineVersion: string
   sourceHashes: Record<string, string>
   generatedAt: string
 }
@@ -127,6 +130,7 @@ export async function compileProductionBundle(
     bundleVersion: '2.4.0-prod',
     schemaVersion: '2.2.0',
     promptVersion: '2.4.0',
+    engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
   }
@@ -136,6 +140,7 @@ export async function compileProductionBundle(
     `bundleVersion: "${metadata.bundleVersion}"`,
     `schemaVersion: "${metadata.schemaVersion}"`,
     `promptVersion: "${metadata.promptVersion}"`,
+    `engineVersion: "${metadata.engineVersion}"`,
     `generatedAt: "${metadata.generatedAt}"`,
     'sourceHashes:',
     ...Object.entries(hashes).map(([file, hash]) => `  "${file}": "${hash}"`),

@@ -1,6 +1,25 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import {
+  CURRENT_ENGINE_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ERA_TAG,
+  CURRENT_QUALITY_PROFILE_VERSION,
+  formatEngineEraLabel,
+  formatEngineVersion,
+} from '@paper-english/generator/engine-version'
+
+export {
+  CURRENT_ENGINE_VERSION,
+  CURRENT_SCHEMA_VERSION,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ERA_TAG,
+  CURRENT_QUALITY_PROFILE_VERSION,
+  formatEngineEraLabel,
+  formatEngineVersion,
+}
 
 function loadRootEnv() {
   const possiblePaths = [
@@ -45,6 +64,7 @@ export type EraTag = 'engine_v1' | 'historical'
 export interface QualityEraItem {
   schemaVersion?: string | null
   promptVersion?: string | null
+  engineVersion?: string | null
   ruleVersion?: string | null
   failureEvidence?: any
   canonicalSource?: any
@@ -109,6 +129,18 @@ export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean 
   }
 
   return false
+}
+
+export function getEngineVersionFromItem(item: QualityEraItem): string | null {
+  if (item.engineVersion) return item.engineVersion
+  const meta = item.canonicalSource?.metadata
+  if (meta?.engineVersion) return meta.engineVersion
+  if (meta?.modelQualityProfile?.engineVersion) return meta.modelQualityProfile.engineVersion
+  const fe = item.failureEvidence
+  if (fe?.engineVersion) return fe.engineVersion
+  if (fe?.modelQualityProfile?.engineVersion) return fe.modelQualityProfile.engineVersion
+  if (item.rawRow?.engine_version) return item.rawRow.engine_version
+  return null
 }
 
 export function classifyQualityEra(item: QualityEraItem): EraTag {
@@ -223,9 +255,10 @@ export interface FailureIntelligence {
   dataSources: DataSourceStatus[]
   selectedEra: QualityEra
   eraBreakdown: {
-    currentEraName: 'Engine v1'
-    currentSchemaVersion: '2.2.0'
-    currentPromptVersion: '2.4.0'
+    currentEraName: string
+    currentEngineVersion: string
+    currentSchemaVersion: string
+    currentPromptVersion: string
     currentTotalFailures: number
     historicalTotalFailures: number
     allTotalFailures: number
@@ -268,6 +301,7 @@ export interface FailureIntelligence {
     sampleMessage: string
     suggestedRemedy: string
     era: EraTag
+    engineVersion?: string | null
   }>
   qualityRuleViolations: Array<{
     rule: string
@@ -276,6 +310,7 @@ export interface FailureIntelligence {
     description: string
     sampleFinding: string
     era: EraTag
+    engineVersion?: string | null
   }>
   dailyTrend: Array<{
     date: string
@@ -297,6 +332,7 @@ export interface FailureIntelligence {
     timestamp: string
     failureEvidence: Record<string, unknown> | null
     era: EraTag
+    engineVersion: string | null
     schemaVersion: string | null
     promptVersion: string | null
     modelName: string | null
@@ -444,6 +480,7 @@ export interface AiExportDataset {
     environment: string
     era: QualityEra
     currentEraName: string
+    currentEngineVersion: string
     currentSchemaVersion: string
     currentPromptVersion: string
     totalEvidenceCount: number
@@ -2012,9 +2049,10 @@ export class AdminService {
       provenance: {
         environment: 'production_database',
         era,
-        currentEraName: 'Engine v1',
-        currentSchemaVersion: '2.2.0',
-        currentPromptVersion: '2.4.0',
+        currentEraName: formatEngineVersion(CURRENT_ENGINE_VERSION),
+        currentEngineVersion: CURRENT_ENGINE_VERSION,
+        currentSchemaVersion: CURRENT_SCHEMA_VERSION,
+        currentPromptVersion: CURRENT_PROMPT_VERSION,
         totalEvidenceCount,
         currentEvidenceCount: failures.eraBreakdown.currentTotalFailures,
         historicalEvidenceCount: failures.eraBreakdown.historicalTotalFailures,
@@ -2135,9 +2173,10 @@ export class AdminService {
       sampleMessage: string
       suggestedRemedy: string
       era: EraTag
+      engineVersion?: string | null
     }> = {}
 
-    const qualityRules: Record<string, { count: number; category: string; description: string; sampleFinding: string; era: EraTag }> = {}
+    const qualityRules: Record<string, { count: number; category: string; description: string; sampleFinding: string; era: EraTag; engineVersion?: string | null }> = {}
     const dailyCounts: Record<string, { total: number; qualityRejected: number; technicalFailed: number; currentCount: number; historicalCount: number }> = {}
     const recentFailuresList: FailureIntelligence['recentFailures'] = []
 
@@ -2211,6 +2250,7 @@ export class AdminService {
         timestamp: job.created_at,
         failureEvidence: null,
         era: jobEra,
+        engineVersion: job.engine_version || null,
         schemaVersion: job.schema_version || null,
         promptVersion: job.prompt_version || null,
         modelName: job.model_name || null,
@@ -2291,6 +2331,7 @@ export class AdminService {
         timestamp: sub.submitted_at,
         failureEvidence: sub.failure_evidence,
         era: subEra,
+        engineVersion: sub.engine_version || (sub.canonical_source?.metadata?.engineVersion ?? sub.failure_evidence?.engineVersion ?? null),
         schemaVersion: sub.schema_version || (sub.failure_evidence?.schemaVersion ?? null),
         promptVersion: sub.prompt_version || (sub.failure_evidence?.promptVersion ?? null),
         modelName: sub.model_name || null,
@@ -2332,6 +2373,7 @@ export class AdminService {
       sampleMessage: data.sampleMessage,
       suggestedRemedy: data.suggestedRemedy,
       era: data.era,
+      engineVersion: data.engineVersion,
     })).sort((a, b) => b.count - a.count)
 
     const qualityRuleViolations: FailureIntelligence['qualityRuleViolations'] = Object.entries(qualityRules).map(([rule, data]) => ({
@@ -2341,6 +2383,7 @@ export class AdminService {
       description: data.description,
       sampleFinding: data.sampleFinding,
       era: data.era,
+      engineVersion: data.engineVersion,
     })).sort((a, b) => b.count - a.count)
 
     const dailyTrend: FailureIntelligence['dailyTrend'] = Object.entries(dailyCounts)
@@ -2359,9 +2402,10 @@ export class AdminService {
       dataSources,
       selectedEra: era,
       eraBreakdown: {
-        currentEraName: 'Engine v1',
-        currentSchemaVersion: '2.2.0',
-        currentPromptVersion: '2.4.0',
+        currentEraName: formatEngineVersion(CURRENT_ENGINE_VERSION),
+        currentEngineVersion: CURRENT_ENGINE_VERSION,
+        currentSchemaVersion: CURRENT_SCHEMA_VERSION,
+        currentPromptVersion: CURRENT_PROMPT_VERSION,
         currentTotalFailures,
         historicalTotalFailures,
         allTotalFailures,
@@ -2664,6 +2708,7 @@ export class AdminService {
           errorMessage: sub.error_message,
           findings: (sub.failure_evidence?.findings || sub.failure_evidence?.auditFindings || []) as any[],
           era: subEra,
+          engineVersion: sub.engine_version || (sub.canonical_source?.metadata?.engineVersion ?? sub.failure_evidence?.engineVersion ?? null),
           schemaVersion: sub.schema_version || (sub.failure_evidence?.schemaVersion ?? null),
           promptVersion: sub.prompt_version || (sub.failure_evidence?.promptVersion ?? null),
           modelName: sub.model_name || null,
@@ -2680,6 +2725,7 @@ export class AdminService {
         errorMessage: 'Claimed but no curriculum submission (認領逾時 / 未提交封包)',
         findings: [],
         era: 'engine_v1' as const,
+        engineVersion: null,
         schemaVersion: null,
         promptVersion: null,
         modelName: null,
