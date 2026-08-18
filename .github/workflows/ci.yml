@@ -6,15 +6,13 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: agent/fix-production-quality-stack
       - uses: pnpm/action-setup@v4
         with:
           version: 11.16.0
@@ -23,18 +21,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Compile and commit deterministic bundle
-        run: |
-          pnpm compile:bundle
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/generator/bundles/production-authoring-bundle.md
-          if git diff --cached --quiet; then
-            echo "Bundle already current"
-          else
-            git commit -m "chore: compile production authoring bundle"
-            git push
-          fi
       - name: Install Traditional Chinese PDF fonts
         run: |
           sudo apt-get update
