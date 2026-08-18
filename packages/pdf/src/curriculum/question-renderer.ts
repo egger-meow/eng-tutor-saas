@@ -1,11 +1,19 @@
 import type { CurriculumQuestion } from '@paper-english/generator'
 import { escapeHtml as h } from '../escape-html.js'
 
+const OPTION_PREFIX_REGEX = /^(?:\([A-Da-d]\)|\[[A-Da-d]\]|[A-Da-d][).:])\s*/u
+
+function cleanOptionText(text: string): string {
+  if (typeof text !== 'string') return text
+  return text.replace(OPTION_PREFIX_REGEX, '').trim()
+}
+
 function renderOptions(options: readonly string[]): string {
-  const isShort = options.every((opt) => opt.length <= 28)
+  const cleaned = options.map(cleanOptionText)
+  const isShort = cleaned.every((opt) => opt.length <= 28)
   const containerClass = isShort ? 'options-grid' : 'options-stack'
 
-  const optionItems = options.map((option, index) => {
+  const optionItems = cleaned.map((option, index) => {
     const marker = `(${String.fromCharCode(65 + index)})`
     return `<div class="option-item">
   <span class="option-marker">${marker}</span>

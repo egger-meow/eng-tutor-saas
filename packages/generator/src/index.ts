@@ -42,7 +42,7 @@ export {
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
-export { countWords, extractBlockTexts, normalizeCurriculumPackage } from './normalize-curriculum-package.js'
+export { countWords, extractBlockTexts, cleanOptionPrefix, normalizeCurriculumPackage } from './normalize-curriculum-package.js'
 
 // CAP Curriculum Maps & Coverage Tracking
 export {
@@ -70,3 +70,23 @@ export type { GrammarProgressionUnit } from './curriculum-maps/derived/grammar-p
 export { getSuggestedGradeForWord, getThemeForWord } from './curriculum-maps/derived/vocabulary-annotations.js'
 export { buildDiversityCapsule, extractHistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'
 export type { DiversityCapsule, HistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'
+
+// Model-Specific Pre-Submit Quality Profiles & Critic Layer
+export {
+  DEFAULT_QUALITY_PROFILES_DIR,
+  parseQualityProfileMarkdown,
+  normalizeModelIdentifier,
+  loadQualityProfileFromFile,
+  resolveQualityProfile,
+} from './quality-profile-loader.js'
+export type {
+  QualityProfile,
+  QualityProfileRule,
+  QualityProfileTargetArea,
+} from './quality-profile-loader.js'
+export { applyModelQualityProfile } from './model-quality-profile.js'
+export type {
+  ModelQualityProfileOptions,
+  ProfileProvenance,
+  PreSubmitResult,
+} from './model-quality-profile.js'

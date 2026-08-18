@@ -16,6 +16,17 @@ export function extractBlockTexts(blocks: any[]): string[] {
   return texts
 }
 
+const OPTION_PREFIX_REGEX = /^(?:\([A-Da-d]\)|\[[A-Da-d]\]|[A-Da-d][).:])\s*/u
+
+/**
+ * Strips accidental option prefix markers such as `(A) `, `(B) `, `A) `, `A. `, `A: `, `[A] `
+ * so options always contain only the clean answer content and never render as `(A) (A) ...` or `(A) A) ...`.
+ */
+export function cleanOptionPrefix(text: string): string {
+  if (typeof text !== 'string') return text
+  return text.replace(OPTION_PREFIX_REGEX, '').trim()
+}
+
 /**
  * Deterministic Normalization Layer
  *
@@ -23,7 +34,8 @@ export function extractBlockTexts(blocks: any[]): string[] {
  * Computer may calculate. Computer may not invent pedagogy.
  *
  * Automatically computes machine-derivable fields (such as actual wordCount)
- * so that LLMs are never failed or retried due to arithmetic counting discrepancies.
+ * and strips redundant formatting artifacts (such as duplicated option letter prefixes)
+ * so that LLMs are never failed or retried due to arithmetic or formatting discrepancies.
  */
 export function normalizeCurriculumPackage(input: unknown): unknown {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return input
@@ -41,6 +53,37 @@ export function normalizeCurriculumPackage(input: unknown): unknown {
       pkg.studentLesson.reading.wordCount = countWords(texts)
     } else if (Array.isArray(pkg.studentLesson.reading.paragraphs)) {
       pkg.studentLesson.reading.wordCount = countWords(pkg.studentLesson.reading.paragraphs)
+    }
+  }
+
+  // Deterministically strip duplicate option prefixes across practice & homework questions
+  if (pkg.studentLesson && typeof pkg.studentLesson === 'object') {
+    if (Array.isArray(pkg.studentLesson.practice)) {
+      for (const section of pkg.studentLesson.practice) {
+        if (section && typeof section === 'object' && Array.isArray(section.questions)) {
+          for (const question of section.questions) {
+            if (question && Array.isArray(question.options)) {
+              question.options = question.options.map((opt: unknown) =>
+                typeof opt === 'string' ? cleanOptionPrefix(opt) : opt,
+              )
+            }
+          }
+        }
+      }
+    }
+
+    if (
+      pkg.studentLesson.homework &&
+      typeof pkg.studentLesson.homework === 'object' &&
+      Array.isArray(pkg.studentLesson.homework.questions)
+    ) {
+      for (const question of pkg.studentLesson.homework.questions) {
+        if (question && Array.isArray(question.options)) {
+          question.options = question.options.map((opt: unknown) =>
+            typeof opt === 'string' ? cleanOptionPrefix(opt) : opt,
+          )
+        }
+      }
     }
   }
 
