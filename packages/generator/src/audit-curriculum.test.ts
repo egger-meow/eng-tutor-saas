@@ -177,7 +177,7 @@ describe('curriculum audit & lexical contract', () => {
     expect(lexicalFinding).toBeUndefined()
   })
 
-  it('verifies workload calibration bounds and flags under-budget packages', () => {
+  it('verifies workload calibration against global sanity bounds (55 / 140 minutes)', () => {
     const pkg = canonicalPackage()
     // Make content valid (12 total items) but minimal workload (all MC, 125 words, 7 vocab -> ~42 minutes)
     pkg.studentLesson.reading.blocks = [
@@ -192,7 +192,6 @@ describe('curriculum audit & lexical contract', () => {
     ]
     pkg.studentLesson.vocabulary = pkg.studentLesson.vocabulary.slice(0, 7)
 
-    // Convert all questions to 0-writingLine MC items so computed time is minimal
     for (const stage of pkg.studentLesson.practice) {
       for (const q of stage.questions) {
         q.itemType = 'grammar'
@@ -206,10 +205,100 @@ describe('curriculum audit & lexical contract', () => {
       q.writingLines = 0
     }
 
+    // 1. Lower global sanity bound (< 55 minutes)
     const reportLow = auditCurriculumPackage(pkg)
     const lowFinding = reportLow.findings.find((f) => f.dimension === 'workload-calibration')
     expect(lowFinding).toBeDefined()
     expect(lowFinding?.severity).toBe('warning')
+    expect(lowFinding?.message).toContain('最低安全下限 (55 分鐘)')
+
+    // 2. Upper global sanity bound (> 140 minutes)
+    const heavyPkg = canonicalPackage()
+    heavyPkg.studentLesson.instruction = [
+      heavyPkg.studentLesson.instruction[0],
+      { ...heavyPkg.studentLesson.instruction[0], id: 'inst-2', titleZh: '進階語法 2' },
+      { ...heavyPkg.studentLesson.instruction[0], id: 'inst-3', titleZh: '進階語法 3' },
+    ]
+
+    for (const stage of heavyPkg.studentLesson.practice) {
+      stage.questions = Array.from({ length: 6 }, (_, i) => {
+        const qId = `${stage.stage.slice(0, 2).toUpperCase()}_Q${i + 1}`
+        if (stage.stage === 'cap-transfer' && i === 0) {
+          return {
+            id: qId,
+            targetIds: ['grammar-do-does', 'vocab-experiment', 'reading-inference'],
+            itemType: 'inference' as const,
+            prompt: 'What does Mina do in the garden?',
+            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+            writingLines: 0,
+            difficulty: 'on-level' as const,
+          }
+        }
+        return {
+          id: qId,
+          targetIds: ['grammar-do-does', 'vocab-experiment', 'reading-inference'],
+          itemType: 'sentence-production' as const,
+          prompt: 'Write a full sentence about the garden experiment.',
+          writingLines: 4,
+          difficulty: 'stretch' as const,
+        }
+      })
+    }
+
+    heavyPkg.studentLesson.homework.questions = Array.from({ length: 6 }, (_, i) => {
+      const qId = `HW_Q${i + 1}`
+      return {
+        id: qId,
+        targetIds: ['grammar-do-does', 'vocab-experiment', 'reading-inference'],
+        itemType: 'sentence-production' as const,
+        prompt: 'Write a full sentence about your plan.',
+        writingLines: 4,
+        difficulty: 'stretch' as const,
+      }
+    })
+
+    const allQuestions = [
+      ...heavyPkg.studentLesson.practice.flatMap((s: { questions: any[] }) => s.questions),
+      ...heavyPkg.studentLesson.homework.questions,
+    ]
+    heavyPkg.answers = allQuestions.map((q: { id: string }) => ({
+      questionId: q.id,
+      answer: 'The plants grow well in the sun.',
+      acceptedAnswers: ['The plants grow well in the sun.'],
+      explanationZh: '依據課文第一段明確說明。',
+      likelyMisconceptionZh: null,
+      followUpZh: null,
+    }))
+
+    const reportHigh = auditCurriculumPackage(heavyPkg)
+    const highFinding = reportHigh.findings.find((f) => f.dimension === 'workload-calibration')
+    expect(highFinding).toBeDefined()
+    expect(highFinding?.severity).toBe('warning')
+    expect(highFinding?.message).toContain('最高安全上限 (140 分鐘)')
+  })
+
+  it('verifies workload calibration against learner declared weekly budget (±20%)', () => {
+    const pkg = canonicalPackage()
+    // Canonical package has computed minutes = 69 (within global bounds 55-140)
+
+    // 1. Declared budget = 80 min (±20% range is [64, 96]) -> 69 min is matched, no finding
+    const reportMatched = auditCurriculumPackage(pkg, 80)
+    const matchedFinding = reportMatched.findings.find((f) => f.dimension === 'workload-calibration')
+    expect(matchedFinding).toBeUndefined()
+
+    // 2. Declared budget = 100 min (±20% range is [80, 120]) -> 69 min < 80 min (under-budget warning)
+    const reportUnder = auditCurriculumPackage(pkg, 100)
+    const underFinding = reportUnder.findings.find((f) => f.dimension === 'workload-calibration')
+    expect(underFinding).toBeDefined()
+    expect(underFinding?.severity).toBe('warning')
+    expect(underFinding?.message).toContain('低於孩子每週設定預算 (100 分鐘 -20% = 80 分鐘)')
+
+    // 3. Declared budget = 50 min (±20% range is [40, 60]) -> 69 min > 60 min (over-budget warning)
+    const reportOver = auditCurriculumPackage(pkg, { declaredWeeklyMinutes: 50 })
+    const overFinding = reportOver.findings.find((f) => f.dimension === 'workload-calibration')
+    expect(overFinding).toBeDefined()
+    expect(overFinding?.severity).toBe('warning')
+    expect(overFinding?.message).toContain('高於孩子每週設定預算 (50 分鐘 +20% = 60 分鐘)')
   })
 
   it('validates presence of core evidence organizer task in independent practice stage', () => {

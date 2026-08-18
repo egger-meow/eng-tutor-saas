@@ -170,7 +170,16 @@ function words(value: string): number { return value.trim().split(/\s+/u).filter
 function cjk(value: string): number { return (value.match(/[\u3400-\u9fff]/gu) ?? []).length }
 
 /** Deterministic publish gate. This complements (never replaces) the independent LLM critic. */
-export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
+export function auditCurriculumPackage(
+  input: unknown,
+  declaredBudgetMinutes?: number | { declaredWeeklyMinutes?: number; declaredBudgetMinutes?: number },
+): CurriculumAuditReport {
+  const declaredBudget = typeof declaredBudgetMinutes === 'number'
+    ? declaredBudgetMinutes
+    : typeof declaredBudgetMinutes === 'object' && declaredBudgetMinutes !== null
+      ? (declaredBudgetMinutes.declaredWeeklyMinutes ?? declaredBudgetMinutes.declaredBudgetMinutes)
+      : undefined
+
   const parsed = validateCurriculumPackage(input)
   if (!parsed.success) {
     return {
@@ -198,7 +207,6 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   if (!pkg.studentLesson.practice.some((stage) => stage.stage === 'retrieval')) add('semantic-critical', 'retrieval', 'critical', '缺少隔天或延遲提取練習。')
   if (questions.length > 70) add('auto-derived', 'token-efficiency', 'warning', '題目超過 70 題；請刪除重複題並保留能區分學習狀態的證據。')
 
-  // Genre-Block Structural & Semantic Consistency
   if (pkg.studentLesson.reading.genre === 'dialogue' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'dialogue')) {
     add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為對話 (dialogue)，但內容未包含任何 dialogue blocks。')
   }
@@ -222,8 +230,6 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
     }
   }
 
-  // 2. Comprehensive Lexical Ceiling & Hidden Difficulty Scan
-  // Scan across reading, worked examples, practice prompts/options, and homework
   const studentFacingTexts: string[] = [
     rawPassageText,
     ...pkg.studentLesson.instruction.flatMap((inst) => inst.workedExamples.map((ex) => ex.example)),
@@ -293,12 +299,26 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
     }
   }
 
-  // 4. Global Deterministic Workload Calibration
+  // 4. Deterministic Workload Calibration
   if (typeof pkg.learningPlan.estimatedMinutes === 'number') {
-    if (pkg.learningPlan.estimatedMinutes < 55) {
-      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${pkg.learningPlan.estimatedMinutes} 分鐘) 顯著低於正常每週學習量，請擴充閱讀篇幅、核心單字或轉移寫作任務。`)
-    } else if (pkg.learningPlan.estimatedMinutes > 140) {
-      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${pkg.learningPlan.estimatedMinutes} 分鐘) 過高，可能造成國中生認知負荷過重，請適度收斂題目數量。`)
+    const minutes = pkg.learningPlan.estimatedMinutes
+
+    // 4.1 Global Sanity Bounds (55 / 140)
+    if (minutes < 55) {
+      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 顯著低於全系統最低安全下限 (55 分鐘)，無法確保每週基礎學習效果。`)
+    } else if (minutes > 140) {
+      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 高於全系統最高安全上限 (140 分鐘)，可能造成國中生認知負荷過重。`)
+    }
+
+    // 4.2 Learner Declared Weekly Budget Calibration (±20%)
+    if (typeof declaredBudget === 'number' && declaredBudget > 0) {
+      const lowerBudgetBound = declaredBudget * 0.8
+      const upperBudgetBound = declaredBudget * 1.2
+      if (minutes < lowerBudgetBound) {
+        add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 低於孩子每週設定預算 (${declaredBudget} 分鐘 -20% = ${Math.round(lowerBudgetBound)} 分鐘)，請擴充閱讀篇幅、核心單字或轉移寫作任務。`)
+      } else if (minutes > upperBudgetBound) {
+        add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 高於孩子每週設定預算 (${declaredBudget} 分鐘 +20% = ${Math.round(upperBudgetBound)} 分鐘)，可能造成孩子負擔過重，請適度收斂題目數量。`)
+      }
     }
   }
 
