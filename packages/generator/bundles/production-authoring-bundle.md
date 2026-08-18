@@ -125,16 +125,6 @@ It defines standard pre-submit critique invariants and provides a clean containe
 
 ## Active Quality Rules
 
-<!-- No model-specific overrides by default; relies on global curriculum validator and quality rubric -->
-
-## Human-Maintained Observations
-
-<!--
-Human operators: record new model observations here before promoting to active rules.
-Format:
-- [YYYY-MM-DD] [Model-Name] Observation description...
--->
-
 ### Bundled Gemini profile
 ---
 profileVersion: "1.1.0"
@@ -199,13 +189,6 @@ Before submission, specifically inspect:
   - Verify every multiple-choice correct option and Parent rationale is directly entailed by the source text.
   - Never combine separately mentioned true details into a new unsupported claim or composite statement.
   - Global Answer Integrity: Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
-
-## Human-Maintained Observations
-
-<!--
-Human operators: record observed model behaviors here.
-Repeated or critical patterns can be promoted into Active Quality Rules above.
--->
 
 ## 4. Curriculum Package Schema
 ```typescript
