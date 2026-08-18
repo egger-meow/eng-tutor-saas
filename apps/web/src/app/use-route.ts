@@ -43,5 +43,5 @@ export function handleInternalLink(event: MouseEvent<HTMLAnchorElement>) {
   const href = event.currentTarget.getAttribute('href')
   if (!href?.startsWith('/')) return
   event.preventDefault()
-  navigate(href)
+  navigate(stripBasePath(href, import.meta.env.BASE_URL))
 }
