@@ -45,6 +45,7 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
     'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 'should', 'would', 'might', 'must',
     's', 're', 've', 'll', 'd', 'm',
     'option', 'opt', 'recall', 'blank', 'item', 'choice', 'passage', 'sentence', 'statement', 'question',
+    'answer', 'code',
   ].includes(w)) {
     return true
   }

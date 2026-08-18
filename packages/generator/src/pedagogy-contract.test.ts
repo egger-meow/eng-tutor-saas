@@ -109,8 +109,8 @@ describe('Wave 4.2 Active Prompt Invariant Contract (v2.4.0 Strict Inheritance)'
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.0.0').success).toBe(true)
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
-    // Bundle compiled with 2.4.0-prod and schema 2.2.0
-    expect(bundle).toContain('bundleVersion: "2.4.0-prod"')
+    // Bundle compiled with 2.4.1-prod and schema 2.2.0
+    expect(bundle).toContain('bundleVersion: "2.4.1-prod"')
     expect(bundle).toContain('schemaVersion: "2.2.0"')
   })
 })
