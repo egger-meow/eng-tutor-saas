@@ -21,25 +21,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Materialize deterministic production fixes
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('apps/admin/src/client/types.ts')
-          s = p.read_text()
-          needle = "  if (isSchema220 && isPrompt240) {\n    return 'engine_v1'\n  }"
-          replacement = "  const hasProfile = hasModelQualityProfileProvenance(item)\n  const hasEngineVersion = Boolean(getEngineVersionFromItem(item))\n\n  // Profile provenance normally identifies current evidence. If that provenance itself is broken,\n  // the admin RPC's authoritative engine_version keeps the current submission visible in Current.\n  if (isSchema220 && isPrompt240 && (hasProfile || hasEngineVersion)) {\n    return 'engine_v1'\n  }"
-          if needle not in s:
-              raise SystemExit('expected classifier condition not found')
-          p.write_text(s.replace(needle, replacement, 1))
-          PY
-          pnpm compile:bundle
-      - uses: actions/upload-artifact@v4
-        with:
-          name: production-quality-final-files
-          path: |
-            apps/admin/src/client/types.ts
-            packages/generator/bundles/production-authoring-bundle.md
       - name: Install Traditional Chinese PDF fonts
         run: |
           sudo apt-get update
