@@ -14,6 +14,7 @@ import type {
   RecordTestFeedbackResult,
   ResetTestChildResult,
   TestPdfSignedUrlResult,
+  QualityEra,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -50,8 +51,8 @@ async function postJson<T>(url: string, body: Record<string, unknown>): Promise<
 
 export const adminApi = {
   getHealth: () => fetchJson<HealthState>('/api/health'),
-  getOverview: () => fetchJson<OperationsOverview>('/api/operations/overview'),
-  getFailures: () => fetchJson<FailureIntelligence>('/api/intelligence/failures'),
+  getOverview: (era?: QualityEra) => fetchJson<OperationsOverview>(`/api/operations/overview${era ? `?era=${era}` : ''}`),
+  getFailures: (era?: QualityEra) => fetchJson<FailureIntelligence>(`/api/intelligence/failures${era ? `?era=${era}` : ''}`),
   getFeedback: () => fetchJson<ParentFeedbackIntelligence>('/api/intelligence/feedback'),
   getProductFeedback: () => fetchJson<ProductFeedbackIntelligence>('/api/intelligence/product-feedback'),
   getTimeline: (childId?: string, week?: string) => {
@@ -61,7 +62,7 @@ export const adminApi = {
     const qs = params.toString()
     return fetchJson<ChildWeekTimeline>(`/api/timeline${qs ? `?${qs}` : ''}`)
   },
-  getAiExport: () => fetchJson<AiExportDataset>('/api/export/ai-dataset'),
+  getAiExport: (era?: QualityEra) => fetchJson<AiExportDataset>(`/api/export/ai-dataset${era ? `?era=${era}` : ''}`),
   grantJobRetry: (jobId: string) => postJson<GrantRetryResult>('/api/jobs/grant-retry', { jobId }),
 
   // Generation Test Mode API

@@ -30,6 +30,8 @@ export const App: React.FC = () => {
     setTimelineChildId,
     timelineWeek,
     setTimelineWeek,
+    qualityEra,
+    setQualityEra,
   } = useAdminData(activeTab, 30)
 
   const handleDrillDownTimeline = (childId: string, week?: string) => {
@@ -95,6 +97,8 @@ export const App: React.FC = () => {
             {activeTab === 'failures' && (
               <FailureIntelligenceView
                 data={failures}
+                currentEra={qualityEra}
+                onSelectEra={setQualityEra}
                 onDrillDownTimeline={handleDrillDownTimeline}
               />
             )}
@@ -124,6 +128,8 @@ export const App: React.FC = () => {
             {activeTab === 'export' && (
               <AiDatasetExportView
                 data={aiExport}
+                currentEra={qualityEra}
+                onSelectEra={setQualityEra}
               />
             )}
           </>

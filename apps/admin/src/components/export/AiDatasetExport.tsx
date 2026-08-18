@@ -1,11 +1,17 @@
 import React, { useState } from 'react'
-import type { AiExportDataset as AiExportDatasetType } from '../../client/types.js'
+import type { AiExportDataset as AiExportDatasetType, QualityEra } from '../../client/types.js'
 
 interface AiDatasetExportProps {
   data: AiExportDatasetType | null
+  currentEra?: QualityEra
+  onSelectEra?: (era: QualityEra) => void
 }
 
-export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) => {
+export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
+  data,
+  currentEra = 'current',
+  onSelectEra,
+}) => {
   const [copied, setCopied] = useState(false)
 
   if (!data) return <div>讀取中...</div>
@@ -27,7 +33,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `paper-english-ai-dataset-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `paper-english-ai-dataset-${currentEra}-${new Date().toISOString().slice(0, 10)}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -36,6 +42,78 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
 
   return (
     <div>
+      {/* Quality Era Selector for Export */}
+      {onSelectEra && (
+        <div className="cockpit-card" style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 700, fontSize: '14px', color: '#f8fafc' }}>
+                  匯出資料集品質世代 (Export Era Scope)
+                </span>
+                <span className={`status-pill ${currentEra === 'current' ? 'active' : currentEra === 'historical' ? 'warning' : 'pending'}`}>
+                  {currentEra === 'current' ? 'Engine v1' : currentEra === 'historical' ? 'Historical' : 'All Eras'}
+                </span>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {currentEra === 'current' ? (
+                  <span>⚡ 匯出 <strong>Engine v1</strong> 證據（Schema 2.2.0 · Prompt 2.4.0 · Model Quality Profiles）</span>
+                ) : currentEra === 'historical' ? (
+                  <span>📜 匯出歷史封存版本證據</span>
+                ) : (
+                  <span>🌐 匯出全世代合併證據資料集</span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                className={`refresh-btn ${currentEra === 'current' ? 'active' : ''}`}
+                style={{
+                  background: currentEra === 'current' ? '#065f46' : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: currentEra === 'current' ? '#059669' : 'var(--border-subtle)',
+                  color: currentEra === 'current' ? '#a7f3d0' : 'var(--text-muted)',
+                  fontWeight: currentEra === 'current' ? 700 : 500,
+                  fontSize: '12px',
+                  padding: '5px 12px',
+                }}
+                onClick={() => onSelectEra('current')}
+              >
+                ⚡ Engine v1
+              </button>
+              <button
+                className={`refresh-btn ${currentEra === 'historical' ? 'active' : ''}`}
+                style={{
+                  background: currentEra === 'historical' ? '#4c1d95' : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: currentEra === 'historical' ? '#7c3aed' : 'var(--border-subtle)',
+                  color: currentEra === 'historical' ? '#ddd6fe' : 'var(--text-muted)',
+                  fontWeight: currentEra === 'historical' ? 700 : 500,
+                  fontSize: '12px',
+                  padding: '5px 12px',
+                }}
+                onClick={() => onSelectEra('historical')}
+              >
+                📜 歷史版本
+              </button>
+              <button
+                className={`refresh-btn ${currentEra === 'all' ? 'active' : ''}`}
+                style={{
+                  background: currentEra === 'all' ? '#1e3a8a' : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: currentEra === 'all' ? '#2563eb' : 'var(--border-subtle)',
+                  color: currentEra === 'all' ? '#bfdbfe' : 'var(--text-muted)',
+                  fontWeight: currentEra === 'all' ? 700 : 500,
+                  fontSize: '12px',
+                  padding: '5px 12px',
+                }}
+                onClick={() => onSelectEra('all')}
+              >
+                🌐 全部世代
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Introduction Card */}
       <div className="cockpit-card featured" style={{ marginBottom: '20px' }}>
         <div className="section-title">
@@ -103,11 +181,9 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
           </div>
           <div className="kpi-value">{data.provenance.totalEvidenceCount}</div>
           <div className="kpi-subtext" style={{ fontSize: '11px', lineHeight: '1.4' }}>
-            <span>Models: <strong>{data.modelNames?.join(', ') || 'None'}</strong></span>
+            <span>Era: <strong>{data.provenance.currentEraName || 'Engine v1'}</strong> (v{data.provenance.currentSchemaVersion} / p{data.provenance.currentPromptVersion})</span>
             <br />
-            <span>Generators: <strong>{data.generatorVersions?.join(', ') || 'None'}</strong></span>
-            <br />
-            <span>Rules: <strong>{data.ruleVersions?.join(', ') || 'None'}</strong></span>
+            <span>Engine v1: <strong>{data.provenance.currentEvidenceCount}</strong> | 歷史: <strong>{data.provenance.historicalEvidenceCount}</strong></span>
           </div>
         </div>
       </div>
@@ -116,7 +192,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({ data }) =>
       <div className="cockpit-card">
         <div className="section-title">
           <span>標準 JSON 資料集預覽 (Sanitized AI Dataset Output)</span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Schema Version: {data.schemaVersion}</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Schema Version: {data.schemaVersion} · Era: {data.provenance.era || 'current'}</span>
         </div>
 
         <div style={{ marginTop: '12px' }}>

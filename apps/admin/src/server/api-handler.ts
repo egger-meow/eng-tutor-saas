@@ -266,14 +266,16 @@ export async function handleApiRequest(
       }
 
       case '/api/operations/overview': {
-        const data = await service.getOperationsOverview()
+        const era = (parsedUrl.query.era as any) || 'current'
+        const data = await service.getOperationsOverview(era)
         res.statusCode = 200
         res.end(JSON.stringify(data))
         return true
       }
 
       case '/api/intelligence/failures': {
-        const data = await service.getFailureIntelligence()
+        const era = (parsedUrl.query.era as any) || 'current'
+        const data = await service.getFailureIntelligence(era)
         res.statusCode = 200
         res.end(JSON.stringify(data))
         return true
@@ -303,7 +305,8 @@ export async function handleApiRequest(
       }
 
       case '/api/export/ai-dataset': {
-        const data = await service.getAiExportDataset()
+        const era = (parsedUrl.query.era as any) || 'current'
+        const data = await service.getAiExportDataset(era)
         res.statusCode = 200
         res.end(JSON.stringify(data, null, 2))
         return true

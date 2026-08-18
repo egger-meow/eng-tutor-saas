@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AdminService } from './admin-service.js'
+import { AdminService, classifyQualityEra } from './admin-service.js'
 
 function createMockSupabaseClient(
   tableData: Record<string, any[]>,
@@ -201,8 +201,8 @@ describe('AdminService Authoritative Truth Layer', () => {
         { capacity: 100, status: 'open', founding_limit: 30 },
       ],
       curriculum_submissions: [
-        { job_id: 'job-1', authoring_attempt: 1, status: 'quality_rejected' },
-        { job_id: 'job-1', authoring_attempt: 2, status: 'completed' },
+        { job_id: 'job-1', authoring_attempt: 1, status: 'quality_rejected', schema_version: '2.2.0', prompt_version: '2.4.0' },
+        { job_id: 'job-1', authoring_attempt: 2, status: 'completed', schema_version: '2.2.0', prompt_version: '2.4.0' },
       ],
     })
 
@@ -263,6 +263,8 @@ describe('AdminService Authoritative Truth Layer', () => {
             error_code: 'CANONICAL_PROMPT_CLIPPED',
             error_message: 'Prompt height exceeded 64px bounding box',
             attempt_count: 2,
+            schema_version: '2.2.0',
+            prompt_version: '2.4.0',
             created_at: '2026-08-17T01:00:00Z',
           },
         ],
@@ -278,6 +280,8 @@ describe('AdminService Authoritative Truth Layer', () => {
               status: 'quality_rejected',
               error_code: 'QUALITY_REJECTED',
               error_message: 'Quality rubric violation',
+              schema_version: '2.2.0',
+              prompt_version: '2.4.0',
               failure_evidence: {
                 findings: [
                   { rule: 'Lexical Ceiling Guard', message: 'Exceeded CEFR B1 limit: meticulous' },
@@ -289,6 +293,8 @@ describe('AdminService Authoritative Truth Layer', () => {
               job_id: 'job-err-3',
               authoring_attempt: 1,
               status: 'completed',
+              schema_version: '2.2.0',
+              prompt_version: '2.4.0',
               submitted_at: '2026-08-17T03:00:00Z',
             },
           ],
@@ -437,7 +443,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     const service = new AdminService({ client: mockClient })
     const dataset = await service.getAiExportDataset()
 
-    expect(dataset.schemaVersion).toBe('1.0.0')
+    expect(dataset.schemaVersion).toBe('2.2.0')
     expect(dataset.taxonomyVersion).toBe('cap-2.2.0')
     expect(dataset.ruleVersions).toContain('curriculum-rules/1.0.0')
     expect(dataset.generatorVersions).toContain('pdf-page-break-fix')
@@ -884,5 +890,212 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(parentPdfRes.signedUrl).toContain(`${testChildId}/2026-08-17_parent.pdf`)
     })
   })
+
+  describe('Quality Eras Refactor & Version-Aware Evidence Segmentation', () => {
+    it('correctly classifies items into Engine v1 vs Historical era based on Schema 2.2.0 & Prompt 2.4.0', () => {
+      // 1. Engine v1 submissions
+      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: '2.4.0' })).toBe('engine_v1')
+      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: '2.4.0-prod' })).toBe('engine_v1')
+      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: 'prompt/2.4.0' })).toBe('engine_v1')
+      expect(classifyQualityEra({ failureEvidence: { schemaVersion: '2.2.0', promptVersion: '2.4.0' } })).toBe('engine_v1')
+      expect(classifyQualityEra({ canonicalSource: { metadata: { schemaVersion: '2.2.0', promptVersion: '2.4.0' } } })).toBe('engine_v1')
+      expect(classifyQualityEra({ schemaVersion: '2.2.0', ruleVersion: '2.2.0' })).toBe('engine_v1')
+
+      // 2. Historical / Legacy submissions
+      expect(classifyQualityEra({ schemaVersion: '1.0.0', promptVersion: '1.0.0' })).toBe('historical')
+      expect(classifyQualityEra({ schemaVersion: '2.0.0', promptVersion: '2.0.0' })).toBe('historical')
+      expect(classifyQualityEra({ schemaVersion: '2.1.0', promptVersion: '2.3.0' })).toBe('historical')
+      expect(classifyQualityEra({ failureEvidence: { schemaVersion: '1.0.0' } })).toBe('historical')
+      expect(classifyQualityEra({ ruleVersion: 'curriculum-rules/1.0.0' })).toBe('historical')
+      expect(classifyQualityEra({})).toBe('historical')
+    })
+
+    it('defaults Failure Intelligence to Engine v1 metrics while preserving all legacy records under Historical', async () => {
+      const legacySubmissions = [
+        {
+          job_id: 'job-legacy-1',
+          child_id: 'c1',
+          authoring_attempt: 1,
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Legacy schema mismatch on commonMistakes',
+          schema_version: '1.0.0',
+          prompt_version: '1.0.0',
+          submitted_at: '2026-08-14T00:00:00Z',
+          failure_evidence: { schemaVersion: '1.0.0', findings: [{ rule: 'LEGACY_FORMAT', message: 'Wrong schema' }] },
+        },
+        {
+          job_id: 'job-legacy-2',
+          child_id: 'c1',
+          authoring_attempt: 2,
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Legacy prompt ceiling violation',
+          schema_version: '2.0.0',
+          prompt_version: '2.1.0',
+          submitted_at: '2026-08-14T01:00:00Z',
+          failure_evidence: { schemaVersion: '2.0.0', findings: [{ rule: 'CEILING_EXCEEDED', message: 'Too hard' }] },
+        },
+        {
+          job_id: 'job-legacy-3',
+          child_id: 'c2',
+          authoring_attempt: 1,
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          schema_version: '2.0.0',
+          prompt_version: '2.0.0',
+          submitted_at: '2026-08-14T02:00:00Z',
+        },
+      ]
+
+      const engineV1Submissions = [
+        {
+          job_id: 'job-enginev1-1',
+          child_id: 'c1',
+          authoring_attempt: 1,
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          submitted_at: '2026-08-17T00:00:00Z',
+        },
+        {
+          job_id: 'job-enginev1-2',
+          child_id: 'c2',
+          authoring_attempt: 1,
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          submitted_at: '2026-08-17T01:00:00Z',
+        },
+      ]
+
+      const allSubmissions = [...legacySubmissions, ...engineV1Submissions]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          generation_jobs: [
+            { id: 'job-legacy-1', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '1.0.0', prompt_version: '1.0.0' },
+            { id: 'job-legacy-2', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '2.0.0', prompt_version: '2.1.0' },
+            { id: 'job-legacy-3', child_id: 'c2', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '2.0.0', prompt_version: '2.0.0' },
+            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+            { id: 'job-enginev1-2', child_id: 'c2', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+          ],
+          children: [
+            { id: 'c1', display_name: '學員 A' },
+            { id: 'c2', display_name: '學員 B' },
+          ],
+        },
+        {},
+        {
+          admin_get_curriculum_submissions: () => {
+            return { data: allSubmissions, error: null }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+
+      // 1. Default Era (Engine v1)
+      const currentFailures = await service.getFailureIntelligence()
+      expect(currentFailures.selectedEra).toBe('current')
+      expect(currentFailures.totalFailures).toBe(0)
+      expect(currentFailures.failureRatePercent).toBe(0)
+      expect(currentFailures.finisherStats.rejectionRatePercent).toBe(0)
+      expect(currentFailures.finisherStats.qualityRejectedSubmissions).toBe(0)
+      expect(currentFailures.recentFailures.length).toBe(0)
+      expect(currentFailures.eraBreakdown.currentTotalFailures).toBe(0)
+      expect(currentFailures.eraBreakdown.historicalTotalFailures).toBe(2)
+      expect(currentFailures.eraBreakdown.allTotalFailures).toBe(2)
+
+      // 2. Historical Era
+      const historicalFailures = await service.getFailureIntelligence('historical')
+      expect(historicalFailures.selectedEra).toBe('historical')
+      expect(historicalFailures.totalFailures).toBe(2)
+      expect(historicalFailures.finisherStats.qualityRejectedSubmissions).toBe(2)
+      expect(historicalFailures.recentFailures.length).toBe(2)
+      expect(historicalFailures.recentFailures[0].era).toBe('historical')
+
+      // 3. All Eras
+      const allFailures = await service.getFailureIntelligence('all')
+      expect(allFailures.selectedEra).toBe('all')
+      expect(allFailures.totalFailures).toBe(2)
+      expect(allFailures.recentFailures.length).toBe(2)
+    })
+
+    it('provides clear Quality Era provenance and tags in AI Dataset Export', async () => {
+      const allSubmissions = [
+        {
+          job_id: 'job-legacy-1',
+          child_id: 'c1',
+          authoring_attempt: 1,
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Legacy format issue',
+          schema_version: '1.0.0',
+          prompt_version: '1.0.0',
+          submitted_at: '2026-08-14T00:00:00Z',
+          failure_evidence: { schemaVersion: '1.0.0', findings: [{ rule: 'LEGACY_FORMAT', message: 'Wrong schema' }] },
+        },
+        {
+          job_id: 'job-enginev1-1',
+          child_id: 'c1',
+          authoring_attempt: 1,
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          submitted_at: '2026-08-17T00:00:00Z',
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          generation_jobs: [
+            { id: 'job-legacy-1', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '1.0.0', prompt_version: '1.0.0' },
+            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+          ],
+          children: [{ id: 'c1', display_name: '學員 A' }],
+          feedback: [],
+          materials: [
+            { id: 'm1', child_id: 'c1', rule_version: '2.2.0', generator_version: 'curriculum/2.0.0', model_name: 'gpt-5.6-sol', prompt_version: '2.4.0' }
+          ],
+          subscriptions: [{ id: 's1', child_id: 'c1', status: 'active', billing_interval: 'month' }],
+        },
+        {},
+        {
+          admin_get_curriculum_submissions: () => {
+            return { data: allSubmissions, error: null }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+
+      // Export default Engine v1 dataset
+      const exportV1 = await service.getAiExportDataset('current')
+      expect(exportV1.schemaVersion).toBe('2.2.0')
+      expect(exportV1.provenance.era).toBe('current')
+      expect(exportV1.provenance.currentEraName).toBe('Engine v1')
+      expect(exportV1.provenance.currentSchemaVersion).toBe('2.2.0')
+      expect(exportV1.provenance.currentPromptVersion).toBe('2.4.0')
+      expect(exportV1.provenance.currentEvidenceCount).toBe(0)
+      expect(exportV1.provenance.historicalEvidenceCount).toBe(1)
+      expect(exportV1.generationFailureEvidence.length).toBe(0)
+
+      // Export All Eras dataset
+      const exportAll = await service.getAiExportDataset('all')
+      expect(exportAll.provenance.era).toBe('all')
+      expect(exportAll.generationFailureEvidence.length).toBe(1)
+      expect(exportAll.generationFailureEvidence[0].era).toBe('historical')
+      expect(exportAll.generationFailureEvidence[0].schemaVersion).toBe('1.0.0')
+    })
+  })
 })
+
 

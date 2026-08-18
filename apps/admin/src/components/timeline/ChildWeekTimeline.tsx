@@ -351,10 +351,22 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                             fontSize: '12px',
                           }}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 600, color: '#f8fafc' }}>
-                              Attempt #{att.attempt || attIdx + 1}
-                            </span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontWeight: 600, color: '#f8fafc' }}>
+                                Attempt #{att.attempt || attIdx + 1}
+                              </span>
+                              {!isNoSubmission && (
+                                <span className={`status-pill ${att.era === 'engine_v1' ? 'active' : 'warning'}`} style={{ fontSize: '10px' }}>
+                                  {att.era === 'engine_v1' ? 'Engine v1' : 'Historical'}
+                                </span>
+                              )}
+                              {(att.schemaVersion || att.promptVersion) && (
+                                <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                                  v{att.schemaVersion || '2.2.0'} / p{att.promptVersion || '2.4.0'}
+                                </span>
+                              )}
+                            </div>
                             <span className={`status-pill ${isNoSubmission ? 'warning' : att.status}`}>
                               {isNoSubmission ? 'NO SUBMISSION' : att.status}
                             </span>
@@ -369,6 +381,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
                                 提交時間: {att.submittedAt ? new Date(att.submittedAt).toLocaleString('zh-TW', { hour12: false }) : 'N/A'}
                                 {att.processorId ? ` | 處理 Finisher: ${att.processorId}` : ''}
+                                {att.modelName ? ` | 模型: ${att.modelName}` : ''}
                               </div>
                               {att.errorMessage && (
                                 <div style={{ color: 'var(--status-rose)', marginTop: '4px', fontSize: '11px' }}>

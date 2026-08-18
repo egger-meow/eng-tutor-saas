@@ -130,7 +130,12 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
         {/* Finisher Pipeline Activity */}
         <div className="cockpit-card">
           <div className="section-title">
-            <span>Finisher 審核管線狀態</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Finisher 審核管線狀態</span>
+              <span className={`status-pill ${data.selectedEra === 'historical' ? 'warning' : data.selectedEra === 'all' ? 'info' : 'active'}`} style={{ fontSize: '10px' }}>
+                {data.selectedEra === 'historical' ? 'Historical' : data.selectedEra === 'all' ? 'All Eras' : 'Engine v1'}
+              </span>
+            </div>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>GitHub Actions Finisher</span>
           </div>
 
@@ -138,7 +143,7 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
             <div className="dist-bar-row">
               <span className="dist-bar-label">審核通過 (Completed)</span>
               <div className="dist-bar-track">
-                <div className="dist-bar-fill emerald" style={{ width: `${finisherStats.completed > 0 ? Math.min(100, finisherStats.completed) : 0}%` }} />
+                <div className="dist-bar-fill emerald" style={{ width: `${finisherStats.completed > 0 ? Math.min(100, finisherStats.completed * 10) : 0}%` }} />
               </div>
               <span className="dist-bar-count">{finisherStats.completed}</span>
             </div>
@@ -170,8 +175,25 @@ export const OperationsOverviewView: React.FC<OperationsOverviewProps> = ({
             </div>
           </div>
 
-          <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-elevated)', borderRadius: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
-            💡 <strong>維運說明：</strong>當 ChatGPT Scheduled Work 生成 canonical 封包後，GitHub Actions Finisher 負責 Deterministic 審核與 PDF 渲染。若出現品質退回，系統將紀錄 failure_evidence 並於下次 attempt 修復。
+          {finisherStats.eraBreakdown && (
+            <div style={{ marginTop: '14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '130px', padding: '8px 10px', background: 'var(--bg-elevated)', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.2)', fontSize: '11px' }}>
+                <div style={{ color: '#a7f3d0', fontWeight: 600, marginBottom: '2px' }}>⚡ Engine v1 (當前)</div>
+                <div style={{ color: 'var(--text-muted)' }}>
+                  通過: <strong>{finisherStats.eraBreakdown.engineV1.completed}</strong> | 退回: <strong style={{ color: finisherStats.eraBreakdown.engineV1.qualityRejected > 0 ? 'var(--status-rose)' : 'inherit' }}>{finisherStats.eraBreakdown.engineV1.qualityRejected}</strong> ({finisherStats.eraBreakdown.engineV1.rejectionRatePercent}%)
+                </div>
+              </div>
+              <div style={{ flex: 1, minWidth: '130px', padding: '8px 10px', background: 'var(--bg-elevated)', borderRadius: '4px', border: '1px solid rgba(147, 51, 234, 0.2)', fontSize: '11px' }}>
+                <div style={{ color: '#ddd6fe', fontWeight: 600, marginBottom: '2px' }}>📜 歷史封存 (Historical)</div>
+                <div style={{ color: 'var(--text-muted)' }}>
+                  通過: <strong>{finisherStats.eraBreakdown.historical.completed}</strong> | 退回: <strong style={{ color: finisherStats.eraBreakdown.historical.qualityRejected > 0 ? 'var(--status-rose)' : 'inherit' }}>{finisherStats.eraBreakdown.historical.qualityRejected}</strong> ({finisherStats.eraBreakdown.historical.rejectionRatePercent}%)
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: '14px', padding: '10px 12px', background: 'var(--bg-elevated)', borderRadius: '6px', fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+            💡 <strong>維運說明：</strong>當 ChatGPT Scheduled Work 生成 canonical 封包後，GitHub Actions Finisher 負責 Deterministic 審核與 PDF 渲染。
           </div>
         </div>
 

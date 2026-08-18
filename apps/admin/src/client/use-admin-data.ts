@@ -9,6 +9,7 @@ import type {
   AiExportDataset,
   HealthState,
   TabId,
+  QualityEra,
 } from './types.js'
 
 export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
@@ -29,6 +30,8 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   const [timelineChildId, setTimelineChildId] = useState<string>('')
   const [timelineWeek, setTimelineWeek] = useState<string>('')
 
+  const [qualityEra, setQualityEra] = useState<QualityEra>('current')
+
   const refreshHealth = useCallback(async () => {
     try {
       const h = await adminApi.getHealth()
@@ -45,12 +48,12 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       await refreshHealth()
       switch (activeTab) {
         case 'overview': {
-          const res = await adminApi.getOverview()
+          const res = await adminApi.getOverview(qualityEra)
           setOverview(res)
           break
         }
         case 'failures': {
-          const res = await adminApi.getFailures()
+          const res = await adminApi.getFailures(qualityEra)
           setFailures(res)
           break
         }
@@ -70,7 +73,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
           break
         }
         case 'export': {
-          const res = await adminApi.getAiExport()
+          const res = await adminApi.getAiExport(qualityEra)
           setAiExport(res)
           break
         }
@@ -83,7 +86,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [activeTab, refreshHealth, timelineChildId, timelineWeek])
+  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek])
 
   useEffect(() => {
     setLoading(true)
@@ -116,5 +119,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
     setTimelineChildId,
     timelineWeek,
     setTimelineWeek,
+    qualityEra,
+    setQualityEra,
   }
 }

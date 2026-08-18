@@ -15,6 +15,8 @@ export type {
   RecordTestFeedbackResult,
   ResetTestChildResult,
   TestPdfSignedUrlResult,
+  QualityEra,
+  EraTag,
 } from '../server/admin-service.js'
 
 export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'export'

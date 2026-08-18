@@ -39,6 +39,35 @@ export interface DataSourceStatus {
   latencyMs: number
 }
 
+export type QualityEra = 'current' | 'historical' | 'all'
+export type EraTag = 'engine_v1' | 'historical'
+
+export function classifyQualityEra(item: {
+  schemaVersion?: string | null
+  promptVersion?: string | null
+  ruleVersion?: string | null
+  failureEvidence?: any
+  canonicalSource?: any
+  errorCode?: string | null
+  errorMessage?: string | null
+}): EraTag {
+  const schema = item.schemaVersion || item.canonicalSource?.metadata?.schemaVersion || item.failureEvidence?.schemaVersion || null
+  const prompt = item.promptVersion || item.canonicalSource?.metadata?.promptVersion || item.failureEvidence?.promptVersion || null
+  const rule = item.ruleVersion || item.canonicalSource?.metadata?.ruleVersion || null
+
+  const isSchema220 = Boolean(schema && (schema === '2.2.0' || schema.startsWith('2.2')))
+  const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
+  const isRule220 = Boolean(rule && (rule === '2.2.0' || rule.startsWith('2.2')))
+
+  if (isSchema220 && (isPrompt240 || isRule220)) {
+    return 'engine_v1'
+  }
+  if (isSchema220) {
+    return 'engine_v1'
+  }
+  return 'historical'
+}
+
 export interface AdminConfig {
   supabaseUrl?: string
   supabaseSecretKey?: string
@@ -47,6 +76,7 @@ export interface AdminConfig {
 
 export interface OperationsOverview {
   systemHealth: 'healthy' | 'attention_needed' | 'degraded' | 'critical'
+  selectedEra?: QualityEra
   dataSources: DataSourceStatus[]
   activeChildrenCount: number
   totalChildrenCount: number
@@ -82,6 +112,23 @@ export interface OperationsOverview {
     qualityRejected: number
     technicalFailed: number
     totalSubmissions: number
+    rejectionRatePercent: number
+    eraBreakdown: {
+      engineV1: {
+        total: number
+        completed: number
+        qualityRejected: number
+        technicalFailed: number
+        rejectionRatePercent: number
+      }
+      historical: {
+        total: number
+        completed: number
+        qualityRejected: number
+        technicalFailed: number
+        rejectionRatePercent: number
+      }
+    }
   }
   recentDeliveries: Array<{
     id: string
@@ -113,6 +160,19 @@ export interface OperationsOverview {
 
 export interface FailureIntelligence {
   dataSources: DataSourceStatus[]
+  selectedEra: QualityEra
+  eraBreakdown: {
+    currentEraName: 'Engine v1'
+    currentSchemaVersion: '2.2.0'
+    currentPromptVersion: '2.4.0'
+    currentTotalFailures: number
+    historicalTotalFailures: number
+    allTotalFailures: number
+    currentJobsEvaluated: number
+    historicalJobsEvaluated: number
+    currentSubmissionsEvaluated: number
+    historicalSubmissionsEvaluated: number
+  }
   totalFailures: number
   failureRatePercent: number
   generationStats: {
@@ -146,6 +206,7 @@ export interface FailureIntelligence {
     lastSeen: string
     sampleMessage: string
     suggestedRemedy: string
+    era: EraTag
   }>
   qualityRuleViolations: Array<{
     rule: string
@@ -153,12 +214,15 @@ export interface FailureIntelligence {
     count: number
     description: string
     sampleFinding: string
+    era: EraTag
   }>
   dailyTrend: Array<{
     date: string
     total: number
     qualityRejected: number
     technicalFailed: number
+    currentCount: number
+    historicalCount: number
   }>
   recentFailures: Array<{
     id: string
@@ -171,6 +235,10 @@ export interface FailureIntelligence {
     authoringAttempt: number
     timestamp: string
     failureEvidence: Record<string, unknown> | null
+    era: EraTag
+    schemaVersion: string | null
+    promptVersion: string | null
+    modelName: string | null
   }>
 }
 
@@ -313,7 +381,13 @@ export interface AiExportDataset {
   }
   provenance: {
     environment: string
+    era: QualityEra
+    currentEraName: string
+    currentSchemaVersion: string
+    currentPromptVersion: string
     totalEvidenceCount: number
+    currentEvidenceCount: number
+    historicalEvidenceCount: number
     activeChildren: number
     paidSubscriptions: number
     trialingSubscriptions: number
@@ -328,6 +402,10 @@ export interface AiExportDataset {
     errorMessage: string
     findings: Array<{ rule?: string; message?: string; description?: string }>
     timestamp: string
+    era: EraTag
+    schemaVersion: string | null
+    promptVersion: string | null
+    modelName: string | null
   }>
   parentFeedbackEvidence: Array<{
     week: string
@@ -343,6 +421,7 @@ export interface AiExportDataset {
     category: string
     violationCount: number
     sampleFinding: string
+    era: EraTag
   }>
 }
 
@@ -1343,7 +1422,7 @@ export class AdminService {
     return []
   }
 
-  public async getOperationsOverview(): Promise<OperationsOverview> {
+  public async getOperationsOverview(era: QualityEra = 'current'): Promise<OperationsOverview> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
@@ -1446,26 +1525,50 @@ export class AdminService {
       }
     }
 
-    // Finisher Queue stats explicitly separated from generation jobs
-    let finisherPending = 0
-    let finisherProcessing = 0
-    let finisherCompleted = 0
-    let finisherQualityRejected = 0
-    let finisherTechnicalFailed = 0
-
-    for (const sub of submissions) {
-      if (sub.status === 'pending') finisherPending++
-      else if (sub.status === 'processing') finisherProcessing++
-      else if (sub.status === 'completed') finisherCompleted++
-      else if (sub.status === 'quality_rejected') finisherQualityRejected++
-      else if (sub.status === 'technical_failed') finisherTechnicalFailed++
+    // Finisher Queue stats explicitly separated from generation jobs with Quality Era awareness
+    const computeSubsStats = (subsList: any[]) => {
+      let pending = 0
+      let processing = 0
+      let completed = 0
+      let qualityRejected = 0
+      let technicalFailed = 0
+      for (const sub of subsList) {
+        if (sub.status === 'pending') pending++
+        else if (sub.status === 'processing') processing++
+        else if (sub.status === 'completed') completed++
+        else if (sub.status === 'quality_rejected') qualityRejected++
+        else if (sub.status === 'technical_failed') technicalFailed++
+      }
+      const evaluated = completed + qualityRejected + technicalFailed
+      const rejectionRatePercent = evaluated > 0 ? Number((((qualityRejected + technicalFailed) / evaluated) * 100).toFixed(1)) : 0
+      return { total: evaluated, pending, processing, completed, qualityRejected, technicalFailed, rejectionRatePercent }
     }
+
+    const engineV1Subs = submissions.filter((s) => classifyQualityEra({
+      schemaVersion: s.schema_version,
+      promptVersion: s.prompt_version,
+      ruleVersion: s.rule_version,
+      failureEvidence: s.failure_evidence,
+    }) === 'engine_v1')
+
+    const historicalSubs = submissions.filter((s) => classifyQualityEra({
+      schemaVersion: s.schema_version,
+      promptVersion: s.prompt_version,
+      ruleVersion: s.rule_version,
+      failureEvidence: s.failure_evidence,
+    }) === 'historical')
+
+    const engineV1FinisherStats = computeSubsStats(engineV1Subs)
+    const historicalFinisherStats = computeSubsStats(historicalSubs)
+    const allFinisherStats = computeSubsStats(submissions)
+
+    const activeFinisherStats = era === 'historical' ? historicalFinisherStats : (era === 'all' ? allFinisherStats : engineV1FinisherStats)
 
     if (stuckJobs.length > 0) {
       anomalies.push(`檢測到 ${stuckJobs.length} 個逾期或租約逾時的生成任務需排查。`)
     }
-    if (finisherQualityRejected > 0) {
-      anomalies.push(`近期有 ${finisherQualityRejected} 次 Finisher 品質審核退回 (QUALITY_REJECTED)。`)
+    if (activeFinisherStats.qualityRejected > 0) {
+      anomalies.push(`近期有 ${activeFinisherStats.qualityRejected} 次 Finisher 品質審核退回 (QUALITY_REJECTED)。`)
     }
     if (failedJobs > 0) {
       anomalies.push(`生成佇列中存在 ${failedJobs} 筆失敗任務。`)
@@ -1509,6 +1612,7 @@ export class AdminService {
 
     return {
       systemHealth,
+      selectedEra: era,
       dataSources,
       activeChildrenCount: activeChildren.length,
       totalChildrenCount: children.length,
@@ -1532,12 +1636,29 @@ export class AdminService {
         overdueOrStuck: overdueOrStuckCount,
       },
       finisherStats: {
-        pending: finisherPending,
-        processing: finisherProcessing,
-        completed: finisherCompleted,
-        qualityRejected: finisherQualityRejected,
-        technicalFailed: finisherTechnicalFailed,
-        totalSubmissions: submissions.length,
+        pending: activeFinisherStats.pending,
+        processing: activeFinisherStats.processing,
+        completed: activeFinisherStats.completed,
+        qualityRejected: activeFinisherStats.qualityRejected,
+        technicalFailed: activeFinisherStats.technicalFailed,
+        totalSubmissions: activeFinisherStats.total,
+        rejectionRatePercent: activeFinisherStats.rejectionRatePercent,
+        eraBreakdown: {
+          engineV1: {
+            total: engineV1FinisherStats.total,
+            completed: engineV1FinisherStats.completed,
+            qualityRejected: engineV1FinisherStats.qualityRejected,
+            technicalFailed: engineV1FinisherStats.technicalFailed,
+            rejectionRatePercent: engineV1FinisherStats.rejectionRatePercent,
+          },
+          historical: {
+            total: historicalFinisherStats.total,
+            completed: historicalFinisherStats.completed,
+            qualityRejected: historicalFinisherStats.qualityRejected,
+            technicalFailed: historicalFinisherStats.technicalFailed,
+            rejectionRatePercent: historicalFinisherStats.rejectionRatePercent,
+          },
+        },
       },
       recentDeliveries,
       stuckJobs: stuckJobs.slice(0, 10),
@@ -1545,7 +1666,7 @@ export class AdminService {
     }
   }
 
-  public async getFailureIntelligence(): Promise<FailureIntelligence> {
+  public async getFailureIntelligence(era: QualityEra = 'current'): Promise<FailureIntelligence> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
@@ -1561,7 +1682,7 @@ export class AdminService {
     const failedSubmissions = submissions.filter((s) => s.status === 'quality_rejected' || s.status === 'technical_failed')
     const childMap = new Map(((childrenData as any[]) || []).map((c: any) => [c.id, c.display_name]))
 
-    return this.aggregateFailures(allJobs, failedJobs, submissions, failedSubmissions, childMap, dataSources)
+    return this.aggregateFailures(allJobs, failedJobs, submissions, failedSubmissions, childMap, dataSources, era)
   }
 
   public async getFeedbackIntelligence(): Promise<ParentFeedbackIntelligence> {
@@ -1745,15 +1866,15 @@ export class AdminService {
     })
   }
 
-  public async getAiExportDataset(): Promise<AiExportDataset> {
+  public async getAiExportDataset(era: QualityEra = 'current'): Promise<AiExportDataset> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
     const [overview, failures, feedback, materialsData, childrenData] = await Promise.all([
-      this.getOperationsOverview(),
-      this.getFailureIntelligence(),
+      this.getOperationsOverview(era),
+      this.getFailureIntelligence(era),
       this.getFeedbackIntelligence(),
-      this.safeQuery<any[]>('materials', () => client.from('materials').select('rule_version, model_name, generator_version'), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('rule_version, model_name, generator_version, prompt_version'), dataSources),
       this.safeQuery<any[]>('children', () => client.from('children').select('display_name'), dataSources),
     ])
 
@@ -1784,6 +1905,10 @@ export class AdminService {
           description: this.sanitizePiiText(f.description || '', knownNames),
         })),
         timestamp: rf.timestamp,
+        era: rf.era,
+        schemaVersion: rf.schemaVersion,
+        promptVersion: rf.promptVersion,
+        modelName: rf.modelName,
       }
     })
 
@@ -1805,12 +1930,13 @@ export class AdminService {
       category: rule.category,
       violationCount: rule.count,
       sampleFinding: this.sanitizePiiText(rule.sampleFinding, knownNames),
+      era: rule.era,
     }))
 
     const totalEvidenceCount = generationFailureEvidence.length + parentFeedbackEvidence.length
 
     return {
-      schemaVersion: '1.0.0',
+      schemaVersion: '2.2.0',
       taxonomyVersion: 'cap-2.2.0',
       ruleVersions: ruleVersions.length > 0 ? ruleVersions : ['curriculum-rules/1.0.0'],
       generatorVersions: generatorVersions.length > 0 ? generatorVersions : ['curriculum/2.0.0'],
@@ -1822,7 +1948,13 @@ export class AdminService {
       },
       provenance: {
         environment: 'production_database',
+        era,
+        currentEraName: 'Engine v1',
+        currentSchemaVersion: '2.2.0',
+        currentPromptVersion: '2.4.0',
         totalEvidenceCount,
+        currentEvidenceCount: failures.eraBreakdown.currentTotalFailures,
+        historicalEvidenceCount: failures.eraBreakdown.historicalTotalFailures,
         activeChildren: overview.activeChildrenCount,
         paidSubscriptions: overview.subscriptionBreakdown.paidActiveCount,
         trialingSubscriptions: overview.subscriptionBreakdown.trialingCount,
@@ -1877,8 +2009,47 @@ export class AdminService {
     allSubmissions: any[],
     failedSubmissions: any[],
     childMap: Map<string, string>,
-    dataSources: DataSourceStatus[]
+    dataSources: DataSourceStatus[],
+    era: QualityEra = 'current'
   ): FailureIntelligence {
+    const getJobEra = (job: any): EraTag => {
+      return classifyQualityEra({
+        ruleVersion: job.rule_version,
+        schemaVersion: job.schema_version,
+        promptVersion: job.prompt_version,
+      })
+    }
+
+    const getSubEra = (sub: any): EraTag => {
+      return classifyQualityEra({
+        schemaVersion: sub.schema_version,
+        promptVersion: sub.prompt_version,
+        ruleVersion: sub.rule_version,
+        failureEvidence: sub.failure_evidence,
+      })
+    }
+
+    // 1. Partition ALL jobs & submissions into Current (Engine v1) vs Historical
+    const currentJobs = allJobs.filter((j) => getJobEra(j) === 'engine_v1')
+    const historicalJobs = allJobs.filter((j) => getJobEra(j) === 'historical')
+    const currentFailedJobs = failedJobs.filter((j) => getJobEra(j) === 'engine_v1')
+    const historicalFailedJobs = failedJobs.filter((j) => getJobEra(j) === 'historical')
+
+    const currentSubs = allSubmissions.filter((s) => getSubEra(s) === 'engine_v1')
+    const historicalSubs = allSubmissions.filter((s) => getSubEra(s) === 'historical')
+    const currentFailedSubs = failedSubmissions.filter((s) => getSubEra(s) === 'engine_v1')
+    const historicalFailedSubs = failedSubmissions.filter((s) => getSubEra(s) === 'historical')
+
+    const currentTotalFailures = currentFailedJobs.length + currentFailedSubs.length
+    const historicalTotalFailures = historicalFailedJobs.length + historicalFailedSubs.length
+    const allTotalFailures = currentTotalFailures + historicalTotalFailures
+
+    // 2. Select active dataset according to chosen era
+    const activeJobs = era === 'historical' ? historicalJobs : (era === 'all' ? allJobs : currentJobs)
+    const activeFailedJobs = era === 'historical' ? historicalFailedJobs : (era === 'all' ? failedJobs : currentFailedJobs)
+    const activeSubmissions = era === 'historical' ? historicalSubs : (era === 'all' ? allSubmissions : currentSubs)
+    const activeFailedSubmissions = era === 'historical' ? historicalFailedSubs : (era === 'all' ? failedSubmissions : currentFailedSubs)
+
     const stageCounts: Record<string, number> = {
       worker_claim: 0,
       chatgpt_authoring: 0,
@@ -1896,21 +2067,29 @@ export class AdminService {
       lastSeen: string
       sampleMessage: string
       suggestedRemedy: string
+      era: EraTag
     }> = {}
 
-    const qualityRules: Record<string, { count: number; category: string; description: string; sampleFinding: string }> = {}
-    const dailyCounts: Record<string, { total: number; qualityRejected: number; technicalFailed: number }> = {}
+    const qualityRules: Record<string, { count: number; category: string; description: string; sampleFinding: string; era: EraTag }> = {}
+    const dailyCounts: Record<string, { total: number; qualityRejected: number; technicalFailed: number; currentCount: number; historicalCount: number }> = {}
     const recentFailuresList: FailureIntelligence['recentFailures'] = []
 
-    for (const job of failedJobs) {
+    for (const job of activeFailedJobs) {
       const code = job.error_code || 'JOB_FAILED'
       const msg = job.error_message || 'Unknown generation job failure'
       const stage = this.classifyStage(code, msg)
+      const jobEra = getJobEra(job)
       stageCounts[stage]++
 
       const dateStr = (job.created_at || new Date().toISOString()).slice(0, 10)
-      if (!dailyCounts[dateStr]) dailyCounts[dateStr] = { total: 0, qualityRejected: 0, technicalFailed: 0 }
+      if (!dailyCounts[dateStr]) dailyCounts[dateStr] = { total: 0, qualityRejected: 0, technicalFailed: 0, currentCount: 0, historicalCount: 0 }
       dailyCounts[dateStr].total++
+      if (jobEra === 'engine_v1') {
+        dailyCounts[dateStr].currentCount++
+      } else {
+        dailyCounts[dateStr].historicalCount++
+      }
+
       if (code === 'QUALITY_REJECTED' || stage === 'finisher_audit') {
         dailyCounts[dateStr].qualityRejected++
       } else {
@@ -1926,6 +2105,7 @@ export class AdminService {
           lastSeen: job.created_at,
           sampleMessage: msg,
           suggestedRemedy: this.suggestRemedy(code),
+          era: jobEra,
         }
       }
       errorClusters[code].count++
@@ -1946,6 +2126,7 @@ export class AdminService {
             category: this.classifyQualityCategory(ruleName),
             description: msg,
             sampleFinding: msg,
+            era: jobEra,
           }
         }
         qualityRules[ruleName].count++
@@ -1962,18 +2143,29 @@ export class AdminService {
         authoringAttempt: job.attempt_count,
         timestamp: job.created_at,
         failureEvidence: null,
+        era: jobEra,
+        schemaVersion: job.schema_version || null,
+        promptVersion: job.prompt_version || null,
+        modelName: job.model_name || null,
       })
     }
 
-    for (const sub of failedSubmissions) {
+    for (const sub of activeFailedSubmissions) {
       const code = sub.error_code || (sub.status === 'quality_rejected' ? 'QUALITY_REJECTED' : 'CURRICULUM_PIPELINE_FAILED')
       const msg = sub.error_message || (sub.status === 'quality_rejected' ? 'Curriculum quality verification rejected by Finisher' : 'Finisher processing failure')
       const stage = sub.status === 'quality_rejected' ? 'finisher_audit' : 'chatgpt_authoring'
+      const subEra = getSubEra(sub)
       stageCounts[stage]++
 
       const dateStr = (sub.submitted_at || new Date().toISOString()).slice(0, 10)
-      if (!dailyCounts[dateStr]) dailyCounts[dateStr] = { total: 0, qualityRejected: 0, technicalFailed: 0 }
+      if (!dailyCounts[dateStr]) dailyCounts[dateStr] = { total: 0, qualityRejected: 0, technicalFailed: 0, currentCount: 0, historicalCount: 0 }
       dailyCounts[dateStr].total++
+      if (subEra === 'engine_v1') {
+        dailyCounts[dateStr].currentCount++
+      } else {
+        dailyCounts[dateStr].historicalCount++
+      }
+
       if (sub.status === 'quality_rejected') {
         dailyCounts[dateStr].qualityRejected++
       } else {
@@ -1989,6 +2181,7 @@ export class AdminService {
           lastSeen: sub.submitted_at,
           sampleMessage: msg,
           suggestedRemedy: this.suggestRemedy(code),
+          era: subEra,
         }
       }
       errorClusters[code].count++
@@ -2009,6 +2202,7 @@ export class AdminService {
               category: this.classifyQualityCategory(ruleName),
               description: finding.description || finding.message || ruleName,
               sampleFinding: finding.message || JSON.stringify(finding),
+              era: subEra,
             }
           }
           qualityRules[ruleName].count++
@@ -2029,21 +2223,25 @@ export class AdminService {
         authoringAttempt: sub.authoring_attempt,
         timestamp: sub.submitted_at,
         failureEvidence: sub.failure_evidence,
+        era: subEra,
+        schemaVersion: sub.schema_version || (sub.failure_evidence?.schemaVersion ?? null),
+        promptVersion: sub.prompt_version || (sub.failure_evidence?.promptVersion ?? null),
+        modelName: sub.model_name || null,
       })
     }
 
-    // 1. Generation stats (from generation_jobs)
-    const completedJobsCount = allJobs.filter((j) => j.status === 'completed').length
-    const failedJobsCount = failedJobs.length
-    const pendingJobsCount = allJobs.filter((j) => j.status === 'pending').length
-    const claimedJobsCount = allJobs.filter((j) => j.status === 'claimed').length
+    // 1. Generation stats (from activeJobs)
+    const completedJobsCount = activeJobs.filter((j) => j.status === 'completed').length
+    const failedJobsCount = activeFailedJobs.length
+    const pendingJobsCount = activeJobs.filter((j) => j.status === 'pending').length
+    const claimedJobsCount = activeJobs.filter((j) => j.status === 'claimed').length
     const terminalJobsEvaluated = completedJobsCount + failedJobsCount
     const generationFailureRatePercent = terminalJobsEvaluated > 0 ? Number(((failedJobsCount / terminalJobsEvaluated) * 100).toFixed(1)) : 0
 
-    // 2. Finisher stats (from curriculum_submissions)
-    const completedSubsCount = allSubmissions.filter((s) => s.status === 'completed').length
-    const qualityRejectedCount = allSubmissions.filter((s) => s.status === 'quality_rejected').length
-    const technicalFailedCount = allSubmissions.filter((s) => s.status === 'technical_failed').length
+    // 2. Finisher stats (from activeSubmissions)
+    const completedSubsCount = activeSubmissions.filter((s) => s.status === 'completed').length
+    const qualityRejectedCount = activeSubmissions.filter((s) => s.status === 'quality_rejected').length
+    const technicalFailedCount = activeSubmissions.filter((s) => s.status === 'technical_failed').length
     const totalSubsEvaluated = completedSubsCount + qualityRejectedCount + technicalFailedCount
     const finisherRejectionRatePercent = totalSubsEvaluated > 0 ? Number((((qualityRejectedCount + technicalFailedCount) / totalSubsEvaluated) * 100).toFixed(1)) : 0
 
@@ -2066,6 +2264,7 @@ export class AdminService {
       lastSeen: data.lastSeen,
       sampleMessage: data.sampleMessage,
       suggestedRemedy: data.suggestedRemedy,
+      era: data.era,
     })).sort((a, b) => b.count - a.count)
 
     const qualityRuleViolations: FailureIntelligence['qualityRuleViolations'] = Object.entries(qualityRules).map(([rule, data]) => ({
@@ -2074,19 +2273,40 @@ export class AdminService {
       count: data.count,
       description: data.description,
       sampleFinding: data.sampleFinding,
+      era: data.era,
     })).sort((a, b) => b.count - a.count)
 
     const dailyTrend: FailureIntelligence['dailyTrend'] = Object.entries(dailyCounts)
-      .map(([date, d]) => ({ date, total: d.total, qualityRejected: d.qualityRejected, technicalFailed: d.technicalFailed }))
+      .map(([date, d]) => ({
+        date,
+        total: d.total,
+        qualityRejected: d.qualityRejected,
+        technicalFailed: d.technicalFailed,
+        currentCount: d.currentCount,
+        historicalCount: d.historicalCount,
+      }))
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(-14)
 
     return {
       dataSources,
+      selectedEra: era,
+      eraBreakdown: {
+        currentEraName: 'Engine v1',
+        currentSchemaVersion: '2.2.0',
+        currentPromptVersion: '2.4.0',
+        currentTotalFailures,
+        historicalTotalFailures,
+        allTotalFailures,
+        currentJobsEvaluated: currentJobs.length,
+        historicalJobsEvaluated: historicalJobs.length,
+        currentSubmissionsEvaluated: currentSubs.length,
+        historicalSubmissionsEvaluated: historicalSubs.length,
+      },
       totalFailures,
       failureRatePercent: generationFailureRatePercent, // Default backward compatible field
       generationStats: {
-        totalJobs: allJobs.length,
+        totalJobs: activeJobs.length,
         terminalJobs: terminalJobsEvaluated,
         completedJobs: completedJobsCount,
         failedJobs: failedJobsCount,
@@ -2358,6 +2578,12 @@ export class AdminService {
       const attemptNum = idx + 1
       const sub = submissionMap.get(attemptNum)
       if (sub) {
+        const subEra = classifyQualityEra({
+          schemaVersion: sub.schema_version,
+          promptVersion: sub.prompt_version,
+          ruleVersion: sub.rule_version,
+          failureEvidence: sub.failure_evidence,
+        })
         return {
           attempt: attemptNum,
           status: sub.status,
@@ -2368,6 +2594,10 @@ export class AdminService {
           errorCode: sub.error_code,
           errorMessage: sub.error_message,
           findings: (sub.failure_evidence?.findings || sub.failure_evidence?.auditFindings || []) as any[],
+          era: subEra,
+          schemaVersion: sub.schema_version || (sub.failure_evidence?.schemaVersion ?? null),
+          promptVersion: sub.prompt_version || (sub.failure_evidence?.promptVersion ?? null),
+          modelName: sub.model_name || null,
         }
       }
       return {
@@ -2380,6 +2610,10 @@ export class AdminService {
         errorCode: 'NO_SUBMISSION_PACKET',
         errorMessage: 'Claimed but no curriculum submission (認領逾時 / 未提交封包)',
         findings: [],
+        era: 'engine_v1' as const,
+        schemaVersion: null,
+        promptVersion: null,
+        modelName: null,
       }
     })
 
