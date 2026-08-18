@@ -1,0 +1,272 @@
+.system-evolution-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.system-evolution-section::before {
+  content: '';
+  position: absolute;
+  inset: 8% -12% auto auto;
+  z-index: -1;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(154 89 56 / 10%), transparent 68%);
+  pointer-events: none;
+}
+
+.system-evolution-heading,
+.usage-heading {
+  max-width: 62rem;
+}
+
+.system-evolution-heading h2,
+.usage-heading h2 {
+  max-width: 18ch;
+  font-size: clamp(2.15rem, 4.6vw, 4.15rem);
+  line-height: 1.24;
+  text-wrap: balance;
+}
+
+.system-evolution-heading > p:last-child,
+.usage-heading > p:last-child {
+  max-width: 46rem;
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+}
+
+.evolution-grid,
+.usage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.6rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.evolution-card,
+.usage-card {
+  position: relative;
+  min-height: 100%;
+  padding: clamp(1.6rem, 3vw, 2.6rem);
+  border: 1px solid var(--color-rule);
+  background: rgb(255 253 248 / 82%);
+  box-shadow: 0 1.2rem 3rem rgb(24 38 31 / 5%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.evolution-card:hover,
+.usage-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-rule-strong);
+  box-shadow: 0 1.5rem 3.5rem rgb(24 38 31 / 8%);
+}
+
+.evolution-card::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-right: 2px solid var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+  opacity: .35;
+}
+
+.evolution-step {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.evolution-card h3,
+.usage-card h3 {
+  margin-top: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  line-height: 1.35;
+}
+
+.evolution-card p,
+.usage-card p {
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: .96rem;
+  line-height: 1.75;
+}
+
+.evolution-loop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem 1rem;
+  margin-top: clamp(2rem, 5vw, 3.75rem);
+  padding: 1.05rem 1.25rem;
+  border-block: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.evolution-loop b {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.usage-modes-section {
+  background: linear-gradient(180deg, transparent, rgb(246 242 233 / 45%) 18%, rgb(246 242 233 / 45%) 82%, transparent);
+}
+
+.usage-card {
+  border-top: 3px solid var(--color-action);
+  background: var(--color-paper);
+}
+
+.usage-card > span {
+  display: inline-flex;
+  padding: .3rem .7rem;
+  border-radius: 999px;
+  background: var(--color-success-soft);
+  color: var(--color-action);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.usage-card h3 {
+  margin-top: var(--space-6);
+}
+
+.pricing-anchor-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(1.2rem, 3vw, 2.5rem);
+  align-items: center;
+  margin: clamp(2rem, 5vw, 3.5rem) 0 1.25rem;
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  border: 1px solid var(--color-rule-strong);
+  border-left: 4px solid var(--color-accent);
+  background: var(--color-paper);
+  box-shadow: 0 1rem 3rem rgb(24 38 31 / 5%);
+}
+
+.pricing-anchor-kicker {
+  max-width: 7rem;
+  color: var(--color-accent);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.pricing-anchor-banner strong {
+  display: block;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2.8vw, 2.15rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.pricing-anchor-banner p {
+  max-width: 46rem;
+  margin: .55rem 0 0;
+  color: var(--color-muted);
+}
+
+.pricing-value-proposition {
+  display: grid;
+  gap: .45rem;
+  min-width: 12rem;
+}
+
+.pricing-value-proposition span {
+  position: relative;
+  padding-left: 1.2rem;
+  color: var(--color-ink);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.pricing-value-proposition span::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-action);
+}
+
+@media (max-width: 920px) {
+  .evolution-grid,
+  .usage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evolution-card,
+  .usage-card {
+    min-height: auto;
+  }
+
+  .pricing-anchor-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-anchor-kicker {
+    max-width: none;
+  }
+
+  .pricing-value-proposition {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .system-evolution-heading h2,
+  .usage-heading h2 {
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .evolution-card,
+  .usage-card {
+    padding: 1.5rem;
+  }
+
+  .evolution-loop {
+    justify-content: flex-start;
+    padding-inline: 0;
+    border-bottom: 0;
+  }
+
+  .evolution-loop b {
+    font-size: 1rem;
+  }
+
+  .pricing-anchor-banner {
+    padding: 1.35rem;
+  }
+
+  .pricing-value-proposition {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evolution-card,
+  .usage-card {
+    transition: none;
+  }
+
+  .evolution-card:hover,
+  .usage-card:hover {
+    transform: none;
+  }
+}
