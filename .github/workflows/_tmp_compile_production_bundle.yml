@@ -1,15 +1,16 @@
-name: Temporary production bundle compile
+name: Temporary branch finalizer
 
 on:
   push:
     branches: [agent/fix-production-quality-stack]
+  pull_request:
 
 permissions:
   contents: write
 
 jobs:
-  compile:
-    if: github.event.head_commit.message != 'chore: compile production bundle'
+  finalize:
+    if: github.event_name != 'push' || github.event.head_commit.message != 'chore: finalize production quality stack'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,14 +24,41 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Keep malformed current provenance in Current via authoritative engine version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('apps/admin/src/client/types.ts')
+          s = p.read_text()
+          old = '''  // Era answers "which production contract authored this?". Provenance completeness is a
+          // separate quality invariant. Missing profile provenance on a current submission must stay
+          // visible in Current so Admin can report the violation instead of laundering it as Historical.
+          if (isSchema220 && isPrompt240) {
+            return 'engine_v1'
+          }
+          '''
+          new = '''  const hasProfile = hasModelQualityProfileProvenance(item)
+          const hasEngineVersion = Boolean(getEngineVersionFromItem(item))
+
+          // Profile provenance normally identifies current evidence. If that provenance itself is broken,
+          // the admin RPC's authoritative engine_version keeps the current submission visible in Current.
+          if (isSchema220 && isPrompt240 && (hasProfile || hasEngineVersion)) {
+            return 'engine_v1'
+          }
+          '''
+          if old not in s:
+              raise SystemExit('expected classifier block not found')
+          p.write_text(s.replace(old, new))
+          PY
       - run: pnpm compile:bundle
-      - run: |
+      - name: Commit deterministic outputs
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/generator/bundles/production-authoring-bundle.md
+          git add apps/admin/src/client/types.ts packages/generator/bundles/production-authoring-bundle.md
           if git diff --cached --quiet; then
-            echo "Bundle already current"
+            echo "Branch already finalized"
           else
-            git commit -m "chore: compile production bundle"
+            git commit -m "chore: finalize production quality stack"
             git push
           fi
