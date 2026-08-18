@@ -49,7 +49,6 @@ export interface QualityEraItem {
 }
 
 export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean {
-  // 1. Direct fields
   if (item.resolvedQualityProfile || item.qualityProfile) return true
   if (item.modelQualityProfile && (typeof item.modelQualityProfile === 'string' || (typeof item.modelQualityProfile === 'object' && Object.keys(item.modelQualityProfile).length > 0))) {
     return true
@@ -58,7 +57,6 @@ export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean 
     return true
   }
 
-  // 2. Canonical Source metadata or qualityEvidence
   const csMeta = item.canonicalSource?.metadata
   if (csMeta) {
     if (csMeta.modelQualityProfile || csMeta.qualityProfile || csMeta.resolvedQualityProfile || csMeta.profileProvenance) {
@@ -70,13 +68,11 @@ export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean 
     return true
   }
 
-  // 3. Quality Evidence directly on item
   const qeChecks = item.qualityEvidence?.criticalChecks
   if (Array.isArray(qeChecks) && qeChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
     return true
   }
 
-  // 4. Failure Evidence
   const fe = item.failureEvidence
   if (fe) {
     if (fe.modelQualityProfile || fe.qualityProfile || fe.resolvedQualityProfile || fe.profileProvenance || fe.provenance?.resolvedQualityProfile || fe.provenance?.profileName) {
@@ -93,7 +89,6 @@ export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean 
     }
   }
 
-  // 5. Raw Row / DB joins if passed
   if (item.rawRow?.quality_profile || item.rawRow?.model_quality_profile) {
     return true
   }
@@ -119,15 +114,14 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
 
   const isSchema220 = Boolean(schema && (schema === '2.2.0' || schema.startsWith('2.2')))
   const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
-  const hasProfile = hasModelQualityProfileProvenance(item)
 
-  // Current Quality Era strictly requires Schema 2.2.0 + Prompt 2.4.0 + Model-Quality-Profile Provenance
-  if (isSchema220 && isPrompt240 && hasProfile) {
+  // Era answers "which production contract authored this?". Provenance completeness is a
+  // separate quality invariant. Missing profile provenance on a current submission must stay
+  // visible in Current so Admin can report the violation instead of laundering it as Historical.
+  if (isSchema220 && isPrompt240) {
     return 'engine_v1'
   }
 
-  // Pre-profile Engine v1 (e.g. Schema 2.2.0 + Prompt 2.4.0 without model-quality-profile)
-  // and all legacy versions (Schema < 2.2.0, Prompt < 2.4.0) are preserved as Historical
   return 'historical'
 }
 
