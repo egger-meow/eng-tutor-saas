@@ -48,57 +48,72 @@ export interface QualityEraItem {
   rawRow?: any
 }
 
+export function isCompleteProfileEvidence(evidence: string): boolean {
+  return (
+    evidence.includes('actualModel=') &&
+    evidence.includes('resolvedQualityProfile=') &&
+    evidence.includes('qualityProfileVersion=') &&
+    evidence.includes('engineVersion=')
+  )
+}
+
+export type ModelProfileProvenanceStatus = 'valid' | 'invalid' | 'missing'
+
+export interface ModelProfileProvenanceAssessment {
+  status: ModelProfileProvenanceStatus
+  isValid: boolean
+  hasCheck: boolean
+  resolvedProfile?: string | null
+  rule?: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING' | 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID'
+  message?: string
+}
+
 export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean {
-  // 1. Direct fields
-  if (item.resolvedQualityProfile || item.qualityProfile) return true
-  if (item.modelQualityProfile && (typeof item.modelQualityProfile === 'string' || (typeof item.modelQualityProfile === 'object' && Object.keys(item.modelQualityProfile).length > 0))) {
-    return true
-  }
-  if (item.profileProvenance && (typeof item.profileProvenance === 'string' || (typeof item.profileProvenance === 'object' && Object.keys(item.profileProvenance).length > 0))) {
-    return true
-  }
+  return assessModelQualityProfileProvenance(item).isValid
+}
 
-  // 2. Canonical Source metadata or qualityEvidence
-  const csMeta = item.canonicalSource?.metadata
-  if (csMeta) {
-    if (csMeta.modelQualityProfile || csMeta.qualityProfile || csMeta.resolvedQualityProfile || csMeta.profileProvenance) {
-      return true
-    }
-  }
-  const csChecks = item.canonicalSource?.qualityEvidence?.criticalChecks
-  if (Array.isArray(csChecks) && csChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-    return true
-  }
+export function assessModelQualityProfileProvenance(item: QualityEraItem): ModelProfileProvenanceAssessment {
+  const checks = [
+    ...(Array.isArray(item.canonicalSource?.qualityEvidence?.criticalChecks) ? item.canonicalSource.qualityEvidence.criticalChecks : []),
+    ...(Array.isArray(item.qualityEvidence?.criticalChecks) ? item.qualityEvidence.criticalChecks : []),
+    ...(Array.isArray(item.failureEvidence?.criticalChecks) ? item.failureEvidence.criticalChecks : []),
+  ]
+  const profileCheck = checks.find((c: any) => c && c.id === 'model-quality-profile')
 
-  // 3. Quality Evidence directly on item
-  const qeChecks = item.qualityEvidence?.criticalChecks
-  if (Array.isArray(qeChecks) && qeChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-    return true
-  }
+  if (profileCheck) {
+    const passed = profileCheck.passed === true
+    const evidence = typeof profileCheck.evidence === 'string' ? profileCheck.evidence : ''
+    const isComplete = isCompleteProfileEvidence(evidence)
 
-  // 4. Failure Evidence
-  const fe = item.failureEvidence
-  if (fe) {
-    if (fe.modelQualityProfile || fe.qualityProfile || fe.resolvedQualityProfile || fe.profileProvenance || fe.provenance?.resolvedQualityProfile || fe.provenance?.profileName) {
-      return true
+    if (passed && isComplete) {
+      const match = evidence.match(/resolvedQualityProfile=([^ |]+)/)
+      return {
+        status: 'valid',
+        isValid: true,
+        hasCheck: true,
+        resolvedProfile: match ? match[1] : (item.resolvedQualityProfile ?? item.qualityProfile ?? null),
+      }
     }
-    if (Array.isArray(fe.criticalChecks) && fe.criticalChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-      return true
-    }
-    if (typeof fe.qualityProfile === 'string' || typeof fe.resolvedQualityProfile === 'string') {
-      return true
-    }
-    if (Array.isArray(fe.findings) && fe.findings.some((f: any) => f.rule === 'model-quality-profile' || (typeof f.message === 'string' && f.message.includes('quality profile')))) {
-      return true
+
+    return {
+      status: 'invalid',
+      isValid: false,
+      hasCheck: true,
+      resolvedProfile: null,
+      rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID',
+      message: 'Current schema/prompt submission contains malformed or incomplete model-profile provenance.',
     }
   }
 
-  // 5. Raw Row / DB joins if passed
-  if (item.rawRow?.quality_profile || item.rawRow?.model_quality_profile) {
-    return true
+  // Metadata/profile objects may be displayed elsewhere, but MUST NEVER satisfy provenance validity for current submissions
+  return {
+    status: 'missing',
+    isValid: false,
+    hasCheck: false,
+    resolvedProfile: item.resolvedQualityProfile || item.qualityProfile || item.modelQualityProfile?.resolvedQualityProfile || item.canonicalSource?.metadata?.modelQualityProfile?.resolvedQualityProfile || null,
+    rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING',
+    message: 'Current schema/prompt submission is missing required model-profile provenance.',
   }
-
-  return false
 }
 
 export function getEngineVersionFromItem(item: QualityEraItem): string | null {
@@ -119,15 +134,14 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
 
   const isSchema220 = Boolean(schema && (schema === '2.2.0' || schema.startsWith('2.2')))
   const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
-  const hasProfile = hasModelQualityProfileProvenance(item)
 
-  // Current Quality Era strictly requires Schema 2.2.0 + Prompt 2.4.0 + Model-Quality-Profile Provenance
-  if (isSchema220 && isPrompt240 && hasProfile) {
+  // Era answers "which production contract authored this?". Provenance completeness is a
+  // separate quality invariant. Missing or malformed profile provenance on a current submission must stay
+  // visible in Current so Admin can report the violation instead of laundering it as Historical.
+  if (isSchema220 && isPrompt240) {
     return 'engine_v1'
   }
 
-  // Pre-profile Engine v1 (e.g. Schema 2.2.0 + Prompt 2.4.0 without model-quality-profile)
-  // and all legacy versions (Schema < 2.2.0, Prompt < 2.4.0) are preserved as Historical
   return 'historical'
 }
 

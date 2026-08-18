@@ -21,10 +21,22 @@ export type CurriculumAuditReport = {
 }
 
 const canonicalVocabSet = new Set(vocabulary2000.map((v) => v.word.toLowerCase()))
+const IRREGULAR_BASE_FORMS: Readonly<Record<string, string>> = {
+  has: 'have',
+  had: 'have',
+  was: 'be',
+  were: 'be',
+}
 
 function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   const w = word.toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
   if (!w || /^\d+$/u.test(w) || w.length <= 2) return true
+
+  if (w.includes('-')) {
+    const parts = w.split(/-+/u).filter(Boolean)
+    if (parts.length > 1 && parts.every((part) => isApprovedWord(part, taughtWords))) return true
+  }
+
   if (taughtWords.has(w) || canonicalVocabSet.has(w)) return true
 
   // Common basic contractions / auxiliaries / compounds / test instructional terms
@@ -33,12 +45,15 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
     'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 'should', 'would', 'might', 'must',
     's', 're', 've', 'll', 'd', 'm',
     'option', 'opt', 'recall', 'blank', 'item', 'choice', 'passage', 'sentence', 'statement', 'question',
+    'answer', 'code',
   ].includes(w)) {
     return true
   }
 
   // Common inflections & stems (against both official 2000 vocabulary and weekly taught words)
   const isBase = (stem: string) => taughtWords.has(stem) || canonicalVocabSet.has(stem)
+  const irregularBase = IRREGULAR_BASE_FORMS[w]
+  if (irregularBase && isBase(irregularBase)) return true
 
   if (w.endsWith('s') && isBase(w.slice(0, -1))) return true
   if (w.endsWith('es') && isBase(w.slice(0, -2))) return true
@@ -127,20 +142,15 @@ function wordAppearsInText(word: string, text: string): boolean {
 }
 
 const STANDARD_EDUCATIONAL_PROPER_NOUNS = [
-  // Days of the week
   'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
-  // Months
   'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december',
-  // Common educational character names in Taiwanese junior-high textbooks
   'alex', 'allen', 'amy', 'andy', 'ann', 'bella', 'ben', 'chris', 'cindy', 'david', 'diana', 'emma', 'eric', 'ethan', 'eva', 'gary', 'grace', 'hank', 'helen', 'jack', 'jay', 'jerry', 'john', 'jonathan', 'kelly', 'ken', 'kevin', 'kobe', 'leo', 'lisa', 'lucy', 'mary', 'max', 'may', 'mia', 'mike', 'mina', 'patty', 'paul', 'peggy', 'peter', 'ross', 'roy', 'sam', 'sara', 'sarah', 'tom', 'tony', 'vicky', 'willy', 'zoe',
-  // Common geographical names in curriculum
   'taiwan', 'taipei', 'kaohsiung', 'taichung', 'tainan', 'taitung', 'hualien', 'yilan', 'japan', 'tokyo', 'america', 'usa', 'uk', 'london', 'canada', 'australia', 'china', 'asia', 'europe',
 ]
 
 function buildAllowedEntitiesSet(pkg: CurriculumPackage): Set<string> {
   const allowed = new Set<string>(STANDARD_EDUCATIONAL_PROPER_NOUNS)
 
-  // 1. Dialogue speakers
   for (const block of pkg.studentLesson.reading.blocks) {
     if (block.type === 'dialogue' && block.speaker) {
       for (const token of block.speaker.toLowerCase().match(/[a-z0-9]+/gu) ?? []) {
@@ -149,7 +159,6 @@ function buildAllowedEntitiesSet(pkg: CurriculumPackage): Set<string> {
     }
   }
 
-  // 2. Child interests & profile identifiers
   const interestSources = [
     ...pkg.learnerSnapshot.specificInterests,
     ...pkg.learnerSnapshot.changedInterests,
@@ -207,20 +216,13 @@ export function auditCurriculumPackage(
   if (!pkg.studentLesson.practice.some((stage) => stage.stage === 'retrieval')) add('semantic-critical', 'retrieval', 'critical', '缺少隔天或延遲提取練習。')
   if (questions.length > 70) add('auto-derived', 'token-efficiency', 'warning', '題目超過 70 題；請刪除重複題並保留能區分學習狀態的證據。')
 
-  if (pkg.studentLesson.reading.genre === 'dialogue' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'dialogue')) {
-    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為對話 (dialogue)，但內容未包含任何 dialogue blocks。')
-  }
-  if (pkg.studentLesson.reading.genre === 'schedule' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'schedule-row')) {
-    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為時刻表/日程 (schedule)，但內容未包含任何 schedule-row blocks。')
-  }
-  if (pkg.studentLesson.reading.genre === 'notice' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'notice')) {
-    add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為公告 (notice)，但內容未包含任何 notice blocks。')
-  }
+  if (pkg.studentLesson.reading.genre === 'dialogue' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'dialogue')) add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為對話 (dialogue)，但內容未包含任何 dialogue blocks。')
+  if (pkg.studentLesson.reading.genre === 'schedule' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'schedule-row')) add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為時刻表/日程 (schedule)，但內容未包含任何 schedule-row blocks。')
+  if (pkg.studentLesson.reading.genre === 'notice' && !pkg.studentLesson.reading.blocks.some((b) => b.type === 'notice')) add('semantic-critical', 'alignment', 'critical', '閱讀體裁標示為公告 (notice)，但內容未包含任何 notice blocks。')
 
   const interestText = [...pkg.learnerSnapshot.specificInterests, ...pkg.learnerSnapshot.changedInterests].join(' ').toLocaleLowerCase()
   const allowedEntities = buildAllowedEntitiesSet(pkg)
 
-  // 1. Passage-First Lexical Anchor Check (Core words must be in the reading passage)
   const rawPassageText = blockTexts.join(' ')
   const taughtVocab = new Set(pkg.studentLesson.vocabulary.map((v) => v.word.toLowerCase()))
 
@@ -237,17 +239,18 @@ export function auditCurriculumPackage(
   ]
   const allStudentTokens = studentFacingTexts.join(' ').split(/\s+/u).filter(Boolean)
 
-  const unapprovedWords: string[] = []
+  const unapprovedWords = new Set<string>()
   for (const token of allStudentTokens) {
     const clean = token.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
     if (!clean) continue
     if (isApprovedWord(clean, taughtVocab)) continue
-    if (allowedEntities.has(clean.toLowerCase())) continue
+    const normalized = clean.toLowerCase()
+    if (allowedEntities.has(normalized)) continue
 
-    unapprovedWords.push(clean)
+    unapprovedWords.add(normalized)
   }
 
-  const uniqueUnapproved = Array.from(new Set(unapprovedWords))
+  const uniqueUnapproved = Array.from(unapprovedWords)
   if (uniqueUnapproved.length > 3) {
     add('semantic-critical', 'lexical-ceiling', 'critical', `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，違反國中會考難度上限。請將其替換為課綱單字或加入核心單字教學。`)
   } else if (uniqueUnapproved.length >= 1) {
@@ -285,7 +288,6 @@ export function auditCurriculumPackage(
   const stageNames = new Set(pkg.studentLesson.practice.map((stage) => stage.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('semantic-critical', 'self-study', 'critical', `缺少 ${stage} 階段。`)
 
-  // 3. Core Evidence / Organizer Task Verification (Must be in Independent stage before transfer)
   const independentSection = pkg.studentLesson.practice.find((s) => s.stage === 'independent')
   if (independentSection) {
     const hasOrganizerTask = independentSection.questions.some((q) =>
@@ -299,18 +301,14 @@ export function auditCurriculumPackage(
     }
   }
 
-  // 4. Deterministic Workload Calibration
   if (typeof pkg.learningPlan.estimatedMinutes === 'number') {
     const minutes = pkg.learningPlan.estimatedMinutes
-
-    // 4.1 Global Sanity Bounds (55 / 140)
     if (minutes < 55) {
       add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 顯著低於全系統最低安全下限 (55 分鐘)，無法確保每週基礎學習效果。`)
     } else if (minutes > 140) {
       add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 高於全系統最高安全上限 (140 分鐘)，可能造成國中生認知負荷過重。`)
     }
 
-    // 4.2 Learner Declared Weekly Budget Calibration (±20%)
     if (typeof declaredBudget === 'number' && declaredBudget > 0) {
       const lowerBudgetBound = declaredBudget * 0.8
       const upperBudgetBound = declaredBudget * 1.2
