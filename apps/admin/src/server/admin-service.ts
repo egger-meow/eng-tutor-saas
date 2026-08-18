@@ -182,6 +182,83 @@ export class AdminService {
     }
   }
 
+  public async requeueCurriculumSubmission(
+    jobId: string,
+    authoringAttempt?: number
+  ): Promise<{
+    success: boolean
+    jobId: string
+    authoringAttempt?: number
+    submissionStatus?: string
+    jobStatus?: string
+    attemptCount?: number
+    maxAttempts?: number
+    error?: string
+    message?: string
+    timestamp?: string
+  }> {
+    if (!jobId || typeof jobId !== 'string') {
+      return { success: false, jobId: '', error: 'INVALID_JOB_ID', message: 'Job ID is required' }
+    }
+
+    const client = this.ensureClient()
+    try {
+      const res = await client.rpc('admin_requeue_curriculum_submission', {
+        p_job_id: jobId,
+        p_authoring_attempt: authoringAttempt ?? null,
+      })
+
+      if (!res.error && res.data && typeof res.data === 'object') {
+        const data = res.data as any
+        if (data.success) {
+          console.log('[AUDIT] curriculum_submission_requeued:', {
+            jobId,
+            authoringAttempt: data.authoringAttempt,
+            timestamp: data.timestamp,
+          })
+        }
+        return data
+      }
+    } catch {}
+
+    // Direct client fallback
+    try {
+      const now = new Date().toISOString()
+      const { data: job } = await client.from('generation_jobs').select('*').eq('id', jobId).single()
+      if (!job) return { success: false, jobId, error: 'JOB_NOT_FOUND', message: 'Generation job not found' }
+      if (job.status === 'completed') return { success: false, jobId, error: 'JOB_ALREADY_COMPLETED', message: 'Completed job cannot be requeued' }
+
+      await client.from('generation_jobs').update({
+        status: 'claimed',
+        claimed_by: 'chatgpt-work-daily',
+        lease_expires_at: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
+        error_code: null,
+        error_message: null,
+        updated_at: now,
+      }).eq('id', jobId)
+
+      const result = {
+        success: true,
+        jobId,
+        authoringAttempt,
+        submissionStatus: 'pending',
+        jobStatus: 'claimed',
+        attemptCount: job.attempt_count,
+        maxAttempts: job.max_attempts,
+        timestamp: now,
+      }
+      console.log('[AUDIT] curriculum_submission_requeued:', { jobId, authoringAttempt, timestamp: now })
+      return result
+    } catch (err) {
+      return {
+        success: false,
+        jobId,
+        error: 'OPERATION_FAILED',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
+  }
+
   public async getTestModeStatus(childId: string): Promise<GenerationTestModeStatus> {
     if (!childId || typeof childId !== 'string') {
       return {

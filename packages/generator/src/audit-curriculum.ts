@@ -343,7 +343,7 @@ export function auditCurriculumPackage(
   return { passed: !findings.some((finding) => finding.severity === 'critical'), findings, summary: { questions: questions.length, words: passageWords, targets: pkg.learningPlan.targets.length, tokenEfficiencySignals } }
 }
 
-if (process.argv[1]?.endsWith('audit-curriculum.ts')) {
+async function runCli() {
   const path = process.argv.slice(2).find((argument) => argument !== '--')
   if (!path) throw new Error('Usage: tsx src/audit-curriculum.ts <curriculum-package.json>')
   const candidates = isAbsolute(path) ? [path] : [resolve(process.cwd(), path), resolve(process.cwd(), '..', '..', path)]
@@ -355,3 +355,11 @@ if (process.argv[1]?.endsWith('audit-curriculum.ts')) {
   const input = JSON.parse(await readFile(filePath, 'utf8')) as unknown
   process.stdout.write(`${JSON.stringify(auditCurriculumPackage(input), null, 2)}\n`)
 }
+
+if (process.argv[1]?.endsWith('audit-curriculum.ts')) {
+  runCli().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+

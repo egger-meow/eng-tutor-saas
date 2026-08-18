@@ -1364,4 +1364,53 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(failures.recentFailures.some((f) => (f.failureEvidence as any)?.findings?.some((fd: any) => fd.rule === 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID'))).toBe(true)
     })
   })
+
+  describe('Requeue Curriculum Submission for Finisher Reprocessing', () => {
+    it('successfully calls admin_requeue_curriculum_submission RPC preserving attempt_count and max_attempts', async () => {
+      let rpcCalledWith: any = null
+      const mockClient = createMockSupabaseClient(
+        {
+          generation_jobs: [{ id: 'job-rejected-1', status: 'failed', attempt_count: 3, max_attempts: 3 }],
+        },
+        {},
+        {
+          admin_requeue_curriculum_submission: async (params: any) => {
+            rpcCalledWith = params
+            return {
+              data: {
+                success: true,
+                jobId: params.p_job_id,
+                authoringAttempt: params.p_authoring_attempt ?? 3,
+                submissionStatus: 'pending',
+                jobStatus: 'claimed',
+                attemptCount: 3,
+                maxAttempts: 3,
+                timestamp: '2026-08-19T01:30:00Z',
+              },
+              error: null,
+            }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.requeueCurriculumSubmission('job-rejected-1', 3)
+
+      expect(result.success).toBe(true)
+      expect(rpcCalledWith).toEqual({ p_job_id: 'job-rejected-1', p_authoring_attempt: 3 })
+      expect(result.jobStatus).toBe('claimed')
+      expect(result.submissionStatus).toBe('pending')
+      expect(result.attemptCount).toBe(3)
+      expect(result.maxAttempts).toBe(3)
+    })
+
+    it('rejects requeuing when jobId is empty or invalid', async () => {
+      const mockClient = createMockSupabaseClient({}, {}, {})
+      const service = new AdminService({ client: mockClient })
+      const result = await service.requeueCurriculumSubmission('')
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('INVALID_JOB_ID')
+    })
+  })
 })
+
