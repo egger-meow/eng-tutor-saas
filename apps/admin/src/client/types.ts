@@ -48,43 +48,76 @@ export interface QualityEraItem {
   rawRow?: any
 }
 
+export function isCompleteProfileEvidence(evidence: string): boolean {
+  return (
+    evidence.includes('actualModel=') &&
+    evidence.includes('resolvedQualityProfile=') &&
+    evidence.includes('qualityProfileVersion=') &&
+    evidence.includes('engineVersion=')
+  )
+}
+
+export type ModelProfileProvenanceStatus = 'valid' | 'invalid' | 'missing'
+
+export interface ModelProfileProvenanceAssessment {
+  status: ModelProfileProvenanceStatus
+  isValid: boolean
+  hasCheck: boolean
+  rule?: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING' | 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID'
+  message?: string
+}
+
 export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean {
   if (item.resolvedQualityProfile || item.qualityProfile) return true
-  if (item.modelQualityProfile && (typeof item.modelQualityProfile === 'string' || (typeof item.modelQualityProfile === 'object' && Object.keys(item.modelQualityProfile).length > 0))) {
-    return true
-  }
-  if (item.profileProvenance && (typeof item.profileProvenance === 'string' || (typeof item.profileProvenance === 'object' && Object.keys(item.profileProvenance).length > 0))) {
-    return true
+  if (item.modelQualityProfile && typeof item.modelQualityProfile === 'object') {
+    const meta = item.modelQualityProfile
+    if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
+      return true
+    }
   }
 
   const csMeta = item.canonicalSource?.metadata
   if (csMeta) {
-    if (csMeta.modelQualityProfile || csMeta.qualityProfile || csMeta.resolvedQualityProfile || csMeta.profileProvenance) {
+    if (csMeta.modelQualityProfile && typeof csMeta.modelQualityProfile === 'object') {
+      const meta = csMeta.modelQualityProfile
+      if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
+        return true
+      }
+    }
+    if (csMeta.resolvedQualityProfile || csMeta.qualityProfile) return true
+  }
+
+  const csChecks = item.canonicalSource?.qualityEvidence?.criticalChecks
+  if (Array.isArray(csChecks)) {
+    const check = csChecks.find((c: any) => c && c.id === 'model-quality-profile')
+    if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
       return true
     }
   }
-  const csChecks = item.canonicalSource?.qualityEvidence?.criticalChecks
-  if (Array.isArray(csChecks) && csChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-    return true
-  }
 
   const qeChecks = item.qualityEvidence?.criticalChecks
-  if (Array.isArray(qeChecks) && qeChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-    return true
+  if (Array.isArray(qeChecks)) {
+    const check = qeChecks.find((c: any) => c && c.id === 'model-quality-profile')
+    if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
+      return true
+    }
   }
 
   const fe = item.failureEvidence
   if (fe) {
-    if (fe.modelQualityProfile || fe.qualityProfile || fe.resolvedQualityProfile || fe.profileProvenance || fe.provenance?.resolvedQualityProfile || fe.provenance?.profileName) {
-      return true
+    if (fe.modelQualityProfile && typeof fe.modelQualityProfile === 'object') {
+      const meta = fe.modelQualityProfile
+      if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
+        return true
+      }
     }
-    if (Array.isArray(fe.criticalChecks) && fe.criticalChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
-      return true
+    if (Array.isArray(fe.criticalChecks)) {
+      const check = fe.criticalChecks.find((c: any) => c && c.id === 'model-quality-profile')
+      if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
+        return true
+      }
     }
     if (typeof fe.qualityProfile === 'string' || typeof fe.resolvedQualityProfile === 'string') {
-      return true
-    }
-    if (Array.isArray(fe.findings) && fe.findings.some((f: any) => f.rule === 'model-quality-profile' || (typeof f.message === 'string' && f.message.includes('quality profile')))) {
       return true
     }
   }
@@ -94,6 +127,45 @@ export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean 
   }
 
   return false
+}
+
+export function assessModelQualityProfileProvenance(item: QualityEraItem): ModelProfileProvenanceAssessment {
+  const checks = [
+    ...(Array.isArray(item.canonicalSource?.qualityEvidence?.criticalChecks) ? item.canonicalSource.qualityEvidence.criticalChecks : []),
+    ...(Array.isArray(item.qualityEvidence?.criticalChecks) ? item.qualityEvidence.criticalChecks : []),
+    ...(Array.isArray(item.failureEvidence?.criticalChecks) ? item.failureEvidence.criticalChecks : []),
+  ]
+  const profileCheck = checks.find((c: any) => c && c.id === 'model-quality-profile')
+
+  if (profileCheck) {
+    const passed = profileCheck.passed === true
+    const evidence = typeof profileCheck.evidence === 'string' ? profileCheck.evidence : ''
+    const isComplete = isCompleteProfileEvidence(evidence)
+
+    if (passed && isComplete) {
+      return { status: 'valid', isValid: true, hasCheck: true }
+    }
+
+    return {
+      status: 'invalid',
+      isValid: false,
+      hasCheck: true,
+      rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID',
+      message: 'Current schema/prompt submission contains malformed or incomplete model-profile provenance.',
+    }
+  }
+
+  if (hasModelQualityProfileProvenance(item)) {
+    return { status: 'valid', isValid: true, hasCheck: false }
+  }
+
+  return {
+    status: 'missing',
+    isValid: false,
+    hasCheck: false,
+    rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING',
+    message: 'Current schema/prompt submission is missing required model-profile provenance.',
+  }
 }
 
 export function getEngineVersionFromItem(item: QualityEraItem): string | null {

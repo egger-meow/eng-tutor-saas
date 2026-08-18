@@ -938,10 +938,10 @@ describe('AdminService Authoritative Truth Layer', () => {
           metadata: {
             schemaVersion: '2.2.0',
             promptVersion: '2.4.0',
-            modelQualityProfile: { actualModel: 'gemini-3.7-flash' },
+            modelQualityProfile: { actualModel: 'gemini-3.7-flash', resolvedQualityProfile: 'gemini-3.7-flash', qualityProfileVersion: '1.0.0', engineVersion: '1.0.1' },
           },
           qualityEvidence: {
-            criticalChecks: [{ id: 'model-quality-profile', passed: true, evidence: 'actualModel=gemini-3.7-flash' }],
+            criticalChecks: [{ id: 'model-quality-profile', passed: true, evidence: 'actualModel=gemini-3.7-flash | resolvedQualityProfile=gemini-3.7-flash | qualityProfileVersion=1.0.0 | engineVersion=1.0.1' }],
           },
         },
       })).toBe('engine_v1')
