@@ -1,4 +1,6 @@
--- Migration: Add quality_profile column to admin_get_curriculum_submissions RPC for tightened quality era provenance
+-- Migration: Fix admin_get_curriculum_submissions by removing invalid job.model_name reference
+-- Model provenance is strictly resolved from canonical submission metadata/profile evidence only.
+
 drop function if exists public.admin_get_curriculum_submissions(uuid, integer);
 
 create or replace function public.admin_get_curriculum_submissions(

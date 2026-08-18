@@ -1167,6 +1167,118 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(exportAll.generationFailureEvidence[0].schemaVersion).toBe('1.0.0')
     })
   })
+
+  describe('Admin Curriculum Submissions Telemetry & Production Schema Invariants', () => {
+    it('relies strictly on authoritative admin_get_curriculum_submissions RPC without public table fallback', async () => {
+      let publicTableQueried = false
+
+      const mockClient = createMockSupabaseClient(
+        {
+          generation_jobs: [{ id: 'job-1', child_id: 'c1', status: 'completed' }],
+          children: [{ id: 'c1', display_name: '學員 A' }],
+          materials: [],
+          subscriptions: [],
+          enrollment_settings: [{ capacity: 100, status: 'open', founding_limit: 30 }],
+          curriculum_submissions: [
+            // Dummy rows that should NEVER be queried directly from public schema
+            { id: 'should-never-read-this' },
+          ],
+        },
+        {},
+        {
+          admin_get_curriculum_submissions: async () => {
+            // RPC fails
+            return { data: null, error: { message: 'permission denied for function admin_get_curriculum_submissions' } }
+          },
+        }
+      )
+
+      // Spy on table queries to confirm curriculum_submissions is never selected directly
+      const origFrom = mockClient.from
+      mockClient.from = (tableName: string) => {
+        if (tableName === 'curriculum_submissions') {
+          publicTableQueried = true
+        }
+        return origFrom(tableName)
+      }
+
+      const service = new AdminService({ client: mockClient })
+      const overview = await service.getOperationsOverview('current')
+
+      // Assert that direct table query was NOT attempted
+      expect(publicTableQueried).toBe(false)
+
+      // Assert that the RPC error is explicitly surfaced in telemetry dataSources (fail-closed)
+      const rpcSource = overview.dataSources.find((ds) => ds.source === 'curriculum_submissions (RPC)')
+      expect(rpcSource).toBeDefined()
+      expect(rpcSource?.status).toBe('error')
+      expect(rpcSource?.error).toContain('permission denied')
+    })
+
+    it('reports 6/6 healthy data sources when admin RPC succeeds on production schema shape', async () => {
+      const mockSubmissions = [
+        {
+          job_id: 'job-real-1',
+          child_id: 'c1',
+          material_week: '2026-08-16',
+          authoring_attempt: 1,
+          generation_worker_id: 'chatgpt-work-daily',
+          processor_id: 'github-actions-finisher',
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          failure_evidence: null,
+          submitted_at: '2026-08-17T05:54:16.848Z',
+          processed_at: '2026-08-17T07:19:35.939Z',
+          attempt_count: 1,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          model_name: 'Gemini 3.7 Flash',
+          quality_profile: 'gemini-3.7-flash',
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          // Real production shape: generation_jobs has NO model_name column
+          generation_jobs: [
+            {
+              id: 'job-real-1',
+              child_id: 'c1',
+              material_week: '2026-08-16',
+              status: 'completed',
+              attempt_count: 1,
+              max_attempts: 3,
+              created_at: '2026-08-17T00:00:00Z',
+            },
+          ],
+          children: [{ id: 'c1', display_name: '學員 A', is_active: true }],
+          materials: [{ id: 'm1', child_id: 'c1', material_week: '2026-08-16', model_name: 'Gemini 3.7 Flash' }],
+          subscriptions: [{ id: 's1', child_id: 'c1', status: 'active', billing_interval: 'month' }],
+          enrollment_settings: [{ capacity: 100, status: 'open', founding_limit: 30 }],
+        },
+        {},
+        {
+          admin_get_curriculum_submissions: async () => {
+            return { data: mockSubmissions, error: null }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const overview = await service.getOperationsOverview('current')
+
+      // Assert all 6 data sources are present and healthy
+      expect(overview.dataSources.length).toBe(6)
+      const healthySources = overview.dataSources.filter((ds) => ds.status === 'healthy')
+      expect(healthySources.length).toBe(6)
+
+      const rpcSource = overview.dataSources.find((ds) => ds.source === 'curriculum_submissions (RPC)')
+      expect(rpcSource?.status).toBe('healthy')
+      expect(rpcSource?.rowCount).toBe(1)
+    })
+  })
 })
+
 
 

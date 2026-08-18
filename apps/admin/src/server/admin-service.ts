@@ -1424,63 +1424,61 @@ export class AdminService {
     const client = this.ensureClient()
     const start = Date.now()
 
-    // 1. Try secure RPC
+    // Authoritative Access: private_generation.curriculum_submissions is accessible ONLY through admin_get_curriculum_submissions RPC
     try {
       const res = await client.rpc('admin_get_curriculum_submissions', {
         p_job_id: jobId || null,
         p_limit: limit,
       })
-      if (!res.error && res.data) {
+      const latencyMs = Date.now() - start
+
+      if (res.error) {
+        if (statuses) {
+          statuses.push({
+            source: 'curriculum_submissions (RPC)',
+            status: 'error',
+            rowCount: 0,
+            error: res.error.message || JSON.stringify(res.error),
+            latencyMs,
+          })
+        }
+        return []
+      }
+
+      if (res.data) {
         if (statuses) {
           statuses.push({
             source: 'curriculum_submissions (RPC)',
             status: res.data.length === 0 ? 'empty' : 'healthy',
             rowCount: res.data.length,
-            latencyMs: Date.now() - start,
+            latencyMs,
           })
         }
         return res.data
       }
-    } catch {}
 
-    // 2. Try direct select
-    try {
-      let query = client.from('curriculum_submissions').select('*').limit(limit)
-      if (jobId) query = query.eq('job_id', jobId)
-      const res = await query
-      if (!res.error && res.data) {
-        if (statuses) {
-          statuses.push({
-            source: 'curriculum_submissions (Table)',
-            status: res.data.length === 0 ? 'empty' : 'healthy',
-            rowCount: res.data.length,
-            latencyMs: Date.now() - start,
-          })
-        }
-        return res.data
-      }
-      if (res.error && statuses) {
-        statuses.push({
-          source: 'curriculum_submissions',
-          status: 'error',
-          rowCount: 0,
-          error: res.error.message || 'Table private_generation.curriculum_submissions requires admin RPC',
-          latencyMs: Date.now() - start,
-        })
-      }
-    } catch (err) {
       if (statuses) {
         statuses.push({
-          source: 'curriculum_submissions',
+          source: 'curriculum_submissions (RPC)',
+          status: 'empty',
+          rowCount: 0,
+          latencyMs,
+        })
+      }
+      return []
+    } catch (err) {
+      const latencyMs = Date.now() - start
+      if (statuses) {
+        statuses.push({
+          source: 'curriculum_submissions (RPC)',
           status: 'error',
           rowCount: 0,
           error: err instanceof Error ? err.message : String(err),
-          latencyMs: Date.now() - start,
+          latencyMs,
         })
       }
+      return []
     }
-
-    return []
   }
 
   public async getOperationsOverview(era: QualityEra = 'current'): Promise<OperationsOverview> {
