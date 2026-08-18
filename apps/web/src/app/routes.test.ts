@@ -12,6 +12,15 @@ describe('hosted route paths', () => {
     expect(addBasePath('/#pricing', '/eng-tutor-saas/')).toBe('/eng-tutor-saas/#pricing')
   })
 
+  it('normalizes already-hosted internal hrefs before navigation without duplicating the base path', () => {
+    const basePath = '/eng-tutor-saas/'
+    for (const route of ['/terms', '/privacy']) {
+      const hostedHref = addBasePath(route, basePath)
+      const appPath = stripBasePath(hostedHref, basePath)
+      expect(addBasePath(appPath, basePath)).toBe(hostedHref)
+    }
+  })
+
   it('keeps the public sample route addressable', () => {
     expect(parseRoute('/sample')).toMatchObject({ name: 'sample', path: '/sample' })
   })
