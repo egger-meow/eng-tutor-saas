@@ -53,14 +53,6 @@ Before submission, specifically inspect:
   - For multiple-choice questions, the explanation must concisely eliminate key distractors with unbroken logical causality.
   - Explanations must be self-contained so a junior-high student studying alone can understand their mistake without external assistance.
 
-### 5. Formatting Content & Option Values
-- **Target Area:** `formatting-content`
-- **Rule ID:** `gemini-fmt-05`
-- **Description:** Do not embed option labels such as "A)" inside option text. Option values must contain content only.
-- **Check Points:**
-  - Verify options in multiple-choice questions do not begin with `(A)`, `A)`, `A.`, or `[A]`.
-  - Renderer owns option markers like `(A)` deterministically; option values hold pure content.
-
 ## Human-Maintained Observations
 
 <!--
