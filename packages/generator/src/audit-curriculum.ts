@@ -228,7 +228,7 @@ export function auditCurriculumPackage(
 
   for (const vocab of pkg.studentLesson.vocabulary) {
     if (!wordAppearsInText(vocab.word, rawPassageText)) {
-      add('semantic-critical', 'lexical-anchor', 'critical', `核心單字 "${vocab.word}" 未出現在閱讀文章中。文章是單字學習的語境錨點，核心單字必須來自文章。`)
+      add('auto-derived', 'lexical-anchor', 'warning', `核心單字 "${vocab.word}" 未出現在閱讀文章中。文章是單字學習的語境錨點，建議核心單字來自文章。`)
     }
   }
 
@@ -252,9 +252,9 @@ export function auditCurriculumPackage(
 
   const uniqueUnapproved = Array.from(unapprovedWords)
   if (uniqueUnapproved.length > 3) {
-    add('semantic-critical', 'lexical-ceiling', 'critical', `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，違反國中會考難度上限。請將其替換為課綱單字或加入核心單字教學。`)
+    add('auto-derived', 'lexical-ceiling', 'warning', `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，建議將其替換為課綱單字或加入核心單字教學。`)
   } else if (uniqueUnapproved.length >= 1) {
-    add('semantic-critical', 'lexical-ceiling', 'warning', `教材中出現少數超綱且未說明的單字 (${uniqueUnapproved.join(', ')})。`)
+    add('auto-derived', 'lexical-ceiling', 'warning', `教材中出現少數超綱且未說明的單字 (${uniqueUnapproved.join(', ')})。`)
   }
 
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))
