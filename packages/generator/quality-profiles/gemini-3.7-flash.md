@@ -1,5 +1,5 @@
 ---
-profileVersion: "1.0.0"
+profileVersion: "1.1.0"
 modelId: "gemini-3.7-flash"
 modelPatterns:
   - "gemini-3.7-flash"
@@ -53,9 +53,19 @@ Before submission, specifically inspect:
   - For multiple-choice questions, the explanation must concisely eliminate key distractors with unbroken logical causality.
   - Explanations must be self-contained so a junior-high student studying alone can understand their mistake without external assistance.
 
+### 5. Textual Entailment & Multi-Detail Synthesis Prevention
+- **Target Area:** `answer-entailment`
+- **Rule ID:** `gemini-entail-05`
+- **Description:** Before submission, verify every MC correct option and Parent rationale is directly entailed by the source text. Never combine separately mentioned true details into a new unsupported claim. Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+- **Check Points:**
+  - Verify every multiple-choice correct option and Parent rationale is directly entailed by the source text.
+  - Never combine separately mentioned true details into a new unsupported claim or composite statement.
+  - Global Answer Integrity: Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+
 ## Human-Maintained Observations
 
 <!--
 Human operators: record observed model behaviors here.
 Repeated or critical patterns can be promoted into Active Quality Rules above.
 -->
+
