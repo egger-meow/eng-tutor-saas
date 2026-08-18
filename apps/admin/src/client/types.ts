@@ -118,7 +118,12 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
   // Era answers "which production contract authored this?". Provenance completeness is a
   // separate quality invariant. Missing profile provenance on a current submission must stay
   // visible in Current so Admin can report the violation instead of laundering it as Historical.
-  if (isSchema220 && isPrompt240) {
+  const hasProfile = hasModelQualityProfileProvenance(item)
+  const hasEngineVersion = Boolean(getEngineVersionFromItem(item))
+
+  // Profile provenance normally identifies current evidence. If that provenance itself is broken,
+  // the admin RPC's authoritative engine_version keeps the current submission visible in Current.
+  if (isSchema220 && isPrompt240 && (hasProfile || hasEngineVersion)) {
     return 'engine_v1'
   }
 
