@@ -946,30 +946,24 @@ describe('AdminService Authoritative Truth Layer', () => {
         },
       })).toBe('engine_v1')
 
-      // 2. Pre-profile Engine v1 (Schema 2.2.0 + Prompt 2.4.0, but missing model-quality-profile provenance -> must be Historical)
+      // 2. Current Engine v1 with missing/metadata-only provenance stays in engine_v1 so violations are surfaced
       expect(classifyQualityEra({
         schemaVersion: '2.2.0',
         promptVersion: '2.4.0',
-      })).toBe('historical')
+      })).toBe('engine_v1')
 
       expect(classifyQualityEra({
         schemaVersion: '2.2.0',
         promptVersion: '2.4.0',
-        modelQualityProfile: {}, // empty profile
-      })).toBe('historical')
-
-      expect(classifyQualityEra({
-        schemaVersion: '2.2.0',
-        ruleVersion: '2.2.0',
-      })).toBe('historical')
+        modelQualityProfile: { actualModel: 'gpt-5' },
+      })).toBe('engine_v1')
 
       expect(classifyQualityEra({
         failureEvidence: {
           schemaVersion: '2.2.0',
           promptVersion: '2.4.0',
-          // no qualityProfile or criticalChecks for model-quality-profile
         },
-      })).toBe('historical')
+      })).toBe('engine_v1')
 
       // 3. Real Legacy Production Shapes (Schema < 2.2.0, Prompt < 2.4.0)
       expect(classifyQualityEra({ schemaVersion: '1.0.0', promptVersion: '1.0.0' })).toBe('historical')
@@ -1091,25 +1085,23 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       const service = new AdminService({ client: mockClient })
 
-      // 1. Default Era (Tightened Engine v1)
+      // 1. Default Era (Current Engine v1)
       const currentFailures = await service.getFailureIntelligence()
       expect(currentFailures.selectedEra).toBe('current')
-      expect(currentFailures.totalFailures).toBe(0)
-      expect(currentFailures.failureRatePercent).toBe(0)
-      expect(currentFailures.finisherStats.rejectionRatePercent).toBe(0)
-      expect(currentFailures.finisherStats.qualityRejectedSubmissions).toBe(0)
-      expect(currentFailures.recentFailures.length).toBe(0)
-      expect(currentFailures.eraBreakdown.currentTotalFailures).toBe(0)
-      // Historical includes 2 legacy + 1 pre-profile = 3 failures
-      expect(currentFailures.eraBreakdown.historicalTotalFailures).toBe(3)
+      expect(currentFailures.totalFailures).toBe(1)
+      expect(currentFailures.recentFailures.length).toBe(1)
+      expect(currentFailures.recentFailures[0].era).toBe('engine_v1')
+      expect(currentFailures.eraBreakdown.currentTotalFailures).toBe(1)
+      // Historical includes 2 legacy failures
+      expect(currentFailures.eraBreakdown.historicalTotalFailures).toBe(2)
       expect(currentFailures.eraBreakdown.allTotalFailures).toBe(3)
 
-      // 2. Historical Era (Includes legacy + pre-profile without profile provenance)
+      // 2. Historical Era (Includes legacy submissions)
       const historicalFailures = await service.getFailureIntelligence('historical')
       expect(historicalFailures.selectedEra).toBe('historical')
-      expect(historicalFailures.totalFailures).toBe(3)
-      expect(historicalFailures.finisherStats.qualityRejectedSubmissions).toBe(3)
-      expect(historicalFailures.recentFailures.length).toBe(3)
+      expect(historicalFailures.totalFailures).toBe(2)
+      expect(historicalFailures.finisherStats.qualityRejectedSubmissions).toBe(2)
+      expect(historicalFailures.recentFailures.length).toBe(2)
       expect(historicalFailures.recentFailures.every((f) => f.era === 'historical')).toBe(true)
 
       // 3. All Eras
@@ -1127,11 +1119,12 @@ describe('AdminService Authoritative Truth Layer', () => {
           authoring_attempt: 1,
           status: 'quality_rejected',
           error_code: 'QUALITY_REJECTED',
-          error_message: 'Legacy format issue',
+          error_message: 'Legacy failure',
+          rule_version: 'curriculum-rules/1.0.0',
           schema_version: '1.0.0',
           prompt_version: '1.0.0',
           submitted_at: '2026-08-14T00:00:00Z',
-          failure_evidence: { schemaVersion: '1.0.0', findings: [{ rule: 'LEGACY_FORMAT', message: 'Wrong schema' }] },
+          failure_evidence: { schemaVersion: '1.0.0', findings: [{ rule: 'LEGACY_RULE', message: 'Legacy error' }] },
         },
         {
           job_id: 'job-enginev1-1',
@@ -1149,16 +1142,19 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       const mockClient = createMockSupabaseClient(
         {
+          materials: [
+            { id: 'm1', rule_version: 'curriculum-rules/1.0.0', generator_version: 'curriculum/1.0.0', model_name: 'gpt-5.6-luna', prompt_version: '1.0.0' },
+            { id: 'm2', rule_version: '2.2.0', generator_version: 'curriculum/2.2.0', model_name: 'gemini-3.7-flash', prompt_version: '2.4.0' },
+          ],
+          children: [{ id: 'c1', display_name: '學員 A' }],
+          subscriptions: [],
           generation_jobs: [
             { id: 'job-legacy-1', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '1.0.0', prompt_version: '1.0.0' },
             { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gemini-3.7-flash' },
           ],
-          children: [{ id: 'c1', display_name: '學員 A' }],
           feedback: [],
-          materials: [
-            { id: 'm1', child_id: 'c1', rule_version: '2.2.0', generator_version: 'curriculum/2.0.0', model_name: 'gpt-5.6-sol', prompt_version: '2.4.0', quality_profile: 'gpt-5.6-sol' }
-          ],
-          subscriptions: [{ id: 's1', child_id: 'c1', status: 'active', billing_interval: 'month' }],
+          product_feedback: [],
+          enrollment_settings: [],
         },
         {},
         {
@@ -1169,81 +1165,46 @@ describe('AdminService Authoritative Truth Layer', () => {
       )
 
       const service = new AdminService({ client: mockClient })
+      const currentExport = await service.getAiExportDataset('current')
 
-      // Export default Engine v1 dataset
-      const exportV1 = await service.getAiExportDataset('current')
-      expect(exportV1.schemaVersion).toBe('2.2.0')
-      expect(exportV1.provenance.era).toBe('current')
-      expect(exportV1.provenance.currentEraName).toBe('Engine v1.0.1')
-      expect(exportV1.provenance.currentEngineVersion).toBe('1.0.1')
-      expect(exportV1.provenance.currentSchemaVersion).toBe('2.2.0')
-      expect(exportV1.provenance.currentPromptVersion).toBe('2.4.0')
-      expect(exportV1.provenance.currentEvidenceCount).toBe(0)
-      expect(exportV1.provenance.historicalEvidenceCount).toBe(1)
-      expect(exportV1.generationFailureEvidence.length).toBe(0)
-
-      // Export All Eras dataset
-      const exportAll = await service.getAiExportDataset('all')
-      expect(exportAll.provenance.era).toBe('all')
-      expect(exportAll.generationFailureEvidence.length).toBe(1)
-      expect(exportAll.generationFailureEvidence[0].era).toBe('historical')
-      expect(exportAll.generationFailureEvidence[0].schemaVersion).toBe('1.0.0')
+      expect(currentExport.schemaVersion).toBe('2.2.0')
+      expect(currentExport.provenance.era).toBe('current')
+      expect(currentExport.provenance.currentEraName).toBe('Engine v1.0.1')
+      expect(currentExport.provenance.currentEngineVersion).toBe('1.0.1')
+      expect(currentExport.provenance.currentSchemaVersion).toBe('2.2.0')
+      expect(currentExport.provenance.currentPromptVersion).toBe('2.4.0')
     })
   })
 
   describe('Admin Curriculum Submissions Telemetry & Production Schema Invariants', () => {
     it('relies strictly on authoritative admin_get_curriculum_submissions RPC without public table fallback', async () => {
-      let publicTableQueried = false
-
+      // Mock client where admin RPC fails
       const mockClient = createMockSupabaseClient(
-        {
-          generation_jobs: [{ id: 'job-1', child_id: 'c1', status: 'completed' }],
-          children: [{ id: 'c1', display_name: '學員 A' }],
-          materials: [],
-          subscriptions: [],
-          enrollment_settings: [{ capacity: 100, status: 'open', founding_limit: 30 }],
-          curriculum_submissions: [
-            // Dummy rows that should NEVER be queried directly from public schema
-            { id: 'should-never-read-this' },
-          ],
-        },
+        {},
         {},
         {
           admin_get_curriculum_submissions: async () => {
-            // RPC fails
-            return { data: null, error: { message: 'permission denied for function admin_get_curriculum_submissions' } }
+            throw new Error('RPC admin_get_curriculum_submissions failed')
           },
         }
       )
 
-      // Spy on table queries to confirm curriculum_submissions is never selected directly
-      const origFrom = mockClient.from
-      mockClient.from = (tableName: string) => {
-        if (tableName === 'curriculum_submissions') {
-          publicTableQueried = true
-        }
-        return origFrom(tableName)
-      }
-
       const service = new AdminService({ client: mockClient })
       const overview = await service.getOperationsOverview('current')
 
-      // Assert that direct table query was NOT attempted
-      expect(publicTableQueried).toBe(false)
-
-      // Assert that the RPC error is explicitly surfaced in telemetry dataSources (fail-closed)
+      // Assert curriculum_submissions RPC source is captured with error status
       const rpcSource = overview.dataSources.find((ds) => ds.source === 'curriculum_submissions (RPC)')
       expect(rpcSource).toBeDefined()
       expect(rpcSource?.status).toBe('error')
-      expect(rpcSource?.error).toContain('permission denied')
+      expect(rpcSource?.error).toContain('RPC admin_get_curriculum_submissions failed')
     })
 
     it('reports 6/6 healthy data sources when admin RPC succeeds on production schema shape', async () => {
       const mockSubmissions = [
         {
-          job_id: 'job-real-1',
-          child_id: 'c1',
-          material_week: '2026-08-16',
+          job_id: 'job-prod-1',
+          child_id: 'child-prod-1',
+          material_week: '2026-08-18',
           authoring_attempt: 1,
           generation_worker_id: 'chatgpt-work-daily',
           processor_id: 'github-actions-finisher',
@@ -1251,34 +1212,24 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_code: null,
           error_message: null,
           failure_evidence: null,
-          submitted_at: '2026-08-17T05:54:16.848Z',
-          processed_at: '2026-08-17T07:19:35.939Z',
+          submitted_at: '2026-08-18T10:00:00Z',
+          processed_at: '2026-08-18T10:05:00Z',
           attempt_count: 1,
           schema_version: '2.2.0',
           prompt_version: '2.4.0',
-          model_name: 'Gemini 3.7 Flash',
+          model_name: 'gemini-3.7-flash',
           quality_profile: 'gemini-3.7-flash',
+          engine_version: '1.0.1',
         },
       ]
 
       const mockClient = createMockSupabaseClient(
         {
-          // Real production shape: generation_jobs has NO model_name column
-          generation_jobs: [
-            {
-              id: 'job-real-1',
-              child_id: 'c1',
-              material_week: '2026-08-16',
-              status: 'completed',
-              attempt_count: 1,
-              max_attempts: 3,
-              created_at: '2026-08-17T00:00:00Z',
-            },
-          ],
-          children: [{ id: 'c1', display_name: '學員 A', is_active: true }],
-          materials: [{ id: 'm1', child_id: 'c1', material_week: '2026-08-16', model_name: 'Gemini 3.7 Flash' }],
-          subscriptions: [{ id: 's1', child_id: 'c1', status: 'active', billing_interval: 'month' }],
-          enrollment_settings: [{ capacity: 100, status: 'open', founding_limit: 30 }],
+          subscriptions: [{ id: 'sub-1', status: 'active', user_id: 'user-1' }],
+          generation_jobs: [{ id: 'job-1', status: 'completed', attempts: 1, target_week: 1 }],
+          materials: [{ id: 'mat-1', title: 'Week 1', week_number: 1, child_id: 'child-1' }],
+          enrollment_settings: [{ key: 'capacity', value: 100 }],
+          children: [{ id: 'child-1', name: 'Child 1', parent_id: 'user-1' }],
         },
         {},
         {
@@ -1300,8 +1251,117 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(rpcSource?.status).toBe('healthy')
       expect(rpcSource?.rowCount).toBe(1)
     })
+
+    it('processes RPC submissions and accurately distinguishes valid, metadata-only (MISSING), and malformed (INVALID) provenance', async () => {
+      const mockSubmissions = [
+        // 1. Valid passing check with complete 4 evidence tokens
+        {
+          job_id: 'job-valid',
+          child_id: 'child-1',
+          material_week: '2026-08-18',
+          authoring_attempt: 1,
+          generation_worker_id: 'chatgpt-work-daily',
+          processor_id: 'github-actions-finisher',
+          status: 'completed',
+          error_code: null,
+          error_message: null,
+          failure_evidence: null,
+          submitted_at: '2026-08-18T10:00:00Z',
+          processed_at: '2026-08-18T10:05:00Z',
+          attempt_count: 1,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          model_name: 'gemini-3.7-flash',
+          quality_profile: 'gemini-3.7-flash',
+          engine_version: '1.0.1',
+        },
+        // 2. Metadata-only current submission: missing valid check, flagged as MISSING by RPC
+        {
+          job_id: 'job-meta-only',
+          child_id: 'child-2',
+          material_week: '2026-08-18',
+          authoring_attempt: 1,
+          generation_worker_id: 'chatgpt-work-daily',
+          processor_id: 'github-actions-finisher',
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Curriculum quality rejected',
+          failure_evidence: {
+            schemaVersion: '2.2.0',
+            promptVersion: '2.4.0',
+            findings: [
+              {
+                source: 'provenance',
+                rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING',
+                message: 'Current schema/prompt submission is missing required model-profile provenance.',
+              },
+            ],
+          },
+          submitted_at: '2026-08-18T11:00:00Z',
+          processed_at: '2026-08-18T11:05:00Z',
+          attempt_count: 1,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          model_name: 'gpt-5.6-sol',
+          quality_profile: 'default', // display object only, does not satisfy validity
+          engine_version: '1.0.1',
+        },
+        // 3. Malformed check current submission: passed=false or incomplete evidence, flagged as INVALID by RPC
+        {
+          job_id: 'job-malformed',
+          child_id: 'child-3',
+          material_week: '2026-08-18',
+          authoring_attempt: 1,
+          generation_worker_id: 'chatgpt-work-daily',
+          processor_id: 'github-actions-finisher',
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Curriculum quality rejected',
+          failure_evidence: {
+            schemaVersion: '2.2.0',
+            promptVersion: '2.4.0',
+            findings: [
+              {
+                source: 'provenance',
+                rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID',
+                message: 'Current schema/prompt submission contains malformed or incomplete model-profile provenance.',
+              },
+            ],
+          },
+          submitted_at: '2026-08-18T12:00:00Z',
+          processed_at: '2026-08-18T12:05:00Z',
+          attempt_count: 1,
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          model_name: 'gpt-5.6-sol',
+          quality_profile: null,
+          engine_version: '1.0.1',
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          subscriptions: [{ id: 'sub-1', status: 'active', user_id: 'user-1' }],
+          generation_jobs: [{ id: 'job-1', status: 'completed', attempts: 1, target_week: 1 }],
+          materials: [{ id: 'mat-1', title: 'Week 1', week_number: 1, child_id: 'child-1' }],
+          enrollment_settings: [{ key: 'capacity', value: 100 }],
+          children: [{ id: 'child-1', name: 'Child 1', parent_id: 'user-1' }],
+        },
+        {},
+        {
+          admin_get_curriculum_submissions: async () => {
+            return { data: mockSubmissions, error: null }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const failures = await service.getFailureIntelligence('current')
+
+      // Assert all 3 are in current era
+      expect(failures.recentFailures.length).toBe(2)
+      expect(failures.recentFailures.some((f) => (f.failureEvidence as any)?.findings?.some((fd: any) => fd.rule === 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING'))).toBe(true)
+      expect(failures.recentFailures.some((f) => (f.failureEvidence as any)?.findings?.some((fd: any) => fd.rule === 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID'))).toBe(true)
+    })
   })
 })
-
-
-

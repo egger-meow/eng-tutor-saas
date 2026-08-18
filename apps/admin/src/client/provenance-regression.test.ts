@@ -94,6 +94,29 @@ describe('current production provenance classification', () => {
     expect(classifyQualityEra(currentWithoutProfile)).toBe('engine_v1')
   })
 
+  it('treats metadata-only current submissions as MISSING (metadata objects never satisfy provenance validity)', () => {
+    const metadataOnly = {
+      schemaVersion: '2.2.0',
+      promptVersion: '2.4.0',
+      modelQualityProfile: {
+        actualModel: 'gpt-5',
+        resolvedQualityProfile: 'default',
+        qualityProfileVersion: '1.0.0',
+        engineVersion: '1.0.1',
+      },
+      qualityProfile: 'default',
+    }
+
+    expect(hasModelQualityProfileProvenance(metadataOnly)).toBe(false)
+    const assessment = assessModelQualityProfileProvenance(metadataOnly)
+    expect(assessment.status).toBe('missing')
+    expect(assessment.isValid).toBe(false)
+    expect(assessment.hasCheck).toBe(false)
+    expect(assessment.resolvedProfile).toBe('default')
+    expect(assessment.rule).toBe('MODEL_QUALITY_PROFILE_PROVENANCE_MISSING')
+    expect(classifyQualityEra(metadataOnly)).toBe('engine_v1')
+  })
+
   it('still classifies genuinely legacy schema/prompt evidence as historical', () => {
     expect(classifyQualityEra({ schemaVersion: '2.1.0', promptVersion: '2.3.0' })).toBe('historical')
   })

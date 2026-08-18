@@ -63,70 +63,13 @@ export interface ModelProfileProvenanceAssessment {
   status: ModelProfileProvenanceStatus
   isValid: boolean
   hasCheck: boolean
+  resolvedProfile?: string | null
   rule?: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING' | 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID'
   message?: string
 }
 
 export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean {
-  if (item.resolvedQualityProfile || item.qualityProfile) return true
-  if (item.modelQualityProfile && typeof item.modelQualityProfile === 'object') {
-    const meta = item.modelQualityProfile
-    if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
-      return true
-    }
-  }
-
-  const csMeta = item.canonicalSource?.metadata
-  if (csMeta) {
-    if (csMeta.modelQualityProfile && typeof csMeta.modelQualityProfile === 'object') {
-      const meta = csMeta.modelQualityProfile
-      if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
-        return true
-      }
-    }
-    if (csMeta.resolvedQualityProfile || csMeta.qualityProfile) return true
-  }
-
-  const csChecks = item.canonicalSource?.qualityEvidence?.criticalChecks
-  if (Array.isArray(csChecks)) {
-    const check = csChecks.find((c: any) => c && c.id === 'model-quality-profile')
-    if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
-      return true
-    }
-  }
-
-  const qeChecks = item.qualityEvidence?.criticalChecks
-  if (Array.isArray(qeChecks)) {
-    const check = qeChecks.find((c: any) => c && c.id === 'model-quality-profile')
-    if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
-      return true
-    }
-  }
-
-  const fe = item.failureEvidence
-  if (fe) {
-    if (fe.modelQualityProfile && typeof fe.modelQualityProfile === 'object') {
-      const meta = fe.modelQualityProfile
-      if (meta.actualModel && (meta.resolvedQualityProfile || meta.profileName || meta.name)) {
-        return true
-      }
-    }
-    if (Array.isArray(fe.criticalChecks)) {
-      const check = fe.criticalChecks.find((c: any) => c && c.id === 'model-quality-profile')
-      if (check && check.passed === true && typeof check.evidence === 'string' && isCompleteProfileEvidence(check.evidence)) {
-        return true
-      }
-    }
-    if (typeof fe.qualityProfile === 'string' || typeof fe.resolvedQualityProfile === 'string') {
-      return true
-    }
-  }
-
-  if (item.rawRow?.quality_profile || item.rawRow?.model_quality_profile) {
-    return true
-  }
-
-  return false
+  return assessModelQualityProfileProvenance(item).isValid
 }
 
 export function assessModelQualityProfileProvenance(item: QualityEraItem): ModelProfileProvenanceAssessment {
@@ -143,26 +86,31 @@ export function assessModelQualityProfileProvenance(item: QualityEraItem): Model
     const isComplete = isCompleteProfileEvidence(evidence)
 
     if (passed && isComplete) {
-      return { status: 'valid', isValid: true, hasCheck: true }
+      const match = evidence.match(/resolvedQualityProfile=([^ |]+)/)
+      return {
+        status: 'valid',
+        isValid: true,
+        hasCheck: true,
+        resolvedProfile: match ? match[1] : (item.resolvedQualityProfile ?? item.qualityProfile ?? null),
+      }
     }
 
     return {
       status: 'invalid',
       isValid: false,
       hasCheck: true,
+      resolvedProfile: null,
       rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_INVALID',
       message: 'Current schema/prompt submission contains malformed or incomplete model-profile provenance.',
     }
   }
 
-  if (hasModelQualityProfileProvenance(item)) {
-    return { status: 'valid', isValid: true, hasCheck: false }
-  }
-
+  // Metadata/profile objects may be displayed elsewhere, but MUST NEVER satisfy provenance validity for current submissions
   return {
     status: 'missing',
     isValid: false,
     hasCheck: false,
+    resolvedProfile: item.resolvedQualityProfile || item.qualityProfile || item.modelQualityProfile?.resolvedQualityProfile || item.canonicalSource?.metadata?.modelQualityProfile?.resolvedQualityProfile || null,
     rule: 'MODEL_QUALITY_PROFILE_PROVENANCE_MISSING',
     message: 'Current schema/prompt submission is missing required model-profile provenance.',
   }
@@ -188,14 +136,9 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
   const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
 
   // Era answers "which production contract authored this?". Provenance completeness is a
-  // separate quality invariant. Missing profile provenance on a current submission must stay
+  // separate quality invariant. Missing or malformed profile provenance on a current submission must stay
   // visible in Current so Admin can report the violation instead of laundering it as Historical.
-  const hasProfile = hasModelQualityProfileProvenance(item)
-  const hasEngineVersion = Boolean(getEngineVersionFromItem(item))
-
-  // Profile provenance normally identifies current evidence. If that provenance itself is broken,
-  // the admin RPC's authoritative engine_version keeps the current submission visible in Current.
-  if (isSchema220 && isPrompt240 && (hasProfile || hasEngineVersion)) {
+  if (isSchema220 && isPrompt240) {
     return 'engine_v1'
   }
 

@@ -140,10 +140,9 @@ begin
           )),
         true
       )
-      -- 2. Missing Provenance (No check and no resolved quality profile)
+      -- 2. Missing Provenance (No passing valid model-quality-profile criticalCheck present, including metadata-only)
       when e.resolved_schema_version like '2.2%'
         and (e.resolved_prompt_version like '2.4%' or e.resolved_prompt_version = 'prompt/2.4.0')
-        and e.resolved_quality_profile is null
         and (e.profile_has_check is null or e.profile_has_check is false)
       then jsonb_set(
         coalesce(e.stored_failure_evidence, '{}'::jsonb),
