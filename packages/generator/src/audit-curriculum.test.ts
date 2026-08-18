@@ -176,4 +176,63 @@ describe('curriculum audit & lexical contract', () => {
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
     expect(lexicalFinding).toBeUndefined()
   })
+
+  it('verifies workload calibration bounds and flags under-budget packages', () => {
+    const pkg = canonicalPackage()
+    // Make content valid (12 total items) but minimal workload (all MC, 125 words, 7 vocab -> ~42 minutes)
+    pkg.studentLesson.reading.blocks = [
+      {
+        type: 'paragraph',
+        text: 'Mina tests a small robot in the school workshop every Tuesday afternoon. Her partner Jay suggests that we sort each camera result carefully before the final match. They repeat the same test multiple times to compare every reading and check each electrical wire connection carefully. When unexpected sensor errors happen during testing, they record the problem calmly and discuss possible solutions with their teacher step by step. Everyone agrees that careful work and good teamwork produce excellent results for the upcoming tournament competition. By keeping detailed test records, the team learns from every single mistake and builds strong confidence for their next big robotics project.',
+      },
+      {
+        type: 'paragraph',
+        text: 'The club members clean the workshop table, charge all spare batteries, and prepare new materials for tomorrow.',
+      },
+    ]
+    pkg.studentLesson.vocabulary = pkg.studentLesson.vocabulary.slice(0, 7)
+
+    // Convert all questions to 0-writingLine MC items so computed time is minimal
+    for (const stage of pkg.studentLesson.practice) {
+      for (const q of stage.questions) {
+        q.itemType = 'grammar'
+        q.options = ['opt A', 'opt B', 'opt C', 'opt D']
+        q.writingLines = 0
+      }
+    }
+    for (const q of pkg.studentLesson.homework.questions) {
+      q.itemType = 'grammar'
+      q.options = ['opt A', 'opt B', 'opt C', 'opt D']
+      q.writingLines = 0
+    }
+
+    const reportLow = auditCurriculumPackage(pkg)
+    const lowFinding = reportLow.findings.find((f) => f.dimension === 'workload-calibration')
+    expect(lowFinding).toBeDefined()
+    expect(lowFinding?.severity).toBe('warning')
+  })
+
+  it('validates presence of core evidence organizer task in independent practice stage', () => {
+    const pkg = canonicalPackage()
+    const independent = pkg.studentLesson.practice.find((s: any) => s.stage === 'independent')
+    if (independent) {
+      independent.questions = [
+        {
+          id: 'I1',
+          targetIds: ['grammar-do-does', 'vocab-experiment'],
+          itemType: 'grammar',
+          prompt: 'Choose the correct form.',
+          options: ['do', 'does', 'did', 'doing'],
+          writingLines: 0,
+          difficulty: 'on-level',
+        },
+      ]
+    }
+    // Keep answers aligned
+    pkg.answers = pkg.answers.filter((a: any) => a.questionId !== 'I2' && a.questionId !== 'I3')
+    const report = auditCurriculumPackage(pkg)
+    const orgFinding = report.findings.find((f) => f.dimension === 'evidence-organizer')
+    expect(orgFinding).toBeDefined()
+    expect(orgFinding?.severity).toBe('warning')
+  })
 })

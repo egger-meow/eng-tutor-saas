@@ -36,7 +36,10 @@ export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   </div>
 </section>`
 
-  const readingHtml = renderReadingSection(lesson.reading)
+  const targetPatterns = Array.isArray(lesson.instruction)
+    ? lesson.instruction.flatMap((i) => (Array.isArray(i.patterns) ? i.patterns : []))
+    : []
+  const readingHtml = renderReadingSection(lesson.reading, lesson.vocabulary, targetPatterns)
   const vocabHtml = renderVocabularySection(lesson.vocabulary)
   const instructionHtml = renderInstructionSection(lesson.instruction)
   const practiceHtml = renderPracticeStages(lesson.practice)

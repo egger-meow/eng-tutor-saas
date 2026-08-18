@@ -10,7 +10,7 @@ const PARENT_SAMPLE_PATH = resolve(REPO_ROOT, 'apps/web/public/samples/sample-we
 describe('Public Samples Regression Lock', () => {
   it('locks public Student PDF strictly to The Redstone Door Test (Minecraft)', async () => {
     const studentBuffer = await readFile(STUDENT_SAMPLE_PATH)
-    const inspection = await inspectPdf(studentBuffer)
+    const inspection = await inspectPdf(studentBuffer, 'sample-week-1-student')
 
     const normalizedText = inspection.text.replace(/\s+/g, ' ')
     expect(inspection.pageCount).toBeGreaterThanOrEqual(2)
@@ -25,7 +25,7 @@ describe('Public Samples Regression Lock', () => {
 
   it('locks public Parent Answer PDF strictly to The Redstone Door Test', async () => {
     const parentBuffer = await readFile(PARENT_SAMPLE_PATH)
-    const inspection = await inspectPdf(parentBuffer)
+    const inspection = await inspectPdf(parentBuffer, 'sample-week-1-parent-answer')
 
     expect(inspection.pageCount).toBeGreaterThanOrEqual(1)
     expect(inspection.text).toContain('The Redstone Door Test')

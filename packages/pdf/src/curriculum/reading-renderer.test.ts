@@ -97,4 +97,47 @@ describe('reading-renderer', () => {
     expect(html).toContain('First paragraph of legacy text.')
     expect(html).toContain('Second paragraph of legacy text.')
   })
+
+  it('deterministically highlights target vocabulary and its inflections without LLM markup', () => {
+    const reading = {
+      title: 'The Robotics Trial',
+      contextZh: '機器人測試。',
+      blocks: [
+        { type: 'paragraph' as const, text: 'Mina tests the robot. Jay suggests changing the camera, and she recorded all results.' },
+      ],
+      wordCount: 15,
+      readingTipsZh: ['注意動詞變化'],
+    }
+
+    const targetVocab = [
+      { word: 'test' },
+      { word: 'suggest' },
+      { word: 'record' },
+    ]
+
+    const html = renderReadingSection(reading, targetVocab)
+    expect(html).toContain('<span class="target-vocab">tests</span>')
+    expect(html).toContain('<span class="target-vocab">suggests</span>')
+    expect(html).toContain('<span class="target-vocab">recorded</span>')
+    expect(html).not.toContain('<b>')
+  })
+
+  it('deterministically highlights validated concrete grammar patterns alongside vocabulary', () => {
+    const reading = {
+      title: 'The Robotics Trial',
+      contextZh: '機器人測試。',
+      blocks: [
+        { type: 'paragraph' as const, text: 'Does the machine work? It does not fail when Mina changes the light.' },
+      ],
+      wordCount: 15,
+      readingTipsZh: ['注意 do/does 助動詞句型'],
+    }
+
+    const targetVocab = [{ word: 'machine' }, { word: 'change' }]
+    const targetPatterns = ['does not', 'Does the machine']
+
+    const html = renderReadingSection(reading, targetVocab, targetPatterns)
+    expect(html).toContain('<span class="target-vocab">changes</span>')
+    expect(html).toContain('<span class="target-grammar">does not</span>')
+  })
 })

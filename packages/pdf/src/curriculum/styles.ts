@@ -261,6 +261,20 @@ export const curriculumStyles = `
     text-align: left;
   }
 
+  .target-vocab {
+    font-weight: 600;
+    color: #173e37;
+    border-bottom: 1px dotted #8c7355;
+  }
+
+  .target-grammar {
+    font-weight: 600;
+    color: #765d42;
+    background: rgba(118, 93, 66, 0.08);
+    padding: 0 1.5px;
+    border-radius: 2px;
+  }
+
   /* Dialogue Genre */
   .dialogue-container {
     margin: 3mm 0 4mm;

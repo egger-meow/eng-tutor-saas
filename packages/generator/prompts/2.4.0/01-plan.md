@@ -75,20 +75,39 @@ Step 3: Instantiate in Authentic Interest Situation & Problem Context
 
 ---
 
-## 5. Learning Plan Output Format (Schema 2.2.0)
+## 5. Workload Budgeting & Dynamic Depth Scaling
+
+Treat the learner's declared weekly available study time as the primary workload input:
+- **Normal Budget Baseline (~75–100 min)**: ~300–380 words reading passage, 10–12 core vocabulary items, 14–16 total practice/homework items across all stages.
+- **Light / Calibration Band (~50–65 min)**: ~220–280 words reading passage, 7–9 core vocabulary items, 10–12 focused practice items.
+- **Deep / Extended Band (~110–130 min)**: ~380–450 words reading passage, 12–14 core vocabulary items, 16–18 rich practice items including deep transfer.
+
+**Invariant Pedagogy Rule**:
+Every budget band MUST preserve the complete 10-stage pedagogy chain without dropping sections. Scale content depth smoothly; never truncate the learning loop.
+
+**Cumulative Review Requirement**:
+Include 2–4 previous-week vocabulary items and prior grammar patterns in `reviewStrategy` and `learnerSnapshot.reviewDue` for long-term retention.
+
+**Rich Learning Tasks**:
+- Plan 1 **Core Evidence/Organizer Task** inside the `independent` practice stage (before transfer).
+- Plan 1 optional **Adaptive Enrichment Module** (placed either after Reading as a Strategy Extension or after Practice as a Transfer Extension) for eligible learners.
+
+---
+
+## 6. Learning Plan Output Format (Schema 2.2.0)
 
 Output a JSON object matching `learningPlan`:
 ```json
 {
-  "estimatedMinutes": 90,
+  "estimatedMinutes": 85,
   "difficultyBand": "國中七年級 / 適中進階",
   "targets": [
     {
       "id": "target-reading-inference",
       "domain": "reading",
-      "description": "根據因果轉折詞 (because, instead) 進行上下文推論。",
+      "description": "根據因果轉折詞 (because, instead) 進行上下文推論與證據整理。",
       "evidence": [{ "source": "feedback", "detail": "上週推論題只看字面。" }],
-      "successCriteria": "圈出文中依據句。"
+      "successCriteria": "圈出文中依據句並完成證據整理表。"
     },
     {
       "id": "target-grammar-time-clause",
@@ -98,16 +117,23 @@ Output a JSON object matching `learningPlan`:
       "successCriteria": "完成練習並訂正錯誤。"
     },
     {
-      "id": "target-comm-polite-request",
-      "domain": "communication",
-      "description": "使用 Could you please...? 提出委託應答。",
-      "evidence": [{ "source": "curriculum", "detail": "CAP 課綱推薦 (cf-making-requests)。" }],
-      "successCriteria": "能辨識並運用禮貌句型。"
+      "id": "target-vocab-workshop",
+      "domain": "vocabulary",
+      "description": "在語境中理解並使用 10-12 個核心單字。",
+      "evidence": [{ "source": "curriculum", "detail": "本週核心詞彙。" }],
+      "successCriteria": "能理解句意並造句。"
+    },
+    {
+      "id": "target-review-present-simple",
+      "domain": "review",
+      "description": "複習上週 do / does 問句動詞還原規則。",
+      "evidence": [{ "source": "weekly-history", "detail": "上週錯題複習。" }],
+      "successCriteria": "無提示下正確作答。"
     }
   ],
-  "prerequisites": ["過去式動詞"],
-  "reviewStrategy": ["引導階段先複習過去式。"],
-  "personalizationStrategy": "機器人團隊情境承載請求委託與時間子句。",
-  "exclusions": ["不引入被動語態"]
+  "prerequisites": ["一般現在式肯定句", "基礎名詞與動詞辨識"],
+  "reviewStrategy": ["do / does 助動詞還原間隔複習", "前週核心單字語境提取"],
+  "personalizationStrategy": "以機器人感測器除錯情境承載時間副詞子句與推論證據整理，維持國中會考挑戰度。",
+  "exclusions": ["passive-voice", "relative-clauses"]
 }
 ```

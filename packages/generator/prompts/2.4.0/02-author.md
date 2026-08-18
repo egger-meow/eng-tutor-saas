@@ -27,7 +27,10 @@ The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a 
 3. `notice`: `{ "type": "notice", "heading": "OPTIONAL_HEADING", "text": "..." }`
 4. `schedule-row`: `{ "type": "schedule-row", "timeOrStep": "09:00 or Step 1", "event": "Action/Event", "detail": "Optional extra detail" }`
 
-* **Word Count Normalization**: Passage text across all blocks must total $\ge 120$ words ($\le 900$ words). The server deterministically computes `wordCount`, so never fabricate or round it artificially.
+* **Reading Contract & Normal-Budget Depth**:
+  - Passage text for normal budgets should target **~300–380 words** (smoothly scaled down to ~220–280 for light budgets, or up to ~380–450 for deep budgets).
+  - **Plain Text Only**: NEVER output inline HTML tags (such as `<b>`, `<em>`, `<span>`) inside reading blocks. The server PDF renderer deterministically highlights target vocabulary and canonical grammar patterns with elegant typographical styling.
+  - The server automatically calculates and normalizes `reading.wordCount`.
 
 ---
 
@@ -75,6 +78,10 @@ explanationZh: "do 用於複數，does 用於第三人稱單數。記住加 s。
 titleZh: "do / does 疑問句的動詞還原規則"
 explanationZh: "【第1步看主詞】問句開頭如果看到 does，代表第三人稱單數的標記已經被 does 拿走了。➔ 【第2步動詞歸位】後面的主要動詞一律回到『原形動詞』，絕對不能再加 s 或 es。"
 patterns: ["Does + he/she/it/單數名詞 + 原形動詞...?"]
+workedExamples: [
+  { "example": "Does Mina record the test results carefully?", "walkthroughZh": "Mina 為第三人稱單數，句首使用 Does；主要動作 record 必須維持原形。" },
+  { "example": "Do the students inspect the sensor cables?", "walkthroughZh": "the students 為複數主詞，句首使用 Do；inspect 維持原形。" }
+]
 commonMistakes: [{
   "wrong": "Does your robot recognizes different colors?",
   "corrected": "Does your robot recognize different colors?",
@@ -112,20 +119,56 @@ likelyMisconceptionZh: "選 B 者常因看見文中提及材料庫存而過度�
 
 ---
 
-## 3. Passage-First Lexical Contract & Ceiling
+## 3. Global Answer Integrity & Textual Entailment
 
-1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
-   Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
-2. **Lexical Ceiling Invariant**:
-   All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words (e.g. *ubiquitous*, *dichotomy*) into reading blocks.
-3. **Proper Nouns & Domain Terms**:
-   Capitalized situational proper nouns (e.g. *Minecraft*, *Arduino*, *Alex*) are permitted when contextualized clearly.
+1. **Strict Entailment Rule**:
+   - Every correct multiple-choice option and Parent answer explanation must be **directly entailed** by explicit statements in the passage, or **explicitly framed as inference** (e.g. 「由第二段...可合理推知...」).
+2. **Never Synthesize Disjoint True Facts**:
+   - Strictly forbid creating correct options that combine separately mentioned true details from different parts of the text into a new composite claim that is not supported as a unified statement by the text.
+3. **Self-Contained Scaffolding**:
+   - The explanation must clearly show *why* the correct answer is right and why the key distractor is wrong, so a student studying alone can understand their error without asking an adult.
 
 ---
 
-## 4. Local Question-Answer Authoring Protocol
+## 4. Practice Stages, Core Organizer Task & Adaptive Enrichment
 
-To eliminate orphan IDs, missing answers, and answer key mismatches:
+### Standard Pedagogical Stage Flow (Normal Workload):
+1. **Guided Practice (`guided`)**: 3 items with scaffolding hints and worked references.
+2. **Independent Practice (`independent`)**: 3–4 items.
+   - **Required Core Evidence/Organizer Task**: Must include at least 1 task requiring the student to organize text evidence (e.g. condition/outcome matrix, chronological trail, or comparison chart) before moving to exam transfer.
+3. **CAP Transfer Practice (`cap-transfer`)**: 3–4 items, including at least 1 text-evidence critical-thinking item.
+4. **Sentence Production (`production`)**: 2 structured items (`P1`, `P2`) requiring writing sentences with target grammar/vocabulary.
+5. **Delayed Retrieval (`retrieval`)**: 2 items (`R1`, `R2`) for memory consolidation.
+6. **Homework (`homework`)**: 3–4 items dedicated strictly to **delayed retrieval and transfer** spaced across study days.
+
+### Item-Type Rotation (Taiwan CAP Competency Distribution)
+Each weekly practice set should balance:
+* **1 Macro Item**: Main idea, author's purpose, or broad title inference.
+* **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
+* **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
+
+### Optional Adaptive Enrichment Module:
+For high-completion or deep-budget learners, you may include an enrichment block in one of **two legal placements**:
+1. *Post-Reading Strategy Extension* (between Reading and Instruction): Deeper situational context inquiry or strategic reading note.
+2. *Post-Practice Transfer Extension* (at end of Practice, before Self-Check): Cross-context challenge prompt or real-world reflection.
+*Guardrail: Adaptive enrichment adds cognitive depth and strategy; it NEVER introduces out-of-scope untaught curriculum targets or repetitive drill filler.*
+
+---
+
+## 5. Passage-First Lexical Contract & Ceiling
+
+1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
+   - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
+   - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+2. **Lexical Ceiling Invariant**:
+   - All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words into reading blocks.
+3. **Proper Nouns & Domain Terms**:
+   - Capitalized situational proper nouns (e.g. *Minecraft*, *Arduino*, *Alex*) are permitted when contextualized clearly.
+
+---
+
+## 6. Local Question-Answer Authoring Protocol
+
 1. Always author the question and its corresponding answer object **atomically in the same conceptual block**.
 2. Question ID `q` in practice/homework MUST match `answers[].questionId` identically.
 3. Every learning target ID referenced in `questions[].targetIds` MUST match a defined target in `learningPlan.targets`.
@@ -133,40 +176,31 @@ To eliminate orphan IDs, missing answers, and answer key mismatches:
 
 ---
 
-## 5. Item-Type Rotation (Taiwan CAP Competency Distribution)
-
-Each weekly practice set should balance:
-* **1 Macro Item**: Main idea, author's purpose, or broad title inference.
-* **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
-* **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
-
----
-
-## 6. trackingDelta: Exposure Only (Schema 2.2.0)
+## 7. trackingDelta: Exposure Only (Schema 2.2.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
 ```json
 {
   "trackingDelta": {
-    "introducedVocabularyIds": ["v-experience", "v-borrow"],
-    "reviewedVocabularyIds": ["v-notice"],
+    "introducedVocabularyIds": ["v-experience", "v-borrow", "v-sensor", "v-calibrate"],
+    "reviewedVocabularyIds": ["v-notice", "v-suggest"],
     "exposedGrammarTargetIds": ["g8-adverbial-clauses-time-reason"],
     "exposedReadingTargetIds": ["target-reading-inference"],
     "exposedCommunicationFunctionIds": ["cf-making-requests"],
-    "hypothesesToVerify": ["學生能正確判斷時間副詞子句時態。"],
-    "nextReviewCandidates": ["before/after 時間子句"]
+    "hypothesesToVerify": ["學生能正確判斷時間副詞子句時態並完成證據整理表。"],
+    "nextReviewCandidates": ["before/after 時間子句", "sensor / calibrate 語境造句"]
   }
 }
 ```
 
 ---
 
-## 7. Server-Side Deterministic Normalization Notice
+## 8. Server-Side Deterministic Normalization Notice
 
-The server automatically computes and normalizes `wordCount`, target counts, and canonical formatting. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
+The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `homework.estimatedMinutes`, strips duplicated option prefixes, and validates lexical ceilings. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
 
 ---
 
-## 8. Output Contract (Strict JSON Only)
+## 9. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).

@@ -4,12 +4,12 @@ schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
 generatedAt: "2026-08-17T00:30:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "df20614ba62e2a7ddb674a9041030ca7a8137e24f92a4ca98c507e7ef56d82ba"
-  "packages/generator/prompts/2.4.0/02-author.md": "85a7ff656801b9aa99d027cef792802d67286d85567b82dedaca796605e293ba"
-  "packages/generator/prompts/2.4.0/03-critic.md": "edaf6220403384522f0d709d608dbe8cb73801cd761f5e3e70fe19bab6971239"
+  "packages/generator/prompts/2.4.0/01-plan.md": "be98af220c7db8bd726f64def4b2fd2b510e6f558160caa7d89c1a4853e18a25"
+  "packages/generator/prompts/2.4.0/02-author.md": "4051b06eade5ee4ccb2e0903914c5cb4c47fa96bd6adcc40da44158cae045ef8"
+  "packages/generator/prompts/2.4.0/03-critic.md": "cc632f99d83b15761f829022202f12ecce2924c88402ff822bee16e1dc670700"
   "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
   "packages/generator/src/curriculum-package-schema.ts": "cbd1bc97d24d39f3c4624b8302f55d6e447f7d9a93663f0cd130e9b632384b20"
-  "docs/curriculum-quality-rubric.md": "3eb158e373d52fa029446f0d14edbc1e73b4df95363b8bc3ae6095e232c7fcb0"
+  "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
   "docs/product-rules.md": "0fd7c373e33f67f439db6df73ca6fb0225d8f0655eba2be1ac02f207557e3540"
 ---
 
@@ -64,16 +64,19 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## Non-negotiable learning contract
 
-- The student packet teaches before it tests: Chinese explanation, worked example, guided attempt, independent attempt, CAP-style transfer, production, and delayed retrieval.
-- A coherent reading uses the learner's actual level and detailed interests as a meaningful situation. Interest never replaces the learning need, and the same hook is not copied week after week.
+- The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
+- A coherent reading uses the learner's actual level and detailed interests as a meaningful problem situation (~300–380 words and 10–12 core vocabulary items for normal-budget baseline, smoothly scaled with available study time). Interest never replaces the learning need, and the same hook is not copied week after week.
+- Plain text reading contract: Reading blocks contain clean text without inline HTML markup; the server PDF renderer owns deterministic target vocabulary and canonical grammar pattern highlighting.
 - The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
 - Reading practice covers detail, main idea, inference, and context clues over time. Difficulty comes from evidence and reasoning, not trivia or hidden words.
+- Global Answer Integrity: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options must never combine separately mentioned true facts from different places into an unsupported composite claim.
+- Estimated duration represents computed workload truth derived formulaically from content metrics, never the learner's requested budget. Budget mismatch triggers surgical content expansion or trimming before recomputation.
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
 
 1. **Observe:** collect school progress, vocabulary status, recurring grammar errors, completion/difficulty, parent feedback, and the previous packet's quality findings.
-2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review, and record what changed from last week and why.
+2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review (including cumulative previous-week review), and record what changed from last week and why.
 3. **Teach:** author one breathable, lively packet with explicit Chinese scaffolding and a realistic time budget.
 4. **Attack:** run deterministic validation and an independent critic that simulates a tired student studying without a tutor.
 5. **Repair:** fix every critical finding and update dependent answers, IDs, targets, and tracking references together.
@@ -87,7 +90,7 @@ The Parent Answer PDF is intentionally narrow: answers, short reasons, legitimat
 
 ## Release bar
 
-Reject a package if a child needs a tutor to understand a new task, if an answer is missing or ambiguous, if Chinese support is insufficient, if a target has no observable evidence, if delayed retrieval is absent, or if a critical critic finding is unresolved. “Different” is not evidence of improvement; compare the new packet against the previous packet's known weaknesses.
+Reject a package if a child needs a tutor to understand a new task, if an answer is missing, ambiguous, or lacks textual entailment, if Chinese support is insufficient, if a target has no observable evidence, if delayed retrieval is absent, or if a critical critic finding is unresolved. “Different” is not evidence of improvement; compare the new packet against the previous packet's known weaknesses.
 
 ## 3. Curriculum Package Schema
 ```typescript
@@ -436,20 +439,39 @@ Step 3: Instantiate in Authentic Interest Situation & Problem Context
 
 ---
 
-## 5. Learning Plan Output Format (Schema 2.2.0)
+## 5. Workload Budgeting & Dynamic Depth Scaling
+
+Treat the learner's declared weekly available study time as the primary workload input:
+- **Normal Budget Baseline (~75–100 min)**: ~300–380 words reading passage, 10–12 core vocabulary items, 14–16 total practice/homework items across all stages.
+- **Light / Calibration Band (~50–65 min)**: ~220–280 words reading passage, 7–9 core vocabulary items, 10–12 focused practice items.
+- **Deep / Extended Band (~110–130 min)**: ~380–450 words reading passage, 12–14 core vocabulary items, 16–18 rich practice items including deep transfer.
+
+**Invariant Pedagogy Rule**:
+Every budget band MUST preserve the complete 10-stage pedagogy chain without dropping sections. Scale content depth smoothly; never truncate the learning loop.
+
+**Cumulative Review Requirement**:
+Include 2–4 previous-week vocabulary items and prior grammar patterns in `reviewStrategy` and `learnerSnapshot.reviewDue` for long-term retention.
+
+**Rich Learning Tasks**:
+- Plan 1 **Core Evidence/Organizer Task** inside the `independent` practice stage (before transfer).
+- Plan 1 optional **Adaptive Enrichment Module** (placed either after Reading as a Strategy Extension or after Practice as a Transfer Extension) for eligible learners.
+
+---
+
+## 6. Learning Plan Output Format (Schema 2.2.0)
 
 Output a JSON object matching `learningPlan`:
 ```json
 {
-  "estimatedMinutes": 90,
+  "estimatedMinutes": 85,
   "difficultyBand": "國中七年級 / 適中進階",
   "targets": [
     {
       "id": "target-reading-inference",
       "domain": "reading",
-      "description": "根據因果轉折詞 (because, instead) 進行上下文推論。",
+      "description": "根據因果轉折詞 (because, instead) 進行上下文推論與證據整理。",
       "evidence": [{ "source": "feedback", "detail": "上週推論題只看字面。" }],
-      "successCriteria": "圈出文中依據句。"
+      "successCriteria": "圈出文中依據句並完成證據整理表。"
     },
     {
       "id": "target-grammar-time-clause",
@@ -459,17 +481,24 @@ Output a JSON object matching `learningPlan`:
       "successCriteria": "完成練習並訂正錯誤。"
     },
     {
-      "id": "target-comm-polite-request",
-      "domain": "communication",
-      "description": "使用 Could you please...? 提出委託應答。",
-      "evidence": [{ "source": "curriculum", "detail": "CAP 課綱推薦 (cf-making-requests)。" }],
-      "successCriteria": "能辨識並運用禮貌句型。"
+      "id": "target-vocab-workshop",
+      "domain": "vocabulary",
+      "description": "在語境中理解並使用 10-12 個核心單字。",
+      "evidence": [{ "source": "curriculum", "detail": "本週核心詞彙。" }],
+      "successCriteria": "能理解句意並造句。"
+    },
+    {
+      "id": "target-review-present-simple",
+      "domain": "review",
+      "description": "複習上週 do / does 問句動詞還原規則。",
+      "evidence": [{ "source": "weekly-history", "detail": "上週錯題複習。" }],
+      "successCriteria": "無提示下正確作答。"
     }
   ],
-  "prerequisites": ["過去式動詞"],
-  "reviewStrategy": ["引導階段先複習過去式。"],
-  "personalizationStrategy": "機器人團隊情境承載請求委託與時間子句。",
-  "exclusions": ["不引入被動語態"]
+  "prerequisites": ["一般現在式肯定句", "基礎名詞與動詞辨識"],
+  "reviewStrategy": ["do / does 助動詞還原間隔複習", "前週核心單字語境提取"],
+  "personalizationStrategy": "以機器人感測器除錯情境承載時間副詞子句與推論證據整理，維持國中會考挑戰度。",
+  "exclusions": ["passive-voice", "relative-clauses"]
 }
 ```
 
@@ -503,7 +532,10 @@ The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a 
 3. `notice`: `{ "type": "notice", "heading": "OPTIONAL_HEADING", "text": "..." }`
 4. `schedule-row`: `{ "type": "schedule-row", "timeOrStep": "09:00 or Step 1", "event": "Action/Event", "detail": "Optional extra detail" }`
 
-* **Word Count Normalization**: Passage text across all blocks must total $\ge 120$ words ($\le 900$ words). The server deterministically computes `wordCount`, so never fabricate or round it artificially.
+* **Reading Contract & Normal-Budget Depth**:
+  - Passage text for normal budgets should target **~300–380 words** (smoothly scaled down to ~220–280 for light budgets, or up to ~380–450 for deep budgets).
+  - **Plain Text Only**: NEVER output inline HTML tags (such as `<b>`, `<em>`, `<span>`) inside reading blocks. The server PDF renderer deterministically highlights target vocabulary and canonical grammar patterns with elegant typographical styling.
+  - The server automatically calculates and normalizes `reading.wordCount`.
 
 ---
 
@@ -551,6 +583,10 @@ explanationZh: "do 用於複數，does 用於第三人稱單數。記住加 s。
 titleZh: "do / does 疑問句的動詞還原規則"
 explanationZh: "【第1步看主詞】問句開頭如果看到 does，代表第三人稱單數的標記已經被 does 拿走了。➔ 【第2步動詞歸位】後面的主要動詞一律回到『原形動詞』，絕對不能再加 s 或 es。"
 patterns: ["Does + he/she/it/單數名詞 + 原形動詞...?"]
+workedExamples: [
+  { "example": "Does Mina record the test results carefully?", "walkthroughZh": "Mina 為第三人稱單數，句首使用 Does；主要動作 record 必須維持原形。" },
+  { "example": "Do the students inspect the sensor cables?", "walkthroughZh": "the students 為複數主詞，句首使用 Do；inspect 維持原形。" }
+]
 commonMistakes: [{
   "wrong": "Does your robot recognizes different colors?",
   "corrected": "Does your robot recognize different colors?",
@@ -588,20 +624,56 @@ likelyMisconceptionZh: "選 B 者常因看見文中提及材料庫存而過度�
 
 ---
 
-## 3. Passage-First Lexical Contract & Ceiling
+## 3. Global Answer Integrity & Textual Entailment
 
-1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
-   Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
-2. **Lexical Ceiling Invariant**:
-   All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words (e.g. *ubiquitous*, *dichotomy*) into reading blocks.
-3. **Proper Nouns & Domain Terms**:
-   Capitalized situational proper nouns (e.g. *Minecraft*, *Arduino*, *Alex*) are permitted when contextualized clearly.
+1. **Strict Entailment Rule**:
+   - Every correct multiple-choice option and Parent answer explanation must be **directly entailed** by explicit statements in the passage, or **explicitly framed as inference** (e.g. 「由第二段...可合理推知...」).
+2. **Never Synthesize Disjoint True Facts**:
+   - Strictly forbid creating correct options that combine separately mentioned true details from different parts of the text into a new composite claim that is not supported as a unified statement by the text.
+3. **Self-Contained Scaffolding**:
+   - The explanation must clearly show *why* the correct answer is right and why the key distractor is wrong, so a student studying alone can understand their error without asking an adult.
 
 ---
 
-## 4. Local Question-Answer Authoring Protocol
+## 4. Practice Stages, Core Organizer Task & Adaptive Enrichment
 
-To eliminate orphan IDs, missing answers, and answer key mismatches:
+### Standard Pedagogical Stage Flow (Normal Workload):
+1. **Guided Practice (`guided`)**: 3 items with scaffolding hints and worked references.
+2. **Independent Practice (`independent`)**: 3–4 items.
+   - **Required Core Evidence/Organizer Task**: Must include at least 1 task requiring the student to organize text evidence (e.g. condition/outcome matrix, chronological trail, or comparison chart) before moving to exam transfer.
+3. **CAP Transfer Practice (`cap-transfer`)**: 3–4 items, including at least 1 text-evidence critical-thinking item.
+4. **Sentence Production (`production`)**: 2 structured items (`P1`, `P2`) requiring writing sentences with target grammar/vocabulary.
+5. **Delayed Retrieval (`retrieval`)**: 2 items (`R1`, `R2`) for memory consolidation.
+6. **Homework (`homework`)**: 3–4 items dedicated strictly to **delayed retrieval and transfer** spaced across study days.
+
+### Item-Type Rotation (Taiwan CAP Competency Distribution)
+Each weekly practice set should balance:
+* **1 Macro Item**: Main idea, author's purpose, or broad title inference.
+* **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
+* **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
+
+### Optional Adaptive Enrichment Module:
+For high-completion or deep-budget learners, you may include an enrichment block in one of **two legal placements**:
+1. *Post-Reading Strategy Extension* (between Reading and Instruction): Deeper situational context inquiry or strategic reading note.
+2. *Post-Practice Transfer Extension* (at end of Practice, before Self-Check): Cross-context challenge prompt or real-world reflection.
+*Guardrail: Adaptive enrichment adds cognitive depth and strategy; it NEVER introduces out-of-scope untaught curriculum targets or repetitive drill filler.*
+
+---
+
+## 5. Passage-First Lexical Contract & Ceiling
+
+1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
+   - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
+   - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+2. **Lexical Ceiling Invariant**:
+   - All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words into reading blocks.
+3. **Proper Nouns & Domain Terms**:
+   - Capitalized situational proper nouns (e.g. *Minecraft*, *Arduino*, *Alex*) are permitted when contextualized clearly.
+
+---
+
+## 6. Local Question-Answer Authoring Protocol
+
 1. Always author the question and its corresponding answer object **atomically in the same conceptual block**.
 2. Question ID `q` in practice/homework MUST match `answers[].questionId` identically.
 3. Every learning target ID referenced in `questions[].targetIds` MUST match a defined target in `learningPlan.targets`.
@@ -609,41 +681,32 @@ To eliminate orphan IDs, missing answers, and answer key mismatches:
 
 ---
 
-## 5. Item-Type Rotation (Taiwan CAP Competency Distribution)
-
-Each weekly practice set should balance:
-* **1 Macro Item**: Main idea, author's purpose, or broad title inference.
-* **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
-* **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
-
----
-
-## 6. trackingDelta: Exposure Only (Schema 2.2.0)
+## 7. trackingDelta: Exposure Only (Schema 2.2.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
 ```json
 {
   "trackingDelta": {
-    "introducedVocabularyIds": ["v-experience", "v-borrow"],
-    "reviewedVocabularyIds": ["v-notice"],
+    "introducedVocabularyIds": ["v-experience", "v-borrow", "v-sensor", "v-calibrate"],
+    "reviewedVocabularyIds": ["v-notice", "v-suggest"],
     "exposedGrammarTargetIds": ["g8-adverbial-clauses-time-reason"],
     "exposedReadingTargetIds": ["target-reading-inference"],
     "exposedCommunicationFunctionIds": ["cf-making-requests"],
-    "hypothesesToVerify": ["學生能正確判斷時間副詞子句時態。"],
-    "nextReviewCandidates": ["before/after 時間子句"]
+    "hypothesesToVerify": ["學生能正確判斷時間副詞子句時態並完成證據整理表。"],
+    "nextReviewCandidates": ["before/after 時間子句", "sensor / calibrate 語境造句"]
   }
 }
 ```
 
 ---
 
-## 7. Server-Side Deterministic Normalization Notice
+## 8. Server-Side Deterministic Normalization Notice
 
-The server automatically computes and normalizes `wordCount`, target counts, and canonical formatting. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
+The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `homework.estimatedMinutes`, strips duplicated option prefixes, and validates lexical ceilings. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
 
 ---
 
-## 8. Output Contract (Strict JSON Only)
+## 9. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
 
@@ -673,17 +736,21 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
    Explanations merely state 「因為根據文章內容此項正確」 or repeat translations without citing specific textual evidence. `likelyMisconceptionZh` must diagnose why a tempting distractor looked plausible.
 7. **Superficial Personalization**:
    Interests are merely pasted as name/noun swaps without creating a meaningful problem context.
-8. **Answer Integrity & Leakage**:
-   Answers are ambiguous, unsupported by the text, leaked in the lesson, or question IDs don't match answer objects.
-9. **Parent Burden & Internal Engine Jargon**:
-   Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
-10. **Passage-First Lexical Contract & Lexical Ceiling**:
+8. **Answer Integrity & Strict Textual Entailment**:
+   Answers must be directly supported by text evidence or explicitly framed as inference. Reject correct options that combine separately mentioned true facts from different places into an unsupported composite claim.
+9. **Required Core Evidence/Organizer Task in Independent Stage**:
+   The `independent` stage must include at least one task requiring the student to organize evidence (e.g. condition/outcome matrix, chronological trail, or comparison chart) before moving to exam transfer.
+10. **Plain Text Reading Contract**:
+    Reading blocks must contain clean text without inline HTML formatting (`<b>`, `<em>`, `<span>`); the PDF renderer owns typographical emphasis.
+11. **Parent Burden & Internal Engine Jargon**:
+    Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
+12. **Passage-First Lexical Contract & Lexical Ceiling**:
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
-11. **Genre-Block Structural Consistency**:
+13. **Genre-Block Structural Consistency**:
     `reading.blocks` must structurally match `genre` (`dialogue` must contain `dialogue` speaker blocks; `schedule` must contain `schedule-row`; `notice` must contain `notice`).
-12. **Target Evidence Invariant**:
+14. **Target Evidence Invariant**:
     Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
-13. **Separation of Exposure vs Mastery**:
+15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 
 ---
@@ -696,9 +763,9 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
   "passed": true,
   "findings": [],
   "summary": {
-    "questions": 14,
-    "words": 210,
-    "targets": 3,
+    "questions": 15,
+    "words": 340,
+    "targets": 4,
     "tokenEfficiencySignals": 0
   }
 }

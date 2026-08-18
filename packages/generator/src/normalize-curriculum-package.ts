@@ -27,13 +27,73 @@ export function cleanOptionPrefix(text: string): string {
   return text.replace(OPTION_PREFIX_REGEX, '').trim()
 }
 
+export function computeQuestionDuration(question: any): number {
+  if (!question || typeof question !== 'object') return 2
+
+  const itemType = question.itemType
+  const writingLines = typeof question.writingLines === 'number' ? question.writingLines : 0
+
+  if (itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || writingLines >= 2) {
+    return 3.5
+  }
+  if (itemType === 'inference' || itemType === 'context-clue' || itemType === 'author-purpose' || itemType === 'sequence' || itemType === 'main-idea') {
+    return 2.5
+  }
+  return 1.5
+}
+
+export function computeDeterministicHomeworkMinutes(homework: any): number {
+  if (!homework || typeof homework !== 'object' || !Array.isArray(homework.questions)) return 15
+
+  let total = 2 // base transition buffer
+  for (const q of homework.questions) {
+    const itemType = q?.itemType
+    const lines = typeof q?.writingLines === 'number' ? q.writingLines : 0
+    if (itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || lines >= 2) {
+      total += 3.0
+    } else {
+      total += 1.5
+    }
+  }
+  return Math.max(5, Math.min(90, Math.round(total)))
+}
+
+export function computeDeterministicPlanMinutes(pkg: Record<string, any>): number {
+  const lesson = pkg.studentLesson
+  if (!lesson || typeof lesson !== 'object') return 60
+
+  const wordCount = typeof lesson.reading?.wordCount === 'number' ? lesson.reading.wordCount : 250
+  const vocabCount = Array.isArray(lesson.vocabulary) ? lesson.vocabulary.length : 8
+
+  const readingMinutes = Math.round(wordCount / 70) + 2
+  const vocabMinutes = vocabCount * 1.0
+  const instructionMinutes = 7
+  const baseMinutes = 4
+
+  let practiceMinutes = 0
+  if (Array.isArray(lesson.practice)) {
+    for (const stage of lesson.practice) {
+      if (stage && Array.isArray(stage.questions)) {
+        for (const q of stage.questions) {
+          practiceMinutes += computeQuestionDuration(q)
+        }
+      }
+    }
+  }
+
+  const homeworkMinutes = computeDeterministicHomeworkMinutes(lesson.homework)
+  const total = readingMinutes + vocabMinutes + instructionMinutes + baseMinutes + practiceMinutes + homeworkMinutes
+
+  return Math.max(30, Math.min(240, Math.round(total)))
+}
+
 /**
  * Deterministic Normalization Layer
  *
  * Core Principle: Only derive information for which there is exactly one deterministic correct value.
  * Computer may calculate. Computer may not invent pedagogy.
  *
- * Automatically computes machine-derivable fields (such as actual wordCount)
+ * Automatically computes machine-derivable fields (such as actual wordCount, estimatedMinutes, homework.estimatedMinutes)
  * and strips redundant formatting artifacts (such as duplicated option letter prefixes)
  * so that LLMs are never failed or retried due to arithmetic or formatting discrepancies.
  */
@@ -85,6 +145,16 @@ export function normalizeCurriculumPackage(input: unknown): unknown {
         }
       }
     }
+
+    // Deterministically compute calibrated homework duration
+    if (pkg.studentLesson.homework && typeof pkg.studentLesson.homework === 'object') {
+      pkg.studentLesson.homework.estimatedMinutes = computeDeterministicHomeworkMinutes(pkg.studentLesson.homework)
+    }
+  }
+
+  // Deterministically compute calibrated total lesson plan duration
+  if (pkg.learningPlan && typeof pkg.learningPlan === 'object') {
+    pkg.learningPlan.estimatedMinutes = computeDeterministicPlanMinutes(pkg)
   }
 
   return pkg

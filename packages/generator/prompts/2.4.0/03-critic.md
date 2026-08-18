@@ -23,17 +23,21 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
    Explanations merely state 「因為根據文章內容此項正確」 or repeat translations without citing specific textual evidence. `likelyMisconceptionZh` must diagnose why a tempting distractor looked plausible.
 7. **Superficial Personalization**:
    Interests are merely pasted as name/noun swaps without creating a meaningful problem context.
-8. **Answer Integrity & Leakage**:
-   Answers are ambiguous, unsupported by the text, leaked in the lesson, or question IDs don't match answer objects.
-9. **Parent Burden & Internal Engine Jargon**:
-   Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
-10. **Passage-First Lexical Contract & Lexical Ceiling**:
+8. **Answer Integrity & Strict Textual Entailment**:
+   Answers must be directly supported by text evidence or explicitly framed as inference. Reject correct options that combine separately mentioned true facts from different places into an unsupported composite claim.
+9. **Required Core Evidence/Organizer Task in Independent Stage**:
+   The `independent` stage must include at least one task requiring the student to organize evidence (e.g. condition/outcome matrix, chronological trail, or comparison chart) before moving to exam transfer.
+10. **Plain Text Reading Contract**:
+    Reading blocks must contain clean text without inline HTML formatting (`<b>`, `<em>`, `<span>`); the PDF renderer owns typographical emphasis.
+11. **Parent Burden & Internal Engine Jargon**:
+    Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
+12. **Passage-First Lexical Contract & Lexical Ceiling**:
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
-11. **Genre-Block Structural Consistency**:
+13. **Genre-Block Structural Consistency**:
     `reading.blocks` must structurally match `genre` (`dialogue` must contain `dialogue` speaker blocks; `schedule` must contain `schedule-row`; `notice` must contain `notice`).
-12. **Target Evidence Invariant**:
+14. **Target Evidence Invariant**:
     Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
-13. **Separation of Exposure vs Mastery**:
+15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 
 ---
@@ -46,9 +50,9 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
   "passed": true,
   "findings": [],
   "summary": {
-    "questions": 14,
-    "words": 210,
-    "targets": 3,
+    "questions": 15,
+    "words": 340,
+    "targets": 4,
     "tokenEfficiencySignals": 0
   }
 }

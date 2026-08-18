@@ -279,6 +279,29 @@ export function auditCurriculumPackage(input: unknown): CurriculumAuditReport {
   const stageNames = new Set(pkg.studentLesson.practice.map((stage) => stage.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('semantic-critical', 'self-study', 'critical', `缺少 ${stage} 階段。`)
 
+  // 3. Core Evidence / Organizer Task Verification (Must be in Independent stage before transfer)
+  const independentSection = pkg.studentLesson.practice.find((s) => s.stage === 'independent')
+  if (independentSection) {
+    const hasOrganizerTask = independentSection.questions.some((q) =>
+      q.itemType === 'short-response' ||
+      q.itemType === 'sequence' ||
+      q.writingLines >= 1 ||
+      (q.targetIds && q.targetIds.some((tid: string) => tid.includes('reading') || tid.includes('inference') || tid.includes('evidence')))
+    )
+    if (!hasOrganizerTask) {
+      add('semantic-critical', 'evidence-organizer', 'warning', 'independent 階段應包含至少一題引導孩子整理文本證據（如條件/結果對照、因果脈絡或結構化檢索）的任務，以建立轉移作答的依據。')
+    }
+  }
+
+  // 4. Global Deterministic Workload Calibration
+  if (typeof pkg.learningPlan.estimatedMinutes === 'number') {
+    if (pkg.learningPlan.estimatedMinutes < 55) {
+      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${pkg.learningPlan.estimatedMinutes} 分鐘) 顯著低於正常每週學習量，請擴充閱讀篇幅、核心單字或轉移寫作任務。`)
+    } else if (pkg.learningPlan.estimatedMinutes > 140) {
+      add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${pkg.learningPlan.estimatedMinutes} 分鐘) 過高，可能造成國中生認知負荷過重，請適度收斂題目數量。`)
+    }
+  }
+
   const lessonText = JSON.stringify({ title: pkg.studentLesson.reading.title, context: pkg.studentLesson.reading.contextZh, blocks: pkg.studentLesson.reading.blocks, strategy: pkg.learningPlan.personalizationStrategy }).toLocaleLowerCase()
   if (interestText && !interestText.split(/[,，、;；\s]+/u).filter((term) => term.length >= 2).some((term) => lessonText.includes(term))) add('semantic-critical', 'personalization', 'warning', '具體興趣沒有在教材情境或個人化策略留下可追溯證據。')
   if (pkg.qualityEvidence.feedbackApplied.length === 0) add('semantic-critical', 'feedback-loop', 'critical', '沒有記錄本週如何使用回饋。')
