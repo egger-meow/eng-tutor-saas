@@ -57,6 +57,8 @@ export const SOURCE_FILES = [
   'packages/generator/prompts/2.4.0/03-critic.md',
   'packages/generator/prompts/2.4.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
+  'packages/generator/quality-profiles/default.md',
+  'packages/generator/quality-profiles/gemini-3.7-flash.md',
   'docs/curriculum-quality-rubric.md',
   'docs/product-rules.md',
 ] as const
@@ -121,13 +123,15 @@ export async function compileProductionBundle(
   const critic = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
   const repair = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/04-repair.md'), 'utf8')
   const schema = await readFile(resolve(repoRoot, 'packages/generator/src/curriculum-package-schema.ts'), 'utf8')
+  const defaultProfile = await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/default.md'), 'utf8')
+  const geminiProfile = await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/gemini-3.7-flash.md'), 'utf8')
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
 
-  const generatedAt = fixedDate ?? '2026-08-17T00:30:00.000Z'
+  const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.4.0-prod',
+    bundleVersion: '2.4.1-prod',
     schemaVersion: '2.2.0',
     promptVersion: '2.4.0',
     engineVersion: CURRENT_ENGINE_VERSION,
@@ -147,6 +151,25 @@ export async function compileProductionBundle(
     '---',
   ].join('\n')
 
+  const profileResolutionContract = [
+    '## 3. Model Quality Profile Resolution & Provenance',
+    '',
+    'Before critique or submission, resolve the authoring model quality profile deterministically:',
+    '',
+    '1. Preserve the exact runtime model identifier as `actualModel`. Never rename the model to a profile name.',
+    '2. Normalize only for lookup: trim, lowercase, and remove a leading `models/` prefix.',
+    '3. Prefer a matching profile filename/modelId/modelPatterns. If no model-specific profile matches, resolve to `default` and mark it as fallback. Never invent a profile for an unmatched model.',
+    '4. Apply the resolved profile before submission, then add or replace exactly one passing `qualityEvidence.criticalChecks` entry with `id: "model-quality-profile"`.',
+    '5. Its evidence must truthfully encode: `actualModel=<exact runtime model> | resolvedQualityProfile=<resolved profile name> | qualityProfileVersion=<resolved profile frontmatter version> | engineVersion=<bundle engineVersion>` and append ` (fallback)` when the default fallback was used.',
+    '6. Missing, fabricated, or mismatched model/profile provenance is a production quality violation. Do not hide it by relabeling the package as legacy/historical.',
+    '',
+    '### Bundled fallback profile',
+    defaultProfile.trim().replace(/\r\n/g, '\n'),
+    '',
+    '### Bundled Gemini profile',
+    geminiProfile.trim().replace(/\r\n/g, '\n'),
+  ].join('\n')
+
   const body = [
     '# 紙屬英文 Production Authoring Bundle',
     '',
@@ -159,21 +182,23 @@ export async function compileProductionBundle(
     '## 2. Curriculum Quality Rubric',
     rubric.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 3. Curriculum Package Schema',
+    profileResolutionContract,
+    '',
+    '## 4. Curriculum Package Schema',
     '```typescript',
     schema.trim().replace(/\r\n/g, '\n'),
     '```',
     '',
-    '## 4. Prompt 01: Planning Engine',
+    '## 5. Prompt 01: Planning Engine',
     plan.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 5. Prompt 02: Authoring Engine',
+    '## 6. Prompt 02: Authoring Engine',
     author.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 6. Prompt 03: Critic Engine',
+    '## 7. Prompt 03: Critic Engine',
     critic.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 7. Prompt 04: Repair Specialist',
+    '## 8. Prompt 04: Repair Specialist',
     repair.trim().replace(/\r\n/g, '\n'),
     '',
   ].join('\n')
