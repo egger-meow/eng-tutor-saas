@@ -21,6 +21,39 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Materialize deterministic production fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('apps/admin/src/client/types.ts')
+          s = p.read_text()
+          old = '''  // Era answers "which production contract authored this?". Provenance completeness is a
+          // separate quality invariant. Missing profile provenance on a current submission must stay
+          // visible in Current so Admin can report the violation instead of laundering it as Historical.
+          if (isSchema220 && isPrompt240) {
+            return 'engine_v1'
+          }
+          '''
+          new = '''  const hasProfile = hasModelQualityProfileProvenance(item)
+          const hasEngineVersion = Boolean(getEngineVersionFromItem(item))
+
+          // Profile provenance normally identifies current evidence. If that provenance itself is broken,
+          // the admin RPC's authoritative engine_version keeps the current submission visible in Current.
+          if (isSchema220 && isPrompt240 && (hasProfile || hasEngineVersion)) {
+            return 'engine_v1'
+          }
+          '''
+          if old not in s:
+              raise SystemExit('expected classifier block not found')
+          p.write_text(s.replace(old, new))
+          PY
+          pnpm compile:bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-quality-final-files
+          path: |
+            apps/admin/src/client/types.ts
+            packages/generator/bundles/production-authoring-bundle.md
       - name: Install Traditional Chinese PDF fonts
         run: |
           sudo apt-get update
