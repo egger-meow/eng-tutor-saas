@@ -42,7 +42,7 @@ export interface DataSourceStatus {
 export type QualityEra = 'current' | 'historical' | 'all'
 export type EraTag = 'engine_v1' | 'historical'
 
-export function classifyQualityEra(item: {
+export interface QualityEraItem {
   schemaVersion?: string | null
   promptVersion?: string | null
   ruleVersion?: string | null
@@ -50,21 +50,82 @@ export function classifyQualityEra(item: {
   canonicalSource?: any
   errorCode?: string | null
   errorMessage?: string | null
-}): EraTag {
+  qualityProfile?: string | null
+  modelQualityProfile?: any
+  profileProvenance?: any
+  resolvedQualityProfile?: string | null
+  qualityEvidence?: any
+  rawRow?: any
+}
+
+export function hasModelQualityProfileProvenance(item: QualityEraItem): boolean {
+  // 1. Direct fields
+  if (item.resolvedQualityProfile || item.qualityProfile) return true
+  if (item.modelQualityProfile && (typeof item.modelQualityProfile === 'string' || (typeof item.modelQualityProfile === 'object' && Object.keys(item.modelQualityProfile).length > 0))) {
+    return true
+  }
+  if (item.profileProvenance && (typeof item.profileProvenance === 'string' || (typeof item.profileProvenance === 'object' && Object.keys(item.profileProvenance).length > 0))) {
+    return true
+  }
+
+  // 2. Canonical Source metadata or qualityEvidence
+  const csMeta = item.canonicalSource?.metadata
+  if (csMeta) {
+    if (csMeta.modelQualityProfile || csMeta.qualityProfile || csMeta.resolvedQualityProfile || csMeta.profileProvenance) {
+      return true
+    }
+  }
+  const csChecks = item.canonicalSource?.qualityEvidence?.criticalChecks
+  if (Array.isArray(csChecks) && csChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
+    return true
+  }
+
+  // 3. Quality Evidence directly on item
+  const qeChecks = item.qualityEvidence?.criticalChecks
+  if (Array.isArray(qeChecks) && qeChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
+    return true
+  }
+
+  // 4. Failure Evidence
+  const fe = item.failureEvidence
+  if (fe) {
+    if (fe.modelQualityProfile || fe.qualityProfile || fe.resolvedQualityProfile || fe.profileProvenance || fe.provenance?.resolvedQualityProfile || fe.provenance?.profileName) {
+      return true
+    }
+    if (Array.isArray(fe.criticalChecks) && fe.criticalChecks.some((c: any) => c.id === 'model-quality-profile' || (typeof c.evidence === 'string' && c.evidence.includes('resolvedQualityProfile=')))) {
+      return true
+    }
+    if (typeof fe.qualityProfile === 'string' || typeof fe.resolvedQualityProfile === 'string') {
+      return true
+    }
+    if (Array.isArray(fe.findings) && fe.findings.some((f: any) => f.rule === 'model-quality-profile' || (typeof f.message === 'string' && f.message.includes('quality profile')))) {
+      return true
+    }
+  }
+
+  // 5. Raw Row / DB joins if passed
+  if (item.rawRow?.quality_profile || item.rawRow?.model_quality_profile) {
+    return true
+  }
+
+  return false
+}
+
+export function classifyQualityEra(item: QualityEraItem): EraTag {
   const schema = item.schemaVersion || item.canonicalSource?.metadata?.schemaVersion || item.failureEvidence?.schemaVersion || null
   const prompt = item.promptVersion || item.canonicalSource?.metadata?.promptVersion || item.failureEvidence?.promptVersion || null
-  const rule = item.ruleVersion || item.canonicalSource?.metadata?.ruleVersion || null
 
   const isSchema220 = Boolean(schema && (schema === '2.2.0' || schema.startsWith('2.2')))
   const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
-  const isRule220 = Boolean(rule && (rule === '2.2.0' || rule.startsWith('2.2')))
+  const hasProfile = hasModelQualityProfileProvenance(item)
 
-  if (isSchema220 && (isPrompt240 || isRule220)) {
+  // Current Quality Era strictly requires Schema 2.2.0 + Prompt 2.4.0 + Model-Quality-Profile Provenance
+  if (isSchema220 && isPrompt240 && hasProfile) {
     return 'engine_v1'
   }
-  if (isSchema220) {
-    return 'engine_v1'
-  }
+
+  // Pre-profile Engine v1 (e.g. Schema 2.2.0 + Prompt 2.4.0 without model-quality-profile)
+  // and all legacy versions (Schema < 2.2.0, Prompt < 2.4.0) are preserved as Historical
   return 'historical'
 }
 
@@ -1548,14 +1609,18 @@ export class AdminService {
       schemaVersion: s.schema_version,
       promptVersion: s.prompt_version,
       ruleVersion: s.rule_version,
+      qualityProfile: s.quality_profile || s.qualityProfile,
       failureEvidence: s.failure_evidence,
+      canonicalSource: s.canonical_source,
     }) === 'engine_v1')
 
     const historicalSubs = submissions.filter((s) => classifyQualityEra({
       schemaVersion: s.schema_version,
       promptVersion: s.prompt_version,
       ruleVersion: s.rule_version,
+      qualityProfile: s.quality_profile || s.qualityProfile,
       failureEvidence: s.failure_evidence,
+      canonicalSource: s.canonical_source,
     }) === 'historical')
 
     const engineV1FinisherStats = computeSubsStats(engineV1Subs)
@@ -2017,6 +2082,8 @@ export class AdminService {
         ruleVersion: job.rule_version,
         schemaVersion: job.schema_version,
         promptVersion: job.prompt_version,
+        qualityProfile: job.quality_profile || job.model_quality_profile,
+        failureEvidence: job.failure_evidence,
       })
     }
 
@@ -2025,7 +2092,9 @@ export class AdminService {
         schemaVersion: sub.schema_version,
         promptVersion: sub.prompt_version,
         ruleVersion: sub.rule_version,
+        qualityProfile: sub.quality_profile || sub.model_quality_profile,
         failureEvidence: sub.failure_evidence,
+        canonicalSource: sub.canonical_source,
       })
     }
 
@@ -2582,7 +2651,9 @@ export class AdminService {
           schemaVersion: sub.schema_version,
           promptVersion: sub.prompt_version,
           ruleVersion: sub.rule_version,
+          qualityProfile: sub.quality_profile || sub.model_quality_profile,
           failureEvidence: sub.failure_evidence,
+          canonicalSource: sub.canonical_source,
         })
         return {
           attempt: attemptNum,

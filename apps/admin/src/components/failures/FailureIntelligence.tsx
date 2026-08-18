@@ -46,7 +46,7 @@ export const FailureIntelligenceView: React.FC<FailureIntelligenceProps> = ({
                 </span>
               ) : currentEra === 'historical' ? (
                 <span>
-                  📜 歷史封存包含 Schema &lt; 2.2.0 或 Prompt &lt; 2.4.0 的早期實驗與退回紀錄，供比對與根因溯源。
+                  📜 歷史封存包含 Schema &lt; 2.2.0、Prompt &lt; 2.4.0 或未具備 Model Quality Profile Provenance 的早期世代紀錄，供比對與根因溯源。
                 </span>
               ) : (
                 <span>

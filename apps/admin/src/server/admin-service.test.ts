@@ -201,8 +201,8 @@ describe('AdminService Authoritative Truth Layer', () => {
         { capacity: 100, status: 'open', founding_limit: 30 },
       ],
       curriculum_submissions: [
-        { job_id: 'job-1', authoring_attempt: 1, status: 'quality_rejected', schema_version: '2.2.0', prompt_version: '2.4.0' },
-        { job_id: 'job-1', authoring_attempt: 2, status: 'completed', schema_version: '2.2.0', prompt_version: '2.4.0' },
+        { job_id: 'job-1', authoring_attempt: 1, status: 'quality_rejected', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gemini-3.7-flash' },
+        { job_id: 'job-1', authoring_attempt: 2, status: 'completed', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gemini-3.7-flash' },
       ],
     })
 
@@ -265,6 +265,7 @@ describe('AdminService Authoritative Truth Layer', () => {
             attempt_count: 2,
             schema_version: '2.2.0',
             prompt_version: '2.4.0',
+            quality_profile: 'gemini-3.7-flash',
             created_at: '2026-08-17T01:00:00Z',
           },
         ],
@@ -282,6 +283,7 @@ describe('AdminService Authoritative Truth Layer', () => {
               error_message: 'Quality rubric violation',
               schema_version: '2.2.0',
               prompt_version: '2.4.0',
+              quality_profile: 'gemini-3.7-flash',
               failure_evidence: {
                 findings: [
                   { rule: 'Lexical Ceiling Guard', message: 'Exceeded CEFR B1 limit: meticulous' },
@@ -295,6 +297,7 @@ describe('AdminService Authoritative Truth Layer', () => {
               status: 'completed',
               schema_version: '2.2.0',
               prompt_version: '2.4.0',
+              quality_profile: 'gemini-3.7-flash',
               submitted_at: '2026-08-17T03:00:00Z',
             },
           ],
@@ -892,25 +895,84 @@ describe('AdminService Authoritative Truth Layer', () => {
   })
 
   describe('Quality Eras Refactor & Version-Aware Evidence Segmentation', () => {
-    it('correctly classifies items into Engine v1 vs Historical era based on Schema 2.2.0 & Prompt 2.4.0', () => {
-      // 1. Engine v1 submissions
-      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: '2.4.0' })).toBe('engine_v1')
-      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: '2.4.0-prod' })).toBe('engine_v1')
-      expect(classifyQualityEra({ schemaVersion: '2.2.0', promptVersion: 'prompt/2.4.0' })).toBe('engine_v1')
-      expect(classifyQualityEra({ failureEvidence: { schemaVersion: '2.2.0', promptVersion: '2.4.0' } })).toBe('engine_v1')
-      expect(classifyQualityEra({ canonicalSource: { metadata: { schemaVersion: '2.2.0', promptVersion: '2.4.0' } } })).toBe('engine_v1')
-      expect(classifyQualityEra({ schemaVersion: '2.2.0', ruleVersion: '2.2.0' })).toBe('engine_v1')
+    it('correctly classifies items into Engine v1 vs Historical era based on Schema 2.2.0 + Prompt 2.4.0 + model-quality-profile provenance', () => {
+      // 1. Current Tightened Engine v1 submissions (Schema 2.2.0 + Prompt 2.4.0 + model-quality-profile provenance)
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        promptVersion: '2.4.0',
+        qualityProfile: 'gemini-3.7-flash',
+      })).toBe('engine_v1')
 
-      // 2. Historical / Legacy submissions
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        promptVersion: '2.4.0-prod',
+        modelQualityProfile: { actualModel: 'gpt-5', resolvedQualityProfile: 'gpt-5', qualityProfileVersion: '1.0.0' },
+      })).toBe('engine_v1')
+
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        promptVersion: 'prompt/2.4.0',
+        resolvedQualityProfile: 'gemini-3.7-flash',
+      })).toBe('engine_v1')
+
+      expect(classifyQualityEra({
+        failureEvidence: {
+          schemaVersion: '2.2.0',
+          promptVersion: '2.4.0',
+          qualityProfile: 'gpt-5.6-sol',
+          findings: [{ rule: 'Lexical Ceiling Guard', message: 'Exceeded limit' }],
+        },
+      })).toBe('engine_v1')
+
+      expect(classifyQualityEra({
+        canonicalSource: {
+          metadata: {
+            schemaVersion: '2.2.0',
+            promptVersion: '2.4.0',
+            modelQualityProfile: { actualModel: 'gemini-3.7-flash' },
+          },
+          qualityEvidence: {
+            criticalChecks: [{ id: 'model-quality-profile', passed: true, evidence: 'actualModel=gemini-3.7-flash' }],
+          },
+        },
+      })).toBe('engine_v1')
+
+      // 2. Pre-profile Engine v1 (Schema 2.2.0 + Prompt 2.4.0, but missing model-quality-profile provenance -> must be Historical)
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        promptVersion: '2.4.0',
+      })).toBe('historical')
+
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        promptVersion: '2.4.0',
+        modelQualityProfile: {}, // empty profile
+      })).toBe('historical')
+
+      expect(classifyQualityEra({
+        schemaVersion: '2.2.0',
+        ruleVersion: '2.2.0',
+      })).toBe('historical')
+
+      expect(classifyQualityEra({
+        failureEvidence: {
+          schemaVersion: '2.2.0',
+          promptVersion: '2.4.0',
+          // no qualityProfile or criticalChecks for model-quality-profile
+        },
+      })).toBe('historical')
+
+      // 3. Real Legacy Production Shapes (Schema < 2.2.0, Prompt < 2.4.0)
       expect(classifyQualityEra({ schemaVersion: '1.0.0', promptVersion: '1.0.0' })).toBe('historical')
       expect(classifyQualityEra({ schemaVersion: '2.0.0', promptVersion: '2.0.0' })).toBe('historical')
       expect(classifyQualityEra({ schemaVersion: '2.1.0', promptVersion: '2.3.0' })).toBe('historical')
+      expect(classifyQualityEra({ schemaVersion: '1.0.0', qualityProfile: 'legacy' })).toBe('historical') // old schema with profile still historical
       expect(classifyQualityEra({ failureEvidence: { schemaVersion: '1.0.0' } })).toBe('historical')
       expect(classifyQualityEra({ ruleVersion: 'curriculum-rules/1.0.0' })).toBe('historical')
       expect(classifyQualityEra({})).toBe('historical')
     })
 
-    it('defaults Failure Intelligence to Engine v1 metrics while preserving all legacy records under Historical', async () => {
+    it('defaults Failure Intelligence to Engine v1 metrics while preserving legacy and pre-profile records under Historical', async () => {
       const legacySubmissions = [
         {
           job_id: 'job-legacy-1',
@@ -936,20 +998,25 @@ describe('AdminService Authoritative Truth Layer', () => {
           submitted_at: '2026-08-14T01:00:00Z',
           failure_evidence: { schemaVersion: '2.0.0', findings: [{ rule: 'CEILING_EXCEEDED', message: 'Too hard' }] },
         },
+      ]
+
+      const preProfileSubmissions = [
         {
-          job_id: 'job-legacy-3',
-          child_id: 'c2',
-          authoring_attempt: 1,
-          status: 'completed',
-          error_code: null,
-          error_message: null,
-          schema_version: '2.0.0',
-          prompt_version: '2.0.0',
-          submitted_at: '2026-08-14T02:00:00Z',
+          job_id: 'job-preprofile-1',
+          child_id: 'c1',
+          authoring_attempt: 3,
+          status: 'quality_rejected',
+          error_code: 'QUALITY_REJECTED',
+          error_message: 'Pre-profile Engine v1 quality rejection',
+          schema_version: '2.2.0',
+          prompt_version: '2.4.0',
+          // No modelQualityProfile provenance attached!
+          submitted_at: '2026-08-16T00:00:00Z',
+          failure_evidence: { schemaVersion: '2.2.0', promptVersion: '2.4.0', findings: [{ rule: 'FORMAT_CHECK', message: 'Pre-profile issue' }] },
         },
       ]
 
-      const engineV1Submissions = [
+      const tightenedEngineV1Submissions = [
         {
           job_id: 'job-enginev1-1',
           child_id: 'c1',
@@ -959,6 +1026,7 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_message: null,
           schema_version: '2.2.0',
           prompt_version: '2.4.0',
+          quality_profile: 'gemini-3.7-flash',
           submitted_at: '2026-08-17T00:00:00Z',
         },
         {
@@ -970,20 +1038,21 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_message: null,
           schema_version: '2.2.0',
           prompt_version: '2.4.0',
+          quality_profile: 'gpt-5',
           submitted_at: '2026-08-17T01:00:00Z',
         },
       ]
 
-      const allSubmissions = [...legacySubmissions, ...engineV1Submissions]
+      const allSubmissions = [...legacySubmissions, ...preProfileSubmissions, ...tightenedEngineV1Submissions]
 
       const mockClient = createMockSupabaseClient(
         {
           generation_jobs: [
             { id: 'job-legacy-1', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '1.0.0', prompt_version: '1.0.0' },
             { id: 'job-legacy-2', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '2.0.0', prompt_version: '2.1.0' },
-            { id: 'job-legacy-3', child_id: 'c2', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '2.0.0', prompt_version: '2.0.0' },
-            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
-            { id: 'job-enginev1-2', child_id: 'c2', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+            { id: 'job-preprofile-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gemini-3.7-flash' },
+            { id: 'job-enginev1-2', child_id: 'c2', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gpt-5' },
           ],
           children: [
             { id: 'c1', display_name: '學員 A' },
@@ -1000,7 +1069,7 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       const service = new AdminService({ client: mockClient })
 
-      // 1. Default Era (Engine v1)
+      // 1. Default Era (Tightened Engine v1)
       const currentFailures = await service.getFailureIntelligence()
       expect(currentFailures.selectedEra).toBe('current')
       expect(currentFailures.totalFailures).toBe(0)
@@ -1009,22 +1078,23 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(currentFailures.finisherStats.qualityRejectedSubmissions).toBe(0)
       expect(currentFailures.recentFailures.length).toBe(0)
       expect(currentFailures.eraBreakdown.currentTotalFailures).toBe(0)
-      expect(currentFailures.eraBreakdown.historicalTotalFailures).toBe(2)
-      expect(currentFailures.eraBreakdown.allTotalFailures).toBe(2)
+      // Historical includes 2 legacy + 1 pre-profile = 3 failures
+      expect(currentFailures.eraBreakdown.historicalTotalFailures).toBe(3)
+      expect(currentFailures.eraBreakdown.allTotalFailures).toBe(3)
 
-      // 2. Historical Era
+      // 2. Historical Era (Includes legacy + pre-profile without profile provenance)
       const historicalFailures = await service.getFailureIntelligence('historical')
       expect(historicalFailures.selectedEra).toBe('historical')
-      expect(historicalFailures.totalFailures).toBe(2)
-      expect(historicalFailures.finisherStats.qualityRejectedSubmissions).toBe(2)
-      expect(historicalFailures.recentFailures.length).toBe(2)
-      expect(historicalFailures.recentFailures[0].era).toBe('historical')
+      expect(historicalFailures.totalFailures).toBe(3)
+      expect(historicalFailures.finisherStats.qualityRejectedSubmissions).toBe(3)
+      expect(historicalFailures.recentFailures.length).toBe(3)
+      expect(historicalFailures.recentFailures.every((f) => f.era === 'historical')).toBe(true)
 
       // 3. All Eras
       const allFailures = await service.getFailureIntelligence('all')
       expect(allFailures.selectedEra).toBe('all')
-      expect(allFailures.totalFailures).toBe(2)
-      expect(allFailures.recentFailures.length).toBe(2)
+      expect(allFailures.totalFailures).toBe(3)
+      expect(allFailures.recentFailures.length).toBe(3)
     })
 
     it('provides clear Quality Era provenance and tags in AI Dataset Export', async () => {
@@ -1050,6 +1120,7 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_message: null,
           schema_version: '2.2.0',
           prompt_version: '2.4.0',
+          quality_profile: 'gemini-3.7-flash',
           submitted_at: '2026-08-17T00:00:00Z',
         },
       ]
@@ -1058,12 +1129,12 @@ describe('AdminService Authoritative Truth Layer', () => {
         {
           generation_jobs: [
             { id: 'job-legacy-1', child_id: 'c1', status: 'completed', rule_version: 'curriculum-rules/1.0.0', schema_version: '1.0.0', prompt_version: '1.0.0' },
-            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0' },
+            { id: 'job-enginev1-1', child_id: 'c1', status: 'completed', rule_version: '2.2.0', schema_version: '2.2.0', prompt_version: '2.4.0', quality_profile: 'gemini-3.7-flash' },
           ],
           children: [{ id: 'c1', display_name: '學員 A' }],
           feedback: [],
           materials: [
-            { id: 'm1', child_id: 'c1', rule_version: '2.2.0', generator_version: 'curriculum/2.0.0', model_name: 'gpt-5.6-sol', prompt_version: '2.4.0' }
+            { id: 'm1', child_id: 'c1', rule_version: '2.2.0', generator_version: 'curriculum/2.0.0', model_name: 'gpt-5.6-sol', prompt_version: '2.4.0', quality_profile: 'gpt-5.6-sol' }
           ],
           subscriptions: [{ id: 's1', child_id: 'c1', status: 'active', billing_interval: 'month' }],
         },
