@@ -1,15 +1,17 @@
 ---
-bundleVersion: "2.4.0-prod"
+bundleVersion: "2.4.1-prod"
 schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
 engineVersion: "1.0.1"
-generatedAt: "2026-08-17T00:30:00.000Z"
+generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "be98af220c7db8bd726f64def4b2fd2b510e6f558160caa7d89c1a4853e18a25"
   "packages/generator/prompts/2.4.0/02-author.md": "4051b06eade5ee4ccb2e0903914c5cb4c47fa96bd6adcc40da44158cae045ef8"
   "packages/generator/prompts/2.4.0/03-critic.md": "cc632f99d83b15761f829022202f12ecce2924c88402ff822bee16e1dc670700"
   "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
   "packages/generator/src/curriculum-package-schema.ts": "d30352a33a94c4b42323d8e892d04a8d0001fe0e04a00f37ab7777f0b8566df1"
+  "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
+  "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
   "docs/product-rules.md": "0fd7c373e33f67f439db6df73ca6fb0225d8f0655eba2be1ac02f207557e3540"
 ---
@@ -93,7 +95,119 @@ The Parent Answer PDF is intentionally narrow: answers, short reasons, legitimat
 
 Reject a package if a child needs a tutor to understand a new task, if an answer is missing, ambiguous, or lacks textual entailment, if Chinese support is insufficient, if a target has no observable evidence, if delayed retrieval is absent, or if a critical critic finding is unresolved. “Different” is not evidence of improvement; compare the new packet against the previous packet's known weaknesses.
 
-## 3. Curriculum Package Schema
+## 3. Model Quality Profile Resolution & Provenance
+
+Before critique or submission, resolve the authoring model quality profile deterministically:
+
+1. Preserve the exact runtime model identifier as `actualModel`. Never rename the model to a profile name.
+2. Normalize only for lookup: trim, lowercase, and remove a leading `models/` prefix.
+3. Prefer a matching profile filename/modelId/modelPatterns. If no model-specific profile matches, resolve to `default` and mark it as fallback. Never invent a profile for an unmatched model.
+4. Apply the resolved profile before submission, then add or replace exactly one passing `qualityEvidence.criticalChecks` entry with `id: "model-quality-profile"`.
+5. Its evidence must truthfully encode: `actualModel=<exact runtime model> | resolvedQualityProfile=<resolved profile name> | qualityProfileVersion=<resolved profile frontmatter version> | engineVersion=<bundle engineVersion>` and append ` (fallback)` when the default fallback was used.
+6. Missing, fabricated, or mismatched model/profile provenance is a production quality violation. Do not hide it by relabeling the package as legacy/historical.
+
+### Bundled fallback profile
+---
+profileVersion: "1.0.0"
+modelId: "default"
+modelPatterns:
+  - "default"
+  - "fallback"
+  - "*"
+description: "Universal fallback pre-submit quality profile for models without specific observed semantic biases"
+updatedAt: "2026-08-18"
+---
+
+# Default Pre-Submit Quality Profile
+
+This is the default quality profile applied when no model-specific profile exists for the authoring model.
+It defines standard pre-submit critique invariants and provides a clean container for operator observations.
+
+## Active Quality Rules
+
+<!-- No model-specific overrides by default; relies on global curriculum validator and quality rubric -->
+
+## Human-Maintained Observations
+
+<!--
+Human operators: record new model observations here before promoting to active rules.
+Format:
+- [YYYY-MM-DD] [Model-Name] Observation description...
+-->
+
+### Bundled Gemini profile
+---
+profileVersion: "1.1.0"
+modelId: "gemini-3.7-flash"
+modelPatterns:
+  - "gemini-3.7-flash"
+  - "gemini-3-7-flash"
+  - "models/gemini-3.7-flash"
+  - "models/gemini-3-7-flash"
+  - "gemini-2.5-flash"
+  - "models/gemini-2.5-flash"
+description: "Model-specific semantic critique profile for Gemini 3.7 Flash authoring"
+updatedAt: "2026-08-18"
+---
+
+# Gemini 3.7 Flash Quality Profile
+
+Before submission, specifically inspect:
+
+## Active Quality Rules
+
+### 1. English Naturalness & Phrasing Pass
+- **Target Area:** `english-naturalness`
+- **Rule ID:** `gemini-nat-01`
+- **Description:** Re-read every generated English sentence. Repair unnatural collocations, missing possessives/articles, and translated-Chinese phrasing. Prefer natural junior-high English over merely grammatical English.
+- **Check Points:**
+  - Eliminate awkward word order, unnatural phrase combinations, or non-idiomatic translations.
+  - Verify conversational dialogue sounds authentic and spoken, not textbook-robotic.
+
+### 2. Possessives, Articles, Agreement & Collocations
+- **Target Area:** `grammar-collocations`
+- **Rule ID:** `gemini-gram-02`
+- **Description:** Verify precision in minor grammatical agreements and high-frequency English collocations.
+- **Check Points:**
+  - Check third-person singular `-s` and past tense consistency across clauses.
+  - Verify correct indefinite/definite article usage (`a`, `an`, `the`, or zero article).
+  - Verify singular/plural noun possessives (e.g., `the boy's`, `the students'`).
+  - Verify natural prepositional collocations (e.g., `interested in`, `good at`, `on the weekend` / `at the weekend`, `listen to`).
+
+### 3. Translated-Chinese Phrasing Elimination
+- **Target Area:** `chinese-naturalness`
+- **Rule ID:** `gemini-zh-03`
+- **Description:** Eliminate English syntax structures mirrored in Traditional Chinese text.
+- **Check Points:**
+  - Ensure all `instructionsZh`, `meaningZh`, `explanationZh`, `contextZh`, and `walkthroughZh` are written in fluent, idiomatic Taiwanese Traditional Chinese (正體中文).
+  - Remove translationese (歐化中文), awkward passive constructions (e.g., 不自然的「被...所...」), and redundant pronouns.
+
+### 4. Answer Integrity & Causal/Evidence Correctness
+- **Target Area:** `explanation-causality`
+- **Rule ID:** `gemini-exp-04`
+- **Description:** Ensure every answer explanation actually explains why the answer is correct with explicit textual or grammatical evidence and clear causal reasoning.
+- **Check Points:**
+  - The explanation must clearly state *why* the correct answer is right by citing specific passage evidence or grammar rules.
+  - For multiple-choice questions, the explanation must concisely eliminate key distractors with unbroken logical causality.
+  - Explanations must be self-contained so a junior-high student studying alone can understand their mistake without external assistance.
+
+### 5. Textual Entailment & Multi-Detail Synthesis Prevention
+- **Target Area:** `answer-entailment`
+- **Rule ID:** `gemini-entail-05`
+- **Description:** Before submission, verify every MC correct option and Parent rationale is directly entailed by the source text. Never combine separately mentioned true details into a new unsupported claim. Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+- **Check Points:**
+  - Verify every multiple-choice correct option and Parent rationale is directly entailed by the source text.
+  - Never combine separately mentioned true details into a new unsupported claim or composite statement.
+  - Global Answer Integrity: Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+
+## Human-Maintained Observations
+
+<!--
+Human operators: record observed model behaviors here.
+Repeated or critical patterns can be promoted into Active Quality Rules above.
+-->
+
+## 4. Curriculum Package Schema
 ```typescript
 import { z } from 'zod'
 
@@ -365,7 +479,7 @@ export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
 export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
-## 4. Prompt 01: Planning Engine
+## 5. Prompt 01: Planning Engine
 # Prompt 01: Planning (v2.4.0)
 
 You are the Planning Engine for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
@@ -506,7 +620,7 @@ Output a JSON object matching `learningPlan`:
 }
 ```
 
-## 5. Prompt 02: Authoring Engine
+## 6. Prompt 02: Authoring Engine
 # Prompt 02: Material Authoring (v2.4.0)
 
 You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
@@ -714,7 +828,7 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
 
-## 6. Prompt 03: Critic Engine
+## 7. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.4.0)
 
 You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
@@ -775,7 +889,7 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
 }
 ```
 
-## 7. Prompt 04: Repair Specialist
+## 8. Prompt 04: Repair Specialist
 # Prompt 04: Repair (v2.4.0)
 
 You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
