@@ -195,10 +195,18 @@ export const curriculumSample: CurriculumPackage = {
   },
 }
 
-if (process.argv[1]?.endsWith('generate-curriculum-sample.ts')) {
+async function runCli() {
   const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url))
   const outputDir = resolve(repositoryRoot, 'output/pdf/curriculum-v2-sample')
   await mkdir(outputDir, { recursive: true })
   const result = await renderCurriculumPackagePair(curriculumSample, outputDir)
   console.log(JSON.stringify(result, null, 2))
 }
+
+if (process.argv[1]?.endsWith('generate-curriculum-sample.ts')) {
+  runCli().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
+
