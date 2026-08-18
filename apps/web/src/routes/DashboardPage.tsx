@@ -49,7 +49,7 @@ export function DashboardPage({ session }: { session: Session }) {
             <header className="dashboard-top-header">
               <div>
                 <p className="eyebrow">本週教材</p>
-                <h1>每個孩子，都有自己的下一步。</h1>
+                <h1 style={{ maxWidth: '40rem' }}>每個孩子，都有自己的下一步。</h1>
                 <p className="dashboard-subtitle">查看本週交付、完成回饋，讓下一份教材接著成長。</p>
               </div>
               <button className="button button-secondary" type="button" onClick={() => navigate('/children/new')}>
