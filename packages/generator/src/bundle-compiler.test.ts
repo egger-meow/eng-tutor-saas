@@ -19,8 +19,10 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
     expect(freshBundle.metadata.schemaVersion).toBe('2.2.0')
     expect(freshBundle.metadata.promptVersion).toBe('2.4.0')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.4.0-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(7)
+    expect(freshBundle.metadata.bundleVersion).toBe('2.4.1-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(9)
+    expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
+    expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {
