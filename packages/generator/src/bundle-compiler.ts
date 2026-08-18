@@ -63,6 +63,14 @@ export const SOURCE_FILES = [
   'docs/product-rules.md',
 ] as const
 
+function compactQualityProfileForBundle(profile: string): string {
+  return profile
+    .replace(/\r\n/g, '\n')
+    .replace(/\n## Human-Maintained Observations[\s\S]*$/u, '')
+    .replace(/<!--[\s\S]*?-->/gu, '')
+    .trim()
+}
+
 export async function computeSourceHashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
   const hashes: Record<string, string> = {}
   for (const relativePath of SOURCE_FILES) {
@@ -123,8 +131,8 @@ export async function compileProductionBundle(
   const critic = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
   const repair = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/04-repair.md'), 'utf8')
   const schema = await readFile(resolve(repoRoot, 'packages/generator/src/curriculum-package-schema.ts'), 'utf8')
-  const defaultProfile = await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/default.md'), 'utf8')
-  const geminiProfile = await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/gemini-3.7-flash.md'), 'utf8')
+  const defaultProfile = compactQualityProfileForBundle(await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/default.md'), 'utf8'))
+  const geminiProfile = compactQualityProfileForBundle(await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/gemini-3.7-flash.md'), 'utf8'))
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
 
@@ -164,10 +172,10 @@ export async function compileProductionBundle(
     '6. Missing, fabricated, or mismatched model/profile provenance is a production quality violation. Do not hide it by relabeling the package as legacy/historical.',
     '',
     '### Bundled fallback profile',
-    defaultProfile.trim().replace(/\r\n/g, '\n'),
+    defaultProfile,
     '',
     '### Bundled Gemini profile',
-    geminiProfile.trim().replace(/\r\n/g, '\n'),
+    geminiProfile,
   ].join('\n')
 
   const body = [
