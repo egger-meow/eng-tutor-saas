@@ -468,4 +468,25 @@ describe('Curriculum Multi-Genre PDF Rendering & Inspection', () => {
     expect(inspection.student.text.replace(/\s+/gu, '')).toContain('深入寫作練習')
     expect(inspection.student.text).toContain('Describe what your family members were doing')
   }, 35_000)
+
+  it('5. Renders and passes inspection for Package with Adaptive Extension module', async () => {
+    const pkg = createBasePackage('test-adaptive-ext', 'Adaptive Extension Test Package')
+    pkg.studentLesson.adaptiveExtension = {
+      id: 'ext-real-world-1',
+      placement: 'after-reading',
+      purpose: 'real-world-application',
+      titleZh: '天文觀測日誌生活應用',
+      contentZh: '當你在真實生活中記錄觀測資料時，精確的時間與過去進行式能幫助他人重現你的發現。',
+      taskZh: '試著用英文寫下一句你昨晚看見夜空時的真實情境。',
+      taskWritingLines: 2,
+    }
+
+    const pair = await renderCurriculumPackageBytes(pkg)
+    const inspection = await inspectCurriculumPdfPair(pkg, pair)
+
+    const cleanStudentText = inspection.student.text.replace(/\s+/gu, '')
+    expect(cleanStudentText).toContain('真實語境應用')
+    expect(cleanStudentText).toContain('天文觀測日誌生活應用')
+    expect(cleanStudentText).toContain('延伸小任務')
+  }, 35_000)
 })

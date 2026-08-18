@@ -2,14 +2,14 @@
 bundleVersion: "2.4.1-prod"
 schemaVersion: "2.2.0"
 promptVersion: "2.4.0"
-engineVersion: "1.0.1"
+engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "be98af220c7db8bd726f64def4b2fd2b510e6f558160caa7d89c1a4853e18a25"
-  "packages/generator/prompts/2.4.0/02-author.md": "4051b06eade5ee4ccb2e0903914c5cb4c47fa96bd6adcc40da44158cae045ef8"
+  "packages/generator/prompts/2.4.0/02-author.md": "73213baa5854a6f1a9d304575fd2d2470de14243ee4f01ae7d96741868cfd34a"
   "packages/generator/prompts/2.4.0/03-critic.md": "cc632f99d83b15761f829022202f12ecce2924c88402ff822bee16e1dc670700"
-  "packages/generator/prompts/2.4.0/04-repair.md": "668ce187a3941b8ec5fde36ddfa10a8eae59cb5704dd99045d044d9b7abd07c5"
-  "packages/generator/src/curriculum-package-schema.ts": "d30352a33a94c4b42323d8e892d04a8d0001fe0e04a00f37ab7777f0b8566df1"
+  "packages/generator/prompts/2.4.0/04-repair.md": "d131411f7d25a3e4858e6b726f3432679966f865271ef9de46c4dff8f57ec1fd"
+  "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
@@ -229,6 +229,35 @@ export const ReadingGenreSchema = z.enum([
 
 export type ReadingGenre = z.infer<typeof ReadingGenreSchema>
 
+export const AdaptiveExtensionPurposeSchema = z.enum([
+  'strategy',
+  'reasoning',
+  'pronunciation',
+  'real-world-application',
+  'creative-depth',
+])
+
+export type AdaptiveExtensionPurpose = z.infer<typeof AdaptiveExtensionPurposeSchema>
+
+export const AdaptiveExtensionPlacementSchema = z.enum([
+  'after-reading',
+  'after-practice',
+])
+
+export type AdaptiveExtensionPlacement = z.infer<typeof AdaptiveExtensionPlacementSchema>
+
+export const AdaptiveExtensionSchema = z.strictObject({
+  id: StableId,
+  placement: AdaptiveExtensionPlacementSchema,
+  purpose: AdaptiveExtensionPurposeSchema,
+  titleZh: Text,
+  contentZh: Text,
+  taskZh: Text.nullable().optional().default(null),
+  taskWritingLines: z.number().int().min(0).max(6).optional().default(0),
+})
+
+export type AdaptiveExtension = z.infer<typeof AdaptiveExtensionSchema>
+
 // Canonical 2.2.0 Production Schema
 export const CurriculumPackageSchema = z.strictObject({
   metadata: z.strictObject({
@@ -277,8 +306,9 @@ export const CurriculumPackageSchema = z.strictObject({
       blocks: z.array(ReadingBlockSchema).min(1).max(20),
       wordCount: z.number().int().min(120).max(900),
       readingTipsZh: z.array(Text).min(1).max(6),
-      sourceNote: Text.nullable().optional().default(null),
+      sourceNote: Text.nullable().optional(),
     }),
+    adaptiveExtension: AdaptiveExtensionSchema.nullable().optional(),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
     practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
@@ -753,11 +783,29 @@ Each weekly practice set should balance:
 * **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
 * **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
 
-### Optional Adaptive Enrichment Module:
-For high-completion or deep-budget learners, you may include an enrichment block in one of **two legal placements**:
-1. *Post-Reading Strategy Extension* (between Reading and Instruction): Deeper situational context inquiry or strategic reading note.
-2. *Post-Practice Transfer Extension* (at end of Practice, before Self-Check): Cross-context challenge prompt or real-world reflection.
-*Guardrail: Adaptive enrichment adds cognitive depth and strategy; it NEVER introduces out-of-scope untaught curriculum targets or repetitive drill filler.*
+### Optional First-Class Adaptive Extension Module (`studentLesson.adaptiveExtension`):
+Max 0–1 per week. When learner state or lesson context warrants genuine depth, include `studentLesson.adaptiveExtension`:
+```json
+{
+  "id": "ext-strategy-1",
+  "placement": "after-reading",
+  "purpose": "strategy",
+  "titleZh": "會考閱讀策略小卡：如何從上下文推論生字",
+  "contentZh": "當遇到生詞時，先觀察前後句的因果連接詞（如 because, so）與同位語，常能直接鎖定字義核心。",
+  "taskZh": "在文章中標出 1 處你運用上下文推測出字義的關鍵線索。",
+  "taskWritingLines": 2
+}
+```
+- **Legal Placements (`placement`)**:
+  1. `"after-reading"`: Placed immediately after Reading.
+  2. `"after-practice"`: Placed immediately after Practice (before Self-Check).
+- **5 Allowed Purposes (`purpose`)**:
+  `"strategy"` | `"reasoning"` | `"pronunciation"` | `"real-world-application"` | `"creative-depth"`
+- **Strict Pedagogical Guardrails**:
+  - Use ONLY for genuinely useful strategy, reasoning, pronunciation, real-world application, or creative learning depth.
+  - NEVER use as mechanical drill filler, arbitrary extra questions, or out-of-scope untaught curriculum targets.
+  - If no extension is needed, set to `null` or omit.
+  - The core lesson (opening, vocabulary, reading, instruction, practice, self-check, homework) remains 100% intact and unchanged.
 
 ---
 
@@ -883,7 +931,7 @@ You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curricul
 
 When fixing validation or critic findings in a curriculum package:
 1. **Preserve Valid Educational Content**: Only modify the specific fields flagged in validation `issues` or critic `findings`.
-2. **Schema 2.2.0 Invariants**: Maintain `schemaVersion: "2.2.0"` and typed `reading.blocks: ReadingBlock[]`.
+2. **Schema 2.2.0 Invariants**: Maintain `schemaVersion: "2.2.0"`, typed `reading.blocks: ReadingBlock[]`, and optional typed `studentLesson.adaptiveExtension` (if present).
 3. **Pedagogical Repair**:
    - For silly distractors, supply plausible student misconceptions (`partial evidence`, `reversed relationship`).
    - For circular explanations, add textual evidence and `likelyMisconceptionZh`.

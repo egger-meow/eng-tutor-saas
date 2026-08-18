@@ -147,11 +147,29 @@ Each weekly practice set should balance:
 * **2 Micro Items**: Specific fact location, pronoun referent, or vocabulary in context.
 * **2 Applied / Transfer Items**: Practical decision making, cross-block comparison, or real-life application.
 
-### Optional Adaptive Enrichment Module:
-For high-completion or deep-budget learners, you may include an enrichment block in one of **two legal placements**:
-1. *Post-Reading Strategy Extension* (between Reading and Instruction): Deeper situational context inquiry or strategic reading note.
-2. *Post-Practice Transfer Extension* (at end of Practice, before Self-Check): Cross-context challenge prompt or real-world reflection.
-*Guardrail: Adaptive enrichment adds cognitive depth and strategy; it NEVER introduces out-of-scope untaught curriculum targets or repetitive drill filler.*
+### Optional First-Class Adaptive Extension Module (`studentLesson.adaptiveExtension`):
+Max 0–1 per week. When learner state or lesson context warrants genuine depth, include `studentLesson.adaptiveExtension`:
+```json
+{
+  "id": "ext-strategy-1",
+  "placement": "after-reading",
+  "purpose": "strategy",
+  "titleZh": "會考閱讀策略小卡：如何從上下文推論生字",
+  "contentZh": "當遇到生詞時，先觀察前後句的因果連接詞（如 because, so）與同位語，常能直接鎖定字義核心。",
+  "taskZh": "在文章中標出 1 處你運用上下文推測出字義的關鍵線索。",
+  "taskWritingLines": 2
+}
+```
+- **Legal Placements (`placement`)**:
+  1. `"after-reading"`: Placed immediately after Reading.
+  2. `"after-practice"`: Placed immediately after Practice (before Self-Check).
+- **5 Allowed Purposes (`purpose`)**:
+  `"strategy"` | `"reasoning"` | `"pronunciation"` | `"real-world-application"` | `"creative-depth"`
+- **Strict Pedagogical Guardrails**:
+  - Use ONLY for genuinely useful strategy, reasoning, pronunciation, real-world application, or creative learning depth.
+  - NEVER use as mechanical drill filler, arbitrary extra questions, or out-of-scope untaught curriculum targets.
+  - If no extension is needed, set to `null` or omit.
+  - The core lesson (opening, vocabulary, reading, instruction, practice, self-check, homework) remains 100% intact and unchanged.
 
 ---
 

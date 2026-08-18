@@ -65,9 +65,9 @@ describe('bundle-compiler', () => {
     })
   })
 
-  it('keeps compiled bundle size within token budget (< 5500 words / ~6500 tokens)', async () => {
+  it('keeps compiled bundle size within token budget (< 5800 words / ~6800 tokens)', async () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
     const wordCount = freshBundle.content.trim().split(/\s+/u).length
-    expect(wordCount).toBeLessThan(5500)
+    expect(wordCount).toBeLessThan(5800)
   })
 })

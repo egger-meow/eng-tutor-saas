@@ -137,4 +137,62 @@ describe('curriculum package v2', () => {
       expect(result.issues.some((issue) => issue.path.includes('exposedCommunicationFunctionIds') && issue.message.includes('16 official communication'))).toBe(true)
     }
   })
+
+  it('validates first-class optional adaptiveExtension in Schema 2.2', () => {
+    const value = validPackage()
+    const v21 = upgradeV20ToV21(value as any)
+    const v22 = upgradeV21ToV22(v21)
+
+    // 1. Valid with strategy purpose after reading
+    v22.studentLesson.adaptiveExtension = {
+      id: 'ext-strategy-1',
+      placement: 'after-reading',
+      purpose: 'strategy',
+      titleZh: '會考長文閱讀策略：條件與轉折線索',
+      contentZh: '當你讀到 If... 或 However 時，先停下來圈出因果或轉折關係。',
+      taskZh: '在文章中找出含有 If 的句子並用括號標記條件。',
+      taskWritingLines: 2,
+    }
+    const res1 = validateCurriculumPackage(v22)
+    expect(res1.success).toBe(true)
+
+    // 2. Valid with reasoning purpose after practice
+    v22.studentLesson.adaptiveExtension = {
+      id: 'ext-reasoning-1',
+      placement: 'after-practice',
+      purpose: 'reasoning',
+      titleZh: '動詞時態陷阱排查',
+      contentZh: '檢查句子時，先抓出主詞是單數還是複數。',
+      taskZh: null,
+      taskWritingLines: 0,
+    }
+    const res2 = validateCurriculumPackage(v22)
+    expect(res2.success).toBe(true)
+
+    // 3. Rejects invalid placement
+    v22.studentLesson.adaptiveExtension = {
+      id: 'ext-invalid-1',
+      placement: 'before-reading' as any,
+      purpose: 'strategy',
+      titleZh: '無效位置測試',
+      contentZh: '說明內容',
+      taskZh: null,
+      taskWritingLines: 0,
+    }
+    const res3 = validateCurriculumPackage(v22)
+    expect(res3.success).toBe(false)
+
+    // 4. Rejects invalid purpose
+    v22.studentLesson.adaptiveExtension = {
+      id: 'ext-invalid-2',
+      placement: 'after-reading',
+      purpose: 'drill-filler' as any,
+      titleZh: '無效目的測試',
+      contentZh: '說明內容',
+      taskZh: null,
+      taskWritingLines: 0,
+    }
+    const res4 = validateCurriculumPackage(v22)
+    expect(res4.success).toBe(false)
+  })
 })

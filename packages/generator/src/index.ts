@@ -23,6 +23,9 @@ export {
   CurriculumPackageV20Schema,
   ReadingBlockSchema,
   ReadingGenreSchema,
+  AdaptiveExtensionSchema,
+  AdaptiveExtensionPurposeSchema,
+  AdaptiveExtensionPlacementSchema,
 } from './curriculum-package-schema.js'
 export type {
   CurriculumPackage,
@@ -31,6 +34,9 @@ export type {
   CurriculumQuestion,
   ReadingBlock,
   ReadingGenre,
+  AdaptiveExtension,
+  AdaptiveExtensionPurpose,
+  AdaptiveExtensionPlacement,
 } from './curriculum-package-schema.js'
 export { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 export { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'

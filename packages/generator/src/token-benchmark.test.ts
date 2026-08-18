@@ -35,7 +35,7 @@ describe('token-benchmark', () => {
 
     // Assert that the compiled bundle is less than 35% of the total raw scattered sources
     expect(bundleWords).toBeLessThan(scatteredWords * 0.35)
-    expect(bundleWords).toBeLessThan(5500)
+    expect(bundleWords).toBeLessThan(5800)
   })
 
   it('demonstrates context capsule token efficiency over raw database table dumps', () => {

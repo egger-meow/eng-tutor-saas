@@ -35,6 +35,35 @@ export const ReadingGenreSchema = z.enum([
 
 export type ReadingGenre = z.infer<typeof ReadingGenreSchema>
 
+export const AdaptiveExtensionPurposeSchema = z.enum([
+  'strategy',
+  'reasoning',
+  'pronunciation',
+  'real-world-application',
+  'creative-depth',
+])
+
+export type AdaptiveExtensionPurpose = z.infer<typeof AdaptiveExtensionPurposeSchema>
+
+export const AdaptiveExtensionPlacementSchema = z.enum([
+  'after-reading',
+  'after-practice',
+])
+
+export type AdaptiveExtensionPlacement = z.infer<typeof AdaptiveExtensionPlacementSchema>
+
+export const AdaptiveExtensionSchema = z.strictObject({
+  id: StableId,
+  placement: AdaptiveExtensionPlacementSchema,
+  purpose: AdaptiveExtensionPurposeSchema,
+  titleZh: Text,
+  contentZh: Text,
+  taskZh: Text.nullable().optional().default(null),
+  taskWritingLines: z.number().int().min(0).max(6).optional().default(0),
+})
+
+export type AdaptiveExtension = z.infer<typeof AdaptiveExtensionSchema>
+
 // Canonical 2.2.0 Production Schema
 export const CurriculumPackageSchema = z.strictObject({
   metadata: z.strictObject({
@@ -83,8 +112,9 @@ export const CurriculumPackageSchema = z.strictObject({
       blocks: z.array(ReadingBlockSchema).min(1).max(20),
       wordCount: z.number().int().min(120).max(900),
       readingTipsZh: z.array(Text).min(1).max(6),
-      sourceNote: Text.nullable().optional().default(null),
+      sourceNote: Text.nullable().optional(),
     }),
+    adaptiveExtension: AdaptiveExtensionSchema.nullable().optional(),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
     practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),

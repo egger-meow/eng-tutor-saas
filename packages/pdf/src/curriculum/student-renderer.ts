@@ -6,6 +6,7 @@ import { renderReadingSection } from './reading-renderer.js'
 import { renderVocabularySection } from './vocabulary-renderer.js'
 import { renderInstructionSection } from './instruction-renderer.js'
 import { renderPracticeStages, renderSelfCheckSection, renderHomeworkSection } from './practice-renderer.js'
+import { renderAdaptiveExtension } from './adaptive-extension-renderer.js'
 
 export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   const lesson = pkg.studentLesson
@@ -46,14 +47,26 @@ export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   const selfCheckHtml = renderSelfCheckSection(lesson.selfCheckZh)
   const homeworkHtml = renderHomeworkSection(lesson.homework)
 
+  const adaptiveExtension = lesson.adaptiveExtension
+  const afterReadingExtensionHtml =
+    adaptiveExtension && adaptiveExtension.placement === 'after-reading'
+      ? renderAdaptiveExtension(adaptiveExtension)
+      : ''
+  const afterPracticeExtensionHtml =
+    adaptiveExtension && adaptiveExtension.placement === 'after-practice'
+      ? renderAdaptiveExtension(adaptiveExtension)
+      : ''
+
   const body = `
 ${renderCurriculumHeader(pkg, 'student')}
 ${orientationHtml}
 ${warmupHtml}
 ${readingHtml}
+${afterReadingExtensionHtml}
 ${vocabHtml}
 ${instructionHtml}
 ${practiceHtml}
+${afterPracticeExtensionHtml}
 ${selfCheckHtml}
 ${homeworkHtml}
 `

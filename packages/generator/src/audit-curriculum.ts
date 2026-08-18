@@ -232,10 +232,21 @@ export function auditCurriculumPackage(
     }
   }
 
+  const adaptiveExtensionTexts: string[] = []
+  if (pkg.studentLesson.adaptiveExtension) {
+    if (pkg.studentLesson.adaptiveExtension.contentZh) {
+      adaptiveExtensionTexts.push(pkg.studentLesson.adaptiveExtension.contentZh)
+    }
+    if (pkg.studentLesson.adaptiveExtension.taskZh) {
+      adaptiveExtensionTexts.push(pkg.studentLesson.adaptiveExtension.taskZh)
+    }
+  }
+
   const studentFacingTexts: string[] = [
     rawPassageText,
     ...pkg.studentLesson.instruction.flatMap((inst) => inst.workedExamples.map((ex) => ex.example)),
     ...questions.map((q) => `${q.prompt} ${(q.options ?? []).join(' ')}`),
+    ...adaptiveExtensionTexts,
   ]
   const allStudentTokens = studentFacingTexts.join(' ').split(/\s+/u).filter(Boolean)
 

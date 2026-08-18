@@ -860,6 +860,69 @@ export const curriculumStyles = `
     line-height: 1.4;
   }
 
+  /* Adaptive Extension Card */
+  .adaptive-extension-card {
+    border: 1.5px dashed #173e37;
+    background: #fbfdfc;
+    border-radius: 4px;
+    padding: 3.5mm 4.5mm;
+    margin: 4.5mm 0 5.5mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .adaptive-extension-header {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    margin-bottom: 2mm;
+  }
+
+  .adaptive-extension-badge {
+    display: inline-block;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #173e37;
+    background: #e8f2ef;
+    border: 1px solid #c2ded7;
+    border-radius: 3px;
+    padding: 0.5mm 2mm;
+    letter-spacing: 0.04em;
+  }
+
+  .adaptive-extension-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #173e37;
+    margin: 0;
+  }
+
+  .adaptive-extension-content {
+    font-size: 9.5pt;
+    line-height: 1.6;
+    color: #242b28;
+    margin-bottom: 2.5mm;
+  }
+
+  .adaptive-extension-task {
+    border-top: 1px solid #d8e8e3;
+    padding-top: 2.5mm;
+    margin-top: 2.5mm;
+  }
+
+  .adaptive-task-kicker {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #765d42;
+    margin-bottom: 1mm;
+  }
+
+  .adaptive-task-prompt {
+    font-size: 9pt;
+    color: #282420;
+    line-height: 1.5;
+  }
+
   /* Utility Break Classes */
   .page-break {
     break-before: page;

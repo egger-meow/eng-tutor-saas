@@ -109,8 +109,13 @@ describe('Wave 4.2 Active Prompt Invariant Contract (v2.4.0 Strict Inheritance)'
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.0.0').success).toBe(true)
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
-    // Bundle compiled with 2.4.1-prod and schema 2.2.0
+    // Bundle compiled with 2.4.1-prod, schema 2.2.0, and engineVersion 1.1.0
     expect(bundle).toContain('bundleVersion: "2.4.1-prod"')
     expect(bundle).toContain('schemaVersion: "2.2.0"')
+    expect(bundle).toContain('engineVersion: "1.1.0"')
+
+    // Assert adaptiveExtension is optional in Schema 2.2 studentLesson
+    const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape
+    expect(studentLessonShape.adaptiveExtension).toBeDefined()
   })
 })
