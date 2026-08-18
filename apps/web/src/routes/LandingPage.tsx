@@ -9,6 +9,7 @@ import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
 import { getEnrollmentCta, useEnrollmentState } from '../lib/enrollment'
+import '../landing-evolution.css'
 
 const abilityBenefits = [
   ['願意開始讀', '先用孩子有興趣的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
@@ -23,10 +24,24 @@ const weeklyContents = [
   '依程度、學校進度、錯誤與回饋調整的下一週教材',
 ] as const
 
+const evolutionPillars = [
+  ['01', '孩子越用，教材越懂他', '不是每週重新猜一次。程度、學校進度、學過的內容、常錯的地方與家長回饋會持續累積，下一週接著孩子真正的位置往前。'],
+  ['02', '教材系統自己也會持續升級', '題型、課程對齊、錯誤診斷與教材設計能力會持續改善。就像軟體更新，訂閱中的孩子會直接得到更完整的下一份教材。'],
+  ['03', 'AI 進步，教材也跟著進步', '我們持續把更適合教育的模型與方法接進系統。家長不用研究模型版本，技術升級是我們的事，孩子拿到更好的教材才是你看見的事。'],
+] as const
+
+const usageModes = [
+  ['自己完成', '孩子自己學', 'Student PDF 直接給孩子，照著閱讀、提示與練習一步一步完成。'],
+  ['一起使用', '家長陪著學', '搭配 Parent Answer PDF，不必先備課；有時間時一起讀、訂正、聊錯在哪裡。'],
+  ['交給老師', '搭配家教／老師使用', '直接當作每週教學內容、補充教材或回家作業，老師不用從零準備一整套。'],
+] as const
+
 export const faqItems = [
   ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
   ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。'],
   ['多久可以拿到第一份教材？', '完成孩子資料後，第一份專屬教材預計於隔天開放下載。之後每週依固定節奏提供新的個人化教材。'],
+  ['一定要讓孩子自己學嗎？', '不用。孩子可以自己完成，也可以由家長陪讀，或把 Student PDF 與 Parent Answer PDF 交給家教、老師當作每週教學內容與回家練習。教材準備好，怎麼使用由家庭決定。'],
+  ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
   ['每個孩子都要各自付費嗎？', '是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子計費，可選月繳 NT$499 或年繳 NT$4,999。'],
@@ -47,7 +62,7 @@ export function LandingPage() {
             <h1>
               每週一份，<br /><em>只屬</em>於你孩子的英文教材。
             </h1>
-            <p className="lede"><strong>先讓孩子願意讀，再把英文能力真的練起來。</strong>紙屬英文依孩子的程度、學校進度、興趣與上週表現，每週重新調整內容。</p>
+            <p className="lede"><strong>先讓孩子願意讀，再把英文能力真的練起來。</strong>紙屬英文會記得孩子的程度、學校進度、興趣與每週表現，讓教材不是重來，而是一路接著他往前。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
               <li>每週 Student PDF + Parent Answer PDF</li>
               <li>孩子用紙筆閱讀、作答與思考</li>
@@ -63,10 +78,10 @@ export function LandingPage() {
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
             <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
-            <p>不是聊天機器人，也不是線上家教。</p>
-            <strong>是一套每週更新、可以直接印出來學的個人化英文教材。</strong>
+            <p>不是買一份固定教材。</p>
+            <strong>是一套會記得孩子、每週重新替他做教材的學習系統。</strong>
             <div className="paper-rule" />
-            <small>AI 在背後記憶與調整；孩子在紙上完成真正的學習。</small>
+            <small>AI 在背後記憶、調整與升級；孩子在紙上完成真正的學習。</small>
           </FadeInUp>
         </section>
 
@@ -99,6 +114,30 @@ export function LandingPage() {
             <p className="overline">只讀興趣主題，對考試真的有用嗎？</p>
             <h3>興趣是入口，不是能力的邊界。</h3>
             <p>主題先讓孩子願意讀；學習目標仍由國中英文能力決定。孩子練的是能轉移到不同文章的單字、文法、上下文理解、細節判讀與推理，不是只會看某一種故事。</p>
+          </FadeInUp>
+        </section>
+
+        <section className="public-section system-evolution-section" id="system-evolution">
+          <FadeInUp className="system-evolution-heading">
+            <p className="overline">訂閱的是一個會變好的系統</p>
+            <h2>你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。</h2>
+            <p>三條進步路徑同時發生：孩子的學習記憶在累積、教材引擎在升級、底層 AI 也持續變強。</p>
+          </FadeInUp>
+
+          <StaggerContainer className="evolution-grid" staggerDelay={0.1}>
+            {evolutionPillars.map(([step, title, body]) => (
+              <StaggerItem key={step}>
+                <article className="evolution-card">
+                  <span className="evolution-step">{step}</span>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </article>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+
+          <FadeInUp delay={0.2} className="evolution-loop" aria-label="教材持續進步的循環">
+            <span>Week 1</span><b>→</b><span>回饋與學習記憶</span><b>→</b><span>Week 2 更貼合</span><b>→</b><span>系統持續升級</span>
           </FadeInUp>
         </section>
 
@@ -187,6 +226,25 @@ export function LandingPage() {
               </a>
               <ul className="preview-notes"><li>完整答案、簡短解釋與觀察重點</li><li>不用會教英文，也知道孩子卡在哪裡</li></ul>
             </article></StaggerItem>
+          </StaggerContainer>
+        </section>
+
+        <section className="public-section usage-modes-section" id="usage-modes">
+          <FadeInUp className="usage-heading">
+            <p className="overline">一套教材，三種都能用</p>
+            <h2>怎麼教，由你決定；每週要教什麼，我們幫你準備好。</h2>
+            <p>紙屬英文不是強迫孩子只能自學。它先把每週最花時間的「找內容、抓難度、出題、做答案」準備好，再讓家庭選最適合自己的使用方式。</p>
+          </FadeInUp>
+          <StaggerContainer className="usage-grid" staggerDelay={0.1}>
+            {usageModes.map(([tag, title, body]) => (
+              <StaggerItem key={title}>
+                <article className="usage-card">
+                  <span>{tag}</span>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </article>
+              </StaggerItem>
+            ))}
           </StaggerContainer>
         </section>
 
