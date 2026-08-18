@@ -30,14 +30,11 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
 
   it('does NOT contain forbidden instantaneous promises or fixed hourly guarantees', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-    // Must NOT promise instant availability
     expect(html).not.toContain('立即下載第一份')
     expect(html).not.toContain('馬上拿到')
     expect(html).not.toContain('立刻生成')
-    // Must NOT promise exact 24 hour windows
     expect(html).not.toContain('24 小時內交付')
     expect(html).not.toContain('24小時內交付')
-    // Must NOT expose operational infrastructure terms to public parents
     expect(html).not.toContain('ChatGPT Scheduled')
     expect(html).not.toContain('finisher')
     expect(html).not.toContain('generation_jobs')
@@ -63,5 +60,40 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).toContain('samples/sample-week-1-student.pdf')
     expect(html).toContain('samples/sample-week-1-parent-answer.pdf')
     expect(html).not.toContain('The Rooftop Garden Challenge')
+  })
+})
+
+describe('Landing Page — Evolving Learning System Positioning', () => {
+  it('renders the evolving learning system headline and all three value pillars', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+
+    expect(html).toContain('你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。')
+    expect(html).toContain('孩子越用，教材越懂他')
+    expect(html).toContain('教材系統自己也會持續升級')
+    expect(html).toContain('AI 進步，教材也跟著進步')
+  })
+
+  it('renders all three flexible usage modes', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+
+    expect(html).toContain('怎麼教，由你決定；每週要教什麼，我們幫你準備好。')
+    expect(html).toContain('孩子自己學')
+    expect(html).toContain('家長陪著學')
+    expect(html).toContain('搭配家教／老師使用')
+  })
+
+  it('anchors monthly value against private tutoring without making an absolute market claim', () => {
+    const html = renderToStaticMarkup(<PricingSection />)
+
+    expect(html).toContain('比許多一對一家教一小時更低的月費')
+    expect(html).toContain('一整個月持續為孩子準備、追蹤與調整')
+    expect(html).not.toContain('比一堂一對一家教更低的月費')
+  })
+
+  it('adds FAQ guidance for flexible use and continuous system upgrades', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+
+    expect(html).toContain('一定要讓孩子自己學嗎？')
+    expect(html).toContain('教材之後也會持續變好嗎？')
   })
 })
