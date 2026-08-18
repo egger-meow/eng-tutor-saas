@@ -42,8 +42,9 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('critical')
+    expect(anchorFinding?.severity).toBe('warning')
     expect(anchorFinding?.message).toContain('astronomy')
+    expect(report.passed).toBe(true)
   })
 
   it('enforces comprehensive lexical ceiling: detects untaught high-difficulty words across options and practice', () => {
@@ -60,7 +61,8 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
     expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('critical')
+    expect(lexicalFinding?.severity).toBe('warning')
+    expect(report.passed).toBe(true)
   })
 
   it('flags genre-block mismatch when dialogue genre lacks dialogue blocks', () => {
@@ -112,7 +114,8 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('car'))
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('critical')
+    expect(anchorFinding?.severity).toBe('warning')
+    expect(report.passed).toBe(true)
   })
 
   it('accepts valid morphological variants: carry is anchored by carries or carrying', () => {
@@ -150,7 +153,7 @@ describe('curriculum audit & lexical contract', () => {
     expect(anchorFinding).toBeUndefined()
   })
 
-  it('rejects capitalized advanced non-allowlist words without unconditional bypass', () => {
+  it('flags capitalized advanced non-allowlist words as warning telemetry without hard rejection', () => {
     const pkg = canonicalPackage()
     // Inject capitalized obscure words that are not in the approved vocab, not dialogue speakers, and not interests
     pkg.studentLesson.reading.blocks[0] = {
@@ -160,7 +163,8 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
     expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('critical')
+    expect(lexicalFinding?.severity).toBe('warning')
+    expect(report.passed).toBe(true)
   })
 
   it('allows dialogue speakers, child interests, and standard educational proper nouns without warning', () => {

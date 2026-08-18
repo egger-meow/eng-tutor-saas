@@ -136,4 +136,33 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     const genreFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'alignment' && f.message.includes('schedule'))
     expect(genreFinding).toBeDefined()
   })
+
+  it('Tier 1 (WARNING TELEMETRY): treats lexical-ceiling and lexical-anchor as warning-only telemetry without failing quality gate', () => {
+    const mutated = structuredClone(samplePackage)
+    // 1. Lexical ceiling violation (inject off-list advanced vocabulary)
+    mutated.studentLesson.practice[0].questions[0].prompt = 'Does the ephemeral juxtaposition cause ubiquitous dichotomy in empirical methodology?'
+    // 2. Lexical anchor violation (vocabulary word not present in reading passage)
+    mutated.studentLesson.vocabulary.push({
+      id: 'v-unanchored',
+      word: 'xylophone',
+      partOfSpeech: 'n.',
+      meaningZh: '木琴',
+      pronunciationHint: null,
+      exampleEn: 'He plays the xylophone.',
+      exampleZh: '他彈奏木琴。',
+      status: 'new',
+    })
+
+    const audit = auditCurriculumPackage(mutated)
+    // Warning-only telemetry must not fail the Finisher quality gate
+    expect(audit.passed).toBe(true)
+
+    const ceilingFinding = audit.findings.find((f) => f.dimension === 'lexical-ceiling')
+    expect(ceilingFinding).toBeDefined()
+    expect(ceilingFinding?.severity).toBe('warning')
+
+    const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
+    expect(anchorFinding).toBeDefined()
+    expect(anchorFinding?.severity).toBe('warning')
+  })
 })
