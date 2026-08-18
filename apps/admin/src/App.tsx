@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { TabId } from './client/types.js'
 import { useAdminData } from './client/use-admin-data.js'
 import { Header } from './components/Header.js'
@@ -11,8 +11,56 @@ import { ProductFeedbackView } from './components/product/ProductFeedbackView.js
 import { ChildWeekTimelineView } from './components/timeline/ChildWeekTimeline.js'
 import { AiDatasetExportView } from './components/export/AiDatasetExport.js'
 
+const VALID_TABS: TabId[] = ['overview', 'failures', 'feedback', 'product', 'timeline', 'export']
+
+function getStoredTab(): TabId {
+  if (typeof window === 'undefined') return 'overview'
+
+  // 1. Check URL Hash (e.g. #failures)
+  const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+  if (VALID_TABS.includes(hash as TabId)) {
+    return hash as TabId
+  }
+
+  // 2. Check localStorage
+  try {
+    const stored = localStorage.getItem('admin_active_tab')?.trim().toLowerCase()
+    if (stored && VALID_TABS.includes(stored as TabId)) {
+      return stored as TabId
+    }
+  } catch {}
+
+  return 'overview'
+}
+
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const [activeTab, setActiveTab] = useState<TabId>(getStoredTab)
+
+  // Sync activeTab to URL hash and localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentHash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+      if (currentHash !== activeTab) {
+        window.location.hash = activeTab
+      }
+      try {
+        localStorage.setItem('admin_active_tab', activeTab)
+      } catch {}
+    }
+  }, [activeTab])
+
+  // Listen to browser back/forward navigation and hash changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const onHashChange = () => {
+      const hash = window.location.hash.replace(/^#/, '').trim().toLowerCase()
+      if (VALID_TABS.includes(hash as TabId)) {
+        setActiveTab(hash as TabId)
+      }
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
   const {
     health,
     overview,
