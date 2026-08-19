@@ -74,24 +74,20 @@ export const App: React.FC = () => {
     error,
     lastRefreshedAt,
     refreshCurrentTab,
+    selectChildTimeline,
     timelineChildId,
-    setTimelineChildId,
     timelineWeek,
-    setTimelineWeek,
     qualityEra,
     setQualityEra,
   } = useAdminData(activeTab, 30)
 
   const handleDrillDownTimeline = (childId: string, week?: string) => {
-    setTimelineChildId(childId)
-    if (week) setTimelineWeek(week)
+    selectChildTimeline(childId, week)
     setActiveTab('timeline')
   }
 
   const handleTimelineSearch = (childId: string, week: string) => {
-    setTimelineChildId(childId)
-    setTimelineWeek(week)
-    refreshCurrentTab(false)
+    selectChildTimeline(childId, week)
   }
 
   return (

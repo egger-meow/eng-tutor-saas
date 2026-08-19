@@ -16,7 +16,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
   weekQuery,
   onSearch,
 }) => {
-  const [inputChildId, setInputChildId] = useState(childIdQuery)
+  const [inputChildId, setInputChildId] = useState(childIdQuery || data?.childId || '')
   const [inputWeek, setInputWeek] = useState(weekQuery)
   const [expandedStep, setExpandedStep] = useState<number | null>(null)
   const [showRawJson, setShowRawJson] = useState(false)
@@ -25,12 +25,36 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
   const [grantSuccessMessage, setGrantSuccessMessage] = useState<string | null>(null)
   const [grantErrorMessage, setGrantErrorMessage] = useState<string | null>(null)
 
+  // Synchronize input fields when queries or data change
+  React.useEffect(() => {
+    if (childIdQuery) {
+      setInputChildId(childIdQuery)
+    } else if (data?.childId) {
+      setInputChildId(data.childId)
+    }
+  }, [childIdQuery, data?.childId])
+
+  React.useEffect(() => {
+    if (weekQuery) {
+      setInputWeek(weekQuery)
+    } else if (data?.targetWeek) {
+      setInputWeek(data.targetWeek)
+    }
+  }, [weekQuery, data?.targetWeek])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearch(inputChildId.trim(), inputWeek.trim())
   }
 
-  if (!data) return <div>讀取中...</div>
+  if (!data) {
+    return (
+      <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '24px', marginBottom: '12px' }}>⏳</div>
+        <div>載入孩子生命週期軌跡中...</div>
+      </div>
+    )
+  }
 
   const {
     childId,
@@ -249,6 +273,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
       {/* Generation Test Mode Operational Control Panel */}
       <GenerationTestModePanel
         childId={childId}
+        initialStatus={data.testModeStatus || (data.rawMetadata?.testModeStatus as any) || null}
         onRefreshTimeline={() => onSearch(childId, targetWeek)}
       />
 

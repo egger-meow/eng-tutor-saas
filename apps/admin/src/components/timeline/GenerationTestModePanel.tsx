@@ -7,14 +7,18 @@ import { adminApi } from '../../client/api.js'
 
 interface GenerationTestModePanelProps {
   childId: string
+  initialStatus?: GenerationTestModeStatus | null
   onRefreshTimeline: () => void
 }
 
 export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = ({
   childId,
+  initialStatus = null,
   onRefreshTimeline,
 }) => {
-  const [status, setStatus] = useState<GenerationTestModeStatus | null>(null)
+  const [status, setStatus] = useState<GenerationTestModeStatus | null>(
+    () => initialStatus || adminApi.getCachedTestModeStatus(childId) || null
+  )
   const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -32,11 +36,29 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
 
   // Reset Confirmation Modal state
   const [showResetModal, setShowResetModal] = useState(false)
-  const [targetWeekInput, setTargetWeekInput] = useState<number>(9)
+  const [targetWeekInput, setTargetWeekInput] = useState<number>(() => initialStatus?.targetWeek || 9)
 
-  const fetchStatus = useCallback(async () => {
+  // Synchronize when initialStatus or childId changes
+  useEffect(() => {
+    if (initialStatus) {
+      setStatus(initialStatus)
+      if (initialStatus.targetWeek) {
+        setTargetWeekInput(initialStatus.targetWeek)
+      }
+    } else if (childId) {
+      const cached = adminApi.getCachedTestModeStatus(childId)
+      if (cached) {
+        setStatus(cached)
+        if (cached.targetWeek) {
+          setTargetWeekInput(cached.targetWeek)
+        }
+      }
+    }
+  }, [childId, initialStatus])
+
+  const fetchStatus = useCallback(async (silent = false) => {
     if (!childId) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const res = await adminApi.getTestModeStatus(childId)
       setStatus(res)
@@ -51,8 +73,9 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
   }, [childId])
 
   useEffect(() => {
-    fetchStatus()
-  }, [fetchStatus])
+    const hasInitial = Boolean(initialStatus || adminApi.getCachedTestModeStatus(childId))
+    fetchStatus(hasInitial)
+  }, [childId, fetchStatus])
 
   const handleEnableTestMode = async () => {
     setActionLoading(true)

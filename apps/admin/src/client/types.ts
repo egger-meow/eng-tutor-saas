@@ -441,11 +441,13 @@ export interface ChildWeekTimeline {
     grade: number
     subscriptionStatus: string
   }>
+  testModeStatus?: GenerationTestModeStatus | null
   rawMetadata: {
     job: Record<string, unknown> | null
     submissions: Array<Record<string, unknown>>
     material: Record<string, unknown> | null
     feedback: Record<string, unknown> | null
+    testModeStatus?: GenerationTestModeStatus | null
   }
 }
 

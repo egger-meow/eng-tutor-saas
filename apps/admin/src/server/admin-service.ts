@@ -1352,9 +1352,20 @@ export class AdminService {
     }
   }
 
-  public async getChildWeekTimeline(childId?: string, targetWeek?: string): Promise<ChildWeekTimeline> {
-    const client = this.ensureClient()
-    const dataSources: DataSourceStatus[] = []
+  private availableChildrenCache: {
+    data: ChildWeekTimeline['availableChildren']
+    expiresAt: number
+  } | null = null
+
+  public invalidateAvailableChildrenCache() {
+    this.availableChildrenCache = null
+  }
+
+  private async fetchAvailableChildren(client: any, dataSources: DataSourceStatus[]): Promise<ChildWeekTimeline['availableChildren']> {
+    const now = Date.now()
+    if (this.availableChildrenCache && this.availableChildrenCache.expiresAt > now) {
+      return this.availableChildrenCache.data
+    }
 
     const [allChildrenData, allSubsData] = await Promise.all([
       this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, grade, is_active').order('created_at', { ascending: false }), dataSources),
@@ -1371,6 +1382,19 @@ export class AdminService {
       subscriptionStatus: subStatusMap.get(c.id) || 'none',
     }))
 
+    this.availableChildrenCache = {
+      data: availableChildren,
+      expiresAt: now + 30000,
+    }
+    return availableChildren
+  }
+
+  public async getChildWeekTimeline(childId?: string, targetWeek?: string): Promise<ChildWeekTimeline> {
+    const client = this.ensureClient()
+    const dataSources: DataSourceStatus[] = []
+
+    const availableChildren = await this.fetchAvailableChildren(client, dataSources)
+
     if (!childId) {
       if (availableChildren.length > 0) {
         childId = availableChildren[0].id
@@ -1379,11 +1403,12 @@ export class AdminService {
       }
     }
 
-    const [childData, subData, jobsData, learningData] = await Promise.all([
+    const [childData, subData, jobsData, learningData, testModeStatus] = await Promise.all([
       this.safeQuery<any>('child_single', () => client.from('children').select('*').eq('id', childId).maybeSingle(), dataSources),
       this.safeQuery<any>('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', childId).maybeSingle(), dataSources),
       this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', childId).order('created_at', { ascending: false }).limit(10), dataSources),
       this.safeQuery<any>('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', childId).maybeSingle(), dataSources),
+      this.getTestModeStatus(childId).catch(() => null),
     ])
 
     const child = childData as any
@@ -1422,6 +1447,7 @@ export class AdminService {
       learningState: learningData,
       targetWeek: actualWeek,
       availableChildren,
+      testModeStatus,
       dataSources,
     })
   }
@@ -2103,11 +2129,13 @@ export class AdminService {
       },
       events: [],
       availableChildren,
+      testModeStatus: null,
       rawMetadata: {
         job: null,
         submissions: [],
         material: null,
         feedback: null,
+        testModeStatus: null,
       },
     }
   }
@@ -2122,9 +2150,10 @@ export class AdminService {
     learningState: any
     targetWeek: string
     availableChildren: ChildWeekTimeline['availableChildren']
+    testModeStatus?: GenerationTestModeStatus | null
     dataSources: DataSourceStatus[]
   }): ChildWeekTimeline {
-    const { child, subscription, job, submissions, material, feedback, learningState, targetWeek, availableChildren, dataSources } = data
+    const { child, subscription, job, submissions, material, feedback, learningState, targetWeek, availableChildren, testModeStatus, dataSources } = data
 
     const now = new Date().toISOString()
     const releaseAt = job?.release_at || null
@@ -2330,11 +2359,13 @@ export class AdminService {
       jobSummary,
       events,
       availableChildren,
+      testModeStatus: testModeStatus || null,
       rawMetadata: {
         job: job || null,
         submissions: sortedSubmissions,
         material: material || null,
         feedback: feedback || null,
+        testModeStatus: testModeStatus || null,
       },
     }
   }
