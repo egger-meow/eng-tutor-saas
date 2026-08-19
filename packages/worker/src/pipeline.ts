@@ -182,9 +182,10 @@ export async function loadGenerationContext(client: WorkerClient, jobId: string,
     if (context.vocabularyCapsule) {
       const vocabDue = (context.vocabularyCapsule as any).dueForReview ?? []
       const vocabWeak = (context.vocabularyCapsule as any).weakRecent ?? []
+      const vocabUncertain = (context.vocabularyCapsule as any).uncertain ?? []
       const vocabMastered = (context.vocabularyCapsule as any).recentlyMastered ?? []
       recordExposureFromTrackingDelta(store, {
-        introducedVocabularyIds: [...vocabDue, ...vocabWeak, ...vocabMastered],
+        introducedVocabularyIds: [...vocabDue, ...vocabWeak, ...vocabUncertain, ...vocabMastered],
         reviewedVocabularyIds: [],
         exposedGrammarTargetIds: [],
       })
@@ -192,22 +193,24 @@ export async function loadGenerationContext(client: WorkerClient, jobId: string,
     if (context.grammarCapsule) {
       const grammarDue = (context.grammarCapsule as any).dueForReview ?? []
       const grammarWeak = (context.grammarCapsule as any).weakRecent ?? []
+      const grammarUncertain = (context.grammarCapsule as any).uncertain ?? []
       const grammarMastered = (context.grammarCapsule as any).recentlyMastered ?? []
       recordExposureFromTrackingDelta(store, {
         introducedVocabularyIds: [],
         reviewedVocabularyIds: [],
-        exposedGrammarTargetIds: [...grammarDue, ...grammarWeak, ...grammarMastered],
+        exposedGrammarTargetIds: [...grammarDue, ...grammarWeak, ...grammarUncertain, ...grammarMastered],
       })
     }
     if (context.communicationCapsule) {
       const commDue = (context.communicationCapsule as any).dueForReview ?? []
       const commWeak = (context.communicationCapsule as any).weakRecent ?? []
+      const commUncertain = (context.communicationCapsule as any).uncertain ?? []
       const commMastered = (context.communicationCapsule as any).recentlyMastered ?? []
       recordExposureFromTrackingDelta(store, {
         introducedVocabularyIds: [],
         reviewedVocabularyIds: [],
         exposedGrammarTargetIds: [],
-        exposedCommunicationFunctionIds: [...commDue, ...commWeak, ...commMastered],
+        exposedCommunicationFunctionIds: [...commDue, ...commWeak, ...commUncertain, ...commMastered],
       })
     }
 

@@ -22,21 +22,37 @@ You receive:
 
 ---
 
-## 2. The Strict Planning Priority Order
+## 2. The Strict Planning Priority Order & Supreme Feedback Authority
 
-When selecting targets for this week, follow this exact sequence:
+### Rule 0: Supreme Feedback & Profile Authority (家長回饋與學生設定最高權威)
+- **Explicit parent/student feedback and student profile are the HIGHEST curriculum authority.**
+- Clear feedback strictly **overrides** default progression, novelty, review cadence, CAP coverage, diversity, workload targets, and other pedagogical heuristics.
+- If feedback (or student profile) says:
+  - `repeat`: (e.g. "上次文法再做一次", "請再練一次 do/does", weak_area: grammar) ➔ Follow it and re-select the requested grammar/topic as the primary target.
+  - `avoid`: (e.g. avoid a topic, avoid a genre) ➔ Strictly exclude it in `exclusions`.
+  - `simplify` / `too_hard`: ➔ Reduce syntactic complexity, passage length, and item count.
+  - `deepen` / `too_easy`: ➔ Increase passage depth, add inference/reasoning challenges and adaptive extension.
+  - `lengthen` / `shorten`: ➔ Adjust workload budget and item volume to declared availability.
+  - `focus on specific area`: (e.g. upcoming exam on Unit 4 / past tense) ➔ Prioritize that focus area over normal progression queue.
+- **Override Limit**: ONLY non-negotiable technical integrity, safety, schema, answer consistency, rendering, and delivery constraints may override explicit feedback.
 
-1. **Demonstrated Weakness & Missing Prerequisites**:
-   If recurring mistakes or prior feedback indicate a foundational gap (e.g., `do/does` verb un-inflection), prioritize repairing this prerequisite first.
-2. **Actual School Syllabus & Upcoming Exam Progress**:
-   Align the primary grammar and vocabulary targets with current school progression.
-3. **Due Spaced Review**:
-   Incorporate items from `dueReviewVocabulary` or `dueReviewGrammar` to consolidate long-term memory.
+---
+
+### The Strict Planning Priority Order (When Not Overridden by Explicit Feedback):
+
+1. **Demonstrated Weakness & Missing Prerequisites (WITH ACTUAL FAILURE EVIDENCE ONLY)**:
+   - Re-promoting a previously exposed unit to a primary teaching target is **ONLY justified when actual failure evidence exists** (explicit mistake logs in `recurringMistakes`, failed quiz evidence, or parent explicitly reporting struggle).
+   - **Exposure Is Never Weakness Invariant**: Unverified past exposure or active learning (`exposureCount > 0` with no failures) must **NEVER** be treated as a weakness. If feedback was neutral/positive and no failure is recorded, the student is ready to advance.
+2. **Default Forward Progression (New Grade-Appropriate Target)**:
+   - Without explicit conflicting feedback, **always prioritize new grade-appropriate learning**.
+   - Select the next untaught primary grammar unit and new core vocabulary from `recommendedGrammar` and `recommendedVocabulary` (canonical progression).
+3. **Due Spaced Review (Consolidation, NOT Primary Target)**:
+   - Previously taught units without failure belong strictly in **spaced review** (`dueReviewGrammar`, `learnerSnapshot.reviewDue`, `learningPlan.reviewStrategy`, retrieval/homework practice), NEVER as the primary instruction target.
 4. **High-Value CAP 3-Year Coverage Gaps (Within Grade-Level Range)**:
-   Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
-   *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*
+   - Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
+   - *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*
 5. **Interest, Genre & Information Structure Optimization**:
-   Select the reading genre and situational problem context that naturally carries the selected targets.
+   - Select the reading genre and situational problem context that naturally carries the selected targets.
 
 ---
 

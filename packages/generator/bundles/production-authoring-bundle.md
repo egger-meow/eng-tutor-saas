@@ -5,10 +5,10 @@ promptVersion: "2.4.0"
 engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "be98af220c7db8bd726f64def4b2fd2b510e6f558160caa7d89c1a4853e18a25"
+  "packages/generator/prompts/2.4.0/01-plan.md": "a78a7e08f520545decef9ddb6116d99d7a80d00380bd8716c722c9ad9ab058e7"
   "packages/generator/prompts/2.4.0/02-author.md": "73213baa5854a6f1a9d304575fd2d2470de14243ee4f01ae7d96741868cfd34a"
-  "packages/generator/prompts/2.4.0/03-critic.md": "cc632f99d83b15761f829022202f12ecce2924c88402ff822bee16e1dc670700"
-  "packages/generator/prompts/2.4.0/04-repair.md": "d131411f7d25a3e4858e6b726f3432679966f865271ef9de46c4dff8f57ec1fd"
+  "packages/generator/prompts/2.4.0/03-critic.md": "818f1881e55a5302c2108a13f8645c1f8cd3b4bd867ca1d2201d1f7399ab0178"
+  "packages/generator/prompts/2.4.0/04-repair.md": "1a1fcc8b44bff9759f8aa31ca7fc0401bb35406553501a3a4d241e1af5a40da8"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
@@ -517,21 +517,37 @@ You receive:
 
 ---
 
-## 2. The Strict Planning Priority Order
+## 2. The Strict Planning Priority Order & Supreme Feedback Authority
 
-When selecting targets for this week, follow this exact sequence:
+### Rule 0: Supreme Feedback & Profile Authority (家長回饋與學生設定最高權威)
+- **Explicit parent/student feedback and student profile are the HIGHEST curriculum authority.**
+- Clear feedback strictly **overrides** default progression, novelty, review cadence, CAP coverage, diversity, workload targets, and other pedagogical heuristics.
+- If feedback (or student profile) says:
+  - `repeat`: (e.g. "上次文法再做一次", "請再練一次 do/does", weak_area: grammar) ➔ Follow it and re-select the requested grammar/topic as the primary target.
+  - `avoid`: (e.g. avoid a topic, avoid a genre) ➔ Strictly exclude it in `exclusions`.
+  - `simplify` / `too_hard`: ➔ Reduce syntactic complexity, passage length, and item count.
+  - `deepen` / `too_easy`: ➔ Increase passage depth, add inference/reasoning challenges and adaptive extension.
+  - `lengthen` / `shorten`: ➔ Adjust workload budget and item volume to declared availability.
+  - `focus on specific area`: (e.g. upcoming exam on Unit 4 / past tense) ➔ Prioritize that focus area over normal progression queue.
+- **Override Limit**: ONLY non-negotiable technical integrity, safety, schema, answer consistency, rendering, and delivery constraints may override explicit feedback.
 
-1. **Demonstrated Weakness & Missing Prerequisites**:
-   If recurring mistakes or prior feedback indicate a foundational gap (e.g., `do/does` verb un-inflection), prioritize repairing this prerequisite first.
-2. **Actual School Syllabus & Upcoming Exam Progress**:
-   Align the primary grammar and vocabulary targets with current school progression.
-3. **Due Spaced Review**:
-   Incorporate items from `dueReviewVocabulary` or `dueReviewGrammar` to consolidate long-term memory.
+---
+
+### The Strict Planning Priority Order (When Not Overridden by Explicit Feedback):
+
+1. **Demonstrated Weakness & Missing Prerequisites (WITH ACTUAL FAILURE EVIDENCE ONLY)**:
+   - Re-promoting a previously exposed unit to a primary teaching target is **ONLY justified when actual failure evidence exists** (explicit mistake logs in `recurringMistakes`, failed quiz evidence, or parent explicitly reporting struggle).
+   - **Exposure Is Never Weakness Invariant**: Unverified past exposure or active learning (`exposureCount > 0` with no failures) must **NEVER** be treated as a weakness. If feedback was neutral/positive and no failure is recorded, the student is ready to advance.
+2. **Default Forward Progression (New Grade-Appropriate Target)**:
+   - Without explicit conflicting feedback, **always prioritize new grade-appropriate learning**.
+   - Select the next untaught primary grammar unit and new core vocabulary from `recommendedGrammar` and `recommendedVocabulary` (canonical progression).
+3. **Due Spaced Review (Consolidation, NOT Primary Target)**:
+   - Previously taught units without failure belong strictly in **spaced review** (`dueReviewGrammar`, `learnerSnapshot.reviewDue`, `learningPlan.reviewStrategy`, retrieval/homework practice), NEVER as the primary instruction target.
 4. **High-Value CAP 3-Year Coverage Gaps (Within Grade-Level Range)**:
-   Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
-   *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*
+   - Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
+   - *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*
 5. **Interest, Genre & Information Structure Optimization**:
-   Select the reading genre and situational problem context that naturally carries the selected targets.
+   - Select the reading genre and situational problem context that naturally carries the selected targets.
 
 ---
 
@@ -901,6 +917,12 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
 15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
+16. **Supreme Feedback & Profile Authority Compliance**:
+    Explicit parent/student feedback and student profile are the HIGHEST curriculum authority. Reject if explicit directives (repeat, avoid, simplify, deepen, lengthen, shorten, focus) are ignored or overridden by default heuristics.
+17. **Default Forward Progression & No Unwarranted Re-promotion**:
+    Without explicit repeat feedback or verified failure evidence, the package MUST introduce new grade-appropriate learning. Reject if prior exposed units are re-promoted to primary targets without failure evidence (they belong strictly in spaced review).
+18. **Exposure Is Never Weakness**:
+    Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
 
 ---
 
@@ -939,6 +961,8 @@ When fixing validation or critic findings in a curriculum package:
    - For untaught off-target words, replace with canonical words or add to `vocabulary`.
 4. **Preserve Exposure Semantics**: Ensure `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 5. **ID & Atomic Q&A Integrity**: Guarantee question IDs match answer objects and targets exist in `learningPlan.targets`.
+6. **Enforce Feedback Authority**: If parent or student feedback requested specific adjustments (repeat, avoid, simplify, deepen, focus), ensure the repaired package strictly honors them.
+7. **Maintain Forward Progression**: Unless repeating is explicitly requested by feedback or justified by actual failure evidence, ensure the primary instruction target is a new grade-appropriate unit and prior units remain in spaced review.
 
 ---
 

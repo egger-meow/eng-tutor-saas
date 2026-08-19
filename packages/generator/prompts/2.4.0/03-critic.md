@@ -39,6 +39,12 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
 15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
+16. **Supreme Feedback & Profile Authority Compliance**:
+    Explicit parent/student feedback and student profile are the HIGHEST curriculum authority. Reject if explicit directives (repeat, avoid, simplify, deepen, lengthen, shorten, focus) are ignored or overridden by default heuristics.
+17. **Default Forward Progression & No Unwarranted Re-promotion**:
+    Without explicit repeat feedback or verified failure evidence, the package MUST introduce new grade-appropriate learning. Reject if prior exposed units are re-promoted to primary targets without failure evidence (they belong strictly in spaced review).
+18. **Exposure Is Never Weakness**:
+    Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
 
 ---
 
