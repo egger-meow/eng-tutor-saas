@@ -6,8 +6,8 @@ engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "a78a7e08f520545decef9ddb6116d99d7a80d00380bd8716c722c9ad9ab058e7"
-  "packages/generator/prompts/2.4.0/02-author.md": "73213baa5854a6f1a9d304575fd2d2470de14243ee4f01ae7d96741868cfd34a"
-  "packages/generator/prompts/2.4.0/03-critic.md": "818f1881e55a5302c2108a13f8645c1f8cd3b4bd867ca1d2201d1f7399ab0178"
+  "packages/generator/prompts/2.4.0/02-author.md": "b78804f9237dec447cf535a9073c2a3e30c532ae984d08f237836521497f6b66"
+  "packages/generator/prompts/2.4.0/03-critic.md": "5045a665f47db94fecc7defe1b60206e53ac7c3bc7d4e0b3876a2fc3334979fc"
   "packages/generator/prompts/2.4.0/04-repair.md": "1a1fcc8b44bff9759f8aa31ca7fc0401bb35406553501a3a4d241e1af5a40da8"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
@@ -865,13 +865,31 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 
 ---
 
-## 8. Server-Side Deterministic Normalization Notice
+## 8. Clean Parent-Facing Copy (`parentSummary`)
+
+`parentSummary` is printed directly on the physical Parent Answer PDF. It is written for a caring Taiwanese parent, NOT a software engineer or curriculum researcher.
+
+### 🚫 Strictly Forbidden Internal Jargon:
+- **Never include internal engine / versioning terms**: "新版規則", "舊版規則", "新規則", "Prompt v2.4", "Schema 2.2", "ruleVersion", "schemaVersion".
+- **Never include internal database / progress terms**: "failure evidence", "評量失敗", "失敗證據", "weakRecent", "dueReview", "uncertain", "trackingDelta", "capsule".
+- **Never include raw acronyms**: Do NOT use raw "CAP" or "CAP-transfer" in Chinese explanations; use "國中會考", "會考推論題型", "會考素養閱讀".
+- **Never include progression / measurement mechanics**: "progression mechanics", "推進機制", "遞進佇列", "observable baseline", "可觀察基線", "production packet".
+
+### ✅ Natural, Parent-Friendly Learning Explanations:
+Each bullet in `parentSummary.personalizationZh` should naturally and warmly answer:
+1. **孩子目前狀況**：例如「前三週文法與閱讀掌握度高」、「依據您上週提到動詞還原較不熟練的回饋」。
+2. **本週教材安排**：例如「本週依照國一進度推進新文法焦點」、「將先前學過的 do/does 疑問句轉為間隔複習題」、「結合機器人感測器除錯情境訓練會考推論」。
+3. **學習意義**：例如「幫助孩子在情境中自然建立語感，並鞏固長期記憶」。
+
+---
+
+## 9. Server-Side Deterministic Normalization Notice
 
 The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `homework.estimatedMinutes`, strips duplicated option prefixes, and validates lexical ceilings. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
 
 ---
 
-## 9. Output Contract (Strict JSON Only)
+## 10. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
 
@@ -908,7 +926,7 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
 10. **Plain Text Reading Contract**:
     Reading blocks must contain clean text without inline HTML formatting (`<b>`, `<em>`, `<span>`); the PDF renderer owns typographical emphasis.
 11. **Parent Burden & Internal Engine Jargon**:
-    Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
+    Parent answers expect parent to lecture/diagnose, or `parentSummary` (focusZh, observeZh, personalizationZh) leaks internal developer/engine jargon ("新版規則", "failure evidence", "weakRecent", "dueReview", "trackingDelta", "capsule", raw "CAP", "progression mechanics", "推進機制", "observable baseline", "production packet"). Reject if parent copy is not written as natural, warm, parent-friendly educational explanations.
 12. **Passage-First Lexical Contract & Lexical Ceiling**:
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
 13. **Genre-Block Structural Consistency**:

@@ -340,12 +340,42 @@ export function auditCurriculumPackage(
   const followUpCount = pkg.answers.filter((answer) => answer.followUpZh !== null).length
   if (followUpCount > Math.max(2, Math.ceil(pkg.answers.length / 4))) add('semantic-critical', 'parent-burden', 'warning', `有 ${followUpCount} 題要求額外追問；家長答案應以核對答案為主。`)
 
+  if (pkg.parentSummary.focusZh) {
+    const jargon = findForbiddenPersonalizationJargon(pkg.parentSummary.focusZh)
+    if (jargon) {
+      add('semantic-critical', 'parent-personalization', 'critical', `parentSummary.focusZh 含有內部專有名詞或量測術語 ("${jargon}")，請改用家長易懂的學習重點說明。`)
+    }
+  }
+
+  if (pkg.parentSummary.observeZh) {
+    for (const item of pkg.parentSummary.observeZh) {
+      const jargon = findForbiddenPersonalizationJargon(item)
+      if (jargon) {
+        add('semantic-critical', 'parent-personalization', 'critical', `parentSummary.observeZh 含有內部專有名詞或量測術語 ("${jargon}")，必須以家長觀察角度撰寫。`)
+      }
+    }
+  }
+
+  if (pkg.parentSummary.completionCheckZh) {
+    const jargon = findForbiddenPersonalizationJargon(pkg.parentSummary.completionCheckZh)
+    if (jargon) {
+      add('semantic-critical', 'parent-personalization', 'critical', `parentSummary.completionCheckZh 含有內部專有名詞或量測術語 ("${jargon}")。`)
+    }
+  }
+
   if (pkg.parentSummary.personalizationZh) {
     for (const reason of pkg.parentSummary.personalizationZh) {
       const jargon = findForbiddenPersonalizationJargon(reason)
       if (jargon) {
         add('semantic-critical', 'parent-personalization', 'critical', `parentSummary.personalizationZh 含有內部引擎專有名詞或量測術語 ("${jargon}")，必須以家長視角的正體中文撰寫。`)
       }
+    }
+  }
+
+  for (const goal of pkg.studentLesson.opening.goalsZh) {
+    const jargon = findForbiddenPersonalizationJargon(goal)
+    if (jargon) {
+      add('semantic-critical', 'self-study', 'critical', `studentLesson.opening.goalsZh 含有內部術語 ("${jargon}")，必須以學生友善的正體中文撰寫。`)
     }
   }
 

@@ -19,17 +19,48 @@ export type CurriculumValidationResult =
   | { success: false; issues: LessonValidationIssue[] }
 
 export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
-  // Implementation / field names
+  // Implementation / field names & schema internals
   /\bfeedbackMissing\b/i,
   /\bruleVersion\b/i,
+  /\bschemaVersion\b/i,
+  /\bpromptVersion\b/i,
+  /\bcurriculumVersion\b/i,
   /\binputFingerprint\b/i,
+  /\btrackingDelta\b/i,
   /\b[a-zA-Z_]+=(?:true|false|\d+)\b/,
 
-  // English curriculum-engine terminology
+  // Progress distillation & evidence categories
+  /\bweakRecent\b/i,
+  /\bdueReview\b/i,
+  /\brecentlyMastered\b/i,
+  /\bfailure evidence\b/i,
+  /\bmissCount\b/i,
+  /\bmiss_count\b/i,
+  /\bmasteryScore\b/i,
+  /\bmastery_score\b/i,
+  /\bassessedCount\b/i,
+  /\bexposureCount\b/i,
+  /失敗證據/i,
+  /評量失敗/i,
+  /未通過證據/i,
+  /錯誤證據/i,
+
+  // Progression & engine mechanics
+  /\bprogression mechanics\b/i,
+  /\bforward progression\b/i,
+  /\bprogression queue\b/i,
+  /推進機制/i,
+  /進度機制/i,
+  /遞進機制/i,
+  /演算法推進/i,
+  /預設推進/i,
+
+  // English curriculum-engine terminology & raw acronyms
   /\bproduction packet\b/i,
   /\bguided\b/i,
   /\bindependent\b/i,
   /\bcap-transfer\b/i,
+  /\bcap transfer\b/i,
   /\bCAP\b/,
   /\bretrieval\b/i,
   /\bproduction\b/i,
@@ -37,12 +68,20 @@ export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
   /\bbaseline\b/i,
   /\bpacket\b/i,
   /\btoken\b/i,
+  /\bcapsule\b/i,
 
-  // Specification / rule terminology
+  // Specification / rule versioning terminology
   /feedback-missing/i,
   /fallback rule/i,
   /rule version/i,
   /規格規則/i,
+  /新版規則/i,
+  /舊版規則/i,
+  /新規則/i,
+  /舊規則/i,
+  /規則版本/i,
+  /引擎版本/i,
+  /新版引擎/i,
 
   // Measurement / debug language
   /observable baseline/i,

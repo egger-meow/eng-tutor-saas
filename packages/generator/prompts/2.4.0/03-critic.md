@@ -30,7 +30,7 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
 10. **Plain Text Reading Contract**:
     Reading blocks must contain clean text without inline HTML formatting (`<b>`, `<em>`, `<span>`); the PDF renderer owns typographical emphasis.
 11. **Parent Burden & Internal Engine Jargon**:
-    Parent answers expect parent to lecture/diagnose, or `parentSummary` uses internal engine jargon ("production packet", "observable baseline").
+    Parent answers expect parent to lecture/diagnose, or `parentSummary` (focusZh, observeZh, personalizationZh) leaks internal developer/engine jargon ("新版規則", "failure evidence", "weakRecent", "dueReview", "trackingDelta", "capsule", raw "CAP", "progression mechanics", "推進機制", "observable baseline", "production packet"). Reject if parent copy is not written as natural, warm, parent-friendly educational explanations.
 12. **Passage-First Lexical Contract & Lexical Ceiling**:
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
 13. **Genre-Block Structural Consistency**:
