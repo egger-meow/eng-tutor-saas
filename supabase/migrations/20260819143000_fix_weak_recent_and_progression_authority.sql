@@ -1,4 +1,4 @@
--- Migration: 20260819140000_fix_weak_recent_and_progression_authority.sql
+-- Migration: 20260819143000_fix_weak_recent_and_progression_authority.sql
 -- Description: Fixes weakRecent distillation so unverified exposure is never classified as weakness,
 -- and fixes recommended gap query ordering to prioritize unexposed units for forward progression.
 
@@ -6,54 +6,45 @@ create or replace function public.worker_generation_context(job_id uuid, worker_
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
-  claimed_job public.generation_jobs%rowtype;
-  child_rec public.children%rowtype;
-  profile public.student_profiles%rowtype;
-  state public.student_learning_states%rowtype;
-  child_rank int;
-
+  claimed_job public.generation_jobs;
+  child_rec record;
+  result jsonb;
   v_vocab_due jsonb;
   v_vocab_weak jsonb;
   v_vocab_uncertain jsonb;
   v_vocab_mastered jsonb;
-  v_vocab_count int;
-
+  v_vocab_count integer;
   v_grammar_due jsonb;
   v_grammar_weak jsonb;
   v_grammar_uncertain jsonb;
   v_grammar_mastered jsonb;
-  v_grammar_count int;
-
+  v_grammar_count integer;
   v_comm_due jsonb;
   v_comm_weak jsonb;
+  v_comm_uncertain jsonb;
   v_comm_mastered jsonb;
-  v_comm_count int;
-
+  v_comm_count integer;
+  v_vocab_exp_count integer;
+  v_vocab_mastered_count integer;
+  v_vocab_due_count integer;
+  v_grammar_exp_count integer;
+  v_grammar_mastered_count integer;
+  v_grammar_due_count integer;
+  v_comm_exp_count integer;
+  v_comm_mastered_count integer;
+  v_comm_due_count integer;
   v_rec_vocab jsonb;
   v_rec_grammar jsonb;
   v_rec_comm jsonb;
-
-  v_vocab_exp_count int;
-  v_vocab_mastered_count int;
-  v_vocab_due_count int;
-
-  v_grammar_exp_count int;
-  v_grammar_mastered_count int;
-  v_grammar_due_count int;
-
-  v_comm_exp_count int;
-  v_comm_mastered_count int;
-  v_comm_due_count int;
-
   v_recent_genres jsonb;
   v_recent_contexts jsonb;
   v_recent_families jsonb;
+  child_rank integer;
 begin
-  select job.*
-  into claimed_job
+  select * into claimed_job
   from public.generation_jobs as job
   where job.id = $1
     and job.status = 'claimed'
@@ -76,12 +67,12 @@ begin
   );
 
   -- 1. Distill vocabulary into decision categories
-  -- Hard Invariant: weakRecent MUST have actual failure evidence (miss_count > 0, failed assessment, or mastery_score < 60).
+  -- Hard Invariant: weakRecent MUST have actual failure evidence (mastery_score < 60).
   -- Unassessed exposure belongs in uncertain, never weakRecent.
   select
     coalesce(jsonb_agg(vocabulary_id) filter (where status = 'reviewing' or (last_seen_at < now() - interval '6 days' and status != 'mastered')), '[]'::jsonb),
-    coalesce(jsonb_agg(vocabulary_id) filter (where (mastery_score is not null and mastery_score < 60) or (miss_count > 0) or (assessed_count > 0 and correct_count < assessed_count)), '[]'::jsonb),
-    coalesce(jsonb_agg(vocabulary_id) filter (where status = 'new' or (exposure_count > 0 and assessed_count = 0 and (mastery_score is null or mastery_score >= 60))), '[]'::jsonb),
+    coalesce(jsonb_agg(vocabulary_id) filter (where mastery_score is not null and mastery_score < 60), '[]'::jsonb),
+    coalesce(jsonb_agg(vocabulary_id) filter (where status in ('new', 'learning') and (mastery_score is null or mastery_score >= 60)), '[]'::jsonb),
     coalesce(jsonb_agg(vocabulary_id) filter (where status = 'mastered'), '[]'::jsonb),
     count(*)
   into v_vocab_due, v_vocab_weak, v_vocab_uncertain, v_vocab_mastered, v_vocab_count
@@ -92,8 +83,8 @@ begin
   -- Hard Invariant: weakRecent MUST have actual failure evidence. Exposure without failure is learning/uncertain, not weakness.
   select
     coalesce(jsonb_agg(grammar_id) filter (where status = 'reviewing' or (last_seen_at < now() - interval '6 days' and status != 'mastered')), '[]'::jsonb),
-    coalesce(jsonb_agg(grammar_id) filter (where (mastery_score is not null and mastery_score < 60) or (miss_count > 0) or (assessed_count > 0 and correct_count < assessed_count)), '[]'::jsonb),
-    coalesce(jsonb_agg(grammar_id) filter (where status = 'new' or (exposure_count > 0 and assessed_count = 0 and (mastery_score is null or mastery_score >= 60))), '[]'::jsonb),
+    coalesce(jsonb_agg(grammar_id) filter (where mastery_score is not null and mastery_score < 60), '[]'::jsonb),
+    coalesce(jsonb_agg(grammar_id) filter (where status in ('new', 'learning') and (mastery_score is null or mastery_score >= 60)), '[]'::jsonb),
     coalesce(jsonb_agg(grammar_id) filter (where status = 'mastered'), '[]'::jsonb),
     count(*)
   into v_grammar_due, v_grammar_weak, v_grammar_uncertain, v_grammar_mastered, v_grammar_count
@@ -103,10 +94,11 @@ begin
   -- 3. Distill communication functions into decision categories
   select
     coalesce(jsonb_agg(communication_function_id) filter (where status = 'reviewing' or (last_seen_at < now() - interval '14 days' and status != 'mastered')), '[]'::jsonb),
-    coalesce(jsonb_agg(communication_function_id) filter (where (miss_count > 0) or (mastery_score is not null and mastery_score < 60) or (assessed_count > 0 and correct_count < assessed_count)), '[]'::jsonb),
+    coalesce(jsonb_agg(communication_function_id) filter (where (miss_count > 0) or (assessed_count > 0 and correct_count < assessed_count)), '[]'::jsonb),
+    coalesce(jsonb_agg(communication_function_id) filter (where status = 'new' or (exposure_count > 0 and (assessed_count = 0 or assessed_count is null))), '[]'::jsonb),
     coalesce(jsonb_agg(communication_function_id) filter (where status = 'mastered'), '[]'::jsonb),
     count(*)
-  into v_comm_due, v_comm_weak, v_comm_mastered, v_comm_count
+  into v_comm_due, v_comm_weak, v_comm_uncertain, v_comm_mastered, v_comm_count
   from public.child_communication_progress
   where child_id = claimed_job.child_id;
 
@@ -238,6 +230,7 @@ begin
     'communicationCapsule', jsonb_build_object(
       'dueForReview', v_comm_due,
       'weakRecent', v_comm_weak,
+      'uncertain', v_comm_uncertain,
       'recentlyMastered', v_comm_mastered,
       'historicalCount', v_comm_exp_count
     ),
@@ -250,25 +243,28 @@ begin
       'recommendedCommunicationFunctions', v_rec_comm,
       'coverage', jsonb_build_object(
         'vocabulary', jsonb_build_object(
-          'totalItems', 2000,
-          'exposurePct', case when v_vocab_exp_count > 0 then round((v_vocab_exp_count::numeric / 2000.0) * 100) else 0 end,
-          'masteryEvidencePct', case when v_vocab_exp_count > 0 then round((v_vocab_mastered_count::numeric / 2000.0) * 100) else 0 end,
+          'totalUniverse', 2000,
+          'exposedCount', v_vocab_exp_count,
+          'masteredCount', v_vocab_mastered_count,
           'dueReviewCount', v_vocab_due_count,
-          'notYetCoveredCount', greatest(0, 2000 - v_vocab_exp_count)
+          'exposurePct', round((v_vocab_exp_count::numeric / 2000.0) * 100.0, 1),
+          'masteryPct', round((v_vocab_mastered_count::numeric / 2000.0) * 100.0, 1)
         ),
         'grammar', jsonb_build_object(
-          'totalItems', 33,
-          'exposurePct', case when v_grammar_exp_count > 0 then round((v_grammar_exp_count::numeric / 33.0) * 100) else 0 end,
-          'masteryEvidencePct', case when v_grammar_exp_count > 0 then round((v_grammar_mastered_count::numeric / 33.0) * 100) else 0 end,
+          'totalUniverse', 24,
+          'exposedCount', v_grammar_exp_count,
+          'masteredCount', v_grammar_mastered_count,
           'dueReviewCount', v_grammar_due_count,
-          'notYetCoveredCount', greatest(0, 33 - v_grammar_exp_count)
+          'exposurePct', round((v_grammar_exp_count::numeric / 24.0) * 100.0, 1),
+          'masteryPct', round((v_grammar_mastered_count::numeric / 24.0) * 100.0, 1)
         ),
         'communication', jsonb_build_object(
-          'totalItems', 16,
-          'exposurePct', case when v_comm_exp_count > 0 then round((v_comm_exp_count::numeric / 16.0) * 100) else 0 end,
-          'masteryEvidencePct', case when v_comm_exp_count > 0 then round((v_comm_mastered_count::numeric / 16.0) * 100) else 0 end,
+          'totalUniverse', 16,
+          'exposedCount', v_comm_exp_count,
+          'masteredCount', v_comm_mastered_count,
           'dueReviewCount', v_comm_due_count,
-          'notYetCoveredCount', greatest(0, 16 - v_comm_exp_count)
+          'exposurePct', round((v_comm_exp_count::numeric / 16.0) * 100.0, 1),
+          'masteryPct', round((v_comm_mastered_count::numeric / 16.0) * 100.0, 1)
         )
       )
     ),
@@ -276,10 +272,24 @@ begin
       'recentGenres', v_recent_genres,
       'recentContextKeys', v_recent_contexts,
       'recentItemFamilies', v_recent_families
-    )
-  ) into state;
+    ),
+    'sourceMaterial', case when source_material.id is null then null else jsonb_build_object(
+      'id', source_material.id, 'materialWeek', source_material.material_week,
+      'generationSummary', source_material.generation_summary
+    ) end,
+    'feedback', case when feedback.id is null then null else to_jsonb(feedback) - 'child_id' - 'updated_at' end
+  ) into result
+  from public.children as child
+  join public.child_profiles as profile on profile.child_id = child.id
+  join public.child_learning_state as state on state.child_id = child.id
+  left join public.materials as source_material on source_material.id = claimed_job.source_material_id
+  left join public.feedback as feedback
+    on feedback.child_id = claimed_job.child_id
+    and feedback.material_id = claimed_job.source_material_id
+    and feedback.created_at <= claimed_job.feedback_cutoff_at
+  where child.id = claimed_job.child_id;
 
-  return to_jsonb(state);
+  return result;
 end;
 $$;
 

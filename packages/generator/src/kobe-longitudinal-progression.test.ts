@@ -11,54 +11,72 @@ import {
 } from './index.js'
 import { grammarProgressionUnits } from './curriculum-maps/derived/grammar-progression.js'
 
-describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => {
-  it('reproduces Kobe real Week 1-3 history and proves Week 4 advances without looping prior grammar', () => {
-    // 1. Initialize Kobe's real Grade 7 curriculum store
-    const store = createEmptyStudentCurriculumStore('kobe-child-id', 7)
+describe('Kobe Production Longitudinal Progression & Feedback Dominance Regression', () => {
+  it('reproduces Kobe authentic production Week 1-3 history (W1: do/does, W2: Wh + do/does, W3: Wh + do/does) and proves Week 4 advances without looping', () => {
+    // 1. Initialize Kobe's Grade 7 curriculum store with authentic production history
+    const store = createEmptyStudentCurriculumStore('e54d3363-a68b-4540-a89e-629cd7d2a223', 7)
 
-    // Week 1: Taught be-verbs and pronouns
+    // Kobe Production Week 1: Taught do/does questions
     recordExposureFromTrackingDelta(store, {
       introducedVocabularyIds: ['v-build', 'v-test', 'v-camera'],
       reviewedVocabularyIds: [],
-      exposedGrammarTargetIds: ['g7-be-verbs-pronouns'],
+      exposedGrammarTargetIds: ['g7-do-does-questions'],
       exposedCommunicationFunctionIds: ['cf-making-requests'],
-    }, '2026-08-05T00:00:00Z')
+    }, '2026-08-18T10:00:00Z')
 
-    // Week 2: "One Change at a Time" - Taught do/does questions
+    // Kobe Production Week 2: Taught Wh- questions + reviewed do/does
     recordExposureFromTrackingDelta(store, {
       introducedVocabularyIds: ['v-experiment', 'v-record', 'v-improve', 'v-sort'],
       reviewedVocabularyIds: ['v-camera'],
-      exposedGrammarTargetIds: ['g7-do-does-questions'],
+      exposedGrammarTargetIds: ['g7-wh-questions', 'g7-do-does-questions'],
       exposedCommunicationFunctionIds: ['cf-agreement-disagreement'],
-    }, '2026-08-12T00:00:00Z')
+    }, '2026-08-18T12:00:00Z')
 
-    // Week 3: "Navigating the Science Fair" - Taught Wh- questions
+    // Kobe Production Week 3: Taught Wh- questions + reviewed do/does
     recordExposureFromTrackingDelta(store, {
       introducedVocabularyIds: ['v-straight', 'v-corner', 'v-opposite', 'v-entrance'],
       reviewedVocabularyIds: ['v-record'],
-      exposedGrammarTargetIds: ['g7-wh-questions'],
+      exposedGrammarTargetIds: ['g7-wh-questions', 'g7-do-does-questions'],
       exposedCommunicationFunctionIds: ['cf-asking-giving-directions'],
-    }, '2026-08-19T00:00:00Z')
+    }, '2026-08-18T18:00:00Z')
 
-    // Verified: In Week 3, Kobe had NO failure evidence (clean completion, positive parent feedback)
-    // Exposure records in store must show exposureCount > 0, but missCount === 0 and assessedCount === 0
-    expect(store.grammarRecords['g7-do-does-questions']!.exposureCount).toBe(1)
-    expect(store.grammarRecords['g7-do-does-questions']!.missCount).toBe(0)
-    expect(store.grammarRecords['g7-wh-questions']!.exposureCount).toBe(1)
-    expect(store.grammarRecords['g7-wh-questions']!.missCount).toBe(0)
+    // Verify Kobe's EXACT production state after Week 3:
+    // Three exposures on do/does, two/three exposures on Wh-, ZERO assessments, ZERO misses.
+    const doDoesRecord = store.grammarRecords['g7-do-does-questions']!
+    const whRecord = store.grammarRecords['g7-wh-questions']!
 
-    // 2. Build Week 4 CAP Coverage Capsule
+    expect(doDoesRecord.exposureCount).toBe(3)
+    expect(doDoesRecord.missCount).toBe(0)
+    expect(doDoesRecord.assessedCount).toBe(0)
+
+    expect(whRecord.exposureCount).toBe(2)
+    expect(whRecord.missCount).toBe(0)
+    expect(whRecord.assessedCount).toBe(0)
+
+    // 2. REPRODUCE OLD BUGGY BEHAVIOR vs FIXED BEHAVIOR
+    // Old SQL distillation logic: (exposure_count > 1 and correct_count < exposure_count / 2)
+    const oldDoDoesWeak = doDoesRecord.exposureCount > 1 && doDoesRecord.correctCount < (doDoesRecord.exposureCount / 2)
+    const oldWhWeak = whRecord.exposureCount > 1 && whRecord.correctCount < (whRecord.exposureCount / 2)
+    expect(oldDoDoesWeak).toBe(true) // BUG: 3 > 1 and 0 < 1.5 evaluated to TRUE
+    expect(oldWhWeak).toBe(true)     // BUG: 2 > 1 and 0 < 1.0 evaluated to TRUE
+
+    // Fixed distillation logic: Requires actual failure evidence
+    const newDoDoesWeak = doDoesRecord.missCount > 0 || (doDoesRecord.assessedCount > 0 && doDoesRecord.correctCount < doDoesRecord.assessedCount)
+    const newWhWeak = whRecord.missCount > 0 || (whRecord.assessedCount > 0 && whRecord.correctCount < whRecord.assessedCount)
+    expect(newDoDoesWeak).toBe(false) // FIXED: No failure evidence, not weak
+    expect(newWhWeak).toBe(false)     // FIXED: No failure evidence, not weak
+
+    // 3. Build Week 4 CAP Coverage Capsule under Fixed Context
     const week4Capsule = buildCapCoverageCapsule(store, {
       nowIso: '2026-08-26T00:00:00Z',
       gradeStage: 'grade_7',
     })
 
-    // Assert: Recommended grammar must NOT contain already-exposed units (g7-do-does-questions, g7-wh-questions, g7-be-verbs-pronouns)
+    // Assert: Recommended grammar MUST NOT contain exposed units (g7-do-does-questions, g7-wh-questions)
     expect(week4Capsule.recommendedGrammar).not.toContain('g7-do-does-questions')
     expect(week4Capsule.recommendedGrammar).not.toContain('g7-wh-questions')
-    expect(week4Capsule.recommendedGrammar).not.toContain('g7-be-verbs-pronouns')
 
-    // Assert: Recommended grammar must advance to unexposed Grade 7 progression units (e.g. g7-present-simple-verbs, g7-present-continuous)
+    // Assert: Recommended grammar must advance to unexposed Grade 7 progression units (e.g. g7-be-verbs-pronouns, g7-present-continuous)
     expect(week4Capsule.recommendedGrammar.length).toBeGreaterThan(0)
     for (const unitId of week4Capsule.recommendedGrammar) {
       const unit = grammarProgressionUnits.find((u) => u.unitId === unitId)
@@ -66,8 +84,8 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
       expect(store.grammarRecords[unitId]?.exposureCount ?? 0).toBe(0)
     }
 
-    // 3. Construct Kobe Week 4 Curriculum Package conforming to Schema 2.2
-    const selectedNewGrammar = week4Capsule.recommendedGrammar[0]! // Unexposed Grade 7 unit
+    // 4. Construct Kobe Week 4 Curriculum Package advancing to an unexposed Grade 7 unit
+    const selectedNewGrammar = week4Capsule.recommendedGrammar[0]! // e.g. g7-be-verbs-pronouns or g7-present-continuous
     const practiceQuestions: CurriculumPackage['studentLesson']['practice'] = [
       {
         id: 'prac-guided',
@@ -77,7 +95,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         hintZh: '請參考步驟第二段。',
         questions: [
           { id: 'G1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What should you do if the ambient light exceeds forty lux?', options: ['Adjust the shade hood over the lens.', 'Turn off all sensors immediately.', 'Replace the white board with a black one.', 'Stop writing in the notebook.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['If the light is strong, adjust the hood.', 'If the light strong, adjust the hood.', 'If the light is strong, adjusts the hood.', 'If the light is strong, adjusting the hood.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['The camera is an essential sensor.', 'The camera are an essential sensor.', 'The camera be an essential sensor.', 'The camera am an essential sensor.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -88,7 +106,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         hintZh: null,
         questions: [
           { id: 'I1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Why do we need to adjust the shade hood?', options: undefined, writingLines: 2, difficulty: 'on-level' },
-          { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: If the battery is low, ______ the charger.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: The optical sensors ______ ready for testing.', options: undefined, writingLines: 2, difficulty: 'on-level' },
           { id: 'I3', targetIds: ['target-reading-inference'], itemType: 'short-response', prompt: 'What does the team verify before starting the trial?', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
@@ -101,7 +119,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         questions: [
           { id: 'C1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What is the main goal of the calibration steps described in the text?', options: ['To ensure consistent sensor accuracy.', 'To buy new optical cameras.', 'To paint the laboratory white.', 'To shorten the competition time.'], writingLines: 0, difficulty: 'on-level' },
           { id: 'C2', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What can we infer about testing in a dark room?', options: ['The shade hood may not need adjustment.', 'The motor will stop immediately.', 'The sensor will definitely fail.', 'The white board cannot be used.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence best expresses condition and action?', options: ['If the signal is weak, check the wire.', 'If signal weak, check wire.', 'If the signal is weak, checking wire.', 'If the signal is weak, checks the wire.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence uses be-verbs correctly?', options: ['These robots are fast and reliable.', 'These robots is fast and reliable.', 'These robots be fast and reliable.', 'These robots am fast and reliable.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -111,7 +129,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         instructionsZh: '造出一個完整的句子。',
         hintZh: null,
         questions: [
-          { id: 'P1', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Write one instruction using If for your robot experiment.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'P1', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Write one sentence describing the robot sensor using is or are.', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -134,14 +152,14 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
 
     const week4Answers: CurriculumPackage['answers'] = [
       { questionId: 'G1', answer: 'Adjust the shade hood over the lens.', acceptedAnswers: ['A', 'Adjust the shade hood over the lens.'], explanationZh: '根據第二段，光線超過 40 lux 時應調整遮光罩。', likelyMisconceptionZh: '若選 B 則忽略了文中具體的調整指示。', followUpZh: null },
-      { questionId: 'G2', answer: 'If the light is strong, adjust the hood.', acceptedAnswers: ['A', 'If the light is strong, adjust the hood.'], explanationZh: '條件子句使用 be 動詞 is，主要子句使用原形動詞 adjust。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'G2', answer: 'The camera is an essential sensor.', acceptedAnswers: ['A', 'The camera is an essential sensor.'], explanationZh: '單數主詞 The camera 搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'I1', answer: 'To protect the sensor from strong ambient light.', acceptedAnswers: ['To protect the sensor from strong ambient light.'], explanationZh: '調整遮光罩是為了避免強光干擾感測器。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I2', answer: 'connect', acceptedAnswers: ['connect', 'plug in'], explanationZh: '主要子句使用原形動詞 connect。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I2', answer: 'are', acceptedAnswers: ['are'], explanationZh: '複數主詞 The optical sensors 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'I3', answer: 'The contrast of the black line on white board.', acceptedAnswers: ['The contrast of the black line.'], explanationZh: '第三段提到確認黑線在白板上的對比度。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'C1', answer: 'To ensure consistent sensor accuracy.', acceptedAnswers: ['A', 'To ensure consistent sensor accuracy.'], explanationZh: '全文說明透過校正步驟確保感測器準確度。', likelyMisconceptionZh: '若選 D 則誤解了實驗目的。', followUpZh: null },
       { questionId: 'C2', answer: 'The shade hood may not need adjustment.', acceptedAnswers: ['A', 'The shade hood may not need adjustment.'], explanationZh: '文中說明光線超過 40 lux 才需調整遮光罩。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C3', answer: 'If the signal is weak, check the wire.', acceptedAnswers: ['A', 'If the signal is weak, check the wire.'], explanationZh: '正確使用 If 條件子句與原形動詞指令。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'P1', answer: 'If the battery is low, recharge the robot.', acceptedAnswers: ['If the battery is low, recharge the robot.'], explanationZh: '使用 If 引導條件並給予指令。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C3', answer: 'These robots are fast and reliable.', acceptedAnswers: ['A', 'These robots are fast and reliable.'], explanationZh: '複數名詞搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'P1', answer: 'The sensor is very sensitive.', acceptedAnswers: ['The sensor is very sensitive.'], explanationZh: '正確使用 is。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'R1', answer: 'Does the sensor detect the black line?', acceptedAnswers: ['Does the sensor detect the black line?'], explanationZh: '第三人稱單數使用 Does 且動詞回到原形 detect。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'H1', answer: 'Please measure the length of the table.', acceptedAnswers: ['Please measure the length of the table.'], explanationZh: '正確使用 measure 作為動詞。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'H2', answer: 'Because does is used for third-person singular subjects.', acceptedAnswers: ['Because does is used for third-person singular subjects.'], explanationZh: '第三人稱單數主詞使用助動詞 does。', likelyMisconceptionZh: null, followUpZh: null },
@@ -152,7 +170,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
       metadata: {
         schemaVersion: '2.2.0',
         jobId: 'job-kobe-week-4',
-        childId: 'kobe-child-id',
+        childId: 'e54d3363-a68b-4540-a89e-629cd7d2a223',
         weekNumber: 4,
         grade: 7,
         gradeStage: 'grade_7',
@@ -171,7 +189,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         changedInterests: [],
         avoid: [],
         recentDifficulty: 'appropriate',
-        feedbackSummary: '上週完成順利，理解良好。',
+        feedbackSummary: '前三週進度順利，掌握良好。',
         // Invariant: Unverified exposure is never classified as recurringMistakes
         recurringMistakes: [],
         // Invariant: Previously exposed grammar belongs in reviewDue for spaced review
@@ -206,11 +224,11 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
             id: 'target-review-questions',
             domain: 'review',
             description: '間隔複習 do / does 與 Wh- 疑問句結構。',
-            evidence: [{ source: 'weekly-history', detail: '前兩週已學文法間隔提取。' }],
+            evidence: [{ source: 'weekly-history', detail: '前三週已學文法間隔提取。' }],
             successCriteria: '在提取題中無提示正確作答。',
           },
         ],
-        prerequisites: ['g7-be-verbs-pronouns'],
+        prerequisites: ['g7-do-does-questions'],
         reviewStrategy: ['在第 5 階段提取題中融入 do/does 動詞還原', '複習前週核心單字'],
         personalizationStrategy: '以 robotics 機器人光學感測器除錯情境承載新文法與推論題目。',
         exclusions: [],
@@ -257,19 +275,19 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
           {
             id: 'inst-1',
             titleZh: '新文法焦點與判斷規則',
-            explanationZh: '在英文指令與操作步驟中，清楚的動詞原形與條件子句能幫助精確執行。',
-            patterns: ['If + condition, Subject + Verb...'],
+            explanationZh: '說明主詞與 be 動詞的搭配原則。',
+            patterns: ['Subject + be-verb + noun/adjective'],
             workedExamples: [
-              { example: 'If the light is strong, adjust the shade.', walkthroughZh: '以 If 引導條件，主要子句給予具體動作指示。' },
-              { example: 'If the value is low, check the battery.', walkthroughZh: '確認條件後檢查電源。' },
+              { example: 'The camera is an essential sensor.', walkthroughZh: '單數主詞搭配 is。' },
+              { example: 'These sensors are very accurate.', walkthroughZh: '複數主詞搭配 are。' },
             ],
             commonMistakes: [
-              { wrong: 'If the light strong, adjust the shade.', corrected: 'If the light is strong, adjust the shade.', whyZh: '條件子句中不可漏掉 be 動詞。' },
+              { wrong: 'The sensors is accurate.', corrected: 'The sensors are accurate.', whyZh: '複數主詞不可使用 is。' },
             ],
           },
         ],
         practice: practiceQuestions,
-        selfCheckZh: ['我能理解光學感測器校正步驟。', '我知道 If 條件句的結構。', '我能完成 do/does 間隔複習題。'],
+        selfCheckZh: ['我能理解光學感測器校正步驟。', '我知道主詞與 be 動詞的搭配。', '我能完成 do/does 間隔複習題。'],
         homework: {
           purposeZh: '隔天提取鞏固記憶',
           estimatedMinutes: 15,
@@ -279,16 +297,16 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
       answers: week4Answers,
       parentSummary: {
         focusZh: '感測器除錯推論與新文法句型',
-        observeZh: ['孩子是否能自己指出課文證據', '是否能正確使用條件句'],
+        observeZh: ['孩子是否能自己指出課文證據', '是否能正確使用新文法句型'],
         completionCheckZh: '確認各練習階段與作業均有作答即可。',
         personalizationZh: [
           '延續 Kobe 感興趣的機器人感測器實驗情境，推進國一新文法學習。',
-          '上週閱讀與文法完成度高，本週將 do/does 與 Wh- 疑問句轉為間隔複習題。',
+          '前三週閱讀與文法完成度高，本週將 do/does 與 Wh- 疑問句轉為間隔複習題。',
           '加入步驟說明書閱讀題型，訓練會考條件與結果推論。',
         ],
       },
       qualityEvidence: {
-        feedbackApplied: ['上週完成度高，本週推進新單元並保留前週間隔複習'],
+        feedbackApplied: ['前三週完成度高，本週推進新單元並保留前週間隔複習'],
         improvementComparedToPrevious: ['提升步驟推論與邏輯判斷深度'],
         criticalChecks: [
           { id: 'self-study', passed: true, evidence: '每個概念均有中文解說與完整例句。' },
@@ -299,9 +317,6 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
 
     // Validate Schema 2.2 and Audit
     const validation = validateCurriculumPackage(week4Package)
-    if (!validation.success) {
-      console.log('Week4 Validation issues:', JSON.stringify(validation.issues, null, 2))
-    }
     expect(validation.success).toBe(true)
 
     const audit = auditCurriculumPackage(week4Package)
@@ -310,14 +325,24 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
   })
 
   it('proves Feedback Dominance: explicit parent request to repeat do/does overrides default progression', () => {
-    const store = createEmptyStudentCurriculumStore('kobe-child-id', 7)
+    const store = createEmptyStudentCurriculumStore('e54d3363-a68b-4540-a89e-629cd7d2a223', 7)
 
-    // Kobe Week 1-3 history
+    // Kobe Week 1-3 production history (3 exposures on do/does, 2 on wh-)
     recordExposureFromTrackingDelta(store, {
       introducedVocabularyIds: ['v-camera'],
       reviewedVocabularyIds: [],
-      exposedGrammarTargetIds: ['g7-be-verbs-pronouns', 'g7-do-does-questions', 'g7-wh-questions'],
-    }, '2026-08-19T00:00:00Z')
+      exposedGrammarTargetIds: ['g7-do-does-questions'],
+    }, '2026-08-18T10:00:00Z')
+    recordExposureFromTrackingDelta(store, {
+      introducedVocabularyIds: [],
+      reviewedVocabularyIds: ['v-camera'],
+      exposedGrammarTargetIds: ['g7-wh-questions', 'g7-do-does-questions'],
+    }, '2026-08-18T12:00:00Z')
+    recordExposureFromTrackingDelta(store, {
+      introducedVocabularyIds: [],
+      reviewedVocabularyIds: [],
+      exposedGrammarTargetIds: ['g7-wh-questions', 'g7-do-does-questions'],
+    }, '2026-08-18T18:00:00Z')
 
     // Scenario: Parent gives explicit feedback asking to repeat do/does questions
     const parentFeedbackDirective = {
@@ -413,7 +438,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
       metadata: {
         schemaVersion: '2.2.0',
         jobId: 'job-kobe-week-4-repeat',
-        childId: 'kobe-child-id',
+        childId: 'e54d3363-a68b-4540-a89e-629cd7d2a223',
         weekNumber: 4,
         grade: 7,
         gradeStage: 'grade_7',
@@ -434,7 +459,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         recentDifficulty: 'appropriate',
         feedbackSummary: parentFeedbackDirective.parentNote,
         recurringMistakes: ['g7-do-does-questions'],
-        reviewDue: ['g7-be-verbs-pronouns'],
+        reviewDue: ['g7-wh-questions'],
       },
       learningPlan: {
         estimatedMinutes: 90,
@@ -462,8 +487,8 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
             successCriteria: '造句正確。',
           },
         ],
-        prerequisites: ['g7-be-verbs-pronouns'],
-        reviewStrategy: ['be 動詞句型提取'],
+        prerequisites: ['g7-do-does-questions'],
+        reviewStrategy: ['Wh- 疑問句提取'],
         personalizationStrategy: '依家長明確回饋優先加強 do/does，結合 robotics 機器人排查情境。',
         exclusions: [],
       },
@@ -474,7 +499,7 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
         exposedReadingTargetIds: ['target-reading'],
         exposedCommunicationFunctionIds: ['cf-describing-problems-troubleshooting'],
         hypothesesToVerify: ['依家長要求重複複習後能徹底掌握動詞還原'],
-        nextReviewCandidates: ['g7-be-verbs-pronouns'],
+        nextReviewCandidates: ['g7-wh-questions'],
       },
       studentLesson: {
         opening: {
@@ -549,9 +574,6 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
     }
 
     const val = validateCurriculumPackage(repeatPackage)
-    if (!val.success) {
-      console.log('Repeat Validation issues:', JSON.stringify(val.issues, null, 2))
-    }
     expect(val.success).toBe(true)
 
     const audit = auditCurriculumPackage(repeatPackage)
@@ -560,17 +582,17 @@ describe('Kobe Longitudinal Progression & Feedback Dominance Regression', () => 
   })
 
   it('proves failure evidence correctly triggers primary target re-promotion', () => {
-    const store = createEmptyStudentCurriculumStore('kobe-child-id', 7)
+    const store = createEmptyStudentCurriculumStore('e54d3363-a68b-4540-a89e-629cd7d2a223', 7)
 
     // Kobe Week 2 taught do/does
     recordExposureFromTrackingDelta(store, {
       introducedVocabularyIds: ['v-camera'],
       reviewedVocabularyIds: [],
       exposedGrammarTargetIds: ['g7-do-does-questions'],
-    }, '2026-08-12T00:00:00Z')
+    }, '2026-08-18T10:00:00Z')
 
     // In Week 3 assessment, Kobe records a failure on do/does (miss)
-    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-do-does-questions', 'miss', '2026-08-19T00:00:00Z')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-do-does-questions', 'miss', '2026-08-18T18:00:00Z')
 
     expect(store.grammarRecords['g7-do-does-questions']!.missCount).toBe(1)
     expect(store.grammarRecords['g7-do-does-questions']!.masteryStatus).toBe('learning')
