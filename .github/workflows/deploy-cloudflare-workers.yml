@@ -1,4 +1,4 @@
-name: Deploy web to Cloudflare Pages
+name: Deploy web to Cloudflare Workers
 
 on:
   workflow_dispatch:
@@ -10,13 +10,13 @@ permissions:
   deployments: write
 
 concurrency:
-  group: cloudflare-pages-production
+  group: cloudflare-workers-production
   cancel-in-progress: true
 
 jobs:
   deploy:
     environment:
-      name: cloudflare-pages
+      name: cloudflare-workers
       url: https://paperbond.jjmowlab.com
     runs-on: ubuntu-latest
     env:
@@ -46,5 +46,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/web/dist --project-name=paperbond --branch=main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: deploy --config wrangler.jsonc

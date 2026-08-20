@@ -15,7 +15,7 @@
 | **OpenAI, LLC** / **Anthropic, PBC** | 美國 | 企業級 API 大型語言模型（負責每週依課綱生成原創情境閱讀、單字解析與題目） | 去識別化之年級、課本單元、核心單字清單、文法重點、通用興趣關鍵字（如：籃球、程式設計） | 否（嚴禁傳輸學生真實姓名、生日、學校或聯絡方式） | **官方商業 API 條款明訂：絕不使用 API 資料進行基礎模型訓練** (No Training on API Data) | SOC 2 Type II, ISO 27001 |
 | **Google LLC (Gmail SMTP)** / **Resend** | 美國 | 發送驗證信（Magic Link）、每週教材交付通知信、重要服務異動通知 | 家長 Email、通知信主旨與內容、暫時性登入連結 | 否 | 遵循標準傳輸加密協議 | ISO 27001, SOC 2 Type II |
 | **GitHub, Inc. (Microsoft)** | 美國 | 原始碼版本控管、CI/CD 自動化建置 | 原始碼與建置紀錄，**絕不存入任何真實用戶個資或生產環境資料庫資料** | 否 | 依 GitHub 商業條款保護 | SOC 1/2/3, ISO 27001 |
-| **Cloudflare, Inc.** | 美國 / 全球邊緣網路 | Cloudflare Pages 前端靜態資源託管、DNS 解析、SSL/TLS 傳輸加密憑證、DDoS 攻擊防禦 | 公開前端程式碼、用戶連線 IP 位址、HTTP 標頭資訊（用以提供與保護網站） | 否 | 僅作為網站託管與網路中繼傳輸 | ISO 27001, SOC 2 |
+| **Cloudflare, Inc.** | 美國 / 全球邊緣網路 | Cloudflare Workers Static Assets 前端靜態資源託管、DNS 解析、SSL/TLS 傳輸加密憑證、DDoS 攻擊防禦 | 公開前端程式碼、用戶連線 IP 位址、HTTP 標頭資訊（用以提供與保護網站） | 否 | 僅作為網站託管與網路中繼傳輸 | ISO 27001, SOC 2 |
 
 ---
 

@@ -2,7 +2,12 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const workflow = readFileSync(new URL('../.github/workflows/finish-curriculum-submissions.yml', import.meta.url), 'utf8')
-const deployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-pages.yml', import.meta.url), 'utf8')
+const deployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-workers.yml', import.meta.url), 'utf8')
+const wranglerConfig = JSON.parse(readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')) as {
+  assets: { directory: string, not_found_handling: string }
+  routes: Array<{ pattern: string, custom_domain: boolean }>
+  workers_dev: boolean
+}
 
 describe('Finisher workflow production secret scope', () => {
   it('never defines Supabase production secrets at job scope', () => {
@@ -23,12 +28,21 @@ describe('Finisher workflow production secret scope', () => {
   })
 })
 
-describe('Cloudflare Pages deployment boundaries', () => {
-  it('deploys the root-based web build to the production Pages project', () => {
+describe('Cloudflare Workers Static Assets deployment boundaries', () => {
+  it('deploys the root-based web build with SPA routing on the production domain', () => {
     expect(deployWorkflow).toContain('url: https://paperbond.jjmowlab.com')
-    expect(deployWorkflow).toContain('pages deploy apps/web/dist --project-name=paperbond --branch=main')
+    expect(deployWorkflow).toContain('command: deploy --config wrangler.jsonc')
     expect(deployWorkflow).not.toContain('VITE_BASE_PATH')
     expect(deployWorkflow).not.toContain('404.html')
+    expect(wranglerConfig.assets).toEqual({
+      directory: 'apps/web/dist',
+      not_found_handling: 'single-page-application',
+    })
+    expect(wranglerConfig.routes).toContainEqual({
+      pattern: 'paperbond.jjmowlab.com',
+      custom_domain: true,
+    })
+    expect(wranglerConfig.workers_dev).toBe(false)
   })
 
   it('does not expose worker or Paddle server secrets to the browser build', () => {

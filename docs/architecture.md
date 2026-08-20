@@ -2,7 +2,7 @@
 
 ## System Boundaries
 
-- `apps/web`: static React/TypeScript parent portal deployed to Cloudflare Pages.
+- `apps/web`: static React/TypeScript parent portal deployed with Cloudflare Workers Static Assets.
 - Supabase Auth: parent email OTP or magic-link sessions.
 - Supabase PostgreSQL: ownership, subscriptions, feedback, materials, operational settings, and generation queue.
 - Supabase Storage: private student and parent-answer PDFs.
@@ -18,9 +18,9 @@ Parent ownership is the authorization root. A child references its parent profil
 
 ## Deployment
 
-GitHub Actions validates every change. The Cloudflare Pages workflow builds and deploys only the SPA to `https://paperbond.jjmowlab.com`. Supabase migrations are reviewed and applied through an authorized environment; CI must not contain production database secrets by default.
+GitHub Actions validates every change. The Cloudflare Workers workflow builds and deploys only the SPA to `https://paperbond.jjmowlab.com`. Supabase migrations are reviewed and applied through an authorized environment; CI must not contain production database secrets by default.
 
-Vite, application routes, assets, authentication callbacks, and release-email links are rooted at `/`. Cloudflare Pages provides the SPA deep-link fallback; the build must not contain the former GitHub Pages `404.html` copy.
+Vite, application routes, assets, authentication callbacks, and release-email links are rooted at `/`. Workers Static Assets provides the SPA deep-link fallback through `wrangler.jsonc`; the build must not contain the former GitHub Pages `404.html` copy.
 
 ## Design Principles
 

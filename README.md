@@ -35,9 +35,9 @@ For local backend work, inspect available commands with `pnpm exec supabase --he
 
 ## Web application structure
 
-Public and authenticated route pages live in `apps/web/src/routes/`; reusable UI is grouped under `apps/web/src/components/`, and browser-safe Supabase access stays in `apps/web/src/lib/`. Production is a root-based Cloudflare Pages SPA at [paperbond.jjmowlab.com](https://paperbond.jjmowlab.com). The deployment workflow publishes `apps/web/dist` to the `paperbond` Pages project; Cloudflare Pages serves SPA deep links without a copied `404.html` fallback.
+Public and authenticated route pages live in `apps/web/src/routes/`; reusable UI is grouped under `apps/web/src/components/`, and browser-safe Supabase access stays in `apps/web/src/lib/`. Production is a root-based Cloudflare Workers Static Assets SPA at [paperbond.jjmowlab.com](https://paperbond.jjmowlab.com). The deployment workflow runs `wrangler deploy`; `wrangler.jsonc` publishes `apps/web/dist`, maps the production custom domain, and serves SPA deep links without a copied `404.html` fallback.
 
-The deploy environment requires GitHub repository variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_PADDLE_CLIENT_TOKEN`, plus secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Worker and server credentials remain separate and must never be exposed through `VITE_*` variables. Set production Supabase Auth Site URL and redirect allow-list to `https://paperbond.jjmowlab.com`, set the admin/notification server `SITE_URL` to the same origin, and approve the domain in Paddle before production checkout.
+The deploy environment requires GitHub repository variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_PADDLE_CLIENT_TOKEN`, plus secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Generation-worker and server credentials remain separate and must never be exposed through `VITE_*` variables. Set production Supabase Auth Site URL and redirect allow-list to `https://paperbond.jjmowlab.com`, set the admin/notification server `SITE_URL` to the same origin, and approve the domain in Paddle before production checkout.
 
 `pnpm test:e2e` is local-only and refuses non-local Supabase URLs. It creates a synthetic parent, child, and Week 1 job; renders and uploads both PDFs; verifies an authenticated signed download; submits feedback; confirms that Week 2 receives it; then removes all synthetic records and artifacts.
 
@@ -62,4 +62,4 @@ Production commands require `SUPABASE_URL` and a server-only `SUPABASE_SECRET_KE
 pnpm worker claim --worker local-operator
 ```
 
-See `docs/generation-workflow.md` for context and completion commands. Never expose the worker key in the Cloudflare Pages bundle or commit generated customer artifacts.
+See `docs/generation-workflow.md` for context and completion commands. Never expose the generation-worker key in the Cloudflare static bundle or commit generated customer artifacts.

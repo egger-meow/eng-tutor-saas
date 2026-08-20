@@ -31,5 +31,5 @@ if (!hostedEntry.includes('/assets/')) {
   throw new Error('Hosted SPA entry does not use root-based asset paths')
 }
 if (existsSync('apps/web/dist/404.html')) {
-  throw new Error('Cloudflare Pages build must not contain a GitHub Pages 404 fallback')
+  throw new Error('Cloudflare Workers build must not contain a GitHub Pages 404 fallback')
 }

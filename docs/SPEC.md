@@ -3119,7 +3119,7 @@ Never expose them to:
 
 * browser JavaScript;
 * public repository;
-* static Cloudflare Pages bundle.
+* static Cloudflare Workers asset bundle.
 
 ---
 
@@ -3156,7 +3156,7 @@ unless genuinely necessary for debugging.
 
 Production frontend hosting:
 
-> **Cloudflare Pages at `https://paperbond.jjmowlab.com`**
+> **Cloudflare Workers Static Assets at `https://paperbond.jjmowlab.com`**
 
 The MVP frontend remains a static SPA. It is built with root-relative routes and assets and deployed from GitHub Actions without browser access to server secrets.
 
@@ -3174,11 +3174,11 @@ The exact UI library is not a core product contract.
 
 ---
 
-# 156. Cloudflare Pages Routing
+# 156. Cloudflare Workers Static Assets Routing
 
 Routing must work correctly when directly opening internal URLs.
 
-Cloudflare Pages must serve the SPA entry for extensionless deep links such as `/dashboard`, `/children/:id`, and `/billing`.
+Workers Static Assets must serve the SPA entry for extensionless deep links such as `/dashboard`, `/children/:id`, and `/billing` through Wrangler's `single-page-application` not-found handling.
 
 Do not restore the former repository-prefix base path or copied `404.html` workaround. Do not ship a dashboard where browser refresh produces a host-level 404.
 
@@ -3186,7 +3186,7 @@ Do not restore the former repository-prefix base path or copied `404.html` worka
 
 # 157. Backend Responsibilities
 
-The Cloudflare Pages static bundle must not contain privileged backend logic.
+The Cloudflare Workers static asset bundle must not contain privileged backend logic.
 
 Backend / server-side responsibilities include:
 
@@ -3631,7 +3631,7 @@ GitHub Actions may handle:
 * type checking;
 * frontend build;
 * migration validation;
-* deployment to Cloudflare Pages.
+* deployment to Cloudflare Workers Static Assets.
 
 MVP lesson generation remains orchestrated separately.
 
@@ -4129,8 +4129,8 @@ For weekly-material work specifically:
        ┌───────────┴───────────┐
        │                       │
        ▼                       ▼
-Cloudflare Pages            Worker
-Parent frontend        Scheduled ChatGPT MVP
+Cloudflare Worker              Worker
+Static Assets frontend    Scheduled ChatGPT MVP
        │                       │
        └───────────┬───────────┘
                    ▼

@@ -40,7 +40,7 @@
 | 88–113 | Learning method, vocabulary notebook, AI literacy, parent guide, feedback |
 | 114–132 | Generation jobs, Scheduled ChatGPT worker, retries, versioning, history |
 | 133–153 | Paddle billing, entitlement, Supabase schema, storage, privacy, RLS |
-| 154–167 | Frontend, Cloudflare Pages, routes, dashboard, marketing messages |
+| 154–167 | Frontend, Cloudflare Workers Static Assets, routes, dashboard, marketing messages |
 | 168–184 | Analytics, validation, operations, testing, non-goals |
 | 185–203 | MVP milestones, definitions of done, post-100 review, future work |
 | 204–210 | Mandatory agent instructions and system/product summaries |
@@ -204,7 +204,7 @@
 153. **Logging Privacy**
 154. **Frontend Hosting**
 155. **Frontend Stack**
-156. **Cloudflare Pages Routing**
+156. **Cloudflare Workers Static Assets Routing**
 157. **Backend Responsibilities**
 158. **PDF Rendering Architecture**
 159. **Public Routes**

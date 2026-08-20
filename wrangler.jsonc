@@ -1,0 +1,15 @@
+{
+  "name": "paperbond",
+  "compatibility_date": "2026-08-21",
+  "workers_dev": false,
+  "assets": {
+    "directory": "apps/web/dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    {
+      "pattern": "paperbond.jjmowlab.com",
+      "custom_domain": true
+    }
+  ]
+}
