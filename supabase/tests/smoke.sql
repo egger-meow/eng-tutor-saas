@@ -742,6 +742,22 @@ begin
   end if;
 
   select count(*) into visible_count
+  from public.get_owned_released_materials_page(
+    '00000000-0000-0000-0000-000000000021', 5, 0, now()
+  );
+  if visible_count <> 1 then
+    raise exception 'family A should see its released material through the history page, saw %', visible_count;
+  end if;
+
+  select count(*) into visible_count
+  from public.get_owned_released_materials_page(
+    '00000000-0000-0000-0000-000000000023', 5, 0, now() + interval '2 days'
+  );
+  if visible_count <> 0 then
+    raise exception 'family A could read family B material through released history RPC';
+  end if;
+
+  select count(*) into visible_count
   from storage.objects
   where bucket_id = 'weekly-materials';
   if visible_count <> 1 then
@@ -1416,12 +1432,92 @@ begin
     raise exception 'REGRESSION: generation job should not be created for canceled subscription webhook';
   end if;
 
+  -- 14. Released material history pagination excludes future prepared materials.
+  with inserted_materials as (
+    insert into public.materials (
+      child_id, material_week, revision, rule_version, input_snapshot,
+      student_pdf_path, parent_answer_pdf_path
+    )
+    select
+      '00000000-0000-0000-0000-000000000099',
+      current_date - ((series.n + 2) * 7),
+      1,
+      'history-pagination-test',
+      '{}'::jsonb,
+      'history/' || series.n || '/student.pdf',
+      'history/' || series.n || '/parent.pdf'
+    from generate_series(1, 6) as series(n)
+    returning id, child_id, material_week
+  )
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at
+  )
+  select
+    inserted_materials.child_id,
+    inserted_materials.material_week,
+    'history-pagination-test',
+    'history-released-' || inserted_materials.id,
+    'completed',
+    now() - interval '30 days',
+    inserted_materials.id,
+    now() - interval '1 day',
+    now() - interval '3 days',
+    now() - interval '2 days'
+  from inserted_materials;
+
+  with future_material as (
+    insert into public.materials (
+      child_id, material_week, revision, rule_version, input_snapshot,
+      student_pdf_path, parent_answer_pdf_path
+    ) values (
+      '00000000-0000-0000-0000-000000000099',
+      current_date + 14,
+      1,
+      'history-pagination-test',
+      '{}'::jsonb,
+      'history/future/student.pdf',
+      'history/future/parent.pdf'
+    ) returning id, child_id, material_week
+  )
+  insert into public.generation_jobs (
+    child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at
+  )
+  select
+    future_material.child_id,
+    future_material.material_week,
+    'history-pagination-test',
+    'history-future-' || future_material.id,
+    'completed',
+    now(),
+    future_material.id,
+    now() + interval '7 days',
+    now() + interval '5 days',
+    now() + interval '6 days'
+  from future_material;
+
+  if (
+    select count(*)
+    from public.get_owned_released_materials_page(
+      '00000000-0000-0000-0000-000000000099', 5, 0, now()
+    )
+  ) <> 5 then
+    raise exception 'REGRESSION: released material page should contain exactly five rows';
+  end if;
+
+  if (
+    select max(total_count)
+    from public.get_owned_released_materials_page(
+      '00000000-0000-0000-0000-000000000099', 5, 0, now()
+    )
+  ) <> 6 then
+    raise exception 'REGRESSION: released history count must exclude the future prepared material';
+  end if;
+
   -- Clean up
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;
 $$;
 
 rollback;
-
-
-

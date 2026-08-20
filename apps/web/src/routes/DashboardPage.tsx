@@ -66,6 +66,7 @@ export function DashboardPage({ session }: { session: Session }) {
                     onRefresh={() => void data.refresh()}
                     onLoadMoreMaterials={() => void data.loadMoreMaterials(child.id)}
                     hasMoreMaterials={Boolean(data.materialHasMore[child.id])}
+                    releasedMaterialCount={data.releasedMaterialCounts[child.id] ?? 0}
                     loadingMoreMaterials={Boolean(data.loadingMoreMaterials[child.id])}
                     defaultExpanded={index === 0}
                   />

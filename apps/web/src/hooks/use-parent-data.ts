@@ -23,6 +23,7 @@ export function useParentData() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [materialOffsets, setMaterialOffsets] = useState<Record<string, number>>({})
   const [materialHasMore, setMaterialHasMore] = useState<Record<string, boolean>>({})
+  const [releasedMaterialCounts, setReleasedMaterialCounts] = useState<Record<string, number>>({})
   const [loadingMoreMaterials, setLoadingMoreMaterials] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -41,7 +42,7 @@ export function useParentData() {
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
       const childIds = childRows.map((c) => c.id)
-      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
+      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {}, releasedCountByChild: {}, releasedLoadedByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
       const joined = childRows.map((child) => ({
         ...child,
         profile: profileMap.get(child.id) ?? null,
@@ -52,8 +53,9 @@ export function useParentData() {
       }))
       setChildren(joined)
       setMaterials(page.materials)
-      setMaterialOffsets(Object.fromEntries(childIds.map((childId) => [childId, 5])))
+      setMaterialOffsets(page.releasedLoadedByChild)
       setMaterialHasMore(page.hasMoreByChild)
+      setReleasedMaterialCounts(page.releasedCountByChild)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '無法讀取家長資料，請稍後再試。')
     } finally {
@@ -74,14 +76,21 @@ export function useParentData() {
     if (!materialHasMore[childId] || loadingMoreMaterials[childId]) return
     setLoadingMoreMaterials((current: Record<string, boolean>) => ({ ...current, [childId]: true }))
     try {
-      const page = await listMaterials([childId], { offset: materialOffsets[childId] ?? 0 })
-      setMaterials((current: Material[]) => [...current, ...page.materials])
-      setMaterialOffsets((current: Record<string, number>) => ({ ...current, [childId]: (current[childId] ?? 0) + 5 }))
+      const page = await listMaterials([childId], { offset: materialOffsets[childId] ?? 0, includeFuture: false })
+      setMaterials((current: Material[]) => {
+        const existingIds = new Set(current.map((material) => material.id))
+        return [...current, ...page.materials.filter((material) => !existingIds.has(material.id))]
+      })
+      setMaterialOffsets((current: Record<string, number>) => ({
+        ...current,
+        [childId]: (current[childId] ?? 0) + (page.releasedLoadedByChild[childId] ?? 0),
+      }))
       setMaterialHasMore((current: Record<string, boolean>) => ({ ...current, ...page.hasMoreByChild }))
+      setReleasedMaterialCounts((current: Record<string, number>) => ({ ...current, ...page.releasedCountByChild }))
     } finally {
       setLoadingMoreMaterials((current: Record<string, boolean>) => ({ ...current, [childId]: false }))
     }
   }, [loadingMoreMaterials, materialHasMore, materialOffsets])
 
-  return { children, materials, loading, error, getMaterialsForChild, loadMoreMaterials, loadingMoreMaterials, materialHasMore, refresh }
+  return { children, materials, loading, error, getMaterialsForChild, loadMoreMaterials, loadingMoreMaterials, materialHasMore, releasedMaterialCounts, refresh }
 }

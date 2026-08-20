@@ -114,7 +114,9 @@
 
 ---
 
-## 7. 開源軟體與第三方依賴授權盤點 (Open Source License Audit)
+## 7. 第三方開源相依套件授權盤點 (Third-Party Dependency License Audit)
+
+> 本節僅描述第三方相依套件。紙屬英文原創程式碼為 JJMowLab 專有、非開源軟體，公開可見不等於取得重製、修改、散布或部署授權；完整聲明見根目錄 `NOTICE`。
 
 * **審查範圍：** `package.json`（Web 前端、Generator、PDF、Worker、Supabase 函式）
 * **授權結果：**

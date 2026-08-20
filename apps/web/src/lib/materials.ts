@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseClient } from './supabase'
 
 export type MaterialFeedback = {
@@ -35,6 +36,8 @@ export type Material = {
 export type MaterialPage = {
   materials: Material[]
   hasMoreByChild: Record<string, boolean>
+  releasedCountByChild: Record<string, number>
+  releasedLoadedByChild: Record<string, number>
   nextJobReleaseAtByChild: Record<string, string | null>
   hasPastDueUnmaterializedJobByChild: Record<string, boolean>
 }
@@ -42,6 +45,25 @@ export type MaterialPage = {
 export type MaterialPageOptions = {
   limit?: number
   offset?: number
+  includeFuture?: boolean
+}
+
+export type MaterialHistoryView = {
+  latestMaterial: Material | null
+  pastMaterials: Material[]
+  futureMaterials: Material[]
+  historyCount: number
+}
+
+export function buildMaterialHistoryView(materials: Material[], releasedCount: number, now = new Date()): MaterialHistoryView {
+  const releasedMaterials = materials.filter((material) => isMaterialReleased(material, now))
+  const futureMaterials = materials.filter((material) => !isMaterialReleased(material, now))
+  return {
+    latestMaterial: releasedMaterials[0] ?? null,
+    pastMaterials: releasedMaterials.slice(1),
+    futureMaterials,
+    historyCount: Math.max(releasedCount - 1, 0),
+  }
 }
 
 export function findNextFutureJobReleaseAt(
@@ -223,19 +245,37 @@ export type FeedbackInput = {
 }
 
 export async function listMaterials(childIds: string[], options: MaterialPageOptions = {}, now = new Date()): Promise<MaterialPage> {
-  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
-  const client = getSupabaseClient()
+  return listMaterialsWithClient(getSupabaseClient(), childIds, options, now)
+}
+
+export async function listMaterialsWithClient(client: SupabaseClient, childIds: string[], options: MaterialPageOptions = {}, now = new Date()): Promise<MaterialPage> {
+  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, releasedCountByChild: {}, releasedLoadedByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
   const limit = options.limit ?? 5
   const offset = options.offset ?? 0
+  const includeFuture = options.includeFuture ?? offset === 0
+  const nowIso = now.toISOString()
+
+  const { data: jobs, error: jobsError } = await client
+    .from('generation_jobs')
+    .select('material_id, child_id, release_at')
+    .in('child_id', childIds)
+  if (jobsError) throw jobsError
+
   const pages = await Promise.all(childIds.map(async (childId) => {
-    const [page, firstMaterial] = await Promise.all([
-      client
-        .from('materials')
-        .select('id, child_id, material_week, revision, student_pdf_path, parent_answer_pdf_path, generation_summary, created_at')
-        .eq('child_id', childId)
-        .order('material_week', { ascending: false })
-        .order('revision', { ascending: false })
-        .range(offset, offset + limit - 1),
+    const childJobs = (jobs ?? []).filter((job) => job.child_id === childId)
+    const futureMaterialIds = includeFuture
+      ? childJobs
+        .filter((job) => job.material_id && job.release_at && Date.parse(job.release_at) > now.getTime())
+        .map((job) => job.material_id as string)
+      : []
+
+    const [releasedPage, firstMaterial, futureMaterials] = await Promise.all([
+      client.rpc('get_owned_released_materials_page', {
+        p_child_id: childId,
+        p_limit: limit,
+        p_offset: offset,
+        p_as_of: nowIso,
+      }),
       client
         .from('materials')
         .select('material_week')
@@ -243,24 +283,42 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
         .order('material_week', { ascending: true })
         .limit(1)
         .maybeSingle(),
+      futureMaterialIds.length === 0
+        ? Promise.resolve({ data: [], error: null })
+        : client
+          .from('materials')
+          .select('id, child_id, material_week, revision, student_pdf_path, parent_answer_pdf_path, generation_summary, created_at')
+          .eq('child_id', childId)
+          .in('id', futureMaterialIds)
+          .order('material_week', { ascending: false })
+          .order('revision', { ascending: false }),
     ])
-    if (page.error) throw page.error
+    if (releasedPage.error) throw releasedPage.error
     if (firstMaterial.error) throw firstMaterial.error
-    return { childId, rows: page.data ?? [], firstMaterialWeek: firstMaterial.data?.material_week ?? null }
+    if (futureMaterials.error) throw futureMaterials.error
+
+    const releasedRows = (releasedPage.data ?? []) as Array<Record<string, any> & { total_count: number | string }>
+    const totalReleased = releasedRows.length > 0 ? Number(releasedRows[0]!.total_count) : 0
+    const futureRows = (futureMaterials.data ?? []).map((material) => ({
+      ...material,
+      release_at: childJobs.find((job) => job.material_id === material.id)?.release_at ?? null,
+    }))
+    return {
+      childId,
+      releasedRows,
+      futureRows,
+      totalReleased,
+      firstMaterialWeek: firstMaterial.data?.material_week ?? null,
+    }
   }))
-  const materials = pages.flatMap((page) => page.rows)
+  const materials = pages.flatMap((page) => [...page.futureRows, ...page.releasedRows])
   const materialIds = materials.map((material) => material.id)
-  const [{ data: feedback, error: feedbackError }, { data: jobs, error: jobsError }] = await Promise.all([
-    materialIds.length === 0
-      ? Promise.resolve({ data: [], error: null })
-      : client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds),
-    client.from('generation_jobs').select('material_id, child_id, release_at').in('child_id', childIds),
-  ])
+  const { data: feedback, error: feedbackError } = materialIds.length === 0
+    ? { data: [], error: null }
+    : await client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds)
   if (feedbackError) throw feedbackError
-  if (jobsError) throw jobsError
 
   const feedbackByMaterial = new Map((feedback ?? []).map((item) => [item.material_id, item]))
-  const releaseByMaterial = new Map((jobs ?? []).filter((job) => job.material_id).map((job) => [job.material_id, job.release_at as string]))
   const firstMaterialWeekByChild = new Map(pages.map((page) => [page.childId, page.firstMaterialWeek]))
 
   const nextJobReleaseAtByChild: Record<string, string | null> = {}
@@ -281,11 +339,13 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
     materials: materials.map((material) => ({
       ...material,
       generation_summary: material.generation_summary as Record<string, unknown>,
-      release_at: releaseByMaterial.get(material.id) ?? null,
+      release_at: material.release_at ?? null,
       week_number: materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
       feedback: feedbackByMaterial.get(material.id) ?? null,
     })) as Material[],
-    hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, page.rows.length === limit])),
+    hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, offset + page.releasedRows.length < page.totalReleased])),
+    releasedCountByChild: Object.fromEntries(pages.map((page) => [page.childId, page.totalReleased])),
+    releasedLoadedByChild: Object.fromEntries(pages.map((page) => [page.childId, page.releasedRows.length])),
     nextJobReleaseAtByChild,
     hasPastDueUnmaterializedJobByChild,
   }

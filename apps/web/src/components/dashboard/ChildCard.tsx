@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ChildWithProfile } from '../../hooks/use-parent-data'
-import { isMaterialReleased, type Material } from '../../lib/materials'
+import { buildMaterialHistoryView, type Material } from '../../lib/materials'
 import { handleInternalLink } from '../../app/use-route'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import { getDeliveryViewModel } from '../../lib/delivery'
@@ -16,19 +16,17 @@ interface ChildCardProps {
   onRefresh: () => void
   onLoadMoreMaterials: () => void
   hasMoreMaterials: boolean
+  releasedMaterialCount: number
   loadingMoreMaterials: boolean
   defaultExpanded?: boolean
 }
 
-export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, hasMoreMaterials, loadingMoreMaterials, defaultExpanded = false }: ChildCardProps) {
+export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, hasMoreMaterials, releasedMaterialCount, loadingMoreMaterials, defaultExpanded = false }: ChildCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const releasedMaterials = materials.filter((material) => isMaterialReleased(material))
-  const latestMaterial = releasedMaterials[0] ?? null
-  const pastMaterials = releasedMaterials.slice(1)
-  const unreleasedMaterials = materials.filter((material) => !isMaterialReleased(material))
+  const { latestMaterial, pastMaterials, futureMaterials, historyCount } = buildMaterialHistoryView(materials, releasedMaterialCount)
   // The immediate next prepared material is the earliest unreleased one
-  const nextPreparedMaterial = unreleasedMaterials[unreleasedMaterials.length - 1] ?? null
+  const nextPreparedMaterial = futureMaterials[futureMaterials.length - 1] ?? null
   const delivery = getDeliveryViewModel(child, latestMaterial, nextPreparedMaterial, child.next_job_release_at, undefined, child.has_past_due_job)
 
   return (
@@ -107,14 +105,14 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             <button
               className="button-link text-link history-toggle-btn"
               type="button"
-              disabled={pastMaterials.length === 0}
+              disabled={historyCount === 0}
               aria-expanded={historyOpen}
-              aria-label={pastMaterials.length === 0 ? '目前沒有過往教材' : historyOpen ? '收起過往教材' : `查看過往教材，共 ${pastMaterials.length} 筆`}
-              data-history-label={pastMaterials.length === 0 ? '過往教材：目前還沒有' : historyOpen ? '收起過往教材' : `查看過往教材（${pastMaterials.length} 筆）`}
+              aria-label={historyCount === 0 ? '目前沒有過往教材' : historyOpen ? '收起過往教材' : `查看過往教材，共 ${historyCount} 筆`}
+              data-history-label={historyCount === 0 ? '過往教材：目前還沒有' : historyOpen ? '收起過往教材' : `查看過往教材（${historyCount} 筆）`}
               onClick={() => setHistoryOpen((prev) => !prev)}
             >
-              <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${pastMaterials.length} 份)`}</span>
-              {pastMaterials.length > 0 && <span className={`toggle-arrow ${historyOpen ? 'expanded' : ''}`}>▼</span>}
+              <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${historyCount} 份)`}</span>
+              {historyCount > 0 && <span className={`toggle-arrow ${historyOpen ? 'expanded' : ''}`}>▼</span>}
             </button>
 
             <AnimatePresence>

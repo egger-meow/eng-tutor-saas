@@ -1,6 +1,7 @@
 {
   "name": "@paper-english/pdf",
   "private": true,
+  "license": "UNLICENSED",
   "version": "0.0.0",
   "type": "module",
   "exports": "./src/index.ts",

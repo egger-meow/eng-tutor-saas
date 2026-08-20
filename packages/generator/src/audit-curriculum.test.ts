@@ -328,4 +328,25 @@ describe('curriculum audit & lexical contract', () => {
     expect(orgFinding).toBeDefined()
     expect(orgFinding?.severity).toBe('warning')
   })
+
+  it('treats short but non-blank answer explanations as warning-only', () => {
+    const pkg = canonicalPackage()
+    pkg.answers[0]!.explanationZh = '見首段。'
+
+    const report = auditCurriculumPackage(pkg)
+    const finding = report.findings.find((item) => item.dimension === 'answer-explanation-depth')
+
+    expect(finding?.severity).toBe('warning')
+    expect(report.findings.some((item) => item.dimension === 'answer-integrity' && item.severity === 'critical')).toBe(false)
+  })
+
+  it('still hard-rejects blank answer explanations through structural validation', () => {
+    const pkg = canonicalPackage()
+    pkg.answers[0]!.explanationZh = '   '
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    expect(report.findings.some((item) => item.tier === 'structural-critical' && item.severity === 'critical')).toBe(true)
+  })
 })

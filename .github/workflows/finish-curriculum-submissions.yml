@@ -16,9 +16,6 @@ jobs:
   finish:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -66,8 +63,14 @@ jobs:
         run: pnpm --filter @paper-english/pdf pdf:install
       - name: Validate required worker secrets
         shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: |
           test -n "$SUPABASE_URL" || { echo 'SUPABASE_URL is missing'; exit 1; }
           test -n "$SUPABASE_SECRET_KEY" || { echo 'SUPABASE_SECRET_KEY is missing'; exit 1; }
       - name: Audit, render, upload, and complete submitted packages
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: pnpm worker process-submissions --processor github-actions-finisher --limit 15

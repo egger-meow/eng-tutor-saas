@@ -336,7 +336,7 @@ export function auditCurriculumPackage(
   if (pkg.qualityEvidence.feedbackApplied.length === 0) add('semantic-critical', 'feedback-loop', 'critical', '沒有記錄本週如何使用回饋。')
   if (pkg.trackingDelta.hypothesesToVerify.length === 0) add('semantic-critical', 'tracking', 'critical', '沒有下一週待驗證假設。')
   if (pkg.metadata.inputFingerprint === 'unknown') add('semantic-critical', 'provenance', 'critical', '缺少可重現的 input fingerprint。')
-  if (pkg.answers.some((answer) => cjk(answer.explanationZh) < 4)) add('semantic-critical', 'answer-integrity', 'critical', '每個答案都需要能協助孩子自行訂正的簡短中文理由。')
+  if (pkg.answers.some((answer) => cjk(answer.explanationZh) < 4)) add('semantic-critical', 'answer-explanation-depth', 'warning', '部分答案的中文理由較短；建議補充足以協助孩子自行訂正的線索或規則。')
   const followUpCount = pkg.answers.filter((answer) => answer.followUpZh !== null).length
   if (followUpCount > Math.max(2, Math.ceil(pkg.answers.length / 4))) add('semantic-critical', 'parent-burden', 'warning', `有 ${followUpCount} 題要求額外追問；家長答案應以核對答案為主。`)
 

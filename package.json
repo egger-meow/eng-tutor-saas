@@ -1,6 +1,7 @@
 {
   "name": "eng-tutor-saas",
   "private": true,
+  "license": "UNLICENSED",
   "packageManager": "pnpm@11.16.0",
   "engines": {
     "node": ">=24"
