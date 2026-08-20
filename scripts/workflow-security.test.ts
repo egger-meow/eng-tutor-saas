@@ -2,11 +2,18 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const workflow = readFileSync(new URL('../.github/workflows/finish-curriculum-submissions.yml', import.meta.url), 'utf8')
-const deployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-workers.yml', import.meta.url), 'utf8')
+const productionWorkflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
+const devDeployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-workers.yml', import.meta.url), 'utf8')
 const wranglerConfig = JSON.parse(readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')) as {
   assets: { directory: string, not_found_handling: string }
   routes: Array<{ pattern: string, custom_domain: boolean }>
   workers_dev: boolean
+  env: {
+    dev: {
+      workers_dev: boolean
+      routes: Array<{ pattern: string, custom_domain: boolean }>
+    }
+  }
 }
 
 describe('Finisher workflow production secret scope', () => {
@@ -29,11 +36,25 @@ describe('Finisher workflow production secret scope', () => {
 })
 
 describe('Cloudflare Workers Static Assets deployment boundaries', () => {
-  it('deploys the root-based web build with SPA routing on the production domain', () => {
-    expect(deployWorkflow).toContain('url: https://paperbond.jjmowlab.com')
-    expect(deployWorkflow).toContain('command: deploy --config wrangler.jsonc')
-    expect(deployWorkflow).not.toContain('VITE_BASE_PATH')
-    expect(deployWorkflow).not.toContain('404.html')
+  it('gates production deployment on main CI verification', () => {
+    expect(productionWorkflow).toContain("if: github.event_name == 'push' && github.ref == 'refs/heads/main'")
+    expect(productionWorkflow).toContain('needs: verify')
+    expect(productionWorkflow).toContain('url: https://paperbond.jjmowlab.com')
+    expect(productionWorkflow).toContain('VITE_BASE_PATH: /')
+    expect(productionWorkflow).toContain('wrangler deploy --config wrangler.jsonc')
+    expect(productionWorkflow).not.toContain('wrangler deploy --config wrangler.jsonc --env dev')
+    expect(productionWorkflow).not.toContain('404.html')
+  })
+
+  it('deploys dev directly to its isolated Cloudflare environment', () => {
+    expect(devDeployWorkflow).toContain('branches: [dev]')
+    expect(devDeployWorkflow).toContain('url: https://dev.paperbond.jjmowlab.com')
+    expect(devDeployWorkflow).toContain('VITE_BASE_PATH: /')
+    expect(devDeployWorkflow).toContain('wrangler deploy --config wrangler.jsonc --env dev')
+    expect(devDeployWorkflow).not.toContain('404.html')
+  })
+
+  it('keeps root-based SPA routing isolated across production and dev domains', () => {
     expect(wranglerConfig.assets).toEqual({
       directory: 'apps/web/dist',
       not_found_handling: 'single-page-application',
@@ -42,13 +63,20 @@ describe('Cloudflare Workers Static Assets deployment boundaries', () => {
       pattern: 'paperbond.jjmowlab.com',
       custom_domain: true,
     })
+    expect(wranglerConfig.env.dev.routes).toContainEqual({
+      pattern: 'dev.paperbond.jjmowlab.com',
+      custom_domain: true,
+    })
     expect(wranglerConfig.workers_dev).toBe(false)
+    expect(wranglerConfig.env.dev.workers_dev).toBe(false)
   })
 
-  it('does not expose worker or Paddle server secrets to the browser build', () => {
-    expect(deployWorkflow).not.toMatch(/SUPABASE_(?:SECRET|SERVICE_ROLE)_KEY/u)
-    expect(deployWorkflow).not.toMatch(/PADDLE_(?:API_KEY|WEBHOOK_SECRET)/u)
-    expect(deployWorkflow).toContain('secrets.CLOUDFLARE_API_TOKEN')
-    expect(deployWorkflow).toContain('secrets.CLOUDFLARE_ACCOUNT_ID')
+  it('does not expose worker or Paddle server secrets to either browser build', () => {
+    for (const deployWorkflow of [productionWorkflow, devDeployWorkflow]) {
+      expect(deployWorkflow).not.toMatch(/SUPABASE_(?:SECRET|SERVICE_ROLE)_KEY/u)
+      expect(deployWorkflow).not.toMatch(/PADDLE_(?:API_KEY|WEBHOOK_SECRET)/u)
+      expect(deployWorkflow).toContain('secrets.CLOUDFLARE_API_TOKEN')
+      expect(deployWorkflow).toContain('secrets.CLOUDFLARE_ACCOUNT_ID')
+    }
   })
 })
