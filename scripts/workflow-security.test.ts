@@ -54,11 +54,11 @@ describe('Cloudflare Workers Static Assets deployment boundaries', () => {
     expect(devDeployWorkflow).not.toContain('404.html')
   })
 
-  it('reads browser build variables from the selected GitHub environment at runner time', () => {
+  it('maps repository browser variables into both deployment jobs', () => {
     for (const deployWorkflow of [productionWorkflow, devDeployWorkflow]) {
-      expect(deployWorkflow).not.toContain('${{ vars.VITE_SUPABASE_URL }}')
-      expect(deployWorkflow).not.toContain('${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}')
-      expect(deployWorkflow).not.toContain('${{ vars.VITE_PADDLE_CLIENT_TOKEN }}')
+      expect(deployWorkflow).toContain('VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}')
+      expect(deployWorkflow).toContain('VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}')
+      expect(deployWorkflow).toContain('VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}')
       expect(deployWorkflow).toContain('test -n "$VITE_SUPABASE_URL"')
       expect(deployWorkflow).toContain('test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"')
       expect(deployWorkflow).toContain('test -n "$VITE_PADDLE_CLIENT_TOKEN"')
