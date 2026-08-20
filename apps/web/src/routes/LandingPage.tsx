@@ -59,8 +59,8 @@ export function LandingPage() {
         <section className="landing-hero">
           <FadeInUp duration={0.4} className="hero-copy">
             <p className="eyebrow">給國小高年級到國中生的每週紙本英文教材</p>
-            <h1>
-              每週一份，<br /><em>只屬</em>於你孩子的英文教材。
+            <h1 className="hero-title">
+              <span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>
             </h1>
             <p className="lede"><strong>先讓孩子願意讀，再把英文能力真的練起來。</strong>紙屬英文會記得孩子的程度、學校進度、興趣與每週表現，讓教材不是重來，而是一路接著他往前。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
@@ -79,17 +79,17 @@ export function LandingPage() {
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
             <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
             <p>不是買一份固定教材。</p>
-            <strong>是一套會記得孩子、每週重新替他做教材的學習系統。</strong>
+            <strong><span>是一套會記得孩子、</span><span>每週重新替他做教材的</span><span>學習系統。</span></strong>
             <div className="paper-rule" />
             <small>AI 在背後記憶、調整與升級；孩子在紙上完成真正的學習。</small>
           </FadeInUp>
         </section>
 
-        <section className="outcome-strip" aria-label="孩子與家長得到的價值">
+        <StaggerContainer tag="section" className="outcome-strip" staggerDelay={0.09} aria-label="孩子與家長得到的價值">
           {abilityBenefits.map(([title, body], index) => (
-            <article key={title}><span>0{index + 1}</span><h2>{title}</h2><p>{body}</p></article>
+            <StaggerItem tag="article" key={title}><span>0{index + 1}</span><h2>{title}</h2><p>{body}</p></StaggerItem>
           ))}
-        </section>
+        </StaggerContainer>
 
         <section className="public-section week-story" id="personalization">
           <FadeInUp className="section-heading">

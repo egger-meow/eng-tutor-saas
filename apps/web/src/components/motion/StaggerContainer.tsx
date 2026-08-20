@@ -1,4 +1,4 @@
-import { motion, type HTMLMotionProps, type Variants } from 'framer-motion'
+import { motion, useReducedMotion, type HTMLMotionProps, type Variants } from 'framer-motion'
 import type { ReactNode } from 'react'
 
 const containerVariants: Variants = {
@@ -44,12 +44,14 @@ export function StaggerContainer({
   tag = 'div',
   ...props
 }: StaggerContainerProps) {
+  const reduceMotion = useReducedMotion()
   const Component = motionMap[tag] as typeof motion.div
   return (
     <Component
       variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      initial={reduceMotion ? false : 'hidden'}
+      whileInView={reduceMotion ? undefined : 'visible'}
+      viewport={{ once: true, amount: 0.12 }}
       custom={staggerDelay}
       className={className}
       {...props}
