@@ -20,7 +20,7 @@
 
 - [x] **P0-4：服務金鑰完全隔離與未授權存取測試 (Key Isolation & RLS Security)**
   - **狀態：** `CONFIRMED (Code Verified)`
-  - **說明：** 確認 `SUPABASE_SERVICE_ROLE_KEY` 絕無洩漏至前端 `apps/web` 或 GitHub Pages 打包檔案，所有跨家長存取阻斷測試（Negative Auth Tests）全數通過。
+  - **說明：** 確認 `SUPABASE_SERVICE_ROLE_KEY` 絕無洩漏至前端 `apps/web` 或 Cloudflare Pages 打包檔案，所有跨家長存取阻斷測試（Negative Auth Tests）全數通過。
 
 ---
 

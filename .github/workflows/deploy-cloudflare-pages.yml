@@ -1,4 +1,4 @@
-name: Deploy web to GitHub Pages
+name: Deploy web to Cloudflare Pages
 
 on:
   workflow_dispatch:
@@ -7,23 +7,23 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  deployments: write
 
 concurrency:
-  group: pages
+  group: cloudflare-pages-production
   cancel-in-progress: true
 
 jobs:
-  build:
-    environment: github-pages
+  deploy:
+    environment:
+      name: cloudflare-pages
+      url: https://paperbond.jjmowlab.com
     runs-on: ubuntu-latest
     env:
-      VITE_BASE_PATH: /eng-tutor-saas/
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}
-      VITE_PADDLE_ENV: sandbox
+      VITE_PADDLE_ENV: production
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -36,28 +36,15 @@ jobs:
       - name: Validate browser build configuration
         shell: bash
         run: |
-          test "$VITE_BASE_PATH" = "/eng-tutor-saas/"
           test -n "$VITE_SUPABASE_URL"
           test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
           test -n "$VITE_PADDLE_CLIENT_TOKEN"
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @paper-english/web build
-      - name: Add SPA deep-link fallback
-        run: cp apps/web/dist/index.html apps/web/dist/404.html
-      - uses: actions/configure-pages@v5
+      - name: Deploy production build
+        uses: cloudflare/wrangler-action@v3
         with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/web/dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web/dist --project-name=paperbond --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

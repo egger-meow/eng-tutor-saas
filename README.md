@@ -35,9 +35,9 @@ For local backend work, inspect available commands with `pnpm exec supabase --he
 
 ## Web application structure
 
-Public and authenticated route pages live in `apps/web/src/routes/`; reusable UI is grouped under `apps/web/src/components/`, and browser-safe Supabase access stays in `apps/web/src/lib/`. The current GitHub Pages deployment builds with `/eng-tutor-saas/` as its asset and router base. The deploy workflow copies the SPA entry to `404.html`, so direct links such as `/eng-tutor-saas/billing` keep working after refresh. The planned Cloudflare Pages target is `paperbond.jjmowlab.com`; before that later hosting migration, remove the hardcoded GitHub Pages base path and fallback assumptions in `.github/workflows/deploy-pages.yml`, Vite/router configuration, and related tests. This change does not migrate hosting yet.
+Public and authenticated route pages live in `apps/web/src/routes/`; reusable UI is grouped under `apps/web/src/components/`, and browser-safe Supabase access stays in `apps/web/src/lib/`. Production is a root-based Cloudflare Pages SPA at [paperbond.jjmowlab.com](https://paperbond.jjmowlab.com). The deployment workflow publishes `apps/web/dist` to the `paperbond` Pages project; Cloudflare Pages serves SPA deep links without a copied `404.html` fallback.
 
-Known dependencies for that later migration are: `VITE_BASE_PATH` and `404.html` handling in `.github/workflows/deploy-pages.yml`; repository-prefix expectations in route, auth-redirect, and E2E tests; the default release-email `SITE_URL` in `apps/admin/src/server/admin-service.ts`; and the hosted Auth redirect allow-list in `supabase/config.toml` and the production Supabase dashboard. They intentionally remain unchanged while GitHub Pages is still the active host.
+The deploy environment requires GitHub repository variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_PADDLE_CLIENT_TOKEN`, plus secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Worker and server credentials remain separate and must never be exposed through `VITE_*` variables. Set production Supabase Auth Site URL and redirect allow-list to `https://paperbond.jjmowlab.com`, set the admin/notification server `SITE_URL` to the same origin, and approve the domain in Paddle before production checkout.
 
 `pnpm test:e2e` is local-only and refuses non-local Supabase URLs. It creates a synthetic parent, child, and Week 1 job; renders and uploads both PDFs; verifies an authenticated signed download; submits feedback; confirms that Week 2 receives it; then removes all synthetic records and artifacts.
 
@@ -62,4 +62,4 @@ Production commands require `SUPABASE_URL` and a server-only `SUPABASE_SECRET_KE
 pnpm worker claim --worker local-operator
 ```
 
-See `docs/generation-workflow.md` for context and completion commands. Never expose the worker key in GitHub Pages or commit generated customer artifacts.
+See `docs/generation-workflow.md` for context and completion commands. Never expose the worker key in the Cloudflare Pages bundle or commit generated customer artifacts.

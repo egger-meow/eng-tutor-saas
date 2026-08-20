@@ -214,15 +214,15 @@ export function LandingPage() {
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
             <StaggerItem><article className="pdf-preview-card">
               <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
-              <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf`} target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
-                <iframe title="Student PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0`} /><span>放大查看真實教材 ↗</span>
+              <a className="pdf-preview" href="/samples/sample-week-1-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
+                <iframe title="Student PDF 教材預覽" src="/samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實教材 ↗</span>
               </a>
               <ul className="preview-notes"><li>清楚告訴孩子每一區怎麼做</li><li>自然閱讀、單字、文法、理解與回想練習</li></ul>
             </article></StaggerItem>
             <StaggerItem><article className="pdf-preview-card">
               <p className="document-label">Parent Answer PDF</p><h3>完整答案分開放，家長不用先備課</h3>
-              <a className="pdf-preview" href={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf`} target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
-                <iframe title="Parent Answer PDF 教材預覽" src={`${import.meta.env.BASE_URL}samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0`} /><span>放大查看真實解答 ↗</span>
+              <a className="pdf-preview" href="/samples/sample-week-1-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
+                <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實解答 ↗</span>
               </a>
               <ul className="preview-notes"><li>完整答案、簡短解釋與觀察重點</li><li>不用會教英文，也知道孩子卡在哪裡</li></ul>
             </article></StaggerItem>

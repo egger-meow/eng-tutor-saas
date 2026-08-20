@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { addBasePath } from '../../app/routes'
 import { handleInternalLink, useRoute } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 
@@ -27,7 +26,7 @@ export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }:
       <div className="header-inner">
         <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>
           <img
-            src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
+            src="/icon.png"
             alt=""
             className="brand-icon"
             width={30}

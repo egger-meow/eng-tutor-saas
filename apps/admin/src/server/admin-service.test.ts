@@ -1586,7 +1586,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       }
       process.env.RESEND_API_KEY = 'resend-test-key'
       process.env.EMAIL_FROM = '紙屬英文 <notify@example.com>'
-      process.env.SITE_URL = 'https://example.com/eng-tutor-saas'
+      process.env.SITE_URL = 'https://paperbond.jjmowlab.com'
       const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: async () => '' })
       vi.stubGlobal('fetch', fetchMock)
 
@@ -1597,7 +1597,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(mockClient.auth.admin.generateLink).toHaveBeenCalledWith({
         type: 'magiclink',
         email: 'parent@test.com',
-        options: { redirectTo: 'https://example.com/eng-tutor-saas/billing' },
+        options: { redirectTo: 'https://paperbond.jjmowlab.com/billing' },
       })
       expect(fetchMock).toHaveBeenCalledWith('https://api.resend.com/emails', expect.objectContaining({ method: 'POST' }))
       expect(updates).toContainEqual(expect.objectContaining({

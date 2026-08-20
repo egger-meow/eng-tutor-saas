@@ -3119,7 +3119,7 @@ Never expose them to:
 
 * browser JavaScript;
 * public repository;
-* static GitHub Pages bundle.
+* static Cloudflare Pages bundle.
 
 ---
 
@@ -3154,11 +3154,11 @@ unless genuinely necessary for debugging.
 
 # 154. Frontend Hosting
 
-Initial frontend hosting:
+Production frontend hosting:
 
-> **GitHub Pages**
+> **Cloudflare Pages at `https://paperbond.jjmowlab.com`**
 
-This is acceptable because the MVP frontend can be a static SPA.
+The MVP frontend remains a static SPA. It is built with root-relative routes and assets and deployed from GitHub Actions without browser access to server secrets.
 
 ---
 
@@ -3174,23 +3174,19 @@ The exact UI library is not a core product contract.
 
 ---
 
-# 156. GitHub Pages Routing
+# 156. Cloudflare Pages Routing
 
 Routing must work correctly when directly opening internal URLs.
 
-Implementation may use:
+Cloudflare Pages must serve the SPA entry for extensionless deep links such as `/dashboard`, `/children/:id`, and `/billing`.
 
-* GitHub Pages compatible SPA fallback;
-* hash routing;
-* equivalent static-host-safe routing.
-
-Do not ship a dashboard where browser refresh produces a GitHub 404.
+Do not restore the former repository-prefix base path or copied `404.html` workaround. Do not ship a dashboard where browser refresh produces a host-level 404.
 
 ---
 
 # 157. Backend Responsibilities
 
-GitHub Pages must not contain privileged backend logic.
+The Cloudflare Pages static bundle must not contain privileged backend logic.
 
 Backend / server-side responsibilities include:
 
@@ -3635,7 +3631,7 @@ GitHub Actions may handle:
 * type checking;
 * frontend build;
 * migration validation;
-* deployment to GitHub Pages.
+* deployment to Cloudflare Pages.
 
 MVP lesson generation remains orchestrated separately.
 
@@ -4133,7 +4129,7 @@ For weekly-material work specifically:
        ┌───────────┴───────────┐
        │                       │
        ▼                       ▼
-GitHub Pages                Worker
+Cloudflare Pages            Worker
 Parent frontend        Scheduled ChatGPT MVP
        │                       │
        └───────────┬───────────┘

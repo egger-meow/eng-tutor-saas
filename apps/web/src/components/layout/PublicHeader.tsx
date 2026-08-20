@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { addBasePath } from '../../app/routes'
 import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
@@ -22,7 +21,7 @@ export function PublicHeader() {
       <div className="header-inner">
         <a className="wordmark" href="/" onClick={handleInternalLink}>
           <img
-            src={addBasePath('/icon.png', import.meta.env.BASE_URL)}
+            src="/icon.png"
             alt=""
             className="brand-icon"
             width={30}

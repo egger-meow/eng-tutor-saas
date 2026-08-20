@@ -2555,7 +2555,7 @@ export class AdminService {
     const client = this.ensureClient()
     const resendApiKey = process.env.RESEND_API_KEY
     const emailFrom = process.env.EMAIL_FROM || '紙屬英文 <noreply@paperenglish.com>'
-    const siteUrl = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://egger-meow.github.io/eng-tutor-saas'
+    const siteUrl = process.env.SITE_URL || 'https://paperbond.jjmowlab.com'
 
     // Query only entries with notification_status = 'pending'
     const { data: pendingRows, error: pendingError } = await client

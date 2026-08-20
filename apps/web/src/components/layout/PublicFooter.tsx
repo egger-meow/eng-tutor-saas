@@ -1,4 +1,3 @@
-import { addBasePath } from '../../app/routes'
 import { handleInternalLink } from '../../app/use-route'
 import { legalConfig } from '../../lib/config'
 
@@ -31,7 +30,7 @@ export function PublicFooter() {
             <ul>
               <li>
                 <a
-                  href={addBasePath('/terms', import.meta.env.BASE_URL)}
+                  href="/terms"
                   onClick={handleInternalLink}
                 >
                   服務條款與定型化契約
@@ -39,7 +38,7 @@ export function PublicFooter() {
               </li>
               <li>
                 <a
-                  href={addBasePath('/privacy', import.meta.env.BASE_URL)}
+                  href="/privacy"
                   onClick={handleInternalLink}
                 >
                   隱私權政策與個資告知

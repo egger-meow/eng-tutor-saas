@@ -1,3 +1,3 @@
-export function buildAuthRedirectUrl(origin: string, basePath: string): string {
-  return new URL(basePath, `${origin.replace(/\/$/, '')}/`).toString()
+export function buildAuthRedirectUrl(origin: string): string {
+  return new URL('/', `${origin.replace(/\/$/, '')}/`).toString()
 }

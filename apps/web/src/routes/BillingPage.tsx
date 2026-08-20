@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { addBasePath } from '../app/routes'
 import { navigate } from '../app/use-route'
 import { ChildSubscription } from '../components/billing/ChildSubscription'
 import { AppShell } from '../components/layout/AppShell'
@@ -218,7 +217,7 @@ export function BillingPage({ session }: { session: Session }) {
               </div>
               <div className="paddle-checkout-frame" />
               <p className="checkout-security-note">
-                付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。完成付款即代表同意 <a href={addBasePath('/terms', import.meta.env.BASE_URL)} target="_blank" rel="noreferrer">服務條款</a> 與 <a href={addBasePath('/privacy', import.meta.env.BASE_URL)} target="_blank" rel="noreferrer">隱私權政策</a>。
+                付款資料由 Paddle 安全處理，紙屬英文不會接觸或保存完整卡號。完成付款即代表同意 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
               </p>
             </aside>
           )}

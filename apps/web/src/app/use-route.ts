@@ -1,10 +1,10 @@
 import { useEffect, useState, type MouseEvent } from 'react'
-import { addBasePath, parseRoute, stripBasePath, type Route } from './routes'
+import { parseRoute, type Route } from './routes'
 
 const routeChangeEvent = 'paper-english:route-change'
 
 export function navigate(path: string) {
-  const browserPath = addBasePath(path, import.meta.env.BASE_URL)
+  const browserPath = path.startsWith('/') ? path : `/${path}`
   const nextUrl = new URL(browserPath, window.location.origin)
   const currentUrl = new URL(window.location.href)
   const sameDocument = currentUrl.pathname === nextUrl.pathname && currentUrl.search === nextUrl.search
@@ -22,7 +22,7 @@ export function navigate(path: string) {
 }
 
 export function useRoute(): Route {
-  const readRoute = () => parseRoute(stripBasePath(window.location.pathname, import.meta.env.BASE_URL))
+  const readRoute = () => parseRoute(window.location.pathname)
   const [route, setRoute] = useState(readRoute)
 
   useEffect(() => {
@@ -43,5 +43,5 @@ export function handleInternalLink(event: MouseEvent<HTMLAnchorElement>) {
   const href = event.currentTarget.getAttribute('href')
   if (!href?.startsWith('/')) return
   event.preventDefault()
-  navigate(stripBasePath(href, import.meta.env.BASE_URL))
+  navigate(href)
 }

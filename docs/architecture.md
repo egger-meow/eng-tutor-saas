@@ -2,7 +2,7 @@
 
 ## System Boundaries
 
-- `apps/web`: static React/TypeScript parent portal deployed to GitHub Pages.
+- `apps/web`: static React/TypeScript parent portal deployed to Cloudflare Pages.
 - Supabase Auth: parent email OTP or magic-link sessions.
 - Supabase PostgreSQL: ownership, subscriptions, feedback, materials, operational settings, and generation queue.
 - Supabase Storage: private student and parent-answer PDFs.
@@ -18,9 +18,9 @@ Parent ownership is the authorization root. A child references its parent profil
 
 ## Deployment
 
-GitHub Actions validates every change. The Pages workflow builds only the SPA. Supabase migrations are reviewed and applied through an authorized environment; CI must not contain production database secrets by default.
+GitHub Actions validates every change. The Cloudflare Pages workflow builds and deploys only the SPA to `https://paperbond.jjmowlab.com`. Supabase migrations are reviewed and applied through an authorized environment; CI must not contain production database secrets by default.
 
-Vite's base path is configurable through `VITE_BASE_PATH` so project Pages (`/eng-tutor-saas/`) and custom-domain (`/`) deployments use the same build.
+Vite, application routes, assets, authentication callbacks, and release-email links are rooted at `/`. Cloudflare Pages provides the SPA deep-link fallback; the build must not contain the former GitHub Pages `404.html` copy.
 
 ## Design Principles
 

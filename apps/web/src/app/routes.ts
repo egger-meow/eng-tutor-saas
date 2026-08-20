@@ -35,18 +35,6 @@ const staticRoutes = new Map<string, RouteName>([
   ['/terms', 'terms'],
 ])
 
-export function stripBasePath(pathname: string, basePath: string): string {
-  const base = basePath === '/' ? '' : `/${basePath.replace(/^\/+|\/+$/g, '')}`
-  if (!base) return pathname || '/'
-  if (pathname === base) return '/'
-  return pathname.startsWith(`${base}/`) ? pathname.slice(base.length) : pathname
-}
-
-export function addBasePath(pathname: string, basePath: string): string {
-  const base = basePath === '/' ? '' : `/${basePath.replace(/^\/+|\/+$/g, '')}`
-  return `${base}${pathname.startsWith('/') ? pathname : `/${pathname}`}` || '/'
-}
-
 function cleanPath(pathname: string) {
   const withoutQuery = pathname.split(/[?#]/, 1)[0] || '/'
   return withoutQuery.length > 1 ? withoutQuery.replace(/\/+$/, '') : withoutQuery

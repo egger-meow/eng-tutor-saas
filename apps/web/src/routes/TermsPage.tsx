@@ -1,4 +1,3 @@
-import { addBasePath } from '../app/routes'
 import { handleInternalLink } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicFooter } from '../components/layout/PublicFooter'
@@ -144,7 +143,7 @@ export function TermsPage() {
             <section>
               <h2>第八條（個人資料保護與安全）</h2>
               <p>
-                本公司蒐集、處理及利用家長與學生個人資料之詳細規範，請參閱本網站公告之《<a href={addBasePath('/privacy', import.meta.env.BASE_URL)} onClick={handleInternalLink}>隱私權政策</a>》，該隱私權政策構成本契約之一部分。
+                本公司蒐集、處理及利用家長與學生個人資料之詳細規範，請參閱本網站公告之《<a href="/privacy" onClick={handleInternalLink}>隱私權政策</a>》，該隱私權政策構成本契約之一部分。
               </p>
             </section>
 

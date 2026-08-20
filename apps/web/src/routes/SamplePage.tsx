@@ -1,4 +1,3 @@
-import { addBasePath } from '../app/routes'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicFooter } from '../components/layout/PublicFooter'
 import { PublicHeader } from '../components/layout/PublicHeader'
@@ -8,7 +7,7 @@ import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 
 function publicAsset(filename: string) {
-  return addBasePath(`/samples/${filename}`, import.meta.env.BASE_URL)
+  return `/samples/${filename}`
 }
 
 export function SamplePage() {

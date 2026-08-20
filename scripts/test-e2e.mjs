@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: 'utf8', ...options })
@@ -24,10 +24,12 @@ if (result.status !== 0) process.exit(result.status ?? 1)
 if (!process.env.npm_execpath) throw new Error('test:e2e must be run through pnpm')
 run(process.execPath, [process.env.npm_execpath, '--filter', '@paper-english/web', 'build'], {
   stdio: 'inherit',
-  env: { ...process.env, VITE_BASE_PATH: '/eng-tutor-saas/' },
+  env: process.env,
 })
-copyFileSync('apps/web/dist/index.html', 'apps/web/dist/404.html')
-const hostedEntry = readFileSync('apps/web/dist/404.html', 'utf8')
-if (!hostedEntry.includes('/eng-tutor-saas/assets/')) {
-  throw new Error('Hosted SPA entry does not use the GitHub Pages repository base path')
+const hostedEntry = readFileSync('apps/web/dist/index.html', 'utf8')
+if (!hostedEntry.includes('/assets/')) {
+  throw new Error('Hosted SPA entry does not use root-based asset paths')
+}
+if (existsSync('apps/web/dist/404.html')) {
+  throw new Error('Cloudflare Pages build must not contain a GitHub Pages 404 fallback')
 }
