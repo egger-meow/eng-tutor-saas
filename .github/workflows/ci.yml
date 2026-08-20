@@ -46,14 +46,12 @@ jobs:
               cp -r /usr/share/fonts/truetype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
             fi
           fi
-
       - name: Cache Playwright Chromium
         id: cache-playwright
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
       - name: Install Playwright Chromium
         if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: pnpm --filter @paper-english/pdf pdf:install
@@ -74,7 +72,7 @@ jobs:
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}
-      VITE_PADDLE_ENV: production
+      VITE_PADDLE_ENV: sandbox
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -93,8 +91,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @paper-english/web build
       - name: Deploy production build
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config wrangler.jsonc
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npm install --global wrangler@4
+          wrangler deploy --config wrangler.jsonc
