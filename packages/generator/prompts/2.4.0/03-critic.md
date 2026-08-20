@@ -45,6 +45,10 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Without explicit repeat feedback or verified failure evidence, the package MUST introduce new grade-appropriate learning. Reject if prior exposed units are re-promoted to primary targets without failure evidence (they belong strictly in spaced review).
 18. **Exposure Is Never Weakness**:
     Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
+19. **Vocabulary Novelty & Review Truthfulness**:
+    Reject prior words labeled/recorded new. Require ≥7 meaningful grade-appropriate new cards and 0–4 due/evidence-backed, correctly tracked reviews (default 0).
+20. **Grammar Instruction Progression**:
+    The first grammar exposure is primary. Reject repetition without feedback, failure evidence, or prerequisite repair; use prior grammar naturally in retrieval/application.
 
 ---
 

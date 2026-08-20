@@ -1529,6 +1529,10 @@ Do not choose artificially easy words merely because the learner is in Grade 7.
 
 Do not choose obscure words only to make the worksheet appear advanced.
 
+Vocabulary cards should be almost entirely genuinely new, meaningful, grade-appropriate difficult words. A word already exposed in an earlier packet may recur naturally in reading, questions, examples, practice, or homework, but it must never be labeled `new` or consume the weekly new-word quota.
+
+Include **0–4 review cards, default 0**, only when a word is genuinely difficult/useful and due for spaced review or supported by actual difficulty evidence. Review cards do not consume the new-word quota and must be clearly labeled as review in the Student PDF.
+
 ---
 
 # 64. Core Vocabulary Defines Difficulty Ceiling
@@ -1592,6 +1596,8 @@ Selection should consider:
 * prerequisite concepts.
 
 Do not advance mechanically when a foundational concept remains weak.
+
+Primary grammar instruction should normally advance to a new grade-appropriate unit. Previously taught grammar should reappear naturally through retrieval and application without being promoted back to the main explanation. It may become primary again only when explicit feedback, actual failure evidence, or prerequisite repair justifies repetition.
 
 ---
 

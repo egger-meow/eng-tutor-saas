@@ -116,7 +116,7 @@ export const curriculumSample: CurriculumPackage = {
       pronunciationHint: null,
       exampleEn: `The team works with ${['a partner', 'a suggestion', 'a machine to sort', 'a camera', 'a plan to repeat', 'a clear result', 'a mistake'][index]}.`,
       exampleZh: '這是放進語境的例句。',
-      status: index === 1 ? 'repeated-miss' : 'new',
+      status: 'new',
     })),
     reading: {
       title: 'One Change at a Time',
@@ -209,4 +209,3 @@ if (process.argv[1]?.endsWith('generate-curriculum-sample.ts')) {
     process.exit(1)
   })
 }
-

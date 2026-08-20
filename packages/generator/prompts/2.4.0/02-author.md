@@ -178,6 +178,8 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
    - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
    - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+   - Provide ≥7 meaningful, difficult, grade-appropriate new cards. Prior words may recur, but never use `new`/`extension` or `introducedVocabularyIds`.
+   - Add 0–4 due/difficult review cards (default 0) as `review`/`repeated-miss` and `reviewedVocabularyIds`; exclude them from the new quota.
 2. **Lexical Ceiling Invariant**:
    - All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words into reading blocks.
 3. **Proper Nouns & Domain Terms**:
@@ -197,6 +199,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 ## 7. trackingDelta: Exposure Only (Schema 2.2.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
+The first `exposedGrammarTargetIds` entry is primary: normally new and grade-appropriate. Prior grammar belongs in retrieval/application unless feedback, failure evidence, or prerequisite repair justifies repetition.
 ```json
 {
   "trackingDelta": {
@@ -240,4 +243,3 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 ## 10. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
-

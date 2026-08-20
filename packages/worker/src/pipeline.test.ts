@@ -101,6 +101,45 @@ describe('completeCurriculumJob', () => {
     expect(state.uploads).toEqual([])
   })
 
+  it('rejects Kobe W6→W7 when coach, team, and practice are relabeled new', async () => {
+    const state = setup()
+    const week7 = structuredClone(curriculumSample) as CurriculumPackage
+    const priorWords = [
+      { id: 'v-coach', word: 'coach' },
+      { id: 'v-team', word: 'team' },
+      { id: 'v-practice', word: 'practice' },
+    ]
+    priorWords.forEach((prior, index) => {
+      week7.studentLesson.vocabulary[index]!.id = prior.id
+      week7.studentLesson.vocabulary[index]!.word = prior.word
+      week7.studentLesson.vocabulary[index]!.status = 'new'
+    })
+    week7.trackingDelta.introducedVocabularyIds = week7.studentLesson.vocabulary.map((item) => item.id)
+    week7.trackingDelta.reviewedVocabularyIds = []
+    const week7Context: GenerationContext = {
+      ...curriculumContext,
+      vocabularyCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: priorWords.map((item) => item.id),
+        recentlyMastered: [],
+        historicalCount: 3,
+      },
+    }
+    const render = vi.fn(async () => pdfs)
+
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: week7Context,
+      curriculumPackage: week7,
+      render,
+      inspect,
+    })).rejects.toThrow(/coach|team|practice/u)
+    expect(render).not.toHaveBeenCalled()
+    expect(state.uploads).toEqual([])
+  })
+
   it('uploads and completes an audited v2 package', async () => {
     const state = setup()
     await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')

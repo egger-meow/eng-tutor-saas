@@ -46,8 +46,11 @@ You receive:
 2. **Default Forward Progression (New Grade-Appropriate Target)**:
    - Without explicit conflicting feedback, **always prioritize new grade-appropriate learning**.
    - Select the next untaught primary grammar unit and new core vocabulary from `recommendedGrammar` and `recommendedVocabulary` (canonical progression).
+   - Cards are almost entirely meaningful, difficult, grade-appropriate new words. Prior words may recur naturally but never count as `new`.
+   - Add 0–4 due/evidence-backed review cards (default 0); label and count them separately.
 3. **Due Spaced Review (Consolidation, NOT Primary Target)**:
    - Previously taught units without failure belong strictly in **spaced review** (`dueReviewGrammar`, `learnerSnapshot.reviewDue`, `learningPlan.reviewStrategy`, retrieval/homework practice), NEVER as the primary instruction target.
+   - Let prior grammar recur through retrieval/application. Repeat it as primary only for explicit feedback, failure evidence, or prerequisite repair.
 4. **High-Value CAP 3-Year Coverage Gaps (Within Grade-Level Range)**:
    - Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
    - *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*

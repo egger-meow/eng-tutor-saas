@@ -4,6 +4,7 @@ import {
   buildDiversityCapsule,
   createEmptyStudentCurriculumStore,
   findForbiddenPersonalizationJargon,
+  getGrammarUnit,
   parseWeeklyLesson,
   recordExposureFromTrackingDelta,
   validateCurriculumPackage,
@@ -43,6 +44,7 @@ export type GenerationContext = {
     dueForReview: string[]
     weakRecent: string[]
     uncertain: string[]
+    recentlyMastered?: string[]
     historicalCount: number
   }
   communicationCapsule?: {
@@ -63,6 +65,75 @@ export type GenerationContext = {
   diversityCapsule?: DiversityCapsule
   recentHistory?: HistoricalPackageSummary[]
   [key: string]: unknown
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
+
+function progressionSet(capsule: Record<string, unknown> | undefined, keys: string[]): Set<string> {
+  return new Set(keys.flatMap((key) => stringArray(capsule?.[key])))
+}
+
+function feedbackExplicitlyRequestsGrammarRepair(context: GenerationContext): boolean {
+  const feedback = context.feedback
+  if (!feedback || typeof feedback !== 'object') return false
+  const text = JSON.stringify(feedback).toLocaleLowerCase()
+  return /grammar|文法|repeat|again|review|複習|再練|重做|不熟|錯|弱/u.test(text)
+}
+
+/** Context-aware publish gate: package-only schema validation cannot detect week-over-week regressions. */
+export function forwardProgressionIssues(pkg: CurriculumPackage, context: GenerationContext): CurriculumFailureEvidence['findings'] {
+  const findings: CurriculumFailureEvidence['findings'] = []
+  const vocabCapsule = context.vocabularyCapsule as Record<string, unknown> | undefined
+  const knownVocabulary = progressionSet(vocabCapsule, ['dueForReview', 'weakRecent', 'uncertain', 'recentlyMastered'])
+  const dueVocabulary = progressionSet(vocabCapsule, ['dueForReview', 'weakRecent'])
+  const introduced = new Set(pkg.trackingDelta.introducedVocabularyIds)
+  const reviewed = new Set(pkg.trackingDelta.reviewedVocabularyIds)
+  const reviewCards = pkg.studentLesson.vocabulary.filter((item) => item.status === 'review' || item.status === 'repeated-miss')
+  const newCards = pkg.studentLesson.vocabulary.filter((item) => item.status === 'new' || item.status === 'extension')
+
+  if (reviewCards.length > 4) {
+    findings.push({ source: 'validation', dimension: 'forward-progression', path: 'studentLesson.vocabulary', message: `Review vocabulary is capped at 4 cards; received ${reviewCards.length}.` })
+  }
+  if (newCards.length < 7) {
+    findings.push({ source: 'validation', dimension: 'forward-progression', path: 'studentLesson.vocabulary', message: `The new-word quota requires at least 7 genuinely new cards; received ${newCards.length}.` })
+  }
+  for (const item of pkg.studentLesson.vocabulary) {
+    const wasExposed = knownVocabulary.has(item.id)
+    if (wasExposed && (item.status === 'new' || item.status === 'extension')) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: `studentLesson.vocabulary.${item.id}`, message: `Previously exposed vocabulary "${item.word}" cannot be labeled new or consume the new-word quota.` })
+    }
+    if ((item.status === 'new' || item.status === 'extension') && !introduced.has(item.id)) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.introducedVocabularyIds', message: `New vocabulary card "${item.word}" is missing from introducedVocabularyIds.` })
+    }
+    if ((item.status === 'review' || item.status === 'repeated-miss') && !reviewed.has(item.id)) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.reviewedVocabularyIds', message: `Review vocabulary card "${item.word}" is missing from reviewedVocabularyIds.` })
+    }
+    if ((item.status === 'review' || item.status === 'repeated-miss') && knownVocabulary.size > 0 && !dueVocabulary.has(item.id)) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: `studentLesson.vocabulary.${item.id}`, message: `Review vocabulary "${item.word}" is not due or supported by actual difficulty evidence.` })
+    }
+  }
+  for (const id of introduced) {
+    if (knownVocabulary.has(id)) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.introducedVocabularyIds', message: `Previously exposed vocabulary ID "${id}" cannot consume the new-word quota.` })
+    }
+  }
+
+  const grammarCapsule = context.grammarCapsule as Record<string, unknown> | undefined
+  const knownGrammar = progressionSet(grammarCapsule, ['dueForReview', 'weakRecent', 'uncertain', 'recentlyMastered'])
+  const weakGrammar = progressionSet(grammarCapsule, ['weakRecent'])
+  const primaryGrammar = pkg.trackingDelta.exposedGrammarTargetIds[0]
+  if (primaryGrammar && knownGrammar.has(primaryGrammar) && !weakGrammar.has(primaryGrammar) && !feedbackExplicitlyRequestsGrammarRepair(context)) {
+    const recommended = stringArray((context.capCoverageCapsule as Record<string, unknown> | undefined)?.recommendedGrammar)
+    const prerequisiteRepair = recommended.some((id) => getGrammarUnit(id)?.prerequisites.includes(primaryGrammar))
+      && !progressionSet(grammarCapsule, ['recentlyMastered']).has(primaryGrammar)
+    if (!prerequisiteRepair) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.exposedGrammarTargetIds.0', message: `Previously exposed grammar "${primaryGrammar}" cannot be primary again without explicit feedback, actual failure evidence, or prerequisite repair.` })
+    }
+  }
+
+  return findings
 }
 
 type RpcResult = Promise<{ data: unknown; error: { message: string } | null }>
@@ -446,6 +517,11 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     })
     const pkg = parsed.curriculumPackage
     assertCurriculumMatchesContext(pkg, input.context)
+    const progressionFindings = forwardProgressionIssues(pkg, input.context)
+    if (progressionFindings.length > 0) throw new CurriculumQualityError({
+      failureType: 'QUALITY_REJECTED',
+      findings: progressionFindings,
+    })
     const audit = auditCurriculumPackage(pkg)
     if (!audit.passed) {
       const findings = audit.findings.filter((finding) => finding.severity === 'critical')

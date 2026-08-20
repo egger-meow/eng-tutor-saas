@@ -5,10 +5,10 @@ promptVersion: "2.4.0"
 engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "a78a7e08f520545decef9ddb6116d99d7a80d00380bd8716c722c9ad9ab058e7"
-  "packages/generator/prompts/2.4.0/02-author.md": "b78804f9237dec447cf535a9073c2a3e30c532ae984d08f237836521497f6b66"
-  "packages/generator/prompts/2.4.0/03-critic.md": "5045a665f47db94fecc7defe1b60206e53ac7c3bc7d4e0b3876a2fc3334979fc"
-  "packages/generator/prompts/2.4.0/04-repair.md": "1a1fcc8b44bff9759f8aa31ca7fc0401bb35406553501a3a4d241e1af5a40da8"
+  "packages/generator/prompts/2.4.0/01-plan.md": "a397c07272bcf959f2459f600b0ece207d7bcbfd450028d6999a9fe3c748171e"
+  "packages/generator/prompts/2.4.0/02-author.md": "2da2f2abecc7743f6c5dd5c83a984a2c28dc29fc1992a86678d69a8983a38bfd"
+  "packages/generator/prompts/2.4.0/03-critic.md": "66b1ba9171dbbd942e9a38e8a6622f970005aff50124d305aaf4b76327152c2b"
+  "packages/generator/prompts/2.4.0/04-repair.md": "37df8b7050d667f31204b1df22c579eceeefd18d16f3d292e94de1967181599a"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
@@ -541,8 +541,11 @@ You receive:
 2. **Default Forward Progression (New Grade-Appropriate Target)**:
    - Without explicit conflicting feedback, **always prioritize new grade-appropriate learning**.
    - Select the next untaught primary grammar unit and new core vocabulary from `recommendedGrammar` and `recommendedVocabulary` (canonical progression).
+   - Cards are almost entirely meaningful, difficult, grade-appropriate new words. Prior words may recur naturally but never count as `new`.
+   - Add 0–4 due/evidence-backed review cards (default 0); label and count them separately.
 3. **Due Spaced Review (Consolidation, NOT Primary Target)**:
    - Previously taught units without failure belong strictly in **spaced review** (`dueReviewGrammar`, `learnerSnapshot.reviewDue`, `learningPlan.reviewStrategy`, retrieval/homework practice), NEVER as the primary instruction target.
+   - Let prior grammar recur through retrieval/application. Repeat it as primary only for explicit feedback, failure evidence, or prerequisite repair.
 4. **High-Value CAP 3-Year Coverage Gaps (Within Grade-Level Range)**:
    - Select from `recommendedCommunicationFunctions`, `recommendedGrammar`, and `recommendedVocabulary`.
    - *Never jump ahead to advanced Grade 9 structures (e.g. passive voice) for Grade 7 learners solely because of coverage gaps.*
@@ -830,6 +833,8 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
    - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
    - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+   - Provide ≥7 meaningful, difficult, grade-appropriate new cards. Prior words may recur, but never use `new`/`extension` or `introducedVocabularyIds`.
+   - Add 0–4 due/difficult review cards (default 0) as `review`/`repeated-miss` and `reviewedVocabularyIds`; exclude them from the new quota.
 2. **Lexical Ceiling Invariant**:
    - All non-target words in the reading passage must fall within Taiwan's official 2,000 junior-high vocabulary scope. Never inject obscure, high-school-level untaught words into reading blocks.
 3. **Proper Nouns & Domain Terms**:
@@ -849,6 +854,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 ## 7. trackingDelta: Exposure Only (Schema 2.2.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
+The first `exposedGrammarTargetIds` entry is primary: normally new and grade-appropriate. Prior grammar belongs in retrieval/application unless feedback, failure evidence, or prerequisite repair justifies repetition.
 ```json
 {
   "trackingDelta": {
@@ -941,6 +947,10 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Without explicit repeat feedback or verified failure evidence, the package MUST introduce new grade-appropriate learning. Reject if prior exposed units are re-promoted to primary targets without failure evidence (they belong strictly in spaced review).
 18. **Exposure Is Never Weakness**:
     Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
+19. **Vocabulary Novelty & Review Truthfulness**:
+    Reject prior words labeled/recorded new. Require ≥7 meaningful grade-appropriate new cards and 0–4 due/evidence-backed, correctly tracked reviews (default 0).
+20. **Grammar Instruction Progression**:
+    The first grammar exposure is primary. Reject repetition without feedback, failure evidence, or prerequisite repair; use prior grammar naturally in retrieval/application.
 
 ---
 
@@ -981,6 +991,7 @@ When fixing validation or critic findings in a curriculum package:
 5. **ID & Atomic Q&A Integrity**: Guarantee question IDs match answer objects and targets exist in `learningPlan.targets`.
 6. **Enforce Feedback Authority**: If parent or student feedback requested specific adjustments (repeat, avoid, simplify, deepen, focus), ensure the repaired package strictly honors them.
 7. **Maintain Forward Progression**: Unless repeating is explicitly requested by feedback or justified by actual failure evidence, ensure the primary instruction target is a new grade-appropriate unit and prior units remain in spaced review.
+8. **Repair Vocabulary Novelty**: Replace prior `new` cards; keep 0–4 due/evidence-backed labeled reviews (default 0) and exact, disjoint tracking arrays.
 
 ---
 

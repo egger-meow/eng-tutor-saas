@@ -37,6 +37,8 @@ describe('vocabulary-renderer', () => {
     expect(html).toContain('Mina 和搭檔一起測試這台機器。')
     expect(html).toContain('class="vocab-word">suggest</span>')
     expect(html).toContain('class="vocab-pos">(v.)</span>')
+    expect(html).toContain('class="vocab-status vocab-status-review">複習</span>')
+    expect(html.match(/vocab-status-review/gu)).toHaveLength(1)
   })
 
   it('returns empty string if vocabulary is empty or undefined', () => {

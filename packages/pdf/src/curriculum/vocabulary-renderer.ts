@@ -12,12 +12,16 @@ function formatPos(pos: string): string {
 function renderVocabEntry(item: VocabularyItem): string {
   const posFormatted = formatPos(item.partOfSpeech)
   const exampleZhHtml = item.exampleZh ? `<div class="vocab-example-zh">${h(item.exampleZh)}</div>` : ''
+  const reviewLabel = item.status === 'review' || item.status === 'repeated-miss'
+    ? '<span class="vocab-status vocab-status-review">複習</span>'
+    : ''
 
   return `<article class="vocab-entry">
   <div class="vocab-header">
     <div class="vocab-word-group">
       <span class="vocab-word">${h(item.word)}</span>
       <span class="vocab-pos">${h(posFormatted)}</span>
+      ${reviewLabel}
     </div>
     <span class="vocab-meaning">${h(item.meaningZh)}</span>
   </div>

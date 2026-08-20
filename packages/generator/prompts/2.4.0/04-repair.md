@@ -18,6 +18,7 @@ When fixing validation or critic findings in a curriculum package:
 5. **ID & Atomic Q&A Integrity**: Guarantee question IDs match answer objects and targets exist in `learningPlan.targets`.
 6. **Enforce Feedback Authority**: If parent or student feedback requested specific adjustments (repeat, avoid, simplify, deepen, focus), ensure the repaired package strictly honors them.
 7. **Maintain Forward Progression**: Unless repeating is explicitly requested by feedback or justified by actual failure evidence, ensure the primary instruction target is a new grade-appropriate unit and prior units remain in spaced review.
+8. **Repair Vocabulary Novelty**: Replace prior `new` cards; keep 0–4 due/evidence-backed labeled reviews (default 0) and exact, disjoint tracking arrays.
 
 ---
 
