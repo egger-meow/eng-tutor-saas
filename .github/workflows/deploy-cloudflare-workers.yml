@@ -1,29 +1,30 @@
-name: Deploy web to Cloudflare Workers
+name: Deploy dev to Cloudflare Workers
 
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [dev]
 
 permissions:
   contents: read
   deployments: write
 
 concurrency:
-  group: cloudflare-workers-production
+  group: cloudflare-workers-dev
   cancel-in-progress: true
 
 jobs:
   deploy:
     environment:
-      name: cloudflare-workers
-      url: https://paperbond.jjmowlab.com
+      name: cloudflare-workers-dev
+      url: https://dev.paperbond.jjmowlab.com
     runs-on: ubuntu-latest
     env:
+      VITE_BASE_PATH: /
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}
-      VITE_PADDLE_ENV: production
+      VITE_PADDLE_ENV: sandbox
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -41,9 +42,9 @@ jobs:
           test -n "$VITE_PADDLE_CLIENT_TOKEN"
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @paper-english/web build
-      - name: Deploy production build
-        uses: cloudflare/wrangler-action@v3
+      - name: Deploy dev build
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --config wrangler.jsonc
+          command: deploy --config wrangler.jsonc --env dev
