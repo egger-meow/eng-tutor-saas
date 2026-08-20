@@ -318,6 +318,19 @@ export async function handleApiRequest(
       return true
     }
 
+    if (pathname === '/api/waitlist/retry-notifications') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+
+      const result = await service.retryFailedNotifications()
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
     // 2. Read GET endpoints
     if (req.method !== 'GET') {
       res.statusCode = 405

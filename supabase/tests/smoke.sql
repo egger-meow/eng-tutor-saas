@@ -1269,6 +1269,153 @@ begin
     raise exception 'initial generation job was not enqueued for converted child';
   end if;
 
+  -- ══════════════════════════════════════════════════════════════════════════
+  -- 13. Production Blocker Regressions
+  -- ══════════════════════════════════════════════════════════════════════════
+
+  -- 13a. Admission gate must count released children toward capacity.
+  -- Currently capacity=2, active=1 (test child 99, but child 77 is now also active via subscription)
+  -- Let's set capacity=2 and already have 2 active subscriptions, then try adding another child.
+  -- Reset: child 77 is now 'converted' with active subscription, child 99 has subscription.
+  -- capacity=2, active=2 → new child should go to waitlist even without any released children.
+  update public.enrollment_settings set capacity = 2 where key = 'default';
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000088',
+    '00000000-0000-0000-0000-000000000001',
+    'Blocker Test Student',
+    7,
+    'grade_7'
+  );
+
+  -- Child 88 should be waitlisted since active=2 (children 99+77) fills capacity=2
+  if not exists (
+    select 1 from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000088'
+      and status = 'waiting'
+  ) then
+    raise exception 'REGRESSION: child was not waitlisted when active count equals capacity';
+  end if;
+
+  -- 13b. Now test released children consuming capacity:
+  -- Raise capacity to 3 and release child 88 → active=2, released=1, remaining should be 0
+  perform public.admin_raise_capacity_and_release(3, true);
+
+  if (
+    select status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000088'
+  ) <> 'released' then
+    raise exception 'REGRESSION: child 88 was not released after capacity raise';
+  end if;
+
+  -- Verify notification_status was set to 'pending' on release
+  if (
+    select notification_status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000088'
+  ) <> 'pending' then
+    raise exception 'REGRESSION: notification_status was not set to pending on release';
+  end if;
+
+  -- Now capacity=3, active=2, released=1 → remaining should be 0
+  -- Adding another child should go to waitlist
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000066',
+    '00000000-0000-0000-0000-000000000001',
+    'Released Cap Test Student',
+    9,
+    'grade_9'
+  );
+
+  if not exists (
+    select 1 from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000066'
+      and status = 'waiting'
+  ) then
+    raise exception 'REGRESSION: child was NOT waitlisted when active+released fills capacity (released children must count toward capacity)';
+  end if;
+
+  -- 13c. Verify get_enrollment_state remaining accounts for released children
+  declare
+    v_remaining integer;
+  begin
+    select remaining into v_remaining from public.get_enrollment_state();
+    if v_remaining <> 0 then
+      raise exception 'REGRESSION: get_enrollment_state remaining should be 0 when active+released=capacity, got %', v_remaining;
+    end if;
+  end;
+
+  -- 13d. Webhook must reject subscription for child in 'waiting' status
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_block_waiting_01', 'subscription.created', now(),
+      '00000000-0000-0000-0000-000000000066',
+      'sub_block_waiting_01', 'ctm_block_waiting_01', 'active',
+      'standard_monthly', 'month', 499,
+      now(), now() + interval '1 month', false
+    );
+  exception
+    when others then
+      blocked := true;
+  end;
+
+  if not blocked then
+    raise exception 'REGRESSION: process_paddle_subscription_event must reject subscription for child in waiting status';
+  end if;
+
+  -- Verify waiting child has no subscription and no generation job
+  if exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000066'
+  ) then
+    raise exception 'REGRESSION: waiting child must not have a subscription after rejected webhook';
+  end if;
+
+  if exists (
+    select 1 from public.generation_jobs
+    where child_id = '00000000-0000-0000-0000-000000000066'
+  ) then
+    raise exception 'REGRESSION: waiting child must not have a generation job after rejected webhook';
+  end if;
+
+  -- 13e. Webhook with canceled status should NOT convert released child or create job
+  -- Release child 66 first to test
+  perform public.admin_raise_capacity_and_release(4, true);
+
+  if (
+    select status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000066'
+  ) <> 'released' then
+    raise exception 'REGRESSION: child 66 was not released for canceled-webhook test';
+  end if;
+
+  -- Send a canceled subscription event → should NOT convert or create job
+  perform public.process_paddle_subscription_event(
+    'evt_cancel_test_01', 'subscription.canceled', now(),
+    '00000000-0000-0000-0000-000000000066',
+    'sub_cancel_test_01', 'ctm_cancel_test_01', 'canceled',
+    'standard_monthly', 'month', 499,
+    now(), now() + interval '1 month', false
+  );
+
+  -- Status should remain 'released' (not converted) because canceled is not an activated status
+  if (
+    select status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000066'
+  ) <> 'released' then
+    raise exception 'REGRESSION: released child should NOT be converted on a canceled subscription webhook';
+  end if;
+
+  -- No generation job should exist for this child
+  if exists (
+    select 1 from public.generation_jobs
+    where child_id = '00000000-0000-0000-0000-000000000066'
+  ) then
+    raise exception 'REGRESSION: generation job should not be created for canceled subscription webhook';
+  end if;
+
   -- Clean up
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;

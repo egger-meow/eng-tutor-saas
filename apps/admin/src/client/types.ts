@@ -665,6 +665,7 @@ export interface TestPdfSignedUrlResult {
 }
 
 export type WaitlistStatus = 'waiting' | 'released' | 'converted' | 'canceled'
+export type NotificationStatus = 'none' | 'pending' | 'sent' | 'failed' | 'manual'
 
 export interface WaitlistEntry {
   id: string
@@ -679,6 +680,10 @@ export interface WaitlistEntry {
   releasedAt: string | null
   convertedAt: string | null
   notes: string | null
+  notificationStatus: NotificationStatus
+  notificationError: string | null
+  notificationAttempts: number
+  notifiedAt: string | null
 }
 
 export interface WaitlistData {
@@ -687,6 +692,8 @@ export interface WaitlistData {
   releasedCount: number
   waitingCount: number
   convertedCount: number
+  pendingNotificationCount: number
+  failedNotificationCount: number
   entries: WaitlistEntry[]
 }
 
@@ -698,6 +705,7 @@ export interface RaiseCapacityAndReleaseResult {
   waitingCount?: number
   releasedInThisRun?: number
   emailsDispatched?: number
+  notificationsFailed?: number
   error?: string
   message?: string
 }
@@ -706,6 +714,7 @@ export interface ReleaseWaitlistResult {
   success: boolean
   releasedCount?: number
   emailsDispatched?: number
+  notificationsFailed?: number
   error?: string
   message?: string
 }
@@ -713,6 +722,14 @@ export interface ReleaseWaitlistResult {
 export interface UpdateCapacityResult {
   success: boolean
   capacity?: number
+  error?: string
+  message?: string
+}
+
+export interface RetryNotificationResult {
+  success: boolean
+  emailsDispatched?: number
+  notificationsFailed?: number
   error?: string
   message?: string
 }

@@ -29,11 +29,94 @@ import {
   type RaiseCapacityAndReleaseResult,
   type ReleaseWaitlistResult,
   type UpdateCapacityResult,
+  type RetryNotificationResult,
   type QualityEra,
   type EraTag,
   type AdminConfig,
   classifyQualityEra,
 } from '../client/types.js'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Waitlist release email — HTML generator and transactional email dispatch
+// ─────────────────────────────────────────────────────────────────────────────
+
+function buildReleaseEmailHtml(magicLinkUrl: string): string {
+  return `<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>紙屬英文 — 學習名額已為您開放</title>
+  </head>
+  <body style="margin:0;background:#f4f0e6;color:#24382f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">您的紙屬英文學習名額已開放，立即前往啟用訂閱。</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f0e6;padding:32px 16px;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fffdf7;border:1px solid #ded7c7;border-radius:16px;overflow:hidden;">
+          <tr><td style="background:#173f35;padding:24px 32px;color:#fffdf7;font-family:Georgia,'Noto Serif TC',serif;font-size:26px;font-weight:700;">紙屬英文</td></tr>
+          <tr><td style="padding:36px 32px;">
+            <h1 style="margin:0 0 16px;font-size:24px;line-height:1.4;">學習名額已為您開放</h1>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.8;">親愛的家長您好：<br>感謝您的耐心等候！我們已開放新一批學習名額，目前已為孩子完成名額保留。您可以立即登入系統確認學習計畫並完成訂閱啟用。</p>
+            <p style="margin:28px 0;text-align:center;"><a href="${magicLinkUrl}" style="display:inline-block;background:#c96c43;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 26px;border-radius:999px;">立即前往啟用訂閱</a></p>
+            <p style="margin:0 0 12px;font-size:14px;line-height:1.7;color:#617068;">若按鈕無法使用，請複製以下連結到瀏覽器：<br><a href="${magicLinkUrl}" style="color:#246451;word-break:break-all;">${magicLinkUrl}</a></p>
+            <p style="margin:24px 0 0;padding-top:20px;border-top:1px solid #e5dfd2;font-size:14px;line-height:1.7;color:#617068;">如果您目前暫無訂閱需求，可直接忽略這封信件，名額將保留給其他有需要的家長。</p>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>`
+}
+
+interface EmailDispatchResult {
+  waitlistId: string
+  success: boolean
+  error?: string
+}
+
+async function sendReleaseEmail(
+  client: SupabaseClient,
+  entry: { waitlistId: string; email: string },
+  siteUrl: string,
+  resendApiKey: string,
+  emailFrom: string,
+): Promise<EmailDispatchResult> {
+  try {
+    // 1. Generate magic-link URL via Supabase Auth admin
+    const { data: linkData, error: linkError } = await client.auth.admin.generateLink({
+      type: 'magiclink',
+      email: entry.email,
+      options: { redirectTo: `${siteUrl}/billing` },
+    })
+    if (linkError || !linkData?.properties?.action_link) {
+      return { waitlistId: entry.waitlistId, success: false, error: `generateLink failed: ${linkError?.message || 'no action_link returned'}` }
+    }
+    const magicLinkUrl = linkData.properties.action_link
+
+    // 2. Send via Resend API
+    const html = buildReleaseEmailHtml(magicLinkUrl)
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: emailFrom,
+        to: [entry.email],
+        subject: '紙屬英文 — 學習名額已為您開放',
+        html,
+      }),
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      return { waitlistId: entry.waitlistId, success: false, error: `Resend ${res.status}: ${body.slice(0, 200)}` }
+    }
+    return { waitlistId: entry.waitlistId, success: true }
+  } catch (err: any) {
+    return { waitlistId: entry.waitlistId, success: false, error: err?.message || 'Unknown email dispatch error' }
+  }
+}
 
 function loadRootEnv() {
   const possiblePaths = [
@@ -2439,11 +2522,17 @@ export class AdminService {
       releasedAt: row.released_at,
       convertedAt: row.converted_at,
       notes: row.notes,
+      notificationStatus: row.notification_status ?? 'none',
+      notificationError: row.notification_error ?? null,
+      notificationAttempts: row.notification_attempts ?? 0,
+      notifiedAt: row.notified_at ?? null,
     }))
 
     const releasedCount = entries.filter((e) => e.status === 'released').length
     const waitingCount = entries.filter((e) => e.status === 'waiting').length
     const convertedCount = entries.filter((e) => e.status === 'converted').length
+    const pendingNotificationCount = entries.filter((e) => e.notificationStatus === 'pending').length
+    const failedNotificationCount = entries.filter((e) => e.notificationStatus === 'failed').length
 
     return {
       capacity,
@@ -2451,7 +2540,130 @@ export class AdminService {
       releasedCount,
       waitingCount,
       convertedCount,
+      pendingNotificationCount,
+      failedNotificationCount,
       entries,
+    }
+  }
+
+  /**
+   * Dispatch release notification emails for waitlist entries with notification_status = 'pending'.
+   * Uses Supabase Auth generateLink() for magic-link URLs + Resend API for transactional email.
+   * If RESEND_API_KEY is not configured, sets all pending entries to 'manual' status honestly.
+   */
+  async dispatchPendingReleaseNotifications(): Promise<{ sent: number; failed: number; manual: number }> {
+    const client = this.ensureClient()
+    const resendApiKey = process.env.RESEND_API_KEY
+    const emailFrom = process.env.EMAIL_FROM || '紙屬英文 <noreply@paperenglish.com>'
+    const siteUrl = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://egger-meow.github.io/eng-tutor-saas'
+
+    // Query only entries with notification_status = 'pending'
+    const { data: pendingRows, error: pendingError } = await client
+      .from('waitlist')
+      .select('id, email, notification_attempts')
+      .eq('notification_status', 'pending')
+
+    if (pendingError) {
+      throw new Error(`Failed to load pending waitlist notifications: ${pendingError.message}`)
+    }
+
+    const pending = (pendingRows || []) as { id: string; email: string; notification_attempts: number | null }[]
+    if (pending.length === 0) return { sent: 0, failed: 0, manual: 0 }
+
+    // If no provider configured, fail honestly into manual state
+    if (!resendApiKey) {
+      console.log('[AUDIT] waitlist_notification_manual: no RESEND_API_KEY configured, marking', pending.length, 'entries as manual')
+      const { error: manualUpdateError } = await client
+        .from('waitlist')
+        .update({ notification_status: 'manual', notification_error: 'No email provider configured (RESEND_API_KEY missing)' })
+        .eq('notification_status', 'pending')
+      if (manualUpdateError) {
+        throw new Error(`Failed to mark waitlist notifications for manual delivery: ${manualUpdateError.message}`)
+      }
+      return { sent: 0, failed: 0, manual: pending.length }
+    }
+
+    let sent = 0
+    let failed = 0
+
+    for (const row of pending) {
+      const result = await sendReleaseEmail(
+        client,
+        { waitlistId: row.id, email: row.email },
+        siteUrl,
+        resendApiKey,
+        emailFrom,
+      )
+
+      if (result.success) {
+        const { error: updateError } = await client
+          .from('waitlist')
+          .update({
+            notification_status: 'sent',
+            notification_error: null,
+            notified_at: new Date().toISOString(),
+            notification_attempts: (row.notification_attempts ?? 0) + 1,
+          })
+          .eq('id', row.id)
+        if (updateError) {
+          console.error('[AUDIT] waitlist_notification_tracking_failed:', { waitlistId: row.id, error: updateError.message })
+          failed++
+        } else {
+          sent++
+        }
+      } else {
+        const { error: updateError } = await client
+          .from('waitlist')
+          .update({
+            notification_status: 'failed',
+            notification_error: result.error || 'Unknown error',
+            notification_attempts: (row.notification_attempts ?? 0) + 1,
+          })
+          .eq('id', row.id)
+        if (updateError) {
+          console.error('[AUDIT] waitlist_notification_tracking_failed:', { waitlistId: row.id, error: updateError.message })
+        }
+        failed++
+      }
+    }
+
+    console.log('[AUDIT] waitlist_notifications_dispatched:', { sent, failed, timestamp: new Date().toISOString() })
+    return { sent, failed, manual: 0 }
+  }
+
+  /**
+   * Retry sending release notifications for entries with notification_status = 'failed'.
+   * Resets them to 'pending' and re-dispatches.
+   */
+  async retryFailedNotifications(): Promise<RetryNotificationResult> {
+    try {
+      const client = this.ensureClient()
+
+      // Reset failed entries back to pending for re-dispatch
+      const { data: failedRows, error: resetError } = await client
+        .from('waitlist')
+        .update({ notification_status: 'pending', notification_error: null })
+        .eq('notification_status', 'failed')
+        .select('id')
+
+      if (resetError) {
+        throw new Error(`Failed to reset waitlist notifications for retry: ${resetError.message}`)
+      }
+
+      if (!failedRows || failedRows.length === 0) {
+        return { success: true, emailsDispatched: 0, notificationsFailed: 0, message: 'No failed notifications to retry' }
+      }
+
+      console.log('[AUDIT] waitlist_notification_retry:', { count: failedRows.length, timestamp: new Date().toISOString() })
+
+      const result = await this.dispatchPendingReleaseNotifications()
+      return {
+        success: true,
+        emailsDispatched: result.sent,
+        notificationsFailed: result.failed,
+      }
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Failed to retry notifications' }
     }
   }
 
@@ -2477,16 +2689,17 @@ export class AdminService {
       const releasedNow = res?.released_in_this_run ?? 0
 
       let emailsDispatched = 0
+      let notificationsFailed = 0
       if (releasedNow > 0) {
-        const { data: releasedEntries } = await client.rpc('admin_get_waitlist')
-        const newlyReleased = (releasedEntries || []).filter(
-          (e: any) => e.status === 'released' && e.released_at
-        )
-        emailsDispatched = newlyReleased.length
+        // Dispatch emails only for newly released entries (notification_status = 'pending')
+        const emailResult = await this.dispatchPendingReleaseNotifications()
+        emailsDispatched = emailResult.sent
+        notificationsFailed = emailResult.failed + emailResult.manual
         console.log('[AUDIT] waitlist_cohort_released:', {
           newCapacity,
           releasedCount: releasedNow,
           emailsDispatched,
+          notificationsFailed,
           timestamp: new Date().toISOString(),
         })
       } else {
@@ -2504,6 +2717,7 @@ export class AdminService {
         waitingCount: res?.waiting_count ?? 0,
         releasedInThisRun: releasedNow,
         emailsDispatched,
+        notificationsFailed,
       }
     } catch (err: any) {
       return {
@@ -2530,17 +2744,28 @@ export class AdminService {
       const res = Array.isArray(data) ? data[0] : (data as any)
       const releasedCount = res?.released_count ?? 0
 
+      // Dispatch emails only for newly released entries (notification_status = 'pending')
+      let emailsDispatched = 0
+      let notificationsFailed = 0
+      if (releasedCount > 0) {
+        const emailResult = await this.dispatchPendingReleaseNotifications()
+        emailsDispatched = emailResult.sent
+        notificationsFailed = emailResult.failed + emailResult.manual
+      }
+
       console.log('[AUDIT] waitlist_children_released:', {
         childIds,
         releasedCount,
-        emailsDispatched: releasedCount,
+        emailsDispatched,
+        notificationsFailed,
         timestamp: new Date().toISOString(),
       })
 
       return {
         success: true,
         releasedCount,
-        emailsDispatched: releasedCount,
+        emailsDispatched,
+        notificationsFailed,
       }
     } catch (err: any) {
       return {
@@ -2574,4 +2799,3 @@ export class AdminService {
     return 'other'
   }
 }
-

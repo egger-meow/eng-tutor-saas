@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { WaitlistData, WaitlistStatus } from '../../client/types.js'
+import type { WaitlistData, WaitlistStatus, NotificationStatus } from '../../client/types.js'
 import { adminApi } from '../../client/api.js'
 
 interface WaitlistManagementViewProps {
@@ -24,6 +24,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
   const [isSubmittingRaise, setIsSubmittingRaise] = useState(false)
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [copyToast, setCopyToast] = useState(false)
+  const [isRetrying, setIsRetrying] = useState(false)
 
   if (!data) {
     return (
@@ -35,6 +36,34 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
   }
 
   const minCapacityRequired = data.activeCount + data.releasedCount + data.waitingCount
+
+  // Handle retry failed notifications
+  const handleRetryNotifications = async () => {
+    setIsRetrying(true)
+    setActionMessage(null)
+    try {
+      const result = await adminApi.retryFailedNotifications()
+      if (result.success) {
+        setActionMessage({
+          type: 'success',
+          text: `重試完成：成功寄出 ${result.emailsDispatched ?? 0} 封通知信${result.notificationsFailed ? `，${result.notificationsFailed} 封仍然失敗` : ''}。`,
+        })
+        onRefresh()
+      } else {
+        setActionMessage({
+          type: 'error',
+          text: result.error || '重試通知信發送失敗',
+        })
+      }
+    } catch (err: any) {
+      setActionMessage({
+        type: 'error',
+        text: err?.message || '重試通知信時發生錯誤',
+      })
+    } finally {
+      setIsRetrying(false)
+    }
+  }
 
   // Filter entries
   const filteredEntries = data.entries.filter((entry) => {
@@ -162,6 +191,22 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
     setTimeout(() => setCopyToast(false), 3000)
   }
 
+  const renderNotificationBadge = (status: NotificationStatus) => {
+    switch (status) {
+      case 'sent':
+        return <span className="status-badge" style={{ background: '#064e3b', color: '#a7f3d0', border: '1px solid #059669', fontSize: '11px' }}>✅ 已寄出</span>
+      case 'pending':
+        return <span className="status-badge" style={{ background: '#78350f', color: '#fde68a', border: '1px solid #b45309', fontSize: '11px' }}>⏳ 待寄出</span>
+      case 'failed':
+        return <span className="status-badge" style={{ background: '#881337', color: '#fda4af', border: '1px solid #e11d48', fontSize: '11px' }}>❌ 寄送失敗</span>
+      case 'manual':
+        return <span className="status-badge" style={{ background: '#374151', color: '#fbbf24', border: '1px solid #6b7280', fontSize: '11px' }}>📋 需手動</span>
+      case 'none':
+      default:
+        return <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
+    }
+  }
+
   const renderStatusBadge = (status: WaitlistStatus) => {
     switch (status) {
       case 'waiting':
@@ -210,6 +255,38 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
           <div className="stat-value" style={{ color: '#a78bfa' }}>{data.convertedCount} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>人</span></div>
           <div className="stat-desc">由等候名單完成付費轉換</div>
         </div>
+
+        {(data.failedNotificationCount > 0 || data.pendingNotificationCount > 0) && (
+          <div className="stat-card" style={{ border: data.failedNotificationCount > 0 ? '1px solid #e11d48' : undefined }}>
+            <div className="stat-label">通知信狀態</div>
+            <div className="stat-value" style={{ color: data.failedNotificationCount > 0 ? '#fb7185' : '#fbbf24' }}>
+              {data.failedNotificationCount > 0
+                ? `${data.failedNotificationCount} 封失敗`
+                : `${data.pendingNotificationCount} 封待發`}
+            </div>
+            <div className="stat-desc">
+              {data.failedNotificationCount > 0 ? (
+                <button
+                  onClick={handleRetryNotifications}
+                  disabled={isRetrying}
+                  style={{
+                    background: '#881337',
+                    color: '#fda4af',
+                    border: '1px solid #e11d48',
+                    borderRadius: '4px',
+                    padding: '4px 10px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: isRetrying ? 'not-allowed' : 'pointer',
+                    marginTop: '4px',
+                  }}
+                >
+                  {isRetrying ? '重試中...' : '🔄 重試失敗通知'}
+                </button>
+              ) : '等待系統自動發送'}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Notification Alert */}
@@ -384,6 +461,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
                   <th>孩子名稱</th>
                   <th>年級</th>
                   <th>狀態</th>
+                  <th>通知信</th>
                   <th>釋出時間</th>
                   <th>轉換時間</th>
                   <th>操作</th>
@@ -410,6 +488,15 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
                     <td>{entry.childName}</td>
                     <td>{entry.gradeStage || `Grade ${entry.grade}`}</td>
                     <td>{renderStatusBadge(entry.status)}</td>
+                    <td>
+                      {renderNotificationBadge(entry.notificationStatus)}
+                      {entry.notificationStatus === 'failed' && entry.notificationError && (
+                        <div style={{ fontSize: '11px', color: '#fb7185', marginTop: '2px', maxWidth: '200px', wordBreak: 'break-all' }}
+                             title={entry.notificationError}>
+                          {entry.notificationError.slice(0, 60)}{entry.notificationError.length > 60 ? '…' : ''}
+                        </div>
+                      )}
+                    </td>
                     <td style={{ color: entry.releasedAt ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                       {entry.releasedAt ? new Date(entry.releasedAt).toLocaleString('zh-TW', { hour12: false }) : '—'}
                     </td>

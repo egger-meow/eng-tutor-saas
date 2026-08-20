@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   AdminService,
   classifyQualityEra,
@@ -171,6 +171,13 @@ function createMockSupabaseClient(
 }
 
 describe('AdminService Authoritative Truth Layer', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+    delete process.env.RESEND_API_KEY
+    delete process.env.EMAIL_FROM
+    delete process.env.SITE_URL
+  })
   it('throws an error if no Supabase connection is configured', async () => {
     const service = new AdminService({ supabaseUrl: '', supabaseSecretKey: '' })
     expect(service.getIsConnected()).toBe(false)
@@ -1516,6 +1523,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       )
 
       const service = new AdminService({ client: mockClient })
+      vi.spyOn(service, 'dispatchPendingReleaseNotifications').mockResolvedValue({ sent: 20, failed: 0, manual: 0 })
       const result = await service.raiseCapacityAndRelease(200, true)
 
       expect(result.success).toBe(true)
@@ -1542,12 +1550,102 @@ describe('AdminService Authoritative Truth Layer', () => {
       )
 
       const service = new AdminService({ client: mockClient })
+      vi.spyOn(service, 'dispatchPendingReleaseNotifications').mockResolvedValue({ sent: 2, failed: 0, manual: 0 })
       const result = await service.releaseWaitlistChildren(['c-1', 'c-2'])
 
       expect(result.success).toBe(true)
       expect(rpcCalledWith).toEqual({ p_child_ids: ['c-1', 'c-2'] })
       expect(result.releasedCount).toBe(2)
       expect(result.emailsDispatched).toBe(2)
+    })
+
+    it('dispatches release email through generateLink and Resend, then tracks success', async () => {
+      const rows = [{ id: 'w-1', email: 'parent@test.com', notification_status: 'pending', notification_attempts: 1, notification_error: 'old failure', notified_at: null }]
+      const updates: any[] = []
+      const mockClient: any = {
+        auth: {
+          admin: {
+            generateLink: vi.fn().mockResolvedValue({
+              data: { properties: { action_link: 'https://auth.test/magic-link' } },
+              error: null,
+            }),
+          },
+        },
+        from: () => ({
+          select: () => ({
+            eq: async () => ({ data: rows, error: null }),
+          }),
+          update: (payload: any) => ({
+            eq: async () => {
+              updates.push(payload)
+              Object.assign(rows[0], payload)
+              return { data: rows, error: null }
+            },
+          }),
+        }),
+      }
+      process.env.RESEND_API_KEY = 'resend-test-key'
+      process.env.EMAIL_FROM = '紙屬英文 <notify@example.com>'
+      process.env.SITE_URL = 'https://example.com/eng-tutor-saas'
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, text: async () => '' })
+      vi.stubGlobal('fetch', fetchMock)
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.dispatchPendingReleaseNotifications()
+
+      expect(result).toEqual({ sent: 1, failed: 0, manual: 0 })
+      expect(mockClient.auth.admin.generateLink).toHaveBeenCalledWith({
+        type: 'magiclink',
+        email: 'parent@test.com',
+        options: { redirectTo: 'https://example.com/eng-tutor-saas/billing' },
+      })
+      expect(fetchMock).toHaveBeenCalledWith('https://api.resend.com/emails', expect.objectContaining({ method: 'POST' }))
+      expect(updates).toContainEqual(expect.objectContaining({
+        notification_status: 'sent',
+        notification_error: null,
+        notification_attempts: 2,
+      }))
+    })
+
+    it('tracks a failed Resend delivery with its error and incremented attempt count', async () => {
+      const rows = [{ id: 'w-2', email: 'fail@test.com', notification_status: 'pending', notification_attempts: 0 }]
+      const updates: any[] = []
+      const mockClient: any = {
+        auth: { admin: { generateLink: vi.fn().mockResolvedValue({ data: { properties: { action_link: 'https://auth.test/link' } }, error: null }) } },
+        from: () => ({
+          select: () => ({ eq: async () => ({ data: rows, error: null }) }),
+          update: (payload: any) => ({ eq: async () => { updates.push(payload); return { data: rows, error: null } } }),
+        }),
+      }
+      process.env.RESEND_API_KEY = 'resend-test-key'
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503, text: async () => 'provider unavailable' }))
+
+      const result = await new AdminService({ client: mockClient }).dispatchPendingReleaseNotifications()
+
+      expect(result).toEqual({ sent: 0, failed: 1, manual: 0 })
+      expect(updates).toContainEqual(expect.objectContaining({
+        notification_status: 'failed',
+        notification_attempts: 1,
+        notification_error: expect.stringContaining('Resend 503'),
+      }))
+    })
+
+    it('resets failed notifications and dispatches them again', async () => {
+      const failedRows = [{ id: 'w-3' }]
+      const mockClient: any = {
+        from: () => ({
+          update: () => ({
+            eq: () => ({ select: async () => ({ data: failedRows, error: null }) }),
+          }),
+        }),
+      }
+      const service = new AdminService({ client: mockClient })
+      vi.spyOn(service, 'dispatchPendingReleaseNotifications').mockResolvedValue({ sent: 1, failed: 0, manual: 0 })
+
+      const result = await service.retryFailedNotifications()
+
+      expect(result).toEqual({ success: true, emailsDispatched: 1, notificationsFailed: 0 })
+      expect(service.dispatchPendingReleaseNotifications).toHaveBeenCalledOnce()
     })
 
     it('updates capacity without releasing all', async () => {

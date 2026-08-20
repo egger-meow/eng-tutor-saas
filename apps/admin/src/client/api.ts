@@ -19,6 +19,7 @@ import type {
   RaiseCapacityAndReleaseResult,
   ReleaseWaitlistResult,
   UpdateCapacityResult,
+  RetryNotificationResult,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -203,5 +204,7 @@ export const adminApi = {
     postJson<ReleaseWaitlistResult>('/api/waitlist/release', { childIds }),
   updateCapacity: (capacity: number) =>
     postJson<UpdateCapacityResult>('/api/waitlist/capacity', { capacity }),
+  retryFailedNotifications: () =>
+    postJson<RetryNotificationResult>('/api/waitlist/retry-notifications', {}),
 }
 
