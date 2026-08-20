@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  deployments: write
 
 jobs:
   verify:
@@ -45,14 +46,12 @@ jobs:
               cp -r /usr/share/fonts/truetype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
             fi
           fi
-
       - name: Cache Playwright Chromium
         id: cache-playwright
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-
       - name: Install Playwright Chromium
         if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: pnpm --filter @paper-english/pdf pdf:install
@@ -60,3 +59,45 @@ jobs:
       - run: pnpm test
       - run: pnpm typecheck
       - run: pnpm build
+
+  deploy-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    environment:
+      name: cloudflare-workers
+      url: https://paperbond.jjmowlab.com
+    runs-on: ubuntu-latest
+    env:
+      VITE_BASE_PATH: /
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_PADDLE_CLIENT_TOKEN: ${{ vars.VITE_PADDLE_CLIENT_TOKEN }}
+      VITE_PADDLE_ENV: sandbox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Validate browser build configuration
+        shell: bash
+        run: |
+          test -n "$VITE_SUPABASE_URL"
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          test -n "$VITE_PADDLE_CLIENT_TOKEN"
+      - run: pnpm install --frozen-lockfile
+      - name: Build production web
+        run: pnpm --filter @paper-english/web build
+      - name: Deploy production build
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          npm install --global wrangler@4
+          wrangler deploy --config wrangler.jsonc

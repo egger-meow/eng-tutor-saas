@@ -11,5 +11,16 @@
       "pattern": "paperbond.jjmowlab.com",
       "custom_domain": true
     }
-  ]
+  ],
+  "env": {
+    "dev": {
+      "workers_dev": false,
+      "routes": [
+        {
+          "pattern": "dev.paperbond.jjmowlab.com",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
 }
