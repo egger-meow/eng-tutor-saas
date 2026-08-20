@@ -54,6 +54,17 @@ describe('Cloudflare Workers Static Assets deployment boundaries', () => {
     expect(devDeployWorkflow).not.toContain('404.html')
   })
 
+  it('reads browser build variables from the selected GitHub environment at runner time', () => {
+    for (const deployWorkflow of [productionWorkflow, devDeployWorkflow]) {
+      expect(deployWorkflow).not.toContain('${{ vars.VITE_SUPABASE_URL }}')
+      expect(deployWorkflow).not.toContain('${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}')
+      expect(deployWorkflow).not.toContain('${{ vars.VITE_PADDLE_CLIENT_TOKEN }}')
+      expect(deployWorkflow).toContain('test -n "$VITE_SUPABASE_URL"')
+      expect(deployWorkflow).toContain('test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"')
+      expect(deployWorkflow).toContain('test -n "$VITE_PADDLE_CLIENT_TOKEN"')
+    }
+  })
+
   it('keeps root-based SPA routing isolated across production and dev domains', () => {
     expect(wranglerConfig.assets).toEqual({
       directory: 'apps/web/dist',
