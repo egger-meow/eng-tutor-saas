@@ -10,11 +10,13 @@ function run(command, args, options = {}) {
 
 const status = run(process.execPath, ['node_modules/supabase/dist/supabase.js', 'status', '-o', 'env'])
 const local = Object.fromEntries([...status.matchAll(/^([A-Z_]+)="([^"]*)"$/gm)].map((match) => [match[1], match[2]]))
-if (!local.API_URL || !local.SECRET_KEY || !local.PUBLISHABLE_KEY) throw new Error('Could not read local Supabase status')
+const secretKey = local.SERVICE_ROLE_KEY || local.SECRET_KEY
+const publishableKey = local.ANON_KEY || local.PUBLISHABLE_KEY
+if (!local.API_URL || !secretKey || !publishableKey) throw new Error('Could not read local Supabase status')
 
 const result = spawnSync(process.execPath, ['packages/worker/node_modules/tsx/dist/cli.mjs', 'packages/worker/src/e2e-local.ts'], {
   stdio: 'inherit',
-  env: { ...process.env, SUPABASE_URL: local.API_URL, SUPABASE_SECRET_KEY: local.SECRET_KEY, SUPABASE_PUBLISHABLE_KEY: local.PUBLISHABLE_KEY },
+  env: { ...process.env, SUPABASE_URL: local.API_URL, SUPABASE_SECRET_KEY: secretKey, SUPABASE_PUBLISHABLE_KEY: publishableKey },
 })
 if (result.error) throw result.error
 if (result.status !== 0) process.exit(result.status ?? 1)

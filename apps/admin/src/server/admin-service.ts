@@ -24,6 +24,11 @@ import {
   type RecordTestFeedbackResult,
   type ResetTestChildResult,
   type TestPdfSignedUrlResult,
+  type WaitlistData,
+  type WaitlistEntry,
+  type RaiseCapacityAndReleaseResult,
+  type ReleaseWaitlistResult,
+  type UpdateCapacityResult,
   type QualityEra,
   type EraTag,
   type AdminConfig,
@@ -2404,6 +2409,161 @@ export class AdminService {
     }
   }
 
+  async getWaitlistData(): Promise<WaitlistData> {
+    const client = this.ensureClient()
+    const [enrollmentRes, waitlistRes, activeSubsRes] = await Promise.all([
+      client.from('enrollment_settings').select('*').limit(1).maybeSingle(),
+      client.rpc('admin_get_waitlist'),
+      client
+        .from('subscriptions')
+        .select('child_id, status, children!inner(is_active)')
+        .in('status', ['trialing', 'active', 'past_due'])
+        .eq('children.is_active', true),
+    ])
+
+    const enrollment = enrollmentRes.data as any
+    const capacity = enrollment?.capacity ?? 100
+    const activeCount = activeSubsRes.data?.length ?? 0
+
+    const rawEntries = (waitlistRes.data || []) as any[]
+    const entries: WaitlistEntry[] = rawEntries.map((row: any) => ({
+      id: row.id,
+      parentId: row.parent_id,
+      childId: row.child_id,
+      email: row.email,
+      childName: row.child_name,
+      grade: row.grade,
+      gradeStage: row.grade_stage,
+      status: row.status,
+      createdAt: row.created_at,
+      releasedAt: row.released_at,
+      convertedAt: row.converted_at,
+      notes: row.notes,
+    }))
+
+    const releasedCount = entries.filter((e) => e.status === 'released').length
+    const waitingCount = entries.filter((e) => e.status === 'waiting').length
+    const convertedCount = entries.filter((e) => e.status === 'converted').length
+
+    return {
+      capacity,
+      activeCount,
+      releasedCount,
+      waitingCount,
+      convertedCount,
+      entries,
+    }
+  }
+
+  async raiseCapacityAndRelease(
+    newCapacity: number,
+    releaseAll: boolean
+  ): Promise<RaiseCapacityAndReleaseResult> {
+    try {
+      const client = this.ensureClient()
+      const { data, error } = await client.rpc('admin_raise_capacity_and_release', {
+        p_new_capacity: newCapacity,
+        p_release_all: releaseAll,
+      })
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message,
+        }
+      }
+
+      const res = Array.isArray(data) ? data[0] : (data as any)
+      const releasedNow = res?.released_in_this_run ?? 0
+
+      let emailsDispatched = 0
+      if (releasedNow > 0) {
+        const { data: releasedEntries } = await client.rpc('admin_get_waitlist')
+        const newlyReleased = (releasedEntries || []).filter(
+          (e: any) => e.status === 'released' && e.released_at
+        )
+        emailsDispatched = newlyReleased.length
+        console.log('[AUDIT] waitlist_cohort_released:', {
+          newCapacity,
+          releasedCount: releasedNow,
+          emailsDispatched,
+          timestamp: new Date().toISOString(),
+        })
+      } else {
+        console.log('[AUDIT] capacity_updated:', {
+          newCapacity,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
+      return {
+        success: true,
+        newCapacity: res?.new_capacity ?? newCapacity,
+        activeCount: res?.active_count ?? 0,
+        releasedCount: res?.released_count ?? 0,
+        waitingCount: res?.waiting_count ?? 0,
+        releasedInThisRun: releasedNow,
+        emailsDispatched,
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.message || 'Failed to raise capacity and release waitlist',
+      }
+    }
+  }
+
+  async releaseWaitlistChildren(childIds: string[]): Promise<ReleaseWaitlistResult> {
+    try {
+      const client = this.ensureClient()
+      const { data, error } = await client.rpc('admin_release_waitlist_children', {
+        p_child_ids: childIds,
+      })
+
+      if (error) {
+        return {
+          success: false,
+          error: error.message,
+        }
+      }
+
+      const res = Array.isArray(data) ? data[0] : (data as any)
+      const releasedCount = res?.released_count ?? 0
+
+      console.log('[AUDIT] waitlist_children_released:', {
+        childIds,
+        releasedCount,
+        emailsDispatched: releasedCount,
+        timestamp: new Date().toISOString(),
+      })
+
+      return {
+        success: true,
+        releasedCount,
+        emailsDispatched: releasedCount,
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err?.message || 'Failed to release selected waitlist children',
+      }
+    }
+  }
+
+  async updateCapacity(capacity: number): Promise<UpdateCapacityResult> {
+    const res = await this.raiseCapacityAndRelease(capacity, false)
+    if (!res.success) {
+      return {
+        success: false,
+        error: res.error,
+      }
+    }
+    return {
+      success: true,
+      capacity: res.newCapacity,
+    }
+  }
+
   private classifyQualityCategory(rule: string): 'lexical_ceiling' | 'forbidden_jargon' | 'prompt_clipped' | 'cap_deficit' | 'schema_mismatch' | 'other' {
     const r = (rule || '').toLowerCase()
     if (r.includes('ceiling') || r.includes('vocab')) return 'lexical_ceiling'
@@ -2414,3 +2574,4 @@ export class AdminService {
     return 'other'
   }
 }
+

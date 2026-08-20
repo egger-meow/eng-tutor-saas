@@ -44,4 +44,13 @@ describe('branded Supabase auth email templates', () => {
     expect(html).toContain('{{ .ConfirmationURL }}')
     expect(html).not.toContain('Click me')
   })
+
+  it('brands the waitlist release notification email', () => {
+    const html = readFileSync(resolve(import.meta.dirname, 'waitlist-release.html'), 'utf8')
+    expect(html).toContain('lang="zh-Hant"')
+    expect(html).toContain('紙屬英文')
+    expect(html).toContain('學習名額已為您開放')
+    expect(html).toContain('>立即前往啟用訂閱</a>')
+    expect(html).toContain('{{ .ConfirmationURL }}')
+  })
 })

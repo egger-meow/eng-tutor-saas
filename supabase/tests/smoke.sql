@@ -821,6 +821,8 @@ $$;
 
 rollback;
 
+begin;
+
 do $$
 declare
   test_mode_res jsonb;
@@ -833,6 +835,7 @@ declare
   bridge_claim_result jsonb;
   bridge_context jsonb;
   bridge_fingerprint text;
+  blocked boolean := false;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
     or not has_column_privilege('authenticated', 'public.generation_jobs', 'child_id', 'select')
@@ -1148,7 +1151,130 @@ begin
     raise exception 'child profile data was corrupted on reset';
   end if;
 
+  -- 12. Scaling Gate Waitlist Lifecycle (>100 child) verification
+  -- Set capacity to 1 (which matches current 1 active child 00000000-0000-0000-0000-000000000099)
+  -- so that the next child triggers the scaling gate.
+  update public.enrollment_settings
+  set capacity = 1, founding_limit = 1
+  where key = 'default';
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000077',
+    '00000000-0000-0000-0000-000000000001',
+    'Waitlist Student',
+    7,
+    'grade_7'
+  );
+
+  -- Verify child is in waitlist in 'waiting' state, no subscription or jobs created
+  if not exists (
+    select 1 from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000077'
+      and status = 'waiting'
+  ) then
+    raise exception 'child #101 was not added to waitlist in waiting state when capacity is full';
+  end if;
+
+  if exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000077'
+  ) then
+    raise exception 'child on waitlist must not receive a subscription';
+  end if;
+
+  if exists (
+    select 1 from public.generation_jobs
+    where child_id = '00000000-0000-0000-0000-000000000077'
+  ) then
+    raise exception 'child on waitlist must not receive initial generation job';
+  end if;
+
+  -- Verify prepare_paddle_checkout is strictly blocked for waiting child
+  blocked := false;
+  begin
+    perform public.prepare_paddle_checkout(
+      '00000000-0000-0000-0000-000000000001',
+      '00000000-0000-0000-0000-000000000077',
+      'standard_monthly'
+    );
+  exception
+    when others then
+      blocked := true;
+  end;
+
+  if not blocked then
+    raise exception 'prepare_paddle_checkout should have blocked waiting child';
+  end if;
+
+  -- Test admin_raise_capacity_and_release rejection when capacity is insufficient
+  blocked := false;
+  begin
+    perform public.admin_raise_capacity_and_release(1, true);
+  exception
+    when others then
+      blocked := true;
+  end;
+
+  if not blocked then
+    raise exception 'admin_raise_capacity_and_release should reject when capacity does not cover active + waiting';
+  end if;
+
+  -- Test atomic raise capacity and release all waiting
+  perform public.admin_raise_capacity_and_release(2, true);
+
+  if (
+    select status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000077'
+  ) <> 'released' then
+    raise exception 'waitlist child was not transitioned to released after cohort release';
+  end if;
+
+  -- Verify prepare_paddle_checkout now succeeds for released child
+  perform public.prepare_paddle_checkout(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000077',
+    'standard_monthly'
+  );
+
+  -- Process Paddle webhook payment event for released waitlist child
+  perform public.process_paddle_subscription_event(
+    'evt_waitlist_smoke', 'subscription.created', now(),
+    '00000000-0000-0000-0000-000000000077',
+    'sub_waitlist_smoke', 'ctm_waitlist_smoke', 'active',
+    'standard_monthly', 'month', 499,
+    now(), now() + interval '1 month', false
+  );
+
+  if (
+    select status from public.waitlist
+    where child_id = '00000000-0000-0000-0000-000000000077'
+  ) <> 'converted' then
+    raise exception 'waitlist status was not converted after paid webhook';
+  end if;
+
+  if not exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000077'
+      and status = 'active'
+  ) then
+    raise exception 'subscription was not activated after paid webhook';
+  end if;
+
+  if not exists (
+    select 1 from public.generation_jobs
+    where child_id = '00000000-0000-0000-0000-000000000077'
+      and status = 'pending'
+  ) then
+    raise exception 'initial generation job was not enqueued for converted child';
+  end if;
+
+  -- Clean up
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;
 $$;
+
+rollback;
+
+
 

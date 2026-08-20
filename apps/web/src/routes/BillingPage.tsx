@@ -9,6 +9,7 @@ import { PageTransition } from '../components/motion/PageTransition'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { listChildren, type Child } from '../lib/children'
 import { cancelSubscription, listOwnedSubscriptions, prepareCheckout, resumeSubscription, type SubscriptionView } from '../lib/subscriptions'
+import { listOwnedWaitlist, type OwnedWaitlistEntry } from '../lib/waitlist'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
@@ -16,6 +17,7 @@ import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice
 export function BillingPage({ session }: { session: Session }) {
   const [children, setChildren] = useState<Child[]>([])
   const [subscriptions, setSubscriptions] = useState<SubscriptionView[]>([])
+  const [waitlistEntries, setWaitlistEntries] = useState<OwnedWaitlistEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [checkoutChildId, setCheckoutChildId] = useState<string | null>(null)
@@ -130,10 +132,11 @@ export function BillingPage({ session }: { session: Session }) {
   }
 
   useEffect(() => {
-    void Promise.all([listChildren(), listOwnedSubscriptions()])
-      .then(([nextChildren, nextSubscriptions]) => {
+    void Promise.all([listChildren(), listOwnedSubscriptions(), listOwnedWaitlist(getSupabaseClient())])
+      .then(([nextChildren, nextSubscriptions, nextWaitlist]) => {
         setChildren(nextChildren)
         setSubscriptions(nextSubscriptions)
+        setWaitlistEntries(nextWaitlist)
       })
       .catch(() => setError('目前無法讀取訂閱資料，請稍後再試。'))
       .finally(() => setLoading(false))
@@ -182,6 +185,7 @@ export function BillingPage({ session }: { session: Session }) {
                 <ChildSubscription
                   child={child}
                   subscription={subscriptions.find((item) => item.childId === child.id)}
+                  waitlist={waitlistEntries.find((item) => item.childId === child.id)}
                   busy={checkoutChildId === child.id || cancelingChildId === child.id || resumingChildId === child.id}
                   activationPending={activatingChildId === child.id}
                   onSubscribe={(childId, plan) => void startCheckout(childId, plan)}

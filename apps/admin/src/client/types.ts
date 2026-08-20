@@ -13,7 +13,7 @@ export {
 import type { EraTag } from '@paper-english/generator/engine-version'
 export type { EraTag }
 
-export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'export'
+export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
 
 export interface HealthState {
   status: string
@@ -174,6 +174,8 @@ export interface OperationsOverview {
     status: 'open' | 'waitlist' | 'closed'
     foundingCount: number
     foundingLimit: number
+    waitingCount?: number
+    releasedCount?: number
   }
   queueStats: {
     pending: number
@@ -658,6 +660,59 @@ export interface TestPdfSignedUrlResult {
   pdfType?: 'student' | 'parent'
   signedUrl?: string
   path?: string
+  error?: string
+  message?: string
+}
+
+export type WaitlistStatus = 'waiting' | 'released' | 'converted' | 'canceled'
+
+export interface WaitlistEntry {
+  id: string
+  parentId: string
+  childId: string
+  email: string
+  childName: string
+  grade: number
+  gradeStage: string
+  status: WaitlistStatus
+  createdAt: string
+  releasedAt: string | null
+  convertedAt: string | null
+  notes: string | null
+}
+
+export interface WaitlistData {
+  capacity: number
+  activeCount: number
+  releasedCount: number
+  waitingCount: number
+  convertedCount: number
+  entries: WaitlistEntry[]
+}
+
+export interface RaiseCapacityAndReleaseResult {
+  success: boolean
+  newCapacity?: number
+  activeCount?: number
+  releasedCount?: number
+  waitingCount?: number
+  releasedInThisRun?: number
+  emailsDispatched?: number
+  error?: string
+  message?: string
+}
+
+export interface ReleaseWaitlistResult {
+  success: boolean
+  releasedCount?: number
+  emailsDispatched?: number
+  error?: string
+  message?: string
+}
+
+export interface UpdateCapacityResult {
+  success: boolean
+  capacity?: number
   error?: string
   message?: string
 }

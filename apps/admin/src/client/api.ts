@@ -15,6 +15,10 @@ import type {
   ResetTestChildResult,
   TestPdfSignedUrlResult,
   QualityEra,
+  WaitlistData,
+  RaiseCapacityAndReleaseResult,
+  ReleaseWaitlistResult,
+  UpdateCapacityResult,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -190,5 +194,14 @@ export const adminApi = {
     fetchJson<TestPdfSignedUrlResult>(
       `/api/test-mode/pdf-url?childId=${encodeURIComponent(childId)}&materialId=${encodeURIComponent(materialId)}&type=${type}`
     ),
+
+  // Waitlist & Scaling Gate API
+  getWaitlist: () => fetchJson<WaitlistData>('/api/waitlist'),
+  raiseCapacityAndRelease: (newCapacity: number, releaseAll = true) =>
+    postJson<RaiseCapacityAndReleaseResult>('/api/waitlist/raise-and-release', { newCapacity, releaseAll }),
+  releaseWaitlistChildren: (childIds: string[]) =>
+    postJson<ReleaseWaitlistResult>('/api/waitlist/release', { childIds }),
+  updateCapacity: (capacity: number) =>
+    postJson<UpdateCapacityResult>('/api/waitlist/capacity', { capacity }),
 }
 

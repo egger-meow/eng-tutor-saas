@@ -42,6 +42,12 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
         <div className="child-card-identity">
           <div className="child-badge-group" style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <span className="child-badge">{gradeStageLabel(child)}</span>
+            {child.waitlist?.status === 'waiting' && (
+              <span className="status-label status-waitlist" style={{ background: '#78350f', color: '#fde68a' }}>等候名單中</span>
+            )}
+            {child.waitlist?.status === 'released' && (
+              <span className="status-label status-released" style={{ background: '#064e3b', color: '#a7f3d0' }}>名額已開放</span>
+            )}
             {child.subscription?.status === 'trialing' && (
               <span className="status-label status-trialing">體驗期</span>
             )}
@@ -136,11 +142,30 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
           <div className="dashboard-support">
-            <section className="empty-state">
-              <h2>{nextPreparedMaterial ? '第一份教材已準備完成' : '第一份教材準備中'}</h2>
-              <p>{nextPreparedMaterial ? '內容已先完成準備，到了開放日期即可下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
-            </section>
-            <DeliveryStatus delivery={delivery} />
+            {child.waitlist?.status === 'waiting' ? (
+              <section className="empty-state">
+                <h2>學習檔案已建立（等候開放中）</h2>
+                <p>目前系統名額等候中，我們不會收取任何費用。當名額開放時，系統會立即以 Email 通知您，屆時再決定是否啟用訂閱。</p>
+              </section>
+            ) : child.waitlist?.status === 'released' ? (
+              <section className="empty-state" style={{ borderColor: '#059669', background: '#064e3b15' }}>
+                <h2 style={{ color: '#047857' }}>🎉 學習名額已為孩子開放！</h2>
+                <p>系統已為 {child.display_name} 保留專屬名額，請前往訂閱頁面完成方案選擇與啟用。</p>
+                <div style={{ marginTop: '12px' }}>
+                  <a className="button button-primary button-sm" href={`/billing?childId=${child.id}`} onClick={handleInternalLink}>
+                    立即前往啟用訂閱
+                  </a>
+                </div>
+              </section>
+            ) : (
+              <section className="empty-state">
+                <h2>{nextPreparedMaterial ? '第一份教材已準備完成' : '第一份教材準備中'}</h2>
+                <p>{nextPreparedMaterial ? '內容已先完成準備，到了開放日期即可下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
+              </section>
+            )}
+            {!child.waitlist || child.waitlist.status === 'converted' ? (
+              <DeliveryStatus delivery={delivery} />
+            ) : null}
           </div>
           </motion.div>
         ))}

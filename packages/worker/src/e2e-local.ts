@@ -28,11 +28,17 @@ try {
   const insertedChild = await service.from('children').insert({ parent_id: userId, display_name: 'Synthetic E2E Learner', grade: 7 }).select('id').single()
   const childId = value(insertedChild.data, insertedChild.error, 'create child').id as string
   const materialWeek = new Date().toISOString().slice(0, 10)
+  const releaseAt = new Date(Date.now() - 60_000)
+  const feedbackCutoffAt = new Date(releaseAt.getTime() - 48 * 3600_000)
+  const generationDueAt = new Date(releaseAt.getTime() - 24 * 3600_000)
+  const scheduledFor = new Date(releaseAt.getTime() - 72 * 3600_000)
+
   const insertedJob = await service.from('generation_jobs').insert({
     child_id: childId, material_week: materialWeek, rule_version: 'weekly-material/1.0.0',
-    idempotency_key: `${childId}:${materialWeek}:e2e`, scheduled_for: new Date(Date.now() - 60_000).toISOString(),
-    release_at: new Date(Date.now() + 3 * 86_400_000).toISOString(), feedback_cutoff_at: new Date(Date.now() + 86_400_000).toISOString(),
-    generation_due_at: new Date(Date.now() + 2 * 86_400_000).toISOString(),
+    idempotency_key: `${childId}:${materialWeek}:e2e`, scheduled_for: scheduledFor.toISOString(),
+    feedback_cutoff_at: feedbackCutoffAt.toISOString(),
+    generation_due_at: generationDueAt.toISOString(),
+    release_at: releaseAt.toISOString(),
   }).select('id').single()
   const jobId = value(insertedJob.data, insertedJob.error, 'create Week 1 job').id as string
 

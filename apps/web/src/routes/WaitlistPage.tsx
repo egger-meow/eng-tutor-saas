@@ -4,5 +4,20 @@ import { PublicHeader } from '../components/layout/PublicHeader'
 import { CapacityStatus } from '../components/public/CapacityStatus'
 
 export function WaitlistPage() {
-  return <AppShell header={<PublicHeader />}><section className="narrow-page"><p className="eyebrow">候補登記</p><h1>先留下 Email，有名額時再通知</h1><p className="lede">初期最多服務 100 位孩子，確保每週教材與回饋都能維持品質。候補不會先收費，也不代表已建立訂閱。</p><CapacityStatus /><div className="login-section"><AuthPanel /></div><p className="muted">登入後可先建立孩子的學習資料；實際名額與付款仍以後端確認為準。</p></section></AppShell>
+  return (
+    <AppShell header={<PublicHeader />}>
+      <section className="narrow-page">
+        <p className="eyebrow">候補登記</p>
+        <h1>目前名額已滿，可先建立學習檔案</h1>
+        <p className="lede">
+          目前名額已滿。可以先建立帳號並填寫孩子的學習資料，不會收費。有名額開放時，我們會寄 Email 通知你，再決定是否訂閱。
+        </p>
+        <CapacityStatus />
+        <div className="login-section">
+          <AuthPanel />
+        </div>
+        <p className="muted">登入後即可為孩子填寫完整的學習履歷；當名額開放時，我們會主動發送通知給您。</p>
+      </section>
+    </AppShell>
+  )
 }

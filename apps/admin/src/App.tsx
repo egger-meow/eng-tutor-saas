@@ -9,9 +9,10 @@ import { FailureIntelligenceView } from './components/failures/FailureIntelligen
 import { ParentFeedbackIntelligenceView } from './components/feedback/ParentFeedbackIntelligence.js'
 import { ProductFeedbackView } from './components/product/ProductFeedbackView.js'
 import { ChildWeekTimelineView } from './components/timeline/ChildWeekTimeline.js'
+import { WaitlistManagementView } from './components/waitlist/WaitlistManagementView.js'
 import { AiDatasetExportView } from './components/export/AiDatasetExport.js'
 
-const VALID_TABS: TabId[] = ['overview', 'failures', 'feedback', 'product', 'timeline', 'export']
+const VALID_TABS: TabId[] = ['overview', 'failures', 'feedback', 'product', 'timeline', 'waitlist', 'export']
 
 function getStoredTab(): TabId {
   if (typeof window === 'undefined') return 'overview'
@@ -68,6 +69,7 @@ export const App: React.FC = () => {
     feedback,
     productFeedback,
     timeline,
+    waitlist,
     aiExport,
     loading,
     isRefreshing,
@@ -124,7 +126,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {loading && !overview && !failures && !feedback && !productFeedback && !timeline && !aiExport ? (
+        {loading && !overview && !failures && !feedback && !productFeedback && !timeline && !waitlist && !aiExport ? (
           <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
             <div style={{ fontSize: '24px', marginBottom: '12px' }}>⏳</div>
             <div>載入維運數據中...</div>
@@ -166,6 +168,13 @@ export const App: React.FC = () => {
                 childIdQuery={timelineChildId}
                 weekQuery={timelineWeek}
                 onSearch={handleTimelineSearch}
+              />
+            )}
+
+            {activeTab === 'waitlist' && (
+              <WaitlistManagementView
+                data={waitlist}
+                onRefresh={() => refreshCurrentTab(false)}
               />
             )}
 

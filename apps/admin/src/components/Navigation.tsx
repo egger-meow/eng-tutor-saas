@@ -48,6 +48,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       icon: '🔍',
     },
     {
+      id: 'waitlist',
+      label: '等候名單與名額釋出 (Waitlist)',
+      icon: '👥',
+      badge: overview?.capacity?.waitingCount && overview.capacity.waitingCount > 0 ? overview.capacity.waitingCount : undefined,
+    },
+    {
       id: 'export',
       label: 'AI 系統改善資料集匯出 (AI Dataset)',
       icon: '🤖',

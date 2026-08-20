@@ -230,6 +230,94 @@ export async function handleApiRequest(
       return true
     }
 
+    if (pathname === '/api/waitlist/raise-and-release') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const newCapacity = Number(parsed?.newCapacity)
+      const releaseAll = Boolean(parsed?.releaseAll)
+      if (!newCapacity || Number.isNaN(newCapacity) || newCapacity < 1) {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CAPACITY', message: 'Valid positive newCapacity is required' }))
+        return true
+      }
+
+      const result = await service.raiseCapacityAndRelease(newCapacity, releaseAll)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/waitlist/release') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const childIds = Array.isArray(parsed?.childIds) ? parsed.childIds : []
+      if (childIds.length === 0) {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CHILD_IDS', message: 'Non-empty childIds array is required' }))
+        return true
+      }
+
+      const result = await service.releaseWaitlistChildren(childIds)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
+    if (pathname === '/api/waitlist/capacity') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+
+      const capacity = Number(parsed?.capacity)
+      if (!capacity || Number.isNaN(capacity) || capacity < 1) {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_CAPACITY', message: 'Valid positive capacity is required' }))
+        return true
+      }
+
+      const result = await service.updateCapacity(capacity)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
     // 2. Read GET endpoints
     if (req.method !== 'GET') {
       res.statusCode = 405
@@ -238,6 +326,13 @@ export async function handleApiRequest(
     }
 
     switch (pathname) {
+      case '/api/waitlist': {
+        const data = await service.getWaitlistData()
+        res.statusCode = 200
+        res.end(JSON.stringify(data))
+        return true
+      }
+
       case '/api/test-mode/status': {
         const childId = typeof parsedUrl.query.childId === 'string' ? parsedUrl.query.childId : ''
         const data = await service.getTestModeStatus(childId)

@@ -213,4 +213,56 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('選擇付款週期')
     expect(html).toContain('創始早鳥優惠')
   })
+
+  it('7. waitlist status = waiting: shows waiting pill, reassurance copy, and disables billing selector', () => {
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        waitlist={{
+          id: 'w-1',
+          childId: 'child-123',
+          status: 'waiting',
+          createdAt: '2026-08-20T00:00:00Z',
+          releasedAt: null,
+          convertedAt: null,
+          notes: null,
+        }}
+        onSubscribe={vi.fn()}
+        onCancel={vi.fn()}
+        onResume={vi.fn()}
+      />
+    )
+
+    expect(html).toContain('等候名單中')
+    expect(html).toContain('目前學習名額等候中。我們會在名額開放時以 Email 通知您，屆時再啟用訂閱，目前不會產生任何費用。')
+    expect(html).not.toContain('選擇付款週期')
+    expect(html).not.toContain('開始訂閱')
+  })
+
+  it('8. waitlist status = released: shows released badge and allows standard plan selection & checkout', () => {
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        waitlist={{
+          id: 'w-1',
+          childId: 'child-123',
+          status: 'released',
+          createdAt: '2026-08-20T00:00:00Z',
+          releasedAt: '2026-08-20T02:00:00Z',
+          convertedAt: null,
+          notes: null,
+        }}
+        onSubscribe={vi.fn()}
+        onCancel={vi.fn()}
+        onResume={vi.fn()}
+      />
+    )
+
+    expect(html).toContain('名額已開放')
+    expect(html).toContain('🎉 學習名額已為孩子開放！請選擇訂閱方案以啟用每週教材生成。')
+    expect(html).toContain('選擇付款週期')
+    expect(html).toContain('年繳 NT$4,999')
+    expect(html).toContain('月繳 NT$499')
+    expect(html).toContain('選擇年繳並開始訂閱')
+  })
 })

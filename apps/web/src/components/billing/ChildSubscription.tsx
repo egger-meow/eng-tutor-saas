@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
+import type { OwnedWaitlistEntry } from '../../lib/waitlist'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
 const labels = {
@@ -19,6 +20,7 @@ function formatDate(value: string | null) {
 type Props = {
   child: Child
   subscription?: SubscriptionView
+  waitlist?: OwnedWaitlistEntry | null
   busy?: boolean
   activationPending?: boolean
   onSubscribe: (childId: string, plan: BillingPlan) => void
@@ -26,7 +28,7 @@ type Props = {
   onResume: (childId: string) => void
 }
 
-export function ChildSubscription({ child, subscription, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
+export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('annual')
@@ -35,6 +37,89 @@ export function ChildSubscription({ child, subscription, busy, activationPending
     setConfirmingCancel(false)
     setReason('')
   }, [subscription?.cancelAtPeriodEnd, subscription?.status])
+
+  if (waitlist?.status === 'waiting' && !subscription) {
+    return (
+      <article className="subscription-card">
+        <div className="subscription-card-body">
+          <div>
+            <p className="overline">{gradeStageLabel(child)}</p>
+            <h2>{child.display_name}</h2>
+          </div>
+          <p>
+            <span className="status-label status-waitlist" style={{ background: '#78350f', color: '#fde68a' }}>
+              等候名單中
+            </span>
+          </p>
+          <p>目前學習名額等候中。我們會在名額開放時以 Email 通知您，屆時再啟用訂閱，目前不會產生任何費用。</p>
+        </div>
+      </article>
+    )
+  }
+
+  if (waitlist?.status === 'released' && !subscription) {
+    return (
+      <article className="subscription-card">
+        <div className="subscription-card-body">
+          <div>
+            <p className="overline">{gradeStageLabel(child)}</p>
+            <h2>{child.display_name}</h2>
+          </div>
+          <p>
+            <span className="status-label status-released" style={{ background: '#064e3b', color: '#a7f3d0' }}>
+              名額已開放
+            </span>
+          </p>
+          <p>🎉 學習名額已為孩子開放！請選擇訂閱方案以啟用每週教材生成。</p>
+        </div>
+        <div className="subscription-action">
+          <fieldset className="billing-plan-selector">
+            <legend>選擇付款週期</legend>
+            <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
+              <input
+                type="radio"
+                name={`billing-plan-${child.id}`}
+                value="annual"
+                checked={selectedPlan === 'annual'}
+                onChange={() => setSelectedPlan('annual')}
+              />
+              <span>
+                <strong className="plan-price-line">
+                  年繳 NT${formatPrice(billingPlans.annual.priceTwd)}
+                  <span className="badge badge-savings">省 NT${formatPrice(annualSavingsTwd)}</span>
+                </strong>
+                <small>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}</small>
+              </span>
+            </label>
+            <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
+              <input
+                type="radio"
+                name={`billing-plan-${child.id}`}
+                value="monthly"
+                checked={selectedPlan === 'monthly'}
+                onChange={() => setSelectedPlan('monthly')}
+              />
+              <span>
+                <strong className="plan-price-line">
+                  月繳 NT${formatPrice(billingPlans.monthly.priceTwd)}
+                </strong>
+                <small>每月自動續訂；可隨時取消下一期續訂</small>
+              </span>
+            </label>
+          </fieldset>
+          <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
+          <button
+            className="button"
+            type="button"
+            disabled={busy}
+            onClick={() => onSubscribe(child.id, selectedPlan)}
+          >
+            {busy ? '正在準備安全付款…' : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
+          </button>
+        </div>
+      </article>
+    )
+  }
 
   if (!subscription) {
     return (

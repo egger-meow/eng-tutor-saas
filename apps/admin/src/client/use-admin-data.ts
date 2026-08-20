@@ -10,6 +10,7 @@ import type {
   HealthState,
   TabId,
   QualityEra,
+  WaitlistData,
 } from './types.js'
 
 export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
@@ -20,6 +21,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   const [productFeedback, setProductFeedback] = useState<ProductFeedbackIntelligence | null>(null)
   const [timeline, setTimeline] = useState<ChildWeekTimeline | null>(() => adminApi.getCachedTimeline())
   const [aiExport, setAiExport] = useState<AiExportDataset | null>(null)
+  const [waitlist, setWaitlist] = useState<WaitlistData | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>('')
@@ -84,6 +86,12 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
           })
           break
         }
+        case 'waitlist': {
+          tabPromise = adminApi.getWaitlist().then((res) => {
+            setWaitlist(res)
+          })
+          break
+        }
         case 'export': {
           tabPromise = adminApi.getAiExport(qualityEra).then((res) => {
             setAiExport(res)
@@ -109,36 +117,42 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
     const targetWeek = typeof week === 'string' ? week.trim() : ''
 
     setTimelineChildId(targetChildId)
-    if (typeof week === 'string') {
-      setTimelineWeek(targetWeek)
-    }
+    setTimelineWeek(targetWeek)
 
-    // 1. Instant synchronous cache lookup (0ms render)
+    // Check fast cache first for zero-latency UI transition
     const cached = adminApi.getCachedTimeline(targetChildId, targetWeek)
     if (cached) {
       setTimeline(cached)
-      if (cached.availableChildren) {
-        adminApi.prefetchAllChildren(cached.availableChildren)
-      }
+      setLoading(false)
+    } else {
+      setLoading(true)
     }
 
-    // 2. Silent background revalidation
-    adminApi.getTimeline(targetChildId || undefined, targetWeek || undefined).then((fresh) => {
-      setTimeline(fresh)
-      if (fresh.availableChildren) {
-        adminApi.prefetchAllChildren(fresh.availableChildren)
-      }
-    }).catch(() => {})
+    // Revalidate in background
+    adminApi
+      .getTimeline(targetChildId || undefined, targetWeek || undefined)
+      .then((fresh) => {
+        setTimeline(fresh)
+      })
+      .catch((err) => {
+        if (!cached) {
+          setError(err instanceof Error ? err.message : String(err))
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
+  // Trigger tab refresh on tab or era change
   useEffect(() => {
-    // Only show full loading if we have no data for current tab
-    const hasData = (
+    const hasData = Boolean(
       (activeTab === 'overview' && overview) ||
       (activeTab === 'failures' && failures) ||
       (activeTab === 'feedback' && feedback) ||
       (activeTab === 'product' && productFeedback) ||
       (activeTab === 'timeline' && timeline) ||
+      (activeTab === 'waitlist' && waitlist) ||
       (activeTab === 'export' && aiExport)
     )
     if (!hasData) {
@@ -163,6 +177,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
     feedback,
     productFeedback,
     timeline,
+    waitlist,
     aiExport,
     loading,
     isRefreshing,

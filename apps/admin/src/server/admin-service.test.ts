@@ -40,7 +40,15 @@ function createMockSupabaseClient(
           return builder
         },
         eq: (col: string, val: any) => {
-          filters.push((r) => r[col] === val)
+          filters.push((r) => {
+            if (r[col] === val) return true
+            if (col.includes('.')) {
+              const parts = col.split('.')
+              const nested = parts.reduce((acc, part) => (acc && typeof acc === 'object' ? acc[part] : undefined), r)
+              return nested === val
+            }
+            return false
+          })
           return builder
         },
         neq: (col: string, val: any) => {
@@ -1412,5 +1420,166 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(result.error).toBe('INVALID_JOB_ID')
     })
   })
+
+  describe('Waitlist & Scaling Gate Management', () => {
+    it('retrieves waitlist entries and calculated cohort breakdown', async () => {
+      const mockWaitlistRows = [
+        {
+          id: 'w-1',
+          parent_id: 'p-1',
+          child_id: 'c-1',
+          email: 'parent1@test.com',
+          child_name: 'Child One',
+          grade: 7,
+          grade_stage: 'grade_7',
+          status: 'waiting',
+          created_at: '2026-08-20T00:00:00Z',
+          released_at: null,
+          converted_at: null,
+          notes: null,
+        },
+        {
+          id: 'w-2',
+          parent_id: 'p-2',
+          child_id: 'c-2',
+          email: 'parent2@test.com',
+          child_name: 'Child Two',
+          grade: 8,
+          grade_stage: 'grade_8',
+          status: 'released',
+          created_at: '2026-08-19T00:00:00Z',
+          released_at: '2026-08-20T01:00:00Z',
+          converted_at: null,
+          notes: null,
+        },
+      ]
+
+      const mockClient = createMockSupabaseClient(
+        {
+          enrollment_settings: [{ capacity: 100, founding_limit: 30, status: 'open' }],
+          subscriptions: [
+            { child_id: 'c-active-1', status: 'active', children: { is_active: true } },
+          ],
+        },
+        {},
+        {
+          admin_get_waitlist: async () => ({
+            data: mockWaitlistRows,
+            error: null,
+          }),
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const data = await service.getWaitlistData()
+
+      expect(data.capacity).toBe(100)
+      expect(data.activeCount).toBe(1)
+      expect(data.waitingCount).toBe(1)
+      expect(data.releasedCount).toBe(1)
+      expect(data.convertedCount).toBe(0)
+      expect(data.entries).toHaveLength(2)
+      expect(data.entries[0].childName).toBe('Child One')
+      expect(data.entries[0].status).toBe('waiting')
+      expect(data.entries[1].childName).toBe('Child Two')
+      expect(data.entries[1].status).toBe('released')
+    })
+
+    it('raises capacity and releases all waiting candidates with audit and email count', async () => {
+      let rpcCalledWith: any = null
+      const mockClient = createMockSupabaseClient(
+        {},
+        {},
+        {
+          admin_raise_capacity_and_release: async (params: any) => {
+            rpcCalledWith = params
+            return {
+              data: {
+                new_capacity: params.p_new_capacity,
+                active_count: 100,
+                released_count: 20,
+                waiting_count: 0,
+                released_in_this_run: 20,
+              },
+              error: null,
+            }
+          },
+          admin_get_waitlist: async () => ({
+            data: Array.from({ length: 20 }, (_, i) => ({
+              id: `w-${i}`,
+              status: 'released',
+              released_at: '2026-08-20T01:00:00Z',
+            })),
+            error: null,
+          }),
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.raiseCapacityAndRelease(200, true)
+
+      expect(result.success).toBe(true)
+      expect(rpcCalledWith).toEqual({ p_new_capacity: 200, p_release_all: true })
+      expect(result.newCapacity).toBe(200)
+      expect(result.releasedInThisRun).toBe(20)
+      expect(result.emailsDispatched).toBe(20)
+    })
+
+    it('releases selected waitlist children by ID', async () => {
+      let rpcCalledWith: any = null
+      const mockClient = createMockSupabaseClient(
+        {},
+        {},
+        {
+          admin_release_waitlist_children: async (params: any) => {
+            rpcCalledWith = params
+            return {
+              data: { released_count: 2 },
+              error: null,
+            }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.releaseWaitlistChildren(['c-1', 'c-2'])
+
+      expect(result.success).toBe(true)
+      expect(rpcCalledWith).toEqual({ p_child_ids: ['c-1', 'c-2'] })
+      expect(result.releasedCount).toBe(2)
+      expect(result.emailsDispatched).toBe(2)
+    })
+
+    it('updates capacity without releasing all', async () => {
+      let rpcCalledWith: any = null
+      const mockClient = createMockSupabaseClient(
+        {},
+        {},
+        {
+          admin_raise_capacity_and_release: async (params: any) => {
+            rpcCalledWith = params
+            return {
+              data: {
+                new_capacity: params.p_new_capacity,
+                active_count: 50,
+                released_count: 0,
+                waiting_count: 0,
+                released_in_this_run: 0,
+              },
+              error: null,
+            }
+          },
+        }
+      )
+
+      const service = new AdminService({ client: mockClient })
+      const result = await service.updateCapacity(150)
+
+      expect(result.success).toBe(true)
+      expect(rpcCalledWith).toEqual({ p_new_capacity: 150, p_release_all: false })
+      expect(result.capacity).toBe(150)
+    })
+  })
 })
+
 

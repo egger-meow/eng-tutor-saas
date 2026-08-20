@@ -3,10 +3,13 @@ import { listChildProfiles, type ChildProfile } from '../lib/child-profiles'
 import { listChildren, type Child } from '../lib/children'
 import { listMaterials, type Material } from '../lib/materials'
 import { listOwnedSubscriptions, type SubscriptionView } from '../lib/subscriptions'
+import { listOwnedWaitlist, type OwnedWaitlistEntry } from '../lib/waitlist'
+import { getSupabaseClient } from '../lib/supabase'
 
 export type ChildWithProfile = Child & {
   profile: ChildProfile | null
   subscription?: SubscriptionView | null
+  waitlist?: OwnedWaitlistEntry | null
   next_job_release_at?: string | null
   has_past_due_job?: boolean
 }
@@ -28,11 +31,13 @@ export function useParentData() {
     setLoading(true)
     setError('')
     try {
-      const [childRows, subscriptions] = await Promise.all([
+      const [childRows, subscriptions, waitlistEntries] = await Promise.all([
         listChildren(),
         listOwnedSubscriptions(),
+        listOwnedWaitlist(getSupabaseClient()),
       ])
       const subscriptionMap = new Map(subscriptions.map((sub) => [sub.childId, sub]))
+      const waitlistMap = new Map(waitlistEntries.map((w) => [w.childId, w]))
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
       const childIds = childRows.map((c) => c.id)
@@ -41,6 +46,7 @@ export function useParentData() {
         ...child,
         profile: profileMap.get(child.id) ?? null,
         subscription: subscriptionMap.get(child.id) ?? null,
+        waitlist: waitlistMap.get(child.id) ?? null,
         next_job_release_at: page.nextJobReleaseAtByChild[child.id] ?? null,
         has_past_due_job: Boolean(page.hasPastDueUnmaterializedJobByChild[child.id]),
       }))
@@ -60,20 +66,20 @@ export function useParentData() {
   }, [refresh])
 
   const getMaterialsForChild = useCallback(
-    (childId: string) => materials.filter((m) => m.child_id === childId),
+    (childId: string) => materials.filter((m: Material) => m.child_id === childId),
     [materials]
   )
 
   const loadMoreMaterials = useCallback(async (childId: string) => {
     if (!materialHasMore[childId] || loadingMoreMaterials[childId]) return
-    setLoadingMoreMaterials((current) => ({ ...current, [childId]: true }))
+    setLoadingMoreMaterials((current: Record<string, boolean>) => ({ ...current, [childId]: true }))
     try {
       const page = await listMaterials([childId], { offset: materialOffsets[childId] ?? 0 })
-      setMaterials((current) => [...current, ...page.materials])
-      setMaterialOffsets((current) => ({ ...current, [childId]: (current[childId] ?? 0) + 5 }))
-      setMaterialHasMore((current) => ({ ...current, ...page.hasMoreByChild }))
+      setMaterials((current: Material[]) => [...current, ...page.materials])
+      setMaterialOffsets((current: Record<string, number>) => ({ ...current, [childId]: (current[childId] ?? 0) + 5 }))
+      setMaterialHasMore((current: Record<string, boolean>) => ({ ...current, ...page.hasMoreByChild }))
     } finally {
-      setLoadingMoreMaterials((current) => ({ ...current, [childId]: false }))
+      setLoadingMoreMaterials((current: Record<string, boolean>) => ({ ...current, [childId]: false }))
     }
   }, [loadingMoreMaterials, materialHasMore, materialOffsets])
 
