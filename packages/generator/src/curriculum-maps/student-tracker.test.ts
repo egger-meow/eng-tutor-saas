@@ -92,12 +92,48 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
     expect(capsule.coverage.vocabulary.exposurePct).toBeGreaterThanOrEqual(0)
     expect(capsule.coverage.grammar.exposurePct).toBeGreaterThan(0)
     expect(capsule.coverage.grammar.dueReviewCount).toBe(1)
+    expect(capsule.coverage.grammar.totalItems).toBe(25)
     expect(capsule.dueReviewGrammar).toContain('g7-be-verbs-pronouns')
 
     // Candidates are populated and compact
     expect(capsule.recommendedVocabulary.length).toBeLessThanOrEqual(8)
     expect(capsule.recommendedGrammar.length).toBeLessThanOrEqual(2)
     expect(capsule.recommendedCommunicationFunctions.length).toBeLessThanOrEqual(2)
+  })
+
+  it('recommends prerequisite-eligible grammar in canonical progression order', () => {
+    const store = createEmptyStudentCurriculumStore('child-progression', 7)
+
+    expect(buildCapCoverageCapsule(store, { gradeStage: 'grade_7' }).recommendedGrammar).toEqual([
+      'g7-be-verbs-pronouns',
+      'g7-imperatives',
+    ])
+
+    recordExposureFromTrackingDelta(store, {
+      introducedVocabularyIds: [],
+      reviewedVocabularyIds: [],
+      exposedGrammarTargetIds: ['g7-be-verbs-pronouns'],
+    })
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct')
+
+    expect(buildCapCoverageCapsule(store, { gradeStage: 'grade_7' }).recommendedGrammar).toEqual([
+      'g7-present-simple-verbs',
+      'g7-present-continuous',
+    ])
+
+    recordExposureFromTrackingDelta(store, {
+      introducedVocabularyIds: [],
+      reviewedVocabularyIds: [],
+      exposedGrammarTargetIds: ['g7-present-simple-verbs'],
+    })
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct')
+
+    expect(buildCapCoverageCapsule(store, { gradeStage: 'grade_7' }).recommendedGrammar).toEqual([
+      'g7-do-does-questions',
+      'g7-modals-ability-permission',
+    ])
   })
 
   it('maps weekly vocabulary to official 2000 and excludes non-CAP domain words from store', () => {

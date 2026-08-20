@@ -42,6 +42,16 @@ export const grammarProgressionUnits: GrammarProgressionUnit[] = [
     annotationSource: 'paper-english-derived',
   },
   {
+    unitId: 'g7-modals-ability-permission',
+    gradeStage: 'grade_7',
+    officialAppendix6Id: 'og-modals-ability-permission',
+    titleZh: '情態助動詞：能力與許可 (can / may)',
+    patterns: ['Subject + can/cannot + 原形動詞', 'Can/May + Subject + 原形動詞...?'],
+    prerequisites: ['g7-present-simple-verbs'],
+    taiwaneseStudentTrapsZh: 'can / may 後面誤加 to 或動詞變化（如 can to swim、can swims）。',
+    annotationSource: 'paper-english-derived',
+  },
+  {
     unitId: 'g7-present-continuous',
     gradeStage: 'grade_7',
     officialAppendix6Id: 'og-present-continuous',

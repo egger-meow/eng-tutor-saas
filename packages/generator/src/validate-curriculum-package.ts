@@ -181,7 +181,7 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
         if (!VALID_GRAMMAR_UNIT_IDS.has(id)) {
           issues.push({
             path: 'trackingDelta.exposedGrammarTargetIds',
-            message: `Unknown canonical grammar target ID: "${id}". Must be one of the 24 derived grammar progression units.`,
+            message: `Unknown canonical grammar target ID: "${id}". Must be one of the 25 derived grammar progression units.`,
           })
         }
       }

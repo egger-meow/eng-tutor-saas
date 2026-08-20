@@ -1,5 +1,4 @@
 import communicationAppendix4 from './official/communication-appendix-4.json' with { type: 'json' }
-import grammarAppendix6 from './official/grammar-appendix-6.json' with { type: 'json' }
 import vocabulary2000 from './official/vocabulary-2000.json' with { type: 'json' }
 import { grammarProgressionUnits } from './derived/grammar-progression.js'
 import { getThemeForWord } from './derived/vocabulary-annotations.js'
@@ -83,7 +82,7 @@ export function buildCapCoverageCapsule(
   }
 
   // 2. Grammar Metrics & Candidates
-  const totalGrammar = grammarAppendix6.length
+  const totalGrammar = grammarProgressionUnits.length
   let grammarExposed = 0
   let grammarMastered = 0
   let grammarDueCount = 0
@@ -109,11 +108,18 @@ export function buildCapCoverageCapsule(
   }
 
   const recommendedGrammarIds: string[] = []
-  const gradeUnits = grammarProgressionUnits.filter((u) => u.gradeStage === gradeStage)
+  const gradeRank = gradeStage === 'grade_7' ? 7 : gradeStage === 'grade_8' ? 8 : 9
+  const gradeUnits = grammarProgressionUnits.filter((unit) => {
+    const unitRank = unit.gradeStage === 'grade_7' ? 7 : unit.gradeStage === 'grade_8' ? 8 : 9
+    return unitRank <= gradeRank
+  })
   for (const unit of gradeUnits) {
     if (recommendedGrammarIds.length >= 2) break
     const rec = store.grammarRecords[unit.unitId]
-    if (!rec || rec.exposureCount === 0) {
+    const prerequisitesMastered = unit.prerequisites.every(
+      (prerequisiteId) => store.grammarRecords[prerequisiteId]?.masteryStatus === 'mastered',
+    )
+    if ((!rec || rec.exposureCount === 0) && prerequisitesMastered) {
       recommendedGrammarIds.push(unit.unitId)
     }
   }

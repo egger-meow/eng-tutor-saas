@@ -121,7 +121,7 @@ describe('curriculum package v2', () => {
     const result = validateCurriculumPackage(v22)
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.issues.some((issue) => issue.path.includes('exposedGrammarTargetIds') && issue.message.includes('24 derived grammar'))).toBe(true)
+      expect(result.issues.some((issue) => issue.path.includes('exposedGrammarTargetIds') && issue.message.includes('25 derived grammar'))).toBe(true)
     }
   })
 

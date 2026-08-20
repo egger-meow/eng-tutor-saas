@@ -12,6 +12,7 @@ declare
   bridge_child_id uuid;
   bridge_claim_result jsonb;
   bridge_context jsonb;
+  progression_context jsonb;
   bridge_fingerprint text;
   first_package jsonb;
   second_package jsonb;
@@ -382,6 +383,78 @@ begin
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    '00000000-0000-0000-0000-000000000006',
+    '00000000-0000-0000-0000-000000000001',
+    'Grammar Progression Test Student',
+    7,
+    'grade_7'
+  );
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, lease_expires_at,
+    release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000061',
+    '00000000-0000-0000-0000-000000000006',
+    current_date + 300,
+    'test-v1',
+    'grammar-progression-smoke',
+    'claimed',
+    now(),
+    'grammar-progression-smoke',
+    now() + interval '30 minutes',
+    now() + interval '48 hours',
+    now(),
+    now() + interval '24 hours'
+  );
+
+  progression_context := public.worker_generation_context(
+    '00000000-0000-0000-0000-000000000061',
+    'grammar-progression-smoke'
+  );
+  if progression_context #> '{capCoverageCapsule,recommendedGrammar}'
+    <> '["g7-be-verbs-pronouns", "g7-imperatives"]'::jsonb then
+    raise exception 'initial grammar recommendation did not follow eligible canonical order: %',
+      progression_context #> '{capCoverageCapsule,recommendedGrammar}';
+  end if;
+
+  insert into public.child_grammar_progress (
+    child_id, grammar_id, status, mastery_score, exposure_count, correct_count, last_seen_at
+  ) values
+    ('00000000-0000-0000-0000-000000000006', 'g7-be-verbs-pronouns', 'mastered', 100, 2, 2, now()),
+    ('00000000-0000-0000-0000-000000000006', 'g7-imperatives', 'learning', null, 1, 0, now());
+
+  progression_context := public.worker_generation_context(
+    '00000000-0000-0000-0000-000000000061',
+    'grammar-progression-smoke'
+  );
+  if progression_context #> '{capCoverageCapsule,recommendedGrammar}'
+    <> '["g7-present-simple-verbs", "g7-present-continuous"]'::jsonb then
+    raise exception 'grammar recommendation did not unlock mastered prerequisites or prioritize new targets: %',
+      progression_context #> '{capCoverageCapsule,recommendedGrammar}';
+  end if;
+
+  insert into public.child_grammar_progress (
+    child_id, grammar_id, status, mastery_score, exposure_count, correct_count, last_seen_at
+  ) values
+    ('00000000-0000-0000-0000-000000000006', 'g7-present-simple-verbs', 'mastered', 100, 2, 2, now());
+
+  progression_context := public.worker_generation_context(
+    '00000000-0000-0000-0000-000000000061',
+    'grammar-progression-smoke'
+  );
+  if progression_context #> '{capCoverageCapsule,recommendedGrammar}'
+    <> '["g7-do-does-questions", "g7-modals-ability-permission"]'::jsonb then
+    raise exception 'grammar recommendation did not follow canonical order after prerequisite mastery: %',
+      progression_context #> '{capCoverageCapsule,recommendedGrammar}';
+  end if;
+
+  delete from public.children
+  where id = '00000000-0000-0000-0000-000000000006';
 
   if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
     or bridge_fingerprint !~ '^sha256:[0-9a-f]{64}$' then

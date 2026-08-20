@@ -102,15 +102,18 @@ describe('CAP Official & Derived Curriculum Maps', () => {
       expect(found?.familyId).toBe('request-permission')
     })
 
-    it('verifies 24 grammar progression units across 3 junior high grades', () => {
-      expect(grammarProgressionUnits.length).toBe(24)
+    it('verifies 25 grammar progression units across 3 junior high grades', () => {
+      expect(grammarProgressionUnits.length).toBe(25)
       const g7 = getUnitsByGradeStage('grade_7')
       const g8 = getUnitsByGradeStage('grade_8')
       const g9 = getUnitsByGradeStage('grade_9')
 
-      expect(g7.length).toBe(8)
+      expect(g7.length).toBe(9)
       expect(g8.length).toBe(8)
       expect(g9.length).toBe(8)
+
+      const coveredOfficialIds = new Set(grammarProgressionUnits.map((unit) => unit.officialAppendix6Id))
+      expect(grammarAppendix6.every((unit) => coveredOfficialIds.has(unit.id))).toBe(true)
 
       for (const unit of grammarProgressionUnits) {
         expect(unit.unitId).toMatch(/^g[789]-[a-z0-9-]+$/)
