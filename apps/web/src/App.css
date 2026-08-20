@@ -642,6 +642,27 @@
   transform: scale(0.98);
 }
 
+.week-flow .flow-line b,
+.evolution-loop b {
+  display: inline-block;
+  animation: directional-nudge 1.8s cubic-bezier(.22, 1, .36, 1) infinite;
+}
+
+.learning-sequence li span,
+.evolution-step {
+  transition: transform .22s cubic-bezier(.22, 1, .36, 1), background-color .22s ease, color .22s ease;
+}
+
+.learning-sequence li:hover span,
+.evolution-card:hover .evolution-step {
+  transform: scale(1.12) rotate(-4deg);
+}
+
+@keyframes directional-nudge {
+  0%, 72%, 100% { transform: translateX(0); }
+  84% { transform: translateX(.35rem) scale(1.08); }
+}
+
 @media (max-width: 48rem) {
   .dashboard-top-header {
     flex-direction: column;

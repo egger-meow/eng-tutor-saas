@@ -92,23 +92,23 @@ export function LandingPage() {
         </StaggerContainer>
 
         <section className="public-section week-story" id="personalization">
-          <FadeInUp className="section-heading">
+          <FadeInUp reveal="pop" className="section-heading">
             <p className="overline">這週的狀況，會改變下週</p>
             <h2>個人化不是換個故事主題。<br />是孩子下一步練什麼，真的會變。</h2>
             <p>家長只要回報難度、完成度與卡住的地方，系統就把這些訊號放進下一週的教材設計。</p>
           </FadeInUp>
 
-          <FadeInUp delay={0.1} className="week-flow">
-            <div className="week-sheet">
+          <StaggerContainer className="week-flow" staggerDelay={0.16}>
+            <StaggerItem reveal="left" className="week-sheet">
               <span>這週觀察</span>
               <ul><li>閱讀明顯太簡單</li><li>do / does 再次答錯</li><li>學校開始現在進行式</li><li>最近開始喜歡籃球</li></ul>
-            </div>
-            <div className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></div>
-            <div className="week-sheet next-week">
+            </StaggerItem>
+            <StaggerItem reveal="pop" className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></StaggerItem>
+            <StaggerItem reveal="right" className="week-sheet next-week">
               <span>下週調整</span>
               <ul><li>閱讀難度提高一級</li><li>安排 do / does 間隔複習</li><li>銜接現在進行式的提示與題目</li><li>用籃球情境承載適合程度的閱讀</li></ul>
-            </div>
-          </FadeInUp>
+            </StaggerItem>
+          </StaggerContainer>
 
           <FadeInUp delay={0.15} className="inline-objection">
             <p className="overline">只讀興趣主題，對考試真的有用嗎？</p>
@@ -118,7 +118,7 @@ export function LandingPage() {
         </section>
 
         <section className="public-section system-evolution-section" id="system-evolution">
-          <FadeInUp className="system-evolution-heading">
+          <FadeInUp reveal="pop" className="system-evolution-heading">
             <p className="overline">訂閱的是一個會變好的系統</p>
             <h2>你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。</h2>
             <p>三條進步路徑同時發生：孩子的學習記憶在累積、教材引擎在升級、底層 AI 也持續變強。</p>
@@ -126,7 +126,7 @@ export function LandingPage() {
 
           <StaggerContainer className="evolution-grid" staggerDelay={0.1}>
             {evolutionPillars.map(([step, title, body]) => (
-              <StaggerItem key={step}>
+              <StaggerItem key={step} reveal="pop">
                 <article className="evolution-card">
                   <span className="evolution-step">{step}</span>
                   <h3>{title}</h3>
@@ -136,13 +136,13 @@ export function LandingPage() {
             ))}
           </StaggerContainer>
 
-          <FadeInUp delay={0.2} className="evolution-loop" aria-label="教材持續進步的循環">
+          <FadeInUp reveal="left" delay={0.12} className="evolution-loop" aria-label="教材持續進步的循環">
             <span>Week 1</span><b>→</b><span>回饋與學習記憶</span><b>→</b><span>Week 2 更貼合</span><b>→</b><span>系統持續升級</span>
           </FadeInUp>
         </section>
 
         <section className="public-section deliverables-section" id="samples">
-          <FadeInUp className="section-heading">
+          <FadeInUp reveal="pop" className="section-heading">
             <p className="overline">先看每週實際拿到什麼</p>
             <h2>兩份 PDF：孩子能自己做，家長看得懂怎麼陪。</h2>
             <ul className="weekly-contents">{weeklyContents.map((item) => <li key={item}>{item}</li>)}</ul>
@@ -212,14 +212,14 @@ export function LandingPage() {
           </FadeInUp>
 
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
-            <StaggerItem><article className="pdf-preview-card">
+            <StaggerItem reveal="left"><article className="pdf-preview-card">
               <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
               <a className="pdf-preview" href="/samples/sample-week-1-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
                 <iframe title="Student PDF 教材預覽" src="/samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實教材 ↗</span>
               </a>
               <ul className="preview-notes"><li>清楚告訴孩子每一區怎麼做</li><li>自然閱讀、單字、文法、理解與回想練習</li></ul>
             </article></StaggerItem>
-            <StaggerItem><article className="pdf-preview-card">
+            <StaggerItem reveal="right"><article className="pdf-preview-card">
               <p className="document-label">Parent Answer PDF</p><h3>完整答案分開放，家長不用先備課</h3>
               <a className="pdf-preview" href="/samples/sample-week-1-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
                 <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實解答 ↗</span>
@@ -230,7 +230,7 @@ export function LandingPage() {
         </section>
 
         <section className="public-section usage-modes-section" id="usage-modes">
-          <FadeInUp className="usage-heading">
+          <FadeInUp reveal="pop" className="usage-heading">
             <p className="overline">一套教材，三種都能用</p>
             <h2>怎麼教，由你決定；每週要教什麼，我們幫你準備好。</h2>
             <p>紙屬英文不是強迫孩子只能自學。它先把每週最花時間的「找內容、抓難度、出題、做答案」準備好，再讓家庭選最適合自己的使用方式。</p>
@@ -249,12 +249,12 @@ export function LandingPage() {
         </section>
 
         <section className="public-section philosophy-section">
-          <FadeInUp><p className="overline">為什麼選紙本？</p><h2>讓科技做它擅長的事，<br />讓孩子完成不能外包的思考。</h2></FadeInUp>
-          <FadeInUp delay={0.1}><p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p></FadeInUp>
+          <FadeInUp reveal="left"><p className="overline">為什麼選紙本？</p><h2>讓科技做它擅長的事，<br />讓孩子完成不能外包的思考。</h2></FadeInUp>
+          <FadeInUp reveal="right" delay={0.08}><p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p></FadeInUp>
         </section>
 
         <section className="public-section ai-section" id="method">
-          <FadeInUp className="section-heading">
+          <FadeInUp reveal="pop" className="section-heading">
             <p className="overline">AI 是教材背後的機制，不是替孩子作答的人</p>
             <h2>先自己讀、自己答；<br />真的不懂，再請 AI 解釋為什麼。</h2>
             <p>每週學習仍從孩子的閱讀與作答開始。AI 可以在卡住時當解釋與延伸練習工具，但不是完成作業的捷徑。</p>
@@ -262,7 +262,7 @@ export function LandingPage() {
           <StaggerContainer className="learning-sequence" staggerDelay={0.08}>
             <StaggerItem tag="li"><span>01</span>先完整讀過文章</StaggerItem><StaggerItem tag="li"><span>02</span>圈出不懂的字句</StaggerItem><StaggerItem tag="li"><span>03</span>自己完成作答</StaggerItem><StaggerItem tag="li"><span>04</span>對答案、找出錯因</StaggerItem><StaggerItem tag="li"><span>05</span>需要時請 AI 解釋，再做一題</StaggerItem>
           </StaggerContainer>
-          <FadeInUp delay={0.1} className="why-not-gpt" id="chatgpt-difference">
+          <FadeInUp reveal="right" delay={0.08} className="why-not-gpt" id="chatgpt-difference">
             <p className="overline">那直接用 ChatGPT 不就好了？</p>
             <h3>ChatGPT 解決一次提問；紙屬英文維持一段學習。</h3>
             <div className="comparison-compact">
@@ -274,12 +274,12 @@ export function LandingPage() {
         </section>
 
         <section className="public-section parent-role">
-          <FadeInUp><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
+          <FadeInUp reveal="left"><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
           <a className="button mid-page-cta" href={cta.href}>{cta.label}</a>
         </section>
 
-        <FadeInUp><FounderSummary /></FadeInUp>
-        <FadeInUp><PricingSection /></FadeInUp>
+        <FadeInUp reveal="right"><FounderSummary /></FadeInUp>
+        <FadeInUp reveal="left"><PricingSection /></FadeInUp>
 
         <section className="public-section faq" id="faq">
           <FadeInUp className="section-heading"><p className="overline">FAQ</p><h2>決定之前，你可能還想確認。</h2></FadeInUp>

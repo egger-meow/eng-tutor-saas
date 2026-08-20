@@ -11,13 +11,24 @@ const containerVariants: Variants = {
   }),
 }
 
+type RevealStyle = 'rise' | 'pop' | 'left' | 'right'
+
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
+  hidden: (reveal: RevealStyle = 'pop') => ({
+    opacity: 0,
+    y: reveal === 'rise' ? 30 : reveal === 'pop' ? 38 : 8,
+    x: reveal === 'left' ? -42 : reveal === 'right' ? 42 : 0,
+    scale: reveal === 'pop' ? 0.88 : 0.96,
+    rotate: reveal === 'left' ? -0.8 : reveal === 'right' ? 0.8 : reveal === 'pop' ? -0.6 : 0,
+  }),
+  visible: (reveal: RevealStyle = 'pop') => ({
     opacity: 1,
+    x: 0,
     y: 0,
-    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
-  },
+    scale: 1,
+    rotate: 0,
+    transition: { type: 'spring', duration: 0.42, bounce: reveal === 'pop' ? 0.38 : 0.22 },
+  }),
 }
 
 type TagName = 'div' | 'ol' | 'ul' | 'li' | 'article' | 'section'
@@ -64,12 +75,13 @@ export function StaggerContainer({
 interface StaggerItemProps extends HTMLMotionProps<'div'> {
   children: ReactNode
   tag?: TagName
+  reveal?: RevealStyle
 }
 
-export function StaggerItem({ children, className = '', tag = 'div', ...props }: StaggerItemProps) {
+export function StaggerItem({ children, className = '', tag = 'div', reveal = 'pop', ...props }: StaggerItemProps) {
   const Component = motionMap[tag] as typeof motion.div
   return (
-    <Component variants={itemVariants} className={className} {...props}>
+    <Component variants={itemVariants} custom={reveal} className={className} {...props}>
       {children}
     </Component>
   )
