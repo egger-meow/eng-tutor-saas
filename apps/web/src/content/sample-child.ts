@@ -1,7 +1,7 @@
 export const sampleChild = {
   name: '國一學生（公開範例）',
   grade: '國中七年級',
-  level: 'developing',
+  level: '英文基礎建立中',
   learningGoal: '閱讀理解',
   interests: ['Minecraft', '科技', '解謎'],
   routine: '每週約 75 分鐘',

@@ -156,7 +156,7 @@ export function LandingPage() {
               </div>
 
               <p className="sample-context-meta">
-                <strong>範例學生</strong>：國一 ｜ developing ｜ 每週約 75 分鐘 ｜ 目標：<strong>閱讀理解</strong>
+                <strong>範例學生</strong>：國一 ｜ 英文基礎建立中 ｜ 每週約 75 分鐘 ｜ 目標：<strong>閱讀理解</strong>
               </p>
               <p className="sample-context-narrative">
                 孩子喜歡 Minecraft、科技與解謎，因此這週不是把興趣名稱貼在制式文章上，而是把它轉化成方塊建造遊戲感的科技門故障排除任務：讀訊號、比較測試結果、找出文章證據，再練 am / is / are。
@@ -178,7 +178,7 @@ export function LandingPage() {
                   <span className="node-label">目前程度</span>
                   <div className="node-tags">
                     <span className="tag-pill">國一</span>
-                    <span className="tag-pill">developing</span>
+                    <span className="tag-pill">英文基礎建立中</span>
                   </div>
                 </div>
 
