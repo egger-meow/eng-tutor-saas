@@ -6,7 +6,7 @@ engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
-  "packages/generator/prompts/2.4.0/02-author.md": "d4af6013c65ac0caada13185683c0cc059ec69b3a1cc6e67efe7bcb0b51d3cf3"
+  "packages/generator/prompts/2.4.0/02-author.md": "1ea2a9f06bde92dfa58ffa05f8eb23816eb984180dd0a9e7c9ed5d55f2fe352b"
   "packages/generator/prompts/2.4.0/03-critic.md": "516a077aad2538c62f174888cb00a4bbea12d2371b72c93ce0d397c0355f76a8"
   "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
@@ -892,6 +892,8 @@ Each bullet in `parentSummary.personalizationZh` should naturally and warmly ans
 ## 9. Server-Side Deterministic Normalization Notice
 
 The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `homework.estimatedMinutes`, strips duplicated option prefixes, and validates lexical ceilings. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
+
+`parentSummary.completionCheckZh` describes completion scope only—never total minutes. The renderer displays normalized `learningPlan.estimatedMinutes`.
 
 ---
 

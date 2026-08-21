@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { CurriculumPackage } from '@paper-english/generator'
+import { normalizeCurriculumPackage, type CurriculumPackage } from '@paper-english/generator'
 import { renderCurriculumParentAnswerHtml, renderCurriculumStudentHtml } from './render-curriculum-package.js'
 
 const pkg = {
@@ -28,5 +28,33 @@ describe('curriculum package PDF HTML', () => {
     expect(html).not.toContain('能否獨立完成')
     expect(html).not.toContain('這份教材為什麼這樣安排')
     expect(html).not.toContain('可追問')
+  })
+
+  it('uses the normalized total in both projections and removes only a stale trailing authored total', () => {
+    const authored = structuredClone(pkg) as unknown as CurriculumPackage
+    authored.learningPlan.estimatedMinutes = 78
+    authored.studentLesson.homework.estimatedMinutes = 14
+    authored.parentSummary.completionCheckZh = '完成閱讀、10 個核心字、三組教學、16 題跨階段練習與隔天作業即可，整體約 78 分鐘。'
+
+    const normalized = normalizeCurriculumPackage(authored) as CurriculumPackage
+    expect(normalized.studentLesson.homework.estimatedMinutes).toBe(5)
+    expect(normalized.learningPlan.estimatedMinutes).toBe(30)
+    expect(normalized.parentSummary.completionCheckZh).toBe('完成閱讀、10 個核心字、三組教學、16 題跨階段練習與隔天作業即可')
+
+    const studentHtml = renderCurriculumStudentHtml(normalized)
+    const parentHtml = renderCurriculumParentAnswerHtml(normalized)
+    expect(studentHtml).toContain('預計 <strong>30</strong> 分鐘')
+    expect(parentHtml).toContain('預計 <strong>30</strong> 分鐘')
+    expect(parentHtml).toContain('<strong>預計總時間：</strong>30 分鐘')
+    expect(parentHtml).toContain('完成閱讀、10 個核心字、三組教學、16 題跨階段練習與隔天作業即可')
+    expect(parentHtml).not.toContain('78 分鐘')
+  })
+
+  it('preserves meaningful and component-specific numbers in completion scope text', () => {
+    const authored = structuredClone(pkg) as unknown as CurriculumPackage
+    authored.parentSummary.completionCheckZh = '完成 10 個核心字、16 題練習與隔天 8 分鐘作業即可。'
+
+    const normalized = normalizeCurriculumPackage(authored) as CurriculumPackage
+    expect(normalized.parentSummary.completionCheckZh).toBe(authored.parentSummary.completionCheckZh)
   })
 })

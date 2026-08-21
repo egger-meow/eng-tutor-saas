@@ -238,6 +238,8 @@ Each bullet in `parentSummary.personalizationZh` should naturally and warmly ans
 
 The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `homework.estimatedMinutes`, strips duplicated option prefixes, and validates lexical ceilings. Focus purely on pedagogical quality, natural dialogue exponents, clean Chinese scaffolding, and diagnostic distractor design.
 
+`parentSummary.completionCheckZh` describes completion scope only—never total minutes. The renderer displays normalized `learningPlan.estimatedMinutes`.
+
 ---
 
 ## 10. Output Contract (Strict JSON Only)

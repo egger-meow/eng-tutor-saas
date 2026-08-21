@@ -54,6 +54,7 @@ ${renderCurriculumHeader(pkg, 'parent-answer')}
   <p><strong>本週學習重點：</strong>${h(summary.focusZh)}</p>
   ${summary.observeZh && summary.observeZh.length > 0 ? `<div><strong>觀察重點：</strong></div>${observeItemsHtml}` : ''}
   <p class="small"><strong>完成度確認：</strong>${h(summary.completionCheckZh)}</p>
+  <p class="small"><strong>預計總時間：</strong>${pkg.learningPlan.estimatedMinutes} 分鐘</p>
   ${personalizationHtml}
 </section>
 

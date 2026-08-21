@@ -48,7 +48,7 @@ export {
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
-export { countWords, extractBlockTexts, cleanOptionPrefix, normalizeCurriculumPackage } from './normalize-curriculum-package.js'
+export { countWords, extractBlockTexts, cleanOptionPrefix, normalizeCurriculumPackage, stripTrailingTotalDuration } from './normalize-curriculum-package.js'
 
 // CAP Curriculum Maps & Coverage Tracking
 export {

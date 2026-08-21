@@ -29,6 +29,15 @@ export function cleanOptionPrefix(text: string): string {
   return text.replace(OPTION_PREFIX_REGEX, '').trim()
 }
 
+const TRAILING_TOTAL_DURATION_REGEX =
+  /(?:[，,；;]\s*)?(?:(?:整體|全部|全程|總共|總計|合計)(?:學習)?(?:時間)?|(?:整份|本份|本週)(?:教材|學習)?(?:總共|總計|合計)?(?:時間)?)\s*(?:大約|約)?\s*[0-9０-９]+\s*分(?:鐘)?\s*[。.!！]?\s*$/u
+
+/** Removes only an authored trailing whole-package duration claim. */
+export function stripTrailingTotalDuration(text: string): string {
+  if (typeof text !== 'string') return text
+  return text.replace(TRAILING_TOTAL_DURATION_REGEX, '').trim()
+}
+
 export function computeQuestionDuration(question: any): number {
   if (!question || typeof question !== 'object') return 2
 
@@ -157,6 +166,11 @@ export function normalizeCurriculumPackage(input: unknown): unknown {
   // Deterministically compute calibrated total lesson plan duration
   if (pkg.learningPlan && typeof pkg.learningPlan === 'object') {
     pkg.learningPlan.estimatedMinutes = computeDeterministicPlanMinutes(pkg)
+  }
+
+  // Completion summary owns scope, while the normalized learning plan owns total time.
+  if (typeof pkg.parentSummary?.completionCheckZh === 'string') {
+    pkg.parentSummary.completionCheckZh = stripTrailingTotalDuration(pkg.parentSummary.completionCheckZh)
   }
 
   // Ensure canonical engineVersion is present in metadata
