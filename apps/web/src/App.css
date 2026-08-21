@@ -654,6 +654,10 @@
   animation: directional-nudge 1.8s cubic-bezier(.22, 1, .36, 1) infinite;
 }
 
+.week-flow .flow-line b {
+  display: block;
+}
+
 .learning-sequence li span,
 .evolution-step {
   transition: transform .22s cubic-bezier(.22, 1, .36, 1), background-color .22s ease, color .22s ease;
