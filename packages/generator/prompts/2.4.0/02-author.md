@@ -177,7 +177,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 
 1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
    - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
-   - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+   - Teach passage-anchored lexical units; 0–3 may be useful grade-appropriate phrases/collocations, never quota fillers, with normal novelty/review tracking.
    - Provide ≥7 meaningful, difficult, grade-appropriate new cards. Prior words may recur, but never use `new`/`extension` or `introducedVocabularyIds`.
    - Add 0–4 due/difficult review cards (default 0) as `review`/`repeated-miss` and `reviewedVocabularyIds`; exclude them from the new quota.
 2. **Lexical Ceiling Invariant**:

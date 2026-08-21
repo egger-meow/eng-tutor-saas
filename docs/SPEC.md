@@ -1519,7 +1519,7 @@ A small number of useful extension words may be allowed when clearly identified.
 
 # 63. Vocabulary Selection Principle
 
-Each weekly main reading should normally introduce approximately:
+Treat core vocabulary as **lexical units**, not only isolated words. Each weekly main reading should normally introduce approximately:
 
 > **7 to 15 meaningful core vocabulary items.**
 
@@ -1530,6 +1530,8 @@ Do not choose artificially easy words merely because the learner is in Grade 7.
 Do not choose obscure words only to make the worksheet appear advanced.
 
 Vocabulary cards should be almost entirely genuinely new, meaningful, grade-appropriate difficult words. A word already exposed in an earlier packet may recur naturally in reading, questions, examples, practice, or homework, but it must never be labeled `new` or consume the weekly new-word quota.
+
+When a useful multi-word expression teaches more than another isolated word, **0–3 core items may be grade-appropriate phrases or collocations**. Do not force phrases to fill a quota. Phrase/collocation items use the same stable-ID, novelty, status, spaced-review, and tracking rules as single-word items.
 
 Include **0–4 review cards, default 0**, only when a word is genuinely difficult/useful and due for spaced review or supported by actual difficulty evidence. Review cards do not consume the new-word quota and must be clearly labeled as review in the Student PDF.
 

@@ -153,6 +153,37 @@ describe('curriculum audit & lexical contract', () => {
     expect(anchorFinding).toBeUndefined()
   })
 
+  it('treats an anchored phrase as one lexical unit without flagging its component words', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.reading.blocks[0].text += ' The students work together after school.'
+    pkg.studentLesson.vocabulary[0] = {
+      ...pkg.studentLesson.vocabulary[0],
+      id: 'v-work-together',
+      word: 'work together',
+      partOfSpeech: 'phr.',
+      meaningZh: '合作',
+      exampleEn: 'The students work together after school.',
+      exampleZh: '學生們放學後一起合作。',
+    }
+
+    const report = auditCurriculumPackage(pkg)
+    expect(report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('work together'))).toBeUndefined()
+    expect(report.findings.find((f) => f.dimension === 'lexical-ceiling' && /work|together/u.test(f.message))).toBeUndefined()
+  })
+
+  it('rejects more than three phrase or collocation cards', () => {
+    const pkg = canonicalPackage()
+    const phrases = ['work together', 'after school', 'take notes', 'find out']
+    phrases.forEach((word, index) => {
+      pkg.studentLesson.vocabulary[index] = { ...pkg.studentLesson.vocabulary[index], word, partOfSpeech: 'phr.' }
+    })
+
+    const report = auditCurriculumPackage(pkg)
+    const finding = report.findings.find((f) => f.dimension === 'lexical-unit-mix')
+    expect(finding?.severity).toBe('critical')
+    expect(report.passed).toBe(false)
+  })
+
   it('flags capitalized advanced non-allowlist words as warning telemetry without hard rejection', () => {
     const pkg = canonicalPackage()
     // Inject capitalized obscure words that are not in the approved vocab, not dialogue speakers, and not interests

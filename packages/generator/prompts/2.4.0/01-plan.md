@@ -90,7 +90,7 @@ Step 3: Instantiate in Authentic Interest Situation & Problem Context
 ## 4. Deep Situational Personalization (No Superficial Skinning)
 
 - **Authentic Engineering & Hobby Situations**: Embed targets into real problems (e.g., debugging a redstone repeater delay, calibrating optical sensors, planning tournament rotations), rather than skin-deep mentions like "Alex likes robots".
-- **Passage-First Lexical Integration**: Core vocabulary targets must be the actual difficult words essential to the reading passage, never artificial random insertions.
+- **Passage-First Lexical Integration**: Core lexical units must anchor the passage, not be random; allow 0–3 useful grade-appropriate phrases/collocations, never quota fillers.
 
 ---
 

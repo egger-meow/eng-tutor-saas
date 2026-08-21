@@ -10,7 +10,7 @@ Every student packet should contain:
 
 - a clear weekly goal and estimated workload;
 - one level-appropriate reading with contextual clues;
-- a bounded vocabulary set selected for usefulness and recurrence;
+- a bounded lexical-unit set; 0–3 may be useful grade-appropriate phrases/collocations, never quota fillers, under normal novelty/review rules;
 - grammar practice connected to the reading rather than isolated drills;
 - comprehension and transfer questions;
 - space to mark unknowns, corrections, and reflection.

@@ -5,15 +5,15 @@ promptVersion: "2.4.0"
 engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "a397c07272bcf959f2459f600b0ece207d7bcbfd450028d6999a9fe3c748171e"
-  "packages/generator/prompts/2.4.0/02-author.md": "2da2f2abecc7743f6c5dd5c83a984a2c28dc29fc1992a86678d69a8983a38bfd"
-  "packages/generator/prompts/2.4.0/03-critic.md": "66b1ba9171dbbd942e9a38e8a6622f970005aff50124d305aaf4b76327152c2b"
-  "packages/generator/prompts/2.4.0/04-repair.md": "37df8b7050d667f31204b1df22c579eceeefd18d16f3d292e94de1967181599a"
+  "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
+  "packages/generator/prompts/2.4.0/02-author.md": "d4af6013c65ac0caada13185683c0cc059ec69b3a1cc6e67efe7bcb0b51d3cf3"
+  "packages/generator/prompts/2.4.0/03-critic.md": "516a077aad2538c62f174888cb00a4bbea12d2371b72c93ce0d397c0355f76a8"
+  "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
-  "docs/product-rules.md": "0fd7c373e33f67f439db6df73ca6fb0225d8f0655eba2be1ac02f207557e3540"
+  "docs/product-rules.md": "70597defa7bfb210443e5a6f6f5d42eba2d96bc702b69efbb832b435b35d75f2"
 ---
 
 # 紙屬英文 Production Authoring Bundle
@@ -34,7 +34,7 @@ Every student packet should contain:
 
 - a clear weekly goal and estimated workload;
 - one level-appropriate reading with contextual clues;
-- a bounded vocabulary set selected for usefulness and recurrence;
+- a bounded lexical-unit set; 0–3 may be useful grade-appropriate phrases/collocations, never quota fillers, under normal novelty/review rules;
 - grammar practice connected to the reading rather than isolated drills;
 - comprehension and transfer questions;
 - space to mark unknowns, corrections, and reflection.
@@ -585,7 +585,7 @@ Step 3: Instantiate in Authentic Interest Situation & Problem Context
 ## 4. Deep Situational Personalization (No Superficial Skinning)
 
 - **Authentic Engineering & Hobby Situations**: Embed targets into real problems (e.g., debugging a redstone repeater delay, calibrating optical sensors, planning tournament rotations), rather than skin-deep mentions like "Alex likes robots".
-- **Passage-First Lexical Integration**: Core vocabulary targets must be the actual difficult words essential to the reading passage, never artificial random insertions.
+- **Passage-First Lexical Integration**: Core lexical units must anchor the passage, not be random; allow 0–3 useful grade-appropriate phrases/collocations, never quota fillers.
 
 ---
 
@@ -832,7 +832,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 
 1. **Vocabulary is Curriculum Anchor, Not Insertion Queue**:
    - Normal workload baseline teaches **10–12 core vocabulary items** (7–9 for light budgets, 12–14 for deep budgets).
-   - Core vocabulary listed in `studentLesson.vocabulary` MUST be the actual unfamiliar or target words taught inside the reading passage.
+   - Teach passage-anchored lexical units; 0–3 may be useful grade-appropriate phrases/collocations, never quota fillers, with normal novelty/review tracking.
    - Provide ≥7 meaningful, difficult, grade-appropriate new cards. Prior words may recur, but never use `new`/`extension` or `introducedVocabularyIds`.
    - Add 0–4 due/difficult review cards (default 0) as `review`/`repeated-miss` and `reviewedVocabularyIds`; exclude them from the new quota.
 2. **Lexical Ceiling Invariant**:
@@ -948,7 +948,7 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
 18. **Exposure Is Never Weakness**:
     Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
 19. **Vocabulary Novelty & Review Truthfulness**:
-    Reject prior words labeled/recorded new. Require ≥7 meaningful grade-appropriate new cards and 0–4 due/evidence-backed, correctly tracked reviews (default 0).
+    Require ≥7 genuinely new lexical units, 0–4 evidence-backed reviews, and 0–3 useful grade-appropriate phrases/collocations—never quota fillers or novelty/review bypasses.
 20. **Grammar Instruction Progression**:
     The first grammar exposure is primary. Reject repetition without feedback, failure evidence, or prerequisite repair; use prior grammar naturally in retrieval/application.
 
@@ -991,7 +991,7 @@ When fixing validation or critic findings in a curriculum package:
 5. **ID & Atomic Q&A Integrity**: Guarantee question IDs match answer objects and targets exist in `learningPlan.targets`.
 6. **Enforce Feedback Authority**: If parent or student feedback requested specific adjustments (repeat, avoid, simplify, deepen, focus), ensure the repaired package strictly honors them.
 7. **Maintain Forward Progression**: Unless repeating is explicitly requested by feedback or justified by actual failure evidence, ensure the primary instruction target is a new grade-appropriate unit and prior units remain in spaced review.
-8. **Repair Vocabulary Novelty**: Replace prior `new` cards; keep 0–4 due/evidence-backed labeled reviews (default 0) and exact, disjoint tracking arrays.
+8. **Repair Lexical-Unit Novelty**: Replace prior `new` cards; keep exact tracking, 0–4 evidence-backed reviews, and 0–3 useful grade-appropriate phrases/collocations—never quota fillers or novelty/review bypasses.
 
 ---
 

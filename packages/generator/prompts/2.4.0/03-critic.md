@@ -46,7 +46,7 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
 18. **Exposure Is Never Weakness**:
     Unverified past exposure without failure evidence must never be classified into `recurringMistakes` or assumed to be a student weakness.
 19. **Vocabulary Novelty & Review Truthfulness**:
-    Reject prior words labeled/recorded new. Require ≥7 meaningful grade-appropriate new cards and 0–4 due/evidence-backed, correctly tracked reviews (default 0).
+    Require ≥7 genuinely new lexical units, 0–4 evidence-backed reviews, and 0–3 useful grade-appropriate phrases/collocations—never quota fillers or novelty/review bypasses.
 20. **Grammar Instruction Progression**:
     The first grammar exposure is primary. Reject repetition without feedback, failure evidence, or prerequisite repair; use prior grammar naturally in retrieval/application.
 

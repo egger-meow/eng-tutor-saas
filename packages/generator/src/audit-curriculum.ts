@@ -129,14 +129,17 @@ function getValidWordVariants(word: string): Set<string> {
   return variants
 }
 
+function lexicalUnitTokens(value: string): string[] {
+  return value.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/gu) ?? []
+}
+
 function wordAppearsInText(word: string, text: string): boolean {
-  const cleanWord = word.toLowerCase().trim().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
-  if (!cleanWord) return true
+  const unitTokens = lexicalUnitTokens(word)
+  if (unitTokens.length === 0) return true
   const tokens = text.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/gu) ?? []
-  const tokenSet = new Set(tokens)
-  const variants = getValidWordVariants(cleanWord)
-  for (const variant of variants) {
-    if (tokenSet.has(variant)) return true
+  const unitVariants = unitTokens.map(getValidWordVariants)
+  for (let start = 0; start <= tokens.length - unitTokens.length; start += 1) {
+    if (unitVariants.every((variants, offset) => variants.has(tokens[start + offset]!))) return true
   }
   return false
 }
@@ -213,6 +216,8 @@ export function auditCurriculumPackage(
   if (pkg.studentLesson.instruction.some((section) => section.workedExamples.length < 2 || section.commonMistakes.length < 1)) add('semantic-critical', 'self-study', 'critical', '每個新概念都需要至少兩個 worked examples 與一個錯誤對照。')
   if (pkg.studentLesson.reading.blocks.length < 2 || passageWords < 120) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
   if (pkg.studentLesson.vocabulary.length > 15) add('semantic-critical', 'cognitive-load', 'critical', '核心單字超過 15 個，可能造成不必要負擔。')
+  const phraseCount = pkg.studentLesson.vocabulary.filter((v) => lexicalUnitTokens(v.word).length > 1).length
+  if (phraseCount > 3) add('semantic-critical', 'lexical-unit-mix', 'critical', `核心詞彙含 ${phraseCount} 個片語或搭配，超過 0–3 個的上限。請只保留比另一個單字更有學習價值的詞彙單位。`)
   if (!pkg.studentLesson.practice.some((stage) => stage.stage === 'retrieval')) add('semantic-critical', 'retrieval', 'critical', '缺少隔天或延遲提取練習。')
   if (questions.length > 70) add('auto-derived', 'token-efficiency', 'warning', '題目超過 70 題；請刪除重複題並保留能區分學習狀態的證據。')
 
@@ -224,7 +229,7 @@ export function auditCurriculumPackage(
   const allowedEntities = buildAllowedEntitiesSet(pkg)
 
   const rawPassageText = blockTexts.join(' ')
-  const taughtVocab = new Set(pkg.studentLesson.vocabulary.map((v) => v.word.toLowerCase()))
+  const taughtVocab = new Set(pkg.studentLesson.vocabulary.flatMap((v) => lexicalUnitTokens(v.word)))
 
   for (const vocab of pkg.studentLesson.vocabulary) {
     if (!wordAppearsInText(vocab.word, rawPassageText)) {
