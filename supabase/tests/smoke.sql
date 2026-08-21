@@ -588,6 +588,21 @@ begin
   if (select count(*) from public.materials where id = completed_material_id) <> 1 then
     raise exception 'attempt 2 did not complete exactly one material';
   end if;
+  if not exists (
+    select 1
+    from public.generation_jobs as week_one
+    join public.generation_jobs as week_two
+      on week_two.source_material_id = week_one.material_id
+    where week_one.id = bridge_job_id
+      and week_one.release_at <= now()
+      and week_one.feedback_cutoff_at = week_one.release_at - interval '48 hours'
+      and week_one.generation_due_at = week_one.release_at - interval '24 hours'
+      and week_two.release_at = week_one.release_at + interval '7 days'
+      and week_two.feedback_cutoff_at = week_one.release_at + interval '7 days' - interval '48 hours'
+      and week_two.generation_due_at = week_one.release_at + interval '7 days' - interval '24 hours'
+  ) then
+    raise exception 'completed Week 1 did not release immediately or anchor Week 2 at actual release + 7 days';
+  end if;
   perform public.worker_finish_curriculum_submission(
     bridge_job_id, 2, 'smoke-finisher-2', 'completed', null, null, null
   );

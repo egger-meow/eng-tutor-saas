@@ -693,6 +693,8 @@ Week 1 is not generated immediately upon onboarding completion. The sole curricu
 Therefore:
 
 * the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
+* Week 1 is the sole early-release exception: when the deterministic Finisher successfully completes both PDFs before that timestamp, completion immediately becomes the actual `release_at` and the parent may download both files at once;
+* Week 2 is scheduled from Week 1's actual release anchor plus seven days. If Week 1 completes today, Week 2 is due today + 7 days; if Week 1 completes tomorrow, Week 2 is due tomorrow + 7 days;
 * for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
 * the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
 * expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
@@ -2495,6 +2497,8 @@ or equivalent scheduled-job logic.
 The system should distribute generation workload rather than accidentally scheduling all 100 students at one exact moment when avoidable.
 
 `next_generation_at` is an operational state representing an internal generation deadline. It is not automatically a parent-facing delivery date; its meaning must be interpreted according to the current material and job state. If an unreleased prepared material already exists, that material's `release_at` is the authoritative parent-visible delivery date rather than an advanced generation deadline for a subsequent cycle.
+
+For the first packet only, successful Finisher completion may advance the actual Week 1 `release_at`. The Week 2 release and generation deadlines must then be derived from that actual Week 1 release anchor plus seven days, rather than from the superseded next-day expectation.
 
 
 ---
