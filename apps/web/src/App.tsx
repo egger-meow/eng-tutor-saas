@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, MotionConfig, motion, useReducedMotion } from 'framer-motion'
+import { MotionConfig, motion, useReducedMotion } from 'framer-motion'
 import type { Session } from '@supabase/supabase-js'
 import './App.css'
 import { useRoute } from './app/use-route'
@@ -54,7 +54,7 @@ function App() {
     : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'child-overview' || route.name === 'child-materials' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'feedback' ? <FeedbackPage session={session} materialId={route.params.materialId} /> : route.name === 'parent-guide-feedback' ? <ParentGuideFeedbackPage session={session} /> : route.name === 'billing' ? <BillingPage session={session} /> : <DashboardPage session={session} />
 
 
-  return <MotionConfig reducedMotion="user"><AnimatePresence mode="sync" initial={false}><motion.div key={`${session ? 'app' : 'public'}:${route.path}`} className="route-stage" initial={reduceMotion ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }} transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}>{page}</motion.div></AnimatePresence></MotionConfig>
+  return <MotionConfig reducedMotion="user"><motion.div className="route-stage" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}>{page}</motion.div></MotionConfig>
 }
 
 export default App

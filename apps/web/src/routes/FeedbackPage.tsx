@@ -7,7 +7,7 @@ import { useParentData } from '../hooks/use-parent-data'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function FeedbackPage({ session, materialId }: { session: Session; materialId: string }) {
-  const data = useParentData()
+  const data = useParentData(session.user.id)
   const material = data.materials.find((item) => item.id === materialId) ?? null
   const child = material ? data.children.find((item) => item.id === material.child_id) ?? null : null
 

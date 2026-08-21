@@ -9,7 +9,7 @@ import { gradeStageLabel } from '../lib/grade-stage'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function ChildProfilePage({ session, childId }: { session: Session; childId: string }) {
-  const data = useParentData()
+  const data = useParentData(session.user.id)
   const requestedChild = data.children.find((item) => item.id === childId) ?? null
   return <AppShell header={<ParentNavigation email={session.user.email} childHref={requestedChild ? `/children/${requestedChild.id}` : '/dashboard'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
     <PageTransition>

@@ -9,7 +9,7 @@ import { useParentData } from '../hooks/use-parent-data'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function DashboardPage({ session }: { session: Session }) {
-  const data = useParentData()
+  const data = useParentData(session.user.id)
 
   return (
     <AppShell
