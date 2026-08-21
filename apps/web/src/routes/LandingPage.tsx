@@ -152,14 +152,14 @@ export function LandingPage() {
             <div className="sample-context-card">
               <div className="sample-context-header">
                 <span className="sample-context-badge">範例拆解</span>
-                <h3 className="sample-context-title">這份教材為什麼是 Minecraft？</h3>
+                <h3 className="sample-context-title">興趣怎麼真的改變這份教材？</h3>
               </div>
 
               <p className="sample-context-meta">
-                <strong>範例學生</strong>：國一 ｜ 喜歡 <strong>Minecraft、科技</strong> ｜ 依目前程度與本週學習目標設計
+                <strong>範例學生</strong>：國一 ｜ developing ｜ 每週約 75 分鐘 ｜ 目標：<strong>閱讀理解</strong>
               </p>
               <p className="sample-context-narrative">
-                因此這週以 Minecraft 的紅石自動門作為閱讀情境，練習真正需要累積的單字、文法與閱讀理解。
+                孩子喜歡 Minecraft、科技與解謎，因此這週不是把興趣名稱貼在制式文章上，而是把它轉化成方塊建造遊戲感的科技門故障排除任務：讀訊號、比較測試結果、找出文章證據，再練 am / is / are。
               </p>
 
               <div className="sample-flow-strip" aria-label="個人化教材生成流程">
@@ -168,6 +168,7 @@ export function LandingPage() {
                   <div className="node-tags">
                     <span className="tag-pill tag-accent">Minecraft</span>
                     <span className="tag-pill tag-accent">科技</span>
+                    <span className="tag-pill tag-accent">解謎</span>
                   </div>
                 </div>
 
@@ -177,6 +178,7 @@ export function LandingPage() {
                   <span className="node-label">目前程度</span>
                   <div className="node-tags">
                     <span className="tag-pill">國一</span>
+                    <span className="tag-pill">developing</span>
                   </div>
                 </div>
 
@@ -186,8 +188,6 @@ export function LandingPage() {
                   <span className="node-label">學習目標</span>
                   <div className="node-tags">
                     <span className="tag-pill">閱讀理解</span>
-                    <span className="tag-pill">核心單字</span>
-                    <span className="tag-pill">文法</span>
                   </div>
                 </div>
 
@@ -195,8 +195,8 @@ export function LandingPage() {
 
                 <div className="sample-flow-node node-output">
                   <span className="node-label">本週教材</span>
-                  <strong className="output-title">The Redstone Door Test</strong>
-                  <span className="output-subtitle">Minecraft 紅石自動門情境閱讀</span>
+                  <strong className="output-title">The Signal Door Test</strong>
+                  <span className="output-subtitle">科技故障排除閱讀＋be 動詞＋證據判讀</span>
                 </div>
               </div>
 
@@ -214,15 +214,15 @@ export function LandingPage() {
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
             <StaggerItem reveal="left"><article className="pdf-preview-card">
               <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
-              <a className="pdf-preview" href="/samples/sample-week-1-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
-                <iframe title="Student PDF 教材預覽" src="/samples/sample-week-1-student.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實教材 ↗</span>
+              <a className="pdf-preview" href="/samples/sample-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
+                <iframe title="Student PDF 教材預覽" src="/samples/sample-student.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實教材 ↗</span>
               </a>
               <ul className="preview-notes"><li>清楚告訴孩子每一區怎麼做</li><li>自然閱讀、單字、文法、理解與回想練習</li></ul>
             </article></StaggerItem>
             <StaggerItem reveal="right"><article className="pdf-preview-card">
               <p className="document-label">Parent Answer PDF</p><h3>完整答案分開放，家長不用先備課</h3>
-              <a className="pdf-preview" href="/samples/sample-week-1-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
-                <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-week-1-parent-answer.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實解答 ↗</span>
+              <a className="pdf-preview" href="/samples/sample-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
+                <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-parent-answer.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實解答 ↗</span>
               </a>
               <ul className="preview-notes"><li>完整答案、簡短解釋與觀察重點</li><li>不用會教英文，也知道孩子卡在哪裡</li></ul>
             </article></StaggerItem>

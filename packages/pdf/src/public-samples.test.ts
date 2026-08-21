@@ -4,18 +4,19 @@ import { resolve } from 'node:path'
 import { inspectPdf } from './inspect-pdf.js'
 
 const REPO_ROOT = resolve(import.meta.dirname, '../../..')
-const STUDENT_SAMPLE_PATH = resolve(REPO_ROOT, 'apps/web/public/samples/sample-week-1-student.pdf')
-const PARENT_SAMPLE_PATH = resolve(REPO_ROOT, 'apps/web/public/samples/sample-week-1-parent-answer.pdf')
+const STUDENT_SAMPLE_PATH = resolve(REPO_ROOT, 'apps/web/public/samples/sample-student.pdf')
+const PARENT_SAMPLE_PATH = resolve(REPO_ROOT, 'apps/web/public/samples/sample-parent-answer.pdf')
 
 describe('Public Samples Regression Lock', () => {
-  it('locks public Student PDF strictly to The Redstone Door Test (Minecraft)', async () => {
+  it('locks the public Student PDF to the production The Signal Door Test artifact', async () => {
     const studentBuffer = await readFile(STUDENT_SAMPLE_PATH)
-    const inspection = await inspectPdf(studentBuffer, 'sample-week-1-student')
+    const inspection = await inspectPdf(studentBuffer, 'sample-student')
 
     const normalizedText = inspection.text.replace(/\s+/g, ' ')
-    expect(inspection.pageCount).toBeGreaterThanOrEqual(2)
-    expect(normalizedText).toContain('The Redstone Door Test')
-    expect(normalizedText.replace(/\s+/g, '')).toContain('紅石自動門')
+    expect(inspection.pageCount).toBe(11)
+    expect(normalizedText).toContain('The Signal Door Test')
+    expect(normalizedText).toContain('block-building game')
+    expect(normalizedText).toContain('am / is / are')
     
     // Ensure legacy / synthetic rooftop garden material never leaks into public samples
     expect(normalizedText).not.toContain('The Rooftop Garden Challenge')
@@ -23,12 +24,12 @@ describe('Public Samples Regression Lock', () => {
     expect(normalizedText).not.toContain('rooftop garden project')
   })
 
-  it('locks public Parent Answer PDF strictly to The Redstone Door Test', async () => {
+  it('locks the public Parent Answer PDF to the matching production artifact', async () => {
     const parentBuffer = await readFile(PARENT_SAMPLE_PATH)
-    const inspection = await inspectPdf(parentBuffer, 'sample-week-1-parent-answer')
+    const inspection = await inspectPdf(parentBuffer, 'sample-parent-answer')
 
-    expect(inspection.pageCount).toBeGreaterThanOrEqual(1)
-    expect(inspection.text).toContain('The Redstone Door Test')
+    expect(inspection.pageCount).toBe(4)
+    expect(inspection.text).toContain('The Signal Door Test')
     expect(inspection.text).toContain('家')
 
     // Ensure legacy rooftop garden material never leaks into parent answer sample

@@ -52,13 +52,14 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).toContain('可以直接把紙本教材寄到家嗎？')
   })
 
-  it('locks public sample presentation strictly to Minecraft Redstone Door Test', () => {
+  it('presents the production Signal Door sample with truthful personalization claims', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).toContain('The Redstone Door Test')
-    expect(html).toContain('這份教材為什麼是 Minecraft？')
-    expect(html).toContain('Minecraft 紅石自動門情境閱讀')
-    expect(html).toContain('samples/sample-week-1-student.pdf')
-    expect(html).toContain('samples/sample-week-1-parent-answer.pdf')
+    expect(html).toContain('The Signal Door Test')
+    expect(html).toContain('興趣怎麼真的改變這份教材？')
+    expect(html).toContain('方塊建造遊戲感的科技門故障排除任務')
+    expect(html).toContain('國一 ｜ developing ｜ 每週約 75 分鐘')
+    expect(html).toContain('samples/sample-student.pdf')
+    expect(html).toContain('samples/sample-parent-answer.pdf')
     expect(html).not.toContain('The Rooftop Garden Challenge')
   })
 })

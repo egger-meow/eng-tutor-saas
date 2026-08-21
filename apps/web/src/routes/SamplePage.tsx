@@ -20,9 +20,9 @@ export function SamplePage() {
               <p className="overline">一個孩子的資料，如何變成一週教材</p>
               <h1>先看輸入，再看真正的產出。</h1>
               <p className="lede">
-                這不是通用講義換上一個孩子喜歡的主題。程度、學校進度、已知卡點與興趣，一起決定文章難度、文法重點、題型與家長觀察方向。
+                這不是通用講義換上一個孩子喜歡的主題。孩子的興趣、目前程度與學習目標，一起決定閱讀情境、文法重點、題型與家長觀察方向。
               </p>
-              <p className="sample-disclaimer">以下人物與資料完全虛構；這份 Week 1 已走過正式產生、審稿與 PDF pipeline，專供產品示範。</p>
+              <p className="sample-disclaimer">以下只公開示範所需的學習資料；兩份 PDF 是正式流程實際產出的 Week 1 教材，未重新生成或修改。</p>
             </FadeInUp>
           </header>
 
@@ -39,16 +39,8 @@ export function SamplePage() {
                   <dd>{sampleChild.level}</dd>
                 </div>
                 <div>
-                  <dt>學校進度</dt>
-                  <dd>{sampleChild.schoolProgress}</dd>
-                </div>
-                <div>
-                  <dt>已知優勢</dt>
-                  <dd>{sampleChild.strengths}</dd>
-                </div>
-                <div>
-                  <dt>本週需要</dt>
-                  <dd>{sampleChild.needs.join('、')}</dd>
+                  <dt>學習目標</dt>
+                  <dd>{sampleChild.learningGoal}</dd>
                 </div>
                 <div>
                   <dt>近期興趣</dt>
@@ -72,17 +64,17 @@ export function SamplePage() {
               <StaggerItem tag="article">
                 <span>01</span>
                 <h3>讀什麼</h3>
-                <p>以 Minecraft 紅石自動門的測試情境寫成閱讀，而不是只把 Minecraft 這個詞塞進制式文章。</p>
+                <p>把 Minecraft、科技與解謎興趣轉化成方塊建造遊戲感的自動門故障排除閱讀，而不是把 Minecraft 這個名稱硬塞進文章。</p>
               </StaggerItem>
               <StaggerItem tag="article">
                 <span>02</span>
                 <h3>練什麼</h3>
-                <p>主旨、細節與推論搭配 do / does，正好承接學校進度，以及「Does 後動詞容易加 s」的已知弱點。</p>
+                <p>用訊號、測試與結果練習找文章證據，並以 am / is / are 建立第一週的閱讀、字彙與基礎文法基線。</p>
               </StaggerItem>
               <StaggerItem tag="article">
                 <span>03</span>
                 <h3>怎麼觀察</h3>
-                <p>家長解答會提示長句跳讀、證據定位與隔天提取等本週觀察點，回饋再成為下一週的調整依據。</p>
+                <p>家長解答會提示主詞與 be 動詞是否一致、孩子能否分清測試結果與結論，以及哪些核心字需要下週再複習。</p>
               </StaggerItem>
             </StaggerContainer>
           </section>
