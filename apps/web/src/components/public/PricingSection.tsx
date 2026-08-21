@@ -34,9 +34,13 @@ export function PricingSection() {
       </div>
       <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
       {foundingRemaining === null || (enrollment?.status === 'open' && foundingRemaining > 0) ? (
-        <div className="founding-offer"><p className="status-label">月繳限定・前 {productConfig.foundingLimit} 位孩子</p><strong>第一週免費，第一個付費月 NT${formatPrice(productConfig.foundingPrice)}</strong><span>第二個付費月起為 NT${formatPrice(productConfig.standardPrice)}／月；年繳固定為 NT${formatPrice(productConfig.annualPrice)}。{foundingRemaining === null ? '' : `目前還有 ${foundingRemaining} 個早鳥名額。`}</span></div>
+        <div className="founding-offer">
+          <p className="status-label">月繳限定・前 {productConfig.foundingLimit} 位孩子</p>
+          <div className="founding-copy"><strong>第一週免費，第一個付費月 NT${formatPrice(productConfig.foundingPrice)}</strong><span>第二個付費月起為 NT${formatPrice(productConfig.standardPrice)}／月；年繳固定為 NT${formatPrice(productConfig.annualPrice)}。</span></div>
+          {foundingRemaining !== null && <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個早鳥名額</p>}
+        </div>
       ) : (
-        <div className="founding-offer"><p className="status-label">目前不開放創始優惠</p><strong>月繳 NT${formatPrice(productConfig.standardPrice)}・年繳 NT${formatPrice(productConfig.annualPrice)}</strong><span>{enrollment?.status === 'open' ? '新加入的孩子不適用創始前 30 位優惠。' : '服務名額開放後，會以當時方案為準。'}</span></div>
+        <div className="founding-offer founding-offer-closed"><p className="status-label">目前不開放創始優惠</p><div className="founding-copy"><strong>月繳 NT${formatPrice(productConfig.standardPrice)}・年繳 NT${formatPrice(productConfig.annualPrice)}</strong><span>{enrollment?.status === 'open' ? '新加入的孩子不適用創始前 30 位優惠。' : '服務名額開放後，會以當時方案為準。'}</span></div></div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
       <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
