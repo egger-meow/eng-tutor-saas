@@ -87,7 +87,7 @@ export function LandingPage() {
 
         <StaggerContainer tag="section" className="outcome-strip" staggerDelay={0.09} aria-label="孩子與家長得到的價值">
           {abilityBenefits.map(([title, body], index) => (
-            <StaggerItem tag="article" key={title}><span>0{index + 1}</span><h2>{title}</h2><p>{body}</p></StaggerItem>
+            <StaggerItem tag="article" key={title} delay={index * 0.05}><span>0{index + 1}</span><h2>{title}</h2><p>{body}</p></StaggerItem>
           ))}
         </StaggerContainer>
 
@@ -99,12 +99,12 @@ export function LandingPage() {
           </FadeInUp>
 
           <StaggerContainer className="week-flow" staggerDelay={0.16}>
-            <StaggerItem reveal="left" className="week-sheet">
+            <StaggerItem reveal="left" delay={0} className="week-sheet">
               <span>這週觀察</span>
               <ul><li>閱讀明顯太簡單</li><li>do / does 再次答錯</li><li>學校開始現在進行式</li><li>最近開始喜歡籃球</li></ul>
             </StaggerItem>
-            <StaggerItem reveal="pop" className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></StaggerItem>
-            <StaggerItem reveal="right" className="week-sheet next-week">
+            <StaggerItem reveal="pop" delay={0.08} className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></StaggerItem>
+            <StaggerItem reveal="right" delay={0.16} className="week-sheet next-week">
               <span>下週調整</span>
               <ul><li>閱讀難度提高一級</li><li>安排 do / does 間隔複習</li><li>銜接現在進行式的提示與題目</li><li>用籃球情境承載適合程度的閱讀</li></ul>
             </StaggerItem>
@@ -125,8 +125,8 @@ export function LandingPage() {
           </FadeInUp>
 
           <StaggerContainer className="evolution-grid" staggerDelay={0.1}>
-            {evolutionPillars.map(([step, title, body]) => (
-              <StaggerItem key={step} reveal="pop">
+            {evolutionPillars.map(([step, title, body], index) => (
+              <StaggerItem key={step} reveal="pop" delay={index * 0.05}>
                 <article className="evolution-card">
                   <span className="evolution-step">{step}</span>
                   <h3>{title}</h3>
@@ -236,8 +236,8 @@ export function LandingPage() {
             <p>紙屬英文不是強迫孩子只能自學。它先把每週最花時間的「找內容、抓難度、出題、做答案」準備好，再讓家庭選最適合自己的使用方式。</p>
           </FadeInUp>
           <StaggerContainer className="usage-grid" staggerDelay={0.1}>
-            {usageModes.map(([tag, title, body]) => (
-              <StaggerItem key={title}>
+            {usageModes.map(([tag, title, body], index) => (
+              <StaggerItem key={title} delay={index * 0.05}>
                 <article className="usage-card">
                   <span>{tag}</span>
                   <h3>{title}</h3>
@@ -260,7 +260,7 @@ export function LandingPage() {
             <p>每週學習仍從孩子的閱讀與作答開始。AI 可以在卡住時當解釋與延伸練習工具，但不是完成作業的捷徑。</p>
           </FadeInUp>
           <StaggerContainer className="learning-sequence" staggerDelay={0.08}>
-            <StaggerItem tag="li"><span>01</span>先完整讀過文章</StaggerItem><StaggerItem tag="li"><span>02</span>圈出不懂的字句</StaggerItem><StaggerItem tag="li"><span>03</span>自己完成作答</StaggerItem><StaggerItem tag="li"><span>04</span>對答案、找出錯因</StaggerItem><StaggerItem tag="li"><span>05</span>需要時請 AI 解釋，再做一題</StaggerItem>
+            <StaggerItem tag="li" delay={0}><span>01</span>先完整讀過文章</StaggerItem><StaggerItem tag="li" delay={0.05}><span>02</span>圈出不懂的字句</StaggerItem><StaggerItem tag="li" delay={0.1}><span>03</span>自己完成作答</StaggerItem><StaggerItem tag="li" delay={0.15}><span>04</span>對答案、找出錯因</StaggerItem><StaggerItem tag="li" delay={0.2}><span>05</span>需要時請 AI 解釋，再做一題</StaggerItem>
           </StaggerContainer>
           <FadeInUp reveal="right" delay={0.08} className="why-not-gpt" id="chatgpt-difference">
             <p className="overline">那直接用 ChatGPT 不就好了？</p>
@@ -275,7 +275,7 @@ export function LandingPage() {
 
         <section className="public-section parent-role">
           <FadeInUp reveal="left"><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
-          <a className="button mid-page-cta" href={cta.href}>{cta.label}</a>
+          <FadeInUp reveal="pop" delay={0.1}><a className="button mid-page-cta" href={cta.href}>{cta.label}</a></FadeInUp>
         </section>
 
         <FadeInUp reveal="right"><FounderSummary /></FadeInUp>
@@ -287,7 +287,7 @@ export function LandingPage() {
             {faqItems.map(([question, answer], index) => {
               const isOpen = openFaqIndex === index
               return (
-                <StaggerItem key={question}>
+                <StaggerItem key={question} delay={(index % 4) * 0.04}>
                   <article className="faq-item">
                     <button
                       type="button"

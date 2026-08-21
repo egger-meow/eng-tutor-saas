@@ -1,35 +1,14 @@
-import { motion, useReducedMotion, type HTMLMotionProps, type Variants } from 'framer-motion'
-import type { ReactNode } from 'react'
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: (stagger = 0.08) => ({
-    opacity: 1,
-    transition: {
-      staggerChildren: stagger,
-    },
-  }),
-}
+import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion'
+import { useState, type ReactNode } from 'react'
 
 type RevealStyle = 'rise' | 'pop' | 'left' | 'right'
-
-const itemVariants: Variants = {
-  hidden: (reveal: RevealStyle = 'pop') => ({
+const revealFrom = (reveal: RevealStyle) => ({
     opacity: 0,
     y: reveal === 'rise' ? 30 : reveal === 'pop' ? 38 : 8,
     x: reveal === 'left' ? -42 : reveal === 'right' ? 42 : 0,
     scale: reveal === 'pop' ? 0.88 : 0.96,
     rotate: reveal === 'left' ? -0.8 : reveal === 'right' ? 0.8 : reveal === 'pop' ? -0.6 : 0,
-  }),
-  visible: (reveal: RevealStyle = 'pop') => ({
-    opacity: 1,
-    x: 0,
-    y: 0,
-    scale: 1,
-    rotate: 0,
-    transition: { type: 'spring', duration: 0.42, bounce: reveal === 'pop' ? 0.38 : 0.22 },
-  }),
-}
+})
 
 type TagName = 'div' | 'ol' | 'ul' | 'li' | 'article' | 'section'
 
@@ -50,20 +29,14 @@ interface StaggerContainerProps extends HTMLMotionProps<'div'> {
 
 export function StaggerContainer({
   children,
-  staggerDelay = 0.08,
+  staggerDelay: _staggerDelay = 0.08,
   className = '',
   tag = 'div',
   ...props
 }: StaggerContainerProps) {
-  const reduceMotion = useReducedMotion()
   const Component = motionMap[tag] as typeof motion.div
   return (
     <Component
-      variants={containerVariants}
-      initial={reduceMotion ? false : 'hidden'}
-      whileInView={reduceMotion ? undefined : 'visible'}
-      viewport={{ once: true, amount: 0.12 }}
-      custom={staggerDelay}
       className={className}
       {...props}
     >
@@ -76,12 +49,28 @@ interface StaggerItemProps extends HTMLMotionProps<'div'> {
   children: ReactNode
   tag?: TagName
   reveal?: RevealStyle
+  delay?: number
 }
 
-export function StaggerItem({ children, className = '', tag = 'div', reveal = 'pop', ...props }: StaggerItemProps) {
+export function StaggerItem({ children, className = '', tag = 'div', reveal = 'pop', delay = 0, onViewportEnter, ...props }: StaggerItemProps) {
+  const reduceMotion = useReducedMotion()
+  const [revealed, setRevealed] = useState(false)
   const Component = motionMap[tag] as typeof motion.div
   return (
-    <Component variants={itemVariants} custom={reveal} className={className} {...props}>
+    <Component
+      initial={reduceMotion ? false : revealFrom(reveal)}
+      whileInView={reduceMotion ? undefined : { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
+      viewport={{ once: true, amount: 0.22, margin: '0px 0px -6% 0px' }}
+      transition={{ type: 'spring', duration: 0.42, bounce: reveal === 'pop' ? 0.38 : 0.22, delay }}
+      onViewportEnter={(entry) => {
+        setRevealed(true)
+        onViewportEnter?.(entry)
+      }}
+      className={`motion-cascade ${className}`.trim()}
+      data-revealed={reduceMotion || revealed ? 'true' : 'false'}
+      data-reveal={reveal}
+      {...props}
+    >
       {children}
     </Component>
   )
