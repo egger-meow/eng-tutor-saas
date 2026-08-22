@@ -90,12 +90,12 @@ begin
   sanitized_message := left(coalesce($4, 'Unsubmitted claim released for immediate reclaim'), 2000);
 
   -- Invalidate any server-owned snapshot created during this claim
-  delete from private_generation.generation_claim_snapshots
-  where job_id = $1
-    and generation_worker_id = $2;
+  delete from private_generation.generation_claim_snapshots as snapshot
+  where snapshot.job_id = $1
+    and snapshot.generation_worker_id = $2;
 
   -- Restore job to pending, decrement attempt_count by exactly 1, and clear lease/worker
-  update public.generation_jobs
+  update public.generation_jobs as target_job
   set status = 'pending',
       claimed_by = null,
       lease_expires_at = null,
@@ -103,7 +103,7 @@ begin
       error_code = sanitized_code,
       error_message = sanitized_message,
       updated_at = now()
-  where id = $1;
+  where target_job.id = $1;
 
   return jsonb_build_object(
     'jobId', $1,
