@@ -86,5 +86,23 @@ describe('Paddle API Base URL configuration & regression', () => {
       ).toBe(false)
     }
   })
+
+  it('ensures all paddle server functions use getPaddleApiBaseUrl for runtime resolution', () => {
+    const targetFunctions = [
+      'paddle-checkout/index.ts',
+      'paddle-cancel-subscription/index.ts',
+      'paddle-update-subscription/index.ts',
+    ]
+
+    for (const relPath of targetFunctions) {
+      const fullPath = join(__dirname, '..', relPath)
+      const content = readFileSync(fullPath, 'utf-8')
+      expect(
+        content.includes("getPaddleApiBaseUrl(Deno.env.get('PADDLE_API_BASE_URL'))"),
+        `Expected ${relPath} to call getPaddleApiBaseUrl(Deno.env.get('PADDLE_API_BASE_URL'))`,
+      ).toBe(true)
+    }
+  })
 })
+
 

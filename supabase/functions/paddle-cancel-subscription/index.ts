@@ -1,5 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
+import { getPaddleApiBaseUrl } from '../_shared/paddle-plans.ts'
 
 const corsHeaders = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'authorization, x-client-info, apikey, content-type' }
 function jsonResponse(status: number, body: Record<string, unknown>) { return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'content-type': 'application/json' } }) }
@@ -11,7 +12,12 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const paddleApiKey = Deno.env.get('PADDLE_API_KEY')
-  const paddleApiBaseUrl = Deno.env.get('PADDLE_API_BASE_URL')
+  let paddleApiBaseUrl: string
+  try {
+    paddleApiBaseUrl = getPaddleApiBaseUrl(Deno.env.get('PADDLE_API_BASE_URL'))
+  } catch {
+    paddleApiBaseUrl = ''
+  }
   if (!authHeader?.startsWith('Bearer ')) return jsonResponse(401, { error: 'authentication_required' })
   if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !paddleApiBaseUrl) return jsonResponse(503, { error: 'server_not_configured' })
   try {

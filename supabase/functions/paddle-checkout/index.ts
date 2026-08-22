@@ -1,6 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
-import { getCheckoutPlan, validateFoundingDiscount } from '../_shared/paddle-plans.ts'
+import { getCheckoutPlan, getPaddleApiBaseUrl, validateFoundingDiscount } from '../_shared/paddle-plans.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -26,10 +26,16 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const paddleApiKey = Deno.env.get('PADDLE_API_KEY')
-  const paddleApiBaseUrl = Deno.env.get('PADDLE_API_BASE_URL')
   const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
   const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
   const foundingDiscountId = Deno.env.get('PADDLE_FOUNDING_DISCOUNT_ID')
+
+  let paddleApiBaseUrl: string
+  try {
+    paddleApiBaseUrl = getPaddleApiBaseUrl(Deno.env.get('PADDLE_API_BASE_URL'))
+  } catch {
+    paddleApiBaseUrl = ''
+  }
 
   if (!authHeader?.startsWith('Bearer ')) return jsonResponse(401, { error: 'authentication_required' })
   if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !paddleApiBaseUrl || !monthlyPriceId || !annualPriceId || !foundingDiscountId) {
