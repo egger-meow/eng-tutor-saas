@@ -9,7 +9,7 @@ type ParentNavigationProps = {
   onSignOut: () => void
 }
 
-export function ParentNavigation({ email, childHref = '/dashboard', onSignOut }: ParentNavigationProps) {
+export function ParentNavigation({ email, childHref = '/children', onSignOut }: ParentNavigationProps) {
   const route = useRoute()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navVisible = useScrollNavVisibility()

@@ -29,6 +29,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/waitlist', 'waitlist'],
   ['/dashboard', 'dashboard'],
   ['/parent-guide-feedback', 'parent-guide-feedback'],
+  ['/children', 'child-overview'],
   ['/children/new', 'child-new'],
   ['/billing', 'billing'],
   ['/privacy', 'privacy'],

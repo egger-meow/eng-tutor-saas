@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { parseRoute } from './routes'
 
 describe('root-hosted route paths', () => {
+  it('routes the aggregate child profile page', () => {
+    expect(parseRoute('/children')).toMatchObject({ name: 'child-overview', params: {} })
+  })
+
   it('matches child routes directly from the domain root', () => {
     expect(parseRoute('/children/child-1/edit')).toMatchObject({ name: 'child-edit', params: { id: 'child-1' } })
   })

@@ -8,10 +8,10 @@ import { useParentData } from '../hooks/use-parent-data'
 import { gradeStageLabel } from '../lib/grade-stage'
 import { getSupabaseClient } from '../lib/supabase'
 
-export function ChildProfilePage({ session, childId }: { session: Session; childId: string }) {
+export function ChildProfilePage({ session, childId }: { session: Session; childId?: string }) {
   const data = useParentData(session.user.id)
   const requestedChild = data.children.find((item) => item.id === childId) ?? null
-  return <AppShell header={<ParentNavigation email={session.user.email} childHref={requestedChild ? `/children/${requestedChild.id}` : '/dashboard'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
+  return <AppShell header={<ParentNavigation email={session.user.email} childHref={requestedChild ? `/children/${requestedChild.id}` : '/children'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
     <PageTransition>
       {data.loading ? <div className="loading-state" role="status"><div className="loading-spinner" /><p>載入孩子資料中…</p></div> : data.error ? <p className="notice notice-error">{data.error}</p> : data.children.length === 0 ? <p className="notice notice-error">找不到可查看的孩子資料。</p> : <>
         <header className="profile-header"><div><p className="overline">孩子資料</p><h1>所有孩子的學習資料</h1><p>{requestedChild ? `目前從 ${requestedChild.display_name} 進入` : '查看每個孩子的程度、進度與學習目標'}</p></div></header>
