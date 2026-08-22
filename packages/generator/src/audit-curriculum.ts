@@ -180,6 +180,9 @@ function buildAllowedEntitiesSet(pkg: CurriculumPackage): Set<string> {
 
 function words(value: string): number { return value.trim().split(/\s+/u).filter(Boolean).length }
 function cjk(value: string): number { return (value.match(/[\u3400-\u9fff]/gu) ?? []).length }
+const NON_EXECUTABLE_INSTRUCTION_ZH = /^(?:加油|待補|待填|無|略|任務|說明|練習|題目|todo|tbd|n\/a)[！!。.？?\s]*$/iu
+
+function hasExecutableInstructionZh(value: string): boolean { return cjk(value) >= 1 && !NON_EXECUTABLE_INSTRUCTION_ZH.test(value.trim()) }
 
 /** Deterministic publish gate. This complements (never replaces) the independent LLM critic. */
 export function auditCurriculumPackage(
@@ -277,10 +280,13 @@ export function auditCurriculumPackage(
   const covered = new Set(questions.flatMap((question) => question.targetIds))
   for (const targetId of targetIds) if (!covered.has(targetId)) add('semantic-critical', 'alignment', 'critical', `學習目標 ${targetId} 沒有任何可觀察題目。`)
   const targetStages = new Map<string, Set<string>>()
+  const guidedTargetIds = new Set<string>()
   for (const section of pkg.studentLesson.practice) {
-    if (cjk(section.instructionsZh) < 4) add('semantic-critical', 'self-study', 'critical', `${section.id} 缺少足以讓孩子獨立執行的中文任務說明。`)
+    if (!hasExecutableInstructionZh(section.instructionsZh)) add('semantic-critical', 'self-study', 'critical', `${section.id} 缺少可執行的中文任務說明。`)
+    else if (cjk(section.instructionsZh) < 4) add('auto-derived', 'self-study', 'warning', `${section.id} 的中文任務說明很短；請確認孩子不需口頭補充也能執行。`)
     for (const question of section.questions) {
       for (const targetId of question.targetIds) {
+        if (section.stage === 'guided') guidedTargetIds.add(targetId)
         const stages = targetStages.get(targetId) ?? new Set<string>()
         stages.add(section.stage)
         targetStages.set(targetId, stages)
@@ -296,10 +302,9 @@ export function auditCurriculumPackage(
   }
   for (const targetId of targetIds) {
     const stages = targetStages.get(targetId) ?? new Set<string>()
-    if (stages.size < 2) add('semantic-critical', 'evidence-plan', 'critical', `學習目標 ${targetId} 只在單一階段出現，無法比較提示前後的表現。`)
-    if (![...stages].some((stage) => ['independent', 'cap-transfer', 'production', 'retrieval', 'homework'].includes(stage))) {
-      add('semantic-critical', 'evidence-plan', 'critical', `學習目標 ${targetId} 沒有無提示、轉移或延遲提取證據。`)
-    }
+    const hasPostGuidedEvidence = [...stages].some((stage) => ['independent', 'cap-transfer', 'production', 'retrieval', 'homework'].includes(stage))
+    if (guidedTargetIds.has(targetId) && !hasPostGuidedEvidence) add('semantic-critical', 'evidence-plan', 'critical', `主要學習目標 ${targetId} 只有引導練習，缺少獨立、轉移、產出、提取或作業證據。`)
+    else if (!guidedTargetIds.has(targetId) && stages.size === 1) add('auto-derived', 'evidence-plan', 'warning', `輔助學習目標 ${targetId} 只在單一階段留下證據；若它是本週主要目標，應加入引導後的獨立、轉移、產出或提取證據。`)
   }
   const stageNames = new Set(pkg.studentLesson.practice.map((stage) => stage.stage))
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production', 'retrieval'] as const) if (!stageNames.has(stage)) add('semantic-critical', 'self-study', 'critical', `缺少 ${stage} 階段。`)

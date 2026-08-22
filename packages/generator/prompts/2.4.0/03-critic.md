@@ -35,8 +35,8 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
 13. **Genre-Block Structural Consistency**:
     `reading.blocks` must structurally match `genre` (`dialogue` must contain `dialogue` speaker blocks; `schedule` must contain `schedule-row`; `notice` must contain `notice`).
-14. **Target Evidence Invariant**:
-    Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
+14. **Major Target Evidence**:
+    Major targets start in `guided` and require independent, transfer, production, retrieval, or homework evidence. Supporting targets may appear once; never demand filler.
 15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 16. **Supreme Feedback & Profile Authority Compliance**:

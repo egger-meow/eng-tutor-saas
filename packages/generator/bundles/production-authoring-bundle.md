@@ -6,8 +6,8 @@ engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
-  "packages/generator/prompts/2.4.0/02-author.md": "1ea2a9f06bde92dfa58ffa05f8eb23816eb984180dd0a9e7c9ed5d55f2fe352b"
-  "packages/generator/prompts/2.4.0/03-critic.md": "516a077aad2538c62f174888cb00a4bbea12d2371b72c93ce0d397c0355f76a8"
+  "packages/generator/prompts/2.4.0/02-author.md": "592198831ffbdf16ffbe6708bc11c6df9c571d925299982f81bd452327e68b8a"
+  "packages/generator/prompts/2.4.0/03-critic.md": "51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7"
   "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
   "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
@@ -847,7 +847,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 1. Always author the question and its corresponding answer object **atomically in the same conceptual block**.
 2. Question ID `q` in practice/homework MUST match `answers[].questionId` identically.
 3. Every learning target ID referenced in `questions[].targetIds` MUST match a defined target in `learningPlan.targets`.
-4. Target Evidence Invariant: Every target in `learningPlan.targets` must appear in at least 2 distinct stages (guided attempt ➔ independent attempt ➔ one later retrieval / homework check).
+4. Major Target Evidence: Major targets start in `guided` and need independent, transfer, production, retrieval, or homework evidence. Supporting targets may appear once; never add filler.
 
 ---
 
@@ -939,8 +939,8 @@ Inspect semantic, cognitive, and pedagogical quality. Mark `critical` whenever a
     Core vocabulary items must be the actual unfamiliar words taught in the reading passage. Reject untaught words above Taiwan's 2,000 junior-high vocabulary ceiling.
 13. **Genre-Block Structural Consistency**:
     `reading.blocks` must structurally match `genre` (`dialogue` must contain `dialogue` speaker blocks; `schedule` must contain `schedule-row`; `notice` must contain `notice`).
-14. **Target Evidence Invariant**:
-    Every learning target in `learningPlan.targets` must appear in at least 2 distinct stages (`guided`, `independent`, `cap-transfer`, `production`, `retrieval`, `homework`).
+14. **Major Target Evidence**:
+    Major targets start in `guided` and require independent, transfer, production, retrieval, or homework evidence. Supporting targets may appear once; never demand filler.
 15. **Separation of Exposure vs Mastery**:
     `trackingDelta` records exposure IDs accurately. Exposure is not evidence of mastery.
 16. **Supreme Feedback & Profile Authority Compliance**:

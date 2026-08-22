@@ -25,6 +25,72 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.findings.filter((f) => f.severity === 'critical')).toEqual([])
   })
 
+  it('allows one meaningful supporting-target observation without filler duplication', () => {
+    const pkg = canonicalPackage()
+    const questions = [...pkg.studentLesson.practice.flatMap((stage: any) => stage.questions), ...pkg.studentLesson.homework.questions]
+    for (const question of questions) question.targetIds = question.targetIds.filter((id: string) => id !== 'vocab-experiment')
+    const production = pkg.studentLesson.practice.find((stage: any) => stage.stage === 'production')
+    production.questions[0].targetIds.push('vocab-experiment')
+    const questionCountBeforeAudit = questions.length
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(true)
+    expect(report.findings).toContainEqual(expect.objectContaining({
+      dimension: 'evidence-plan',
+      severity: 'warning',
+      message: expect.stringContaining('vocab-experiment'),
+    }))
+    expect(report.summary.questions).toBe(questionCountBeforeAudit)
+  })
+
+  it('accepts short clear Traditional Chinese stage instructions', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.practice.find((stage: any) => stage.stage === 'independent').instructionsZh = '作答'
+    pkg.studentLesson.practice.find((stage: any) => stage.stage === 'cap-transfer').instructionsZh = '自己完成'
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(true)
+    expect(report.findings.some((finding) => finding.dimension === 'self-study' && finding.severity === 'critical')).toBe(false)
+    expect(report.findings.some((finding) => finding.dimension === 'self-study' && finding.severity === 'warning')).toBe(true)
+  })
+
+  it('rejects an empty stage instruction through structural validation', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.practice.find((stage: any) => stage.stage === 'independent').instructionsZh = ''
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    expect(report.findings.some((finding) => finding.tier === 'structural-critical' && finding.severity === 'critical')).toBe(true)
+  })
+
+  it('rejects a non-executable stage instruction', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.practice.find((stage: any) => stage.stage === 'independent').instructionsZh = '加油'
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    expect(report.findings.some((finding) => finding.dimension === 'self-study' && finding.severity === 'critical')).toBe(true)
+  })
+
+  it('preserves structural rejection for reading below 120 words', () => {
+    const pkg = canonicalPackage()
+    pkg.studentLesson.reading.blocks = [{ type: 'paragraph', text: 'This reading is intentionally too short.' }]
+    pkg.studentLesson.reading.wordCount = 6
+
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    expect(report.findings).toContainEqual(expect.objectContaining({
+      tier: 'structural-critical',
+      dimension: 'deterministic-validation',
+      severity: 'critical',
+      message: expect.stringContaining('studentLesson.reading.wordCount'),
+    }))
+  })
   it('enforces lexical anchor: rejects package when core vocabulary is absent from reading passage', () => {
     const pkg = canonicalPackage()
     // Inject a core vocabulary word that never appears anywhere in the reading passage

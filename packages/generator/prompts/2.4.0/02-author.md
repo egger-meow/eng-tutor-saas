@@ -192,7 +192,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 1. Always author the question and its corresponding answer object **atomically in the same conceptual block**.
 2. Question ID `q` in practice/homework MUST match `answers[].questionId` identically.
 3. Every learning target ID referenced in `questions[].targetIds` MUST match a defined target in `learningPlan.targets`.
-4. Target Evidence Invariant: Every target in `learningPlan.targets` must appear in at least 2 distinct stages (guided attempt ➔ independent attempt ➔ one later retrieval / homework check).
+4. Major Target Evidence: Major targets start in `guided` and need independent, transfer, production, retrieval, or homework evidence. Supporting targets may appear once; never add filler.
 
 ---
 

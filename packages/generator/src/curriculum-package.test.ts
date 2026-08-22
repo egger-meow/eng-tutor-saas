@@ -52,17 +52,21 @@ describe('curriculum package v2', () => {
     expect(validateCurriculumPackage(value).success).toBe(true)
   })
 
-  it('requires evidence for every target across more than one learning stage', () => {
+  it('requires post-guided evidence for major targets', () => {
     const value = validPackage()
     for (const stage of value.studentLesson.practice) {
-      for (const question of stage.questions) question.targetIds = ['reading-inference']
+      for (const question of stage.questions) {
+        question.targetIds = stage.stage === 'guided'
+          ? ['grammar-do-does', 'reading-inference']
+          : ['reading-inference']
+      }
     }
     for (const question of value.studentLesson.homework.questions) question.targetIds = ['reading-inference']
 
     const report = auditCurriculumPackage(value)
     expect(report.passed).toBe(false)
     expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ dimension: 'evidence-plan', severity: 'critical' }),
+      expect.objectContaining({ dimension: 'evidence-plan', severity: 'critical', message: expect.stringContaining('grammar-do-does') }),
     ]))
   })
 

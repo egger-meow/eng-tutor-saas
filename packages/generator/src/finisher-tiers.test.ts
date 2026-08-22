@@ -63,7 +63,7 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(orphanAnswer).toBeDefined()
   })
 
-  it('Tier 3 (SEMANTIC CRITICAL): fails closed when learning target lacks cross-stage evidence', () => {
+  it('Tier 3 (SEMANTIC CRITICAL): fails closed when a major target lacks post-guided evidence', () => {
     const mutated = structuredClone(samplePackage)
     // Add a new target that appears in only 1 stage
     const singleTargetId = 'target-only-in-one-stage'
@@ -81,7 +81,7 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(audit.passed).toBe(false)
     const semanticFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'evidence-plan')
     expect(semanticFinding).toBeDefined()
-    expect(semanticFinding?.message).toContain('只在單一階段出現')
+    expect(semanticFinding?.message).toContain('主要學習目標')
   })
 
   it('Tier 3 (SEMANTIC CRITICAL): fails closed on forbidden internal developer jargon', () => {
