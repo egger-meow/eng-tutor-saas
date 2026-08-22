@@ -310,6 +310,18 @@ export function LandingPage() {
           <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{!cta.isWaitlist && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
           <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
+        <section className="public-section improvement-note" aria-labelledby="improvement-note-title">
+          <FadeInUp reveal="left" className="improvement-note-inner">
+            <p className="overline">持續改善，也保持透明</p>
+            <h2 id="improvement-note-title">我們還在把它做得更好</h2>
+            <div className="improvement-note-copy">
+              <p>紙屬英文目前已能依孩子的程度、興趣與學習紀錄調整教材內容，但我們知道「個人化」不只是不斷換主題。</p>
+              <p>我們正在持續改善不同週次之間的文本形式、題型組合與學習任務變化，讓長期使用不會逐漸形成固定套路。</p>
+              <p>這些變化不會以隨機取代教學邏輯。孩子該學什麼、難度怎麼走、哪些內容需要複習，仍會由學習狀態與證據決定。</p>
+            </div>
+            <p className="improvement-note-commitment"><strong>我們會持續公開我們看見的限制，也持續把系統做得更好。</strong></p>
+          </FadeInUp>
+        </section>
       </PageTransition>
       <PublicFooter />
     </AppShell>

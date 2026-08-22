@@ -98,4 +98,16 @@ describe('Landing Page — Evolving Learning System Positioning', () => {
     expect(html).toContain('一定要讓孩子自己學嗎？')
     expect(html).toContain('教材之後也會持續變好嗎？')
   })
+
+  it('publishes a concise improvement commitment without exposing internal observations', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+
+    expect(html).toContain('我們還在把它做得更好')
+    expect(html).toContain('「個人化」不只是不斷換主題')
+    expect(html).toContain('這些變化不會以隨機取代教學邏輯')
+    expect(html).toContain('我們會持續公開我們看見的限制，也持續把系統做得更好。')
+    expect(html).not.toContain('mini-report 9/15')
+    expect(html).not.toContain('lexical-unit')
+    expect(html).not.toContain('OBS-')
+  })
 })
