@@ -8,18 +8,28 @@
 
 **Core principle:** Observation ≠ requirement ≠ quality gate.
 
+`confirmed-limitation` means repeated evidence supports the limitation, but it is not automatically a launch blocker, implementation requirement, or deterministic quality gate.
+
 Lifecycle: `monitoring → repeated-evidence → decision → closed/promoted`
 
 ## Observations
 
-### OBS-001 — Practice structure may be too uniform
+### OBS-001 — Structural diversity is insufficient
 
 - **ID:** OBS-001
-- **Title:** Practice structure may be too uniform
-- **Evidence:** In the 2026-08-22 15-job production load test, 15/15 materials used essentially the same stage/question-count skeleton: guided 3, independent 3, cap-transfer 3, production 2, retrieval 2, homework 3.
-- **Interpretation/risk:** Fine for Week 1 calibration, but repeated longitudinally it may become predictable.
-- **Action threshold:** Recheck after 4+ weeks of real learner materials. Do not change unless repeated structure meaningfully reduces variety or engagement.
-- **Status:** monitoring
+- **Title:** Structural diversity is insufficient
+- **Evidence:**
+  - 15/15 materials used essentially the same lesson-stage skeleton: guided 3, independent 3, cap-transfer 3, production 2, retrieval 2, homework 3.
+  - Question-type distributions were also highly similar across learners.
+  - Different topics and personalization were meaningful, but the underlying lesson architecture remained highly uniform.
+- **Interpretation:**
+  - The system personalizes content well, but does not yet produce enough variation in lesson structure.
+  - This is acceptable for Week 1 calibration, but longitudinally may become predictable.
+- **Status:** confirmed-limitation
+- **Action direction:**
+  - Future work should expand the set of pedagogically valid lesson structures.
+  - Diversity must remain bounded by learning goals, learner state, progression, and quality constraints.
+  - Do not solve this by adding arbitrary quotas or deterministic rejection rules.
 
 ### OBS-002 — mini-report genre concentration
 
@@ -47,6 +57,33 @@ Lifecycle: `monitoring → repeated-evidence → decision → closed/promoted`
 - **Interpretation/risk:** These may be legitimately useful cross-domain academic words, not unwanted repetition.
 - **Action threshold:** Monitor longitudinal novelty per child, not global cross-child duplication. Promote only if individual learners repeatedly lose meaningful new-vocabulary capacity to unnecessary recurring analytical words.
 - **Status:** monitoring
+
+### OBS-005 — Controlled variation is insufficient
+
+- **ID:** OBS-005
+- **Title:** Controlled variation is insufficient
+- **Evidence:**
+  - Across the 15-job batch, similar learner states repeatedly converged on the same safe lesson structure and question composition.
+  - The authoring system currently shows little controlled variation among multiple equally valid lesson designs.
+- **Interpretation:**
+  - The system is currently more deterministic than desirable.
+  - This is NOT a request for unconstrained randomness.
+  - Desired behavior is bounded stochasticity: when multiple lesson designs are equally valid, the system should be able to select among them while preserving pedagogy, progression, workload, and quality.
+- **Desired future architecture:**
+
+  ```text
+  Pedagogical constraints
+  → valid design space
+  → diversity / controlled-variation policy
+  → selected lesson design
+  → deterministic validation
+  ```
+
+- **Status:** confirmed-limitation
+- **Action direction:**
+  - Explore controlled variation only after defining the allowed design space.
+  - Never randomize learning targets, difficulty, learner history, feedback response, or correctness.
+  - Variation may apply to genre, task framing, stage composition, question distribution, activity shape, and presentation where pedagogically equivalent.
 
 ## Promotion rule
 
