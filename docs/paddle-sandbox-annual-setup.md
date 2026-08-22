@@ -60,12 +60,15 @@ https://<SUPABASE_PROJECT_REF>.supabase.co/functions/v1/paddle-webhook
 在 Supabase **Edge Functions > Secrets** 設定：
 
 ```text
+PADDLE_API_BASE_URL=https://sandbox-api.paddle.com
 PADDLE_API_KEY=<Sandbox API key>
 PADDLE_WEBHOOK_SECRET=<notification endpoint secret>
 PADDLE_STANDARD_PRICE_ID=<monthly pri_...>
 PADDLE_ANNUAL_PRICE_ID=<annual pri_...>
 PADDLE_FOUNDING_DISCOUNT_ID=<monthly first-period dsc_...>
 ```
+
+> **注意**：正式環境使用 `PADDLE_API_BASE_URL=https://api.paddle.com`。若未設定 `PADDLE_API_BASE_URL`，Server-side 函式將拒絕服務（fail closed），不會預設 fallback 至 Sandbox。
 
 前端部署環境另設：
 

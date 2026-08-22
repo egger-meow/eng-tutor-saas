@@ -11,9 +11,9 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const paddleApiKey = Deno.env.get('PADDLE_API_KEY')
-  const paddleApiBaseUrl = Deno.env.get('PADDLE_API_BASE_URL') ?? 'https://sandbox-api.paddle.com'
+  const paddleApiBaseUrl = Deno.env.get('PADDLE_API_BASE_URL')
   if (!authHeader?.startsWith('Bearer ')) return jsonResponse(401, { error: 'authentication_required' })
-  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey) return jsonResponse(503, { error: 'server_not_configured' })
+  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !paddleApiBaseUrl) return jsonResponse(503, { error: 'server_not_configured' })
   try {
     const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
     const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.slice('Bearer '.length))

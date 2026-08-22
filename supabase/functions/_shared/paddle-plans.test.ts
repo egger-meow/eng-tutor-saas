@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { getCheckoutPlan, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+import { getCheckoutPlan, getPaddleApiBaseUrl, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
 
 const priceIds = { monthly: 'pri_monthly', annual: 'pri_annual' }
 
@@ -44,3 +46,45 @@ describe('Paddle plan allowlist', () => {
     })).toThrow('one recurring interval')
   })
 })
+
+describe('Paddle API Base URL configuration & regression', () => {
+  it('resolves sandbox and production base URLs with trailing slash normalization', () => {
+    expect(getPaddleApiBaseUrl('https://sandbox-api.paddle.com')).toBe('https://sandbox-api.paddle.com')
+    expect(getPaddleApiBaseUrl('https://api.paddle.com')).toBe('https://api.paddle.com')
+    expect(getPaddleApiBaseUrl('https://api.paddle.com/')).toBe('https://api.paddle.com')
+  })
+
+  it('fails closed when PADDLE_API_BASE_URL is missing or empty and does not fall back to sandbox', () => {
+    expect(() => getPaddleApiBaseUrl(undefined)).toThrow('PADDLE_API_BASE_URL is not configured')
+    expect(() => getPaddleApiBaseUrl('')).toThrow('PADDLE_API_BASE_URL is not configured')
+    expect(() => getPaddleApiBaseUrl('   ')).toThrow('PADDLE_API_BASE_URL is not configured')
+  })
+
+  it('ensures no server-side edge function hardcodes sandbox-api.paddle.com in runtime code', () => {
+    const functionsDir = join(__dirname, '..')
+    const findTsFiles = (dir: string): string[] => {
+      const files: string[] = []
+      for (const entry of readdirSync(dir)) {
+        const fullPath = join(dir, entry)
+        if (statSync(fullPath).isDirectory()) {
+          files.push(...findTsFiles(fullPath))
+        } else if (fullPath.endsWith('.ts') && !fullPath.endsWith('.test.ts') && !fullPath.endsWith('.d.ts')) {
+          files.push(fullPath)
+        }
+      }
+      return files
+    }
+
+    const runtimeFiles = findTsFiles(functionsDir)
+    expect(runtimeFiles.length).toBeGreaterThan(0)
+
+    for (const file of runtimeFiles) {
+      const content = readFileSync(file, 'utf-8')
+      expect(
+        content.includes('sandbox-api.paddle.com'),
+        `Found hardcoded sandbox-api.paddle.com in server runtime file: ${file}`,
+      ).toBe(false)
+    }
+  })
+})
+

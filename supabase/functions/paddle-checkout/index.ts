@@ -26,12 +26,13 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const paddleApiKey = Deno.env.get('PADDLE_API_KEY')
+  const paddleApiBaseUrl = Deno.env.get('PADDLE_API_BASE_URL')
   const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
   const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
   const foundingDiscountId = Deno.env.get('PADDLE_FOUNDING_DISCOUNT_ID')
 
   if (!authHeader?.startsWith('Bearer ')) return jsonResponse(401, { error: 'authentication_required' })
-  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !monthlyPriceId || !annualPriceId || !foundingDiscountId) {
+  if (!supabaseUrl || !serviceRoleKey || !paddleApiKey || !paddleApiBaseUrl || !monthlyPriceId || !annualPriceId || !foundingDiscountId) {
     console.error('Paddle checkout server configuration is incomplete')
     return jsonResponse(503, { error: 'server_not_configured' })
   }
@@ -64,7 +65,7 @@ Deno.serve(async (request) => {
 
     const foundingApplies = eligibility.founding_applies === true
     if (foundingApplies) {
-      const discountResponse = await fetch(`https://sandbox-api.paddle.com/discounts/${foundingDiscountId}`, {
+      const discountResponse = await fetch(`${paddleApiBaseUrl}/discounts/${foundingDiscountId}`, {
         headers: { authorization: `Bearer ${paddleApiKey}` },
       })
       const discountBody = await discountResponse.json()
@@ -79,7 +80,7 @@ Deno.serve(async (request) => {
         return jsonResponse(503, { error: 'paddle_discount_misconfigured' })
       }
     }
-    const paddleResponse = await fetch('https://sandbox-api.paddle.com/transactions', {
+    const paddleResponse = await fetch(`${paddleApiBaseUrl}/transactions`, {
       method: 'POST',
       headers: {
         authorization: `Bearer ${paddleApiKey}`,

@@ -65,6 +65,14 @@ export function getWebhookPlan(
   return plan
 }
 
+export function getPaddleApiBaseUrl(envValue: string | undefined): string {
+  const trimmed = envValue?.trim()
+  if (!trimmed) {
+    throw new Error('PADDLE_API_BASE_URL is not configured')
+  }
+  return trimmed.replace(/\/+$/, '')
+}
+
 export function validateFoundingDiscount(discount: PaddleDiscount | undefined): void {
   if (discount?.status !== 'active'
     || discount.type !== 'flat'
@@ -75,3 +83,4 @@ export function validateFoundingDiscount(discount: PaddleDiscount | undefined): 
     throw new Error('Founding discount must be an active TWD 200 flat discount for one recurring interval')
   }
 }
+
