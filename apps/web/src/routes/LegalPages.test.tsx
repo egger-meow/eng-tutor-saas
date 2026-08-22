@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { PrivacyPage } from './PrivacyPage'
 import { TermsPage } from './TermsPage'
+import { RefundPage } from './RefundPage'
 import { legalConfig } from '../lib/config'
 
 describe('Legal & Compliance Pages Rendering', () => {
@@ -84,6 +85,28 @@ describe('Legal & Compliance Pages Rendering', () => {
       expect(html).toContain('準據法與管轄法院')
       expect(html).toContain('中華民國法律')
       expect(html).toContain('臺灣新竹地方法院')
+    })
+  })
+
+  describe('RefundPage (/refund)', () => {
+    it('faithfully summarizes monthly and annual cancellation rules', () => {
+      const html = renderToStaticMarkup(<RefundPage />)
+
+      expect(html).toContain('退款政策 / Refund Policy')
+      expect(html).toContain('當期一旦開始製作並交付教材，當期費用不予退還')
+      expect(html).toContain('取消操作自次月起生效')
+      expect(html).toContain('標準月費 NT$499／月')
+      expect(html).toContain('尚未開始履約之全月份費用將無息按比例退還')
+    })
+
+    it('explains digital delivery and how to request cancellation, refunds, and support', () => {
+      const html = renderToStaticMarkup(<RefundPage />)
+
+      expect(html).toContain('非以有形媒介提供之客製數位內容')
+      expect(html).toContain('訂閱管理')
+      expect(html).toContain('取消續訂')
+      expect(html).toContain(legalConfig.contactEmail)
+      expect(html).toContain('href="/terms"')
     })
   })
 })

@@ -17,4 +17,17 @@ describe('root-hosted route paths', () => {
   it('keeps the parent guide and feedback route addressable', () => {
     expect(parseRoute('/parent-guide-feedback')).toMatchObject({ name: 'parent-guide-feedback', path: '/parent-guide-feedback' })
   })
+
+  it.each([
+    ['/', 'landing'],
+    ['/terms', 'terms'],
+    ['/privacy', 'privacy'],
+    ['/refund', 'refund'],
+  ] as const)('keeps public Paddle review route %s directly addressable', (path, name) => {
+    expect(parseRoute(path)).toMatchObject({ name, path })
+  })
+
+  it('keeps the pricing anchor on the public landing route', () => {
+    expect(parseRoute('/#pricing')).toMatchObject({ name: 'landing', path: '/' })
+  })
 })

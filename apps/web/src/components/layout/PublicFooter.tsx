@@ -44,6 +44,11 @@ export function PublicFooter() {
                   隱私權政策與個資告知
                 </a>
               </li>
+              <li>
+                <a href="/refund" onClick={handleInternalLink}>
+                  退款政策 / Refund Policy
+                </a>
+              </li>
             </ul>
           </div>
         </nav>

@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage, faqItems } from './LandingPage'
 import { PricingSection } from '../components/public/PricingSection'
+import { PublicFooter } from '../components/layout/PublicFooter'
+
+describe('Public Footer — Paddle Review Links', () => {
+  it('links directly to pricing and all public legal policies', () => {
+    const html = renderToStaticMarkup(<PublicFooter />)
+
+    expect(html).toContain('href="/#pricing"')
+    expect(html).toContain('href="/terms"')
+    expect(html).toContain('href="/privacy"')
+    expect(html).toContain('href="/refund"')
+    expect(html).toContain('退款政策 / Refund Policy')
+  })
+})
 
 describe('Landing Page — First Delivery Timing Disclosure', () => {
   it('discloses next-day delivery expectation in hero section', () => {

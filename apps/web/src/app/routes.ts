@@ -14,6 +14,7 @@ export type RouteName =
   | 'billing'
   | 'privacy'
   | 'terms'
+  | 'refund'
 
 export type Route = {
   name: RouteName
@@ -34,6 +35,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/billing', 'billing'],
   ['/privacy', 'privacy'],
   ['/terms', 'terms'],
+  ['/refund', 'refund'],
 ])
 
 function cleanPath(pathname: string) {

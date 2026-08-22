@@ -17,6 +17,7 @@ import { FeedbackPage } from './routes/FeedbackPage'
 import { ParentGuideFeedbackPage } from './routes/ParentGuideFeedbackPage'
 import { PrivacyPage } from './routes/PrivacyPage'
 import { TermsPage } from './routes/TermsPage'
+import { RefundPage } from './routes/RefundPage'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
   // Public/Legal pages accessible regardless of session
   if (route.name === 'privacy') return <PrivacyPage />
   if (route.name === 'terms') return <TermsPage />
+  if (route.name === 'refund') return <RefundPage />
   if (route.name === 'about') return <AboutPage />
   if (route.name === 'guide') return <GuidePage />
   if (route.name === 'sample') return <SamplePage />
