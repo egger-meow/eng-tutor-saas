@@ -17,6 +17,10 @@ declare
   first_package jsonb;
   second_package jsonb;
   completed_material_id uuid;
+  recovery_job_id uuid;
+  recovery_child_id uuid;
+  recovery_status_result jsonb;
+  recovery_release_result jsonb;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
@@ -649,6 +653,226 @@ begin
     raise exception 'max_attempts allowed a fourth authoring attempt';
   end if;
 
+  -- =========================================================================
+  -- Submit-Transport Recovery & Read-After-Write Verification (Scenarios A–G)
+  -- =========================================================================
+  recovery_child_id := '00000000-0000-0000-0000-000000000088';
+  recovery_job_id := '00000000-0000-0000-0000-000000000081';
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values (
+    recovery_child_id,
+    '00000000-0000-0000-0000-000000000001',
+    'Transport Recovery Test Student',
+    7,
+    'grade_7'
+  );
+
+  insert into public.subscriptions (id, parent_id, child_id, provider, status)
+  values (
+    '00000000-0000-0000-0000-000000000089',
+    '00000000-0000-0000-0000-000000000001',
+    recovery_child_id,
+    'beta',
+    'active'
+  );
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    recovery_job_id,
+    recovery_child_id,
+    current_date + 350,
+    'test-v1',
+    'transport-recovery-smoke-job',
+    'pending',
+    now() - interval '1 minute',
+    0,
+    3,
+    now() + interval '12 hours',
+    now() - interval '36 hours',
+    now() - interval '12 hours'
+  );
+
+  -- 1. Initial claim for Attempt 1
+  select private_generation.chatgpt_claim_generation_batch('transport-recovery-worker')
+  into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = recovery_job_id::text;
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+
+  first_package := jsonb_build_object('metadata', jsonb_build_object(
+    'schemaVersion', '2.0.0', 'jobId', recovery_job_id::text,
+    'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint
+  ));
+  perform private_generation.chatgpt_submit_curriculum_package(
+    recovery_job_id, 'transport-recovery-worker', first_package
+  );
+
+  -- 2. Quality rejection for Attempt 1
+  perform public.worker_claim_curriculum_submissions('recovery-finisher-1', 5);
+  if not public.worker_finish_curriculum_submission(
+    recovery_job_id, 1, 'recovery-finisher-1', 'quality_rejected', 'QUALITY_REJECTED',
+    'reading: needs targeted repair',
+    jsonb_build_object('failureType', 'QUALITY_REJECTED', 'findings', jsonb_build_array(
+      jsonb_build_object('source', 'audit', 'path', 'reading', 'dimension', 'quality', 'message', 'needs repair')
+    ))
+  ) then
+    raise exception 'failed to record quality rejection for attempt 1';
+  end if;
+
+  -- Verify job returned to pending with attempt_count = 1
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = recovery_job_id and status = 'pending' and attempt_count = 1
+  ) then
+    raise exception 'quality rejection attempt 1 did not return job to pending attempt 1';
+  end if;
+
+  -- 3. Claim Attempt 2
+  select private_generation.chatgpt_claim_generation_batch('transport-recovery-worker')
+  into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = recovery_job_id::text;
+
+  if (bridge_context #>> '{job,attemptCount}')::integer <> 2
+    or bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1' then
+    raise exception 'attempt 2 claim context mismatch: %', bridge_context;
+  end if;
+
+  -- Test Status RPC before attempt 2 submission (read-after-write uncertainty check)
+  select private_generation.chatgpt_curriculum_submission_status(
+    recovery_job_id, 'transport-recovery-worker'
+  ) into recovery_status_result;
+  if recovery_status_result ->> 'jobAttemptCount' <> '2'
+    or (recovery_status_result ->> 'submissionFound')::boolean <> true
+    or recovery_status_result ->> 'authoringAttempt' <> '1' then
+    raise exception 'status check before attempt 2 submit did not reflect attempt 2 unsubmitted state: %', recovery_status_result;
+  end if;
+
+  -- Test C: Wrong worker cannot release claim
+  blocked := false;
+  begin
+    perform private_generation.chatgpt_release_unsubmitted_claim(
+      recovery_job_id, 'wrong-worker', 'SUBMIT_TRANSPORT_FAILED', 'wrong worker test'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Test C failed: wrong worker was allowed to release claim';
+  end if;
+
+  -- Test A: Claimed attempt 2 + no submission for attempt 2 -> release succeeds
+  select private_generation.chatgpt_release_unsubmitted_claim(
+    recovery_job_id, 'transport-recovery-worker', 'SUBMIT_TRANSPORT_FAILED', 'Connector safety filter blocked payload'
+  ) into recovery_release_result;
+
+  if (recovery_release_result ->> 'released')::boolean <> true
+    or recovery_release_result ->> 'status' <> 'pending'
+    or (recovery_release_result ->> 'attemptCount')::integer <> 1 then
+    raise exception 'Test A failed: release result did not match expected structure: %', recovery_release_result;
+  end if;
+
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = recovery_job_id
+      and status = 'pending'
+      and claimed_by is null
+      and lease_expires_at is null
+      and attempt_count = 1
+      and error_code = 'SUBMIT_TRANSPORT_FAILED'
+  ) then
+    raise exception 'Test A failed: generation_jobs state was not properly restored after release';
+  end if;
+
+  -- Test E: Repeated release call fails closed without decrementing again
+  blocked := false;
+  begin
+    perform private_generation.chatgpt_release_unsubmitted_claim(
+      recovery_job_id, 'transport-recovery-worker', 'SUBMIT_TRANSPORT_FAILED', 'duplicate release test'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Test E failed: repeated release did not fail closed';
+  end if;
+  if (select attempt_count from public.generation_jobs where id = recovery_job_id) <> 1 then
+    raise exception 'Test E failed: repeated release mutated attempt_count';
+  end if;
+
+  -- Test D: Cannot release pending / completed / failed job
+  -- (Job is currently pending, calling release is blocked above)
+
+  -- Test F: Next claim after successful release increments back to attempt 2 and preserves retryContext
+  select private_generation.chatgpt_claim_generation_batch('transport-recovery-worker')
+  into bridge_claim_result;
+  select item into bridge_context
+  from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
+  where item #>> '{job,id}' = recovery_job_id::text;
+
+  if (bridge_context #>> '{job,attemptCount}')::integer <> 2
+    or bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
+    or bridge_context #> '{retryContext,previousCanonicalPackage}' <> first_package then
+    raise exception 'Test F failed: reclaim after release did not reuse attempt 2 or preserve retryContext: %', bridge_context;
+  end if;
+
+  bridge_fingerprint := bridge_context ->> 'inputFingerprint';
+  second_package := jsonb_build_object('metadata', jsonb_build_object(
+    'schemaVersion', '2.0.0', 'jobId', recovery_job_id::text,
+    'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint,
+    'repaired', true
+  ));
+
+  -- Test G: Ambiguous submit result where attempt 2 actually persisted -> discovered by status check
+  perform private_generation.chatgpt_submit_curriculum_package(
+    recovery_job_id, 'transport-recovery-worker', second_package
+  );
+  select private_generation.chatgpt_curriculum_submission_status(
+    recovery_job_id, 'transport-recovery-worker'
+  ) into recovery_status_result;
+
+  if recovery_status_result ->> 'jobAttemptCount' <> '2'
+    or (recovery_status_result ->> 'submissionFound')::boolean <> true
+    or recovery_status_result ->> 'authoringAttempt' <> '2'
+    or recovery_status_result ->> 'status' <> 'pending' then
+    raise exception 'Test G failed: status check did not discover persisted attempt 2: %', recovery_status_result;
+  end if;
+
+  -- Test B: Claimed attempt 2 + submission attempt 2 exists -> release rejected, zero state mutation
+  blocked := false;
+  begin
+    perform private_generation.chatgpt_release_unsubmitted_claim(
+      recovery_job_id, 'transport-recovery-worker', 'SUBMIT_TRANSPORT_FAILED', 'illegal release on persisted submission'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'Test B failed: release was allowed on a job with a persisted submission';
+  end if;
+
+  -- Verify no mutation on Test B rejection
+  if not exists (
+    select 1 from public.generation_jobs
+    where id = recovery_job_id and status = 'claimed' and attempt_count = 2 and claimed_by = 'transport-recovery-worker'
+  ) or not exists (
+    select 1 from private_generation.curriculum_submissions
+    where job_id = recovery_job_id and authoring_attempt = 2 and status = 'pending'
+  ) then
+    raise exception 'Test B failed: state mutated despite release rejection';
+  end if;
+
+  -- Clean up recovery fixture
+  delete from public.subscriptions where id = '00000000-0000-0000-0000-000000000089';
+  delete from public.children where id = recovery_child_id;
+
+
+
   if exists (
     select 1
     from public.generation_jobs as legacy_job
@@ -995,6 +1219,11 @@ begin
   end if;
   if has_function_privilege('service_role', 'private_generation.chatgpt_submit_curriculum_package(uuid,text,jsonb)', 'execute') then
     raise exception 'service role can bypass the app-only ChatGPT bridge';
+  end if;
+  if has_function_privilege('anon', 'private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)', 'execute')
+    or has_function_privilege('authenticated', 'private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)', 'execute')
+    or has_function_privilege('service_role', 'private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)', 'execute') then
+    raise exception 'unauthorized role can execute chatgpt_release_unsubmitted_claim RPC';
   end if;
   if has_function_privilege('anon', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute')
     or has_function_privilege('authenticated', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute') then

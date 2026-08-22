@@ -57,7 +57,8 @@ Using the connected Supabase app, execute exactly this read-only preflight:
 select
   to_regprocedure('private_generation.chatgpt_claim_generation_batch(text)') is not null as claim_ready,
   to_regprocedure('private_generation.chatgpt_submit_curriculum_package(uuid,text,jsonb)') is not null as submit_ready,
-  to_regprocedure('private_generation.chatgpt_fail_generation_job(uuid,text,text,text)') is not null as fail_ready;
+  to_regprocedure('private_generation.chatgpt_fail_generation_job(uuid,text,text,text)') is not null as fail_ready,
+  to_regprocedure('private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)') is not null as release_ready;
 
 If any value is false, claim nothing and report PIPELINE_BRIDGE_MISSING.
 
@@ -113,7 +114,7 @@ select private_generation.chatgpt_fail_generation_job(
 
 Continue only if the function returns true. Otherwise report LEASE_LOST.
 
-SUBMIT — DO NOT RENDER OR COMPLETE
+SUBMIT AND READ-AFTER-WRITE RECOVERY — DO NOT RENDER OR COMPLETE
 
 For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.2.0, submit it with exactly one call:
 
@@ -127,25 +128,54 @@ Before executing, ensure the JSON does not contain the delimiter $curriculum$. D
 
 The bridge rejects packages whose `metadata.inputFingerprint` is absent or differs from the snapshot returned for that job. Treat such a rejection as `TECHNICAL_FAILED`; never repair it with a fabricated hash.
 
-The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently validates, audits, renders, inspects, privately uploads, and transactionally completes the job. A finisher technical failure retries this same immutable submission and must not trigger LLM re-authoring. A deterministic quality rejection returns the job to a new authoring claim only while `attempt_count < max_attempts`; otherwise report HUMAN_REVIEW_REQUIRED.
+READ-AFTER-WRITE UNCERTAINTY HANDLING:
 
-You may check one submitted job without exposing its package by executing:
+Do NOT blindly retry or hammer the same submit SQL after a connector error, tool failure, or safety layer block. If any submit call returns an error, timeout, or ambiguous result, immediately verify status:
 
 select private_generation.chatgpt_curriculum_submission_status(
   '<job-uuid>'::uuid,
   'chatgpt-work-daily'
 ) as result;
 
+Inspect the returned status object comparing `authoringAttempt` against `jobAttemptCount`:
+
+1. Persisted for current attempt (`submissionFound = true` and `authoringAttempt = jobAttemptCount`):
+   The submission reached Supabase and was immutably persisted. Continue normally with the persisted submission. Never release, rewrite, or resubmit a different payload.
+
+2. Unsubmitted / Transport Blocked (`submissionFound = false` or `authoringAttempt < jobAttemptCount`):
+   The authored package never reached Supabase. Do not hammer the submit endpoint. Immediately release the unsubmitted claim:
+
+   select private_generation.chatgpt_release_unsubmitted_claim(
+     '<job-uuid>'::uuid,
+     'chatgpt-work-daily',
+     'SUBMIT_TRANSPORT_FAILED',
+     '<sanitized transport/connector error description>'
+   ) as result;
+
+   If release returns `released: true` and `status: "pending"`, record this run as a recoverable `SUBMIT_TRANSPORT_FAILED`. The job is immediately pending for the next scheduled run with its authoring attempt count restored, without consuming retry budget. HUMAN_REVIEW_REQUIRED is NOT required for a cleanly released transient transport failure.
+
+3. Ambiguous Status or Release Failure:
+   If status cannot be authoritatively checked or release fails closed, report HUMAN_REVIEW_REQUIRED and leave state fail-closed.
+
+FINISHER HANDOFF AND OUTCOME TYPES
+
+The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently validates, audits, renders, inspects, privately uploads, and transactionally completes the job.
+
+Distinguish the three failure classes:
+- QUALITY_REJECTED: Curriculum, critic, or deterministic quality/rubric/validation audit rejection. A retryable quality rejection returns the job to a new authoring claim while `attempt_count < max_attempts`; otherwise report HUMAN_REVIEW_REQUIRED.
+- FINISHER_TECHNICAL_FAILED: Immutable submission exists, but deterministic rendering, storage upload, or infrastructure runtime failed. Retries the same immutable submission without LLM re-authoring.
+- SUBMIT_TRANSPORT_FAILED: Authored package never reached Supabase due to transport/connector safety block, and the unsubmitted claim was safely released for immediate reclaim.
+
 FINAL REPORT
 
 Return concise Traditional Chinese containing only:
 
 - timestamp, Git SHA, and actual model identifier;
-- claimed / submitted / completed / quality-rejected / technical-failed counts;
-- one line per opaque job UUID with SUBMITTED_AWAITING_FINISHER, COMPLETED plus material UUID, or failure state;
+- claimed / submitted / completed / quality-rejected / finisher-technical-failed / submit-transport-failed counts;
+- one line per opaque job UUID with SUBMITTED_AWAITING_FINISHER, COMPLETED plus material UUID, RECOVERABLE_SUBMIT_TRANSPORT_FAILED, or failure state;
 - 1–2 privacy-safe learning-adjustment statements for each submitted package;
 - mandatory capacity override and oldest outstanding deadline from the claim result;
-- HUMAN_REVIEW_REQUIRED for any failure, warning, lease risk, connector permission request, or privacy concern.
+- HUMAN_REVIEW_REQUIRED only if ownership/status is ambiguous, recovery fails, attempt count reaches max_attempts, or system invariants are at risk.
 
 Never claim delivery merely because JSON was authored or submitted. Delivery means the status bridge reports completed with a materialId after the deterministic finisher succeeds.
 ```
