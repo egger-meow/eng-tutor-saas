@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto'
 import type { WorkerClient } from './pipeline.js'
+import type { TransactionalEmailProvider } from './transactional-email.js'
 
 export type MaterialEmailClaim = {
   delivery_id: string
@@ -11,7 +12,6 @@ export type MaterialEmailClaim = {
 }
 
 export type MaterialEmailEnvironment = {
-  resendApiKey: string
   materialLinkSecret: string
   siteUrl: string
   emailFrom: string
@@ -42,7 +42,7 @@ export async function dispatchMaterialEmails(
   client: WorkerClient,
   workerId: string,
   environment: MaterialEmailEnvironment,
-  fetcher: typeof fetch = fetch,
+  emailProvider: TransactionalEmailProvider,
   limit = 10,
 ): Promise<{ claimed: number; sent: number; failed: number }> {
   const claims = unwrap(await client.rpc('worker_claim_material_email_deliveries', {
@@ -52,6 +52,7 @@ export async function dispatchMaterialEmails(
   let failed = 0
 
   for (const claim of claims) {
+    let providerAccepted = false
     try {
       const token = materialAccessToken(claim.delivery_id, environment.materialLinkSecret)
       const tokenReady = unwrap(await client.rpc('worker_set_material_email_token', {
@@ -59,33 +60,40 @@ export async function dispatchMaterialEmails(
       }), 'store material access token') as boolean
       if (!tokenReady) throw new Error('delivery claim no longer owns token provisioning')
       const link = `${environment.siteUrl.replace(/\/$/, '')}/material?t=${encodeURIComponent(token)}`
-      const response = await fetcher('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${environment.resendApiKey}`,
-          'content-type': 'application/json',
-          'idempotency-key': `material-ready/${claim.delivery_id}`,
-        },
-        body: JSON.stringify({
-          from: environment.emailFrom,
-          to: [claim.recipient_email],
-          subject: '本週紙屬英文教材準備好了',
-          html: buildMaterialReadyEmailHtml(link),
-        }),
+      const sendReady = unwrap(await client.rpc('worker_begin_material_email_send', {
+        p_delivery_id: claim.delivery_id, p_worker_id: workerId,
+      }), 'begin material email send') as boolean
+      if (!sendReady) throw new Error('delivery claim could not enter SMTP send state')
+      const result = await emailProvider.send({
+        from: environment.emailFrom,
+        to: claim.recipient_email,
+        subject: '本週紙屬英文教材準備好了',
+        html: buildMaterialReadyEmailHtml(link),
+        idempotencyKey: `material-ready/${claim.delivery_id}`,
       })
-      if (!response.ok) throw new Error(`Resend ${response.status}: ${(await response.text()).slice(0, 500)}`)
-      const body = await response.json() as { id?: string }
-      const completed = unwrap(await client.rpc('worker_complete_material_email_delivery', {
-        p_delivery_id: claim.delivery_id, p_worker_id: workerId, p_provider_message_id: body.id ?? null,
-      }), 'complete material email delivery') as boolean
+      providerAccepted = true
+      let completed = false
+      let completionError: unknown
+      for (let completionAttempt = 0; completionAttempt < 3 && !completed; completionAttempt++) {
+        try {
+          completed = unwrap(await client.rpc('worker_complete_material_email_delivery', {
+            p_delivery_id: claim.delivery_id, p_worker_id: workerId, p_provider_message_id: result.messageId ?? null,
+          }), 'complete material email delivery') as boolean
+        } catch (error) {
+          completionError = error
+        }
+      }
+      if (completionError && !completed) throw completionError
       if (!completed) throw new Error('delivery claim could not record success')
       sent++
     } catch (error) {
       failed++
       const message = error instanceof Error ? error.message : String(error)
-      await client.rpc('worker_fail_material_email_delivery', {
-        p_delivery_id: claim.delivery_id, p_worker_id: workerId, p_error: message.slice(0, 2000), p_max_attempts: 5,
-      })
+      if (!providerAccepted) {
+        await client.rpc('worker_fail_material_email_delivery', {
+          p_delivery_id: claim.delivery_id, p_worker_id: workerId, p_error: message.slice(0, 2000), p_max_attempts: 5,
+        })
+      }
       console.error('[AUDIT] material_email_failed', { deliveryId: claim.delivery_id, attempt: claim.attempt_count, error: message })
     }
   }

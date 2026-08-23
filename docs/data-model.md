@@ -19,7 +19,7 @@
 - `generation_jobs`: private worker queue with a source material, promised release, 48-hour feedback cutoff, 24-hour generation deadline, idempotency, leases, retries, and sanitized errors. Browser roles cannot read raw jobs.
 - `operational_settings`: privileged configuration such as `daily_generation_limit = 15`.
 - `enrollment_settings`: typed public capacity state (`open`, `waitlist`, or `closed`) with capacity and founding limits.
-- `material_email_deliveries`: one independent notification row per material, with account-email snapshot, bounded attempts, lease state, provider result, sent time, hashed 90-day scoped token, expiry, and revocation. Browser roles have no table or RPC access.
+- `material_email_deliveries`: one independent notification row per material, with account-email snapshot, bounded attempts, lease state, durable SMTP send-start marker, optional provider result, sent time, hashed 90-day scoped token, expiry, and revocation. An abandoned post-send-start lease is held for operator review rather than automatically resent. Browser roles have no table or RPC access.
 
 ## Memory Boundaries
 
@@ -56,7 +56,7 @@ Parents may select owned library rows under RLS and use only the parent-safe tim
 
 ## Storage Layout
 
-Scoped email access is resolved only in the server-side Edge Function. A valid, unexpired, unrevoked token hash must resolve through the recorded parent, child, material, completed job, and elapsed `release_at` before the server mints five-minute URLs for the two exact objects. Possession never becomes an authenticated session.
+Scoped email access is resolved only in the server-side Edge Function. A valid, unexpired, unrevoked token hash must resolve through the recorded parent, child, material, completed job, and elapsed `release_at` before the server mints 30-minute URLs for the two exact objects. `sent_at` is deliberately not an authorization predicate: a token provisioned before SMTP acceptance remains usable if the process crashes before recording delivery success. Possession never becomes an authenticated session.
 
 Use private bucket `weekly-materials` and opaque paths:
 

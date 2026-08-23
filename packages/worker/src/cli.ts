@@ -4,6 +4,7 @@ import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGene
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
 import { processCurriculumSubmissions } from './submission-processor.js'
 import { dispatchMaterialEmails } from './material-email.js'
+import { createSmtpEmailProvider } from './transactional-email.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -18,12 +19,18 @@ async function main(): Promise<void> {
 
   if (command === 'dispatch-material-emails') {
     const workerId = option('worker') ?? ''
+    const smtpPort = Number(process.env.SMTP_PORT?.trim() || '465')
     const result = await dispatchMaterialEmails(client, workerId, {
-      resendApiKey: process.env.RESEND_API_KEY ?? '',
       materialLinkSecret: process.env.MATERIAL_LINK_SECRET ?? '',
       siteUrl: process.env.SITE_URL?.trim() || 'https://paperbond.jjmowlab.com',
       emailFrom: process.env.EMAIL_FROM?.trim() || '紙屬英文 <noreply@paperenglish.com>',
-    }, fetch, Number(option('limit', false) ?? '10'))
+    }, createSmtpEmailProvider({
+      host: process.env.SMTP_HOST?.trim() || 'smtp.gmail.com',
+      port: smtpPort,
+      secure: (process.env.SMTP_SECURE?.trim() || String(smtpPort === 465)).toLowerCase() === 'true',
+      user: process.env.SMTP_USER?.trim() || '',
+      password: process.env.SMTP_PASS ?? '',
+    }), Number(option('limit', false) ?? '10'))
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
     if (result.failed > 0) process.exitCode = 1
     return

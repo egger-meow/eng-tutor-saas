@@ -1,0 +1,55 @@
+name: Dispatch released material emails
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: material-email-dispatcher
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate material email secrets
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MATERIAL_LINK_SECRET: ${{ secrets.MATERIAL_LINK_SECRET }}
+        run: |
+          test -n "$SUPABASE_URL" || { echo 'SUPABASE_URL is missing'; exit 1; }
+          test -n "$SUPABASE_SECRET_KEY" || { echo 'SUPABASE_SECRET_KEY is missing'; exit 1; }
+          test -n "$SMTP_USER" || { echo 'SMTP_USER is missing'; exit 1; }
+          test -n "$SMTP_PASS" || { echo 'SMTP_PASS is missing'; exit 1; }
+          test "${#MATERIAL_LINK_SECRET}" -ge 32 || { echo 'MATERIAL_LINK_SECRET must contain at least 32 characters'; exit 1; }
+      - name: Dispatch released material notifications
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: 465
+          SMTP_SECURE: true
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MATERIAL_LINK_SECRET: ${{ secrets.MATERIAL_LINK_SECRET }}
+          SITE_URL: https://paperbond.jjmowlab.com
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+        run: pnpm worker dispatch-material-emails --worker github-actions-material-email --limit 15

@@ -4,6 +4,7 @@ import { navigate } from '../app/use-route'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { PublicFooter } from '../components/layout/PublicFooter'
 import { getSupabaseClient } from '../lib/supabase'
+import { captureScopedMaterialToken, forgetScopedMaterialToken } from '../lib/scoped-material-token'
 
 type ScopedMaterial = {
   childName: string
@@ -20,12 +21,14 @@ export function ScopedMaterialPage({ session }: { session: Session | null }) {
   const [state, setState] = useState<AccessState>({ status: 'loading' })
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get('t')
-    window.history.replaceState({}, '', '/material')
+    const token = captureScopedMaterialToken(window.location.search, window.sessionStorage, () => {
+      window.history.replaceState({}, '', '/material')
+    })
     if (!token) { setState({ status: 'error' }); return }
     void getSupabaseClient().functions.invoke('material-access', { body: { token } }).then(({ data, error }) => {
       if (error || !data) { setState({ status: 'error' }); return }
       if (data.ownerSessionMatches && typeof data.canonicalPath === 'string') {
+        forgetScopedMaterialToken(window.sessionStorage)
         navigate(data.canonicalPath)
         return
       }

@@ -6,6 +6,8 @@ const corsHeaders = {
   'access-control-allow-headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const PDF_SIGNED_URL_TTL_SECONDS = 30 * 60
+
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'content-type': 'application/json', 'cache-control': 'no-store' } })
 }
@@ -43,8 +45,8 @@ Deno.serve(async (request) => {
       return json(200, { ownerSessionMatches: true, canonicalPath: `/materials/${encodeURIComponent(data.material_id)}` })
     }
     const [student, parent] = await Promise.all([
-      client.storage.from('weekly-materials').createSignedUrl(data.student_pdf_path, 300, { download: false }),
-      client.storage.from('weekly-materials').createSignedUrl(data.parent_answer_pdf_path, 300, { download: false }),
+      client.storage.from('weekly-materials').createSignedUrl(data.student_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false }),
+      client.storage.from('weekly-materials').createSignedUrl(data.parent_answer_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false }),
     ])
     if (student.error || parent.error) throw student.error ?? parent.error
     return json(200, {

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const workflow = readFileSync(new URL('../.github/workflows/finish-curriculum-submissions.yml', import.meta.url), 'utf8')
+const materialEmailWorkflow = readFileSync(new URL('../.github/workflows/dispatch-material-emails.yml', import.meta.url), 'utf8')
 const productionWorkflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
 const devDeployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-workers.yml', import.meta.url), 'utf8')
 const wranglerConfig = JSON.parse(readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')) as {
@@ -21,18 +22,27 @@ describe('Finisher workflow production secret scope', () => {
     expect(workflow).not.toMatch(/^    env:\s*\n(?:      .+\n)*?      SUPABASE_/m)
   })
 
-  it('exposes production secrets only to validation, Finisher, and material notification steps', () => {
+  it('exposes production secrets only to validation and Finisher steps', () => {
     const lines = workflow.split(/\r?\n/u)
     const secretLines = lines
       .map((line, index) => ({ line, index }))
       .filter(({ line }) => line.includes('secrets.SUPABASE_'))
 
-    expect(secretLines).toHaveLength(6)
+    expect(secretLines).toHaveLength(4)
     for (const { index } of secretLines) {
       const precedingStep = lines.slice(0, index + 1).reverse().find((line) => /^      - name:/u.test(line))
-      expect(precedingStep).toMatch(/Validate required worker secrets|Audit, render, upload, and complete submitted packages|Dispatch released material notifications/u)
+      expect(precedingStep).toMatch(/Validate required worker secrets|Audit, render, upload, and complete submitted packages/u)
     }
-    expect(workflow).toMatch(/Dispatch released material notifications[\s\S]*RESEND_API_KEY: \$\{\{ secrets\.RESEND_API_KEY \}\}[\s\S]*MATERIAL_LINK_SECRET: \$\{\{ secrets\.MATERIAL_LINK_SECRET \}\}/u)
+    expect(workflow).not.toContain('Dispatch released material notifications')
+  })
+
+  it('runs a lightweight Gmail SMTP dispatcher every ten minutes without PDF tooling', () => {
+    expect(materialEmailWorkflow).toContain("cron: '*/10 * * * *'")
+    expect(materialEmailWorkflow).toContain('SMTP_USER: ${{ secrets.SMTP_USER }}')
+    expect(materialEmailWorkflow).toContain('SMTP_PASS: ${{ secrets.SMTP_PASS }}')
+    expect(materialEmailWorkflow).toContain('MATERIAL_LINK_SECRET: ${{ secrets.MATERIAL_LINK_SECRET }}')
+    expect(materialEmailWorkflow).toContain('dispatch-material-emails')
+    expect(materialEmailWorkflow).not.toMatch(/RESEND|Playwright|Chromium|pdf:install/u)
   })
 })
 

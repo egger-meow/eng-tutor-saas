@@ -7,7 +7,8 @@
   "dependencies": {
     "@paper-english/generator": "workspace:*",
     "@paper-english/pdf": "workspace:*",
-    "@supabase/supabase-js": "^2.57.4"
+    "@supabase/supabase-js": "^2.57.4",
+    "nodemailer": "7.0.11"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
+    "@types/nodemailer": "7.0.11",
     "tsx": "^4.20.6",
     "typescript": "~6.0.2"
   }

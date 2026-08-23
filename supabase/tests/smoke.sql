@@ -1878,6 +1878,12 @@ begin
   if not public.worker_set_material_email_token((select id from public.material_email_deliveries where claimed_by='email-worker-a'), 'email-worker-a', repeat('a',64)) then
     raise exception 'REGRESSION: initial attempt could not persist hashed scoped token';
   end if;
+  if (select count(*) from public.resolve_material_email_access(repeat('a',64), null)) <> 1 then
+    raise exception 'REGRESSION: provisioned scoped token must survive a crash after SMTP acceptance before sent_at';
+  end if;
+  if not public.worker_begin_material_email_send((select id from public.material_email_deliveries where claimed_by='email-worker-a'), 'email-worker-a') then
+    raise exception 'REGRESSION: claimed delivery could not durably enter SMTP send state';
+  end if;
   if not public.worker_fail_material_email_delivery((select id from public.material_email_deliveries where claimed_by='email-worker-a'), 'email-worker-a', 'temporary smtp outage', 5) then
     raise exception 'REGRESSION: transient email failure was not recorded';
   end if;
@@ -1892,6 +1898,9 @@ begin
   end if;
   if not public.worker_set_material_email_token((select id from public.material_email_deliveries where claimed_by='email-worker-b'), 'email-worker-b', repeat('a',64)) then
     raise exception 'REGRESSION: worker could not persist hashed scoped token';
+  end if;
+  if not public.worker_begin_material_email_send((select id from public.material_email_deliveries where claimed_by='email-worker-b'), 'email-worker-b') then
+    raise exception 'REGRESSION: retry could not durably enter SMTP send state';
   end if;
   if not public.worker_complete_material_email_delivery((select id from public.material_email_deliveries where claimed_by='email-worker-b'), 'email-worker-b', 'provider-1') then
     raise exception 'REGRESSION: worker could not mark email sent';

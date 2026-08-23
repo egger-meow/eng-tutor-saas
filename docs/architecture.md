@@ -18,9 +18,9 @@ Parent ownership is the authorization root. A child references its parent profil
 
 ## Scoped Material Notification Boundary
 
-The existing privileged worker environment dispatches release notifications through the existing Resend account and PostgreSQL leases. Email is notification plus scoped convenience access; the Dashboard remains canonical authenticated material history.
+The privileged worker dispatches release notifications through a small transactional-email provider boundary and PostgreSQL leases. Gmail SMTP is the current provider; a future provider adapter can be added without changing claims, retries, templates, tokens, release rules, or database state. A durable send-start marker prevents automatic resend when an interrupted SMTP transaction has an uncertain outcome; explicit failures remain retryable. Email is notification plus scoped convenience access; the Dashboard remains canonical authenticated material history.
 
-One hashed, revocable, 90-day token resolves to one parent, child, and released material plus two five-minute private PDF URLs. It never grants a session, Dashboard, history, billing, profile, or feedback access. A matching existing parent session redirects to the canonical authenticated material area; a different account remains in scoped mode.
+One hashed, revocable, 90-day token resolves to one parent, child, and released material plus two 30-minute private PDF URLs. Scoped validity is independent of `sent_at`, closing the SMTP-accepted/database-acknowledgement crash window. The browser captures the raw token in tab-scoped `sessionStorage` before removing it from the visible URL, so refresh works without persisting access across browser sessions. It never grants a session, Dashboard, history, billing, profile, or feedback access. A matching existing parent session redirects to the canonical authenticated material area; a different account remains in scoped mode.
 
 ## Deployment
 
