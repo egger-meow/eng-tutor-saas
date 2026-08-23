@@ -21,17 +21,18 @@ describe('Finisher workflow production secret scope', () => {
     expect(workflow).not.toMatch(/^    env:\s*\n(?:      .+\n)*?      SUPABASE_/m)
   })
 
-  it('exposes production secrets only to validation and Finisher execution steps', () => {
+  it('exposes production secrets only to validation, Finisher, and material notification steps', () => {
     const lines = workflow.split(/\r?\n/u)
     const secretLines = lines
       .map((line, index) => ({ line, index }))
       .filter(({ line }) => line.includes('secrets.SUPABASE_'))
 
-    expect(secretLines).toHaveLength(4)
+    expect(secretLines).toHaveLength(6)
     for (const { index } of secretLines) {
       const precedingStep = lines.slice(0, index + 1).reverse().find((line) => /^      - name:/u.test(line))
-      expect(precedingStep).toMatch(/Validate required worker secrets|Audit, render, upload, and complete submitted packages/u)
+      expect(precedingStep).toMatch(/Validate required worker secrets|Audit, render, upload, and complete submitted packages|Dispatch released material notifications/u)
     }
+    expect(workflow).toMatch(/Dispatch released material notifications[\s\S]*RESEND_API_KEY: \$\{\{ secrets\.RESEND_API_KEY \}\}[\s\S]*MATERIAL_LINK_SECRET: \$\{\{ secrets\.MATERIAL_LINK_SECRET \}\}/u)
   })
 })
 

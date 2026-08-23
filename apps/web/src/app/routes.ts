@@ -4,6 +4,8 @@ export type RouteName =
   | 'guide'
   | 'sample'
   | 'waitlist'
+  | 'material'
+  | 'authenticated-material'
   | 'dashboard'
   | 'child-new'
   | 'child-overview'
@@ -28,6 +30,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/guide', 'guide'],
   ['/sample', 'sample'],
   ['/waitlist', 'waitlist'],
+  ['/material', 'material'],
   ['/dashboard', 'dashboard'],
   ['/parent-guide-feedback', 'parent-guide-feedback'],
   ['/children', 'child-overview'],
@@ -63,6 +66,9 @@ export function parseRoute(pathname: string): Route {
   if (feedbackMatch) {
     return { name: 'feedback', params: { materialId: decodeURIComponent(feedbackMatch[1]) }, path }
   }
+
+  const materialMatch = path.match(/^\/materials\/([^/]+)$/)
+  if (materialMatch) return { name: 'authenticated-material', params: { materialId: decodeURIComponent(materialMatch[1]) }, path }
 
   return { name: 'landing', params: {}, path: '/' }
 }

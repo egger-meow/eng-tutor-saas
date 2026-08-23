@@ -50,6 +50,18 @@ This gives the Scheduled authoring task at least one 00:15 window before the par
 11. On deterministic quality rejection, preserve the immutable submission plus structured findings. If authoring attempts remain, return the job to the Scheduled task with the prior package and exact repair context; otherwise mark it HUMAN_REVIEW_REQUIRED. On rendering, upload, or completion failure, retry the same submission in the deterministic finisher without spending another LLM authoring attempt.
 12. End with a concise run report: waiting for feedback, mandatory/overdue, claimed, completed, failed, deferred, observation-write failures, and oldest outstanding deadline.
 
+## Release and Notification Dispatch
+
+Material release and email notification are separate state machines. The deterministic finisher may complete a package before `release_at`; no notification is eligible until the job is completed and `release_at <= now()`. At that moment the existing Dashboard release rules make it available even if email is unavailable.
+
+The same scheduled server environment runs `pnpm worker dispatch-material-emails --worker material-email-daily --limit 10`. The database discovers newly eligible material, snapshots the owning account/login email, and atomically leases retryable rows with `FOR UPDATE SKIP LOCKED`. Attempts are bounded at five. A stable provider idempotency key (`material-ready/<delivery-id>`) prevents duplicate successful Resend sends across retry ambiguity. Failures record a sanitized error and never mutate material release or Dashboard availability.
+
+Each delivery has one 90-day access token deterministically derived with the server-only `MATERIAL_LINK_SECRET`; only its hash is stored. Rotation globally revokes outstanding links, and individual rows support explicit revocation. The no-login resolver grants only the linked material and mints five-minute URLs for its two exact private objects. It never grants Dashboard access or creates a Supabase Auth session.
+
+> **Email = notification + scoped convenience access. Dashboard = canonical authenticated material history.**
+
+V1 sends only to the Supabase account/login email. A verified alternate delivery email is future work.
+
 ## Guardrails
 
 - Never commit generated PDFs, child data, secrets, or copied database rows.

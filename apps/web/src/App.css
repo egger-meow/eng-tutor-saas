@@ -1104,3 +1104,5 @@
     gap: var(--space-1);
   }
 }
+.scoped-material-page { max-width: 720px; }
+.scoped-material-downloads { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin: 28px 0; }

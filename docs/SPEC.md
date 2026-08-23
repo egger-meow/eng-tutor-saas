@@ -3048,6 +3048,10 @@ Parent downloads should use authenticated access or short-lived signed URLs.
 
 Do not expose permanent public PDF URLs.
 
+Release-time email is a transactional notification and scoped convenience access, not the material-delivery authority. A completed package remains unavailable until `release_at`; at release it becomes available in the authenticated Dashboard independently of SMTP health. The notification goes only to the parent account/login email in V1, contains no attachments, and links through a revocable 90-day token scoped to one parent, one child, and one released material. Only a token hash is persisted. The scoped resolver may issue short-lived private-Storage URLs for that package's Student PDF and Parent Answer PDF; it must never create a general session or expose another package. Future work may add a verified alternate delivery email, but V1 has no alternate address or unsubscribe control for this core transactional notification.
+
+> **Email = notification + scoped convenience access. Dashboard = canonical authenticated material history.**
+
 ---
 
 # 146. Privacy Principles
@@ -3316,6 +3320,8 @@ Additional legal routes may be required before paid launch.
 
 Main dashboard should be child-centric.
 
+The authenticated material area states that each finished weekly package appears there and a notification is sent to the login email. Email failure never removes or rolls back a released material. A valid email token used by its matching authenticated parent redirects to the canonical material area with the token removed from the visible URL; another signed-in account remains in narrow scoped-token mode and receives no access to the token owner's Dashboard.
+
 The dashboard may include a compact Student Library summary and sequence-cursor timeline. It must use parent-safe, evidence-backed language: targets without explicit assessment remain learning/uncertain, and mastery is labelled as supported by spaced results rather than inferred from completion. It must not expose canonical source, prompts, model reasoning, mastery scores, confidence jargon, or internal curriculum machinery.
 
 Example:
@@ -3537,6 +3543,8 @@ During beta, operator must be able to inspect:
 * storage artifacts;
 * feedback;
 * capacity.
+* material email delivery status, attempts, last error, and sent time;
+* scoped-link expiry/revocation state.
 
 A polished admin app is not required initially.
 
@@ -3674,6 +3682,9 @@ At minimum test:
 * feedback ownership;
 * profile edit behavior;
 * historical packet immutability.
+* release-time email eligibility, retry bounds, atomic concurrent claims, and provider idempotency;
+* invalid, expired, revoked, cross-child, cross-week, and unreleased scoped material access;
+* equivalent scoped authorization for both private PDF artifacts without weakening normal Dashboard RLS.
 
 ---
 

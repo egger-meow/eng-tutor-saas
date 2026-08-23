@@ -3,6 +3,7 @@ import { createWorkerClient } from './client.js'
 import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext } from './pipeline.js'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
 import { processCurriculumSubmissions } from './submission-processor.js'
+import { dispatchMaterialEmails } from './material-email.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -14,6 +15,19 @@ function option(name: string, required = true): string | undefined {
 async function main(): Promise<void> {
   const command = process.argv[2]
   const client = createWorkerClient()
+
+  if (command === 'dispatch-material-emails') {
+    const workerId = option('worker') ?? ''
+    const result = await dispatchMaterialEmails(client, workerId, {
+      resendApiKey: process.env.RESEND_API_KEY ?? '',
+      materialLinkSecret: process.env.MATERIAL_LINK_SECRET ?? '',
+      siteUrl: process.env.SITE_URL?.trim() || 'https://paperbond.jjmowlab.com',
+      emailFrom: process.env.EMAIL_FROM?.trim() || '紙屬英文 <noreply@paperenglish.com>',
+    }, fetch, Number(option('limit', false) ?? '10'))
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+    if (result.failed > 0) process.exitCode = 1
+    return
+  }
 
   if (command === 'process-submissions') {
     const processorId = option('processor') ?? ''
@@ -83,7 +97,7 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2|process-submissions> [options]')
+  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2|process-submissions|dispatch-material-emails> [options]')
 }
 
 main().catch((error: unknown) => {

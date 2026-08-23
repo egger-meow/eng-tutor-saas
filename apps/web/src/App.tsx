@@ -18,6 +18,8 @@ import { ParentGuideFeedbackPage } from './routes/ParentGuideFeedbackPage'
 import { PrivacyPage } from './routes/PrivacyPage'
 import { TermsPage } from './routes/TermsPage'
 import { RefundPage } from './routes/RefundPage'
+import { ScopedMaterialPage } from './routes/ScopedMaterialPage'
+import { AuthenticatedMaterialPage } from './routes/AuthenticatedMaterialPage'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
 
 function App() {
@@ -50,10 +52,11 @@ function App() {
   if (route.name === 'guide') return <GuidePage />
   if (route.name === 'sample') return <SamplePage />
   if (route.name === 'waitlist') return <WaitlistPage />
+  if (route.name === 'material') return <ScopedMaterialPage session={session} />
 
   const page = !session
     ? <LandingPage />
-    : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'child-overview' || route.name === 'child-materials' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'feedback' ? <FeedbackPage session={session} materialId={route.params.materialId} /> : route.name === 'parent-guide-feedback' ? <ParentGuideFeedbackPage session={session} /> : route.name === 'billing' ? <BillingPage session={session} /> : <DashboardPage session={session} />
+    : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'child-overview' || route.name === 'child-materials' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'authenticated-material' ? <AuthenticatedMaterialPage session={session} materialId={route.params.materialId} /> : route.name === 'feedback' ? <FeedbackPage session={session} materialId={route.params.materialId} /> : route.name === 'parent-guide-feedback' ? <ParentGuideFeedbackPage session={session} /> : route.name === 'billing' ? <BillingPage session={session} /> : <DashboardPage session={session} />
 
 
   return <MotionConfig reducedMotion="user"><motion.div className="route-stage" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}>{page}</motion.div></MotionConfig>

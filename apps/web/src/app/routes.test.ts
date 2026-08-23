@@ -18,6 +18,14 @@ describe('root-hosted route paths', () => {
     expect(parseRoute('/parent-guide-feedback')).toMatchObject({ name: 'parent-guide-feedback', path: '/parent-guide-feedback' })
   })
 
+  it('keeps scoped material links public and query-insensitive', () => {
+    expect(parseRoute('/material?t=secret')).toMatchObject({ name: 'material', path: '/material' })
+  })
+
+  it('routes a specific authenticated material', () => {
+    expect(parseRoute('/materials/material-1')).toMatchObject({ name: 'authenticated-material', params: { materialId: 'material-1' } })
+  })
+
   it.each([
     ['/', 'landing'],
     ['/terms', 'terms'],

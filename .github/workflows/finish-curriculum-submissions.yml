@@ -74,3 +74,13 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: pnpm worker process-submissions --processor github-actions-finisher --limit 15
+      - name: Dispatch released material notifications
+        if: always()
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MATERIAL_LINK_SECRET: ${{ secrets.MATERIAL_LINK_SECRET }}
+          SITE_URL: https://paperbond.jjmowlab.com
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+        run: pnpm worker dispatch-material-emails --worker github-actions-material-email --limit 15

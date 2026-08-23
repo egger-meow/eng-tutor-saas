@@ -60,6 +60,9 @@ Production commands require `SUPABASE_URL` and a server-only `SUPABASE_SECRET_KE
 
 ```powershell
 pnpm worker claim --worker local-operator
+pnpm worker dispatch-material-emails --worker material-email-daily --limit 10
 ```
+
+Material email dispatch additionally requires server-only `RESEND_API_KEY` and a random `MATERIAL_LINK_SECRET` of at least 32 characters, plus `SITE_URL` and `EMAIL_FROM`. Schedule it in the same trusted environment after the finisher cadence. Deploy the `material-access` Supabase Edge Function with JWT verification disabled at the gateway; it performs its own scoped-token validation and never exposes the service-role key.
 
 See `docs/generation-workflow.md` for context and completion commands. Never expose the generation-worker key in the Cloudflare static bundle or commit generated customer artifacts.

@@ -16,6 +16,12 @@ The browser uses a publishable key and is restricted by explicit Data API grants
 
 Parent ownership is the authorization root. A child references its parent profile; all subscriptions, feedback, materials, and jobs resolve through that child. Sibling records remain independent even under one parent.
 
+## Scoped Material Notification Boundary
+
+The existing privileged worker environment dispatches release notifications through the existing Resend account and PostgreSQL leases. Email is notification plus scoped convenience access; the Dashboard remains canonical authenticated material history.
+
+One hashed, revocable, 90-day token resolves to one parent, child, and released material plus two five-minute private PDF URLs. It never grants a session, Dashboard, history, billing, profile, or feedback access. A matching existing parent session redirects to the canonical authenticated material area; a different account remains in scoped mode.
+
 ## Deployment
 
 GitHub Actions validates every change. The Cloudflare Workers workflow builds and deploys only the SPA to `https://paperbond.jjmowlab.com`. Supabase migrations are reviewed and applied through an authorized environment; CI must not contain production database secrets by default.

@@ -96,6 +96,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
           <WeeklyLearningPanel material={latestMaterial} childName={child.display_name} onFeedbackSaved={onRefresh} />
+          <p className="muted">每週新教材完成後，會同步更新在這裡，並寄送通知至你的登入 Email。</p>
           
           <div className="dashboard-support">
             <PersonalizationSummary material={latestMaterial} />

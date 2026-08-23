@@ -1852,6 +1852,79 @@ begin
     raise exception 'REGRESSION: browser roles can mutate Student Library tables';
   end if;
 
+  -- 16. Release-time material email delivery is independent, idempotent, and scoped.
+  update auth.users set email = 'login-parent@example.com' where id = '00000000-0000-0000-0000-000000000001';
+  with released_material as (
+    insert into public.materials (child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+    values ('00000000-0000-0000-0000-000000000099', current_date + 100, 1, 'email-test', '{}', 'email-test/student.pdf', 'email-test/parent.pdf')
+    returning id, child_id, material_week
+  ) insert into public.generation_jobs (child_id, material_week, rule_version, idempotency_key, status, scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at, completed_at)
+    select child_id, material_week, 'email-test', 'email-eligible', 'completed', now() - interval '3 days', id, now() - interval '1 minute', now() - interval '48 hours 1 minute', now() - interval '24 hours 1 minute', now() - interval '2 minutes' from released_material;
+  with future_material as (
+    insert into public.materials (child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+    values ('00000000-0000-0000-0000-000000000099', current_date + 107, 1, 'email-test', '{}', 'email-future/student.pdf', 'email-future/parent.pdf') returning id, child_id, material_week
+  ) insert into public.generation_jobs (child_id, material_week, rule_version, idempotency_key, status, scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at, completed_at)
+    select child_id, material_week, 'email-test', 'email-future', 'completed', now(), id, now() + interval '3 days', now() + interval '1 day', now() + interval '2 days', now() from future_material;
+  insert into public.generation_jobs (child_id, material_week, rule_version, idempotency_key, status, scheduled_for, release_at, feedback_cutoff_at, generation_due_at)
+    values ('00000000-0000-0000-0000-000000000099', current_date + 114, 'email-test', 'email-unfinished', 'pending',
+      now() - interval '3 days', now() - interval '1 minute', now() - interval '48 hours 1 minute', now() - interval '24 hours 1 minute');
+
+  if (select count(*) from public.worker_claim_material_email_deliveries('email-worker-a', 10, 300, 5)) <> 1 then
+    raise exception 'REGRESSION: only completed and released material should be claimed for email';
+  end if;
+  if (select count(*) from public.worker_claim_material_email_deliveries('email-worker-b', 10, 300, 5)) <> 0 then
+    raise exception 'REGRESSION: concurrent dispatcher claim duplicated an active delivery';
+  end if;
+  if not public.worker_set_material_email_token((select id from public.material_email_deliveries where claimed_by='email-worker-a'), 'email-worker-a', repeat('a',64)) then
+    raise exception 'REGRESSION: initial attempt could not persist hashed scoped token';
+  end if;
+  if not public.worker_fail_material_email_delivery((select id from public.material_email_deliveries where claimed_by='email-worker-a'), 'email-worker-a', 'temporary smtp outage', 5) then
+    raise exception 'REGRESSION: transient email failure was not recorded';
+  end if;
+  if not exists (select 1 from public.materials where student_pdf_path='email-test/student.pdf') then
+    raise exception 'REGRESSION: email failure reverted released material';
+  end if;
+  if (select count(*) from public.worker_claim_material_email_deliveries('email-worker-b', 10, 300, 5)) <> 1 then
+    raise exception 'REGRESSION: failed email was not safely retryable';
+  end if;
+  if (select count(*) from public.worker_claim_material_email_deliveries('email-worker-c', 10, 300, 5)) <> 0 then
+    raise exception 'REGRESSION: retried delivery was concurrently claimed twice';
+  end if;
+  if not public.worker_set_material_email_token((select id from public.material_email_deliveries where claimed_by='email-worker-b'), 'email-worker-b', repeat('a',64)) then
+    raise exception 'REGRESSION: worker could not persist hashed scoped token';
+  end if;
+  if not public.worker_complete_material_email_delivery((select id from public.material_email_deliveries where claimed_by='email-worker-b'), 'email-worker-b', 'provider-1') then
+    raise exception 'REGRESSION: worker could not mark email sent';
+  end if;
+  if (select count(*) from public.worker_claim_material_email_deliveries('email-worker-c', 10, 300, 5)) <> 0 then
+    raise exception 'REGRESSION: successful material notification was claimed twice';
+  end if;
+  if (select count(*) from public.resolve_material_email_access(repeat('a',64), null)) <> 1 then
+    raise exception 'REGRESSION: valid scoped link did not resolve without login';
+  end if;
+  if exists (select 1 from public.resolve_material_email_access(repeat('b',64), null)) then
+    raise exception 'REGRESSION: invalid scoped token resolved';
+  end if;
+  insert into public.material_email_deliveries (material_id, parent_id, child_id, recipient_email, status, sent_at, access_token_hash, access_expires_at)
+    select material.id, child.parent_id, child.id, 'login-parent@example.com', 'sent', now(), repeat('b',64), now()+interval '90 days'
+    from public.materials as material join public.children as child on child.id=material.child_id
+    where material.student_pdf_path='email-future/student.pdf';
+  if exists (select 1 from public.resolve_material_email_access(repeat('b',64), null)) then
+    raise exception 'REGRESSION: unreleased material resolved through a valid token';
+  end if;
+  if (select student_pdf_path from public.resolve_material_email_access(repeat('a',64), null)) <> 'email-test/student.pdf' then
+    raise exception 'REGRESSION: scoped link exposed a different material artifact';
+  end if;
+  update public.material_email_deliveries set access_revoked_at=now() where access_token_hash=repeat('a',64);
+  if exists (select 1 from public.resolve_material_email_access(repeat('a',64), null)) then raise exception 'REGRESSION: revoked scoped token resolved'; end if;
+  update public.material_email_deliveries set access_revoked_at=null, access_expires_at=now()-interval '1 second' where access_token_hash=repeat('a',64);
+  if exists (select 1 from public.resolve_material_email_access(repeat('a',64), null)) then raise exception 'REGRESSION: expired scoped token resolved'; end if;
+  if has_table_privilege('anon','public.material_email_deliveries','select')
+    or has_function_privilege('anon','public.resolve_material_email_access(text,uuid)','execute')
+    or has_function_privilege('authenticated','public.worker_claim_material_email_deliveries(text,integer,integer,integer)','execute') then
+    raise exception 'REGRESSION: scoped delivery internals are exposed to browser roles';
+  end if;
+
   -- Clean up
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;
