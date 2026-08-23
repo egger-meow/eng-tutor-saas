@@ -104,7 +104,7 @@
 
 .evolution-loop {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
   gap: .8rem 1rem;
@@ -114,6 +114,7 @@
   color: var(--color-ink);
   font-size: .86rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .evolution-loop b {
@@ -242,9 +243,15 @@
 
   .evolution-loop {
     justify-content: flex-start;
+    gap: clamp(.35rem, 2vw, .75rem);
     padding-inline: 0;
     border-bottom: 0;
+    overflow-x: auto;
+    font-size: clamp(.72rem, 3vw, .86rem);
+    scrollbar-width: none;
   }
+
+  .evolution-loop::-webkit-scrollbar { display: none; }
 
   .evolution-loop b {
     font-size: 1rem;
