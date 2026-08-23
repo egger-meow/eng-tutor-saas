@@ -9,6 +9,7 @@ import { WeeklyLearningPanel } from './WeeklyLearningPanel'
 import { PersonalizationSummary } from './PersonalizationSummary'
 import { DeliveryStatus } from './DeliveryStatus'
 import { MaterialHistory } from '../materials/MaterialHistory'
+import { LearningJourneyPanel } from './LearningJourneyPanel'
 
 interface ChildCardProps {
   child: ChildWithProfile
@@ -100,6 +101,8 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             <PersonalizationSummary material={latestMaterial} />
             <DeliveryStatus delivery={delivery} />
           </div>
+
+          <LearningJourneyPanel childId={child.id} />
 
           <div className="history-toggle-section">
             <button
