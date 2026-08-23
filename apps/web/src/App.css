@@ -672,21 +672,7 @@
   84% { transform: translateX(.35rem) scale(1.08); }
 }
 
-/* Each visible content beat follows its parent into view instead of appearing as one flat block. */
-.motion-cascade[data-revealed='false'] {
-  opacity: 0;
-  transform: translateY(2rem) scale(.95);
-}
-
-.motion-cascade[data-revealed='false'][data-reveal='left'] { transform: translateX(-2.75rem) scale(.96); }
-.motion-cascade[data-revealed='false'][data-reveal='right'] { transform: translateX(2.75rem) scale(.96); }
-
-.motion-cascade[data-revealed='true'] {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-  transition: opacity .28s ease-out, transform .4s cubic-bezier(.22, 1, .36, 1);
-}
-
+/* Framer Motion owns the wrapper transform; CSS only cascades its children. */
 .motion-cascade > * {
   opacity: 0;
   transform: translateY(1rem) scale(.985);
