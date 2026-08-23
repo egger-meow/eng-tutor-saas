@@ -288,7 +288,10 @@
   .comparison-layout, .week-flow, .document-pair { grid-template-columns: 1fr; }
   .comparison-arrow { transform: rotate(90deg); text-align: center; }
   .week-sheet, .week-sheet.next-week { transform: none; }
-  .flow-line b { transform: rotate(90deg); }
+  .flow-line b {
+    transform: rotate(90deg);
+    animation-name: directional-nudge-down;
+  }
   .learning-sequence { grid-template-columns: 1fr; }
   .sample-decisions { grid-template-columns: 1fr; }
   .learning-sequence li { min-height: auto; border-right: 0; border-bottom: 1px solid var(--color-rule); }
@@ -670,6 +673,11 @@
 @keyframes directional-nudge {
   0%, 72%, 100% { transform: translateX(0); }
   84% { transform: translateX(.35rem) scale(1.08); }
+}
+
+@keyframes directional-nudge-down {
+  0%, 72%, 100% { transform: rotate(90deg) translateX(0); }
+  84% { transform: rotate(90deg) translateX(.35rem) scale(1.08); }
 }
 
 /* Framer Motion owns the wrapper transform; CSS only cascades its children. */
