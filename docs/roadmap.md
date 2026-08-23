@@ -27,6 +27,8 @@ Current implementation now proves that loop locally, including private parent do
 
 ## Launch
 
+Use [`docs/launch-readiness.md`](./launch-readiness.md) as the launch control sheet and Golden Customer Test.
+
 - Publish the learning-method guide and parent onboarding.
 - Validate pricing, Week 1 free behavior, founding offer, refunds, and privacy terms.
 - Pilot with a small family cohort, review packets manually, then expand gradually.
