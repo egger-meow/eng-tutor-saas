@@ -53,7 +53,8 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
     expect(store.grammarRecords['g7-do-does-questions']?.assessedCount).toBe(1)
     expect(store.grammarRecords['g7-do-does-questions']?.missCount).toBe(1)
     expect(store.grammarRecords['g7-do-does-questions']?.correctCount).toBe(0)
-    expect(store.grammarRecords['g7-do-does-questions']?.masteryStatus).toBe('learning')
+    expect(store.grammarRecords['g7-do-does-questions']?.masteryStatus).toBe('reviewing')
+    expect(store.grammarRecords['g7-do-does-questions']?.weaknessReason).toBe('explicit_incorrect')
     // Next review scheduled in 7 days
     expect(store.grammarRecords['g7-do-does-questions']?.nextReviewAt).toBe('2026-08-24T00:00:00.000Z')
 
@@ -80,8 +81,8 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
     }, '2026-08-10T00:00:00.000Z')
 
     // Give mastery to 2 vocab and 1 grammar
-    recordLearnerAssessmentEvidence(store, 'vocabulary', 'v-borrow', 'correct', '2026-08-10T00:00:00.000Z')
-    recordLearnerAssessmentEvidence(store, 'vocabulary', 'v-borrow', 'correct', '2026-08-15T00:00:00.000Z')
+    recordLearnerAssessmentEvidence(store, 'vocabulary', 'v-borrow', 'correct', '2026-08-10T00:00:00.000Z', 'week-1')
+    recordLearnerAssessmentEvidence(store, 'vocabulary', 'v-borrow', 'correct', '2026-08-17T00:00:00.000Z', 'week-2')
 
     // Schedule 1 due review for grammar (nextReviewAt earlier than now)
     store.grammarRecords['g7-be-verbs-pronouns']!.nextReviewAt = '2026-08-25T00:00:00.000Z'
@@ -114,8 +115,8 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
       reviewedVocabularyIds: [],
       exposedGrammarTargetIds: ['g7-be-verbs-pronouns'],
     })
-    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct')
-    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct', '2026-08-01T00:00:00.000Z', 'week-1')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-be-verbs-pronouns', 'correct', '2026-08-08T00:00:00.000Z', 'week-2')
 
     expect(buildCapCoverageCapsule(store, { gradeStage: 'grade_7' }).recommendedGrammar).toEqual([
       'g7-present-simple-verbs',
@@ -127,8 +128,8 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
       reviewedVocabularyIds: [],
       exposedGrammarTargetIds: ['g7-present-simple-verbs'],
     })
-    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct')
-    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct', '2026-08-08T00:00:00.000Z', 'week-2')
+    recordLearnerAssessmentEvidence(store, 'grammar', 'g7-present-simple-verbs', 'correct', '2026-08-15T00:00:00.000Z', 'week-3')
 
     expect(buildCapCoverageCapsule(store, { gradeStage: 'grade_7' }).recommendedGrammar).toEqual([
       'g7-do-does-questions',
@@ -156,5 +157,19 @@ describe('Student Curriculum Progress Tracker & Coverage Capsule', () => {
     expect(store.vocabRecords['sensor']).toBeUndefined()
     expect(store.vocabRecords['v-minecraft']).toBeUndefined()
     expect(Object.keys(store.vocabRecords).length).toBe(2)
+  })
+
+  it('keeps partial neutral and marks a later miss as regression without erasing mastery provenance', () => {
+    const store = createEmptyStudentCurriculumStore('child-longitudinal', 7)
+    const target = 'g7-do-does-questions'
+    recordLearnerAssessmentEvidence(store, 'grammar', target, 'partial', '2026-08-01T00:00:00.000Z', 'week-1')
+    expect(store.grammarRecords[target]).toMatchObject({ assessedCount: 1, partialCount: 1, correctCount: 0, missCount: 0, masteryStatus: 'learning' })
+
+    recordLearnerAssessmentEvidence(store, 'grammar', target, 'correct', '2026-08-08T00:00:00.000Z', 'week-2')
+    recordLearnerAssessmentEvidence(store, 'grammar', target, 'correct', '2026-08-15T00:00:00.000Z', 'week-3')
+    expect(store.grammarRecords[target]).toMatchObject({ masteryStatus: 'mastered', masteryReason: 'two_spaced_correct_materials' })
+
+    recordLearnerAssessmentEvidence(store, 'grammar', target, 'miss', '2026-09-26T00:00:00.000Z', 'week-9')
+    expect(store.grammarRecords[target]).toMatchObject({ masteryStatus: 'reviewing', weaknessReason: 'regression_after_mastery', masteryReason: 'two_spaced_correct_materials' })
   })
 })

@@ -595,7 +595,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
     recordLearnerAssessmentEvidence(store, 'grammar', 'g7-do-does-questions', 'miss', '2026-08-18T18:00:00Z')
 
     expect(store.grammarRecords['g7-do-does-questions']!.missCount).toBe(1)
-    expect(store.grammarRecords['g7-do-does-questions']!.masteryStatus).toBe('learning')
+    expect(store.grammarRecords['g7-do-does-questions']!.masteryStatus).toBe('reviewing')
 
     // With explicit failure evidence, re-promoting g7-do-does-questions as primary target in Week 4 IS justified
     const dueCapsule = buildCapCoverageCapsule(store, {

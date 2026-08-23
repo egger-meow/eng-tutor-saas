@@ -10,6 +10,28 @@ export type GenerationContext = {
   grade: 7 | 8 | 9
   preferences: ReadonlyArray<string>
   priorFeedback: ReadonlyArray<string>
+  compactWeeklyHistory?: ReadonlyArray<unknown>
+  lifetimeLearningMemory?: {
+    vocabulary: LifetimeTargetMemory
+    grammar: LifetimeTargetMemory
+    communication: LifetimeTargetMemory
+  }
+  targetedOlderEvidence?: ReadonlyArray<{
+    targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading'
+    targetId: string | null
+    result: 'correct' | 'incorrect' | 'partial' | 'unknown'
+    observedAt: string
+  }>
+  memoryPolicyVersion?: 'evidence-v1'
+}
+
+export type LifetimeTargetMemory = {
+  total: number
+  dueTargetIds: ReadonlyArray<string>
+  verifiedWeakTargetIds: ReadonlyArray<string>
+  uncertainTargetIds: ReadonlyArray<string>
+  masteredTargetIds: ReadonlyArray<string>
+  regressionTargetIds: ReadonlyArray<string>
 }
 
 export { WeeklyLessonSchema } from './lesson-schema.js'
