@@ -47,7 +47,9 @@ JSON is allowed only for bounded, internally structured payloads whose members d
 
 Exposure is never assessment. Generated questions, answer keys, silence, missing feedback, and vague parent impressions never count as successful learner evidence.
 
-An explicit failure immediately creates a review need. Mastery requires successful assessed evidence on at least two distinct materials, including a later success at least seven days after the first successful assessment. This is intentionally conservative, explainable, and compatible with the existing delayed-retrieval curriculum principle. The policy is stored as a versioned database constant/function contract and is covered by tests; changing it requires a forward migration and updated documentation.
+An explicit failure immediately creates a review need. Mastery requires successful assessed evidence on at least two distinct materials, including a later success at least seven days after the first successful assessment. A later explicit incorrect result moves a mastered target to `reviewing`, sets `review_due = true`, and records `weakness_reason = regression_after_mastery`; the earlier mastery milestone remains derivable from the immutable evidence trail.
+
+Partial evidence increments assessed and partial counts, but neither correct nor miss counts. It cannot grant mastery and is not treated as an explicit full failure. Unknown evidence changes none of those result counts and cannot grant mastery or regression. This is intentionally conservative, explainable, and compatible with the existing delayed-retrieval curriculum principle. The policy is stored as a versioned database constant/function contract and is covered by tests; changing it requires a forward migration and updated documentation.
 
 ## Data Model
 
@@ -55,12 +57,14 @@ An explicit failure immediately creates a review need. Mastery requires successf
 
 One row exists per completed material:
 
-- identity: `id`, `child_id`, `material_id`, `material_week`, `week_number`;
+- identity: `id`, `child_id`, `material_id`, `material_week`, `sequence_number`;
 - provenance: generation job, schema, curriculum, prompt, generator, model, and input fingerprint identifiers;
 - learning focus: reading level/signals, introduced/reviewed vocabulary IDs, grammar IDs, communication-function IDs, measurable targets, and target-evidence map;
 - forward memory: hypotheses, next-review candidates, recurring/observed mistakes, verified strengths/weaknesses known at completion, and meaningful state delta;
 - validated generation evidence: personalization and improvement evidence;
-- timestamp: `created_at`.
+- timestamps: historical `recorded_at`, optional actual backfill execution time `backfilled_at`, and row-audit `created_at`.
+
+`sequence_number` is the immutable one-based ordinal of the child's canonical completed-material delivery chain. It is never derived from wall-clock week differences. Live recording and backfill use the same deterministic ordering: `released_at nulls last`, completion/creation time, then material ID. A correction is a new traceable material in the canonical chain and never rewrites an existing snapshot. Parent UI renders this authority as `Week ${sequenceNumber}`; `material_week` remains only a source-package label.
 
 `material_id` is unique. Rows are service-created and immutable through a trigger. They survive child archival because archival is a flag, not deletion. Existing hard-delete semantics are not broadened by this feature.
 
@@ -68,10 +72,10 @@ One row exists per completed material:
 
 Each row represents one auditable learner observation:
 
-- `id`, `child_id`, `material_id`, and optional `feedback_id`;
+- `id`, `child_id`, `material_id`, optional `feedback_id`, and optional `feedback_processing_id`;
 - `target_type`: vocabulary, grammar, communication function, or reading;
 - canonical `target_id` (nullable only for reading-wide evidence);
-- `evidence_type`: assessment result, structured parent observation, packet-derived observation, or future exercise result;
+- `evidence_type`: `learner_assessment`, `structured_parent_observation`, or `captured_exercise_result`;
 - `result`: correct, incorrect, partial, or unknown;
 - `assessed` flag;
 - `source` and evidence-strength classification;
@@ -80,13 +84,13 @@ Each row represents one auditable learner observation:
 
 The evidence table is append-only. It has a unique idempotency key and composite foreign-key ownership checks so material, feedback, and child cannot cross boundaries.
 
-Packet-derived observations may establish exposure context or an explicit hypothesis, but not successful assessment. Vague feedback may create an unknown/weak-area observation without attaching invented question-level correctness.
+Packet facts—including introduced/reviewed target IDs, target evidence, assessment opportunities, hypotheses, generated questions, and answer keys—belong in the immutable snapshot. They may describe exposure or an intended assessment opportunity, but they never create learner-performance evidence. Evidence rows require an actual learner assessment, structured parent observation, or captured exercise result. Vague feedback may create a reading-wide unknown/weak-area observation without attaching invented target-level correctness.
 
 ### Feedback processing audit
 
-`feedback_memory_processing` records one processing state per feedback revision fingerprint. It stores processor version, source cutoff classification, processing time, and sanitized outcome metadata. The raw feedback row remains parent-editable, while child/material identity remains immutable.
+`feedback_memory_processing` records one immutable processing revision per feedback revision fingerprint. It stores processor version, source cutoff classification, processing time, sanitized outcome metadata, and `status = effective | superseded`. The raw feedback row remains parent-editable, while child/material identity remains immutable. Exactly one processing revision per feedback may be effective.
 
-Editing feedback produces a new immutable processing revision. Derived projections are rebuilt from all current authoritative feedback revisions plus append-only non-feedback evidence, preventing double counting while keeping an audit trail of prior interpretations. Superseded feedback evidence remains historical but is excluded from current projections through its processing revision status.
+Feedback-derived evidence always records both `feedback_id` and `feedback_processing_id`. An identical current payload fingerprint returns the existing processing revision. A changed fingerprint atomically supersedes the previous effective revision, inserts a new effective revision, appends evidence linked to it, and rebuilds affected projections from effective evidence only. Superseded feedback evidence remains immutable historical provenance but is excluded from current projections, preventing double counting.
 
 ### Progress projections
 
@@ -112,11 +116,11 @@ canonical package accepted
 → deterministic finisher succeeds
 → material and job completed transactionally
 → curriculum observations recorded
-→ immutable weekly snapshot inserted ON CONFLICT DO NOTHING
+→ immutable weekly snapshot inserted or verified identical
 → exposure projections and current state refreshed
 ```
 
-`worker_record_curriculum_observations` remains the service-only entry point and becomes responsible for snapshot creation in the same idempotent observation transaction. Its existing `observations_recorded_at` guard remains compatible with retry behavior, while the snapshot's unique `material_id` is the final duplicate defense.
+`worker_record_curriculum_observations` remains the service-only entry point and calls the snapshot canonicalizer in the same idempotent observation transaction. Its existing `observations_recorded_at` guard cannot bypass snapshot conflict verification. A retry for the same material returns the existing snapshot only when every reconstructed historical fact is identical; a conflicting reconstruction raises an exception and refreshes no projection. Silent `ON CONFLICT DO NOTHING` is forbidden here.
 
 If snapshot/projection recording fails after material completion, the material stays completed and an operator-visible retry can safely replay observation recording. It never mutates canonical material or PDFs.
 
@@ -138,7 +142,7 @@ Free prose is retained as the raw observation. The database does not use open-en
 
 ### Backfill
 
-A service-only idempotent backfill function scans completed materials lacking snapshots in stable chronological order. It reconstructs generation-time facts from `canonical_source`, `generation_summary`, material provenance, and existing observation records. It then processes current feedback revisions through the same feedback processor.
+A service-only idempotent backfill function scans completed materials lacking snapshots in stable canonical delivery order. It reconstructs generation-time facts from `canonical_source`, `generation_summary`, material provenance, and existing observation records. Historical completion/release time becomes `recorded_at`, the execution time becomes `backfilled_at`, and `created_at` remains row-audit time. It then processes current feedback revisions through the same feedback processor.
 
 Unknown historical fields remain null or empty. The backfill never edits a material, creates assessment success from answer keys, or duplicates snapshots/evidence.
 
@@ -164,10 +168,10 @@ The private ChatGPT bridge continues to receive the server-produced input snapsh
 
 Two authenticated SECURITY INVOKER/owned-query RPCs provide the Student Library:
 
-1. a cursor- or offset-paginated chronological timeline returning stable facts for each released week;
+1. a sequence-cursor-paginated chronological timeline returning stable facts for each released week;
 2. an aggregate summary returning total weeks, exposed/mastered counts, reading trajectory, persistent weak areas, and recent improvement signals.
 
-The projection excludes canonical source, raw model reasoning, prompt terminology, mastery scores, confidence jargon, and internal CAP machinery. Feedback prose is returned only where already parent-owned and necessary; timeline labels are deterministic Traditional Chinese mappings from stored facts.
+The projection excludes canonical source, raw model reasoning, prompt terminology, mastery scores, confidence jargon, and internal CAP machinery. Feedback prose is returned only where already parent-owned and necessary; timeline labels are deterministic Traditional Chinese mappings from stored facts. MVP target-level assessment is intentionally sparse, so exposed targets default to learning/uncertain until explicit evidence exists. Mastery is always labelled as evidence-backed and never inferred from packet completion, answer keys, missing feedback, or vague prose.
 
 Rows are protected by RLS ownership through `children.parent_id = auth.uid()`. Browser roles receive read access only through owned rows/RPCs. All mutation functions remain service-only except the existing tightly scoped feedback write path.
 
