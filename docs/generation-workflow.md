@@ -46,6 +46,7 @@ This gives the Scheduled authoring task at least one 00:15 window before the par
 8. Submit the canonical JSON to the private bridge. GitHub Actions independently validates it with `CurriculumPackageSchema` and repository-owned quality gates, renders and inspects the separate Student and Parent PDFs, and rejects the pair on any structure, answer-consistency, identifier, learning-stage, hidden-difficulty, critique, or rendering failure.
 9. GitHub Actions uploads both PDFs to private Storage and transactionally records the material and completed job. Completion creates the next job from the existing release anchor with `release_at + 7 days`, `feedback_cutoff_at = release_at - 48 hours`, and `generation_due_at = release_at - 24 hours`.
 10. After completion, call `worker_record_curriculum_observations` with the canonical package. It records vocabulary exposure, grammar targets, compact weekly history, verification hypotheses, and critic observations. This write-back must never silently claim mastery.
+    The same lifecycle records or verifies the immutable weekly Student Library snapshot. Identical retries return the existing snapshot; a conflicting reconstruction fails closed and refreshes no projection.
 11. On deterministic quality rejection, preserve the immutable submission plus structured findings. If authoring attempts remain, return the job to the Scheduled task with the prior package and exact repair context; otherwise mark it HUMAN_REVIEW_REQUIRED. On rendering, upload, or completion failure, retry the same submission in the deterministic finisher without spending another LLM authoring attempt.
 12. End with a concise run report: waiting for feedback, mandatory/overdue, claimed, completed, failed, deferred, observation-write failures, and oldest outstanding deadline.
 
@@ -65,6 +66,16 @@ This gives the Scheduled authoring task at least one 00:15 window before the par
 ## Recovery
 
 Operators may adjust normal capacity in Supabase, manually invoke the same worker procedure, or requeue a reviewed failure. Mandatory work still bypasses normal capacity. A rerun must reuse the idempotency key and detect already-uploaded artifacts. Repeated failures require human review rather than unbounded retries.
+
+### Historical Student Library backfill
+
+`worker_backfill_student_library(p_child_id, p_limit)` is service-only and processes completed materials in canonical delivery order. Use small batches (the default is 100) and rerun safely until `created = 0`. Historical completion/release time is preserved as `recorded_at`; execution time is stored separately as `backfilled_at`. Missing historical facts remain null or empty, and answer keys never create learner evidence. A conflicting existing snapshot aborts the transaction rather than overwriting history.
+
+Repository implementation and CI must not invoke a production backfill. Operators run it only in the intended environment after migrations, RLS checks, and a staging rehearsal.
+
+## Longitudinal generation memory
+
+`worker_generation_context()` preserves the existing server-owned fingerprint boundary and bounded compact history. It additionally returns lifetime counts and bounded target IDs for due, weak, uncertain, evidence-mastered, and regression targets, plus targeted older incorrect/partial evidence. Superseded feedback revisions are excluded. Full snapshots, canonical packets, prompts, and answer keys are never serialized into lifetime context.
 
 ## Schedule Activation Checklist
 

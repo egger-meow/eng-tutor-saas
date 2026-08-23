@@ -1208,6 +1208,8 @@ MVP does not require a sophisticated machine-learning mastery model.
 
 Simple interpretable rules are acceptable.
 
+The permanent Student Library separates immutable weekly exposure snapshots from append-only learner evidence. Exposure, generated questions, answer keys, missing feedback, and vague prose are not learner-performance evidence. Evidence-backed mastery requires correct assessed results on two distinct materials with at least seven days between the first and later success. A later explicit incorrect result changes current status to reviewing while preserving the historical mastery milestone. Partial results increment partial/assessed counts only; unknown results cannot grant mastery or regression.
+
 ---
 
 # 48. Grammar Progress
@@ -1311,6 +1313,8 @@ It should NOT normally load:
 > every historical Student PDF in full.
 
 Old full material should only be loaded when there is a specific reason.
+
+Compact history is bounded working memory, not the permanent record. Targeted lifetime retrieval may include due, weak, prerequisite-relevant, uncertain, mastered, or regressed target IDs and a bounded set of older evidence without loading all historical packets.
 
 ---
 
@@ -2814,6 +2818,8 @@ created_at
 
 `weekly_materials` should contain enough compact metadata to support future generation without opening historical PDFs.
 
+Every completed canonical material also has one immutable weekly learning snapshot. Its `sequence_number` is the stable one-based ordinal of the child's canonical delivery chain and is the only authority for parent-facing `Week N` labels. `material_week` remains a source package label and wall-clock week differences must not define the sequence.
+
 Suggested summary fields include:
 
 * theme;
@@ -3309,6 +3315,8 @@ Additional legal routes may be required before paid launch.
 # 160. Parent Dashboard
 
 Main dashboard should be child-centric.
+
+The dashboard may include a compact Student Library summary and sequence-cursor timeline. It must use parent-safe, evidence-backed language: targets without explicit assessment remain learning/uncertain, and mastery is labelled as supported by spaced results rather than inferred from completion. It must not expose canonical source, prompts, model reasoning, mastery scores, confidence jargon, or internal curriculum machinery.
 
 Example:
 

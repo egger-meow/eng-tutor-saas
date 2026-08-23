@@ -26,6 +26,20 @@ Stable parent-provided context belongs in `child_profiles`; generator-owned obse
 
 Parents may read all records belonging to their children and edit profiles and feedback. Children are archived with `is_active = false`; browser hard deletion is denied so materials and learning history remain intact. Service-role workers maintain progress, learning state, materials, subscriptions, and generation jobs.
 
+## Permanent Student Library
+
+Longitudinal memory has three layers:
+
+1. `child_weekly_learning_snapshots` stores one immutable, canonical completion-time snapshot per material. Its `sequence_number` is the one-based delivery-chain authority shown as `Week N`; `material_week` is only the source package label.
+2. `child_learning_evidence` stores append-only learner observations. Packet targets, questions, answer keys, hypotheses, and intended assessment opportunities stay in the snapshot and never become learner results by themselves.
+3. vocabulary, grammar, and communication progress tables are rebuildable current projections. Generation receives these distilled facts plus bounded recent history, not the lifetime packet archive.
+
+Feedback processing is revisioned through `feedback_memory_processing`. Identical fingerprints reuse the effective revision. An edit supersedes the prior effective revision, appends evidence linked by both `feedback_id` and `feedback_processing_id`, and excludes superseded evidence from current projections without deleting its audit trail.
+
+Evidence policy `evidence-v1` requires correct assessed evidence on two distinct materials, with the later result at least seven days after the first, before a target is evidence-mastered. A later explicit incorrect result moves it to reviewing with `regression_after_mastery`. Partial increments assessed/partial only; unknown changes no result count. Exposure, answer keys, missing feedback, and vague prose cannot prove mastery.
+
+Parents may select owned library rows under RLS and use only the parent-safe timeline and summary RPCs. Browser roles cannot mutate snapshots, evidence, or processing revisions. Service functions are `SECURITY DEFINER`, use an empty search path, and are granted only to `service_role` unless explicitly parent-facing.
+
 ## Queue Invariants
 
 - A unique idempotency key prevents duplicate work for the same child/week/rule version.
