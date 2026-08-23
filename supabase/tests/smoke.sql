@@ -668,14 +668,7 @@ begin
     'grade_7'
   );
 
-  insert into public.subscriptions (id, parent_id, child_id, provider, status)
-  values (
-    '00000000-0000-0000-0000-000000000089',
-    '00000000-0000-0000-0000-000000000001',
-    recovery_child_id,
-    'beta',
-    'active'
-  );
+  update public.subscriptions set status = 'active' where child_id = recovery_child_id;
 
   insert into public.generation_jobs (
     id, child_id, material_week, rule_version, idempotency_key, status,
@@ -868,7 +861,7 @@ begin
   end if;
 
   -- Clean up recovery fixture
-  delete from public.subscriptions where id = '00000000-0000-0000-0000-000000000089';
+  delete from public.subscriptions where child_id = recovery_child_id;
   delete from public.children where id = recovery_child_id;
 
 
@@ -1763,7 +1756,7 @@ begin
       '{}'::jsonb,
       'history/' || series.n || '/student.pdf',
       'history/' || series.n || '/parent.pdf'
-    from generate_series(1, 6) as series(n)
+    from generate_series(1, 19) as series(n)
     returning id, child_id, material_week
   )
   insert into public.generation_jobs (
@@ -1828,8 +1821,35 @@ begin
     from public.get_owned_released_materials_page(
       '00000000-0000-0000-0000-000000000099', 5, 0, now()
     )
-  ) <> 6 then
+  ) <> 19 then
     raise exception 'REGRESSION: released history count must exclude the future prepared material';
+  end if;
+
+  -- 15. Permanent Student Library backfill, retry, parent read model, and grants.
+  if (public.worker_backfill_student_library('00000000-0000-0000-0000-000000000099', 100)->>'created')::integer <> 20 then
+    raise exception 'REGRESSION: backfill should create one snapshot per completed material';
+  end if;
+  if (select count(*) from public.child_weekly_learning_snapshots where child_id='00000000-0000-0000-0000-000000000099') <> 20 then
+    raise exception 'REGRESSION: Student Library snapshot count is not durable';
+  end if;
+  if (public.worker_backfill_student_library('00000000-0000-0000-0000-000000000099', 100)->>'created')::integer <> 0 then
+    raise exception 'REGRESSION: repeated backfill must not duplicate snapshots';
+  end if;
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+  if jsonb_array_length(public.parent_child_learning_timeline('00000000-0000-0000-0000-000000000099',null,5)) <> 5 then
+    raise exception 'REGRESSION: Student Library timeline limit/cursor page is incorrect';
+  end if;
+  if (public.parent_child_learning_summary('00000000-0000-0000-0000-000000000099')->>'totalWeeks')::integer <> 20 then
+    raise exception 'REGRESSION: Student Library summary week count is incorrect';
+  end if;
+  if has_function_privilege('authenticated','public.worker_backfill_student_library(uuid,integer)','execute')
+    or has_function_privilege('anon','private.process_feedback_memory(uuid)','execute') then
+    raise exception 'REGRESSION: browser roles can execute Student Library mutation functions';
+  end if;
+  if has_table_privilege('authenticated','public.child_weekly_learning_snapshots','insert')
+    or has_table_privilege('authenticated','public.child_learning_evidence','update')
+    or has_table_privilege('authenticated','public.feedback_memory_processing','delete') then
+    raise exception 'REGRESSION: browser roles can mutate Student Library tables';
   end if;
 
   -- Clean up
