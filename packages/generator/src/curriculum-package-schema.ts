@@ -64,8 +64,42 @@ export const AdaptiveExtensionSchema = z.strictObject({
 
 export type AdaptiveExtension = z.infer<typeof AdaptiveExtensionSchema>
 
-// Canonical 2.2.0 Production Schema
-export const CurriculumPackageSchema = z.strictObject({
+export const GroundingSourceSchema = z.strictObject({
+  id: StableId,
+  url: z.url(),
+  title: Text,
+  publisher: Text,
+  publishedAt: z.iso.datetime().optional(),
+  accessedAt: z.iso.datetime(),
+})
+
+export const GroundingFactSchema = z.strictObject({
+  id: StableId,
+  text: Text,
+  sourceIds: z.array(StableId).min(1),
+  classification: z.enum(['fact', 'inference']),
+})
+
+export const GroundingClaimSchema = z.strictObject({
+  id: StableId,
+  factIds: z.array(StableId).min(1),
+  location: Text,
+  text: Text,
+})
+
+export const GroundingSchema = z.strictObject({
+  topic: Text,
+  knowledgeType: z.enum(['event', 'person', 'place', 'process', 'concept', 'comparison', 'other']),
+  temporalMode: z.enum(['evergreen', 'current']),
+  researchedAt: z.iso.datetime(),
+  sources: z.array(GroundingSourceSchema).min(1),
+  facts: z.array(GroundingFactSchema).min(1),
+  claims: z.array(GroundingClaimSchema).min(1),
+})
+
+// Legacy 2.2.0 production schema. Historical packages remain renderable but are
+// never upgraded by inventing grounding metadata.
+export const CurriculumPackageV22Schema = z.strictObject({
   metadata: z.strictObject({
     schemaVersion: z.literal('2.2.0'),
     jobId: StableId,
@@ -143,6 +177,17 @@ export const CurriculumPackageSchema = z.strictObject({
     criticFindings: z.array(z.strictObject({ dimension: StableId, severity: z.enum(['info', 'warning', 'critical']), finding: Text, resolution: Text.nullable() })),
   }),
 })
+
+// Canonical 2.3.0 Production Schema
+export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
+  metadata: CurriculumPackageV22Schema.shape.metadata.extend({
+    schemaVersion: z.literal('2.3.0'),
+  }),
+  grounding: GroundingSchema,
+})
+
+/** The one canonical schema used for all newly authored production packages. */
+export const CurriculumPackageSchema = CurriculumPackageV23Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -292,7 +337,9 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
-export type CurriculumPackage = z.infer<typeof CurriculumPackageSchema>
+export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
+export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
+export type CurriculumPackage = CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
 export type CurriculumQuestion = z.infer<typeof Question>

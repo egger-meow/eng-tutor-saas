@@ -215,6 +215,29 @@ export function auditCurriculumPackage(
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
+  if ('grounding' in pkg) {
+    const hasDensityException = pkg.qualityEvidence.criticalChecks.some(
+      (check) => check.id === 'grounding-density-exception' && check.passed && check.evidence.trim().length >= 20,
+    )
+    if (pkg.grounding.facts.length < 3 && !hasDensityException) {
+      add('semantic-critical', 'grounding-substance', 'critical', 'Grounded primary reading requires at least three concrete researched propositions or a specific passed grounding-density-exception check.')
+    }
+    if (pkg.grounding.claims.length < 3 && !hasDensityException) {
+      add('semantic-critical', 'grounding-coverage', 'critical', 'Grounding must bind at least three factual claims to actual primary-reading prose unless a specific density exception is justified.')
+    }
+    const claimedBlocks = new Set(pkg.grounding.claims.map((claim) => claim.location.split('.')[3]))
+    if (claimedBlocks.size < 2 && pkg.studentLesson.reading.blocks.length >= 2 && !hasDensityException) {
+      add('semantic-critical', 'grounding-coverage', 'critical', 'Grounded claims must inform more than one primary-reading block instead of appearing as a detachable fact label.')
+    }
+    if (pkg.grounding.temporalMode === 'current') {
+      const researchedAt = Date.parse(pkg.grounding.researchedAt)
+      const newestPublishedAt = Math.max(...pkg.grounding.sources.map((source) => Date.parse(source.publishedAt!)))
+      if (newestPublishedAt > researchedAt) {
+        add('semantic-critical', 'grounding-freshness', 'critical', 'Current grounding cannot cite a publication timestamp later than researchedAt.')
+      }
+    }
+  }
+
   if (pkg.studentLesson.opening.goalsZh.length < 2 || cjk(pkg.studentLesson.opening.howToUseZh) < 8) add('semantic-critical', 'self-study', 'critical', '開場沒有足夠的中文目標或使用說明。')
   if (pkg.studentLesson.instruction.some((section) => section.workedExamples.length < 2 || section.commonMistakes.length < 1)) add('semantic-critical', 'self-study', 'critical', '每個新概念都需要至少兩個 worked examples 與一個錯誤對照。')
   if (pkg.studentLesson.reading.blocks.length < 2 || passageWords < 120) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
@@ -413,4 +436,3 @@ if (process.argv[1]?.endsWith('audit-curriculum.ts')) {
     process.exit(1)
   })
 }
-

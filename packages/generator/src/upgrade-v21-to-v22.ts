@@ -1,4 +1,4 @@
-import type { CurriculumPackage, CurriculumPackageV21 } from './curriculum-package-schema.js'
+import type { CurriculumPackageV21, CurriculumPackageV22 } from './curriculum-package-schema.js'
 
 const LEGACY_GRAMMAR_MAP: Record<string, string> = {
   'grammar-do-does': 'g7-do-does-questions',
@@ -9,7 +9,7 @@ const LEGACY_GRAMMAR_MAP: Record<string, string> = {
   'lang-present-simple': 'g7-present-simple-verbs',
 }
 
-export function upgradeV21ToV22(pkgV21: CurriculumPackageV21 | any): CurriculumPackage {
+export function upgradeV21ToV22(pkgV21: CurriculumPackageV21 | any): CurriculumPackageV22 {
   const raw = typeof pkgV21 === 'object' && pkgV21 !== null ? JSON.parse(JSON.stringify(pkgV21)) : {}
 
   const trackingDeltaRaw = raw.trackingDelta || {}

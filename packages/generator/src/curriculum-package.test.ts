@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { auditCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumPackageV20, type CurriculumQuestion } from './index.js'
+import { auditCurriculumPackage, makeGroundedCurriculumPackage, validateCurriculumPackage, type CurriculumPackage, type CurriculumPackageV20, type CurriculumQuestion } from './index.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
 
@@ -198,5 +198,68 @@ describe('curriculum package v2', () => {
     }
     const res4 = validateCurriculumPackage(v22)
     expect(res4.success).toBe(false)
+  })
+})
+
+describe('curriculum package v2.3 grounding', () => {
+  const groundedPackage = (theme: 'basketball' | 'anime' | 'technology' = 'technology') => {
+    const v22 = upgradeV21ToV22(upgradeV20ToV21(validPackage()))
+    if (v22.metadata.schemaVersion !== '2.2.0') throw new Error('Expected a 2.2 fixture')
+    return makeGroundedCurriculumPackage(v22, theme)
+  }
+
+  it.each(['basketball', 'anime', 'technology'] as const)('accepts prose-bound %s research', (theme) => {
+    expect(validateCurriculumPackage(groundedPackage(theme)).success).toBe(true)
+  })
+
+  it('rejects a 2.3 package without real grounding', () => {
+    const value = groundedPackage() as unknown as Record<string, unknown>
+    delete value.grounding
+    expect(validateCurriculumPackage(value).success).toBe(false)
+  })
+
+  it.each([
+    ['unknown source', (value: ReturnType<typeof groundedPackage>) => { value.grounding.facts[0]!.sourceIds = ['source-missing'] }],
+    ['unknown fact', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.factIds = ['fact-missing'] }],
+    ['missing location', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.location = 'studentLesson.reading.blocks.99.text' }],
+    ['noncanonical location', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.location = 'parentSummary.focusZh' }],
+    ['text absent from prose', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.text = 'This sentence was not authored.' }],
+  ])('rejects a broken provenance chain: %s', (_, mutate) => {
+    const value = groundedPackage()
+    mutate(value)
+    expect(validateCurriculumPackage(value).success).toBe(false)
+  })
+
+  it('requires publication timestamps for every current source', () => {
+    const value = groundedPackage()
+    value.grounding.temporalMode = 'current'
+    expect(validateCurriculumPackage(value).success).toBe(false)
+    value.grounding.sources[0]!.publishedAt = '2026-08-23T00:00:00.000Z'
+    value.qualityEvidence.criticalChecks.push({ id: 'grounding-freshness', passed: true, evidence: 'Critic checked publication and research dates.' })
+    expect(validateCurriculumPackage(value).success).toBe(true)
+  })
+
+  it('rejects generic one-fact theming at the semantic quality gate', () => {
+    const value = groundedPackage('basketball')
+    value.grounding.facts = value.grounding.facts.slice(0, 1)
+    value.grounding.claims = value.grounding.claims.slice(0, 1)
+    const report = auditCurriculumPackage(value)
+    expect(report.passed).toBe(false)
+    expect(report.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ dimension: 'grounding-substance', severity: 'critical' }),
+      expect.objectContaining({ dimension: 'grounding-coverage', severity: 'critical' }),
+    ]))
+  })
+
+  it('rejects current research that cites a source published after research occurred', () => {
+    const value = groundedPackage('technology')
+    value.grounding.temporalMode = 'current'
+    value.grounding.sources[0]!.publishedAt = '2026-08-25T00:00:00.000Z'
+    value.qualityEvidence.criticalChecks.push({ id: 'grounding-freshness', passed: true, evidence: 'Critic checked publication and research dates.' })
+    const report = auditCurriculumPackage(value)
+    expect(report.passed).toBe(false)
+    expect(report.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ dimension: 'grounding-freshness', severity: 'critical' }),
+    ]))
   })
 })

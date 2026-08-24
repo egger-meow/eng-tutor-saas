@@ -41,6 +41,9 @@ export type { LessonValidationIssue, LessonValidationResult } from './validate-l
 export { syntheticWeekOne } from './fixtures/synthetic-week-1.js'
 export {
   CurriculumPackageSchema,
+  CurriculumPackageV23Schema,
+  CurriculumPackageV22Schema,
+  GroundingSchema,
   CurriculumPackageV21Schema,
   CurriculumPackageV20Schema,
   ReadingBlockSchema,
@@ -51,6 +54,8 @@ export {
 } from './curriculum-package-schema.js'
 export type {
   CurriculumPackage,
+  CurriculumPackageV23,
+  CurriculumPackageV22,
   CurriculumPackageV21,
   CurriculumPackageV20,
   CurriculumQuestion,
@@ -60,6 +65,8 @@ export type {
   AdaptiveExtensionPurpose,
   AdaptiveExtensionPlacement,
 } from './curriculum-package-schema.js'
+export { makeGroundedCurriculumPackage } from './fixtures/grounded-curriculum-packages.js'
+export type { GroundedFixtureTheme } from './fixtures/grounded-curriculum-packages.js'
 export { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 export { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
 export {

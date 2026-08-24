@@ -3,6 +3,7 @@ import {
   CurriculumPackageSchema,
   CurriculumPackageV20Schema,
   CurriculumPackageV21Schema,
+  CurriculumPackageV22Schema,
   type CurriculumPackage,
 } from './curriculum-package-schema.js'
 import {
@@ -174,6 +175,10 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   if (value.qualityEvidence.criticFindings.some((finding) => finding.severity === 'critical' && !finding.resolution))
     issues.push({ path: 'qualityEvidence.criticFindings', message: 'Unresolved critical critic finding' })
 
+  if ('grounding' in value) {
+    issues.push(...groundingRelationshipIssues(value))
+  }
+
   // Validate trackingDelta canonical IDs fail-closed
   if (value.trackingDelta) {
     if (Array.isArray(value.trackingDelta.exposedGrammarTargetIds)) {
@@ -196,6 +201,122 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
         }
       }
     }
+  }
+
+  return issues
+}
+
+const GROUNDED_READING_LOCATION = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail)$/u
+
+function groundingRelationshipIssues(
+  value: Extract<CurriculumPackage, { metadata: { schemaVersion: '2.3.0' } }>,
+): LessonValidationIssue[] {
+  const issues: LessonValidationIssue[] = []
+  const sourceIds = new Set<string>()
+  const factIds = new Set<string>()
+  const claimIds = new Set<string>()
+  const referencedSourceIds = new Set<string>()
+  const referencedFactIds = new Set<string>()
+
+  for (const source of value.grounding.sources) {
+    if (sourceIds.has(source.id)) {
+      issues.push({ path: 'grounding.sources', message: `Duplicate grounding source ID: ${source.id}` })
+    }
+    sourceIds.add(source.id)
+    if (value.grounding.temporalMode === 'current' && !source.publishedAt) {
+      issues.push({
+        path: `grounding.sources.${source.id}.publishedAt`,
+        message: 'Current grounding requires publishedAt for every source',
+      })
+    }
+  }
+
+  for (const fact of value.grounding.facts) {
+    if (factIds.has(fact.id)) {
+      issues.push({ path: 'grounding.facts', message: `Duplicate grounding fact ID: ${fact.id}` })
+    }
+    factIds.add(fact.id)
+    for (const sourceId of fact.sourceIds) {
+      referencedSourceIds.add(sourceId)
+      if (!sourceIds.has(sourceId)) {
+        issues.push({
+          path: `grounding.facts.${fact.id}.sourceIds`,
+          message: `Unknown grounding source ID: ${sourceId}`,
+        })
+      }
+    }
+  }
+
+  for (const claim of value.grounding.claims) {
+    if (claimIds.has(claim.id)) {
+      issues.push({ path: 'grounding.claims', message: `Duplicate grounding claim ID: ${claim.id}` })
+    }
+    claimIds.add(claim.id)
+    for (const factId of claim.factIds) {
+      referencedFactIds.add(factId)
+      if (!factIds.has(factId)) {
+        issues.push({
+          path: `grounding.claims.${claim.id}.factIds`,
+          message: `Unknown grounding fact ID: ${factId}`,
+        })
+      }
+    }
+
+    const match = GROUNDED_READING_LOCATION.exec(claim.location)
+    if (!match) {
+      issues.push({
+        path: `grounding.claims.${claim.id}.location`,
+        message: 'Claim location must resolve to an authored studentLesson.reading.blocks field',
+      })
+      continue
+    }
+
+    const blockIndex = Number(match[1])
+    const field = match[2]!
+    const block = value.studentLesson.reading.blocks[blockIndex] as unknown as Record<string, unknown> | undefined
+    const authoredProse = block?.[field]
+    if (typeof authoredProse !== 'string') {
+      issues.push({
+        path: `grounding.claims.${claim.id}.location`,
+        message: `Claim location does not resolve to a canonical string field: ${claim.location}`,
+      })
+    } else if (!authoredProse.includes(claim.text)) {
+      issues.push({
+        path: `grounding.claims.${claim.id}.text`,
+        message: 'Claim text must occur exactly in the canonical field identified by location',
+      })
+    }
+  }
+
+  for (const sourceId of sourceIds) {
+    if (!referencedSourceIds.has(sourceId)) {
+      issues.push({ path: 'grounding.sources', message: `Unused grounding source ID: ${sourceId}` })
+    }
+  }
+  for (const factId of factIds) {
+    if (!referencedFactIds.has(factId)) {
+      issues.push({ path: 'grounding.facts', message: `Unclaimed grounding fact ID: ${factId}` })
+    }
+  }
+
+  const passedCriticalChecks = new Set(
+    value.qualityEvidence.criticalChecks
+      .filter((check) => check.passed)
+      .map((check) => check.id),
+  )
+  for (const checkId of ['grounding-accuracy', 'grounding-copyright']) {
+    if (!passedCriticalChecks.has(checkId)) {
+      issues.push({
+        path: 'qualityEvidence.criticalChecks',
+        message: `Missing required passed grounding critical check: ${checkId}`,
+      })
+    }
+  }
+  if (value.grounding.temporalMode === 'current' && !passedCriticalChecks.has('grounding-freshness')) {
+    issues.push({
+      path: 'qualityEvidence.criticalChecks',
+      message: 'Current grounding requires a passed grounding-freshness critical check',
+    })
   }
 
   return issues
@@ -232,7 +353,12 @@ export function validateCurriculumPackage(input: unknown): CurriculumValidationR
     }
   }
 
-  const parsed = CurriculumPackageSchema.safeParse(normalized)
+  const normalizedVersion = normalized && typeof normalized === 'object' && !Array.isArray(normalized)
+    ? (normalized as Record<string, any>).metadata?.schemaVersion
+    : undefined
+  const parsed = normalizedVersion === '2.2.0'
+    ? CurriculumPackageV22Schema.safeParse(normalized)
+    : CurriculumPackageSchema.safeParse(normalized)
   if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
   const issues = relationshipIssues(parsed.data)
   return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage: parsed.data }
