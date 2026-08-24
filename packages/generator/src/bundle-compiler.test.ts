@@ -27,6 +27,11 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).toContain('studentLesson.reading.blocks.1.text')
     expect(freshBundle.content).toContain('temporalMode')
     expect(freshBundle.content).toContain('There is no N/A mode')
+    expect(freshBundle.content).not.toContain('Maintain `schemaVersion: "2.2.0"`')
+    expect(freshBundle.content).not.toContain('CurriculumPackageSchema` (2.2.0)')
+    expect(freshBundle.content).toContain('Preserve valid research and unaffected authored content')
+    expect(freshBundle.content).toContain('Re-research only when the rejection concerns grounding accuracy')
+    expect(freshBundle.content).toContain('Never transmit child names, child/job IDs')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {

@@ -131,7 +131,9 @@ export async function compileProductionBundle(
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
   const readPromptStage = async (fileName: string) => {
-    const base = await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8')
+    const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
+      .replaceAll('2.2.0', '2.3.0')
+      .replaceAll('2.4.0', '2.5.0')
     const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
     return `${base.trim()}\n\n---\n\n${groundingOverlay.trim()}\n`
   }

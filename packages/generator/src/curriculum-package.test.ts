@@ -224,6 +224,14 @@ describe('curriculum package v2.3 grounding', () => {
     ['missing location', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.location = 'studentLesson.reading.blocks.99.text' }],
     ['noncanonical location', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.location = 'parentSummary.focusZh' }],
     ['text absent from prose', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.text = 'This sentence was not authored.' }],
+    ['trivial claim span', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.text = 'Mina' }],
+    ['duplicate source reference', (value: ReturnType<typeof groundedPackage>) => { value.grounding.facts[0]!.sourceIds.push(value.grounding.facts[0]!.sourceIds[0]!) }],
+    ['duplicate fact reference', (value: ReturnType<typeof groundedPackage>) => { value.grounding.claims[0]!.factIds.push(value.grounding.claims[0]!.factIds[0]!) }],
+    ['duplicate fact proposition', (value: ReturnType<typeof groundedPackage>) => { value.grounding.facts[1]!.text = value.grounding.facts[0]!.text }],
+    ['duplicate prose binding', (value: ReturnType<typeof groundedPackage>) => {
+      value.grounding.claims[1]!.location = value.grounding.claims[0]!.location
+      value.grounding.claims[1]!.text = value.grounding.claims[0]!.text
+    }],
   ])('rejects a broken provenance chain: %s', (_, mutate) => {
     const value = groundedPackage()
     mutate(value)
@@ -248,6 +256,22 @@ describe('curriculum package v2.3 grounding', () => {
     expect(report.findings).toEqual(expect.arrayContaining([
       expect.objectContaining({ dimension: 'grounding-substance', severity: 'critical' }),
       expect.objectContaining({ dimension: 'grounding-coverage', severity: 'critical' }),
+    ]))
+  })
+
+  it('does not allow an article to self-declare a density exception', () => {
+    const value = groundedPackage('anime')
+    value.grounding.facts = value.grounding.facts.slice(0, 2)
+    value.grounding.claims = value.grounding.claims.slice(0, 2)
+    value.qualityEvidence.criticalChecks.push({
+      id: 'grounding-density-exception',
+      passed: true,
+      evidence: 'This long self-declared explanation cannot waive substance for a normal article reading genre.',
+    })
+    const report = auditCurriculumPackage(value)
+    expect(report.passed).toBe(false)
+    expect(report.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({ dimension: 'grounding-substance', severity: 'critical' }),
     ]))
   })
 

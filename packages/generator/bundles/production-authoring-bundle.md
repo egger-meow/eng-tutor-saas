@@ -563,9 +563,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.4.0)
+# Prompt 01: Planning (v2.5.0)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
 
 ---
 
@@ -678,7 +678,7 @@ Include 2–4 previous-week vocabulary items and prior grammar patterns in `revi
 
 ---
 
-## 6. Learning Plan Output Format (Schema 2.2.0)
+## 6. Learning Plan Output Format (Schema 2.3.0)
 
 Output a JSON object matching `learningPlan`:
 ```json
@@ -758,13 +758,13 @@ Prefer official/primary sources and reputable news, science, educational, or ref
 This contract is executor-neutral. A future Responses API `web_search` adapter may supply research results, but it must emit the same canonical grounding fields and must never place provider response shapes in the curriculum package.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.4.0)
+# Prompt 02: Material Authoring (v2.5.0)
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
 
 ---
 
-## 1. Schema 2.2.0 Multi-Genre Reading Blocks
+## 1. Schema 2.3.0 Multi-Genre Reading Blocks
 
 The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a `paragraphs` array.
 
@@ -956,7 +956,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 
 ---
 
-## 7. trackingDelta: Exposure Only (Schema 2.2.0)
+## 7. trackingDelta: Exposure Only (Schema 2.3.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
 The first `exposedGrammarTargetIds` entry is primary: normally new and grade-appropriate. Prior grammar belongs in retrieval/application unless feedback, failure evidence, or prerequisite repair justifies repetition.
@@ -1004,7 +1004,7 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 ## 10. Output Contract (Strict JSON Only)
 
-Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
+Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.3.0).
 
 ---
 
@@ -1041,9 +1041,9 @@ Grounding metadata is internal. Do not render engineering citations into Student
 Before output, add passed `qualityEvidence.criticalChecks` entries for `grounding-accuracy` and `grounding-copyright`; current packages also require `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.4.0)
+# Prompt 03: Critic (v2.5.0)
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
 
 ---
 
@@ -1132,9 +1132,9 @@ Mark critical when any of these occur:
 For `current`, inspect `publishedAt` and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.4.0)
+# Prompt 04: Repair (v2.5.0)
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.2.0, Prompt Version 2.4.0).
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
 
 ---
 
@@ -1142,7 +1142,7 @@ You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curricul
 
 When fixing validation or critic findings in a curriculum package:
 1. **Preserve Valid Educational Content**: Only modify the specific fields flagged in validation `issues` or critic `findings`.
-2. **Schema 2.2.0 Invariants**: Maintain `schemaVersion: "2.2.0"`, typed `reading.blocks: ReadingBlock[]`, and optional typed `studentLesson.adaptiveExtension` (if present).
+2. **Schema 2.3.0 Invariants**: Maintain `schemaVersion: "2.3.0"`, typed `reading.blocks: ReadingBlock[]`, and optional typed `studentLesson.adaptiveExtension` (if present).
 3. **Pedagogical Repair**:
    - For silly distractors, supply plausible student misconceptions (`partial evidence`, `reversed relationship`).
    - For circular explanations, add textual evidence and `likelyMisconceptionZh`.
@@ -1158,7 +1158,7 @@ When fixing validation or critic findings in a curriculum package:
 
 ## 2. Output Contract
 
-Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.2.0).
+Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.3.0).
 
 ---
 

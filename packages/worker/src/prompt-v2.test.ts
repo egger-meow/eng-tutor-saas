@@ -13,5 +13,7 @@ describe('v2 prompt bundle', () => {
     expect(bundle).toContain('Curriculum Schema 2.3.0')
     expect(bundle).toContain('There is no N/A mode')
     expect(bundle).toContain('generalized public topic terms only')
+    expect(bundle).not.toContain('Maintain `schemaVersion: "2.2.0"`')
+    expect(bundle).not.toContain('CurriculumPackageSchema` (2.2.0)')
   })
 })

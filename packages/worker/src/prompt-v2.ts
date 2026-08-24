@@ -8,7 +8,7 @@ const promptFiles = ['01-plan.md', '02-author.md', '03-critic.md', '04-repair.md
 export async function buildCurriculumPromptBundle(context: GenerationContext): Promise<string> {
   const prompts = await Promise.all(promptFiles.map(async (file) => ({
     file,
-    content: `${await readFile(new URL(file, basePromptRoot), 'utf8')}\n\n---\n\n${await readFile(new URL(file, groundingPromptRoot), 'utf8')}`,
+    content: `${(await readFile(new URL(file, basePromptRoot), 'utf8')).replaceAll('2.2.0', '2.3.0').replaceAll('2.4.0', '2.5.0')}\n\n---\n\n${await readFile(new URL(file, groundingPromptRoot), 'utf8')}`,
   })))
   return [
     '# 紙屬英文 Curriculum Package 2.3.0 · Prompt 2.5.0 · Production Authoring bundle',

@@ -216,13 +216,14 @@ export function auditCurriculumPackage(
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
   if ('grounding' in pkg) {
-    const hasDensityException = pkg.qualityEvidence.criticalChecks.some(
-      (check) => check.id === 'grounding-density-exception' && check.passed && check.evidence.trim().length >= 20,
+    const densityExceptionGenres = new Set(['notice', 'schedule', 'instructions'])
+    const hasDensityException = densityExceptionGenres.has(pkg.studentLesson.reading.genre) && pkg.qualityEvidence.criticalChecks.some(
+      (check) => check.id === 'grounding-density-exception' && check.passed && check.evidence.trim().length >= 60,
     )
-    if (pkg.grounding.facts.length < 3 && !hasDensityException) {
+    if (pkg.grounding.facts.length < 2 || (pkg.grounding.facts.length < 3 && !hasDensityException)) {
       add('semantic-critical', 'grounding-substance', 'critical', 'Grounded primary reading requires at least three concrete researched propositions or a specific passed grounding-density-exception check.')
     }
-    if (pkg.grounding.claims.length < 3 && !hasDensityException) {
+    if (pkg.grounding.claims.length < 2 || (pkg.grounding.claims.length < 3 && !hasDensityException)) {
       add('semantic-critical', 'grounding-coverage', 'critical', 'Grounding must bind at least three factual claims to actual primary-reading prose unless a specific density exception is justified.')
     }
     const claimedBlocks = new Set(pkg.grounding.claims.map((claim) => claim.location.split('.')[3]))

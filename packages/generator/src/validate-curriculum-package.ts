@@ -217,6 +217,8 @@ function groundingRelationshipIssues(
   const claimIds = new Set<string>()
   const referencedSourceIds = new Set<string>()
   const referencedFactIds = new Set<string>()
+  const normalizedFactTexts = new Set<string>()
+  const claimBindings = new Set<string>()
 
   for (const source of value.grounding.sources) {
     if (sourceIds.has(source.id)) {
@@ -236,6 +238,14 @@ function groundingRelationshipIssues(
       issues.push({ path: 'grounding.facts', message: `Duplicate grounding fact ID: ${fact.id}` })
     }
     factIds.add(fact.id)
+    const normalizedFactText = fact.text.trim().replace(/\s+/gu, ' ').toLocaleLowerCase()
+    if (normalizedFactTexts.has(normalizedFactText)) {
+      issues.push({ path: 'grounding.facts', message: `Duplicate grounding fact proposition: ${fact.id}` })
+    }
+    normalizedFactTexts.add(normalizedFactText)
+    if (new Set(fact.sourceIds).size !== fact.sourceIds.length) {
+      issues.push({ path: `grounding.facts.${fact.id}.sourceIds`, message: 'Grounding sourceIds must be unique within a fact' })
+    }
     for (const sourceId of fact.sourceIds) {
       referencedSourceIds.add(sourceId)
       if (!sourceIds.has(sourceId)) {
@@ -252,6 +262,22 @@ function groundingRelationshipIssues(
       issues.push({ path: 'grounding.claims', message: `Duplicate grounding claim ID: ${claim.id}` })
     }
     claimIds.add(claim.id)
+    if (new Set(claim.factIds).size !== claim.factIds.length) {
+      issues.push({ path: `grounding.claims.${claim.id}.factIds`, message: 'Grounding factIds must be unique within a claim' })
+    }
+    const claimTokens = claim.text.match(/[\p{L}\p{N}]+/gu) ?? []
+    if (claim.text.length < 20 || claimTokens.length < 4) {
+      issues.push({
+        path: `grounding.claims.${claim.id}.text`,
+        message: 'Grounding claim text must be a non-trivial authored proposition (at least 20 characters and four word tokens)',
+      })
+    }
+    const normalizedClaimText = claim.text.trim().replace(/\s+/gu, ' ').toLocaleLowerCase()
+    const claimBinding = `${claim.location}\u0000${normalizedClaimText}`
+    if (claimBindings.has(claimBinding)) {
+      issues.push({ path: 'grounding.claims', message: `Duplicate grounding claim binding: ${claim.id}` })
+    }
+    claimBindings.add(claimBinding)
     for (const factId of claim.factIds) {
       referencedFactIds.add(factId)
       if (!factIds.has(factId)) {
