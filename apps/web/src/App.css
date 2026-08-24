@@ -290,7 +290,6 @@
   .week-sheet, .week-sheet.next-week { transform: none; }
   .flow-line b {
     transform: rotate(90deg);
-    animation-name: directional-nudge-down;
   }
   .learning-sequence { grid-template-columns: 1fr; }
   .sample-decisions { grid-template-columns: 1fr; }
@@ -659,6 +658,12 @@
 
 .week-flow .flow-line b {
   display: block;
+}
+
+@media (max-width: 48rem) {
+  .week-flow .flow-line b {
+    animation-name: directional-nudge-down;
+  }
 }
 
 .learning-sequence li span,
