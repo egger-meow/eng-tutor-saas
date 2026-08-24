@@ -467,6 +467,21 @@ export type CompleteCurriculumInput = {
   render?: (pkg: CurriculumPackage) => Promise<CurriculumPdfBytes>
   inspect?: (pkg: CurriculumPackage, pair: CurriculumPdfBytes) => Promise<CurriculumPdfPairInspection>
   recordJobFailure?: boolean
+  allowSoftQualityOverride?: boolean
+}
+
+export const SOFT_QUALITY_OVERRIDE_DIMENSIONS = new Set([
+  'cognitive-load',
+  'lexical-unit-mix',
+  'evidence-plan',
+])
+
+export function isSoftQualityOverrideEligible(error: unknown): error is CurriculumQualityError {
+  return error instanceof CurriculumQualityError
+    && error.evidence.findings.length > 0
+    && error.evidence.findings.every((finding) =>
+      finding.source === 'audit' && SOFT_QUALITY_OVERRIDE_DIMENSIONS.has(finding.dimension),
+    )
 }
 
 export type CurriculumFailureEvidence = {
@@ -525,10 +540,11 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     const audit = auditCurriculumPackage(pkg)
     if (!audit.passed) {
       const findings = audit.findings.filter((finding) => finding.severity === 'critical')
-      throw new CurriculumQualityError({
+      const qualityError = new CurriculumQualityError({
         failureType: 'QUALITY_REJECTED',
         findings: findings.map((finding) => ({ source: 'audit', dimension: finding.dimension, message: finding.message })),
       })
+      if (!input.allowSoftQualityOverride || !isSoftQualityOverrideEligible(qualityError)) throw qualityError
     }
 
     const inspect = input.inspect ?? inspectCurriculumPdfPair

@@ -2734,6 +2734,8 @@ Future operator flow should allow:
 
 During early beta, manual quality inspection is acceptable.
 
+Quality-rejected authoring retries automatically up to five attempts. After attempt five, the Finisher may deliver a valid and renderable candidate only when every remaining rejection belongs to the explicit code-reviewed soft pedagogical allowlist. The rejected submission and evidence remain immutable; the delivery is recorded separately as `delivered_with_quality_override` with an override reason and is never represented as passed or completed. Invalid schema, missing required content, progression-integrity failures, broken rendering, storage failures, PII or safety violations, grounding/provenance failures, and corrupted artifacts are never bypassable.
+
 ---
 
 # 127. Completed Job Metadata
@@ -2940,6 +2942,8 @@ Examples:
 * standard active subscription.
 
 The generator should not infer entitlement merely from the existence of a `students` row.
+
+An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, and public capacity accounting only. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics and founding quota.
 
 ---
 
@@ -3567,6 +3571,8 @@ A polished admin app is not required initially.
 
 Supabase Dashboard plus targeted internal tooling is acceptable.
 
+The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is derived from the current job and latest authoring attempt only. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand. The current engine manifest is declared by production repository code and compared with persisted job, submission, and material provenance; mismatches must display expected and actual versions as `VERSION DRIFT`.
+
 ---
 
 # 173. Manual Recovery
@@ -4042,6 +4048,10 @@ The operator can:
 * retry safely;
 * avoid duplicate material;
 * inspect version metadata.
+* distinguish the current pipeline stage from historical attempts;
+* inspect exact Finisher rejection rules and immutable evidence;
+* identify any production engine-version drift;
+* identify `delivered_with_quality_override` without treating it as a quality pass.
 
 ---
 

@@ -14,6 +14,15 @@ export const CURRENT_PROMPT_VERSION = '2.5.0'
 export const CURRENT_ERA_TAG = 'engine_v1' as const
 export const CURRENT_QUALITY_PROFILE_VERSION = '1.1.0'
 
+export const CURRENT_ENGINE_MANIFEST = {
+  engine: CURRENT_ENGINE_VERSION,
+  schema: CURRENT_SCHEMA_VERSION,
+  prompt: CURRENT_PROMPT_VERSION,
+  qualityProfile: CURRENT_QUALITY_PROFILE_VERSION,
+  worker: '1.1.0',
+  pdfRenderer: '1.0.0',
+} as const
+
 export type EraTag = typeof CURRENT_ERA_TAG | 'historical'
 
 /**

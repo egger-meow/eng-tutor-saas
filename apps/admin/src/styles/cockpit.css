@@ -573,3 +573,48 @@
   margin-top: 4px;
   user-select: all;
 }
+.operations-cockpit { display: grid; gap: 14px; }
+.capacity-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--border-subtle); }
+.capacity-strip > div { background: var(--bg-card); padding: 14px 18px; display: flex; align-items: baseline; justify-content: space-between; }
+.capacity-strip span { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.capacity-strip strong { font-size: 22px; }
+.engine-inspector { border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-card); }
+.engine-inspector.drift { border-color: var(--status-rose); }
+.engine-inspector > button { width: 100%; border: 0; background: transparent; color: var(--text-main); padding: 10px 14px; display: flex; gap: 14px; align-items: center; text-align: left; cursor: pointer; }
+.engine-inspector > button strong { margin-left: auto; color: var(--status-emerald); font-size: 11px; letter-spacing: .06em; }
+.engine-inspector.drift > button strong { color: var(--status-rose); }
+.engine-inspector > button small { color: var(--text-muted); }
+.engine-manifest { border-top: 1px solid var(--border-subtle); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 12px 14px; }
+.engine-manifest > div { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.engine-manifest .drift-row { grid-column: 1 / -1; padding-top: 8px; border-top: 1px solid var(--border-subtle); color: var(--status-rose); }
+.pipeline-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.pipeline-column { padding: 0; overflow: hidden; }
+.pipeline-title { padding: 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+.pipeline-title span { display: block; font-weight: 800; letter-spacing: .04em; }
+.pipeline-title small { display: block; margin-top: 4px; color: var(--text-muted); font-weight: 400; }
+.pipeline-title b { font-size: 26px; }
+.pipeline-list { display: grid; gap: 1px; background: var(--border-subtle); max-height: 62vh; overflow: auto; }
+.pipeline-job { border: 0; background: var(--bg-card); color: var(--text-main); padding: 12px 14px; text-align: left; cursor: pointer; }
+.pipeline-job:hover { background: var(--bg-elevated); }
+.pipeline-job-head, .pipeline-job-meta { display: flex; justify-content: space-between; gap: 8px; }
+.pipeline-job-head span, .pipeline-job-meta { color: var(--text-muted); font-size: 11px; }
+.pipeline-job-status { margin: 7px 0; font-size: 12px; font-weight: 700; }
+.pipeline-job-meta { flex-wrap: wrap; }
+.pipeline-job-meta time { width: 100%; }
+.pipeline-empty { padding: 28px 16px; text-align: center; color: var(--text-muted); background: var(--bg-card); }
+@media (max-width: 1000px) { .pipeline-grid { grid-template-columns: 1fr; } .engine-manifest { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .capacity-strip { grid-template-columns: 1fr; } }
+.quality-rule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0; }
+.quality-rule-card { color: var(--text-main); text-align: left; cursor: pointer; }
+.quality-rule-card p, .quality-rule-card small { color: var(--text-muted); }
+.technical-failures summary { cursor: pointer; font-weight: 700; }
+.technical-row { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; padding: 10px 0; border-top: 1px solid var(--border-subtle); }
+.technical-row small { grid-column: 1 / -1; color: var(--text-muted); }
+.evidence-modal { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: grid; place-items: center; z-index: 100; padding: 24px; }
+.evidence-dialog { width: min(900px, 100%); max-height: 86vh; overflow: auto; }
+.evidence-example { border-top: 1px solid var(--border-subtle); padding: 14px 0; }
+.feedback-filters { display: flex; gap: 8px; }
+.feedback-message-list article { padding: 14px 0; border-top: 1px solid var(--border-subtle); }
+.feedback-message-list article > div { display: flex; justify-content: space-between; align-items: center; }
+.feedback-message-list time { color: var(--text-muted); font-size: 11px; }
+.feedback-message-list p { margin-bottom: 0; white-space: pre-wrap; }

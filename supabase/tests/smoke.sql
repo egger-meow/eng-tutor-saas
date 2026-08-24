@@ -1950,6 +1950,21 @@ begin
     raise exception 'REGRESSION: scoped delivery internals are exposed to browser roles';
   end if;
 
+  if (select column_default from information_schema.columns where table_schema='public' and table_name='generation_jobs' and column_name='max_attempts') <> '5' then
+    raise exception 'REGRESSION: generation jobs do not default to five authoring attempts';
+  end if;
+  if not public.admin_set_internal_test_entitlement('00000000-0000-0000-0000-000000000099', true) then
+    raise exception 'REGRESSION: internal test entitlement could not be enabled';
+  end if;
+  if not exists (select 1 from public.children where id='00000000-0000-0000-0000-000000000099' and is_internal_test)
+    or not exists (select 1 from public.subscriptions where child_id='00000000-0000-0000-0000-000000000099' and provider='internal_test' and status='trialing' and founding_status='none') then
+    raise exception 'REGRESSION: internal test entitlement did not bypass billing/founding through explicit state';
+  end if;
+  if has_function_privilege('authenticated','public.admin_set_internal_test_entitlement(uuid,boolean)','execute')
+    or has_table_privilege('authenticated','public.material_quality_overrides','select') then
+    raise exception 'REGRESSION: internal entitlement or quality overrides are exposed to browser roles';
+  end if;
+
   -- Clean up
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;

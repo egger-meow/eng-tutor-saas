@@ -7,6 +7,7 @@ import {
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
   CURRENT_PROMPT_VERSION,
+  CURRENT_ENGINE_MANIFEST,
   formatEngineVersion,
   type DataSourceStatus,
   type OperationsOverview,
@@ -1078,16 +1079,17 @@ export class AdminService {
       enrollmentData,
       submissionsData,
     ] = await Promise.all([
-      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active'), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active, is_internal_test'), dataSources),
       this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
       this.safeQuery<any[]>('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery<any[]>('materials', () => client.from('materials').select('id, child_id, material_week, revision, rule_version, model_name, student_pdf_path, parent_answer_pdf_path, created_at').order('created_at', { ascending: false }).limit(20), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select('id, child_id, material_week, revision, rule_version, prompt_version, generator_version, model_name, student_pdf_path, parent_answer_pdf_path, release_at, released_at, created_at').order('created_at', { ascending: false }).limit(200), dataSources),
       this.safeQuery<any>('enrollment_settings', () => client.from('enrollment_settings').select('*').limit(1).maybeSingle(), dataSources),
       this.queryCurriculumSubmissions(undefined, 200, dataSources),
     ])
 
     const children = (childrenData as any[]) || []
-    const activeChildren = children.filter((c) => c.is_active)
+    const activeChildren = children.filter((c) => c.is_active && !c.is_internal_test)
+    const internalTestChildIds = new Set(children.filter((c) => c.is_internal_test).map((c) => c.id))
     const subscriptions = (subsData as any[]) || []
 
     let paidActiveCount = 0
@@ -1100,6 +1102,7 @@ export class AdminService {
     let foundingEligibleCount = 0
 
     for (const sub of subscriptions) {
+      if (internalTestChildIds.has(sub.child_id)) continue
       if (sub.status === 'active') {
         paidActiveCount++
         if (sub.billing_interval === 'year' || (sub.plan_code && sub.plan_code.includes('annual'))) {
@@ -1125,6 +1128,8 @@ export class AdminService {
     const jobs = (jobsData as any[]) || []
     const materials = (materialsData as any[]) || []
     const submissions = (submissionsData as any[]) || []
+    const overrideResult = await client.from('material_quality_overrides').select('*').order('created_at', { ascending: false }).limit(200)
+    const overrides = overrideResult.error ? [] : (overrideResult.data ?? [])
 
     const now = new Date().toISOString()
     const stuckJobs: OperationsOverview['stuckJobs'] = []
@@ -1256,6 +1261,73 @@ export class AdminService {
       status: capacityStatus as any,
       foundingCount: foundingRedeemedCount,
       foundingLimit,
+      waitingCount: enrollment?.waiting_count ?? 0,
+    }
+
+    const latestSubmissionByJob = new Map<string, any>()
+    for (const submission of submissions) {
+      const previous = latestSubmissionByJob.get(submission.job_id)
+      if (!previous || Number(submission.authoring_attempt) > Number(previous.authoring_attempt)) {
+        latestSubmissionByJob.set(submission.job_id, submission)
+      }
+    }
+    const materialById = new Map(materials.map((material: any) => [material.id, material]))
+    const overrideByJob = new Map(overrides.map((override: any) => [override.job_id, override]))
+    const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [] }
+    for (const job of jobs) {
+      if (job.status === 'canceled') continue
+      const latest = latestSubmissionByJob.get(job.id)
+      const material: any = materialById.get(job.material_id)
+      const qualityOverride = overrideByJob.get(job.id)
+      const attempt = Number(job.attempt_count) || 0
+      const row = {
+        jobId: job.id,
+        childId: job.child_id,
+        childPseudonym: this.maskName(childMap.get(job.child_id), job.child_id),
+        materialWeek: job.material_week,
+        attemptNumber: latest ? Number(latest.authoring_attempt) : attempt,
+        maxAttempts: Number(job.max_attempts) || 5,
+        retryState: (attempt >= (Number(job.max_attempts) || 5) ? 'exhausted' : attempt > 0 ? (job.status === 'pending' ? 'retry_waiting' : 'retry_in_progress') : 'first_attempt') as any,
+        createdAt: job.created_at,
+        updatedAt: latest?.processed_at || latest?.submitted_at || job.completed_at || job.started_at || job.created_at,
+        relevantTimestamp: latest?.processed_at || latest?.submitted_at || job.generation_due_at || job.scheduled_for || null,
+        status: job.status,
+      }
+      // Current job state wins. A historical rejection can never pull a retrying job into FINISHER DONE.
+      if (job.status === 'pending') {
+        row.status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
+        pipeline.readyToClaim.push(row)
+      } else if (latest && ['pending', 'processing'].includes(latest.status)) {
+        row.status = latest.status === 'processing' ? 'FINISHER PROCESSING' : 'AWAITING FINISHER'
+        pipeline.awaitingFinisher.push(row)
+      } else if (latest && ['completed', 'quality_rejected', 'technical_failed'].includes(latest.status)) {
+        row.status = qualityOverride
+          ? 'DELIVERED WITH QUALITY OVERRIDE'
+          : material?.released_at && material.released_at <= now
+          ? 'RELEASED'
+          : material?.release_at
+          ? 'AWAITING RELEASE'
+          : latest.status === 'completed'
+          ? 'COMPLETED'
+          : latest.status.replaceAll('_', ' ').toUpperCase()
+        pipeline.finisherDone.push(row)
+      }
+    }
+    const expected = { ...CURRENT_ENGINE_MANIFEST } as Record<string, string>
+    const drift: OperationsOverview['engineInspector']['drift'] = []
+    const compare = (source: string, id: string, component: string, actual: unknown) => {
+      const expectedVersion = expected[component]
+      const observed = typeof actual === 'string' && actual.length > 0 ? actual : null
+      if (expectedVersion && observed !== expectedVersion) drift.push({ source, id, component, expected: expectedVersion, actual: observed })
+    }
+    for (const submission of latestSubmissionByJob.values()) {
+      compare('submission', submission.job_id, 'engine', submission.engine_version ?? submission.canonical_source?.metadata?.engineVersion)
+      compare('submission', submission.job_id, 'schema', submission.schema_version ?? submission.canonical_source?.metadata?.schemaVersion)
+      compare('submission', submission.job_id, 'prompt', submission.prompt_version ?? submission.canonical_source?.metadata?.promptVersion)
+    }
+    for (const material of materials.slice(0, 50)) {
+      compare('material', material.id, 'prompt', material.prompt_version)
+      compare('material', material.id, 'schema', material.generator_version)
     }
 
     return {
@@ -1311,6 +1383,8 @@ export class AdminService {
       recentDeliveries,
       stuckJobs: stuckJobs.slice(0, 10),
       anomalies,
+      pipeline,
+      engineInspector: { expected, aligned: drift.length === 0, drift },
     }
   }
 
@@ -1437,6 +1511,12 @@ export class AdminService {
           { name: 'Cancellation Survey Reason Field', status: 'pending', reason: 'Detailed cancellation survey table pending database migration' },
         ],
       },
+      messages: feedbackItems.map((item) => ({
+        id: item.id,
+        category: item.category in categoryCounts ? item.category : 'other',
+        message: this.sanitizePiiText(item.message, knownNames),
+        createdAt: item.created_at,
+      })),
     }
   }
 
@@ -1750,7 +1830,10 @@ export class AdminService {
       engineVersion?: string | null
     }> = {}
 
-    const qualityRules: Record<string, { count: number; category: string; description: string; sampleFinding: string; era: EraTag; engineVersion?: string | null }> = {}
+    const qualityRules: Record<string, {
+      count: number; category: string; description: string; sampleFinding: string; era: EraTag; engineVersion?: string | null
+      children: Set<string>; attempts: Set<number>; recentExamples: FailureIntelligence['qualityRuleViolations'][number]['recentExamples']
+    }> = {}
     const dailyCounts: Record<string, { total: number; qualityRejected: number; technicalFailed: number; currentCount: number; historicalCount: number }> = {}
     const recentFailuresList: FailureIntelligence['recentFailures'] = []
 
@@ -1807,9 +1890,12 @@ export class AdminService {
             description: msg,
             sampleFinding: msg,
             era: jobEra,
+            children: new Set(), attempts: new Set(), recentExamples: [],
           }
         }
         qualityRules[ruleName].count++
+        if (job.child_id) qualityRules[ruleName].children.add(job.child_id)
+        qualityRules[ruleName].attempts.add(Number(job.attempt_count) || 0)
       }
 
       recentFailuresList.push({
@@ -1876,7 +1962,7 @@ export class AdminService {
         const evidence = sub.failure_evidence as any
         const findings = evidence.findings || evidence.auditFindings || []
         for (const finding of findings) {
-          const ruleName = finding.rule || finding.code || 'Pedagogical Rubric'
+          const ruleName = finding.rule || finding.code || finding.dimension || 'Pedagogical Rubric'
           if (!qualityRules[ruleName]) {
             qualityRules[ruleName] = {
               count: 0,
@@ -1884,9 +1970,23 @@ export class AdminService {
               description: finding.description || finding.message || ruleName,
               sampleFinding: finding.message || JSON.stringify(finding),
               era: subEra,
+              children: new Set(), attempts: new Set(), recentExamples: [],
             }
           }
           qualityRules[ruleName].count++
+          qualityRules[ruleName].children.add(sub.child_id || sub.job_id)
+          qualityRules[ruleName].attempts.add(Number(sub.authoring_attempt) || 0)
+          if (qualityRules[ruleName].recentExamples.length < 5) {
+            qualityRules[ruleName].recentExamples.push({
+              jobId: sub.job_id,
+              childPseudonym: sub.child_id ? this.maskName(childMap.get(sub.child_id), sub.child_id) : `Job #${sub.job_id.slice(0, 6)}`,
+              materialWeek: sub.material_week || 'Week Cycle',
+              attempt: Number(sub.authoring_attempt) || 0,
+              timestamp: sub.processed_at || sub.submitted_at,
+              message: finding.message || finding.description || ruleName,
+              evidence: sub.failure_evidence,
+            })
+          }
         }
       }
 
@@ -1958,6 +2058,9 @@ export class AdminService {
       sampleFinding: data.sampleFinding,
       era: data.era,
       engineVersion: data.engineVersion,
+      affectedChildrenCount: data.children.size,
+      attempts: [...data.attempts].sort((a, b) => a - b),
+      recentExamples: data.recentExamples,
     })).sort((a, b) => b.count - a.count)
 
     const dailyTrend: FailureIntelligence['dailyTrend'] = Object.entries(dailyCounts)

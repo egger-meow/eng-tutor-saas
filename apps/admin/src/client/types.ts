@@ -6,6 +6,7 @@ export {
   CURRENT_PROMPT_VERSION,
   CURRENT_ERA_TAG,
   CURRENT_QUALITY_PROFILE_VERSION,
+  CURRENT_ENGINE_MANIFEST,
   formatEngineEraLabel,
   formatEngineVersion,
 } from '@paper-english/generator/engine-version'
@@ -235,6 +236,30 @@ export interface OperationsOverview {
     stuckReason: string
   }>
   anomalies: string[]
+  pipeline: {
+    readyToClaim: PipelineJobRow[]
+    awaitingFinisher: PipelineJobRow[]
+    finisherDone: PipelineJobRow[]
+  }
+  engineInspector: {
+    expected: Record<string, string>
+    aligned: boolean
+    drift: Array<{ source: string; id: string; component: string; expected: string; actual: string | null }>
+  }
+}
+
+export interface PipelineJobRow {
+  jobId: string
+  childId: string
+  childPseudonym: string
+  materialWeek: string
+  attemptNumber: number
+  maxAttempts: number
+  retryState: 'first_attempt' | 'retry_waiting' | 'retry_in_progress' | 'exhausted'
+  createdAt: string
+  updatedAt: string
+  relevantTimestamp: string | null
+  status: string
 }
 
 export interface FailureIntelligence {
@@ -297,6 +322,17 @@ export interface FailureIntelligence {
     sampleFinding: string
     era: EraTag
     engineVersion?: string | null
+    affectedChildrenCount: number
+    attempts: number[]
+    recentExamples: Array<{
+      jobId: string
+      childPseudonym: string
+      materialWeek: string
+      attempt: number
+      timestamp: string
+      message: string
+      evidence: Record<string, unknown>
+    }>
   }>
   dailyTrend: Array<{
     date: string
@@ -399,6 +435,12 @@ export interface ProductFeedbackIntelligence {
     collectedSources: Array<{ name: string; status: 'active'; description: string }>
     futureInstrumentationNeeded: Array<{ name: string; status: 'pending'; reason: string }>
   }
+  messages: Array<{
+    id: string
+    category: 'bug' | 'flow' | 'materials' | 'other'
+    message: string
+    createdAt: string
+  }>
 }
 
 export interface LifecycleEvent {

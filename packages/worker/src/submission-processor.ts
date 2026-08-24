@@ -1,4 +1,4 @@
-import { CurriculumQualityError, completeCurriculumJob, loadGenerationContext, type CurriculumFailureEvidence, type WorkerClient } from './pipeline.js'
+import { CurriculumQualityError, completeCurriculumJob, isSoftQualityOverrideEligible, loadGenerationContext, type CurriculumFailureEvidence, type WorkerClient } from './pipeline.js'
 
 export type CurriculumSubmission = {
   job_id: string
@@ -9,7 +9,7 @@ export type CurriculumSubmission = {
 
 export type CurriculumSubmissionResult = {
   jobId: string
-  status: 'completed' | 'quality_rejected' | 'technical_failed'
+  status: 'completed' | 'quality_rejected' | 'technical_failed' | 'delivered_with_quality_override'
   materialId?: string
   errorCode?: string
 }
@@ -66,8 +66,39 @@ export async function processCurriculumSubmissions(
       if (!finished) throw new Error('curriculum submission lease was lost before completion was recorded')
       results.push({ jobId: submission.job_id, status: 'completed', materialId })
     } catch (error) {
-      const failure = classifyFailure(error)
-      const message = error instanceof Error ? error.message : String(error)
+      let failure = classifyFailure(error)
+      let message = error instanceof Error ? error.message : String(error)
+      if (submission.authoring_attempt >= 5 && isSoftQualityOverrideEligible(error)) {
+        try {
+          const context = await loadGenerationContext(client, submission.job_id, submission.generation_worker_id)
+          const materialId = await completeCurriculumJob({
+            client,
+            workerId: submission.generation_worker_id,
+            context,
+            curriculumPackage: submission.canonical_source,
+            recordJobFailure: false,
+            allowSoftQualityOverride: true,
+          })
+          unwrap(await client.rpc('worker_record_quality_override', {
+            job_id: submission.job_id,
+            authoring_attempt: submission.authoring_attempt,
+            material_id: materialId,
+            processor_id: processorId,
+            override_reason: 'Attempt 5 exhausted; all remaining findings are in the explicit soft pedagogical allowlist.',
+            rejection_evidence: error.evidence,
+            rejection_message: message.slice(0, 2000),
+          }), 'record quality override')
+          results.push({ jobId: submission.job_id, status: 'delivered_with_quality_override', materialId })
+          continue
+        } catch (overrideError) {
+          if (!(overrideError instanceof CurriculumQualityError)) {
+            const overrideMessage = overrideError instanceof Error ? overrideError.message : String(overrideError)
+            console.error('[AUDIT] quality_override_failed', { jobId: submission.job_id, error: overrideMessage })
+            failure = classifyFailure(overrideError)
+            message = overrideMessage
+          }
+        }
+      }
       const finished = unwrap(await client.rpc('worker_finish_curriculum_submission', {
         job_id: submission.job_id,
         authoring_attempt: submission.authoring_attempt,

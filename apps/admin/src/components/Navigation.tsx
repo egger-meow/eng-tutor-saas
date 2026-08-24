@@ -43,11 +43,6 @@ export const Navigation: React.FC<NavigationProps> = ({
       icon: '🧭',
     },
     {
-      id: 'timeline',
-      label: '孩子/週次 生命週期追蹤 (Timeline)',
-      icon: '🔍',
-    },
-    {
       id: 'waitlist',
       label: '等候名單與名額釋出 (Waitlist)',
       icon: '👥',

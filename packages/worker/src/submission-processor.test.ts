@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CurriculumQualityError } from './pipeline.js'
+import { CurriculumQualityError, isSoftQualityOverrideEligible } from './pipeline.js'
 import { processCurriculumSubmissions, type CurriculumSubmission } from './submission-processor.js'
 import type { WorkerClient } from './pipeline.js'
 
@@ -69,5 +69,25 @@ describe('processCurriculumSubmissions', () => {
     const results = await processCurriculumSubmissions(state.client, 'github-actions-finisher', 5, complete)
     expect(results.map((result) => result.status)).toEqual(['technical_failed', 'completed'])
     expect(complete).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('quality override classification', () => {
+  it('allows only explicitly allowlisted audit findings', () => {
+    expect(isSoftQualityOverrideEligible(new CurriculumQualityError({
+      failureType: 'QUALITY_REJECTED',
+      findings: [{ source: 'audit', dimension: 'cognitive-load', message: 'too many vocabulary cards' }],
+    }))).toBe(true)
+    expect(isSoftQualityOverrideEligible(new CurriculumQualityError({
+      failureType: 'QUALITY_REJECTED',
+      findings: [{ source: 'validation', dimension: 'deterministic-validation', message: 'required section missing' }],
+    }))).toBe(false)
+    expect(isSoftQualityOverrideEligible(new CurriculumQualityError({
+      failureType: 'QUALITY_REJECTED',
+      findings: [
+        { source: 'audit', dimension: 'evidence-plan', message: 'thin evidence plan' },
+        { source: 'audit', dimension: 'grounding-coverage', message: 'missing grounding' },
+      ],
+    }))).toBe(false)
   })
 })
