@@ -14,7 +14,7 @@ export {
 import type { EraTag } from '@paper-english/generator/engine-version'
 export type { EraTag }
 
-export type TabId = 'overview' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
+export type TabId = 'overview' | 'subscriptions' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
 
 export interface HealthState {
   status: string
@@ -783,4 +783,31 @@ export interface RetryNotificationResult {
   notificationsFailed?: number
   error?: string
   message?: string
+}
+
+export type SubscriptionLifecycleEventType = 'trial_started' | 'activated' | 'renewed' | 'cancel_scheduled' | 'resumed' | 'past_due' | 'paused' | 'canceled' | 'expired'
+
+export interface SubscriptionLifecycleEventRow {
+  id: string
+  eventType: SubscriptionLifecycleEventType
+  source: 'paddle_webhook' | 'internal_beta' | 'internal_billing_action'
+  sourceEventId: string | null
+  effectiveAt: string
+  observedStatus: string
+}
+
+export interface SubscriptionRevenueData {
+  rangeDays: number
+  instrumentationStartedAt: string | null
+  current: { trialing: number; activePaid: number; cancelScheduled: number; pastDue: number; paused: number; canceled: number }
+  series: Array<{ date: string; activePaid: number; trials: number; newPaid: number; cancellations: number; netGrowth: number; conversionPercent: number }>
+  funnels: {
+    subscription: { observable: boolean; trialStarted: number; activatedAfterTrial: number }
+    cancellation: { observable: boolean; cancelScheduled: number; canceled: number }
+  }
+  subscriptions: Array<{
+    id: string; childId: string; childPseudonym: string; status: string; planCode: string | null
+    billingInterval: string | null; priceTwd: number | null; startDate: string
+    currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; events: SubscriptionLifecycleEventRow[]
+  }>
 }

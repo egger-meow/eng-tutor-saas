@@ -381,6 +381,13 @@ export async function handleApiRequest(
         return true
       }
 
+      case '/api/subscriptions': {
+        const requestedDays = Number(parsedUrl.query.days || 90)
+        const data = await service.getSubscriptionRevenueData(requestedDays)
+        res.statusCode = 200
+        res.end(JSON.stringify(data))
+        return true
+      }
       case '/api/intelligence/failures': {
         const era = (parsedUrl.query.era as any) || 'current'
         const data = await service.getFailureIntelligence(era)

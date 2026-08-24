@@ -1777,6 +1777,45 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(result.capacity).toBe(150)
     })
   })
-})
+
+  describe('subscription lifecycle revenue truth', () => {
+    it('uses recorded events for history and excludes internal-test children from every paid metric', async () => {
+      const now = new Date().toISOString()
+      const mockClient = createMockSupabaseClient({
+        children: [
+          { id: 'paid-child', display_name: 'Paid Child', is_internal_test: false },
+          { id: 'test-child', display_name: 'Operator Test', is_internal_test: true },
+        ],
+        subscriptions: [
+          { id: 'paid-sub', child_id: 'paid-child', provider: 'paddle', status: 'active', plan_code: 'standard_monthly', billing_interval: 'month', price_twd: 499, current_period_start: now, current_period_end: now, cancel_at_period_end: false, created_at: now, updated_at: now },
+          { id: 'test-sub', child_id: 'test-child', provider: 'paddle', status: 'active', plan_code: 'standard_monthly', billing_interval: 'month', price_twd: 499, current_period_start: now, current_period_end: now, cancel_at_period_end: false, created_at: now, updated_at: now },
+        ],
+        subscription_lifecycle_events: [
+          { id: 'event-trial', subscription_id: 'paid-sub', child_id: 'paid-child', event_type: 'trial_started', source: 'internal_beta', source_event_id: 'trial-paid', effective_at: now, observed_status: 'trialing' },
+          { id: 'event-active', subscription_id: 'paid-sub', child_id: 'paid-child', event_type: 'activated', source: 'paddle_webhook', source_event_id: 'evt-paid', effective_at: now, observed_status: 'active' },
+          { id: 'event-test', subscription_id: 'test-sub', child_id: 'test-child', event_type: 'activated', source: 'paddle_webhook', source_event_id: 'evt-test', effective_at: now, observed_status: 'active' },
+        ],
+      })
+      const data = await new AdminService({ client: mockClient }).getSubscriptionRevenueData(30)
+      expect(data.current.activePaid).toBe(1)
+      expect(data.subscriptions).toHaveLength(1)
+      expect(data.funnels.subscription).toMatchObject({ observable: true, trialStarted: 1, activatedAfterTrial: 1 })
+      expect(data.series.at(-1)).toMatchObject({ newPaid: 1, activePaid: 1 })
+    })
+
+    it('does not fabricate history when lifecycle instrumentation has no events', async () => {
+      const now = new Date().toISOString()
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: 'legacy-child', display_name: 'Legacy', is_internal_test: false }],
+        subscriptions: [{ id: 'legacy-sub', child_id: 'legacy-child', provider: 'paddle', status: 'active', plan_code: 'standard_monthly', billing_interval: 'month', price_twd: 499, current_period_start: now, current_period_end: now, cancel_at_period_end: false, created_at: now, updated_at: now }],
+        subscription_lifecycle_events: [],
+      })
+      const data = await new AdminService({ client: mockClient }).getSubscriptionRevenueData(30)
+      expect(data.current.activePaid).toBe(1)
+      expect(data.instrumentationStartedAt).toBeNull()
+      expect(data.funnels.subscription.observable).toBe(false)
+      expect(data.series.every((point) => point.activePaid === 0 && point.newPaid === 0)).toBe(true)
+    })
+  })})
 
 

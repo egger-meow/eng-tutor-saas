@@ -121,7 +121,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
               >
                 {data.availableChildren.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.displayPseudonym} (G{c.grade} / {c.subscriptionStatus})
+                    {c.displayPseudonym}（年級 {c.grade}／{c.subscriptionStatus}）
                   </option>
                 ))}
               </select>
@@ -130,11 +130,11 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
 
           <div style={{ flex: 1, minWidth: '200px' }}>
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-              或手動輸入 Child ID
+              或手動輸入孩子 ID
             </label>
             <input
               type="text"
-              placeholder="輸入 Child UUID..."
+              placeholder="輸入孩子 UUID…"
               value={inputChildId}
               onChange={(e) => setInputChildId(e.target.value)}
               style={{ width: '100%', background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '13px' }}
@@ -143,7 +143,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
 
           <div style={{ width: '160px' }}>
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-              教材週次 (Target Week)
+              教材週次
             </label>
             <input
               type="text"
@@ -270,7 +270,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
         </div>
       )}
 
-      {/* Generation Test Mode Operational Control Panel */}
+      {/* 生成測試模式 Operational Control Panel */}
       <GenerationTestModePanel
         childId={childId}
         initialStatus={data.testModeStatus || (data.rawMetadata?.testModeStatus as any) || null}
@@ -281,7 +281,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
       <div className="kpi-grid">
         <div className="cockpit-card featured">
           <div className="card-header-sm">
-            <span>孩子檔案 (Child Profile)</span>
+            <span>孩子檔案</span>
             <span className={`status-pill ${isActive ? 'active' : 'closed'}`}>{isActive ? '在學中' : '已封存'}</span>
           </div>
           <div className="kpi-value" style={{ fontSize: '20px' }}>{childPseudonym}</div>

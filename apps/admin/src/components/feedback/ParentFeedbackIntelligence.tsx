@@ -48,7 +48,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
         <div className="cockpit-card featured">
           <div className="card-header-sm">
             <span>累計家長反饋份數</span>
-            <span className="status-pill completed">Feedback</span>
+            <span className="status-pill completed">回饋</span>
           </div>
           <div className="kpi-value">{totalSubmissions}</div>
           <div className="kpi-subtext">主動完成率 100%: {completionRateDistribution.rate100} 份</div>
@@ -217,7 +217,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
       {/* Child Voice Direct Quotes */}
       <div className="cockpit-card" style={{ marginBottom: '24px' }}>
         <div className="section-title">
-          <span>孩子真實反饋原音 (Child Voice Quotes)</span>
+          <span>孩子真實回饋原文</span>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>保留最真實學習體驗</span>
         </div>
 
@@ -239,7 +239,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
       {/* Searchable Raw Feedback Stream */}
       <div className="cockpit-card">
         <div className="section-title">
-          <span>家長反饋明細檢索 (Raw Feedback Stream)</span>
+          <span>家長回饋明細檢索</span>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
               type="text"
@@ -281,7 +281,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
                 <th>難度</th>
                 <th>完成度</th>
                 <th>卡點領域</th>
-                <th>孩子發言 (Child Voice)</th>
+                <th>孩子發言</th>
                 <th>家長觀察與建議</th>
                 <th>學校進度 / 興趣更新</th>
               </tr>

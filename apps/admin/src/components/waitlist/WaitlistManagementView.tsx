@@ -239,7 +239,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
         </div>
 
         <div className="stat-card">
-          <div className="stat-label">等候名單總人數 (Waiting)</div>
+          <div className="stat-label">等候名單總人數</div>
           <div className="stat-value" style={{ color: '#f59e0b' }}>{data.waitingCount} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>人</span></div>
           <div className="stat-desc">已建立檔案等候開放中</div>
         </div>
@@ -310,7 +310,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
       <div className="section-card" style={{ marginBottom: '24px', background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', border: '1px solid #334155' }}>
         <div className="section-header" style={{ borderBottom: '1px solid #334155', paddingBottom: '16px', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '18px', color: '#f8fafc' }}>🚀 調升容量並全數釋出等候名額 (Raise Capacity & Release Cohort)</h3>
+            <h3 style={{ margin: 0, fontSize: '18px', color: '#f8fafc' }}>🚀 調升容量並全數釋出等候名額</h3>
             <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94a3b8' }}>
               容量代表系統承載規模。當運算資源與模型管線擴充完畢時，可一次調升容量上限並將目前所有等候中的孩子（{data.waitingCount} 人）全數釋出，系統將自動寄發通知信並開放標準訂閱。
             </p>

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   assessModelQualityProfileProvenance,
@@ -119,5 +121,20 @@ describe('current production provenance classification', () => {
 
   it('still classifies genuinely legacy schema/prompt evidence as historical', () => {
     expect(classifyQualityEra({ schemaVersion: '2.1.0', promptVersion: '2.3.0' })).toBe('historical')
+  })
+})
+
+describe('Engine Inspector operator semantics', () => {
+  it('keeps unobservable provenance neutral and preserves the declared hierarchy', () => {
+    const component = readFileSync(fileURLToPath(new URL('../components/overview/OperationsOverview.tsx', import.meta.url)), 'utf8')
+    const css = readFileSync(fileURLToPath(new URL('../styles/cockpit.css', import.meta.url)), 'utf8')
+    expect(component).toContain("state === 'unobservable' ? '尚無可驗證版本資料'")
+    expect(component).toContain("item.status === 'version_drift' ? 'drift-row' : 'unobservable-row'")
+    expect(component).toContain("engine: '引擎'")
+    expect(component).toContain("prompt: '提示詞'")
+    expect(component).toContain("schema: '標準資料結構'")
+    expect(css).toContain('.engine-inspector.unobservable')
+    expect(css).toContain('.engine-manifest .unobservable-row')
+    expect(css).not.toMatch(/\.engine-manifest \.unobservable-row[^}]*status-rose/s)
   })
 })

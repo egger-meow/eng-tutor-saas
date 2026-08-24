@@ -50,10 +50,10 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontWeight: 700, fontSize: '14px', color: '#f8fafc' }}>
-                  匯出資料集品質世代 (Export Era Scope)
+                  匯出資料集品質版本範圍
                 </span>
                 <span className={`status-pill ${currentEra === 'current' ? 'active' : currentEra === 'historical' ? 'warning' : 'pending'}`}>
-                  {currentEra === 'current' ? currentEngineLabel : currentEra === 'historical' ? 'Historical' : 'All Eras'}
+                  {currentEra === 'current' ? currentEngineLabel : currentEra === 'historical' ? '歷史版本' : '全部版本'}
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -142,7 +142,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
         </p>
 
         <div style={{ marginTop: '12px', padding: '12px', background: 'var(--bg-main)', border: '1px solid var(--border-subtle)', borderRadius: '6px', fontFamily: 'monospace', fontSize: '12px', color: '#93c5fd' }}>
-          Production Data → Sanitized Structured Observations → AI Analysis → Proposed Generator / Prompt Improvements → Human Review
+          生產資料 → 去識別化結構觀察 → AI 分析 → 生成器／提示詞改善建議 → 人工審查
         </div>
       </div>
 
@@ -160,7 +160,7 @@ export const AiDatasetExportView: React.FC<AiDatasetExportProps> = ({
         <div className="cockpit-card">
           <div className="card-header-sm">
             <span>家長反饋證據筆數</span>
-            <span className="status-pill pending">Feedback</span>
+            <span className="status-pill pending">回饋</span>
           </div>
           <div className="kpi-value">{data.parentFeedbackEvidence.length} 筆</div>
           <div className="kpi-subtext">去識別化 Snippets</div>

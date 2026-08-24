@@ -8,70 +8,21 @@ interface NavigationProps {
   failures: FailureIntelligence | null
 }
 
-export const Navigation: React.FC<NavigationProps> = ({
-  activeTab,
-  setActiveTab,
-  overview,
-  failures,
-}) => {
+export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, overview, failures }) => {
   const stuckCount = overview?.queueStats.overdueOrStuck || 0
   const failureCount = failures?.totalFailures || overview?.queueStats.failed || 0
-
-  const tabs: Array<{ id: TabId; label: string; icon: string; badge?: number; isAlert?: boolean }> = [
-    {
-      id: 'overview',
-      label: '即時維運總覽 (Operations)',
-      icon: '📊',
-      badge: stuckCount > 0 ? stuckCount : undefined,
-      isAlert: stuckCount > 0,
-    },
-    {
-      id: 'failures',
-      label: '生成與 Finisher 失敗情報 (Failures)',
-      icon: '🚨',
-      badge: failureCount > 0 ? failureCount : undefined,
-      isAlert: failureCount > 0,
-    },
-    {
-      id: 'feedback',
-      label: '家長每週反饋情報 (Parent Feedback)',
-      icon: '💬',
-    },
-    {
-      id: 'product',
-      label: '產品與使用反饋 (Product & Friction)',
-      icon: '🧭',
-    },
-    {
-      id: 'waitlist',
-      label: '等候名單與名額釋出 (Waitlist)',
-      icon: '👥',
-      badge: overview?.capacity?.waitingCount && overview.capacity.waitingCount > 0 ? overview.capacity.waitingCount : undefined,
-    },
-    {
-      id: 'export',
-      label: 'AI 系統改善資料集匯出 (AI Dataset)',
-      icon: '🤖',
-    },
+  const tabs: Array<{ id: TabId; label: string; badge?: number; isAlert?: boolean }> = [
+    { id: 'overview', label: '營運總覽', badge: stuckCount || undefined, isAlert: stuckCount > 0 },
+    { id: 'subscriptions', label: '訂閱與營收' },
+    { id: 'failures', label: '失敗情報', badge: failureCount || undefined, isAlert: failureCount > 0 },
+    { id: 'feedback', label: '家長回饋' },
+    { id: 'product', label: '產品回饋' },
+    { id: 'waitlist', label: '等候名單', badge: overview?.capacity?.waitingCount || undefined },
+    { id: 'export', label: 'AI 資料匯出' },
   ]
-
-  return (
-    <nav className="cockpit-nav">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          className={`nav-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-          onClick={() => setActiveTab(tab.id)}
-        >
-          <span>{tab.icon}</span>
-          <span>{tab.label}</span>
-          {tab.badge !== undefined && (
-            <span className={`tab-badge ${tab.isAlert ? 'alert' : ''}`}>
-              {tab.badge}
-            </span>
-          )}
-        </button>
-      ))}
-    </nav>
-  )
+  return <nav className="cockpit-nav" aria-label="管理功能">
+    {tabs.map((tab) => <button key={tab.id} className={'nav-tab-btn ' + (activeTab === tab.id ? 'active' : '')} onClick={() => setActiveTab(tab.id)}>
+      <span>{tab.label}</span>{tab.badge !== undefined && <span className={'tab-badge ' + (tab.isAlert ? 'alert' : '')}>{tab.badge}</span>}
+    </button>)}
+  </nav>
 }

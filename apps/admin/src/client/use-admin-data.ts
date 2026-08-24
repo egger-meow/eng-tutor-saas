@@ -11,6 +11,7 @@ import type {
   TabId,
   QualityEra,
   WaitlistData,
+  SubscriptionRevenueData,
 } from './types.js'
 
 export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
@@ -22,6 +23,8 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   const [timeline, setTimeline] = useState<ChildWeekTimeline | null>(() => adminApi.getCachedTimeline())
   const [aiExport, setAiExport] = useState<AiExportDataset | null>(null)
   const [waitlist, setWaitlist] = useState<WaitlistData | null>(null)
+  const [subscriptions, setSubscriptions] = useState<SubscriptionRevenueData | null>(null)
+  const [subscriptionRangeDays, setSubscriptionRangeDays] = useState(90)
 
   const [loading, setLoading] = useState(true)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>('')
@@ -55,6 +58,12 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
         case 'overview': {
           tabPromise = adminApi.getOverview(qualityEra).then((res) => {
             setOverview(res)
+          })
+          break
+        }
+        case 'subscriptions': {
+          tabPromise = adminApi.getSubscriptions(subscriptionRangeDays).then((res) => {
+            setSubscriptions(res)
           })
           break
         }
@@ -109,7 +118,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek])
+  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek, subscriptionRangeDays])
 
   // Instant Child Switching via Cache + Background Revalidation
   const selectChildTimeline = useCallback((childId: string, week?: string) => {
@@ -148,6 +157,8 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   useEffect(() => {
     const hasData = Boolean(
       (activeTab === 'overview' && overview) ||
+      (activeTab === 'subscriptions' && subscriptions) ||
+      (activeTab === 'subscriptions' && subscriptions) ||
       (activeTab === 'failures' && failures) ||
       (activeTab === 'feedback' && feedback) ||
       (activeTab === 'product' && productFeedback) ||
@@ -173,6 +184,9 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   return {
     health,
     overview,
+    subscriptions,
+    subscriptionRangeDays,
+    setSubscriptionRangeDays,
     failures,
     feedback,
     productFeedback,

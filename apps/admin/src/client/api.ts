@@ -20,6 +20,7 @@ import type {
   ReleaseWaitlistResult,
   UpdateCapacityResult,
   RetryNotificationResult,
+  SubscriptionRevenueData,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -75,6 +76,7 @@ export const adminApi = {
   getFailures: (era?: QualityEra) => fetchJson<FailureIntelligence>(`/api/intelligence/failures${era ? `?era=${era}` : ''}`),
   getFeedback: () => fetchJson<ParentFeedbackIntelligence>('/api/intelligence/feedback'),
   getProductFeedback: () => fetchJson<ProductFeedbackIntelligence>('/api/intelligence/product-feedback'),
+  getSubscriptions: (days = 90) => fetchJson<SubscriptionRevenueData>('/api/subscriptions?days=' + days),
 
   // Fast Synchronous Cache Readers
   getCachedTimeline: (childId?: string, week?: string): ChildWeekTimeline | null => {

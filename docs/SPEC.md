@@ -2894,8 +2894,9 @@ created_at
 updated_at
 ```
 
----
+Subscription history for operations is recorded separately in append-only subscription_lifecycle_events. subscriptions remains authoritative for current state. Lifecycle events record only transitions observed after instrumentation begins; historical curves must never be fabricated from the current row.
 
+---
 # 135. Subscription States
 
 Possible internal states:
@@ -2929,8 +2930,9 @@ Billing webhook must:
 * update subscription state idempotently;
 * never trust arbitrary browser-submitted subscription status.
 
----
+The verified Paddle event transaction also records the normalized subscription lifecycle transition with Paddle occurred_at when available. Internal beta/trial and successful internal billing actions record their real transaction time and an explicit non-webhook source. Repeated webhook delivery must not duplicate lifecycle events.
 
+---
 # 138. Entitlement
 
 Generation eligibility should use an explicit entitlement decision.
@@ -3573,8 +3575,11 @@ Supabase Dashboard plus targeted internal tooling is acceptable.
 
 The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is exhaustive for active jobs and is derived from the current job and latest matching authoring attempt only. Claimed jobs remain visible before submission, and `technical_failed` Finisher work remains retryable in `AWAITING FINISHER`. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand, where total demand is service children plus waiting children plus released-not-converted children. The current engine manifest is declared by production repository code and compared only with exact matching persisted job, submission, and material provenance fields; mismatches display expected and actual versions as `VERSION DRIFT`, while components without matching persisted provenance display `UNOBSERVABLE`. Material release truth comes from `generation_jobs.release_at`.
 
----
+Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
 
+Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.1.0, Prompt 2.5.0, and canonical Schema 2.3.0.
+
+---
 # 173. Manual Recovery
 
 Operator needs the ability to:

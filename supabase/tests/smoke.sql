@@ -75,6 +75,26 @@ begin
     raise exception 'Paddle webhook did not activate and redeem founding subscription';
   end if;
 
+  if not exists (
+    select 1 from public.subscription_lifecycle_events
+    where child_id = '00000000-0000-0000-0000-000000000002'
+      and event_type = 'trial_started' and source = 'internal_beta'
+  ) then
+    raise exception 'subscription lifecycle did not record the internal beta trial';
+  end if;
+  if not exists (
+    select 1 from public.subscription_lifecycle_events
+    where child_id = '00000000-0000-0000-0000-000000000002'
+      and event_type = 'activated' and source = 'paddle_webhook'
+      and source_event_id = 'evt_checkout_smoke'
+  ) then
+    raise exception 'subscription lifecycle did not record the Paddle activation';
+  end if;
+  if has_table_privilege('authenticated', 'public.subscription_lifecycle_events', 'select')
+    or has_table_privilege('service_role', 'public.subscription_lifecycle_events', 'update')
+    or has_table_privilege('service_role', 'public.subscription_lifecycle_events', 'delete') then
+    raise exception 'subscription lifecycle append-only grants are incorrect';
+  end if;
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values (
     '00000000-0000-0000-0000-000000000004',

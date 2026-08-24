@@ -83,7 +83,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
     try {
       const res = await adminApi.enableTestMode(childId, targetWeekInput)
       if (res.success) {
-        setActionMessage({ type: 'success', text: `已成功啟用 Generation Test Mode (目標週次: Week ${targetWeekInput})` })
+        setActionMessage({ type: 'success', text: `已成功啟用 生成測試模式 (目標週次: Week ${targetWeekInput})` })
         await fetchStatus()
         onRefreshTimeline()
       } else {
@@ -102,7 +102,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
     try {
       const res = await adminApi.disableTestMode(childId, false)
       if (res.success) {
-        setActionMessage({ type: 'success', text: '已結束 Generation Test Mode' })
+        setActionMessage({ type: 'success', text: '已結束 生成測試模式' })
         await fetchStatus()
         onRefreshTimeline()
       } else {
@@ -179,7 +179,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
       const res = await adminApi.resetTestChildToOnboarding(childId)
       if (res.success) {
         setShowResetModal(false)
-        let msg = '✓ 已成功重設回開通起點 (Reset to Onboarding)！所有歷史教材與記憶已清理，並重新建立 Week 1 任務。'
+        let msg = '✓ 已成功重設回開通起點 （重設至開通起點）！所有歷史教材與記憶已清理，並重新建立 第 1 週 任務。'
         if (res.storageCleanupWarning) {
           msg += ' (儲存清理警告: 部分 PDF 檔案可能需手動清除)'
         }
@@ -268,7 +268,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               style={{ background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 16].map((w) => (
-                <option key={w} value={w}>Week {w}</option>
+                <option key={w} value={w}>第 {w} 週</option>
               ))}
             </select>
             <button
@@ -321,7 +321,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
             <div style={{ background: 'var(--bg-main)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>目前進度 (Completed)</div>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc' }}>
-                Week {status.completedWeeksCount} 完成
+                已完成第 {status.completedWeeksCount} 週
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 教材週: {status.currentMaterialWeek || '無'}
@@ -334,14 +334,14 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
                 {status.nextJob ? `Week ${status.completedWeeksCount + 1} (${status.nextJob.status})` : '無待處理任務'}
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                嘗試: {status.nextJob ? `${status.nextJob.attemptCount} / ${status.nextJob.maxAttempts}` : '-'}
+                嘗試次數： {status.nextJob ? `${status.nextJob.attemptCount} / ${status.nextJob.maxAttempts}` : '-'}
               </div>
             </div>
 
             <div style={{ background: 'var(--bg-main)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>目標測試週次 (Target)</div>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#a78bfa' }}>
-                Week {status.targetWeek}
+                第 {status.targetWeek} 週
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 剩餘 {Math.max(0, status.targetWeek - status.completedWeeksCount)} 週
@@ -383,7 +383,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               onClick={handleAdvanceWeek}
               disabled={!canAdvance || actionLoading}
             >
-              {actionLoading ? '推進中...' : '⚡ Advance 1 Test Week (推進 1 週)'}
+              {actionLoading ? '推進中...' : '⚡ 推進 1 個測試週'}
             </button>
 
             {status.latestMaterial && (
@@ -395,7 +395,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
                   onClick={() => setShowFeedbackModal(true)}
                   disabled={actionLoading}
                 >
-                  📝 填寫測試反饋 (Test Feedback)
+                  📝 填寫測試回饋
                 </button>
 
                 <button
@@ -551,7 +551,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                  孩子聲音 / 回饋 (Child Voice)
+                  孩子聲音／回饋
                 </label>
                 <input
                   type="text"
@@ -641,7 +641,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
         }}>
           <div className="cockpit-card" style={{ maxWidth: '520px', width: '100%', background: '#0f172a', border: '1px solid #ef4444', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
             <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', marginBottom: '12px' }}>
-              ⚠️ 重設測試學員回開通起點 (Reset to Onboarding)？
+              ⚠️ 重設測試學員回開通起點 （重設至開通起點）？
             </div>
             <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '14px' }}>
               此操作為 <strong>長週期測試環境專用</strong>：
@@ -650,7 +650,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               <li><strong>完整保留</strong>：家長帳號、孩子 Profile、基準等級、年級 (G7-9)、版本 (康軒/翰林/南一)、興趣偏好、訂閱資格。</li>
               <li><strong>清空重設</strong>：已生成之每週教材、反饋、單字記憶、文法進度、歷史摘要與 Quality Observations。</li>
               <li><strong>自動清理</strong>：透過 Supabase Storage API 清除已上傳之私有 PDF 檔案。</li>
-              <li><strong>重新排程</strong>：立即建立一份全新的 Week 1 待生成任務。</li>
+              <li><strong>重新排程</strong>：立即建立一份全新的 第 1 週 待生成任務。</li>
             </ul>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button

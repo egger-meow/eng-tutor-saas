@@ -5,6 +5,7 @@ import { Header } from './components/Header.js'
 import { Navigation } from './components/Navigation.js'
 import { AnomalyBanner } from './components/AnomalyBanner.js'
 import { OperationsOverviewView } from './components/overview/OperationsOverview.js'
+import { SubscriptionRevenueView } from './components/subscriptions/SubscriptionRevenueView.js'
 import { FailureIntelligenceView } from './components/failures/FailureIntelligence.js'
 import { ParentFeedbackIntelligenceView } from './components/feedback/ParentFeedbackIntelligence.js'
 import { ProductFeedbackView } from './components/product/ProductFeedbackView.js'
@@ -12,7 +13,7 @@ import { ChildWeekTimelineView } from './components/timeline/ChildWeekTimeline.j
 import { WaitlistManagementView } from './components/waitlist/WaitlistManagementView.js'
 import { AiDatasetExportView } from './components/export/AiDatasetExport.js'
 
-const VALID_TABS: TabId[] = ['overview', 'failures', 'feedback', 'product', 'timeline', 'waitlist', 'export']
+const VALID_TABS: TabId[] = ['overview', 'subscriptions', 'failures', 'feedback', 'product', 'timeline', 'waitlist', 'export']
 
 function getStoredTab(): TabId {
   if (typeof window === 'undefined') return 'overview'
@@ -65,6 +66,9 @@ export const App: React.FC = () => {
   const {
     health,
     overview,
+    subscriptions,
+    subscriptionRangeDays,
+    setSubscriptionRangeDays,
     failures,
     feedback,
     productFeedback,
@@ -112,10 +116,7 @@ export const App: React.FC = () => {
       <main className="cockpit-main">
         {error && (
           <div className="anomaly-banner critical" style={{ marginBottom: '20px' }}>
-            <div>
-              <div className="anomaly-title">連線或資料讀取異常</div>
-              <p style={{ fontSize: '13px', color: '#fecdd3' }}>{error}</p>
-            </div>
+            <div><div className="anomaly-title">資料載入失敗</div><p style={{ fontSize: '13px', color: '#fecdd3' }}>{error}</p></div>
           </div>
         )}
 
@@ -126,11 +127,8 @@ export const App: React.FC = () => {
           />
         )}
 
-        {loading && !overview && !failures && !feedback && !productFeedback && !timeline && !waitlist && !aiExport ? (
-          <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: '24px', marginBottom: '12px' }}>⏳</div>
-            <div>載入維運數據中...</div>
-          </div>
+        {loading && !overview && !subscriptions && !failures && !feedback && !productFeedback && !timeline && !waitlist && !aiExport ? (
+          <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>載入管理資料中…</div>
         ) : (
           <>
             {activeTab === 'overview' && (
@@ -140,6 +138,13 @@ export const App: React.FC = () => {
               />
             )}
 
+            {activeTab === 'subscriptions' && (
+              <SubscriptionRevenueView
+                data={subscriptions}
+                rangeDays={subscriptionRangeDays}
+                onRangeChange={setSubscriptionRangeDays}
+              />
+            )}
             {activeTab === 'failures' && (
               <FailureIntelligenceView
                 data={failures}

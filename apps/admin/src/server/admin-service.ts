@@ -84,6 +84,7 @@ import {
   formatEngineVersion,
   type DataSourceStatus,
   type OperationsOverview,
+  type SubscriptionRevenueData,
   type FailureIntelligence,
   type ParentFeedbackIntelligence,
   type ProductFeedbackIntelligence,
@@ -1462,6 +1463,112 @@ export class AdminService {
     }
   }
 
+  public async getSubscriptionRevenueData(rangeDays = 90): Promise<SubscriptionRevenueData> {
+    const client = this.ensureClient()
+    const days = [30, 90, 180, 365].includes(rangeDays) ? rangeDays : 90
+    const dataSources: DataSourceStatus[] = []
+    const [childrenData, subscriptionsData, eventsData] = await Promise.all([
+      this.safeQuery<any[]>('subscription_children', () => client.from('children').select('id, display_name, is_internal_test'), dataSources),
+      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, provider, status, plan_code, billing_interval, price_twd, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at'), dataSources),
+      this.safeQuery<any[]>('subscription_lifecycle_events', () => client.from('subscription_lifecycle_events').select('id, subscription_id, child_id, event_type, source, source_event_id, effective_at, observed_status').order('effective_at', { ascending: true }).limit(5000), dataSources),
+    ])
+    const children = (childrenData as any[]) || []
+    const internalIds = new Set(children.filter((child) => child.is_internal_test).map((child) => child.id))
+    const childNames = new Map(children.map((child) => [child.id, child.display_name]))
+    const subscriptions = ((subscriptionsData as any[]) || []).filter((subscription) => !internalIds.has(subscription.child_id))
+    const events = ((eventsData as any[]) || []).filter((event) => !internalIds.has(event.child_id))
+    const current = { trialing: 0, activePaid: 0, cancelScheduled: 0, pastDue: 0, paused: 0, canceled: 0 }
+    for (const subscription of subscriptions) {
+      if (subscription.cancel_at_period_end && subscription.status !== 'canceled') current.cancelScheduled++
+      else if (subscription.status === 'trialing') current.trialing++
+      else if (subscription.status === 'active') current.activePaid++
+      else if (subscription.status === 'past_due') current.pastDue++
+      else if (subscription.status === 'paused') current.paused++
+      else if (subscription.status === 'canceled') current.canceled++
+    }
+
+    const start = new Date()
+    start.setUTCHours(0, 0, 0, 0)
+    start.setUTCDate(start.getUTCDate() - days + 1)
+    const states = new Map<string, 'trial' | 'paid' | 'inactive'>()
+    const trialChildren = new Set<string>()
+    const activatedAfterTrial = new Set<string>()
+    const buckets = new Map<string, { trials: number; newPaid: number; cancellations: number }>()
+    const applyEvent = (event: any) => {
+      if (event.event_type === 'trial_started') {
+        states.set(event.child_id, 'trial')
+        trialChildren.add(event.child_id)
+      } else if (event.event_type === 'activated' || event.event_type === 'resumed') {
+        if (trialChildren.has(event.child_id) && event.event_type === 'activated') activatedAfterTrial.add(event.child_id)
+        states.set(event.child_id, 'paid')
+      } else if (['canceled', 'expired', 'paused', 'past_due'].includes(event.event_type)) {
+        states.set(event.child_id, 'inactive')
+      }
+    }
+    for (const event of events.filter((item) => new Date(item.effective_at) < start)) applyEvent(event)
+    for (const event of events.filter((item) => new Date(item.effective_at) >= start)) {
+      const date = String(event.effective_at).slice(0, 10)
+      const bucket = buckets.get(date) || { trials: 0, newPaid: 0, cancellations: 0 }
+      if (event.event_type === 'trial_started') bucket.trials++
+      if (event.event_type === 'activated') bucket.newPaid++
+      if (event.event_type === 'canceled' || event.event_type === 'expired') bucket.cancellations++
+      buckets.set(date, bucket)
+    }
+    const series: SubscriptionRevenueData['series'] = []
+    let totalTrials = trialChildren.size
+    let totalConversions = activatedAfterTrial.size
+    for (let offset = 0; offset < days; offset++) {
+      const date = new Date(start)
+      date.setUTCDate(start.getUTCDate() + offset)
+      const key = date.toISOString().slice(0, 10)
+      const bucket = buckets.get(key) || { trials: 0, newPaid: 0, cancellations: 0 }
+      for (const event of events.filter((item) => String(item.effective_at).slice(0, 10) === key)) {
+        const wasTrial = trialChildren.has(event.child_id)
+        applyEvent(event)
+        if (event.event_type === 'trial_started') totalTrials++
+        if (event.event_type === 'activated' && wasTrial) totalConversions++
+      }
+      series.push({
+        date: key,
+        activePaid: Array.from(states.values()).filter((state) => state === 'paid').length,
+        trials: bucket.trials,
+        newPaid: bucket.newPaid,
+        cancellations: bucket.cancellations,
+        netGrowth: bucket.newPaid - bucket.cancellations,
+        conversionPercent: totalTrials > 0 ? Number(((totalConversions / totalTrials) * 100).toFixed(1)) : 0,
+      })
+    }
+    const bySubscription = new Map<string, any[]>()
+    for (const event of events) bySubscription.set(event.subscription_id, [...(bySubscription.get(event.subscription_id) || []), event])
+    const cancelScheduled = new Set(events.filter((event) => event.event_type === 'cancel_scheduled').map((event) => event.child_id))
+    const canceled = new Set(events.filter((event) => ['canceled', 'expired'].includes(event.event_type)).map((event) => event.child_id))
+    return {
+      rangeDays: days,
+      instrumentationStartedAt: events[0]?.effective_at ?? null,
+      current,
+      series,
+      funnels: {
+        subscription: { observable: events.length > 0, trialStarted: trialChildren.size, activatedAfterTrial: activatedAfterTrial.size },
+        cancellation: { observable: events.length > 0, cancelScheduled: cancelScheduled.size, canceled: canceled.size },
+      },
+      subscriptions: subscriptions.map((subscription) => ({
+        id: subscription.id,
+        childId: subscription.child_id,
+        childPseudonym: this.maskName(childNames.get(subscription.child_id), subscription.child_id),
+        status: subscription.cancel_at_period_end && subscription.status !== 'canceled' ? 'cancel_scheduled' : subscription.status,
+        planCode: subscription.plan_code,
+        billingInterval: subscription.billing_interval,
+        priceTwd: subscription.price_twd,
+        startDate: subscription.current_period_start || subscription.created_at,
+        currentPeriodEnd: subscription.current_period_end,
+        cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+        events: (bySubscription.get(subscription.id) || []).slice().reverse().map((event) => ({
+          id: event.id, eventType: event.event_type, source: event.source,
+          sourceEventId: event.source_event_id, effectiveAt: event.effective_at, observedStatus: event.observed_status,
+        })),
+      })).sort((a, b) => b.startDate.localeCompare(a.startDate)),
+    }
+  }
   public async getFailureIntelligence(era: QualityEra = 'current'): Promise<FailureIntelligence> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
