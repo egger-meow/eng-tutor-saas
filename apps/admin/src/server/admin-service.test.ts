@@ -470,7 +470,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     const service = new AdminService({ client: mockClient })
     const dataset = await service.getAiExportDataset()
 
-    expect(dataset.schemaVersion).toBe('2.2.0')
+    expect(dataset.schemaVersion).toBe('2.3.0')
     expect(dataset.taxonomyVersion).toBe('cap-2.2.0')
     expect(dataset.ruleVersions).toContain('curriculum-rules/1.0.0')
     expect(dataset.generatorVersions).toContain('pdf-page-break-fix')
@@ -991,8 +991,8 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       // 4. Central Engine Versioning & Dynamic Label Formatting
       expect(CURRENT_ENGINE_VERSION).toBe('1.1.0')
-      expect(CURRENT_SCHEMA_VERSION).toBe('2.2.0')
-      expect(CURRENT_PROMPT_VERSION).toBe('2.4.0')
+      expect(CURRENT_SCHEMA_VERSION).toBe('2.3.0')
+      expect(CURRENT_PROMPT_VERSION).toBe('2.5.0')
       expect(CURRENT_ERA_TAG).toBe('engine_v1')
       expect(formatEngineVersion()).toBe('Engine v1.1.0')
       expect(formatEngineVersion('1.0.0')).toBe('Engine v1.0.0')
@@ -1182,12 +1182,12 @@ describe('AdminService Authoritative Truth Layer', () => {
       const service = new AdminService({ client: mockClient })
       const currentExport = await service.getAiExportDataset('current')
 
-      expect(currentExport.schemaVersion).toBe('2.2.0')
+      expect(currentExport.schemaVersion).toBe('2.3.0')
       expect(currentExport.provenance.era).toBe('current')
       expect(currentExport.provenance.currentEraName).toBe('Engine v1.1.0')
       expect(currentExport.provenance.currentEngineVersion).toBe('1.1.0')
-      expect(currentExport.provenance.currentSchemaVersion).toBe('2.2.0')
-      expect(currentExport.provenance.currentPromptVersion).toBe('2.4.0')
+      expect(currentExport.provenance.currentSchemaVersion).toBe('2.3.0')
+      expect(currentExport.provenance.currentPromptVersion).toBe('2.5.0')
     })
   })
 

@@ -1610,7 +1610,7 @@ export class AdminService {
     const totalEvidenceCount = generationFailureEvidence.length + parentFeedbackEvidence.length
 
     return {
-      schemaVersion: '2.2.0',
+      schemaVersion: CURRENT_SCHEMA_VERSION,
       taxonomyVersion: 'cap-2.2.0',
       ruleVersions: ruleVersions.length > 0 ? ruleVersions : ['curriculum-rules/1.0.0'],
       generatorVersions: generatorVersions.length > 0 ? generatorVersions : ['curriculum/2.0.0'],

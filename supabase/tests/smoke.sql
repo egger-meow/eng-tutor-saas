@@ -477,7 +477,7 @@ begin
       bridge_job_id,
       'bridge-smoke',
       jsonb_build_object('metadata', jsonb_build_object(
-        'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+        'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
         'childId', bridge_child_id::text, 'inputFingerprint', 'sha256:' || repeat('0', 64)
       ))
     );
@@ -489,7 +489,7 @@ begin
   end if;
 
   first_package := jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+      'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ));
   perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', first_package);
@@ -558,7 +558,7 @@ begin
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
   second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.0.0', 'jobId', bridge_job_id::text,
+    'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
     'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repairMarker', 'targeted-attempt-2'
   ));
@@ -627,7 +627,7 @@ begin
   perform private_generation.chatgpt_submit_curriculum_package(
     '00000000-0000-0000-0000-000000000071', 'max-attempt-smoke',
     jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.0.0', 'jobId', '00000000-0000-0000-0000-000000000071',
+      'schemaVersion', '2.3.0', 'jobId', '00000000-0000-0000-0000-000000000071',
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ))
   );
@@ -697,7 +697,7 @@ begin
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
 
   first_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.0.0', 'jobId', recovery_job_id::text,
+    'schemaVersion', '2.3.0', 'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint
   ));
   perform private_generation.chatgpt_submit_curriculum_package(
@@ -816,7 +816,7 @@ begin
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
   second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.0.0', 'jobId', recovery_job_id::text,
+    'schemaVersion', '2.3.0', 'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repaired', true
   ));
