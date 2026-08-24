@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { makeGroundedCurriculumPackage, syntheticWeekOne, type CurriculumPackage, type CurriculumPackageV22 } from '@paper-english/generator'
+import { syntheticWeekOne, type CurriculumPackage } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
@@ -148,7 +148,7 @@ describe('completeCurriculumJob', () => {
 
   it('processes a grounded 2.3 package through the unchanged render, upload, and completion path', async () => {
     const state = setup()
-    const grounded = makeGroundedCurriculumPackage(curriculumSample as CurriculumPackageV22, 'basketball')
+    const grounded = structuredClone(curriculumSample)
     await expect(completeCurriculumJob({
       client: state.client,
       workerId: 'worker-1',
@@ -162,7 +162,7 @@ describe('completeCurriculumJob', () => {
 
   it('rejects broken 2.3 prose grounding before rendering or storage', async () => {
     const state = setup()
-    const grounded = makeGroundedCurriculumPackage(curriculumSample as CurriculumPackageV22, 'technology')
+    const grounded = structuredClone(curriculumSample)
     grounded.grounding.claims[0]!.text = 'Text that is absent from the authored reading.'
     const render = vi.fn(async () => pdfs)
     await expect(completeCurriculumJob({

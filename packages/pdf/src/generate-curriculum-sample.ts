@@ -1,4 +1,4 @@
-import type { CurriculumPackage } from '@paper-english/generator'
+import { makeGroundedCurriculumPackage, type CurriculumPackageV22 } from '@paper-english/generator'
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -44,7 +44,7 @@ const homework = [
 ]
 const all = [...guided, ...independent, ...cap, ...production, ...retrieval, ...homework]
 
-export const curriculumSample: CurriculumPackage = {
+const curriculumSampleV22: CurriculumPackageV22 = {
   metadata: {
     schemaVersion: '2.2.0',
     jobId: 'kobe-week-2-v2',
@@ -194,6 +194,8 @@ export const curriculumSample: CurriculumPackage = {
     criticFindings: [],
   },
 }
+
+export const curriculumSample = makeGroundedCurriculumPackage(curriculumSampleV22, 'technology')
 
 async function runCli() {
   const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url))

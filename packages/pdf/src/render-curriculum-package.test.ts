@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { normalizeCurriculumPackage, type CurriculumPackage } from '@paper-english/generator'
 import { renderCurriculumParentAnswerHtml, renderCurriculumStudentHtml } from './render-curriculum-package.js'
+import { curriculumSample } from './generate-curriculum-sample.js'
 
 const pkg = {
   metadata: { schemaVersion: '2.0.0', jobId: 'kobe-week-2', childId: 'child-1', weekNumber: 2, grade: 7, gradeStage: 'grade_7', title: 'One Change at a Time', generatedAt: '2026-08-12T00:00:00Z', curriculumVersion: 'curriculum/2.0.0', promptVersion: 'prompt/2.0.0', rubricVersion: 'rubric/2.0.0', rendererVersion: 'renderer/2.0.0', model: 'test', inputFingerprint: 'sha256:test' },
@@ -14,6 +15,17 @@ const pkg = {
 } as unknown as CurriculumPackage
 
 describe('curriculum package PDF HTML', () => {
+  it('renders grounded 2.3 metadata deterministically without exposing internal provenance', () => {
+    const firstStudent = renderCurriculumStudentHtml(curriculumSample)
+    const secondStudent = renderCurriculumStudentHtml(curriculumSample)
+    const parent = renderCurriculumParentAnswerHtml(curriculumSample)
+    expect(firstStudent).toBe(secondStudent)
+    for (const internalValue of ['source-energy-solar', 'fact-1', 'claim-1', 'energy.gov/eere']) {
+      expect(firstStudent).not.toContain(internalValue)
+      expect(parent).not.toContain(internalValue)
+    }
+  })
+
   it('renders bilingual student scaffolding and no answer key', () => {
     const html = renderCurriculumStudentHtml(pkg)
     expect(html).toContain('先看提示再作答')
