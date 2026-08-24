@@ -1366,12 +1366,28 @@ begin
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
 
   -- 7. Submit curriculum package and complete material
+  begin
+    perform private_generation.chatgpt_submit_curriculum_package(
+      test_job_id,
+      'chatgpt-test-worker',
+      jsonb_build_object('metadata', jsonb_build_object('schemaVersion', '2.2.0'))
+    );
+    raise exception 'legacy curriculum schema was accepted for new production submission';
+  exception when others then
+    if sqlerrm = 'legacy curriculum schema was accepted for new production submission' then
+      raise;
+    end if;
+    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.3.0 object%' then
+      raise exception 'unexpected legacy schema rejection: %', sqlerrm;
+    end if;
+  end;
+
   perform private_generation.chatgpt_submit_curriculum_package(
     test_job_id,
     'chatgpt-test-worker',
     jsonb_build_object(
       'metadata', jsonb_build_object(
-        'schemaVersion', '2.2.0',
+        'schemaVersion', '2.3.0',
         'jobId', test_job_id::text,
         'childId', '00000000-0000-0000-0000-000000000099',
         'inputFingerprint', bridge_fingerprint

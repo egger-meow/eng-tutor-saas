@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { syntheticWeekOne, type CurriculumPackage } from '@paper-english/generator'
+import { makeGroundedCurriculumPackage, syntheticWeekOne, type CurriculumPackage, type CurriculumPackageV22 } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
@@ -144,6 +144,37 @@ describe('completeCurriculumJob', () => {
     const state = setup()
     await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')
     expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+  })
+
+  it('processes a grounded 2.3 package through the unchanged render, upload, and completion path', async () => {
+    const state = setup()
+    const grounded = makeGroundedCurriculumPackage(curriculumSample as CurriculumPackageV22, 'basketball')
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: grounded,
+      render: async () => pdfs,
+      inspect,
+    })).resolves.toBe('material-1')
+    expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+  })
+
+  it('rejects broken 2.3 prose grounding before rendering or storage', async () => {
+    const state = setup()
+    const grounded = makeGroundedCurriculumPackage(curriculumSample as CurriculumPackageV22, 'technology')
+    grounded.grounding.claims[0]!.text = 'Text that is absent from the authored reading.'
+    const render = vi.fn(async () => pdfs)
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: grounded,
+      render,
+      inspect,
+    })).rejects.toThrow('Invalid curriculum package')
+    expect(render).not.toHaveBeenCalled()
+    expect(state.uploads).toEqual([])
   })
 
   it('records a technical failure without touching storage when rendering fails', async () => {
