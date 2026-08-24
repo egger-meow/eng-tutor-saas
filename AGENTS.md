@@ -444,3 +444,7 @@ pnpm generate:synthetic
 ```
 
 Source lives under `apps/web/src/`, `packages/generator/src/`, and `packages/pdf/src/`; Supabase migrations and tests live under `supabase/`. Web route pages belong in `apps/web/src/routes/`, reusable components in `apps/web/src/components/`, and browser-safe data access in `apps/web/src/lib/`. Preserve the root-based Cloudflare Workers Static Assets SPA at `https://paperbond.jjmowlab.com`; do not restore `VITE_BASE_PATH`, repository-prefixed routes, or a built `404.html` fallback. Generated PDFs belong only in the git-ignored `output/pdf/` directory. The synthetic command proves canonical validation and deterministic PDF rendering locally; the future ChatGPT Work schedule remains responsible for queue claiming, production generation, private upload, and job completion.
+
+# Supabase Production Delivery
+
+After committing and pushing a completed change, if the commit includes new Supabase migrations, apply the pending migration chain to the linked production database and verify the remote migration history. If the commit includes new or changed Supabase Edge Functions, deploy the affected functions to the linked production project and verify the deployment. Treat these production deployment steps as part of the default delivery workflow unless the user explicitly opts out or production access is unavailable.
