@@ -56,6 +56,10 @@ export const SOURCE_FILES = [
   'packages/generator/prompts/2.4.0/02-author.md',
   'packages/generator/prompts/2.4.0/03-critic.md',
   'packages/generator/prompts/2.4.0/04-repair.md',
+  'packages/generator/prompts/2.5.0/01-plan.md',
+  'packages/generator/prompts/2.5.0/02-author.md',
+  'packages/generator/prompts/2.5.0/03-critic.md',
+  'packages/generator/prompts/2.5.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'packages/generator/quality-profiles/default.md',
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
@@ -126,10 +130,15 @@ export async function compileProductionBundle(
   fixedDate?: string,
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
-  const plan = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/01-plan.md'), 'utf8')
-  const author = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
-  const critic = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
-  const repair = await readFile(resolve(repoRoot, 'packages/generator/prompts/2.4.0/04-repair.md'), 'utf8')
+  const readPromptStage = async (fileName: string) => {
+    const base = await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8')
+    const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
+    return `${base.trim()}\n\n---\n\n${groundingOverlay.trim()}\n`
+  }
+  const plan = await readPromptStage('01-plan.md')
+  const author = await readPromptStage('02-author.md')
+  const critic = await readPromptStage('03-critic.md')
+  const repair = await readPromptStage('04-repair.md')
   const schema = await readFile(resolve(repoRoot, 'packages/generator/src/curriculum-package-schema.ts'), 'utf8')
   const defaultProfile = compactQualityProfileForBundle(await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/default.md'), 'utf8'))
   const geminiProfile = compactQualityProfileForBundle(await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/gemini-3.7-flash.md'), 'utf8'))
@@ -139,9 +148,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.4.1-prod',
-    schemaVersion: '2.2.0',
-    promptVersion: '2.4.0',
+    bundleVersion: '2.5.0-prod',
+    schemaVersion: '2.3.0',
+    promptVersion: '2.5.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,

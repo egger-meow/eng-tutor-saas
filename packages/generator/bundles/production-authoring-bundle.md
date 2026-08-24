@@ -1,7 +1,7 @@
 ---
-bundleVersion: "2.4.1-prod"
-schemaVersion: "2.2.0"
-promptVersion: "2.4.0"
+bundleVersion: "2.5.0-prod"
+schemaVersion: "2.3.0"
+promptVersion: "2.5.0"
 engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
@@ -9,11 +9,15 @@ sourceHashes:
   "packages/generator/prompts/2.4.0/02-author.md": "592198831ffbdf16ffbe6708bc11c6df9c571d925299982f81bd452327e68b8a"
   "packages/generator/prompts/2.4.0/03-critic.md": "51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7"
   "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
-  "packages/generator/src/curriculum-package-schema.ts": "b84f82edfb4212d63599c6c687456f463bb2fd518084c397f0a00b2a75bea501"
+  "packages/generator/prompts/2.5.0/01-plan.md": "bfad89bdbb0fa64d821cf86a57a606dd12adee2d1508861a7e9abfae85884bc5"
+  "packages/generator/prompts/2.5.0/02-author.md": "46c0fda48adbfe653e4b824876cdeecca469141311fc51bc49d7bf398997b6ec"
+  "packages/generator/prompts/2.5.0/03-critic.md": "03f36e04147638d836494dd17b7173842151efb7867936c5a6bc66aa49e2bd1c"
+  "packages/generator/prompts/2.5.0/04-repair.md": "ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c"
+  "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "3c1e785b935118cc41e16f49511782ec6ca185293c1ca6171c8703e60a039198"
-  "docs/product-rules.md": "70597defa7bfb210443e5a6f6f5d42eba2d96bc702b69efbb832b435b35d75f2"
+  "docs/curriculum-quality-rubric.md": "db156a95b50ddf59174ca9018e509ac7c0bb711b7b9009fc2e06510ad3dee193"
+  "docs/product-rules.md": "b190a1c62733b79628015f9879ac4361381df73188c23afcab500758dfb197e7"
 ---
 
 # 紙屬英文 Production Authoring Bundle
@@ -47,10 +51,21 @@ Use grade, current syllabus position, demonstrated difficulty, prior mistakes, p
 
 Week 2 and later must demonstrate continuity through selected vocabulary recurrence, mistake-informed practice, or adjusted scaffolding. Avoid repeating an entire packet or overfitting to one mistake.
 
+## Real-world grounding
+
+Every newly authored production CurriculumPackage 2.3.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
+
+The production research funnel is explore, select, drill down, verify, then author. Planning priority remains learning need, target, genre/information structure, then researched topic. Normal factual readings carry 3–5 concrete propositions unless quality evidence records a specific justified exception.
+
+Canonical provenance closes `Source -> Fact -> Claim -> Actual lesson prose`. Each claim records stable fact IDs, an allowlisted canonical reading-block location, and exact text found at that location. `temporalMode` is explicitly `evergreen` or `current`; current research requires source publication dates, `researchedAt`, and freshness criticism.
+
+Web queries contain generalized public topic terms only. Never send child identity, school, level, feedback, mistakes, history, or profile data to search. Research extracts propositions rather than prose; authoring uses original educational synthesis and never reproduces protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
+
 ## Quality Gates
 
 - Align language and question style with Taiwan junior-high/CAP expectations.
 - Keep facts age-appropriate and checkable.
+- Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
 - Verify student and answer packets agree exactly.
 - Optimize for black-and-white A4 printing with readable spacing.
@@ -67,6 +82,10 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## Non-negotiable learning contract
 
+- Every new production 2.3.0 primary reading is real-world grounded, including grammar-heavy weeks. It normally teaches 3–5 concrete researched propositions and never uses null or N/A grounding as an escape hatch.
+- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, and a passed freshness review.
+- Research queries are privacy-safe generalized public topics. Authored prose is an original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported factual embellishment.
+
 - The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
 - A coherent reading uses the learner's actual level and detailed interests as a meaningful problem situation (~300–380 words and 10–12 core vocabulary items for normal-budget baseline, smoothly scaled with available study time). Interest never replaces the learning need, and the same hook is not copied week after week.
 - Plain text reading contract: Reading blocks contain clean text without inline HTML markup; the server PDF renderer owns deterministic target vocabulary and canonical grammar pattern highlighting.
@@ -77,6 +96,8 @@ This is the review contract for every weekly package. It distills the teaching r
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
+
+Research occurs after the single authoritative batch claim and before lesson planning/authoring: explore several public angles, select one per job, drill down, and verify important propositions. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes factual support, freshness, genericity, copyright transformation, and exact prose-bound provenance; repair updates dependent prose and grounding together.
 
 1. **Observe:** collect school progress, vocabulary status, recurring grammar errors, completion/difficulty, parent feedback, and the previous packet's quality findings.
 2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review (including cumulative previous-week review), and record what changed from last week and why.
@@ -92,6 +113,8 @@ Feedback about the child changes the next lesson's targets and difficulty. Feedb
 The Parent Answer PDF is intentionally narrow: answers, short reasons, legitimate alternatives, and only high-value misconception notes. Personalization rationale, internal tracking hypotheses, critic evidence, and routine follow-up prompts remain in structured production data rather than becoming parent homework.
 
 ## Release bar
+
+Grounding release failures include generic noun-skinning, unsupported or stale claims, copied/source-shaped prose, missing mandatory grounding, and any claim not bound to exact canonical reading text.
 
 Reject a package if a child needs a tutor to understand a new task, if an answer is missing, ambiguous, or lacks textual entailment, if Chinese support is insufficient, if a target has no observable evidence, if delayed retrieval is absent, or if a critical critic finding is unresolved. “Different” is not evidence of improvement; compare the new packet against the previous packet's known weaknesses.
 
@@ -258,8 +281,42 @@ export const AdaptiveExtensionSchema = z.strictObject({
 
 export type AdaptiveExtension = z.infer<typeof AdaptiveExtensionSchema>
 
-// Canonical 2.2.0 Production Schema
-export const CurriculumPackageSchema = z.strictObject({
+export const GroundingSourceSchema = z.strictObject({
+  id: StableId,
+  url: z.url(),
+  title: Text,
+  publisher: Text,
+  publishedAt: z.iso.datetime().optional(),
+  accessedAt: z.iso.datetime(),
+})
+
+export const GroundingFactSchema = z.strictObject({
+  id: StableId,
+  text: Text,
+  sourceIds: z.array(StableId).min(1),
+  classification: z.enum(['fact', 'inference']),
+})
+
+export const GroundingClaimSchema = z.strictObject({
+  id: StableId,
+  factIds: z.array(StableId).min(1),
+  location: Text,
+  text: Text,
+})
+
+export const GroundingSchema = z.strictObject({
+  topic: Text,
+  knowledgeType: z.enum(['event', 'person', 'place', 'process', 'concept', 'comparison', 'other']),
+  temporalMode: z.enum(['evergreen', 'current']),
+  researchedAt: z.iso.datetime(),
+  sources: z.array(GroundingSourceSchema).min(1),
+  facts: z.array(GroundingFactSchema).min(1),
+  claims: z.array(GroundingClaimSchema).min(1),
+})
+
+// Legacy 2.2.0 production schema. Historical packages remain renderable but are
+// never upgraded by inventing grounding metadata.
+export const CurriculumPackageV22Schema = z.strictObject({
   metadata: z.strictObject({
     schemaVersion: z.literal('2.2.0'),
     jobId: StableId,
@@ -337,6 +394,17 @@ export const CurriculumPackageSchema = z.strictObject({
     criticFindings: z.array(z.strictObject({ dimension: StableId, severity: z.enum(['info', 'warning', 'critical']), finding: Text, resolution: Text.nullable() })),
   }),
 })
+
+// Canonical 2.3.0 Production Schema
+export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
+  metadata: CurriculumPackageV22Schema.shape.metadata.extend({
+    schemaVersion: z.literal('2.3.0'),
+  }),
+  grounding: GroundingSchema,
+})
+
+/** The one canonical schema used for all newly authored production packages. */
+export const CurriculumPackageSchema = CurriculumPackageV23Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -486,7 +554,9 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
-export type CurriculumPackage = z.infer<typeof CurriculumPackageSchema>
+export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
+export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
+export type CurriculumPackage = CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
 export type CurriculumQuestion = z.infer<typeof Question>
@@ -651,6 +721,41 @@ Output a JSON object matching `learningPlan`:
   "exclusions": ["passive-voice", "relative-clauses"]
 }
 ```
+
+---
+
+# Prompt 01 Overlay: Grounded Planning (v2.5.0)
+
+Apply the full Prompt 2.4.0 planning contract, with Curriculum Schema 2.3.0 and Prompt Version 2.5.0.
+
+## Batch grounding research
+
+After exactly one authoritative queue batch claim, conduct one batched public-web research phase before lesson planning. Do not claim again. Broad discovery may be deduplicated, but each job receives an isolated research brief and no learner context is shared between jobs.
+
+Use this funnel:
+
+1. Explore several specific real-world angles related to the permitted interest terms.
+2. Select one angle by learning-target fit, interest relevance, age appropriateness, lexical feasibility, evidence quality, novelty, and teachability.
+3. Drill into the selected entity, event, mechanism, history, system, or cultural context.
+4. Verify important propositions with suitable sources.
+5. Build the per-job `grounding` object before authoring.
+
+Planning priority remains `learning need -> target -> genre/information structure -> researched topic`. Research never overrides feedback, prerequisites, school progress, CAP progression, workload, or the lexical ceiling.
+
+## Search privacy boundary
+
+Web queries may contain only generalized public topic terms. Never transmit child names, child/job IDs, school information, grade or English level, feedback, mistakes, learner history, profile text, or any other private learner context. Search executors receive a privacy-safe topic query, not the curriculum capsule.
+
+## Research brief contract
+
+Choose `temporalMode` explicitly:
+
+- `evergreen`: durable knowledge; `researchedAt` required and `publishedAt` optional.
+- `current`: time-sensitive information; `researchedAt` and every source `publishedAt` required, with date-aware freshness review.
+
+Prefer official/primary sources and reputable news, science, educational, or reference publishers. Use Wikipedia/Wikimedia only for discovery or cross-checking, never as the narrative template. Extract propositions, not prose. Plan normally 3–5 concrete factual propositions; when the information structure legitimately needs fewer, require a specific `grounding-density-exception` critical check with substantive evidence.
+
+This contract is executor-neutral. A future Responses API `web_search` adapter may supply research results, but it must emit the same canonical grounding fields and must never place provider response shapes in the curriculum package.
 
 ## 6. Prompt 02: Authoring Engine
 # Prompt 02: Material Authoring (v2.4.0)
@@ -901,6 +1006,40 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).
 
+---
+
+# Prompt 02 Overlay: Grounded Authoring (v2.5.0)
+
+Apply the full Prompt 2.4.0 authoring contract, with Curriculum Schema 2.3.0 and Prompt Version 2.5.0.
+
+## Mandatory canonical grounding
+
+Every new production package contains one non-null top-level `grounding` object. There is no N/A mode. Grammar-heavy weeks may contain ordinary language practice, but the primary reading still teaches through a researched real-world context.
+
+Use only approved `grounding.facts` for externally checkable prose. Keep verified facts and explicit inferences distinct. Do not invent statistics, dates, quotations, transactions, biography details, scientific claims, events, or fictional-work details.
+
+For every factual statement authored into the primary reading, create a claim:
+
+```json
+{
+  "id": "claim-1",
+  "factIds": ["fact-2"],
+  "location": "studentLesson.reading.blocks.1.text",
+  "text": "The NBA adopted the three-point line in 1979."
+}
+```
+
+`location` must identify the exact canonical reading-block string field, and `text` must occur there exactly. Every source supports a fact, every fact is claimed, and every claim binds actual prose. Keep IDs unique and stable.
+The required provenance chain is `Source -> Fact -> Claim -> Actual lesson prose`.
+
+## Original educational synthesis
+
+Independently reorganize and rewrite source propositions into level-appropriate prose. Do not copy source structure or distinctive wording. Avoid unnecessary quotations and substantial reproduction. For copyrighted fictional works, use limited factual/cultural context only; never reproduce dialogue, scripts, subtitles, manga text, or long plot summaries.
+
+Grounding metadata is internal. Do not render engineering citations into Student or Parent content. `reading.sourceNote` stays optional, compact, and pedagogical—not the provenance authority.
+
+Before output, add passed `qualityEvidence.criticalChecks` entries for `grounding-accuracy` and `grounding-copyright`; current packages also require `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
+
 ## 7. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.4.0)
 
@@ -972,6 +1111,26 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
 }
 ```
 
+---
+
+# Prompt 03 Overlay: Grounding Critic (v2.5.0)
+
+Apply the full Prompt 2.4.0 critic contract and evaluate grounding together with CAP authenticity, lexical ceiling, grammar, entailment, personalization, cognitive load, self-study continuity, and print usability.
+
+Ask directly: did the learner gain specific, real, informative knowledge about the interest, or is this generic noun-skinning?
+
+Mark critical when any of these occur:
+
+- generic fictional filler or surface interest labels where researched treatment is appropriate;
+- a source does not support its extracted fact, or prose makes an unsupported factual claim;
+- a claim lacks valid fact IDs, canonical location, or exact authored text binding;
+- current research is stale, undated, or insensitive to event dates;
+- prose copies source wording/structure or uses protected dialogue, scripts, subtitles, manga text, or excessive plot retelling;
+- grounding hijacks the diagnosed learning plan;
+- the primary reading lacks meaningful factual substance without a specific justified density exception.
+
+For `current`, inspect `publishedAt` and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient.
+
 ## 8. Prompt 04: Repair Specialist
 # Prompt 04: Repair (v2.4.0)
 
@@ -1000,3 +1159,15 @@ When fixing validation or critic findings in a curriculum package:
 ## 2. Output Contract
 
 Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.2.0).
+
+---
+
+# Prompt 04 Overlay: Grounding Repair (v2.5.0)
+
+Apply the full Prompt 2.4.0 targeted-repair contract, with Curriculum Schema 2.3.0 and Prompt Version 2.5.0.
+
+Repair dependent fragments atomically. If a factual sentence changes, update its claim `text` and `location`; if support changes, update the claim's `factIds`, the fact, and its `sourceIds` together. Never make a validator pass by deleting grounding, using N/A, weakening IDs, or pointing claims at unrelated prose.
+
+Preserve valid research and unaffected authored content. Re-research only when the rejection concerns grounding accuracy, freshness, topic quality, source adequacy, or a changed passage dependency. Ordinary pedagogy, formatting, answer, or rendering repairs must reuse the valid grounding brief.
+
+Maintain all existing retry behavior. This repair stage does not claim, submit, render, upload, complete, or alter technical retry state. Output the complete corrected schema 2.3.0 package only.

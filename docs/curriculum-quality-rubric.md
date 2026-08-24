@@ -4,6 +4,10 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## Non-negotiable learning contract
 
+- Every new production 2.3.0 primary reading is real-world grounded, including grammar-heavy weeks. It normally teaches 3–5 concrete researched propositions and never uses null or N/A grounding as an escape hatch.
+- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, and a passed freshness review.
+- Research queries are privacy-safe generalized public topics. Authored prose is an original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported factual embellishment.
+
 - The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
 - A coherent reading uses the learner's actual level and detailed interests as a meaningful problem situation (~300–380 words and 10–12 core vocabulary items for normal-budget baseline, smoothly scaled with available study time). Interest never replaces the learning need, and the same hook is not copied week after week.
 - Plain text reading contract: Reading blocks contain clean text without inline HTML markup; the server PDF renderer owns deterministic target vocabulary and canonical grammar pattern highlighting.
@@ -14,6 +18,8 @@ This is the review contract for every weekly package. It distills the teaching r
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
+
+Research occurs after the single authoritative batch claim and before lesson planning/authoring: explore several public angles, select one per job, drill down, and verify important propositions. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes factual support, freshness, genericity, copyright transformation, and exact prose-bound provenance; repair updates dependent prose and grounding together.
 
 1. **Observe:** collect school progress, vocabulary status, recurring grammar errors, completion/difficulty, parent feedback, and the previous packet's quality findings.
 2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review (including cumulative previous-week review), and record what changed from last week and why.
@@ -29,5 +35,7 @@ Feedback about the child changes the next lesson's targets and difficulty. Feedb
 The Parent Answer PDF is intentionally narrow: answers, short reasons, legitimate alternatives, and only high-value misconception notes. Personalization rationale, internal tracking hypotheses, critic evidence, and routine follow-up prompts remain in structured production data rather than becoming parent homework.
 
 ## Release bar
+
+Grounding release failures include generic noun-skinning, unsupported or stale claims, copied/source-shaped prose, missing mandatory grounding, and any claim not bound to exact canonical reading text.
 
 Reject a package if a child needs a tutor to understand a new task, if an answer is missing, ambiguous, or lacks textual entailment, if Chinese support is insufficient, if a target has no observable evidence, if delayed retrieval is absent, or if a critical critic finding is unresolved. “Different” is not evidence of improvement; compare the new packet against the previous packet's known weaknesses.

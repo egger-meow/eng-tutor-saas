@@ -1511,6 +1511,8 @@ The implementation format may differ from the original CSV/Markdown format.
 
 The content model should preserve the same purpose.
 
+Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable.
+
 ---
 
 # 62. Vocabulary Source
@@ -1740,6 +1742,8 @@ Interest is a hook.
 
 It is not permission to turn every week into repetitive fan fiction.
 
+It is also not permission for generic noun-skinning. Every new production primary reading, including grammar-heavy weeks, should teach specific real-world knowledge researched through an explore, select, drill-down, and verify funnel. Planning order remains learning need, target, information structure/genre, then researched interest angle.
+
 ---
 
 # 74. Theme Memory
@@ -1775,6 +1779,8 @@ Across weekly packets, reading comprehension should include a useful mixture of:
 The system should not mechanically require every category in exactly equal numbers every week.
 
 The overall curriculum should preserve CAP-style thinking.
+
+Interest-grounded factual readings normally carry 3–5 concrete propositions. Canonical provenance must close `Source -> Fact -> Claim -> Actual lesson prose`: every claim identifies fact IDs, an allowed canonical reading field, and exact text occurring in that field.
 
 ---
 
@@ -2530,7 +2536,7 @@ Its job is to:
 
 ---
 
-# 118. Worker Reads Two Sources
+# 118. Worker Reads Three Sources
 
 Normal production generation combines:
 
@@ -2558,12 +2564,18 @@ Contains:
 * current job;
 * subscription entitlement.
 
+## Source C: Public web research
+
+Contains only public, non-private curriculum-topic information. Search queries may use generalized interest/topic terms but must never transmit child identity, school, grade/level, feedback, mistakes, history, or profile data. Research is batched only after the single authoritative claim; broad discovery may be deduplicated while each job's brief remains isolated.
+
 Concept:
 
 ```text
 Production rules
 +
 child state
++
+public topic research
 =
 next packet
 ```
@@ -2621,6 +2633,8 @@ A future GitHub Actions based job runner may also be evaluated if appropriate.
 That migration must be explicit.
 
 The frontend and core database model should not depend on which worker implementation is currently used.
+
+A future Responses API `web_search` executor must emit the same canonical grounding object. Provider-specific response shapes must not enter the curriculum schema.
 
 ---
 
@@ -2751,6 +2765,7 @@ An operator should be able to determine:
 * which feedback was available;
 * which profile state was used;
 * which curriculum state was used.
+* which public sources, facts, and authored prose claims grounded it.
 
 ---
 
@@ -2768,6 +2783,8 @@ Git provides:
 * commit identifiers.
 
 Every material should record the relevant git-based rule / prompt version.
+
+New production authoring uses schema 2.3.0 and prompt 2.5.0. Historical 2.0.0–2.2.0 packages remain readable but are not valid targets for new authoring.
 
 ---
 
@@ -3702,6 +3719,11 @@ Automated or semi-automated validation should eventually check:
 * PDF renders successfully;
 * Homework exists;
 * material metadata exists.
+* schema 2.3.0 grounding exists and is not nullable;
+* source, fact, and claim IDs are unique and fully referenced;
+* claim locations resolve to allowed canonical authored-prose fields and contain the exact claim text;
+* `temporalMode` is explicit, and `current` sources have publication dates plus passed freshness evidence;
+* required grounding accuracy and copyright critical checks pass.
 
 ---
 
@@ -3924,6 +3946,7 @@ For an eligible child:
 9. both are stored privately;
 10. parent can download them;
 11. metadata records generation version.
+12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance.
 
 ---
 
@@ -4142,6 +4165,10 @@ For weekly-material work specifically:
 12. Include retrieval practice.
 13. Produce Student and Parent outputs separately.
 14. Record why this week differs from the previous week.
+15. Research one real-world interest angle after the single batch claim using privacy-safe public queries.
+16. Require real grounding for every new production 2.3.0 primary reading; never use null or N/A.
+17. Bind every factual claim to exact canonical lesson prose and verify current-event freshness.
+18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
 
 ---
 

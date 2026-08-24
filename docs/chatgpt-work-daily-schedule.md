@@ -74,7 +74,9 @@ For a retry claim, `retryContext` is authoritative and contains the immutable pr
 
 PACKAGE AUTHORING
 
-For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.2.0. Use only the returned context plus the current repository rules. A retry submission is a new immutable authoring attempt; never overwrite or omit the prior package from the audit trail.
+After the one authoritative batch claim, conduct one batch grounding-research phase using public web sources. Explore several privacy-safe generalized topic angles, select and drill into one per job, verify important propositions, and create an isolated grounding brief before planning/authoring. Never put child names or IDs, nickname, school, grade/level, feedback, mistakes, history, or profile data in a web query. Broad public-topic discovery may be deduplicated, but never mix briefs or learner context between children. Do not claim a second time.
+
+For each claimed context, create exactly one JSON object conforming to CurriculumPackageSchema 2.3.0. Every package requires real, non-null grounding; there is no N/A mode. Use only the returned private context, the current repository rules, and privacy-safe public research. A retry submission is a new immutable authoring attempt; never overwrite or omit the prior package from the audit trail.
 
 Plan before authoring:
 
@@ -97,7 +99,7 @@ Author a self-study-first packet:
 
 INDEPENDENT CRITIC AND REPAIR
 
-Switch to a strict independent critic stance. Simulate a tired junior-high learner studying alone. Inspect self-study continuity, gradual release, CAP authenticity, vocabulary ceiling, grammar accuracy, question-answer integrity, distractors, personalization depth, feedback/school/history use, cognitive load, print usability, tracking provenance, and every claimed improvement.
+Switch to a strict independent critic stance. Simulate a tired junior-high learner studying alone. Inspect self-study continuity, gradual release, CAP authenticity, vocabulary ceiling, grammar accuracy, question-answer integrity, distractors, personalization depth, feedback/school/history use, cognitive load, print usability, tracking provenance, and every claimed improvement. Also inspect factual support, `Source -> Fact -> Claim -> Actual lesson prose` bindings, meaningful specificity, copyright-safe transformation, and whether `current` source publication dates remain fresh relative to `researchedAt`.
 
 Treat any `qualityTrends` dimension with count >= 2 as repeated evidence: require a concrete response in this packet or a context-specific reason for not applying it. Also reject any Parent projection that expects routine teaching, diagnosis, or follow-up interviewing from the parent.
 
@@ -116,7 +118,7 @@ Continue only if the function returns true. Otherwise report LEASE_LOST.
 
 SUBMIT AND READ-AFTER-WRITE RECOVERY — DO NOT RENDER OR COMPLETE
 
-For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.2.0, submit it with exactly one call:
+For a package that passes the independent critic and conforms to CurriculumPackageSchema 2.3.0, submit it with exactly one call:
 
 select private_generation.chatgpt_submit_curriculum_package(
   '<job-uuid>'::uuid,

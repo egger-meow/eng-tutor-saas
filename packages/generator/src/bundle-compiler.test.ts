@@ -17,12 +17,16 @@ describe('bundle-compiler', () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
-    expect(freshBundle.metadata.schemaVersion).toBe('2.2.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.4.0')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.4.1-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(9)
+    expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
+    expect(freshBundle.metadata.promptVersion).toBe('2.5.0')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.5.0-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
+    expect(freshBundle.content).toContain('Source -> Fact -> Claim')
+    expect(freshBundle.content).toContain('studentLesson.reading.blocks.1.text')
+    expect(freshBundle.content).toContain('temporalMode')
+    expect(freshBundle.content).toContain('There is no N/A mode')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {
@@ -65,9 +69,9 @@ describe('bundle-compiler', () => {
     })
   })
 
-  it('keeps compiled bundle size within token budget (< 6400 words / ~7500 tokens)', async () => {
+  it('keeps compiled bundle size within grounded-production budget (< 8000 words)', async () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
     const wordCount = freshBundle.content.trim().split(/\s+/u).length
-    expect(wordCount).toBeLessThan(6400)
+    expect(wordCount).toBeLessThan(8000)
   })
 })
