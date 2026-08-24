@@ -22,18 +22,22 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
   const [manifestOpen, setManifestOpen] = useState(false)
   if (!data) return <div>Loading operations…</div>
   const open = (job: PipelineJobRow) => onDrillDownTimeline(job.childId, job.materialWeek)
-  const demand = data.capacity.activeCount + (data.capacity.waitingCount || 0)
+  const alignmentLabel = data.engineInspector.alignmentStatus === 'version_drift'
+    ? 'VERSION DRIFT'
+    : data.engineInspector.alignmentStatus === 'unobservable'
+    ? 'UNOBSERVABLE'
+    : 'VERSIONS ALIGNED'
   return <div className="operations-cockpit">
     <section className="capacity-strip" aria-label="Service capacity">
       <div><span>Service children</span><strong>{data.capacity.activeCount} / {data.capacity.maxCapacity}</strong></div>
       <div><span>Waiting</span><strong>{data.capacity.waitingCount || 0}</strong></div>
-      <div><span>Total demand</span><strong>{demand}</strong></div>
+      <div><span>Total demand</span><strong>{data.capacity.totalDemand}</strong></div>
     </section>
     <section className={`engine-inspector ${data.engineInspector.aligned ? 'aligned' : 'drift'}`}>
-      <button onClick={() => setManifestOpen((value) => !value)}><span>Production engine v{data.engineInspector.expected.engine}</span><strong>{data.engineInspector.aligned ? 'VERSIONS ALIGNED' : 'VERSION DRIFT'}</strong><small>{manifestOpen ? 'Hide manifest' : 'Show manifest'}</small></button>
+      <button onClick={() => setManifestOpen((value) => !value)}><span>Production engine v{data.engineInspector.expected.engine}</span><strong>{alignmentLabel}</strong><small>{manifestOpen ? 'Hide manifest' : 'Show manifest'}</small></button>
       {manifestOpen && <div className="engine-manifest">
         {Object.entries(data.engineInspector.expected).map(([component, version]) => <div key={component}><span>{component}</span><code>{version}</code></div>)}
-        {data.engineInspector.drift.map((item) => <div className="drift-row" key={`${item.source}-${item.id}-${item.component}`}><span>{item.source} · {item.id.slice(0, 8)} · {item.component}</span><code>expected {item.expected} / actual {item.actual || 'missing'}</code></div>)}
+        {data.engineInspector.drift.map((item) => <div className="drift-row" key={`${item.source}-${item.id}-${item.component}`}><span>{item.source} · {item.id.slice(0, 8)} · {item.component}</span><code>{item.status === 'unobservable' ? `UNOBSERVABLE (expected ${item.expected})` : `expected ${item.expected} / actual ${item.actual}`}</code></div>)}
       </div>}
     </section>
     <div className="pipeline-grid">

@@ -8,6 +8,8 @@ import {
   CURRENT_ERA_TAG,
   formatEngineEraLabel,
   formatEngineVersion,
+  deriveOperationsPipeline,
+  OPERATIONS_MATERIALS_SELECT,
 } from './admin-service.js'
 
 function createMockSupabaseClient(
@@ -143,6 +145,9 @@ function createMockSupabaseClient(
       if (fnName === 'admin_get_curriculum_submissions' && tableData.curriculum_submissions) {
         return { data: tableData.curriculum_submissions, error: null }
       }
+      if (fnName === 'get_enrollment_state' && tableData.enrollment_settings) {
+        return { data: tableData.enrollment_settings, error: null }
+      }
       if (tableData[fnName]) {
         return { data: tableData[fnName], error: null }
       }
@@ -182,6 +187,100 @@ describe('AdminService Authoritative Truth Layer', () => {
     const service = new AdminService({ supabaseUrl: '', supabaseSecretKey: '' })
     expect(service.getIsConnected()).toBe(false)
     await expect(service.getOperationsOverview()).rejects.toThrow('Supabase client is not configured')
+  })
+
+  it('uses only real production materials columns in the overview select contract', () => {
+    expect(OPERATIONS_MATERIALS_SELECT.split(',').map((field) => field.trim())).toEqual([
+      'id', 'child_id', 'material_week', 'revision', 'rule_version', 'prompt_version',
+      'generator_version', 'model_name', 'student_pdf_path', 'parent_answer_pdf_path',
+      'canonical_source', 'created_at',
+    ])
+    expect(OPERATIONS_MATERIALS_SELECT).not.toMatch(/(?:^|,\s*)(?:release_at|released_at)(?:\s*,|$)/)
+  })
+
+  it('classifies every active production pipeline state exhaustively from the current attempt', () => {
+    const now = '2026-08-24T12:00:00.000Z'
+    const base = {
+      child_id: 'child-1', material_week: '2026-08-24', max_attempts: 5,
+      created_at: '2026-08-24T00:00:00.000Z', updated_at: '2026-08-24T01:00:00.000Z',
+    }
+    const jobs = [
+      { ...base, id: 'pending-new', status: 'pending', attempt_count: 0 },
+      { ...base, id: 'pending-retry', status: 'pending', attempt_count: 2 },
+      { ...base, id: 'claimed-unsubmitted', status: 'claimed', attempt_count: 2 },
+      { ...base, id: 'finisher-pending', status: 'claimed', attempt_count: 1 },
+      { ...base, id: 'finisher-processing', status: 'claimed', attempt_count: 1 },
+      { ...base, id: 'finisher-technical', status: 'claimed', attempt_count: 1 },
+      { ...base, id: 'completed-released', status: 'completed', attempt_count: 1, release_at: '2026-08-24T10:00:00.000Z' },
+      { ...base, id: 'completed-unreleased', status: 'completed', attempt_count: 1, release_at: '2026-08-25T10:00:00.000Z' },
+      { ...base, id: 'quality-exhausted', status: 'failed', attempt_count: 5 },
+      { ...base, id: 'quality-override', status: 'completed', attempt_count: 5, release_at: '2026-08-25T10:00:00.000Z' },
+      { ...base, id: 'generation-failed', status: 'failed', attempt_count: 2 },
+      { ...base, id: 'canceled', status: 'canceled', attempt_count: 0 },
+    ]
+    const submissions = [
+      { job_id: 'pending-retry', authoring_attempt: 1, status: 'quality_rejected' },
+      { job_id: 'claimed-unsubmitted', authoring_attempt: 1, status: 'quality_rejected' },
+      { job_id: 'finisher-pending', authoring_attempt: 1, status: 'pending' },
+      { job_id: 'finisher-processing', authoring_attempt: 1, status: 'processing' },
+      { job_id: 'finisher-technical', authoring_attempt: 1, status: 'technical_failed' },
+      { job_id: 'completed-released', authoring_attempt: 1, status: 'completed' },
+      { job_id: 'completed-unreleased', authoring_attempt: 1, status: 'completed' },
+      { job_id: 'quality-exhausted', authoring_attempt: 5, status: 'quality_rejected' },
+      { job_id: 'quality-override', authoring_attempt: 5, status: 'quality_rejected' },
+    ]
+    const pipeline = deriveOperationsPipeline({
+      jobs,
+      submissions,
+      overrides: [{ job_id: 'quality-override' }],
+      childNames: new Map([['child-1', 'Test Child']]),
+      maskName: (name) => name || 'unknown',
+      now,
+    })
+    const ready = new Map(pipeline.readyToClaim.map((row) => [row.jobId, row.status]))
+    const awaiting = new Map(pipeline.awaitingFinisher.map((row) => [row.jobId, row.status]))
+    const done = new Map(pipeline.finisherDone.map((row) => [row.jobId, row.status]))
+
+    expect([...ready.keys()]).toEqual(['pending-new', 'pending-retry', 'claimed-unsubmitted', 'generation-failed'])
+    expect(ready.get('pending-retry')).toBe('RETRY READY')
+    expect(ready.get('claimed-unsubmitted')).toBe('AUTHORING CLAIMED — AWAITING SUBMISSION')
+    expect([...awaiting.keys()]).toEqual(['finisher-pending', 'finisher-processing', 'finisher-technical'])
+    expect(awaiting.get('finisher-technical')).toBe('TECHNICAL FAILURE — RETRYABLE')
+    expect(done.get('completed-released')).toBe('RELEASED')
+    expect(done.get('completed-unreleased')).toBe('AWAITING RELEASE')
+    expect(done.get('quality-exhausted')).toBe('QUALITY REJECTED')
+    expect(done.get('quality-override')).toBe('DELIVERED WITH QUALITY OVERRIDE')
+    expect(done.has('finisher-technical')).toBe(false)
+    expect(pipeline.readyToClaim.length + pipeline.awaitingFinisher.length + pipeline.finisherDone.length).toBe(11)
+  })
+
+  it('never treats generator_version as schema provenance and labels missing components unobservable', async () => {
+    const service = new AdminService({ client: createMockSupabaseClient({
+      children: [{ id: 'child-1', display_name: 'Test Child', is_active: true, is_internal_test: false }],
+      subscriptions: [],
+      generation_jobs: [],
+      materials: [{
+        id: 'material-1', child_id: 'child-1', material_week: '2026-08-24', revision: 1,
+        rule_version: 'rules/1', prompt_version: CURRENT_PROMPT_VERSION,
+        generator_version: CURRENT_SCHEMA_VERSION, model_name: 'model',
+        student_pdf_path: 'child/job/student.pdf', parent_answer_pdf_path: 'child/job/parent-answer.pdf',
+        canonical_source: { metadata: {} }, created_at: '2026-08-24T00:00:00.000Z',
+      }],
+      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
+      curriculum_submissions: [],
+    }) })
+
+    const overview = await service.getOperationsOverview()
+    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
+    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
+      source: 'material', id: 'material-1', component: 'schema', actual: null, status: 'unobservable',
+    }))
+    expect(overview.engineInspector.drift).not.toContainEqual(expect.objectContaining({
+      component: 'schema', actual: CURRENT_SCHEMA_VERSION, status: 'version_drift',
+    }))
+    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
+      component: 'worker', actual: null, status: 'unobservable',
+    }))
   })
 
   it('aggregates real database rows for Operations Overview with separated Generation and Finisher queues', async () => {

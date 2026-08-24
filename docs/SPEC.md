@@ -2734,7 +2734,7 @@ Future operator flow should allow:
 
 During early beta, manual quality inspection is acceptable.
 
-Quality-rejected authoring retries automatically up to five attempts. After attempt five, the Finisher may deliver a valid and renderable candidate only when every remaining rejection belongs to the explicit code-reviewed soft pedagogical allowlist. The rejected submission and evidence remain immutable; the delivery is recorded separately as `delivered_with_quality_override` with an override reason and is never represented as passed or completed. Invalid schema, missing required content, progression-integrity failures, broken rendering, storage failures, PII or safety violations, grounding/provenance failures, and corrupted artifacts are never bypassable.
+Quality-rejected authoring retries automatically up to five attempts. After attempt five, the Finisher may deliver a valid and renderable candidate only when every remaining rejection belongs to the explicit code-reviewed soft pedagogical allowlist. The rejected submission and evidence remain immutable; the delivery is recorded separately as `delivered_with_quality_override` with an override reason and is never represented as passed or completed. Material/job completion, immutable rejection, and the separate override outcome must commit atomically so no candidate becomes releasable before all three records exist. Invalid schema, missing required content, progression-integrity failures, broken rendering, storage failures, PII or safety violations, grounding/provenance failures, and corrupted artifacts are never bypassable.
 
 ---
 
@@ -2943,7 +2943,7 @@ Examples:
 
 The generator should not infer entitlement merely from the existence of a `students` row.
 
-An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, and public capacity accounting only. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics and founding quota.
+An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, public waitlist demand, and public capacity accounting only. Enabling or disabling it must not overwrite, cancel, or otherwise mutate a real subscription. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics and founding quota.
 
 ---
 
@@ -3571,7 +3571,7 @@ A polished admin app is not required initially.
 
 Supabase Dashboard plus targeted internal tooling is acceptable.
 
-The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is derived from the current job and latest authoring attempt only. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand. The current engine manifest is declared by production repository code and compared with persisted job, submission, and material provenance; mismatches must display expected and actual versions as `VERSION DRIFT`.
+The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is exhaustive for active jobs and is derived from the current job and latest matching authoring attempt only. Claimed jobs remain visible before submission, and `technical_failed` Finisher work remains retryable in `AWAITING FINISHER`. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand, where total demand is service children plus waiting children plus released-not-converted children. The current engine manifest is declared by production repository code and compared only with exact matching persisted job, submission, and material provenance fields; mismatches display expected and actual versions as `VERSION DRIFT`, while components without matching persisted provenance display `UNOBSERVABLE`. Material release truth comes from `generation_jobs.release_at`.
 
 ---
 

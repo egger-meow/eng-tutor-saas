@@ -78,16 +78,14 @@ export async function processCurriculumSubmissions(
             curriculumPackage: submission.canonical_source,
             recordJobFailure: false,
             allowSoftQualityOverride: true,
+            qualityOverride: {
+              authoringAttempt: submission.authoring_attempt,
+              processorId,
+              reason: 'Attempt 5 exhausted; all remaining findings are in the explicit soft pedagogical allowlist.',
+              rejectionEvidence: error.evidence,
+              rejectionMessage: message.slice(0, 2000),
+            },
           })
-          unwrap(await client.rpc('worker_record_quality_override', {
-            job_id: submission.job_id,
-            authoring_attempt: submission.authoring_attempt,
-            material_id: materialId,
-            processor_id: processorId,
-            override_reason: 'Attempt 5 exhausted; all remaining findings are in the explicit soft pedagogical allowlist.',
-            rejection_evidence: error.evidence,
-            rejection_message: message.slice(0, 2000),
-          }), 'record quality override')
           results.push({ jobId: submission.job_id, status: 'delivered_with_quality_override', materialId })
           continue
         } catch (overrideError) {

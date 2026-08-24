@@ -7,7 +7,12 @@ import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationConte
 function setup() {
   const uploads: string[] = []
   const removals: string[][] = []
-  const rpc = vi.fn<WorkerClient['rpc']>(async (name: string) => ({ data: name === 'worker_complete_generation_job' ? 'material-1' : true, error: null }))
+  const rpc = vi.fn<WorkerClient['rpc']>(async (name: string) => ({
+    data: name === 'worker_complete_generation_job' || name === 'worker_complete_generation_job_with_quality_override'
+      ? 'material-1'
+      : true,
+    error: null,
+  }))
   const client: WorkerClient = {
     rpc,
     storage: { from: () => ({
@@ -144,6 +149,40 @@ describe('completeCurriculumJob', () => {
     const state = setup()
     await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1', context: curriculumContext, curriculumPackage: curriculumSample, render: async () => pdfs, inspect })).resolves.toBe('material-1')
     expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+  })
+
+  it('commits an override candidate, immutable rejection, and delivery outcome through one atomic RPC', async () => {
+    const state = setup()
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: curriculumSample,
+      render: async () => pdfs,
+      inspect,
+      allowSoftQualityOverride: true,
+      qualityOverride: {
+        authoringAttempt: 5,
+        processorId: 'github-actions-finisher',
+        reason: 'Only allowlisted soft pedagogical gates remain.',
+        rejectionEvidence: {
+          failureType: 'QUALITY_REJECTED',
+          findings: [{ source: 'audit', dimension: 'cognitive-load', message: 'Too dense.' }],
+        },
+        rejectionMessage: 'Curriculum quality rejected: cognitive load',
+      },
+    })).resolves.toBe('material-1')
+
+    expect(state.rpc).toHaveBeenCalledWith(
+      'worker_complete_generation_job_with_quality_override',
+      expect.objectContaining({
+        job_id: 'kobe-week-2-v2',
+        authoring_attempt: 5,
+        processor_id: 'github-actions-finisher',
+        rejection_evidence: expect.objectContaining({ failureType: 'QUALITY_REJECTED' }),
+      }),
+    )
+    expect(state.rpc).not.toHaveBeenCalledWith('worker_record_quality_override', expect.anything())
   })
 
   it('processes a grounded 2.3 package through the unchanged render, upload, and completion path', async () => {

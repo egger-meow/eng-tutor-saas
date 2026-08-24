@@ -3,6 +3,79 @@ import { resolve } from 'node:path'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 export * from '../client/types.js'
 
+export const OPERATIONS_MATERIALS_SELECT = 'id, child_id, material_week, revision, rule_version, prompt_version, generator_version, model_name, student_pdf_path, parent_answer_pdf_path, canonical_source, created_at'
+
+type PipelineInput = {
+  jobs: any[]
+  submissions: any[]
+  overrides: any[]
+  childNames: Map<string, string>
+  maskName: (name: string | undefined, id: string) => string
+  now: string
+}
+
+export function deriveOperationsPipeline(input: PipelineInput): OperationsOverview['pipeline'] {
+  const latestSubmissionByJob = new Map<string, any>()
+  for (const submission of input.submissions) {
+    const previous = latestSubmissionByJob.get(submission.job_id)
+    if (!previous || Number(submission.authoring_attempt) > Number(previous.authoring_attempt)) {
+      latestSubmissionByJob.set(submission.job_id, submission)
+    }
+  }
+  const overrideByJob = new Map(input.overrides.map((override: any) => [override.job_id, override]))
+  const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [] }
+
+  for (const job of input.jobs) {
+    if (job.status === 'canceled') continue
+    const latest = latestSubmissionByJob.get(job.id)
+    const current = latest && Number(latest.authoring_attempt) === Number(job.attempt_count) ? latest : null
+    const attempt = Number(job.attempt_count) || 0
+    const maxAttempts = Number(job.max_attempts) || 5
+    const row: OperationsOverview['pipeline']['readyToClaim'][number] = {
+      jobId: job.id,
+      childId: job.child_id,
+      childPseudonym: input.maskName(input.childNames.get(job.child_id), job.child_id),
+      materialWeek: job.material_week,
+      attemptNumber: current ? Number(current.authoring_attempt) : attempt,
+      maxAttempts,
+      retryState: attempt >= maxAttempts ? 'exhausted' : attempt > 0 ? (job.status === 'pending' ? 'retry_waiting' : 'retry_in_progress') : 'first_attempt',
+      createdAt: job.created_at,
+      updatedAt: current?.processed_at || current?.submitted_at || job.completed_at || job.started_at || job.updated_at || job.created_at,
+      relevantTimestamp: current?.processed_at || current?.submitted_at || job.generation_due_at || job.scheduled_for || null,
+      status: job.status,
+    }
+
+    if (job.status === 'pending') {
+      row.status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
+      pipeline.readyToClaim.push(row)
+    } else if (job.status === 'claimed' && !current) {
+      row.status = 'AUTHORING CLAIMED — AWAITING SUBMISSION'
+      pipeline.readyToClaim.push(row)
+    } else if (current?.status === 'technical_failed') {
+      row.status = 'TECHNICAL FAILURE — RETRYABLE'
+      pipeline.awaitingFinisher.push(row)
+    } else if (current && ['pending', 'processing'].includes(current.status)) {
+      row.status = current.status === 'processing' ? 'FINISHER PROCESSING' : 'AWAITING FINISHER'
+      pipeline.awaitingFinisher.push(row)
+    } else if (overrideByJob.has(job.id)) {
+      row.status = 'DELIVERED WITH QUALITY OVERRIDE'
+      pipeline.finisherDone.push(row)
+    } else if (current?.status === 'completed' || job.status === 'completed') {
+      row.status = job.release_at
+        ? (job.release_at <= input.now ? 'RELEASED' : 'AWAITING RELEASE')
+        : 'COMPLETED'
+      pipeline.finisherDone.push(row)
+    } else if (current?.status === 'quality_rejected') {
+      row.status = 'QUALITY REJECTED'
+      pipeline.finisherDone.push(row)
+    } else {
+      row.status = job.status === 'failed' ? 'GENERATION FAILED — RETRY REQUIRED' : job.status.replaceAll('_', ' ').toUpperCase()
+      pipeline.readyToClaim.push(row)
+    }
+  }
+  return pipeline
+}
+
 import {
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
@@ -1082,8 +1155,11 @@ export class AdminService {
       this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active, is_internal_test'), dataSources),
       this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
       this.safeQuery<any[]>('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery<any[]>('materials', () => client.from('materials').select('id, child_id, material_week, revision, rule_version, prompt_version, generator_version, model_name, student_pdf_path, parent_answer_pdf_path, release_at, released_at, created_at').order('created_at', { ascending: false }).limit(200), dataSources),
-      this.safeQuery<any>('enrollment_settings', () => client.from('enrollment_settings').select('*').limit(1).maybeSingle(), dataSources),
+      this.safeQuery<any[]>('materials', () => client.from('materials').select(OPERATIONS_MATERIALS_SELECT).order('created_at', { ascending: false }).limit(200), dataSources),
+      this.safeQuery<any>('enrollment_state', () => client.rpc('get_enrollment_state').then((result: any) => ({
+        data: Array.isArray(result.data) ? result.data[0] ?? null : result.data,
+        error: result.error,
+      })), dataSources),
       this.queryCurriculumSubmissions(undefined, 200, dataSources),
     ])
 
@@ -1256,12 +1332,15 @@ export class AdminService {
     const capacityStatus = enrollment?.status ?? enrollment?.capacity_status ?? (activeChildren.length >= maxCapacity ? 'closed' : 'open')
 
     const capacity: OperationsOverview['capacity'] = {
-      activeCount: activeChildren.length,
+      activeCount: enrollment?.active_count ?? activeChildren.length,
       maxCapacity,
       status: capacityStatus as any,
       foundingCount: foundingRedeemedCount,
       foundingLimit,
       waitingCount: enrollment?.waiting_count ?? 0,
+      releasedCount: enrollment?.released_count ?? 0,
+      totalDemand: enrollment?.total_demand
+        ?? ((enrollment?.active_count ?? activeChildren.length) + (enrollment?.waiting_count ?? 0) + (enrollment?.released_count ?? 0)),
     }
 
     const latestSubmissionByJob = new Map<string, any>()
@@ -1271,64 +1350,59 @@ export class AdminService {
         latestSubmissionByJob.set(submission.job_id, submission)
       }
     }
-    const materialById = new Map(materials.map((material: any) => [material.id, material]))
-    const overrideByJob = new Map(overrides.map((override: any) => [override.job_id, override]))
-    const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [] }
-    for (const job of jobs) {
-      if (job.status === 'canceled') continue
-      const latest = latestSubmissionByJob.get(job.id)
-      const material: any = materialById.get(job.material_id)
-      const qualityOverride = overrideByJob.get(job.id)
-      const attempt = Number(job.attempt_count) || 0
-      const row = {
-        jobId: job.id,
-        childId: job.child_id,
-        childPseudonym: this.maskName(childMap.get(job.child_id), job.child_id),
-        materialWeek: job.material_week,
-        attemptNumber: latest ? Number(latest.authoring_attempt) : attempt,
-        maxAttempts: Number(job.max_attempts) || 5,
-        retryState: (attempt >= (Number(job.max_attempts) || 5) ? 'exhausted' : attempt > 0 ? (job.status === 'pending' ? 'retry_waiting' : 'retry_in_progress') : 'first_attempt') as any,
-        createdAt: job.created_at,
-        updatedAt: latest?.processed_at || latest?.submitted_at || job.completed_at || job.started_at || job.created_at,
-        relevantTimestamp: latest?.processed_at || latest?.submitted_at || job.generation_due_at || job.scheduled_for || null,
-        status: job.status,
-      }
-      // Current job state wins. A historical rejection can never pull a retrying job into FINISHER DONE.
-      if (job.status === 'pending') {
-        row.status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
-        pipeline.readyToClaim.push(row)
-      } else if (latest && ['pending', 'processing'].includes(latest.status)) {
-        row.status = latest.status === 'processing' ? 'FINISHER PROCESSING' : 'AWAITING FINISHER'
-        pipeline.awaitingFinisher.push(row)
-      } else if (latest && ['completed', 'quality_rejected', 'technical_failed'].includes(latest.status)) {
-        row.status = qualityOverride
-          ? 'DELIVERED WITH QUALITY OVERRIDE'
-          : material?.released_at && material.released_at <= now
-          ? 'RELEASED'
-          : material?.release_at
-          ? 'AWAITING RELEASE'
-          : latest.status === 'completed'
-          ? 'COMPLETED'
-          : latest.status.replaceAll('_', ' ').toUpperCase()
-        pipeline.finisherDone.push(row)
-      }
-    }
+    const pipeline = deriveOperationsPipeline({
+      jobs,
+      submissions,
+      overrides,
+      childNames: childMap,
+      maskName: (name, id) => this.maskName(name, id),
+      now,
+    })
     const expected = { ...CURRENT_ENGINE_MANIFEST } as Record<string, string>
     const drift: OperationsOverview['engineInspector']['drift'] = []
+    let observableComparisons = 0
     const compare = (source: string, id: string, component: string, actual: unknown) => {
       const expectedVersion = expected[component]
       const observed = typeof actual === 'string' && actual.length > 0 ? actual : null
-      if (expectedVersion && observed !== expectedVersion) drift.push({ source, id, component, expected: expectedVersion, actual: observed })
+      if (!expectedVersion) return
+      if (observed === null) {
+        drift.push({ source, id, component, expected: expectedVersion, actual: null, status: 'unobservable' })
+      } else {
+        observableComparisons++
+        if (observed !== expectedVersion) drift.push({ source, id, component, expected: expectedVersion, actual: observed, status: 'version_drift' })
+      }
     }
     for (const submission of latestSubmissionByJob.values()) {
-      compare('submission', submission.job_id, 'engine', submission.engine_version ?? submission.canonical_source?.metadata?.engineVersion)
-      compare('submission', submission.job_id, 'schema', submission.schema_version ?? submission.canonical_source?.metadata?.schemaVersion)
-      compare('submission', submission.job_id, 'prompt', submission.prompt_version ?? submission.canonical_source?.metadata?.promptVersion)
+      compare('submission', submission.job_id, 'engine', submission.engine_version)
+      compare('submission', submission.job_id, 'schema', submission.schema_version)
+      compare('submission', submission.job_id, 'prompt', submission.prompt_version)
+      compare('submission', submission.job_id, 'qualityProfile', submission.quality_profile_version)
+      compare('submission', submission.job_id, 'pdfRenderer', submission.renderer_version)
+      compare('submission', submission.job_id, 'worker', submission.worker_version)
     }
     for (const material of materials.slice(0, 50)) {
+      compare('material', material.id, 'engine', material.canonical_source?.metadata?.engineVersion)
+      compare('material', material.id, 'schema', material.canonical_source?.metadata?.schemaVersion)
       compare('material', material.id, 'prompt', material.prompt_version)
-      compare('material', material.id, 'schema', material.generator_version)
+      compare('material', material.id, 'qualityProfile', material.canonical_source?.metadata?.modelQualityProfile?.qualityProfileVersion)
+      compare('material', material.id, 'pdfRenderer', material.canonical_source?.metadata?.rendererVersion)
+      compare('material', material.id, 'worker', material.canonical_source?.metadata?.workerVersion)
     }
+    if (latestSubmissionByJob.size === 0 && materials.length === 0) {
+      for (const [component, expectedVersion] of Object.entries(expected)) {
+        drift.push({
+          source: 'production',
+          id: 'no-recent-provenance',
+          component,
+          expected: expectedVersion,
+          actual: null,
+          status: 'unobservable',
+        })
+      }
+    }
+    const hasVersionDrift = drift.some((item) => item.status === 'version_drift')
+    const hasUnobservable = drift.some((item) => item.status === 'unobservable') || observableComparisons === 0
+    const alignmentStatus = hasVersionDrift ? 'version_drift' : hasUnobservable ? 'unobservable' : 'aligned'
 
     return {
       systemHealth,
@@ -1384,7 +1458,7 @@ export class AdminService {
       stuckJobs: stuckJobs.slice(0, 10),
       anomalies,
       pipeline,
-      engineInspector: { expected, aligned: drift.length === 0, drift },
+      engineInspector: { expected, aligned: alignmentStatus === 'aligned', alignmentStatus, drift },
     }
   }
 

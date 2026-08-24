@@ -177,6 +177,7 @@ export interface OperationsOverview {
     foundingLimit: number
     waitingCount?: number
     releasedCount?: number
+    totalDemand: number
   }
   queueStats: {
     pending: number
@@ -244,7 +245,15 @@ export interface OperationsOverview {
   engineInspector: {
     expected: Record<string, string>
     aligned: boolean
-    drift: Array<{ source: string; id: string; component: string; expected: string; actual: string | null }>
+    alignmentStatus: 'aligned' | 'version_drift' | 'unobservable'
+    drift: Array<{
+      source: string
+      id: string
+      component: string
+      expected: string
+      actual: string | null
+      status: 'version_drift' | 'unobservable'
+    }>
   }
 }
 

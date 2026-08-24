@@ -468,6 +468,13 @@ export type CompleteCurriculumInput = {
   inspect?: (pkg: CurriculumPackage, pair: CurriculumPdfBytes) => Promise<CurriculumPdfPairInspection>
   recordJobFailure?: boolean
   allowSoftQualityOverride?: boolean
+  qualityOverride?: {
+    authoringAttempt: number
+    processorId: string
+    reason: string
+    rejectionEvidence: CurriculumFailureEvidence
+    rejectionMessage: string
+  }
 }
 
 export const SOFT_QUALITY_OVERRIDE_DIMENSIONS = new Set([
@@ -567,7 +574,10 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       : await inspect(pkg, { student, parentAnswer })
     assertMatchingPdfPair(expectedInspection, actualInspection)
     completionStarted = true
-    const materialId = unwrap(await input.client.rpc('worker_complete_generation_job', {
+    const completionRpc = input.qualityOverride
+      ? 'worker_complete_generation_job_with_quality_override'
+      : 'worker_complete_generation_job'
+    const completionArgs: Record<string, unknown> = {
       job_id: input.context.job.id,
       worker_id: input.workerId,
       student_pdf_path: paths.student,
@@ -577,7 +587,15 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       prompt_version: pkg.metadata.promptVersion,
       generator_version: pkg.metadata.curriculumVersion,
       model_name: pkg.metadata.model,
-    }), 'complete curriculum generation job') as string
+    }
+    if (input.qualityOverride) {
+      completionArgs.authoring_attempt = input.qualityOverride.authoringAttempt
+      completionArgs.processor_id = input.qualityOverride.processorId
+      completionArgs.override_reason = input.qualityOverride.reason
+      completionArgs.rejection_evidence = input.qualityOverride.rejectionEvidence
+      completionArgs.rejection_message = input.qualityOverride.rejectionMessage
+    }
+    const materialId = unwrap(await input.client.rpc(completionRpc, completionArgs), 'complete curriculum generation job') as string
     try {
       unwrap(await input.client.rpc('worker_record_curriculum_observations', { material_id: materialId, worker_id: input.workerId, canonical_source: pkg }), 'record curriculum observations')
     } catch (observationError) {

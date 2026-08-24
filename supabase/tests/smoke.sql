@@ -1953,12 +1953,91 @@ begin
   if (select column_default from information_schema.columns where table_schema='public' and table_name='generation_jobs' and column_name='max_attempts') <> '5' then
     raise exception 'REGRESSION: generation jobs do not default to five authoring attempts';
   end if;
+  if exists (
+    select requested.column_name
+    from unnest(array[
+      'id','child_id','material_week','revision','rule_version','prompt_version',
+      'generator_version','model_name','student_pdf_path','parent_answer_pdf_path',
+      'canonical_source','created_at'
+    ]) as requested(column_name)
+    where not exists (
+      select 1 from information_schema.columns as actual
+      where actual.table_schema='public' and actual.table_name='materials'
+        and actual.column_name=requested.column_name
+    )
+  ) then
+    raise exception 'REGRESSION: Admin materials select contract references a nonexistent production column';
+  end if;
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='materials'
+      and column_name in ('release_at','released_at')
+  ) then
+    raise exception 'REGRESSION: release truth drifted from generation_jobs.release_at';
+  end if;
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+    attempt_count, max_attempts, claimed_by, lease_expires_at, release_at,
+    feedback_cutoff_at, generation_due_at
+  ) values (
+    '00000000-0000-0000-0000-000000000088',
+    '00000000-0000-0000-0000-000000000099', current_date + 200,
+    'override-atomicity-test', 'override-atomicity-test', 'claimed', now(),
+    5, 5, 'override-author', now() + interval '1 hour', now() + interval '3 days',
+    now() + interval '1 day', now() + interval '2 days'
+  );
+  insert into private_generation.curriculum_submissions (
+    job_id, authoring_attempt, generation_worker_id, canonical_source, status,
+    processor_id, processor_lease_expires_at, input_fingerprint
+  ) values (
+    '00000000-0000-0000-0000-000000000088', 5, 'override-author',
+    '{"metadata":{"schemaVersion":"2.3.0"}}', 'processing',
+    'override-finisher', now() + interval '30 minutes', 'sha256:override-test'
+  );
+  perform public.worker_complete_generation_job_with_quality_override(
+    '00000000-0000-0000-0000-000000000088', 'override-author',
+    '00000000-0000-0000-0000-000000000099/00000000-0000-0000-0000-000000000088/student.pdf',
+    '00000000-0000-0000-0000-000000000099/00000000-0000-0000-0000-000000000088/parent-answer.pdf',
+    '{"metadata":{"schemaVersion":"2.3.0"}}', '{}', '2.5.0', 'curriculum/2.3.0', 'test-model',
+    5, 'override-finisher', 'Only allowlisted soft gates remain.',
+    '{"failureType":"QUALITY_REJECTED","findings":[{"source":"audit","dimension":"cognitive-load","message":"Too dense."}]}',
+    'Curriculum quality rejected: cognitive load'
+  );
+  if not exists (
+      select 1 from public.generation_jobs
+      where id='00000000-0000-0000-0000-000000000088' and status='completed' and material_id is not null
+    ) or not exists (
+      select 1 from private_generation.curriculum_submissions
+      where job_id='00000000-0000-0000-0000-000000000088' and authoring_attempt=5
+        and status='quality_rejected' and failure_evidence->>'failureType'='QUALITY_REJECTED'
+    ) or not exists (
+      select 1 from public.material_quality_overrides
+      where job_id='00000000-0000-0000-0000-000000000088' and authoring_attempt=5
+        and outcome='delivered_with_quality_override'
+    ) then
+    raise exception 'REGRESSION: quality override finalization did not commit all terminal records together';
+  end if;
+  if to_regprocedure('public.worker_record_quality_override(uuid,integer,uuid,text,text,jsonb,text)') is not null then
+    raise exception 'REGRESSION: obsolete non-atomic quality override RPC remains callable';
+  end if;
+
   if not public.admin_set_internal_test_entitlement('00000000-0000-0000-0000-000000000099', true) then
     raise exception 'REGRESSION: internal test entitlement could not be enabled';
   end if;
   if not exists (select 1 from public.children where id='00000000-0000-0000-0000-000000000099' and is_internal_test)
-    or not exists (select 1 from public.subscriptions where child_id='00000000-0000-0000-0000-000000000099' and provider='internal_test' and status='trialing' and founding_status='none') then
-    raise exception 'REGRESSION: internal test entitlement did not bypass billing/founding through explicit state';
+    or not exists (select 1 from public.subscriptions where child_id='00000000-0000-0000-0000-000000000099' and provider <> 'internal_test') then
+    raise exception 'REGRESSION: internal test entitlement replaced a real subscription';
+  end if;
+  if not public.admin_set_internal_test_entitlement('00000000-0000-0000-0000-000000000077', true) then
+    raise exception 'REGRESSION: waitlisted internal test child could not be enabled';
+  end if;
+  if (select waiting_count from public.get_enrollment_state()) <> 0 then
+    raise exception 'REGRESSION: internal test child remains in public waiting demand';
+  end if;
+  if (select total_demand from public.get_enrollment_state()) <>
+     (select active_count + waiting_count + released_count from public.get_enrollment_state()) then
+    raise exception 'REGRESSION: total demand omits service, waiting, or released-not-converted children';
   end if;
   if has_function_privilege('authenticated','public.admin_set_internal_test_entitlement(uuid,boolean)','execute')
     or has_table_privilege('authenticated','public.material_quality_overrides','select') then
@@ -1966,6 +2045,8 @@ begin
   end if;
 
   -- Clean up
+  delete from public.material_quality_overrides
+  where job_id = '00000000-0000-0000-0000-000000000088';
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';
 end;
 $$;
