@@ -219,12 +219,33 @@ function groundingRelationshipIssues(
   const referencedFactIds = new Set<string>()
   const normalizedFactTexts = new Set<string>()
   const claimBindings = new Set<string>()
+  const researchedAt = Date.parse(value.grounding.researchedAt)
 
   for (const source of value.grounding.sources) {
     if (sourceIds.has(source.id)) {
       issues.push({ path: 'grounding.sources', message: `Duplicate grounding source ID: ${source.id}` })
     }
     sourceIds.add(source.id)
+    const accessedAt = Date.parse(source.accessedAt)
+    const publishedAt = source.publishedAt ? Date.parse(source.publishedAt) : undefined
+    if (accessedAt > researchedAt) {
+      issues.push({
+        path: `grounding.sources.${source.id}.accessedAt`,
+        message: 'Grounding source accessedAt must not be later than researchedAt',
+      })
+    }
+    if (publishedAt !== undefined && publishedAt > accessedAt) {
+      issues.push({
+        path: `grounding.sources.${source.id}.publishedAt`,
+        message: 'Grounding source publishedAt must not be later than accessedAt',
+      })
+    }
+    if (publishedAt !== undefined && publishedAt > researchedAt) {
+      issues.push({
+        path: `grounding.sources.${source.id}.publishedAt`,
+        message: 'Grounding source publishedAt must not be later than researchedAt',
+      })
+    }
     if (value.grounding.temporalMode === 'current' && !source.publishedAt) {
       issues.push({
         path: `grounding.sources.${source.id}.publishedAt`,

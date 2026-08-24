@@ -10,8 +10,8 @@ sourceHashes:
   "packages/generator/prompts/2.4.0/03-critic.md": "51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7"
   "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
   "packages/generator/prompts/2.5.0/01-plan.md": "bfad89bdbb0fa64d821cf86a57a606dd12adee2d1508861a7e9abfae85884bc5"
-  "packages/generator/prompts/2.5.0/02-author.md": "46c0fda48adbfe653e4b824876cdeecca469141311fc51bc49d7bf398997b6ec"
-  "packages/generator/prompts/2.5.0/03-critic.md": "03f36e04147638d836494dd17b7173842151efb7867936c5a6bc66aa49e2bd1c"
+  "packages/generator/prompts/2.5.0/02-author.md": "fcdfe17881606f4830dbac5d7edd5123dbfd5fda7acdd1518d4b985b89db9822"
+  "packages/generator/prompts/2.5.0/03-critic.md": "2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05"
   "packages/generator/prompts/2.5.0/04-repair.md": "ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c"
   "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
@@ -1038,7 +1038,7 @@ Independently reorganize and rewrite source propositions into level-appropriate 
 
 Grounding metadata is internal. Do not render engineering citations into Student or Parent content. `reading.sourceNote` stays optional, compact, and pedagogical—not the provenance authority.
 
-Before output, add passed `qualityEvidence.criticalChecks` entries for `grounding-accuracy` and `grounding-copyright`; current packages also require `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
+Do not self-certify grounding critical checks. Only the independent critic may add or mark `grounding-accuracy` and `grounding-copyright` as passed after semantic inspection; for current packages, the same rule applies to `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
 
 ## 7. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.5.0)
@@ -1129,7 +1129,7 @@ Mark critical when any of these occur:
 - grounding hijacks the diagnosed learning plan;
 - the primary reading lacks meaningful factual substance without a specific justified density exception.
 
-For `current`, inspect `publishedAt` and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient.
+The independent critic is the only stage authorized to add or mark grounding critical checks as passed. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient. For `current`, inspect `publishedAt`, `accessedAt`, and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate.
 
 ## 8. Prompt 04: Repair Specialist
 # Prompt 04: Repair (v2.5.0)

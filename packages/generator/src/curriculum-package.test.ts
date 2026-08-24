@@ -247,6 +247,29 @@ describe('curriculum package v2.3 grounding', () => {
     expect(validateCurriculumPackage(value).success).toBe(true)
   })
 
+  it.each([
+    ['source access after research', (value: ReturnType<typeof groundedPackage>) => {
+      value.grounding.sources[0]!.accessedAt = '2026-08-25T00:00:00.000Z'
+    }, 'accessedAt must not be later than researchedAt'],
+    ['source publication after access', (value: ReturnType<typeof groundedPackage>) => {
+      value.grounding.sources[0]!.publishedAt = '2026-08-25T00:00:00.000Z'
+    }, 'publishedAt must not be later than accessedAt'],
+    ['source publication after research', (value: ReturnType<typeof groundedPackage>) => {
+      value.grounding.sources[0]!.accessedAt = '2026-08-26T00:00:00.000Z'
+      value.grounding.sources[0]!.publishedAt = '2026-08-25T00:00:00.000Z'
+    }, 'publishedAt must not be later than researchedAt'],
+  ])('rejects non-causal grounding timestamps: %s', (_, mutate, expectedMessage) => {
+    const value = groundedPackage()
+    mutate(value)
+    const result = validateCurriculumPackage(value)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ message: expect.stringContaining(expectedMessage) }),
+      ]))
+    }
+  })
+
   it('rejects generic one-fact theming at the semantic quality gate', () => {
     const value = groundedPackage('basketball')
     value.grounding.facts = value.grounding.facts.slice(0, 1)
@@ -283,7 +306,11 @@ describe('curriculum package v2.3 grounding', () => {
     const report = auditCurriculumPackage(value)
     expect(report.passed).toBe(false)
     expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ dimension: 'grounding-freshness', severity: 'critical' }),
+      expect.objectContaining({
+        dimension: 'deterministic-validation',
+        severity: 'critical',
+        message: expect.stringContaining('publishedAt must not be later than researchedAt'),
+      }),
     ]))
   })
 })

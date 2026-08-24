@@ -3723,6 +3723,7 @@ Automated or semi-automated validation should eventually check:
 * source, fact, and claim IDs are unique and fully referenced;
 * claim locations resolve to allowed canonical authored-prose fields and contain the exact claim text;
 * `temporalMode` is explicit, and `current` sources have publication dates plus passed freshness evidence;
+* provenance timestamps are causal: `publishedAt`, when present, is not later than `accessedAt`, and neither source access nor publication is later than `researchedAt`;
 * required grounding accuracy and copyright critical checks pass.
 
 ---

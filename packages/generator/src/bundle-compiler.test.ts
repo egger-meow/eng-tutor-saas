@@ -32,6 +32,16 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).toContain('Preserve valid research and unaffected authored content')
     expect(freshBundle.content).toContain('Re-research only when the rejection concerns grounding accuracy')
     expect(freshBundle.content).toContain('Never transmit child names, child/job IDs')
+    expect(freshBundle.content).toContain('Only the independent critic may add or mark')
+    expect(freshBundle.content).not.toContain('Before output, add passed `qualityEvidence.criticalChecks`')
+  })
+
+  it('keeps public web research in the scheduled production input contract', async () => {
+    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
+
+    expect(schedule).toContain('exactly three authorized production inputs')
+    expect(schedule).toContain('3. public web research, used only for privacy-safe, non-private curriculum-topic grounding')
+    expect(schedule).not.toContain('exactly two authorized production inputs')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {

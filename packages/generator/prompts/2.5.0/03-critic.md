@@ -14,5 +14,4 @@ Mark critical when any of these occur:
 - grounding hijacks the diagnosed learning plan;
 - the primary reading lacks meaningful factual substance without a specific justified density exception.
 
-For `current`, inspect `publishedAt` and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient.
-
+The independent critic is the only stage authorized to add or mark grounding critical checks as passed. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient. For `current`, inspect `publishedAt`, `accessedAt`, and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate.

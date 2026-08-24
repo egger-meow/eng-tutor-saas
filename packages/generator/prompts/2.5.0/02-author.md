@@ -28,4 +28,4 @@ Independently reorganize and rewrite source propositions into level-appropriate 
 
 Grounding metadata is internal. Do not render engineering citations into Student or Parent content. `reading.sourceNote` stays optional, compact, and pedagogical—not the provenance authority.
 
-Before output, add passed `qualityEvidence.criticalChecks` entries for `grounding-accuracy` and `grounding-copyright`; current packages also require `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
+Do not self-certify grounding critical checks. Only the independent critic may add or mark `grounding-accuracy` and `grounding-copyright` as passed after semantic inspection; for current packages, the same rule applies to `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.

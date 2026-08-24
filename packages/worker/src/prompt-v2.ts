@@ -14,7 +14,7 @@ export async function buildCurriculumPromptBundle(context: GenerationContext): P
     '# 紙屬英文 Curriculum Package 2.3.0 · Prompt 2.5.0 · Production Authoring bundle',
     '',
     '這是一個 production generation context。只產出符合 `CurriculumPackageSchema` (2.3.0) 的 JSON；不要輸出 Markdown、PDF、解釋文字或另一位孩子的資料。',
-    '流程固定為：plan → author → deterministic validation → independent critic → targeted repair → deterministic validation。',
+    '流程固定為：grounding research → plan → author → deterministic validation → independent critic → targeted repair → deterministic validation。',
     '完成後把 JSON 存成檔案，使用 `pnpm worker complete-v2 --worker chatgpt-work-daily --job <job-id> --package <file>`；不要使用 legacy `complete`。',
     '',
     '## Current context',
