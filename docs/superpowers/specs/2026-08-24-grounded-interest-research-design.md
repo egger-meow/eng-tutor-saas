@@ -31,12 +31,23 @@ The grounding object contains:
 
 - `topic`: the specific teachable subject or angle;
 - `knowledgeType`: a stable, executor-independent category string;
+- `temporalMode`: either `evergreen` or `current`;
 - `researchedAt`: an ISO timestamp;
 - `sources`: compact source records with stable IDs, URL, title, publisher, optional publication date, and access date;
 - `facts`: approved factual propositions with stable IDs, text, supporting source IDs, and a classification distinguishing verified fact from explicitly marked inference;
-- `claims`: mappings from authored factual claims to one or more approved fact IDs.
+- `claims`: mappings from actual authored prose to one or more approved fact IDs. Every claim contains a stable ID, `factIds`, a canonical field `location`, and the exact `text` present at that location.
 
-This shape separates source discovery, extracted facts, and authored claims. It provides deterministic referential integrity without pretending deterministic code can prove semantic truth.
+This shape separates source discovery, extracted facts, and authored claims. It closes the auditable provenance chain:
+
+```text
+Source -> Fact -> Claim -> Actual lesson prose
+```
+
+Deterministic validation can prove that the location exists, the declared text occurs in that canonical field, and every referenced fact exists, without pretending deterministic code can prove semantic truth.
+
+Every new production `2.3.0` package requires real grounding. `grounding` is never nullable and has no `not-applicable` mode. A grammar-heavy week may contain limited non-grounded language practice, but its primary reading still uses a researched real-world context. This prevents an optional-grounding escape hatch from restoring generic fictional filler.
+
+`temporalMode` is explicit rather than inferred. For `current` grounding, every supporting source used for current-event facts requires `publishedAt`; `researchedAt` is always required; and the critic must verify freshness and date awareness. `evergreen` grounding still records `researchedAt`, while `publishedAt` remains optional when the source has no meaningful publication date.
 
 Schema `2.2.0`, `2.1.0`, and `2.0.0` remain readable as immutable legacy material through existing compatibility paths. New production authoring and submission use only `2.3.0`. The bridge's version allow-list changes only as required to accept the new canonical schema; storage and lifecycle semantics do not change.
 
@@ -94,8 +105,10 @@ Repository validation fails closed on properties it can prove deterministically:
 - unique stable source, fact, and claim IDs;
 - every fact references existing sources;
 - every authored claim references existing facts;
+- every claim `location` resolves to an allowed canonical authored-prose field;
+- every claim `text` occurs exactly within the resolved canonical field;
 - every source/fact/claim is used as required by the contract;
-- recent-event metadata includes publication dates where required by the authored classification;
+- `current` grounding requires publication dates for sources supporting current-event facts;
 - required grounding critical-check evidence exists and passes;
 - production authoring bundle metadata and source hashes match the new contract.
 
