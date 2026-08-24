@@ -1,0 +1,2 @@
+create index subscription_lifecycle_events_subscription_id_idx
+  on public.subscription_lifecycle_events(subscription_id);
