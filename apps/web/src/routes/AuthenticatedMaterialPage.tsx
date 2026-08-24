@@ -5,18 +5,33 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { MaterialActions } from '../components/materials/MaterialActions'
 import { PageTransition } from '../components/motion/PageTransition'
 import { getSupabaseClient } from '../lib/supabase'
-import type { Material } from '../lib/materials'
+import { loadAuthenticatedMaterial, type MaterialLoadState } from '../lib/authenticated-material-loader'
 
-type OwnedMaterial = Material & { child_name: string }
+export function AuthenticatedMaterialContent({ state, onRetry }: { state: MaterialLoadState; onRetry: () => void }) {
+  if (state.status === 'loading') {
+    return <div className="loading-state" role="status"><div className="loading-spinner" /><p>正在載入教材…</p></div>
+  }
+  if (state.status === 'error') {
+    return <section className="surface-card" role="alert"><h1>教材暫時無法載入</h1><p className="muted">請稍後再試一次。</p><div className="form-actions"><button className="button" type="button" onClick={onRetry}>再試一次</button><a className="button button-secondary" href="/dashboard">返回 Dashboard</a></div></section>
+  }
+  if (state.status === 'not-found') {
+    return <section className="surface-card"><h1>找不到這份教材</h1><p className="muted">教材尚未開放，或不屬於這個帳戶。</p><a className="button" href="/dashboard">返回 Dashboard</a></section>
+  }
+  return <section className="surface-card"><p className="overline">{state.material.child_name} · {state.material.material_week}</p><h1>本週教材</h1><MaterialActions material={state.material} childName={state.material.child_name} /><p><a className="text-link" href="/dashboard">查看所有教材與學習紀錄</a></p></section>
+}
 
 export function AuthenticatedMaterialPage({ session, materialId }: { session: Session; materialId: string }) {
-  const [material, setMaterial] = useState<OwnedMaterial | null>(null)
-  const [ready, setReady] = useState(false)
+  const [state, setState] = useState<MaterialLoadState>({ status: 'loading' })
+  const [attempt, setAttempt] = useState(0)
   useEffect(() => {
-    void getSupabaseClient().rpc('get_owned_released_material', { p_material_id: materialId }).maybeSingle()
-      .then(({ data }) => { setMaterial(data as OwnedMaterial | null); setReady(true) }, () => setReady(true))
-  }, [materialId])
+    let active = true
+    setState({ status: 'loading' })
+    void loadAuthenticatedMaterial(materialId, session.user.id).then((nextState) => {
+      if (active) setState(nextState)
+    })
+    return () => { active = false }
+  }, [attempt, materialId, session.user.id])
   return <AppShell header={<ParentNavigation email={session.user.email} onSignOut={() => void getSupabaseClient().auth.signOut()} />}><PageTransition>
-    {!ready ? <div className="loading-state" role="status"><div className="loading-spinner" /><p>正在載入教材…</p></div> : !material ? <section className="surface-card"><h1>找不到這份教材</h1><p className="muted">教材尚未開放，或不屬於這個帳戶。</p><a className="button" href="/dashboard">返回 Dashboard</a></section> : <section className="surface-card"><p className="overline">{material.child_name} · {material.material_week}</p><h1>本週教材</h1><MaterialActions material={material} childName={material.child_name} /><p><a className="text-link" href="/dashboard">查看所有教材與學習紀錄</a></p></section>}
+    <AuthenticatedMaterialContent state={state} onRetry={() => setAttempt((current) => current + 1)} />
   </PageTransition></AppShell>
 }

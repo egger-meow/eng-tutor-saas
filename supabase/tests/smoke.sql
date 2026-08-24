@@ -1176,15 +1176,18 @@ declare
   bridge_claim_result jsonb;
   bridge_context jsonb;
   bridge_fingerprint text;
+  email_released_material_id uuid;
+  email_future_material_id uuid;
   blocked boolean := false;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
     or not has_column_privilege('authenticated', 'public.generation_jobs', 'child_id', 'select')
-    or not has_column_privilege('authenticated', 'public.generation_jobs', 'release_at', 'select') then
-    raise exception 'authenticated parents cannot read the safe material release schedule';
+    or not has_column_privilege('authenticated', 'public.generation_jobs', 'release_at', 'select')
+    or not has_column_privilege('authenticated', 'public.generation_jobs', 'status', 'select')
+    or not has_column_privilege('authenticated', 'public.generation_jobs', 'completed_at', 'select') then
+    raise exception 'authenticated material RPC is missing required generation job columns';
   end if;
-  if has_column_privilege('authenticated', 'public.generation_jobs', 'status', 'select')
-    or has_column_privilege('authenticated', 'public.generation_jobs', 'error_message', 'select')
+  if has_column_privilege('authenticated', 'public.generation_jobs', 'error_message', 'select')
     or has_column_privilege('authenticated', 'public.generation_jobs', 'claimed_by', 'select') then
     raise exception 'authenticated parents can read server-only generation job state';
   end if;
@@ -1947,6 +1950,47 @@ begin
   if (select count(*) from public.resolve_material_email_access(repeat('a',64), null)) <> 1 then
     raise exception 'REGRESSION: valid scoped link did not resolve without login';
   end if;
+
+  select id into email_released_material_id from public.materials where student_pdf_path = 'email-test/student.pdf';
+  select id into email_future_material_id from public.materials where student_pdf_path = 'email-future/student.pdf';
+
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
+  if (
+    select count(*)
+    from public.get_owned_released_material(email_released_material_id)
+  ) <> 1 then
+    raise exception 'REGRESSION: authenticated owner could not retrieve released material';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000012', true);
+  if exists (
+    select 1
+    from public.get_owned_released_material(email_released_material_id)
+  ) then
+    raise exception 'REGRESSION: another authenticated parent retrieved released material';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
+  if exists (
+    select 1
+    from public.get_owned_released_material(email_future_material_id)
+  ) then
+    raise exception 'REGRESSION: authenticated owner retrieved unreleased material';
+  end if;
+
+  perform set_config('role', 'anon', true);
+  blocked := false;
+  begin
+    perform public.get_owned_released_material(email_released_material_id);
+  exception when insufficient_privilege then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'REGRESSION: anon could execute authenticated material RPC';
+  end if;
+  perform set_config('role', 'none', true);
+
   if exists (select 1 from public.resolve_material_email_access(repeat('b',64), null)) then
     raise exception 'REGRESSION: invalid scoped token resolved';
   end if;
