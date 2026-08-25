@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, CURRENT_WORKER_VERSION, type CurriculumPackage } from '@paper-english/generator'
+import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, CURRENT_WORKER_VERSION, CURRENT_RELEASE_ID, type CurriculumPackage } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
@@ -264,6 +264,42 @@ describe('completeCurriculumJob', () => {
         }),
       }),
     }))
+  })
+
+  it('stamps server-owned target release when LLM releaseId is missing or forged without quality rejection', async () => {
+    const state = setup()
+    const grounded = structuredClone(curriculumSample)
+    grounded.metadata.releaseId = 'fake-forged-release-id'
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: { ...curriculumContext, targetReleaseId: CURRENT_RELEASE_ID },
+      curriculumPackage: grounded,
+      render: async () => pdfs,
+      inspect,
+    })).resolves.toBe('material-1')
+
+    expect(state.rpc).toHaveBeenCalledWith('worker_complete_generation_job', expect.objectContaining({
+      canonical_source: expect.objectContaining({
+        metadata: expect.objectContaining({
+          releaseId: CURRENT_RELEASE_ID,
+        }),
+      }),
+    }))
+  })
+
+  it('fails explicitly as release mismatch when submission targetReleaseId does not match Finisher CURRENT_RELEASE_ID', async () => {
+    const state = setup()
+    const grounded = structuredClone(curriculumSample)
+    grounded.metadata.releaseId = 'rel_1.2.0' // Previous release submission
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: { ...curriculumContext, targetReleaseId: 'rel_1.2.0' },
+      curriculumPackage: grounded,
+      render: async () => pdfs,
+      inspect,
+    })).rejects.toThrow(/Release mismatch: submission target release 'rel_1.2.0' does not match Finisher CURRENT_RELEASE_ID/u)
   })
 
   it('rejects broken 2.3 prose grounding before rendering or storage', async () => {

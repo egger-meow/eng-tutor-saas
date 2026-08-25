@@ -307,6 +307,7 @@ describe('AdminService Authoritative Truth Layer', () => {
         parent_answer_pdf_path: 'child/job/parent-answer.pdf',
         canonical_source: {
           metadata: {
+            releaseId: 'rel_1.2.0', // Historical release identity
             schemaVersion: '2.3.0',
             promptVersion: '2.6.0',
             engineVersion: '1.2.0', // immediately previous engine

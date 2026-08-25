@@ -36,6 +36,7 @@ export type GenerationContext = {
     materialWeek: string
     ruleVersion: string
   }
+  targetReleaseId?: string
   profile?: {
     weekly_minutes?: number | null
   }
@@ -538,11 +539,21 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
   try {
     const raw = (input.curriculumPackage && typeof input.curriculumPackage === 'object') ? input.curriculumPackage as any : {}
     const rawMetadata = (raw.metadata && typeof raw.metadata === 'object') ? raw.metadata : {}
+
+    // Resolve target release ID: from server-owned claim context or from submission metadata
+    const targetReleaseId = input.context.targetReleaseId ?? rawMetadata.releaseId ?? CURRENT_RELEASE_ID
+
+    // Finisher must verify the submission targetReleaseId equals its CURRENT_RELEASE_ID before processing.
+    // If they differ, fail explicitly as a release/worker mismatch; never overwrite the artifact into another release identity.
+    if (targetReleaseId !== CURRENT_RELEASE_ID) {
+      throw new Error(`Release mismatch: submission target release '${targetReleaseId}' does not match Finisher CURRENT_RELEASE_ID '${CURRENT_RELEASE_ID}'`)
+    }
+
     const preparedPackage = {
       ...raw,
       metadata: {
         ...rawMetadata,
-        releaseId: CURRENT_RELEASE_ID,
+        releaseId: targetReleaseId,
         rendererVersion: CURRENT_PDF_RENDERER_VERSION,
         workerVersion: CURRENT_WORKER_VERSION,
       },
@@ -555,10 +566,10 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       })),
     })
     const pkg = parsed.curriculumPackage
-    // Finisher owns PDF renderer, Worker, and release provenance deterministically - never trust LLM-supplied versions
+    // Finisher preserves the immutable targetReleaseId and stamps deterministic renderer/worker versions
     pkg.metadata = {
       ...pkg.metadata,
-      releaseId: CURRENT_RELEASE_ID,
+      releaseId: targetReleaseId,
       rendererVersion: CURRENT_PDF_RENDERER_VERSION,
       workerVersion: CURRENT_WORKER_VERSION,
     }
