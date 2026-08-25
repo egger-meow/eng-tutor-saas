@@ -151,7 +151,7 @@
 .announcements-list { display: grid; gap: var(--space-5); }
 .announcement-card { padding: var(--space-6); transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
 .announcement-card:hover { border-color: var(--color-rule-strong); }
-.announcement-card-meta { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+.announcement-card-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
 .category-badge { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; line-height: 1.2; white-space: nowrap; }
 .category-badge-feature { background: #e0f2fe; color: #0369a1; }
 .category-badge-material { background: #dcfce7; color: #15803d; }
