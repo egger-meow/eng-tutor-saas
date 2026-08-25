@@ -22,15 +22,19 @@ import { ScopedMaterialPage } from './routes/ScopedMaterialPage'
 import { AuthenticatedMaterialPage } from './routes/AuthenticatedMaterialPage'
 import { AnnouncementsPage } from './routes/AnnouncementsPage'
 import { AnnouncementDetailPage } from './routes/AnnouncementDetailPage'
+import { PayPage } from './routes/PayPage'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
 
 function App() {
   const route = useRoute()
+  const isPaymentLinkRoute = route.name === 'pay'
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(false)
   const reduceMotion = useReducedMotion()
 
   useEffect(() => {
+    if (isPaymentLinkRoute) return
+
     const supabase = getSupabaseClient()
     const handleSession = (nextSession: Session | null) => {
       setSession(nextSession)
@@ -42,7 +46,11 @@ function App() {
     void supabase.auth.getSession().then(({ data }) => { handleSession(data.session) })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => { handleSession(nextSession) })
     return () => subscription.unsubscribe()
-  }, [])
+  }, [isPaymentLinkRoute])
+
+  // Paddle must see `_ptxn` as soon as its public default payment page loads.
+  // Do not put this route behind the Supabase session lookup above.
+  if (isPaymentLinkRoute) return <PayPage />
 
   if (!ready) return <main className="loading-state" role="status">正在確認登入狀態…</main>
 

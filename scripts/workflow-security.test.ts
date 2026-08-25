@@ -76,6 +76,11 @@ describe('Cloudflare Workers Static Assets deployment boundaries', () => {
     }
   })
 
+  it('builds the production payment page against Paddle production', () => {
+    expect(productionWorkflow).toContain('VITE_PADDLE_ENV: production')
+    expect(devDeployWorkflow).toContain('VITE_PADDLE_ENV: sandbox')
+  })
+
   it('keeps root-based SPA routing isolated across production and dev domains', () => {
     expect(wranglerConfig.assets).toEqual({
       directory: 'apps/web/dist',

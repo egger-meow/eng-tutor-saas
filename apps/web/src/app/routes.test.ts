@@ -22,6 +22,10 @@ describe('root-hosted route paths', () => {
     expect(parseRoute('/material?t=secret')).toMatchObject({ name: 'material', path: '/material' })
   })
 
+  it('keeps the Paddle default payment link route public and query-insensitive', () => {
+    expect(parseRoute('/pay?_ptxn=txn_123')).toMatchObject({ name: 'pay', path: '/pay' })
+  })
+
   it('routes a specific authenticated material', () => {
     expect(parseRoute('/materials/material-1')).toMatchObject({ name: 'authenticated-material', params: { materialId: 'material-1' } })
   })

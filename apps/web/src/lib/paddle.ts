@@ -7,7 +7,7 @@ function getEnvironment(): Environments {
   return import.meta.env.VITE_PADDLE_ENV === 'production' ? 'production' : 'sandbox'
 }
 
-async function getPaddle() {
+export async function initializePaddleClient() {
   const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN
   if (!token) throw new Error('Paddle browser configuration is missing')
 
@@ -25,7 +25,7 @@ async function getPaddle() {
 
 export async function openPaddleCheckout(transactionId: string, frameTarget: string, onCompleted: () => void) {
   completedCallback = onCompleted
-  const paddle = await getPaddle()
+  const paddle = await initializePaddleClient()
   paddle.Checkout.close()
   paddle.Checkout.open({
     transactionId,
@@ -44,6 +44,6 @@ export async function openPaddleCheckout(transactionId: string, frameTarget: str
 }
 
 export async function closePaddleCheckout() {
-  const paddle = await getPaddle()
+  const paddle = await initializePaddleClient()
   paddle.Checkout.close()
 }

@@ -16,6 +16,29 @@
 .history-section { margin-top: var(--space-16); }
 .history-section > h2 { margin-bottom: var(--space-6); }
 .loading-state { display: grid; min-height: 50vh; place-items: center; color: var(--color-muted); }
+
+.payment-link-page .page-shell {
+  display: grid;
+  min-height: calc(100vh - 5rem);
+  place-items: center;
+}
+
+.payment-link-shell {
+  width: min(100%, 36rem);
+  padding: clamp(var(--space-6), 6vw, var(--space-10));
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-surface);
+  background: var(--color-paper);
+  box-shadow: 0 8px 30px rgb(24 38 31 / 7%);
+  text-align: center;
+}
+
+.payment-link-shell h1 { margin-top: var(--space-2); }
+.payment-link-loading,
+.payment-link-fallback { display: grid; justify-items: center; gap: var(--space-5); margin-top: var(--space-6); }
+.payment-link-loading p,
+.payment-link-fallback p { margin: 0; color: var(--color-muted); }
+.payment-link-fallback .button { text-decoration: none; }
 .error-state, .zero-state, .form-page { max-width: 42rem; margin-inline: auto; }
 .zero-state { padding-block: clamp(var(--space-12), 10vw, 7rem); text-align: center; }
 .zero-state p:not(.eyebrow) { margin: var(--space-6) auto; color: var(--color-muted); font-size: 1.0625rem; }
