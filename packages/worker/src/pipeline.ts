@@ -8,6 +8,7 @@ import {
   parseWeeklyLesson,
   recordExposureFromTrackingDelta,
   validateCurriculumPackage,
+  CURRENT_PDF_RENDERER_VERSION,
   type CapCoverageCapsule,
   type CurriculumPackage,
   type DiversityCapsule,
@@ -541,6 +542,11 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       })),
     })
     const pkg = parsed.curriculumPackage
+    // Finisher owns PDF renderer provenance deterministically - never trust LLM-supplied version
+    pkg.metadata = {
+      ...pkg.metadata,
+      rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+    }
     assertCurriculumMatchesContext(pkg, input.context)
     const progressionFindings = forwardProgressionIssues(pkg, input.context)
     if (progressionFindings.length > 0) throw new CurriculumQualityError({

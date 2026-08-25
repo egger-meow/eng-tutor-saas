@@ -288,6 +288,43 @@ describe('AdminService Authoritative Truth Layer', () => {
     }))
   })
 
+  it('excludes historical materials from current engine manifest version drift checks', async () => {
+    const service = new AdminService({ client: createMockSupabaseClient({
+      children: [{ id: 'child-legacy', display_name: 'Legacy Child', is_active: true, is_internal_test: false }],
+      subscriptions: [],
+      generation_jobs: [],
+      materials: [{
+        id: 'material-legacy-1',
+        child_id: 'child-legacy',
+        material_week: '2026-07-01',
+        revision: 1,
+        rule_version: 'rules/1',
+        prompt_version: '2.3.0', // historical legacy prompt
+        generator_version: '2.1.0', // historical legacy schema
+        model_name: 'model-old',
+        student_pdf_path: 'child/job/student.pdf',
+        parent_answer_pdf_path: 'child/job/parent-answer.pdf',
+        canonical_source: {
+          metadata: {
+            schemaVersion: '2.1.0',
+            promptVersion: '2.3.0',
+            engineVersion: '1.0.0',
+            rendererVersion: '0.9.0',
+            workerVersion: '1.0.0',
+          },
+        },
+        created_at: '2026-07-01T00:00:00.000Z',
+      }],
+      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
+      curriculum_submissions: [],
+    }) })
+
+    const overview = await service.getOperationsOverview()
+    // Historical material must not trigger version_drift against the current 2.6.0 manifest
+    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
+    expect(overview.engineInspector.drift.some((d) => d.status === 'version_drift')).toBe(false)
+  })
+
   it('aggregates real database rows for Operations Overview with separated Generation and Finisher queues', async () => {
     const mockClient = createMockSupabaseClient({
       children: [

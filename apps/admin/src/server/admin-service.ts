@@ -1432,6 +1432,16 @@ export class AdminService {
       }
     }
     for (const submission of latestSubmissionByJob.values()) {
+      const era = classifyQualityEra({
+        schemaVersion: submission.schema_version,
+        promptVersion: submission.prompt_version,
+        ruleVersion: submission.rule_version,
+        qualityProfile: submission.quality_profile || submission.qualityProfile,
+        failureEvidence: submission.failure_evidence,
+        canonicalSource: submission.canonical_source,
+      })
+      if (era === 'historical') continue
+
       compare('submission', submission.job_id, 'engine', submission.engine_version)
       compare('submission', submission.job_id, 'schema', submission.schema_version)
       compare('submission', submission.job_id, 'prompt', submission.prompt_version)
@@ -1440,6 +1450,14 @@ export class AdminService {
       compare('submission', submission.job_id, 'worker', submission.worker_version)
     }
     for (const material of materials.slice(0, 50)) {
+      const era = classifyQualityEra({
+        schemaVersion: material.canonical_source?.metadata?.schemaVersion,
+        promptVersion: material.prompt_version,
+        ruleVersion: material.rule_version,
+        canonicalSource: material.canonical_source,
+      })
+      if (era === 'historical') continue
+
       compare('material', material.id, 'engine', material.canonical_source?.metadata?.engineVersion)
       compare('material', material.id, 'schema', material.canonical_source?.metadata?.schemaVersion)
       compare('material', material.id, 'prompt', material.prompt_version)

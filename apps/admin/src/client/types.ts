@@ -6,6 +6,8 @@ export {
   CURRENT_PROMPT_VERSION,
   CURRENT_ERA_TAG,
   CURRENT_QUALITY_PROFILE_VERSION,
+  CURRENT_WORKER_VERSION,
+  CURRENT_PDF_RENDERER_VERSION,
   CURRENT_ENGINE_MANIFEST,
   formatEngineEraLabel,
   formatEngineVersion,
@@ -133,13 +135,17 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
   const schema = item.schemaVersion || item.canonicalSource?.metadata?.schemaVersion || item.failureEvidence?.schemaVersion || null
   const prompt = item.promptVersion || item.canonicalSource?.metadata?.promptVersion || item.failureEvidence?.promptVersion || null
 
-  const isSchema220 = Boolean(schema && (schema === '2.2.0' || schema.startsWith('2.2')))
-  const isPrompt240 = Boolean(prompt && (prompt === '2.4.0' || prompt === '2.4.0-prod' || prompt.startsWith('2.4') || prompt === 'prompt/2.4.0'))
+  const isLegacySchema = Boolean(schema && (schema.startsWith('1.') || schema.startsWith('2.0') || schema.startsWith('2.1') || schema === '2.0.0' || schema === '2.1.0'))
+  const isLegacyPrompt = Boolean(prompt && (prompt.startsWith('1.') || prompt.startsWith('2.0') || prompt.startsWith('2.1') || prompt.startsWith('2.2') || prompt.startsWith('2.3') || prompt === '2.0.0' || prompt === '2.1.0' || prompt === '2.2.0' || prompt === '2.3.0'))
 
-  // Era answers "which production contract authored this?". Provenance completeness is a
-  // separate quality invariant. Missing or malformed profile provenance on a current submission must stay
-  // visible in Current so Admin can report the violation instead of laundering it as Historical.
-  if (isSchema220 && isPrompt240) {
+  if (isLegacySchema || isLegacyPrompt) {
+    return 'historical'
+  }
+
+  const isSchemaCurrent = Boolean(!schema || schema.startsWith('2.2') || schema.startsWith('2.3'))
+  const isPromptCurrent = Boolean(!prompt || prompt.startsWith('2.4') || prompt.startsWith('2.5') || prompt.startsWith('2.6') || prompt === '2.4.0-prod' || prompt === 'prompt/2.4.0')
+
+  if (isSchemaCurrent && isPromptCurrent && (schema || prompt)) {
     return 'engine_v1'
   }
 

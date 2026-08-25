@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { syntheticWeekOne, type CurriculumPackage } from '@paper-english/generator'
+import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, type CurriculumPackage } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
@@ -217,6 +217,28 @@ describe('completeCurriculumJob', () => {
       inspect,
     })).resolves.toBe('material-1')
     expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+  })
+
+  it('overwrites LLM-supplied rendererVersion with canonical CURRENT_PDF_RENDERER_VERSION upon completion', async () => {
+    const state = setup()
+    const grounded = structuredClone(curriculumSample)
+    grounded.metadata.rendererVersion = 'fake-llm-renderer-v99'
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: grounded,
+      render: async () => pdfs,
+      inspect,
+    })).resolves.toBe('material-1')
+
+    expect(state.rpc).toHaveBeenCalledWith('worker_complete_generation_job', expect.objectContaining({
+      canonical_source: expect.objectContaining({
+        metadata: expect.objectContaining({
+          rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+        }),
+      }),
+    }))
   })
 
   it('rejects broken 2.3 prose grounding before rendering or storage', async () => {
