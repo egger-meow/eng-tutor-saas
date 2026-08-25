@@ -14,6 +14,8 @@ export type RouteName =
   | 'feedback'
   | 'parent-guide-feedback'
   | 'billing'
+  | 'announcements'
+  | 'announcement-detail'
   | 'privacy'
   | 'terms'
   | 'refund'
@@ -32,6 +34,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/waitlist', 'waitlist'],
   ['/material', 'material'],
   ['/dashboard', 'dashboard'],
+  ['/announcements', 'announcements'],
   ['/parent-guide-feedback', 'parent-guide-feedback'],
   ['/children', 'child-overview'],
   ['/children/new', 'child-new'],
@@ -50,6 +53,11 @@ export function parseRoute(pathname: string): Route {
   const path = cleanPath(pathname)
   const staticName = staticRoutes.get(path)
   if (staticName) return { name: staticName, params: {}, path }
+
+  const announcementMatch = path.match(/^\/announcements\/([^/]+)$/)
+  if (announcementMatch) {
+    return { name: 'announcement-detail', params: { id: decodeURIComponent(announcementMatch[1]) }, path }
+  }
 
   const childMatch = path.match(/^\/children\/([^/]+)(?:\/(edit|materials))?$/)
   if (childMatch) {

@@ -17,7 +17,7 @@ export {
 import type { EraTag } from '@paper-english/generator/engine-version'
 export type { EraTag }
 
-export type TabId = 'overview' | 'subscriptions' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
+export type TabId = 'overview' | 'announcements' | 'subscriptions' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
 
 export interface HealthState {
   status: string
@@ -819,4 +819,51 @@ export interface SubscriptionRevenueData {
     billingInterval: string | null; priceTwd: number | null; startDate: string
     currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; events: SubscriptionLifecycleEventRow[]
   }>
+}
+
+export type AnnouncementCategory = 'feature' | 'material' | 'maintenance' | 'notice'
+export type AnnouncementStatus = 'draft' | 'published' | 'archived'
+
+export interface AnnouncementItem {
+  id: string
+  title: string
+  body: string
+  category: AnnouncementCategory
+  status: AnnouncementStatus
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AnnouncementsAdminData {
+  dataSources: DataSourceStatus[]
+  announcements: AnnouncementItem[]
+  stats: {
+    total: number
+    draft: number
+    published: number
+    archived: number
+  }
+}
+
+export interface CreateAnnouncementInput {
+  title: string
+  body: string
+  category: AnnouncementCategory
+  status?: AnnouncementStatus
+}
+
+export interface UpdateAnnouncementInput {
+  id: string
+  title?: string
+  body?: string
+  category?: AnnouncementCategory
+  status?: AnnouncementStatus
+}
+
+export interface AnnouncementActionResult {
+  success: boolean
+  announcement?: AnnouncementItem
+  error?: string
+  message?: string
 }

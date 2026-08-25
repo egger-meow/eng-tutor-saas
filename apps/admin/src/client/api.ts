@@ -21,6 +21,10 @@ import type {
   UpdateCapacityResult,
   RetryNotificationResult,
   SubscriptionRevenueData,
+  AnnouncementsAdminData,
+  CreateAnnouncementInput,
+  UpdateAnnouncementInput,
+  AnnouncementActionResult,
 } from './types.js'
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -77,6 +81,10 @@ export const adminApi = {
   getFeedback: () => fetchJson<ParentFeedbackIntelligence>('/api/intelligence/feedback'),
   getProductFeedback: () => fetchJson<ProductFeedbackIntelligence>('/api/intelligence/product-feedback'),
   getSubscriptions: (days = 90) => fetchJson<SubscriptionRevenueData>('/api/subscriptions?days=' + days),
+  getAnnouncements: (status?: string) => fetchJson<AnnouncementsAdminData>(`/api/announcements${status && status !== 'all' ? `?status=${status}` : ''}`),
+  createAnnouncement: (input: CreateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/create', input as unknown as Record<string, unknown>),
+  updateAnnouncement: (input: UpdateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/update', input as unknown as Record<string, unknown>),
+  archiveAnnouncement: (id: string) => postJson<AnnouncementActionResult>('/api/announcements/archive', { id }),
 
   // Fast Synchronous Cache Readers
   getCachedTimeline: (childId?: string, week?: string): ChildWeekTimeline | null => {

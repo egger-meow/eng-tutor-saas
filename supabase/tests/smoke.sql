@@ -2164,7 +2164,48 @@ begin
     raise exception 'REGRESSION: internal entitlement or quality overrides are exposed to browser roles';
   end if;
 
+  -- Announcement Center Tests
+  insert into public.announcements (id, title, body, category, status, published_at)
+  values
+    ('00000000-0000-0000-0000-000000000101', 'Published 1', 'Content 1', 'feature', 'published', now() - interval '2 days'),
+    ('00000000-0000-0000-0000-000000000102', 'Published 2', 'Content 2', 'material', 'published', now() - interval '1 day'),
+    ('00000000-0000-0000-0000-000000000103', 'Future Notice', 'Content 3', 'notice', 'published', now() + interval '1 day'),
+    ('00000000-0000-0000-0000-000000000104', 'Draft Maintenance', 'Content 4', 'maintenance', 'draft', null),
+    ('00000000-0000-0000-0000-000000000105', 'Archived Notice', 'Content 5', 'notice', 'archived', now() - interval '10 days');
+
+  if has_table_privilege('anon', 'public.announcements', 'select') then
+    raise exception 'REGRESSION: anon role has select privilege on announcements';
+  end if;
+
+  if has_table_privilege('authenticated', 'public.announcements', 'insert')
+     or has_table_privilege('authenticated', 'public.announcements', 'update')
+     or has_table_privilege('authenticated', 'public.announcements', 'delete') then
+    raise exception 'REGRESSION: authenticated role has mutating privileges on announcements';
+  end if;
+
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
+  perform set_config('role', 'authenticated', true);
+
+  select count(*) into visible_count from public.announcements;
+  if visible_count <> 2 then
+    raise exception 'authenticated user should see exactly 2 published announcements, saw %', visible_count;
+  end if;
+
+  if (select id from public.announcements order by published_at desc, id desc limit 1) <> '00000000-0000-0000-0000-000000000102'::uuid then
+    raise exception 'announcements not returned in deterministic published_at desc order';
+  end if;
+
+  perform set_config('role', 'none', true);
+
   -- Clean up
+  delete from public.announcements
+  where id in (
+    '00000000-0000-0000-0000-000000000101',
+    '00000000-0000-0000-0000-000000000102',
+    '00000000-0000-0000-0000-000000000103',
+    '00000000-0000-0000-0000-000000000104',
+    '00000000-0000-0000-0000-000000000105'
+  );
   delete from public.material_quality_overrides
   where job_id = '00000000-0000-0000-0000-000000000088';
   delete from auth.users where id = '00000000-0000-0000-0000-000000000001';

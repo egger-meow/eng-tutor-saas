@@ -156,6 +156,12 @@ import {
   type QualityEra,
   type EraTag,
   type AdminConfig,
+  type AnnouncementsAdminData,
+  type AnnouncementItem,
+  type AnnouncementStatus,
+  type CreateAnnouncementInput,
+  type UpdateAnnouncementInput,
+  type AnnouncementActionResult,
   classifyQualityEra,
 } from '../client/types.js'
 
@@ -3194,6 +3200,209 @@ export class AdminService {
       success: true,
       capacity: res.newCapacity,
     }
+  }
+
+  async getAnnouncementsData(filterStatus?: AnnouncementStatus | 'all'): Promise<AnnouncementsAdminData> {
+    const client = this.ensureClient()
+    const statuses: DataSourceStatus[] = []
+
+    const rows = await this.safeQuery<AnnouncementItem[]>(
+      'announcements',
+      async () => {
+        let query = client
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+        if (filterStatus && filterStatus !== 'all') {
+          query = query.eq('status', filterStatus)
+        }
+        return query
+      },
+      statuses,
+    )
+
+    const allRows = await this.safeQuery<Array<{ status: AnnouncementStatus }>>(
+      'announcements_counts',
+      async () => client.from('announcements').select('status'),
+      statuses,
+    )
+
+    const stats = {
+      total: 0,
+      draft: 0,
+      published: 0,
+      archived: 0,
+    }
+
+    if (allRows) {
+      stats.total = allRows.length
+      for (const row of allRows) {
+        if (row.status === 'draft') stats.draft++
+        else if (row.status === 'published') stats.published++
+        else if (row.status === 'archived') stats.archived++
+      }
+    }
+
+    return {
+      dataSources: statuses,
+      announcements: rows || [],
+      stats,
+    }
+  }
+
+  async createAnnouncement(input: CreateAnnouncementInput): Promise<AnnouncementActionResult> {
+    try {
+      const client = this.ensureClient()
+      const title = (input?.title || '').trim()
+      const body = (input?.body || '').trim()
+      const category = input?.category
+      const status = input?.status || 'draft'
+
+      if (!title) {
+        return { success: false, error: 'TITLE_REQUIRED', message: '標題為必填項目。' }
+      }
+      if (title.length > 200) {
+        return { success: false, error: 'TITLE_TOO_LONG', message: '標題長度不可超過 200 字。' }
+      }
+      if (!body) {
+        return { success: false, error: 'BODY_REQUIRED', message: '公告內容為必填項目。' }
+      }
+      if (!['feature', 'material', 'maintenance', 'notice'].includes(category)) {
+        return { success: false, error: 'INVALID_CATEGORY', message: '無效的公告分類。' }
+      }
+      if (!['draft', 'published', 'archived'].includes(status)) {
+        return { success: false, error: 'INVALID_STATUS', message: '無效的公告狀態。' }
+      }
+
+      const publishedAt = status === 'published' ? new Date().toISOString() : null
+
+      const { data, error } = await client
+        .from('announcements')
+        .insert({
+          title,
+          body,
+          category,
+          status,
+          published_at: publishedAt,
+        })
+        .select('*')
+        .single()
+
+      if (error) {
+        return { success: false, error: error.code || 'DB_ERROR', message: error.message }
+      }
+
+      console.log('[AUDIT] announcement_created:', {
+        id: data.id,
+        title: data.title,
+        category: data.category,
+        status: data.status,
+        publishedAt: data.published_at,
+        timestamp: new Date().toISOString(),
+      })
+
+      return {
+        success: true,
+        announcement: data,
+        message: status === 'published' ? '公告已成功建立並發布。' : '公告草稿已成功儲存。',
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: 'UNEXPECTED_ERROR',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
+  }
+
+  async updateAnnouncement(input: UpdateAnnouncementInput): Promise<AnnouncementActionResult> {
+    try {
+      const client = this.ensureClient()
+      const id = input?.id
+      if (!id || typeof id !== 'string') {
+        return { success: false, error: 'ID_REQUIRED', message: '公告 ID 為必填。' }
+      }
+
+      const { data: existing, error: fetchError } = await client
+        .from('announcements')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle()
+
+      if (fetchError || !existing) {
+        return { success: false, error: 'NOT_FOUND', message: '找不到指定的公告。' }
+      }
+
+      const updates: Record<string, any> = {}
+
+      if (input.title !== undefined) {
+        const title = input.title.trim()
+        if (!title) return { success: false, error: 'TITLE_REQUIRED', message: '標題不可為空白。' }
+        if (title.length > 200) return { success: false, error: 'TITLE_TOO_LONG', message: '標題長度不可超過 200 字。' }
+        updates.title = title
+      }
+
+      if (input.body !== undefined) {
+        const body = input.body.trim()
+        if (!body) return { success: false, error: 'BODY_REQUIRED', message: '公告內容不可為空白。' }
+        updates.body = body
+      }
+
+      if (input.category !== undefined) {
+        if (!['feature', 'material', 'maintenance', 'notice'].includes(input.category)) {
+          return { success: false, error: 'INVALID_CATEGORY', message: '無效的公告分類。' }
+        }
+        updates.category = input.category
+      }
+
+      if (input.status !== undefined) {
+        if (!['draft', 'published', 'archived'].includes(input.status)) {
+          return { success: false, error: 'INVALID_STATUS', message: '無效的公告狀態。' }
+        }
+        updates.status = input.status
+
+        if (input.status === 'published') {
+          if (!existing.published_at) {
+            updates.published_at = new Date().toISOString()
+          }
+        }
+      }
+
+      const { data: updated, error: updateError } = await client
+        .from('announcements')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
+        .single()
+
+      if (updateError) {
+        return { success: false, error: updateError.code || 'DB_ERROR', message: updateError.message }
+      }
+
+      console.log('[AUDIT] announcement_updated:', {
+        id: updated.id,
+        status: updated.status,
+        publishedAt: updated.published_at,
+        timestamp: new Date().toISOString(),
+      })
+
+      return {
+        success: true,
+        announcement: updated,
+        message: '公告已成功更新。',
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: 'UNEXPECTED_ERROR',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
+  }
+
+  async archiveAnnouncement(id: string): Promise<AnnouncementActionResult> {
+    return this.updateAnnouncement({ id, status: 'archived' })
   }
 
   private classifyQualityCategory(rule: string): 'lexical_ceiling' | 'forbidden_jargon' | 'prompt_clipped' | 'cap_deficit' | 'schema_mismatch' | 'other' {

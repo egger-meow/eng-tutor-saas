@@ -4,6 +4,7 @@ import { parseRoute, type Route } from './routes'
 const routeChangeEvent = 'paper-english:route-change'
 
 export function navigate(path: string) {
+  if (typeof window === 'undefined') return
   const browserPath = path.startsWith('/') ? path : `/${path}`
   const nextUrl = new URL(browserPath, window.location.origin)
   const currentUrl = new URL(window.location.href)
@@ -22,10 +23,11 @@ export function navigate(path: string) {
 }
 
 export function useRoute(): Route {
-  const readRoute = () => parseRoute(window.location.pathname)
+  const readRoute = () => parseRoute(typeof window !== 'undefined' ? window.location.pathname : '/')
   const [route, setRoute] = useState(readRoute)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     const update = () => setRoute(readRoute())
     window.addEventListener('popstate', update)
     window.addEventListener(routeChangeEvent, update)

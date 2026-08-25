@@ -110,7 +110,14 @@ function createMockSupabaseClient(
               for (const r of matched) {
                 Object.assign(r, payload)
               }
-              return Promise.resolve({ data: matched, error: null })
+              const res = { data: matched, error: null }
+              return {
+                select: () => ({
+                  single: async () => ({ data: matched[0] || null, error: null }),
+                  maybeSingle: async () => ({ data: matched[0] || null, error: null }),
+                }),
+                then: (resolve: any) => Promise.resolve(res).then(resolve),
+              }
             },
           }
         },
@@ -1972,6 +1979,178 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(data.funnels.subscription.observable).toBe(false)
       expect(data.series.every((point) => point.activePaid === 0 && point.newPaid === 0)).toBe(true)
     })
-  })})
+  })
+
+  describe('announcements management', () => {
+    it('creates an announcement as draft by default without published_at', async () => {
+      const mockClient = createMockSupabaseClient({ announcements: [] })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.createAnnouncement({
+        title: '新功能預告',
+        body: '這是一篇草稿內容',
+        category: 'feature',
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.announcement).toMatchObject({
+        title: '新功能預告',
+        body: '這是一篇草稿內容',
+        category: 'feature',
+        status: 'draft',
+        published_at: null,
+      })
+    })
+
+    it('sets published_at when creating an announcement with published status', async () => {
+      const mockClient = createMockSupabaseClient({ announcements: [] })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.createAnnouncement({
+        title: '教材更新上線',
+        body: '教材更新詳細說明',
+        category: 'material',
+        status: 'published',
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.announcement?.status).toBe('published')
+      expect(res.announcement?.published_at).not.toBeNull()
+    })
+
+    it('preserves existing published_at when updating an already published announcement', async () => {
+      const originalPublishedAt = '2026-08-20T12:00:00Z'
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          {
+            id: 'ann-1',
+            title: '舊標題',
+            body: '舊內容',
+            category: 'feature',
+            status: 'published',
+            published_at: originalPublishedAt,
+            created_at: '2026-08-20T10:00:00Z',
+            updated_at: '2026-08-20T10:00:00Z',
+          },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.updateAnnouncement({
+        id: 'ann-1',
+        title: '新標題',
+        status: 'published',
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.announcement?.title).toBe('新標題')
+      expect(res.announcement?.published_at).toBe(originalPublishedAt)
+    })
+
+    it('sets published_at when publishing an existing draft', async () => {
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          {
+            id: 'ann-draft',
+            title: '草稿標題',
+            body: '草稿內容',
+            category: 'notice',
+            status: 'draft',
+            published_at: null,
+            created_at: '2026-08-20T10:00:00Z',
+            updated_at: '2026-08-20T10:00:00Z',
+          },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.updateAnnouncement({
+        id: 'ann-draft',
+        status: 'published',
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.announcement?.status).toBe('published')
+      expect(res.announcement?.published_at).not.toBeNull()
+    })
+
+    it('archives an announcement', async () => {
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          {
+            id: 'ann-pub',
+            title: '已發布公告',
+            body: '內容',
+            category: 'maintenance',
+            status: 'published',
+            published_at: '2026-08-20T12:00:00Z',
+            created_at: '2026-08-20T10:00:00Z',
+            updated_at: '2026-08-20T10:00:00Z',
+          },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.archiveAnnouncement('ann-pub')
+      expect(res.success).toBe(true)
+      expect(res.announcement?.status).toBe('archived')
+    })
+
+    it('rejects creation with empty title, empty body, or invalid category', async () => {
+      const mockClient = createMockSupabaseClient({ announcements: [] })
+      const service = new AdminService({ client: mockClient })
+
+      const res1 = await service.createAnnouncement({
+        title: '   ',
+        body: '內容',
+        category: 'feature',
+      })
+      expect(res1.success).toBe(false)
+      expect(res1.error).toBe('TITLE_REQUIRED')
+
+      const res2 = await service.createAnnouncement({
+        title: '標題',
+        body: '   ',
+        category: 'feature',
+      })
+      expect(res2.success).toBe(false)
+      expect(res2.error).toBe('BODY_REQUIRED')
+
+      const res3 = await service.createAnnouncement({
+        title: '標題',
+        body: '內容',
+        category: 'invalid_cat' as any,
+      })
+      expect(res3.success).toBe(false)
+      expect(res3.error).toBe('INVALID_CATEGORY')
+    })
+
+    it('filters announcements and computes stats accurately', async () => {
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          { id: '1', title: 'Draft 1', body: 'b', category: 'feature', status: 'draft' },
+          { id: '2', title: 'Pub 1', body: 'b', category: 'material', status: 'published' },
+          { id: '3', title: 'Pub 2', body: 'b', category: 'notice', status: 'published' },
+          { id: '4', title: 'Arch 1', body: 'b', category: 'maintenance', status: 'archived' },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const allData = await service.getAnnouncementsData('all')
+      expect(allData.announcements).toHaveLength(4)
+      expect(allData.stats).toEqual({
+        total: 4,
+        draft: 1,
+        published: 2,
+        archived: 1,
+      })
+
+      const draftData = await service.getAnnouncementsData('draft')
+      expect(draftData.announcements).toHaveLength(1)
+      expect(draftData.announcements[0].title).toBe('Draft 1')
+      expect(draftData.stats.total).toBe(4)
+    })
+  })
+})
 
 

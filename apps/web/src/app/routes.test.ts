@@ -38,4 +38,17 @@ describe('root-hosted route paths', () => {
   it('keeps the pricing anchor on the public landing route', () => {
     expect(parseRoute('/#pricing')).toMatchObject({ name: 'landing', path: '/' })
   })
+
+  it('routes the parent announcements list page', () => {
+    expect(parseRoute('/announcements')).toMatchObject({ name: 'announcements', path: '/announcements' })
+    expect(parseRoute('/announcements?page=2')).toMatchObject({ name: 'announcements', path: '/announcements' })
+  })
+
+  it('routes a specific announcement detail page', () => {
+    expect(parseRoute('/announcements/ann-123')).toMatchObject({
+      name: 'announcement-detail',
+      params: { id: 'ann-123' },
+      path: '/announcements/ann-123',
+    })
+  })
 })

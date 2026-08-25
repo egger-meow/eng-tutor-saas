@@ -12,11 +12,15 @@ import type {
   QualityEra,
   WaitlistData,
   SubscriptionRevenueData,
+  AnnouncementsAdminData,
+  AnnouncementStatus,
 } from './types.js'
 
 export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   const [health, setHealth] = useState<HealthState | null>(null)
   const [overview, setOverview] = useState<OperationsOverview | null>(null)
+  const [announcements, setAnnouncements] = useState<AnnouncementsAdminData | null>(null)
+  const [announcementsFilter, setAnnouncementsFilter] = useState<AnnouncementStatus | 'all'>('all')
   const [failures, setFailures] = useState<FailureIntelligence | null>(null)
   const [feedback, setFeedback] = useState<ParentFeedbackIntelligence | null>(null)
   const [productFeedback, setProductFeedback] = useState<ProductFeedbackIntelligence | null>(null)
@@ -107,6 +111,12 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
           })
           break
         }
+        case 'announcements': {
+          tabPromise = adminApi.getAnnouncements(announcementsFilter).then((res) => {
+            setAnnouncements(res)
+          })
+          break
+        }
       }
 
       await Promise.all([healthPromise, tabPromise])
@@ -118,7 +128,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek, subscriptionRangeDays])
+  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek, subscriptionRangeDays, announcementsFilter])
 
   // Instant Child Switching via Cache + Background Revalidation
   const selectChildTimeline = useCallback((childId: string, week?: string) => {
@@ -193,6 +203,9 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
     timeline,
     waitlist,
     aiExport,
+    announcements,
+    announcementsFilter,
+    setAnnouncementsFilter,
     loading,
     isRefreshing,
     error,
