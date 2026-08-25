@@ -59,7 +59,7 @@ export function DashboardPage({ session }: { session: Session }) {
 
             <StaggerContainer className="children-cards-list" staggerDelay={0.08} id="children">
               {data.children.map((child, index) => (
-                <StaggerItem key={child.id}>
+                <StaggerItem key={child.id} initial={false} data-revealed="true">
                   <ChildCard
                     child={child}
                     materials={data.getMaterialsForChild(child.id)}
