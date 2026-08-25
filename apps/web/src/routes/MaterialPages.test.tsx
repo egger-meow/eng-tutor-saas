@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { loadAuthenticatedMaterial } from '../lib/authenticated-material-loader'
 import { AuthenticatedMaterialContent } from './AuthenticatedMaterialPage'
-import { ScopedMaterialLoadingState, ScopedMaterialPage } from './ScopedMaterialPage'
+import { ScopedMaterialContent, ScopedMaterialLoadingState, ScopedMaterialPage } from './ScopedMaterialPage'
 
 const { rpcMock } = vi.hoisted(() => ({ rpcMock: vi.fn() }))
 
@@ -14,7 +14,7 @@ describe('material page states', () => {
   it('marks the scoped page wrapper as full-width only while loading', () => {
     const html = renderToStaticMarkup(<ScopedMaterialPage session={null} />)
 
-    expect(html).toContain('scoped-material-main scoped-material-main-loading')
+    expect(html).toContain('scoped-material-main-loading')
     expect(html).toContain('container scoped-material-page')
   })
 
@@ -24,6 +24,44 @@ describe('material page states', () => {
     expect(html).toContain('scoped-material-loading-state')
     expect(html).toContain('正在安全開啟教材')
     expect(html).toContain('role="status"')
+  })
+
+  it('renders scoped material ready state with structured download cards and badges', () => {
+    const html = renderToStaticMarkup(
+      <ScopedMaterialContent
+        state={{
+          status: 'ready',
+          material: { childName: 'Pax', materialWeek: '2026-W35', weekNumber: 1 },
+          studentPdfUrl: 'https://example.com/student.pdf',
+          parentAnswerPdfUrl: 'https://example.com/parent.pdf',
+        }}
+        session={null}
+      />
+    )
+
+    expect(html).toContain('Pax · Week 1')
+    expect(html).toContain('本週教材')
+    expect(html).toContain('學生學習版')
+    expect(html).toContain('學生教材')
+    expect(html).toContain('家長解答版')
+    expect(html).toContain('家長解答')
+    expect(html).toContain('href="https://example.com/student.pdf"')
+    expect(html).toContain('href="https://example.com/parent.pdf"')
+    expect(html).toContain('scoped-download-item')
+    expect(html).toContain('登入查看所有教材與學習紀錄')
+  })
+
+  it('renders scoped material error state with clear notice and recovery action', () => {
+    const html = renderToStaticMarkup(
+      <ScopedMaterialContent
+        state={{ status: 'error' }}
+        session={null}
+      />
+    )
+
+    expect(html).toContain('這個教材連結無法使用')
+    expect(html).toContain('教材連結')
+    expect(html).toContain('登入紙屬英文')
   })
 
   it('keeps a successful empty result distinct from an RPC error', () => {
