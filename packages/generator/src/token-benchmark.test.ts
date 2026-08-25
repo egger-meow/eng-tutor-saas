@@ -36,7 +36,7 @@ describe('token-benchmark', () => {
     // Grounding remains compact relative to scattered context while retaining
     // the full inherited pedagogy and the auditable research contract.
     expect(bundleWords).toBeLessThan(scatteredWords * 0.4)
-    expect(bundleWords).toBeLessThan(8000)
+    expect(bundleWords).toBeLessThan(8500)
   })
 
   it('demonstrates context capsule token efficiency over raw database table dumps', () => {

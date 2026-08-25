@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import type { PipelineJobRow } from '../client/types.js'
 export * from '../client/types.js'
 
 export const OPERATIONS_MATERIALS_SELECT = 'id, child_id, material_week, revision, rule_version, prompt_version, generator_version, model_name, student_pdf_path, parent_answer_pdf_path, canonical_source, created_at'

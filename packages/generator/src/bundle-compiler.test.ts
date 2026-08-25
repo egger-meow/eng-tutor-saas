@@ -104,9 +104,9 @@ describe('bundle-compiler', () => {
     })
   })
 
-  it('keeps compiled bundle size within grounded-production budget (< 8000 words)', async () => {
+  it('keeps compiled bundle size within grounded-production budget (< 8500 words)', async () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
     const wordCount = freshBundle.content.trim().split(/\s+/u).length
-    expect(wordCount).toBeLessThan(8000)
+    expect(wordCount).toBeLessThan(8500)
   })
 })

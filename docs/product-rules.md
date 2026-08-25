@@ -40,6 +40,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 - Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
 - Verify student and answer packets agree exactly.
+- Distribute multiple-choice correct answer positions across (A), (B), (C), and (D); reject position concentration (single position > 60% when N >= 6, or 100% when N >= 4) and excessively long identical runs (run >= 4) without forcing artificial 25/25/25/25 distribution.
 - Optimize for black-and-white A4 printing with readable spacing.
 - Record curriculum rule and prompt versions with every material.
 

@@ -188,3 +188,232 @@ export function normalizeCurriculumPackage(input: unknown): unknown {
 
   return pkg
 }
+
+/**
+ * Resolves the 0-indexed correct option position (0 = A, 1 = B, 2 = C, 3 = D) and letter ('A'..'D')
+ * for a 4-option multiple choice question from its matching answer item.
+ */
+export function resolveQuestionAnswerLetter(
+  question: { id: string; options?: readonly unknown[] },
+  answerItem?: { questionId: string; answer: string; acceptedAnswers?: readonly string[] },
+): { index: number; letter: string } | null {
+  if (!question.options || question.options.length !== 4 || !answerItem || typeof answerItem.answer !== 'string') {
+    return null
+  }
+  const ansText = answerItem.answer.trim()
+
+  // 1. Direct single letter
+  const singleLetterMatch = ansText.match(/^[A-Da-d]$/u)
+  if (singleLetterMatch) {
+    const letter = singleLetterMatch[0].toUpperCase()
+    return { index: letter.charCodeAt(0) - 65, letter }
+  }
+
+  // 2. Prefix letter: e.g. "(A)", "A.", "A)", "[A]", "A: "
+  const prefixMatch = ansText.match(/^(?:\(([A-Da-d])\)|\[([A-Da-d])\]|([A-Da-d])[).:])(?:\s|$)/u)
+  if (prefixMatch) {
+    const letter = (prefixMatch[1] || prefixMatch[2] || prefixMatch[3])!.toUpperCase()
+    return { index: letter.charCodeAt(0) - 65, letter }
+  }
+
+  // 3. Match against option texts
+  const cleanAns = cleanOptionPrefix(ansText).trim().toLowerCase()
+  for (let i = 0; i < question.options.length; i++) {
+    const opt = question.options[i]
+    if (typeof opt === 'string') {
+      const cleanOpt = cleanOptionPrefix(opt).trim().toLowerCase()
+      if (cleanOpt && (cleanOpt === cleanAns || cleanAns === cleanOpt)) {
+        return { index: i, letter: String.fromCharCode(65 + i) }
+      }
+    }
+  }
+
+  // 4. Accepted answers fallback
+  if (Array.isArray(answerItem.acceptedAnswers)) {
+    for (const alt of answerItem.acceptedAnswers) {
+      if (typeof alt === 'string') {
+        const altSingle = alt.trim().match(/^[A-Da-d]$/u)
+        if (altSingle) {
+          const letter = altSingle[0].toUpperCase()
+          return { index: letter.charCodeAt(0) - 65, letter }
+        }
+        const altPrefix = alt.trim().match(/^(?:\(([A-Da-d])\)|\[([A-Da-d])\]|([A-Da-d])[).:])(?:\s|$)/u)
+        if (altPrefix) {
+          const letter = (altPrefix[1] || altPrefix[2] || altPrefix[3])!.toUpperCase()
+          return { index: letter.charCodeAt(0) - 65, letter }
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Safely remaps option letter references (e.g. (A), 選 A, 答案為 A) in explanation or misconception text.
+ */
+export function remapOptionLettersInText(text: string, letterMap: Record<string, string>): string {
+  if (typeof text !== 'string' || !text) return text
+  return text.replace(
+    /(\((?:[A-Da-d])\)|（(?:[A-Da-d])）|\[(?:[A-Da-d])\]|(?:[選為是]|答案(?:為|是)?|選項)\s*[A-Da-d]|[A-Da-d]\s*選項)/gu,
+    (match) => {
+      const m = match.match(/[A-Da-d]/u)
+      if (!m) return match
+      const oldLetter = m[0].toUpperCase()
+      const newLetter = letterMap[oldLetter] ?? oldLetter
+      return match.replace(m[0], newLetter)
+    },
+  )
+}
+
+/**
+ * Reorders the options of a 4-option multiple-choice question using a permutation array
+ * and updates the corresponding answer object to preserve correctness and distractor explanations.
+ *
+ * @param question Question object with `options: string[]` of length 4.
+ * @param newOptionOrder Permutation of [0, 1, 2, 3] indicating source indices for new positions,
+ *                       e.g. [1, 0, 2, 3] moves old option 1 to index 0 and old option 0 to index 1.
+ * @param answerItem Corresponding answer item in pkg.answers.
+ */
+export function reorderQuestionOptions<
+  Q extends { id: string; options?: string[] },
+  A extends { questionId: string; answer: string; acceptedAnswers?: string[]; explanationZh?: string; likelyMisconceptionZh?: string | null },
+>(
+  question: Q,
+  newOptionOrder: number[],
+  answerItem?: A,
+): { question: Q; answerItem?: A } {
+  if (!question.options || question.options.length !== 4) {
+    return { question, answerItem }
+  }
+  if (newOptionOrder.length !== 4 || new Set(newOptionOrder).size !== 4 || !newOptionOrder.every((idx) => idx >= 0 && idx < 4)) {
+    throw new Error(`Invalid 4-option permutation: ${JSON.stringify(newOptionOrder)}`)
+  }
+
+  const oldOptions = [...question.options]
+  const resolved = answerItem ? resolveQuestionAnswerLetter(question, answerItem) : null
+  const oldCorrectIdx = resolved ? resolved.index : 0
+  const newCorrectIdx = newOptionOrder.indexOf(oldCorrectIdx)
+
+  // Map old letter -> new letter: old index i moves to new index newOptionOrder.indexOf(i)
+  const letterMap: Record<string, string> = {}
+  for (let oldIdx = 0; oldIdx < 4; oldIdx++) {
+    const oldLetter = String.fromCharCode(65 + oldIdx)
+    const newIdx = newOptionOrder.indexOf(oldIdx)
+    const newLetter = String.fromCharCode(65 + newIdx)
+    letterMap[oldLetter] = newLetter
+  }
+
+  // Update question options
+  question.options = newOptionOrder.map((srcIdx) => oldOptions[srcIdx]!)
+
+  if (answerItem && resolved) {
+    const newLetter = String.fromCharCode(65 + newCorrectIdx)
+    const oldLetter = resolved.letter
+
+    // Update answer string
+    const rawAnswer = answerItem.answer.trim()
+    if (/^[A-Da-d]$/u.test(rawAnswer)) {
+      answerItem.answer = newLetter
+    } else if (/^(?:\([A-Da-d]\)|\[[A-Da-d]\]|[A-Da-d][).:])\s*/u.test(rawAnswer)) {
+      const cleanText = cleanOptionPrefix(rawAnswer)
+      answerItem.answer = `${newLetter}. ${cleanText}`
+    } else {
+      // If answer was raw option text, preserve it
+      answerItem.answer = rawAnswer
+    }
+
+    // Update acceptedAnswers
+    if (Array.isArray(answerItem.acceptedAnswers)) {
+      answerItem.acceptedAnswers = answerItem.acceptedAnswers.map((alt) => {
+        if (typeof alt !== 'string') return alt
+        const trimmed = alt.trim()
+        if (/^[A-Da-d]$/u.test(trimmed)) {
+          return newLetter
+        }
+        if (/^\([A-Da-d]\)$/u.test(trimmed)) {
+          return `(${newLetter})`
+        }
+        if (/^\[[A-Da-d]\]$/u.test(trimmed)) {
+          return `[${newLetter}]`
+        }
+        if (/^[A-Da-d]\.$/u.test(trimmed)) {
+          return `${newLetter}.`
+        }
+        if (/^[A-Da-d]\)$/u.test(trimmed)) {
+          return `${newLetter})`
+        }
+        if (/^(?:\([A-Da-d]\)|\[[A-Da-d]\]|[A-Da-d][).:])\s*/u.test(trimmed)) {
+          const cleanText = cleanOptionPrefix(trimmed)
+          return cleanText ? `${newLetter}. ${cleanText}` : newLetter
+        }
+        return alt
+      })
+    }
+
+    // Update explanationZh and likelyMisconceptionZh
+    if (typeof answerItem.explanationZh === 'string') {
+      answerItem.explanationZh = remapOptionLettersInText(answerItem.explanationZh, letterMap)
+    }
+    if (typeof answerItem.likelyMisconceptionZh === 'string') {
+      answerItem.likelyMisconceptionZh = remapOptionLettersInText(answerItem.likelyMisconceptionZh, letterMap)
+    }
+  }
+
+  return { question, answerItem }
+}
+
+/**
+ * Deterministically balances MCQ answer positions across a package by rotating options
+ * so that correct answers cycle through (A), (B), (C), (D) without long runs or position concentration.
+ */
+export function balanceCurriculumMcqPositions<T extends Record<string, any>>(input: T): T {
+  const pkg = structuredClone(input) as Record<string, any>
+  if (!pkg || typeof pkg !== 'object' || !Array.isArray(pkg.answers)) return input
+
+  const answerMap = new Map<string, any>()
+  for (const a of pkg.answers) {
+    if (a && typeof a === 'object' && typeof a.questionId === 'string') {
+      answerMap.set(a.questionId, a)
+    }
+  }
+
+  const allQuestions: any[] = []
+  if (pkg.studentLesson && typeof pkg.studentLesson === 'object') {
+    if (Array.isArray(pkg.studentLesson.practice)) {
+      for (const section of pkg.studentLesson.practice) {
+        if (section && Array.isArray(section.questions)) {
+          allQuestions.push(...section.questions)
+        }
+      }
+    }
+    if (pkg.studentLesson.homework && Array.isArray(pkg.studentLesson.homework.questions)) {
+      allQuestions.push(...pkg.studentLesson.homework.questions)
+    }
+  }
+
+  const mcqQuestions = allQuestions.filter(
+    (q) => q && typeof q === 'object' && Array.isArray(q.options) && q.options.length === 4,
+  )
+
+  // Desired target cycle: A (0), B (1), C (2), D (3), A (0), B (1), ...
+  mcqQuestions.forEach((q, idx) => {
+    const ans = answerMap.get(q.id)
+    const resolved = resolveQuestionAnswerLetter(q, ans)
+    if (!resolved) return
+
+    const targetIdx = idx % 4
+    const currIdx = resolved.index
+    if (currIdx === targetIdx) return
+
+    // Construct permutation: we want old index `currIdx` to end up at `targetIdx`.
+    // Permutation array `newOrder` where newOrder[targetIdx] = currIdx, and other indices filled.
+    const newOrder = [0, 1, 2, 3]
+    newOrder[targetIdx] = currIdx
+    newOrder[currIdx] = targetIdx
+
+    reorderQuestionOptions(q, newOrder, ans)
+  })
+
+  return pkg as T
+}

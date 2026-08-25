@@ -6,6 +6,7 @@ import {
   buildCapCoverageCapsule,
   validateCurriculumPackage,
   auditCurriculumPackage,
+  balanceCurriculumMcqPositions,
   type CurriculumPackage,
   type CurriculumQuestion,
 } from './index.js'
@@ -315,11 +316,12 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
       },
     }
 
-    // Validate Schema 2.2 and Audit
-    const validation = validateCurriculumPackage(week4Package)
+    // Balance MCQs and Validate Schema 2.2 and Audit
+    const balancedPackage = balanceCurriculumMcqPositions(week4Package)
+    const validation = validateCurriculumPackage(balancedPackage)
     expect(validation.success).toBe(true)
 
-    const audit = auditCurriculumPackage(week4Package)
+    const audit = auditCurriculumPackage(balancedPackage)
     const criticalFindings = audit.findings.filter((f) => f.tier === 'structural-critical' || f.tier === 'semantic-critical')
     expect(criticalFindings).toEqual([])
   })
@@ -573,10 +575,11 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
       },
     }
 
-    const val = validateCurriculumPackage(repeatPackage)
+    const balancedRepeat = balanceCurriculumMcqPositions(repeatPackage)
+    const val = validateCurriculumPackage(balancedRepeat)
     expect(val.success).toBe(true)
 
-    const audit = auditCurriculumPackage(repeatPackage)
+    const audit = auditCurriculumPackage(balancedRepeat)
     const criticalFindings = audit.findings.filter((f) => f.tier === 'structural-critical' || f.tier === 'semantic-critical')
     expect(criticalFindings).toEqual([])
   })

@@ -2,7 +2,7 @@ import { access, readFile } from 'node:fs/promises'
 import { isAbsolute, resolve } from 'node:path'
 import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from './validate-curriculum-package.js'
 import type { CurriculumPackage } from './curriculum-package-schema.js'
-import { extractBlockTexts } from './normalize-curriculum-package.js'
+import { extractBlockTexts, resolveQuestionAnswerLetter } from './normalize-curriculum-package.js'
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
 import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
 
@@ -420,6 +420,74 @@ export function auditCurriculumPackage(
     const jargon = findForbiddenPersonalizationJargon(goal)
     if (jargon) {
       add('semantic-critical', 'self-study', 'critical', `studentLesson.opening.goalsZh 含有內部術語 ("${jargon}")，必須以學生友善的正體中文撰寫。`)
+    }
+  }
+
+  // Deterministic MCQ Answer-Position Leakage Gate
+  const answerMap = new Map(pkg.answers.map((a) => [a.questionId, a]))
+  const mcqLetters: { id: string; letter: string }[] = []
+
+  for (const q of questions) {
+    if (Array.isArray(q.options) && q.options.length === 4) {
+      const ans = answerMap.get(q.id)
+      const resolved = resolveQuestionAnswerLetter(q, ans)
+      if (resolved) {
+        mcqLetters.push({ id: q.id, letter: resolved.letter })
+      }
+    }
+  }
+
+  const mcqTotal = mcqLetters.length
+  if (mcqTotal >= 4) {
+    // 1. Identical-position run gate: reject runs >= 4
+    let maxRun = 0
+    let maxRunLetter = ''
+    let curRun = 0
+    let curLetter = ''
+    for (const item of mcqLetters) {
+      if (item.letter === curLetter) {
+        curRun += 1
+      } else {
+        curLetter = item.letter
+        curRun = 1
+      }
+      if (curRun > maxRun) {
+        maxRun = curRun
+        maxRunLetter = curLetter
+      }
+    }
+
+    if (maxRun >= 4) {
+      add(
+        'semantic-critical',
+        'mcq-position-leakage',
+        'critical',
+        `選擇題正確答案位置連續出現 ${maxRun} 次 "${maxRunLetter}"，存在明顯位置規律洩漏 (run >= 4)。請打散選項順序。`,
+      )
+    }
+
+    // 2. Single-position concentration gate
+    const counts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 }
+    for (const item of mcqLetters) {
+      counts[item.letter] = (counts[item.letter] ?? 0) + 1
+    }
+    const maxCount = Math.max(...Object.values(counts))
+    const maxLetter = Object.keys(counts).find((k) => counts[k] === maxCount) ?? 'A'
+
+    if (maxCount === mcqTotal) {
+      add(
+        'semantic-critical',
+        'mcq-position-leakage',
+        'critical',
+        `所有 ${mcqTotal} 題選擇題的正確答案均為 "${maxLetter}"，存在嚴重答案位置集中洩漏。請將選項順序打散至 (A)、(B)、(C)、(D) 各位置。`,
+      )
+    } else if (mcqTotal >= 6 && maxCount / mcqTotal > 0.60) {
+      add(
+        'semantic-critical',
+        'mcq-position-leakage',
+        'critical',
+        `選擇題正確答案過度集中於位置 "${maxLetter}" (${maxCount}/${mcqTotal} 題，佔比 ${Math.round((maxCount / mcqTotal) * 100)}% > 60%)。請打散選項順序，避免單一位置比例過高。`,
+      )
     }
   }
 

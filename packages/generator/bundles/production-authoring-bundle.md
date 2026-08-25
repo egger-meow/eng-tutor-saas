@@ -14,14 +14,14 @@ sourceHashes:
   "packages/generator/prompts/2.5.0/03-critic.md": "2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05"
   "packages/generator/prompts/2.5.0/04-repair.md": "ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c"
   "packages/generator/prompts/2.6.0/01-plan.md": "a3e75601b5013d7098aa0c9fdcb60cb3e4cee534e3ca2538235315c2433d449a"
-  "packages/generator/prompts/2.6.0/02-author.md": "48bddaff5ba7ced05f20c99ba221e728882c86e877ce88608c1f9dbf80183ff7"
-  "packages/generator/prompts/2.6.0/03-critic.md": "5519a35438e1b91fc77b4690d3d5362e8687299761f89dbc7dfaecaaf0998db3"
-  "packages/generator/prompts/2.6.0/04-repair.md": "e227397c176db4b05a2b8c48943f1c7210771797c4353df23d85cc1c58baa16f"
+  "packages/generator/prompts/2.6.0/02-author.md": "6f5b82e2d8740837e13cc8fdfd16c9903fea72f49ae45871f578f6075dbf7996"
+  "packages/generator/prompts/2.6.0/03-critic.md": "6409020eb5dfec22cd91d991bf0da4a0b90f62e2b9300051ded6589e8d0b7582"
+  "packages/generator/prompts/2.6.0/04-repair.md": "cc3b82b44d43a51ff515b4cef0709bbcac6791426b809881a6b22db7151628eb"
   "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "bf6de7fb81d15fc4f7478ab24d23dd257d5b934687f22d29ace7235a84192a9b"
-  "docs/product-rules.md": "b190a1c62733b79628015f9879ac4361381df73188c23afcab500758dfb197e7"
+  "docs/curriculum-quality-rubric.md": "12a822cfae283750a09afbd5eee4fadb11888489edc16e90644747f686275a3c"
+  "docs/product-rules.md": "9712825db688aa392c92ac944e99b82ade81f1f1b849b0cdf55be2050c27135f"
 ---
 
 # 紙屬英文 Production Authoring Bundle
@@ -72,6 +72,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 - Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
 - Verify student and answer packets agree exactly.
+- Distribute multiple-choice correct answer positions across (A), (B), (C), and (D); reject position concentration (single position > 60% when N >= 6, or 100% when N >= 4) and excessively long identical runs (run >= 4) without forcing artificial 25/25/25/25 distribution.
 - Optimize for black-and-white A4 printing with readable spacing.
 - Record curriculum rule and prompt versions with every material.
 
@@ -96,6 +97,7 @@ This is the review contract for every weekly package. It distills the teaching r
 - The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
 - Reading practice covers detail, main idea, inference, and context clues over time. Difficulty comes from evidence and reasoning, not trivia or hidden words.
 - Global Answer Integrity: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options must never combine separately mentioned true facts from different places into an unsupported composite claim.
+- MCQ Answer-Position Integrity: Correct multiple-choice answer positions must be distributed across (A), (B), (C), and (D). Reject packages where all or near-all answers are concentrated in one position (single position > 60% when N >= 6, or 100% when N >= 4) or where identical answers repeat in runs of 4 or more. Natural variance is expected without artificial 25/25/25/25 balancing; targeted repair reorders options rather than rewriting valid questions.
 - Profile `weekly_minutes` is `targetMinutes`; `estimatedMinutes` remains deterministic, represented-work truth. Never copy them. Require the rounded inclusive 85%-115% band, otherwise emit `BUDGET_UNDERFILLED`/`BUDGET_OVERFILLED`, repair useful content surgically, recompute, and re-audit. Exceptions require specific passed `workload-budget-exception` evidence and are never valid outside the deterministic 75%-125% hard bound.
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
@@ -1052,9 +1054,10 @@ Do not self-certify grounding critical checks. Only the independent critic may a
 
 ---
 
-# Workload Authoring Overlay (v2.6.0)
+# Workload & Answer-Distribution Authoring Overlay (v2.6.0)
 
 Scheduled Work estimates fit but cannot run exact normalization. The Finisher is authoritative; its immutable workload finding drives the next targeted retry. Never falsify duration.
+Distribute 4-option MCQ answers across (A), (B), (C), and (D). Never concentrate all/near-all answers in one position (single position <= 60% when N >= 6, or 100% when N >= 4) or author runs of 4+ identical answers.
 
 ## 7. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.6.0)
@@ -1149,9 +1152,10 @@ The independent critic is the only stage authorized to add or mark grounding cri
 
 ---
 
-# Workload Critic Overlay (v2.6.0)
+# Workload & Answer-Distribution Critic Overlay (v2.6.0)
 
 Reject underfill, overload, or filler. Exceptions need learner evidence and must remain within 75%-125%. Never claim an exact deterministic pre-submit calculation.
+Reject MCQ answer-position leakage: flag critical if answers are concentrated in a single position (> 60% when N >= 6, or 100% when N >= 4) or contain runs of 4+ identical answers (e.g. AAAA).
 
 ## 8. Prompt 04: Repair Specialist
 # Prompt 04: Repair (v2.6.0)
@@ -1196,6 +1200,7 @@ Maintain all existing retry behavior. This repair stage does not claim, submit, 
 
 ---
 
-# Workload Repair Overlay (v2.6.0)
+# Workload & Answer-Distribution Repair Overlay (v2.6.0)
 
 On retry, surgically expand useful work or trim redundancy. Preserve grounding, reading, targets, unaffected Q&A/tracking, and required stages; re-research only changed facts. Finisher recomputes.
+When repairing MCQ answer-position leakage, reorder question options (updating answer key, accepted answers, and explanation letter references) rather than rewriting valid questions.

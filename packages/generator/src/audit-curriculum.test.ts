@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { auditCurriculumPackage } from './audit-curriculum.js'
-import { computeDeterministicPlanMinutes } from './normalize-curriculum-package.js'
+import {
+  balanceCurriculumMcqPositions,
+  computeDeterministicPlanMinutes,
+  reorderQuestionOptions,
+  resolveQuestionAnswerLetter,
+} from './normalize-curriculum-package.js'
 import { validPackage } from './curriculum-package.test.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
@@ -447,7 +452,6 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.passed).toBe(false)
     expect(report.findings.some((item) => item.tier === 'structural-critical' && item.severity === 'critical')).toBe(true)
   })
-})
 
   it('requires explicit substantive evidence for a workload exception', () => {
     const pkg = canonicalPackage()
@@ -476,3 +480,213 @@ describe('curriculum audit & lexical contract', () => {
       (finding) => finding.message.includes('cannot bypass the deterministic 75%-125% hard bound'),
     )).toBe(true)
   })
+})
+
+function make12McqPackage(answerLetters: string[]): any {
+  const pkg = canonicalPackage()
+  const validTargetIds = pkg.learningPlan.targets.map((t: any) => t.id)
+  let qIndex = 0
+  const stages = [
+    { stage: 'guided', count: 2 },
+    { stage: 'independent', count: 2 },
+    { stage: 'cap-transfer', count: 3 },
+    { stage: 'production', count: 1 },
+    { stage: 'retrieval', count: 1 },
+  ] as const
+
+  const baseOptions = [
+    'Mina tests the camera carefully.',
+    'Ken checks the sensor angle.',
+    'The club needs new parts.',
+    'The robot works well today.',
+  ]
+
+  pkg.studentLesson.practice = stages.map(({ stage, count }) => {
+    const stageQuestions: any[] = []
+    for (let i = 0; i < count; i++) {
+      const qId = `${stage.slice(0, 1).toUpperCase()}${i + 1}`
+      const letter = answerLetters[qIndex] ?? 'A'
+      stageQuestions.push({
+        id: qId,
+        targetIds: validTargetIds,
+        itemType: 'inference',
+        prompt: `Why does Mina test the robot in question ${qId}?`,
+        options: [...baseOptions],
+        writingLines: 0,
+        difficulty: 'on-level',
+      })
+      qIndex++
+    }
+    return {
+      id: `stage-${stage}`,
+      stage,
+      titleZh: `Stage ${stage}`,
+      instructionsZh: '請根據文章細心回答問題。',
+      hintZh: null,
+      questions: stageQuestions,
+    }
+  })
+
+  const hwQuestions: any[] = []
+  while (qIndex < answerLetters.length || hwQuestions.length < 3) {
+    const qId = `H${hwQuestions.length + 1}`
+    const letter = answerLetters[qIndex] ?? 'A'
+    hwQuestions.push({
+      id: qId,
+      targetIds: validTargetIds,
+      itemType: 'inference',
+      prompt: `Why does Mina record the result in question ${qId}?`,
+      options: [...baseOptions],
+      writingLines: 0,
+      difficulty: 'on-level',
+    })
+    qIndex++
+  }
+
+  pkg.studentLesson.homework = {
+    purposeZh: '隔日延遲提取與會考轉移練習。',
+    estimatedMinutes: 15,
+    questions: hwQuestions,
+  }
+
+  const allQuestions = [
+    ...pkg.studentLesson.practice.flatMap((s: any) => s.questions),
+    ...pkg.studentLesson.homework.questions,
+  ]
+
+  pkg.answers = allQuestions.map((q: any, idx: number) => {
+    const letter = answerLetters[idx] ?? 'A'
+    const letterIdx = letter.charCodeAt(0) - 65
+    const optText = baseOptions[letterIdx] ?? baseOptions[0]
+    return {
+      questionId: q.id,
+      answer: `${letter}. ${optText}`,
+      acceptedAnswers: [letter, `(${letter})`],
+      explanationZh: `解析：答案為 ${letter}，第二段明確指出相關證據。`,
+      likelyMisconceptionZh: '選其他選項者因部分線索誤判。',
+      followUpZh: null,
+    }
+  })
+
+  return pkg
+}
+
+describe('MCQ answer-position leakage & distribution gate', () => {
+  it('rejects all-A concentrated pattern (AAAAAAAAAAAA)', () => {
+    const allA = Array.from({ length: 12 }, () => 'A')
+    const pkg = make12McqPackage(allA)
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(leakageFindings.length).toBeGreaterThanOrEqual(1)
+    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('run >= 4'))).toBe(true)
+    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('嚴重答案位置集中洩漏'))).toBe(true)
+  })
+
+  it('rejects strongly concentrated patterns exceeding 60% single-position concentration', () => {
+    // 10 A's out of 12 (83.3% > 60%), with runs broken up (maxRun = 3)
+    const concentrated = ['A', 'A', 'A', 'B', 'A', 'A', 'A', 'C', 'A', 'A', 'A', 'D']
+    const pkg = make12McqPackage(concentrated)
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('過度集中於位置 "A"'))).toBe(true)
+  })
+
+  it('rejects excessively long identical-position runs (run >= 4)', () => {
+    // 4 consecutive A's, but overall counts are balanced (4 A, 3 B, 3 C, 2 D)
+    const longRun = ['A', 'A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'D', 'D']
+    const pkg = make12McqPackage(longRun)
+    const report = auditCurriculumPackage(pkg)
+
+    expect(report.passed).toBe(false)
+    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('run >= 4'))).toBe(true)
+  })
+
+  it('accepts naturally mixed distributions without requiring artificial 25/25/25/25 balancing', () => {
+    // 1. Equal balanced distribution (3 A, 3 B, 3 C, 3 D)
+    const dist1 = ['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'D']
+    const report1 = auditCurriculumPackage(make12McqPackage(dist1))
+    expect(report1.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report1.passed).toBe(true)
+
+    // 2. Natural variation with pairs (3 A, 3 B, 3 C, 3 D, maxRun = 2)
+    const dist2 = ['A', 'A', 'B', 'C', 'B', 'B', 'C', 'D', 'A', 'C', 'D', 'D']
+    const report2 = auditCurriculumPackage(make12McqPackage(dist2))
+    expect(report2.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report2.passed).toBe(true)
+
+    // 3. Natural variation with run of 3 (maxRun = 3, allowed)
+    const dist3 = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D', 'A', 'B', 'C']
+    const report3 = auditCurriculumPackage(make12McqPackage(dist3))
+    expect(report3.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report3.passed).toBe(true)
+
+    // 4. Uneven natural distribution (5 A, 3 B, 2 C, 2 D = 41.7% max)
+    const dist4 = ['A', 'B', 'A', 'C', 'A', 'D', 'B', 'C', 'A', 'B', 'D', 'C']
+    const report4 = auditCurriculumPackage(make12McqPackage(dist4))
+    expect(report4.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report4.passed).toBe(true)
+
+    // 5. Uneven natural distribution (6 A, 3 B, 2 C, 1 D = 50% max)
+    const dist5 = ['A', 'B', 'A', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'A', 'D']
+    const report5 = auditCurriculumPackage(make12McqPackage(dist5))
+    expect(report5.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report5.passed).toBe(true)
+  })
+
+  it('reorders question options while preserving semantic answer correctness and distractor explanations', () => {
+    const question = {
+      id: 'Q1',
+      prompt: 'Why does Mina test the robot again?',
+      options: ['To isolate the error', 'To buy new parts', 'To quit the club', 'To paint the robot'],
+    }
+    const answer = {
+      questionId: 'Q1',
+      answer: 'A. To isolate the error',
+      acceptedAnswers: ['A', '(A)'],
+      explanationZh: '第 3 句明確說明答案為 A，選 B 者忽略了材料庫存，選 C 者誤解態度。',
+      likelyMisconceptionZh: '選 B 者常因看見零件而過度推論。',
+      followUpZh: null,
+    }
+
+    // Swap position 0 (A) with position 1 (B): permutation [1, 0, 2, 3]
+    const { question: reorderedQ, answerItem: reorderedA } = reorderQuestionOptions(
+      question,
+      [1, 0, 2, 3],
+      answer,
+    )
+
+    // Options are reordered
+    expect(reorderedQ.options).toEqual(['To buy new parts', 'To isolate the error', 'To quit the club', 'To paint the robot'])
+    // Answer is now B
+    expect(reorderedA?.answer).toBe('B. To isolate the error')
+    expect(reorderedA?.acceptedAnswers).toEqual(['B', '(B)'])
+    // Explanation and misconceptions mapped correctly: A -> B, B -> A
+    expect(reorderedA?.explanationZh).toBe('第 3 句明確說明答案為 B，選 A 者忽略了材料庫存，選 C 者誤解態度。')
+    expect(reorderedA?.likelyMisconceptionZh).toBe('選 A 者常因看見零件而過度推論。')
+  })
+
+  it('balances an all-A package using balanceCurriculumMcqPositions so it passes quality audit', () => {
+    const allA = Array.from({ length: 12 }, () => 'A')
+    const pkg = make12McqPackage(allA)
+
+    // Initial audit fails
+    expect(auditCurriculumPackage(pkg).passed).toBe(false)
+
+    // Balance options deterministically
+    const balanced = balanceCurriculumMcqPositions(pkg)
+
+    // Balanced audit passes
+    const report = auditCurriculumPackage(balanced)
+    expect(report.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
+    expect(report.passed).toBe(true)
+
+    // Check that answers are distributed across A, B, C, D
+    const letters = balanced.answers.map((a: any) => a.answer[0])
+    expect(letters).toEqual(['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'])
+  })
+})

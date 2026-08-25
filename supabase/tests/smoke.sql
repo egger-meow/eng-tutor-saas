@@ -947,7 +947,24 @@ begin
     );
 
   update public.materials
-  set canonical_source = '{"studentLesson":{"vocabulary":[]},"learningPlan":{"targets":[]},"trackingDelta":{"hypothesesToVerify":[]},"qualityEvidence":{"feedbackApplied":[],"criticFindings":[]},"learnerSnapshot":{"feedbackSummary":"smoke"},"metadata":{"curriculumVersion":"test-v1"}}'::jsonb
+  set canonical_source = '{
+    "studentLesson":{
+      "vocabulary":[{"id":"v-book","word":"book","status":"new"}],
+      "practice":[{"id":"guided","stage":"guided","questions":[{"id":"q1","targetIds":["v-book","g-present-simple-statements"]}]}],
+      "homework":{"questions":[{"id":"h1","targetIds":["v-book"]}]}
+    },
+    "learningPlan":{"targets":[{"id":"v-book"},{"id":"g-present-simple-statements"}]},
+    "trackingDelta":{
+      "introducedVocabularyIds":["v-book"],
+      "reviewedVocabularyIds":[],
+      "exposedGrammarTargetIds":["g-present-simple-statements"],
+      "exposedCommunicationFunctionIds":["comm-ask-for-and-give-information"],
+      "hypothesesToVerify":["Student completes practice independently"]
+    },
+    "qualityEvidence":{"feedbackApplied":[],"criticFindings":[]},
+    "learnerSnapshot":{"feedbackSummary":"smoke","readingLevel":"國一適中"},
+    "metadata":{"curriculumVersion":"test-v1","schemaVersion":"2.3.0","inputFingerprint":"fp-smoke-1"}
+  }'::jsonb
   where id = '00000000-0000-0000-0000-000000000031';
 
   insert into public.generation_jobs (
@@ -985,6 +1002,18 @@ begin
   end if;
   if (select observations_recorded_at from public.materials where id = '00000000-0000-0000-0000-000000000031') is null then
     raise exception 'curriculum observation marker was not recorded';
+  end if;
+  if not exists (select 1 from public.child_vocab_progress where child_id = '00000000-0000-0000-0000-000000000021' and vocabulary_id = 'v-book') then
+    raise exception 'child vocab progress was not recorded';
+  end if;
+  if not exists (select 1 from public.child_grammar_progress where child_id = '00000000-0000-0000-0000-000000000021' and grammar_id = 'g-present-simple-statements') then
+    raise exception 'child grammar progress was not recorded';
+  end if;
+  if not exists (select 1 from public.child_communication_progress where child_id = '00000000-0000-0000-0000-000000000021' and communication_function_id = 'comm-ask-for-and-give-information') then
+    raise exception 'child communication progress was not recorded';
+  end if;
+  if not exists (select 1 from public.child_weekly_learning_snapshots where material_id = '00000000-0000-0000-0000-000000000031') then
+    raise exception 'child weekly learning snapshot was not recorded';
   end if;
   if (select jsonb_array_length(compact_weekly_history) from public.child_learning_state where child_id = '00000000-0000-0000-0000-000000000021') <> 1 then
     raise exception 'curriculum observation history was applied more than once';

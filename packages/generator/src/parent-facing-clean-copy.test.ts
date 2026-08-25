@@ -3,11 +3,12 @@ import {
   findForbiddenPersonalizationJargon,
   validateCurriculumPackage,
   auditCurriculumPackage,
+  balanceCurriculumMcqPositions,
   type CurriculumPackage,
 } from './index.js'
 
 describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
-  const baseValidPackage: CurriculumPackage = {
+  const baseValidPackage: CurriculumPackage = balanceCurriculumMcqPositions({
     metadata: {
       schemaVersion: '2.2.0',
       jobId: 'job-parent-copy-1',
@@ -219,7 +220,7 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
       ],
       criticFindings: [],
     },
-  }
+  })
 
   describe('findForbiddenPersonalizationJargon detection', () => {
     it.each([
