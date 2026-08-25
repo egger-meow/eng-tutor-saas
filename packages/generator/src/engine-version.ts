@@ -8,6 +8,7 @@
  * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.1.0')
  */
 
+export const CURRENT_RELEASE_ID = 'rel_1.3.0'
 export const CURRENT_ENGINE_VERSION = '1.3.0'
 export const CURRENT_SCHEMA_VERSION = '2.3.0'
 export const CURRENT_PROMPT_VERSION = '2.7.0'
@@ -17,6 +18,7 @@ export const CURRENT_WORKER_VERSION = '1.3.0'
 export const CURRENT_PDF_RENDERER_VERSION = '1.0.0'
 
 export const CURRENT_ENGINE_MANIFEST = {
+  releaseId: CURRENT_RELEASE_ID,
   engine: CURRENT_ENGINE_VERSION,
   schema: CURRENT_SCHEMA_VERSION,
   prompt: CURRENT_PROMPT_VERSION,

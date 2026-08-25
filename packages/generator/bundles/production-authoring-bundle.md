@@ -21,7 +21,7 @@ sourceHashes:
   "packages/generator/prompts/2.7.0/02-author.md": "df7034db3aee85bc1260fac17bc6c0b2f91cef1298074a555d98d33fbecf5695"
   "packages/generator/prompts/2.7.0/03-critic.md": "0cbce4661fd86238a708fca205d7468a1cf8014155a9ab89b005286c4d207458"
   "packages/generator/prompts/2.7.0/04-repair.md": "2c8564e6131002e44f392887996197e624984e3c24360f9b296de1ce778cb16b"
-  "packages/generator/src/curriculum-package-schema.ts": "0ff6029a06668532d796f52427061c544fad493cae277cd3c49b60567374edaf"
+  "packages/generator/src/curriculum-package-schema.ts": "40114cd21457f67e4ca72491f94b81216de2e0a819a9ed5441495df9f0d45131"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "12a822cfae283750a09afbd5eee4fadb11888489edc16e90644747f686275a3c"
@@ -344,6 +344,7 @@ export const CurriculumPackageV22Schema = z.strictObject({
     inputFingerprint: StableId,
     engineVersion: Text.optional(),
     workerVersion: Text.optional(),
+    releaseId: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -436,6 +437,7 @@ export const CurriculumPackageV21Schema = z.strictObject({
     inputFingerprint: StableId,
     engineVersion: Text.optional(),
     workerVersion: Text.optional(),
+    releaseId: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),
@@ -515,6 +517,7 @@ export const CurriculumPackageV20Schema = z.strictObject({
     inputFingerprint: StableId,
     engineVersion: Text.optional(),
     workerVersion: Text.optional(),
+    releaseId: Text.optional(),
   }),
   learnerSnapshot: z.strictObject({
     schoolProgress: Text.nullable(),

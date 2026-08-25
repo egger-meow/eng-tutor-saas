@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   AdminService,
   classifyQualityEra,
+  CURRENT_RELEASE_ID,
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
   CURRENT_PROMPT_VERSION,
@@ -323,6 +324,49 @@ describe('AdminService Authoritative Truth Layer', () => {
     // Valid artifact from immediately previous production release is historical provenance and must NOT trigger drift
     expect(overview.engineInspector.drift.some((d) => d.status === 'version_drift')).toBe(false)
     expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
+  })
+
+  it('correctly triggers VERSION DRIFT when a current-release artifact incorrectly records Engine 1.2 / Prompt 2.6', async () => {
+    const service = new AdminService({ client: createMockSupabaseClient({
+      children: [{ id: 'child-drift', display_name: 'Drift Child', is_active: true, is_internal_test: false }],
+      subscriptions: [],
+      generation_jobs: [],
+      materials: [{
+        id: 'material-drift-1',
+        child_id: 'child-drift',
+        material_week: '2026-08-25',
+        revision: 1,
+        rule_version: 'rules/1',
+        prompt_version: '2.6.0', // Incorrectly recorded prompt on current release
+        generator_version: '2.3.0',
+        model_name: 'model-drift',
+        student_pdf_path: 'child/job/student.pdf',
+        parent_answer_pdf_path: 'child/job/parent-answer.pdf',
+        canonical_source: {
+          metadata: {
+            releaseId: CURRENT_RELEASE_ID, // Current release identity!
+            schemaVersion: '2.3.0',
+            promptVersion: '2.6.0', // Drifted
+            engineVersion: '1.2.0', // Drifted
+            rendererVersion: '1.0.0',
+            workerVersion: '1.3.0',
+          },
+        },
+        created_at: '2026-08-25T12:00:00.000Z',
+      }],
+      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
+      curriculum_submissions: [],
+    }) })
+
+    const overview = await service.getOperationsOverview()
+    // Current release artifact with drifted engine/prompt MUST trigger version_drift
+    expect(overview.engineInspector.alignmentStatus).toBe('version_drift')
+    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
+      source: 'material', id: 'material-drift-1', component: 'engine', expected: CURRENT_ENGINE_VERSION, actual: '1.2.0', status: 'version_drift',
+    }))
+    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
+      source: 'material', id: 'material-drift-1', component: 'prompt', expected: CURRENT_PROMPT_VERSION, actual: '2.6.0', status: 'version_drift',
+    }))
   })
 
   it('does not label missing submission-time renderer or worker provenance as unobservable for authoring submissions', async () => {
@@ -1488,11 +1532,13 @@ describe('AdminService Authoritative Truth Layer', () => {
           submitted_at: '2026-08-18T10:00:00Z',
           processed_at: '2026-08-18T10:05:00Z',
           attempt_count: 1,
-          schema_version: '2.2.0',
-          prompt_version: '2.4.0',
+          schema_version: CURRENT_SCHEMA_VERSION,
+          prompt_version: CURRENT_PROMPT_VERSION,
           model_name: 'gemini-3.7-flash',
           quality_profile: 'gemini-3.7-flash',
-          engine_version: '1.0.1',
+          engine_version: CURRENT_ENGINE_VERSION,
+          quality_profile_version: '1.1.0',
+          release_id: CURRENT_RELEASE_ID,
         },
         // 2. Metadata-only current submission: missing valid check, flagged as MISSING by RPC
         {
@@ -1506,8 +1552,8 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_code: 'QUALITY_REJECTED',
           error_message: 'Curriculum quality rejected',
           failure_evidence: {
-            schemaVersion: '2.2.0',
-            promptVersion: '2.4.0',
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            promptVersion: CURRENT_PROMPT_VERSION,
             findings: [
               {
                 source: 'provenance',
@@ -1519,11 +1565,13 @@ describe('AdminService Authoritative Truth Layer', () => {
           submitted_at: '2026-08-18T11:00:00Z',
           processed_at: '2026-08-18T11:05:00Z',
           attempt_count: 1,
-          schema_version: '2.2.0',
-          prompt_version: '2.4.0',
+          schema_version: CURRENT_SCHEMA_VERSION,
+          prompt_version: CURRENT_PROMPT_VERSION,
           model_name: 'gpt-5.6-sol',
           quality_profile: 'default', // display object only, does not satisfy validity
-          engine_version: '1.0.1',
+          engine_version: CURRENT_ENGINE_VERSION,
+          quality_profile_version: null,
+          release_id: CURRENT_RELEASE_ID,
         },
         // 3. Malformed check current submission: passed=false or incomplete evidence, flagged as INVALID by RPC
         {
@@ -1537,8 +1585,8 @@ describe('AdminService Authoritative Truth Layer', () => {
           error_code: 'QUALITY_REJECTED',
           error_message: 'Curriculum quality rejected',
           failure_evidence: {
-            schemaVersion: '2.2.0',
-            promptVersion: '2.4.0',
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            promptVersion: CURRENT_PROMPT_VERSION,
             findings: [
               {
                 source: 'provenance',
@@ -1550,11 +1598,13 @@ describe('AdminService Authoritative Truth Layer', () => {
           submitted_at: '2026-08-18T12:00:00Z',
           processed_at: '2026-08-18T12:05:00Z',
           attempt_count: 1,
-          schema_version: '2.2.0',
-          prompt_version: '2.4.0',
+          schema_version: CURRENT_SCHEMA_VERSION,
+          prompt_version: CURRENT_PROMPT_VERSION,
           model_name: 'gpt-5.6-sol',
           quality_profile: null,
-          engine_version: '1.0.1',
+          engine_version: CURRENT_ENGINE_VERSION,
+          quality_profile_version: null,
+          release_id: CURRENT_RELEASE_ID,
         },
       ]
 

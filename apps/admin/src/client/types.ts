@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export {
+  CURRENT_RELEASE_ID,
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
   CURRENT_PROMPT_VERSION,

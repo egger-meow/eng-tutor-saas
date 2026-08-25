@@ -219,7 +219,31 @@ describe('completeCurriculumJob', () => {
     expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
   })
 
-  it('overwrites LLM-supplied rendererVersion and persists CURRENT_WORKER_VERSION upon completion', async () => {
+  it('injects canonical repo-owned versions when LLM rendererVersion is missing without quality rejection', async () => {
+    const state = setup()
+    const grounded = structuredClone(curriculumSample)
+    delete (grounded.metadata as any).rendererVersion
+    delete (grounded.metadata as any).workerVersion
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: curriculumContext,
+      curriculumPackage: grounded,
+      render: async () => pdfs,
+      inspect,
+    })).resolves.toBe('material-1')
+
+    expect(state.rpc).toHaveBeenCalledWith('worker_complete_generation_job', expect.objectContaining({
+      canonical_source: expect.objectContaining({
+        metadata: expect.objectContaining({
+          rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+          workerVersion: CURRENT_WORKER_VERSION,
+        }),
+      }),
+    }))
+  })
+
+  it('overwrites forged LLM rendererVersion with canonical CURRENT_PDF_RENDERER_VERSION without quality rejection', async () => {
     const state = setup()
     const grounded = structuredClone(curriculumSample)
     grounded.metadata.rendererVersion = 'fake-llm-renderer-v99'

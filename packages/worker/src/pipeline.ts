@@ -10,6 +10,7 @@ import {
   validateCurriculumPackage,
   CURRENT_PDF_RENDERER_VERSION,
   CURRENT_WORKER_VERSION,
+  CURRENT_RELEASE_ID,
   type CapCoverageCapsule,
   type CurriculumPackage,
   type DiversityCapsule,
@@ -535,7 +536,18 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
   const createdPaths: string[] = []
   let completionStarted = false
   try {
-    const parsed = validateCurriculumPackage(input.curriculumPackage)
+    const raw = (input.curriculumPackage && typeof input.curriculumPackage === 'object') ? input.curriculumPackage as any : {}
+    const rawMetadata = (raw.metadata && typeof raw.metadata === 'object') ? raw.metadata : {}
+    const preparedPackage = {
+      ...raw,
+      metadata: {
+        ...rawMetadata,
+        releaseId: CURRENT_RELEASE_ID,
+        rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+        workerVersion: CURRENT_WORKER_VERSION,
+      },
+    }
+    const parsed = validateCurriculumPackage(preparedPackage)
     if (!parsed.success) throw new CurriculumQualityError({
       failureType: 'QUALITY_REJECTED',
       findings: parsed.issues.map((issue) => ({
@@ -543,9 +555,10 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       })),
     })
     const pkg = parsed.curriculumPackage
-    // Finisher owns PDF renderer and Worker provenance deterministically - never trust LLM-supplied versions
+    // Finisher owns PDF renderer, Worker, and release provenance deterministically - never trust LLM-supplied versions
     pkg.metadata = {
       ...pkg.metadata,
+      releaseId: CURRENT_RELEASE_ID,
       rendererVersion: CURRENT_PDF_RENDERER_VERSION,
       workerVersion: CURRENT_WORKER_VERSION,
     }

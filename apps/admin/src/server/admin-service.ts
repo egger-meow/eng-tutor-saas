@@ -124,6 +124,7 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
 }
 
 import {
+  CURRENT_RELEASE_ID,
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
   CURRENT_PROMPT_VERSION,
@@ -1433,19 +1434,50 @@ export class AdminService {
       }
     }
     const isHistoricalReleaseArtifact = (provenance: {
+      releaseId?: string | null
       promptVersion?: string | null
       engineVersion?: string | null
       schemaVersion?: string | null
     }): boolean => {
-      const { promptVersion, engineVersion, schemaVersion } = provenance
-      if (promptVersion && promptVersion !== CURRENT_PROMPT_VERSION) return true
-      if (engineVersion && engineVersion !== CURRENT_ENGINE_VERSION) return true
-      if (schemaVersion && schemaVersion !== CURRENT_SCHEMA_VERSION) return true
+      const { releaseId, promptVersion, engineVersion, schemaVersion } = provenance
+      if (releaseId) {
+        return releaseId !== CURRENT_RELEASE_ID
+      }
+
+      const isLegacyPrompt = Boolean(promptVersion && (
+        promptVersion.startsWith('1.') ||
+        promptVersion.startsWith('2.0') ||
+        promptVersion.startsWith('2.1') ||
+        promptVersion.startsWith('2.2') ||
+        promptVersion.startsWith('2.3') ||
+        promptVersion.startsWith('2.4') ||
+        promptVersion.startsWith('2.5') ||
+        promptVersion.startsWith('2.6')
+      ))
+      const isLegacyEngine = Boolean(engineVersion && (
+        engineVersion.startsWith('0.') ||
+        engineVersion.startsWith('1.0') ||
+        engineVersion.startsWith('1.1') ||
+        engineVersion.startsWith('1.2')
+      ))
+      const isLegacySchema = Boolean(schemaVersion && (
+        schemaVersion.startsWith('1.') ||
+        schemaVersion.startsWith('2.0') ||
+        schemaVersion.startsWith('2.1') ||
+        schemaVersion.startsWith('2.2')
+      ))
+
+      if (isLegacyPrompt || isLegacyEngine || isLegacySchema) {
+        return true
+      }
+
       return false
     }
 
     for (const submission of latestSubmissionByJob.values()) {
+      const releaseId = submission.release_id || submission.canonical_source?.metadata?.releaseId || submission.failure_evidence?.releaseId || null
       if (isHistoricalReleaseArtifact({
+        releaseId,
         promptVersion: submission.prompt_version,
         engineVersion: submission.engine_version,
         schemaVersion: submission.schema_version,
@@ -1462,7 +1494,9 @@ export class AdminService {
     }
 
     for (const material of materials.slice(0, 50)) {
+      const releaseId = material.canonical_source?.metadata?.releaseId || null
       if (isHistoricalReleaseArtifact({
+        releaseId,
         promptVersion: material.prompt_version || material.canonical_source?.metadata?.promptVersion,
         engineVersion: material.canonical_source?.metadata?.engineVersion,
         schemaVersion: material.canonical_source?.metadata?.schemaVersion,
