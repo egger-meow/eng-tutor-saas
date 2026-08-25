@@ -80,11 +80,252 @@
 .product-feedback-submit span { font-size: .8125rem; }
 .learning-journey-panel { display: grid; gap: var(--space-6); margin-top: var(--space-8); padding-top: var(--space-8); border-top: 1px solid var(--color-rule-strong); }
 .learning-journey-summary, .learning-journey-timeline { padding: var(--space-6); border: 1px solid var(--color-rule); border-radius: var(--radius-surface); background: var(--color-paper); }
-.learning-status-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); padding: 0; list-style: none; }
-.learning-status-counts li { display: grid; gap: var(--space-1); padding: var(--space-3); background: color-mix(in srgb, var(--color-paper) 75%, var(--color-rule)); }
-.learning-evidence-explanation { color: var(--color-muted); font-size: .875rem; }
-.learning-journey-timeline ol { display: grid; gap: var(--space-4); padding-inline-start: var(--space-6); }
-.learning-journey-timeline li::marker { font-weight: 700; }
+
+/* Learning Journey Summary Styles */
+.learning-summary-top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); }
+.learning-summary-title-group .overline { margin-bottom: var(--space-1); }
+.learning-journey-heading { font-size: 1.35rem; color: var(--color-ink); }
+.learning-journey-heading .highlight-number { color: var(--color-action); font-weight: 700; }
+.reading-trajectory-box { display: inline-flex; align-items: baseline; gap: var(--space-2); background: var(--color-success-soft); padding: 0.35rem 0.75rem; border-radius: var(--radius-control); border: 1px solid color-mix(in srgb, var(--color-action) 20%, transparent); }
+.reading-label { font-size: 0.8125rem; color: var(--color-muted); font-weight: 600; }
+.reading-val { font-size: 0.9375rem; color: var(--color-action); font-weight: 700; }
+
+.learning-status-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); padding: 0; list-style: none; margin-bottom: var(--space-4); }
+.learning-status-item { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); background: color-mix(in srgb, var(--color-canvas) 60%, var(--color-paper)); border-radius: var(--radius-control); border: 1px solid var(--color-rule); }
+.learning-status-item .status-label { font-size: 0.875rem; color: var(--color-ink); font-weight: 700; }
+.status-badge-group { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.status-badge { font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: white; border: 1px solid var(--color-rule); color: var(--color-text); }
+.status-badge-mastered { background: var(--color-success-soft); border-color: color-mix(in srgb, var(--color-success) 30%, transparent); color: var(--color-success); font-weight: 600; }
+.status-badge-review { background: var(--color-warning-soft); border-color: color-mix(in srgb, var(--color-warning) 30%, transparent); color: var(--color-warning); }
+
+.learning-evidence-explanation { color: var(--color-muted); font-size: 0.8125rem; line-height: 1.5; margin: 0; padding-top: var(--space-2); border-top: 1px dashed var(--color-rule); }
+
+/* Learning Constellation Timeline Styles */
+.timeline-header-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.timeline-header-row h3 { font-size: 1.25rem; color: var(--color-ink); margin-bottom: 0.15rem; }
+.timeline-hint { font-size: 0.8125rem; color: var(--color-muted); margin: 0; }
+.load-more-history-btn { font-size: 0.8125rem; align-self: flex-start; }
+
+.constellation-empty { text-align: center; padding: var(--space-8) var(--space-4); color: var(--color-muted); }
+
+.constellation-scroll-wrapper { width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; padding: var(--space-2) 0; margin-bottom: var(--space-4); scrollbar-width: thin; scrollbar-color: var(--color-rule) transparent; }
+.constellation-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+.constellation-scroll-wrapper::-webkit-scrollbar-thumb { background-color: var(--color-rule); border-radius: 3px; }
+
+.constellation-canvas-container { position: relative; height: 116px; margin: 0 auto; user-select: none; }
+.constellation-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.constellation-line { stroke: var(--color-rule-strong); stroke-dasharray: 4 3; opacity: 0.6; }
+.constellation-line-glow { stroke: var(--color-action); opacity: 0.15; }
+
+.constellation-nodes-track { position: absolute; inset: 0; pointer-events: none; }
+.constellation-node {
+  position: absolute;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  outline: none;
+  transition: transform var(--transition-fast);
+}
+
+.constellation-node:focus-visible .constellation-star-outer {
+  outline: 2px solid var(--color-action);
+  outline-offset: 3px;
+}
+
+.constellation-star-outer {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-paper);
+  border: 2px solid var(--color-rule-strong);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-fast);
+}
+
+.constellation-star-inner {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  transition: all var(--transition-fast);
+}
+
+.constellation-node:hover .constellation-star-outer {
+  transform: scale(1.15);
+  border-color: var(--color-action);
+  box-shadow: 0 0 8px rgba(40, 79, 62, 0.25);
+}
+
+.constellation-node:hover .constellation-star-inner {
+  background: var(--color-action);
+}
+
+.constellation-node.is-selected .constellation-star-outer {
+  width: 26px;
+  height: 26px;
+  border-color: var(--color-action);
+  background: var(--color-success-soft);
+  box-shadow: 0 0 0 4px rgba(40, 79, 62, 0.15), 0 2px 8px rgba(40, 79, 62, 0.3);
+  transform: scale(1.1);
+}
+
+.constellation-node.is-selected .constellation-star-inner {
+  width: 10px;
+  height: 10px;
+  background: var(--color-action);
+}
+
+.constellation-node.is-latest:not(.is-selected) .constellation-star-outer {
+  border-color: var(--color-accent);
+}
+.constellation-node.is-latest:not(.is-selected) .constellation-star-inner {
+  background: var(--color-accent);
+}
+
+.constellation-label {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  letter-spacing: 0.02em;
+  transition: color var(--transition-fast);
+}
+
+.constellation-node.is-selected .constellation-label {
+  color: var(--color-action);
+  font-weight: 800;
+}
+
+/* Detail Card */
+.constellation-detail-card {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-control);
+  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-2);
+  display: grid;
+  gap: var(--space-3);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.detail-week-pill {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-action);
+  color: white;
+  letter-spacing: 0.03em;
+}
+
+.detail-date {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.detail-reading-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.detail-reading-label {
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.detail-reading-badge {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-rule);
+}
+
+.detail-card-body {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.detail-vocab-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.detail-vocab-icon {
+  font-size: 1.1rem;
+}
+
+.detail-section {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+}
+
+.detail-improvements {
+  border-left: 3px solid var(--color-success);
+}
+
+.detail-next-review {
+  border-left: 3px solid var(--color-accent);
+}
+
+.detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.detail-section-icon {
+  font-size: 1rem;
+}
+
+.detail-section-content {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
 .capacity-status { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding: var(--space-4); border: 1px solid var(--color-rule); border-left: .25rem solid var(--color-success); border-radius: var(--radius-control); }
 .capacity-status span { color: var(--color-muted); }
 .capacity-status .button { margin-left: auto; }
