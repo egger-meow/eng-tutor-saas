@@ -288,41 +288,104 @@ describe('AdminService Authoritative Truth Layer', () => {
     }))
   })
 
-  it('excludes historical materials from current engine manifest version drift checks', async () => {
+  it('excludes immediately previous production release (Engine 1.2.0 / Schema 2.3.0 / Prompt 2.6.0) from drift against current 1.3.0 / 2.7.0 release', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
-      children: [{ id: 'child-legacy', display_name: 'Legacy Child', is_active: true, is_internal_test: false }],
+      children: [{ id: 'child-prev', display_name: 'Previous Release Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
       generation_jobs: [],
       materials: [{
-        id: 'material-legacy-1',
-        child_id: 'child-legacy',
-        material_week: '2026-07-01',
+        id: 'material-prev-1',
+        child_id: 'child-prev',
+        material_week: '2026-08-20',
         revision: 1,
         rule_version: 'rules/1',
-        prompt_version: '2.3.0', // historical legacy prompt
-        generator_version: '2.1.0', // historical legacy schema
-        model_name: 'model-old',
+        prompt_version: '2.6.0', // immediately previous production prompt
+        generator_version: '2.3.0',
+        model_name: 'model-260',
         student_pdf_path: 'child/job/student.pdf',
         parent_answer_pdf_path: 'child/job/parent-answer.pdf',
         canonical_source: {
           metadata: {
-            schemaVersion: '2.1.0',
-            promptVersion: '2.3.0',
-            engineVersion: '1.0.0',
-            rendererVersion: '0.9.0',
-            workerVersion: '1.0.0',
+            schemaVersion: '2.3.0',
+            promptVersion: '2.6.0',
+            engineVersion: '1.2.0', // immediately previous engine
+            rendererVersion: '1.0.0',
+            workerVersion: '1.2.0',
           },
         },
-        created_at: '2026-07-01T00:00:00.000Z',
+        created_at: '2026-08-20T00:00:00.000Z',
       }],
       enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
       curriculum_submissions: [],
     }) })
 
     const overview = await service.getOperationsOverview()
-    // Historical material must not trigger version_drift against the current 2.6.0 manifest
-    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
+    // Valid artifact from immediately previous production release is historical provenance and must NOT trigger drift
     expect(overview.engineInspector.drift.some((d) => d.status === 'version_drift')).toBe(false)
+    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
+  })
+
+  it('does not label missing submission-time renderer or worker provenance as unobservable for authoring submissions', async () => {
+    const service = new AdminService({ client: createMockSupabaseClient({
+      children: [{ id: 'child-active', display_name: 'Active Child', is_active: true, is_internal_test: false }],
+      subscriptions: [],
+      generation_jobs: [{ id: 'job-active-1', child_id: 'child-active', status: 'claimed', material_week: '2026-08-25', attempt_count: 1 }],
+      materials: [],
+      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
+      curriculum_submissions: [{
+        job_id: 'job-active-1',
+        authoring_attempt: 1,
+        status: 'pending',
+        engine_version: CURRENT_ENGINE_VERSION,
+        schema_version: CURRENT_SCHEMA_VERSION,
+        prompt_version: CURRENT_PROMPT_VERSION,
+        quality_profile_version: '1.1.0',
+        renderer_version: null, // submission time has no renderer
+        worker_version: null, // submission time has no finisher worker
+      }],
+    }) })
+
+    const overview = await service.getOperationsOverview()
+    // Missing submission-time renderer/worker must NOT be added to drift as unobservable
+    expect(overview.engineInspector.drift).toEqual([])
+    expect(overview.engineInspector.alignmentStatus).toBe('aligned')
+  })
+
+  it('proves a freshly completed Engine 1.3.0 / Prompt 2.7.0 material produces a fully ALIGNED inspector', async () => {
+    const service = new AdminService({ client: createMockSupabaseClient({
+      children: [{ id: 'child-fresh', display_name: 'Fresh Child', is_active: true, is_internal_test: false }],
+      subscriptions: [],
+      generation_jobs: [{ id: 'job-fresh-1', child_id: 'child-fresh', status: 'completed', material_week: '2026-08-25', attempt_count: 1 }],
+      materials: [{
+        id: 'material-fresh-1',
+        child_id: 'child-fresh',
+        material_week: '2026-08-25',
+        revision: 1,
+        rule_version: 'rules/1',
+        prompt_version: CURRENT_PROMPT_VERSION,
+        generator_version: CURRENT_SCHEMA_VERSION,
+        model_name: 'model-fresh',
+        student_pdf_path: 'child/job/student.pdf',
+        parent_answer_pdf_path: 'child/job/parent-answer.pdf',
+        canonical_source: {
+          metadata: {
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+            promptVersion: CURRENT_PROMPT_VERSION,
+            engineVersion: CURRENT_ENGINE_VERSION,
+            modelQualityProfile: { qualityProfileVersion: '1.1.0' },
+            rendererVersion: '1.0.0',
+            workerVersion: '1.3.0',
+          },
+        },
+        created_at: '2026-08-25T12:00:00.000Z',
+      }],
+      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
+      curriculum_submissions: [],
+    }) })
+
+    const overview = await service.getOperationsOverview()
+    expect(overview.engineInspector.alignmentStatus).toBe('aligned')
+    expect(overview.engineInspector.drift).toEqual([])
   })
 
   it('aggregates real database rows for Operations Overview with separated Generation and Finisher queues', async () => {

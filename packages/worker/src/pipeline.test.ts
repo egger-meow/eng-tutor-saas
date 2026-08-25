@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, type CurriculumPackage } from '@paper-english/generator'
+import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, CURRENT_WORKER_VERSION, type CurriculumPackage } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
@@ -219,7 +219,7 @@ describe('completeCurriculumJob', () => {
     expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
   })
 
-  it('overwrites LLM-supplied rendererVersion with canonical CURRENT_PDF_RENDERER_VERSION upon completion', async () => {
+  it('overwrites LLM-supplied rendererVersion and persists CURRENT_WORKER_VERSION upon completion', async () => {
     const state = setup()
     const grounded = structuredClone(curriculumSample)
     grounded.metadata.rendererVersion = 'fake-llm-renderer-v99'
@@ -236,6 +236,7 @@ describe('completeCurriculumJob', () => {
       canonical_source: expect.objectContaining({
         metadata: expect.objectContaining({
           rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+          workerVersion: CURRENT_WORKER_VERSION,
         }),
       }),
     }))

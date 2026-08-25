@@ -1432,36 +1432,48 @@ export class AdminService {
         if (observed !== expectedVersion) drift.push({ source, id, component, expected: expectedVersion, actual: observed, status: 'version_drift' })
       }
     }
-    for (const submission of latestSubmissionByJob.values()) {
-      const era = classifyQualityEra({
-        schemaVersion: submission.schema_version,
-        promptVersion: submission.prompt_version,
-        ruleVersion: submission.rule_version,
-        qualityProfile: submission.quality_profile || submission.qualityProfile,
-        failureEvidence: submission.failure_evidence,
-        canonicalSource: submission.canonical_source,
-      })
-      if (era === 'historical') continue
+    const isHistoricalReleaseArtifact = (provenance: {
+      promptVersion?: string | null
+      engineVersion?: string | null
+      schemaVersion?: string | null
+    }): boolean => {
+      const { promptVersion, engineVersion, schemaVersion } = provenance
+      if (promptVersion && promptVersion !== CURRENT_PROMPT_VERSION) return true
+      if (engineVersion && engineVersion !== CURRENT_ENGINE_VERSION) return true
+      if (schemaVersion && schemaVersion !== CURRENT_SCHEMA_VERSION) return true
+      return false
+    }
 
+    for (const submission of latestSubmissionByJob.values()) {
+      if (isHistoricalReleaseArtifact({
+        promptVersion: submission.prompt_version,
+        engineVersion: submission.engine_version,
+        schemaVersion: submission.schema_version,
+      })) {
+        continue
+      }
+
+      // Authoring submission authoritatively owns: engine, schema, prompt, qualityProfile
       compare('submission', submission.job_id, 'engine', submission.engine_version)
       compare('submission', submission.job_id, 'schema', submission.schema_version)
       compare('submission', submission.job_id, 'prompt', submission.prompt_version)
       compare('submission', submission.job_id, 'qualityProfile', submission.quality_profile_version)
-      compare('submission', submission.job_id, 'pdfRenderer', submission.renderer_version)
-      compare('submission', submission.job_id, 'worker', submission.worker_version)
+      // NOTE: Submission does NOT own worker or pdfRenderer; do not compare submission against worker / pdfRenderer
     }
-    for (const material of materials.slice(0, 50)) {
-      const era = classifyQualityEra({
-        schemaVersion: material.canonical_source?.metadata?.schemaVersion,
-        promptVersion: material.prompt_version,
-        ruleVersion: material.rule_version,
-        canonicalSource: material.canonical_source,
-      })
-      if (era === 'historical') continue
 
+    for (const material of materials.slice(0, 50)) {
+      if (isHistoricalReleaseArtifact({
+        promptVersion: material.prompt_version || material.canonical_source?.metadata?.promptVersion,
+        engineVersion: material.canonical_source?.metadata?.engineVersion,
+        schemaVersion: material.canonical_source?.metadata?.schemaVersion,
+      })) {
+        continue
+      }
+
+      // Material completion authoritatively owns all 6 components
       compare('material', material.id, 'engine', material.canonical_source?.metadata?.engineVersion)
       compare('material', material.id, 'schema', material.canonical_source?.metadata?.schemaVersion)
-      compare('material', material.id, 'prompt', material.prompt_version)
+      compare('material', material.id, 'prompt', material.prompt_version || material.canonical_source?.metadata?.promptVersion)
       compare('material', material.id, 'qualityProfile', material.canonical_source?.metadata?.modelQualityProfile?.qualityProfileVersion)
       compare('material', material.id, 'pdfRenderer', material.canonical_source?.metadata?.rendererVersion)
       compare('material', material.id, 'worker', material.canonical_source?.metadata?.workerVersion)
