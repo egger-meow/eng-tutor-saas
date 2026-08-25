@@ -403,7 +403,18 @@ begin
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke')
   into bridge_claim_result;
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
+    or not (bridge_claim_result ? 'claimed')
+    or not (bridge_claim_result ? 'claimedCount')
+    or not (bridge_claim_result ? 'normalCapacity')
+    or not (bridge_claim_result ? 'mandatoryCapacityOverride')
+    or not (bridge_claim_result ? 'oldestOutstandingDeadline') then
+    raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
+  end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.3.0' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.3.0: %', bridge_context;
+  end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
@@ -567,13 +578,29 @@ begin
   end if;
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke') into bridge_claim_result;
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
+    or not (bridge_claim_result ? 'claimed')
+    or not (bridge_claim_result ? 'claimedCount')
+    or not (bridge_claim_result ? 'normalCapacity')
+    or not (bridge_claim_result ? 'mandatoryCapacityOverride')
+    or not (bridge_claim_result ? 'oldestOutstandingDeadline') then
+    raise exception 'retry claim response violates Scheduled Work API contract: %', bridge_claim_result;
+  end if;
   select item into bridge_context
   from jsonb_array_elements(bridge_claim_result -> 'claimed') as claimed(item)
   where item #>> '{job,id}' = bridge_job_id::text;
+  if bridge_context is null then
+    raise exception 'second claim failed to return claimed job after quality rejection';
+  end if;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.3.0' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.3.0: %', bridge_context;
+  end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
+    or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
     or bridge_context #>> '{retryContext,findings,0,path}' <> 'reading.answer'
-    or bridge_context #> '{retryContext,previousCanonicalPackage}' <> first_package then
-    raise exception 'retry claim omitted the immutable package or exact failure evidence';
+    or bridge_context #> '{retryContext,previousCanonicalPackage}' <> first_package
+    or jsonb_array_length(bridge_context #> '{retryContext,repairInstructions}') = 0 then
+    raise exception 'retry claim omitted the immutable package, repair instructions, or exact failure evidence';
   end if;
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';

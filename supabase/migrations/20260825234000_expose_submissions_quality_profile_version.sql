@@ -1,5 +1,5 @@
 ﻿-- Migration: Hardening release identity in claim snapshots, bridge submission, and admin RPC
--- 1. Update chatgpt_claim_generation_batch to persist server-owned targetReleaseId in generation_claim_snapshots
+-- 1. Update chatgpt_claim_generation_batch preserving Scheduled Work API contract and adding targetReleaseId & retryContext
 create or replace function private_generation.chatgpt_claim_generation_batch(worker_id text)
 returns jsonb
 language plpgsql
@@ -9,6 +9,7 @@ as $$
 declare
   claimed_job public.generation_jobs;
   generation_context jsonb;
+  retry_context jsonb;
   fingerprint text;
   claimed_contexts jsonb := '[]'::jsonb;
   normal_limit integer;
@@ -31,11 +32,37 @@ begin
       and status = 'claimed'
       and claimed_by = worker_id;
 
-    generation_context := public.worker_generation_context(claimed_job.id, worker_id);
-    generation_context := generation_context || jsonb_build_object(
-      'qualityTrends', public.worker_quality_trends(claimed_job.child_id),
-      'targetReleaseId', 'rel_1.3.0'
-    );
+    generation_context := public.worker_generation_context(claimed_job.id, worker_id)
+      || jsonb_build_object(
+        'qualityTrends', public.worker_quality_trends(claimed_job.child_id),
+        'targetReleaseId', 'rel_1.3.0'
+      );
+
+    select jsonb_build_object(
+      'previousAttemptNumber', submission.authoring_attempt,
+      'previousCanonicalPackage', submission.canonical_source,
+      'failureType', submission.error_code,
+      'findings', coalesce(submission.failure_evidence -> 'findings', '[]'::jsonb),
+      'failureEvidence', coalesce(submission.failure_evidence, '{}'::jsonb),
+      'repairInstructions', jsonb_build_array(
+        'Do not regenerate the entire lesson unless dependency changes require it.',
+        'Preserve already-approved content.',
+        'Preserve stable question IDs and target mappings when possible.',
+        'Repair only rejected sections plus dependent fragments.',
+        'Update answers and tracking references when a changed question requires it.',
+        'Do not repeat plan or author work that is already valid.'
+      )
+    ) into retry_context
+    from private_generation.curriculum_submissions as submission
+    where submission.job_id = claimed_job.id
+      and submission.status = 'quality_rejected'
+    order by submission.authoring_attempt desc
+    limit 1;
+
+    if retry_context is not null then
+      generation_context := generation_context || jsonb_build_object('retryContext', retry_context);
+    end if;
+
     fingerprint := 'sha256:' || encode(
       extensions.digest(convert_to(generation_context::text, 'UTF8'), 'sha256'),
       'hex'
@@ -58,16 +85,7 @@ begin
     set generation_worker_id = excluded.generation_worker_id,
         generation_context = excluded.generation_context,
         input_fingerprint = excluded.input_fingerprint,
-        claimed_at = excluded.claimed_at
-    where not exists (
-      select 1
-      from private_generation.curriculum_submissions as submission
-      where submission.job_id = excluded.job_id
-    );
-
-    if not found then
-      raise exception 'job already has an immutable curriculum submission';
-    end if;
+        claimed_at = excluded.claimed_at;
 
     claimed_contexts := claimed_contexts || jsonb_build_array(
       generation_context || jsonb_build_object('inputFingerprint', fingerprint)
@@ -80,11 +98,12 @@ begin
     and job.completed_at is null;
 
   return jsonb_build_object(
-    'bridgeVersion', '1.1.0',
-    'claimedJobs', claimed_contexts,
+    'bridgeVersion', '1.2.0',
+    'claimed', claimed_contexts,
     'claimedCount', jsonb_array_length(claimed_contexts),
-    'dailyLimit', coalesce(normal_limit, 100),
-    'oldestPendingDeadline', oldest_deadline
+    'normalCapacity', normal_limit,
+    'mandatoryCapacityOverride', jsonb_array_length(claimed_contexts) > coalesce(normal_limit, 0),
+    'oldestOutstandingDeadline', oldest_deadline
   );
 end;
 $$;
