@@ -1104,7 +1104,7 @@
   }
 }
 .scoped-material-main-loading { display: grid; min-height: calc(100svh - 5.25rem); }
-.scoped-material-main-loading .scoped-material-page { display: grid; align-items: center; }
+.scoped-material-main-loading .scoped-material-page { display: grid; width: 100%; max-width: none; align-items: center; }
 .scoped-material-page { max-width: 720px; }
 .scoped-material-loading-state { align-content: center; justify-items: center; gap: var(--space-3); min-height: 0; text-align: center; }
 .scoped-material-loading-state p { margin: 0; }
