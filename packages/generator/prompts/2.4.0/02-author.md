@@ -242,9 +242,6 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 ---
 
-
-## Workload fit
-Author useful work to `targetMinutes`; normalize, then surgically repair `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` while preserving valid content. Recompute; never add filler or edit duration metadata.
 ## 10. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.2.0).

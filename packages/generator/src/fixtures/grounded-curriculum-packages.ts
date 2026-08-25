@@ -65,7 +65,7 @@ export function makeGroundedCurriculumPackage(
   const value = structuredClone(legacyPackage) as unknown as CurriculumPackageV23
   const research = THEME_RESEARCH[theme]
   value.metadata.schemaVersion = '2.3.0'
-  value.metadata.promptVersion = 'prompt/2.5.0'
+  value.metadata.promptVersion = 'prompt/2.6.0'
 
   research.claims.forEach((claim, index) => {
     const block = value.studentLesson.reading.blocks[index]

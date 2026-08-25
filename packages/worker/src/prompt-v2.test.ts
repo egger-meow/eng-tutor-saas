@@ -11,6 +11,8 @@ describe('v2 prompt bundle', () => {
     expect(bundle).toContain('04-repair.md')
     expect(bundle).toContain('complete-v2')
     expect(bundle).toContain('Curriculum Schema 2.3.0')
+    expect(bundle).toContain('Prompt 2.6.0')
+    expect(bundle).toContain('Finisher is authoritative')
     expect(bundle).toContain('There is no N/A mode')
     expect(bundle).toContain('generalized public topic terms only')
     expect(bundle).toContain('grounding research → plan → author → deterministic validation')

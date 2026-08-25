@@ -1136,7 +1136,7 @@ Core fields:
 * approximate English level;
 * current school progress;
 * main goals;
-* weekly available study time;
+* weekly available study time (30–240 minutes for one MVP weekly packet);
 * interests.
 
 Optional fields:
@@ -2786,7 +2786,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses schema 2.3.0 and prompt 2.5.0. Historical 2.0.0–2.2.0 packages remain readable but are not valid targets for new authoring.
+New production authoring uses schema 2.3.0 and prompt 2.6.0. Prompt 2.4.0 and 2.5.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring.
 
 ---
 
@@ -3577,7 +3577,7 @@ The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLA
 
 Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
 
-Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.1.0, Prompt 2.5.0, and canonical Schema 2.3.0.
+Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.2.0, Prompt 2.6.0, and canonical Schema 2.3.0.
 
 ---
 # 173. Manual Recovery
@@ -3959,7 +3959,7 @@ For an eligible child:
 10. parent can download them;
 11. metadata records generation version.
 12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance.
-13. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or a bounded exception is explicitly justified with evidence.
+13. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
 
 ---
 
@@ -4187,9 +4187,9 @@ For weekly-material work specifically:
 17. Bind every factual claim to exact canonical lesson prose and verify current-event freshness.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
 19. Treat profile `weekly_minutes` as `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`.
-20. After authoring, normalize and compare deterministic workload with the inclusive 85%-115% target band; emit `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` outside it.
-21. Repair workload surgically with useful dependent learning work or removal of redundancy, then normalize, recompute, criticize, and audit again; never falsify duration metadata or delete required stages.
-22. Permit a bounded workload exception only through an explicit passing `workload-budget-exception` check with specific evidence.
+20. Scheduled Work plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
+21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
+22. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 
 ---
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { auditCurriculumPackage } from './audit-curriculum.js'
+import { computeDeterministicPlanMinutes } from './normalize-curriculum-package.js'
 import { validPackage } from './curriculum-package.test.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
@@ -378,23 +379,23 @@ describe('curriculum audit & lexical contract', () => {
     expect(highFinding?.message).toContain('最高安全上限 (140 分鐘)')
   })
 
-  it('verifies workload calibration against learner declared weekly budget (±20%)', () => {
+  it('verifies workload calibration against the inclusive 85%-115% band', () => {
     const pkg = canonicalPackage()
     // Canonical package has computed minutes = 69 (within global bounds 55-140)
 
-    // 1. Declared budget = 80 min (±20% range is [64, 96]) -> 69 min is matched, no finding
+    // 1. Declared budget = 80 min (85%-115% range is [68, 92]) -> 69 min is matched, no finding
     const reportMatched = auditCurriculumPackage(pkg, 80)
     const matchedFinding = reportMatched.findings.find((f) => f.dimension === 'workload-calibration')
     expect(matchedFinding).toBeUndefined()
 
-    // 2. Declared budget = 100 min (±20% range is [80, 120]) -> 69 min < 80 min (under-budget warning)
+    // 2. Declared budget = 100 min (85%-115% range is [85, 115]) -> 69 min < 80 min (under-budget warning)
     const reportUnder = auditCurriculumPackage(pkg, 100)
     const underFinding = reportUnder.findings.find((f) => f.dimension === 'workload-calibration')
     expect(underFinding).toBeDefined()
     expect(underFinding?.severity).toBe('critical')
     expect(underFinding?.message).toContain('BUDGET_UNDERFILLED')
 
-    // 3. Declared budget = 50 min (±20% range is [40, 60]) -> 69 min > 60 min (over-budget warning)
+    // 3. Declared budget = 50 min (85%-115% range is [43, 58]) -> 69 min > 60 min (over-budget warning)
     const reportOver = auditCurriculumPackage(pkg, { declaredWeeklyMinutes: 50 })
     const overFinding = reportOver.findings.find((f) => f.dimension === 'workload-calibration')
     expect(overFinding).toBeDefined()
@@ -450,21 +451,28 @@ describe('curriculum audit & lexical contract', () => {
 
   it('requires explicit substantive evidence for a workload exception', () => {
     const pkg = canonicalPackage()
+    const targetMinutes = Math.round(computeDeterministicPlanMinutes(pkg) / 0.8)
     pkg.qualityEvidence.criticalChecks.push({
       id: 'workload-budget-exception',
       passed: true,
       evidence: 'Temporary exception.',
     })
 
-    const report = auditCurriculumPackage(pkg, 100)
+    const report = auditCurriculumPackage(pkg, targetMinutes)
     expect(report.passed).toBe(false)
     expect(report.findings.some((finding) => finding.message.includes('requires at least 80 characters'))).toBe(true)
 
     pkg.qualityEvidence.criticalChecks.at(-1)!.evidence =
       'The independent critic confirms a temporary learner-specific fatigue constraint this week; the bounded workload preserves every required stage and remains safe and useful.'
-    const excepted = auditCurriculumPackage(pkg, 100)
+    const excepted = auditCurriculumPackage(pkg, targetMinutes)
     expect(excepted.findings.some((finding) => finding.message.includes('BUDGET_UNDERFILLED'))).toBe(false)
     expect(excepted.findings.some(
       (finding) => finding.severity === 'critical' && finding.dimension === 'workload-calibration',
     )).toBe(false)
+
+    const outsideHardBound = auditCurriculumPackage(pkg, 600)
+    expect(outsideHardBound.passed).toBe(false)
+    expect(outsideHardBound.findings.some(
+      (finding) => finding.message.includes('cannot bypass the deterministic 75%-125% hard bound'),
+    )).toBe(true)
   })

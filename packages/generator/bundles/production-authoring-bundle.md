@@ -1,22 +1,26 @@
 ---
-bundleVersion: "2.5.0-prod"
+bundleVersion: "2.6.0-prod"
 schemaVersion: "2.3.0"
-promptVersion: "2.5.0"
-engineVersion: "1.1.0"
+promptVersion: "2.6.0"
+engineVersion: "1.2.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "0a3b40811eff961a68106da172dd4caedbe404341177f8425a07660f361c28ec"
-  "packages/generator/prompts/2.4.0/02-author.md": "cdeb01b26df22fee0106eaa02924fc80468997fedf38faf118af0e3c33ce7e65"
-  "packages/generator/prompts/2.4.0/03-critic.md": "5a3538b36dc0e0d58e9e5f720becac0d152a07f64353b9319ef9ac2df785f131"
-  "packages/generator/prompts/2.4.0/04-repair.md": "9d73d3dbb49750a921ff9349964fc460cd49d3f883d6fc35c4ccbd0de0321e2d"
+  "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
+  "packages/generator/prompts/2.4.0/02-author.md": "592198831ffbdf16ffbe6708bc11c6df9c571d925299982f81bd452327e68b8a"
+  "packages/generator/prompts/2.4.0/03-critic.md": "51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7"
+  "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
   "packages/generator/prompts/2.5.0/01-plan.md": "bfad89bdbb0fa64d821cf86a57a606dd12adee2d1508861a7e9abfae85884bc5"
   "packages/generator/prompts/2.5.0/02-author.md": "fcdfe17881606f4830dbac5d7edd5123dbfd5fda7acdd1518d4b985b89db9822"
   "packages/generator/prompts/2.5.0/03-critic.md": "2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05"
   "packages/generator/prompts/2.5.0/04-repair.md": "ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c"
+  "packages/generator/prompts/2.6.0/01-plan.md": "a3e75601b5013d7098aa0c9fdcb60cb3e4cee534e3ca2538235315c2433d449a"
+  "packages/generator/prompts/2.6.0/02-author.md": "48bddaff5ba7ced05f20c99ba221e728882c86e877ce88608c1f9dbf80183ff7"
+  "packages/generator/prompts/2.6.0/03-critic.md": "5519a35438e1b91fc77b4690d3d5362e8687299761f89dbc7dfaecaaf0998db3"
+  "packages/generator/prompts/2.6.0/04-repair.md": "e227397c176db4b05a2b8c48943f1c7210771797c4353df23d85cc1c58baa16f"
   "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "fb9d9cac8892aceb97cc54ef871f579f339fff8de80210e74933189c576f9812"
+  "docs/curriculum-quality-rubric.md": "bf6de7fb81d15fc4f7478ab24d23dd257d5b934687f22d29ace7235a84192a9b"
   "docs/product-rules.md": "b190a1c62733b79628015f9879ac4361381df73188c23afcab500758dfb197e7"
 ---
 
@@ -92,7 +96,7 @@ This is the review contract for every weekly package. It distills the teaching r
 - The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
 - Reading practice covers detail, main idea, inference, and context clues over time. Difficulty comes from evidence and reasoning, not trivia or hidden words.
 - Global Answer Integrity: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options must never combine separately mentioned true facts from different places into an unsupported composite claim.
-- Profile `weekly_minutes` is `targetMinutes`; `estimatedMinutes` remains deterministic, represented-work truth. Never copy them. Require the rounded inclusive 85%-115% band, otherwise emit `BUDGET_UNDERFILLED`/`BUDGET_OVERFILLED`, repair useful content surgically, recompute, and re-audit. Exceptions require specific passed `workload-budget-exception` evidence.
+- Profile `weekly_minutes` is `targetMinutes`; `estimatedMinutes` remains deterministic, represented-work truth. Never copy them. Require the rounded inclusive 85%-115% band, otherwise emit `BUDGET_UNDERFILLED`/`BUDGET_OVERFILLED`, repair useful content surgically, recompute, and re-audit. Exceptions require specific passed `workload-budget-exception` evidence and are never valid outside the deterministic 75%-125% hard bound.
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
@@ -563,9 +567,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.5.0)
+# Prompt 01: Planning (v2.6.0)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
 
 ---
 
@@ -719,12 +723,8 @@ Output a JSON object matching `learningPlan`:
   "reviewStrategy": ["do / does 助動詞還原間隔複習", "前週核心單字語境提取"],
   "personalizationStrategy": "以機器人感測器除錯情境承載時間副詞子句與推論證據整理，維持國中會考挑戰度。",
   "exclusions": ["passive-voice", "relative-clauses"]
-
 }
 ```
-
-## Weekly workload fit
-Plan useful reading, scaffolding, practice, production, retrieval, homework, and extension from `weekly_minutes`/`targetMinutes` for the 85%-115% band. Scale needs-support vocabulary work without filler; never copy target into `estimatedMinutes`.
 
 ---
 
@@ -761,10 +761,16 @@ Prefer official/primary sources and reputable news, science, educational, or ref
 
 This contract is executor-neutral. A future Responses API `web_search` adapter may supply research results, but it must emit the same canonical grounding fields and must never place provider response shapes in the curriculum package.
 
-## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.5.0)
+---
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
+# Workload Planning Overlay (v2.6.0)
+
+Use `weekly_minutes` as `targetMinutes`. Plan meaningful work for 85%-115% without filler. `estimatedMinutes` stays content-derived and never copies target.
+
+## 6. Prompt 02: Authoring Engine
+# Prompt 02: Material Authoring (v2.6.0)
+
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
 
 ---
 
@@ -1006,9 +1012,6 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 ---
 
-
-## Workload fit
-Author useful work to `targetMinutes`; normalize, then surgically repair `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` while preserving valid content. Recompute; never add filler or edit duration metadata.
 ## 10. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.3.0).
@@ -1047,10 +1050,16 @@ Grounding metadata is internal. Do not render engineering citations into Student
 
 Do not self-certify grounding critical checks. Only the independent critic may add or mark `grounding-accuracy` and `grounding-copyright` as passed after semantic inspection; for current packages, the same rule applies to `grounding-freshness`. Output one strict JSON object conforming to schema 2.3.0.
 
-## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.5.0)
+---
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
+# Workload Authoring Overlay (v2.6.0)
+
+Scheduled Work estimates fit but cannot run exact normalization. The Finisher is authoritative; its immutable workload finding drives the next targeted retry. Never falsify duration.
+
+## 7. Prompt 03: Critic Engine
+# Prompt 03: Critic (v2.6.0)
+
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
 
 ---
 
@@ -1118,9 +1127,6 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
 }
 ```
 
-## Workload-fit responsibility
-Using normalized actual workload, reject below 85% or above 115% of `targetMinutes` without filler or overload. Never falsify duration. Only approve `workload-budget-exception` with specific learner evidence; rerun normalization, critic, and audit after repair.
-
 ---
 
 # Prompt 03 Overlay: Grounding Critic (v2.5.0)
@@ -1141,10 +1147,16 @@ Mark critical when any of these occur:
 
 The independent critic is the only stage authorized to add or mark grounding critical checks as passed. Pass `grounding-accuracy` and `grounding-copyright` only after semantic inspection; deterministic reference integrity alone is insufficient. For `current`, inspect `publishedAt`, `accessedAt`, and `researchedAt`, explain the freshness judgment, and pass `grounding-freshness` only when the sources are date-appropriate.
 
-## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.5.0)
+---
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.5.0).
+# Workload Critic Overlay (v2.6.0)
+
+Reject underfill, overload, or filler. Exceptions need learner evidence and must remain within 75%-125%. Never claim an exact deterministic pre-submit calculation.
+
+## 8. Prompt 04: Repair Specialist
+# Prompt 04: Repair (v2.6.0)
+
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
 
 ---
 
@@ -1170,9 +1182,6 @@ When fixing validation or critic findings in a curriculum package:
 
 Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.3.0).
 
-## 3. Workload-only surgical repair
-Underfill: add useful dependent practice/reasoning/writing/retrieval/extension. Overfill: remove redundancy, never required stages. Preserve valid grounding, reading, targets, Q&A, and tracking; avoid re-research. Normalize, recompute, criticize, and audit; never copy target into estimate.
-
 ---
 
 # Prompt 04 Overlay: Grounding Repair (v2.5.0)
@@ -1184,3 +1193,9 @@ Repair dependent fragments atomically. If a factual sentence changes, update its
 Preserve valid research and unaffected authored content. Re-research only when the rejection concerns grounding accuracy, freshness, topic quality, source adequacy, or a changed passage dependency. Ordinary pedagogy, formatting, answer, or rendering repairs must reuse the valid grounding brief.
 
 Maintain all existing retry behavior. This repair stage does not claim, submit, render, upload, complete, or alter technical retry state. Output the complete corrected schema 2.3.0 package only.
+
+---
+
+# Workload Repair Overlay (v2.6.0)
+
+On retry, surgically expand useful work or trim redundancy. Preserve grounding, reading, targets, unaffected Q&A/tracking, and required stages; re-research only changed facts. Finisher recomputes.

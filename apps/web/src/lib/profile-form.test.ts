@@ -9,6 +9,14 @@ describe('profile form', () => {
     expect(validateProfileStep(6, emptyProfileDraft)).toHaveProperty('learningGoals')
   })
 
+  it('accepts only a single-packet weekly workload domain', () => {
+    expect(validateProfileStep(5, { ...emptyProfileDraft, weeklyMinutes: 30 })).toEqual({})
+    expect(validateProfileStep(5, { ...emptyProfileDraft, weeklyMinutes: 240 })).toEqual({})
+    expect(validateProfileStep(5, { ...emptyProfileDraft, weeklyMinutes: 29 })).toHaveProperty('weeklyMinutes')
+    expect(validateProfileStep(5, { ...emptyProfileDraft, weeklyMinutes: 241 })).toHaveProperty('weeklyMinutes')
+    expect(() => toChildProfileInput({ ...emptyProfileDraft, weeklyMinutes: 600 })).toThrow(RangeError)
+  })
+
   it('maps flexible context into preferences without losing core profile fields', () => {
     const input = toChildProfileInput({ ...emptyProfileDraft, baselineLevel: 'grade-7', learningGoals: 'read independently', interests: ['動物'], upcomingTest: '9/15' })
     expect(input.baseline_level).toBe('grade-7')

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   computeDeterministicPlanMinutes,
   evaluateWorkloadFit,
+  isWithinWorkloadExceptionBand,
   normalizeCurriculumPackage,
 } from './index.js'
 
@@ -40,6 +41,13 @@ describe('weekly workload fit', () => {
   it('passes the inclusive target band and detects material overfill', () => {
     expect(evaluateWorkloadFit(90, 86).code).toBe('BUDGET_ALIGNED')
     expect(evaluateWorkloadFit(90, 105).code).toBe('BUDGET_OVERFILLED')
+  })
+
+  it('bounds evidence-backed exceptions to 75%-125% of target', () => {
+    expect(isWithinWorkloadExceptionBand(100, 75)).toBe(true)
+    expect(isWithinWorkloadExceptionBand(100, 125)).toBe(true)
+    expect(isWithinWorkloadExceptionBand(100, 74)).toBe(false)
+    expect(isWithinWorkloadExceptionBand(100, 126)).toBe(false)
   })
 
   it('keeps estimatedMinutes deterministic and content-derived', () => {

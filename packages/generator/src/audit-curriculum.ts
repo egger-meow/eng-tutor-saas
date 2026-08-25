@@ -4,7 +4,7 @@ import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from '.
 import type { CurriculumPackage } from './curriculum-package-schema.js'
 import { extractBlockTexts } from './normalize-curriculum-package.js'
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
-import { evaluateWorkloadFit, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
+import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -360,9 +360,13 @@ export function auditCurriculumPackage(
       const exception = pkg.qualityEvidence.criticalChecks.find(
         (check) => check.id === WORKLOAD_BUDGET_EXCEPTION_CHECK_ID && check.passed,
       )
-      const hasEvidenceBackedException = Boolean(exception && exception.evidence.trim().length >= 80)
-      if (exception && !hasEvidenceBackedException) {
+      const hasSubstantiveEvidence = Boolean(exception && exception.evidence.trim().length >= 80)
+      const isWithinExceptionBand = isWithinWorkloadExceptionBand(declaredBudget, minutes)
+      const hasEvidenceBackedException = hasSubstantiveEvidence && isWithinExceptionBand
+      if (exception && !hasSubstantiveEvidence) {
         add('semantic-critical', 'workload-calibration', 'critical', `${WORKLOAD_BUDGET_EXCEPTION_CHECK_ID} requires at least 80 characters of specific evidence explaining why the learner benefits from this bounded exception.`)
+      } else if (exception && !isWithinExceptionBand) {
+        add('semantic-critical', 'workload-calibration', 'critical', `${WORKLOAD_BUDGET_EXCEPTION_CHECK_ID} cannot bypass the deterministic 75%-125% hard bound for targetMinutes=${declaredBudget}; actual workload is ${minutes} minutes.`)
       } else if (fit.code === 'BUDGET_UNDERFILLED' && !hasEvidenceBackedException) {
         add('semantic-critical', 'workload-calibration', 'critical', `BUDGET_UNDERFILLED: deterministic workload ${minutes} minutes is below the ${fit.minimumMinutes}-${fit.maximumMinutes} minute band for targetMinutes=${declaredBudget}. Add useful dependent practice, reasoning, retrieval, writing, or a justified adaptive extension; never alter duration metadata.`)
       } else if (fit.code === 'BUDGET_OVERFILLED' && !hasEvidenceBackedException) {

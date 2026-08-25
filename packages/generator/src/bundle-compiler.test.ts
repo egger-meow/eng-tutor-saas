@@ -7,6 +7,8 @@ import {
   computeFrozen210Hashes,
   computeFrozen220Hashes,
   computeFrozen230Hashes,
+  computeFrozen240Hashes,
+  computeFrozen250Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
@@ -18,9 +20,9 @@ describe('bundle-compiler', () => {
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
     expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.5.0')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.5.0-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
+    expect(freshBundle.metadata.promptVersion).toBe('2.6.0')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.6.0-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(17)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
     expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -81,6 +83,24 @@ describe('bundle-compiler', () => {
       'packages/generator/prompts/2.3.0/02-author.md': '9e23182a87c863f8d28ee98b176bb95b5ec67c7c0317952f75fe9236bdf1291a',
       'packages/generator/prompts/2.3.0/03-critic.md': '0aa7812f7cc8d163123cf2b98cb926f151bb22156aab9db7c775011d147638e6',
       'packages/generator/prompts/2.3.0/04-repair.md': 'd3165f6d70dbd12abc9ec08e7f72c811a02ad6324c1dbf25ca086824789dcd28',
+    })
+  })
+
+  it('verifies that prompts/2.4.0 baseline remains byte-for-byte frozen', async () => {
+    expect(await computeFrozen240Hashes(REPO_ROOT)).toEqual({
+      'packages/generator/prompts/2.4.0/01-plan.md': '35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853',
+      'packages/generator/prompts/2.4.0/02-author.md': '592198831ffbdf16ffbe6708bc11c6df9c571d925299982f81bd452327e68b8a',
+      'packages/generator/prompts/2.4.0/03-critic.md': '51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7',
+      'packages/generator/prompts/2.4.0/04-repair.md': 'bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702',
+    })
+  })
+
+  it('verifies that prompts/2.5.0 grounding overlay remains byte-for-byte frozen', async () => {
+    expect(await computeFrozen250Hashes(REPO_ROOT)).toEqual({
+      'packages/generator/prompts/2.5.0/01-plan.md': 'bfad89bdbb0fa64d821cf86a57a606dd12adee2d1508861a7e9abfae85884bc5',
+      'packages/generator/prompts/2.5.0/02-author.md': 'fcdfe17881606f4830dbac5d7edd5123dbfd5fda7acdd1518d4b985b89db9822',
+      'packages/generator/prompts/2.5.0/03-critic.md': '2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05',
+      'packages/generator/prompts/2.5.0/04-repair.md': 'ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c',
     })
   })
 

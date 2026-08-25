@@ -1,6 +1,8 @@
 import type { ChildWithProfile } from '../hooks/use-parent-data'
 import type { ChildProfileInput } from './child-profiles'
 
+export const MIN_WEEKLY_MINUTES = 30
+export const MAX_WEEKLY_MINUTES = 240
 export const profileStepCount = 6
 
 export type ProfileDraft = {
@@ -42,7 +44,7 @@ export function validateProfileStep(step: number, draft: ProfileDraft): Record<s
   if (step === 1 && !draft.displayName.trim()) errors.displayName = '請填寫孩子暱稱。'
   if (step === 1 && !['incoming_grade_7', 'grade_7', 'grade_8', 'grade_9'].includes(draft.gradeStage)) errors.grade = '請選擇目前就學階段。'
   if (step === 2 && !draft.baselineLevel) errors.baselineLevel = '請選擇整體程度。'
-  if (step === 5 && (draft.weeklyMinutes < 20 || draft.weeklyMinutes > 1200)) errors.weeklyMinutes = '每週時間請填 20 到 1200 分鐘。'
+  if (step === 5 && (draft.weeklyMinutes < MIN_WEEKLY_MINUTES || draft.weeklyMinutes > MAX_WEEKLY_MINUTES)) errors.weeklyMinutes = '每週時間請填 30 到 240 分鐘。'
   if (step === 6 && !draft.learningGoals.trim()) errors.learningGoals = '請至少填寫一項學習目標。'
   return errors
 }
@@ -81,6 +83,10 @@ export function profileDraftFromChild(child: ChildWithProfile): ProfileDraft {
 }
 
 export function toChildProfileInput(draft: ProfileDraft): ChildProfileInput {
+  if (draft.weeklyMinutes < MIN_WEEKLY_MINUTES || draft.weeklyMinutes > MAX_WEEKLY_MINUTES) {
+    throw new RangeError(`weeklyMinutes must be between ${MIN_WEEKLY_MINUTES} and ${MAX_WEEKLY_MINUTES}`)
+  }
+
   return {
     baseline_level: draft.baselineLevel || null,
     reading_level: draft.readingLevel || null,

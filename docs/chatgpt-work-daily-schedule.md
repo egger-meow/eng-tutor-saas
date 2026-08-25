@@ -96,7 +96,8 @@ Author a self-study-first packet:
 - stable unique question IDs, real target mappings, usable writing space, and exact one-to-one Parent answers;
 - compact Parent answers with short reasoning, genuine accepted variants, and only useful misconception notes; `followUpZh` is normally null because the parent is not the tutor;
 - truthful tracking hypotheses and concrete feedback/improvement evidence;
-- metadata using the claimed job/child, actual grade stage, current timestamp, repository versions, actual model identifier, and the claimed `inputFingerprint` copied byte-for-byte. The fingerprint is already a `sha256:<64 lowercase hex>` value owned by Supabase; do not compute it locally. Never use unknown, latest, placeholders, or invented IDs.
+- metadata using the claimed job/child, actual grade stage, current timestamp, repository versions, actual model identifier, and the claimed `inputFingerprint` copied byte-for-byte;
+- use `weekly_minutes` as the real single-packet target capacity and author useful work toward the 85%-115% band without filler. Do not copy the target into `estimatedMinutes` or claim to have run repository normalization locally; the Finisher computes the authoritative estimate. The fingerprint is already a `sha256:<64 lowercase hex>` value owned by Supabase; do not compute it locally. Never use unknown, latest, placeholders, or invented IDs.
 
 INDEPENDENT CRITIC AND REPAIR
 
@@ -106,7 +107,7 @@ Treat any `qualityTrends` dimension with count >= 2 as repeated evidence: requir
 
 Missing or ambiguous answers, answer leakage, unsupported jumps, insufficient Chinese scaffolding, fake personalization, ignored recurring mistakes, hidden difficult vocabulary, invented mastery, or unusable print structure are critical.
 
-Repair all dependent fragments together and rerun the critic. Allow at most two complete repair rounds. If a critical issue remains, call:
+Repair all dependent fragments together and rerun the critic. On a retry, treat immutable Finisher `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings as authoritative and adjust only useful dependent work or redundancy while preserving valid grounding and required stages. A `workload-budget-exception` needs specific learner evidence and is never allowed outside 75%-125% of target. Allow at most two complete repair rounds. If a critical issue remains, call:
 
 select private_generation.chatgpt_fail_generation_job(
   '<job-uuid>'::uuid,
@@ -162,7 +163,7 @@ Inspect the returned status object comparing `authoringAttempt` against `jobAtte
 
 FINISHER HANDOFF AND OUTCOME TYPES
 
-The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently validates, audits, renders, inspects, privately uploads, and transactionally completes the job.
+The result status pending means the curriculum is safely handed to the GitHub Actions finisher. It does not mean delivered. Do not render PDFs, upload files, or mark jobs complete yourself. GitHub Actions independently normalizes the canonical package, computes the truthful deterministic workload, enforces the workload band and hard-bounded exceptions, audits, renders, inspects, privately uploads, and transactionally completes the job. A workload rejection becomes immutable retry context for the next Scheduled Work claim; there is no exact deterministic pre-submit calculator in Scheduled Work.
 
 Distinguish the three failure classes:
 - QUALITY_REJECTED: Curriculum, critic, or deterministic quality/rubric/validation audit rejection. A retryable quality rejection returns the job to a new authoring claim while `attempt_count < max_attempts`; otherwise report HUMAN_REVIEW_REQUIRED.

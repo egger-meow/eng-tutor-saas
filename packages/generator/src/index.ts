@@ -81,8 +81,11 @@ export { countWords, extractBlockTexts, cleanOptionPrefix, computeQuestionDurati
 export {
   DEFAULT_WORKLOAD_LOWER_RATIO,
   DEFAULT_WORKLOAD_UPPER_RATIO,
+  WORKLOAD_EXCEPTION_LOWER_RATIO,
+  WORKLOAD_EXCEPTION_UPPER_RATIO,
   WORKLOAD_BUDGET_EXCEPTION_CHECK_ID,
   evaluateWorkloadFit,
+  isWithinWorkloadExceptionBand,
 } from './workload-fit.js'
 export type { WorkloadFitCode, WorkloadFitResult } from './workload-fit.js'
 
