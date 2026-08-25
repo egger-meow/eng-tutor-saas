@@ -4,6 +4,7 @@ import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from '.
 import type { CurriculumPackage } from './curriculum-package-schema.js'
 import { extractBlockTexts } from './normalize-curriculum-package.js'
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
+import { evaluateWorkloadFit, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -187,12 +188,12 @@ function hasExecutableInstructionZh(value: string): boolean { return cjk(value) 
 /** Deterministic publish gate. This complements (never replaces) the independent LLM critic. */
 export function auditCurriculumPackage(
   input: unknown,
-  declaredBudgetMinutes?: number | { declaredWeeklyMinutes?: number; declaredBudgetMinutes?: number },
+  declaredBudgetMinutes?: number | { targetMinutes?: number; declaredWeeklyMinutes?: number; declaredBudgetMinutes?: number },
 ): CurriculumAuditReport {
   const declaredBudget = typeof declaredBudgetMinutes === 'number'
     ? declaredBudgetMinutes
     : typeof declaredBudgetMinutes === 'object' && declaredBudgetMinutes !== null
-      ? (declaredBudgetMinutes.declaredWeeklyMinutes ?? declaredBudgetMinutes.declaredBudgetMinutes)
+      ? (declaredBudgetMinutes.targetMinutes ?? declaredBudgetMinutes.declaredWeeklyMinutes ?? declaredBudgetMinutes.declaredBudgetMinutes)
       : undefined
 
   const parsed = validateCurriculumPackage(input)
@@ -355,12 +356,17 @@ export function auditCurriculumPackage(
     }
 
     if (typeof declaredBudget === 'number' && declaredBudget > 0) {
-      const lowerBudgetBound = declaredBudget * 0.8
-      const upperBudgetBound = declaredBudget * 1.2
-      if (minutes < lowerBudgetBound) {
-        add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 低於孩子每週設定預算 (${declaredBudget} 分鐘 -20% = ${Math.round(lowerBudgetBound)} 分鐘)，請擴充閱讀篇幅、核心單字或轉移寫作任務。`)
-      } else if (minutes > upperBudgetBound) {
-        add('semantic-critical', 'workload-calibration', 'warning', `教材總預估時間 (${minutes} 分鐘) 高於孩子每週設定預算 (${declaredBudget} 分鐘 +20% = ${Math.round(upperBudgetBound)} 分鐘)，可能造成孩子負擔過重，請適度收斂題目數量。`)
+      const fit = evaluateWorkloadFit(declaredBudget, minutes)
+      const exception = pkg.qualityEvidence.criticalChecks.find(
+        (check) => check.id === WORKLOAD_BUDGET_EXCEPTION_CHECK_ID && check.passed,
+      )
+      const hasEvidenceBackedException = Boolean(exception && exception.evidence.trim().length >= 80)
+      if (exception && !hasEvidenceBackedException) {
+        add('semantic-critical', 'workload-calibration', 'critical', `${WORKLOAD_BUDGET_EXCEPTION_CHECK_ID} requires at least 80 characters of specific evidence explaining why the learner benefits from this bounded exception.`)
+      } else if (fit.code === 'BUDGET_UNDERFILLED' && !hasEvidenceBackedException) {
+        add('semantic-critical', 'workload-calibration', 'critical', `BUDGET_UNDERFILLED: deterministic workload ${minutes} minutes is below the ${fit.minimumMinutes}-${fit.maximumMinutes} minute band for targetMinutes=${declaredBudget}. Add useful dependent practice, reasoning, retrieval, writing, or a justified adaptive extension; never alter duration metadata.`)
+      } else if (fit.code === 'BUDGET_OVERFILLED' && !hasEvidenceBackedException) {
+        add('semantic-critical', 'workload-calibration', 'critical', `BUDGET_OVERFILLED: deterministic workload ${minutes} minutes is above the ${fit.minimumMinutes}-${fit.maximumMinutes} minute band for targetMinutes=${declaredBudget}. Remove low-value redundancy while preserving every required stage and target evidence; never alter duration metadata.`)
       }
     }
   }

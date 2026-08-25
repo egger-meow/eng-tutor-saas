@@ -45,7 +45,7 @@ export function computeQuestionDuration(question: any): number {
   const writingLines = typeof question.writingLines === 'number' ? question.writingLines : 0
 
   if (itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || writingLines >= 2) {
-    return 3.5
+    return Math.max(3.5, Math.min(7, 2.5 + writingLines * 0.5))
   }
   if (itemType === 'inference' || itemType === 'context-clue' || itemType === 'author-purpose' || itemType === 'sequence' || itemType === 'main-idea') {
     return 2.5
@@ -58,13 +58,7 @@ export function computeDeterministicHomeworkMinutes(homework: any): number {
 
   let total = 2 // base transition buffer
   for (const q of homework.questions) {
-    const itemType = q?.itemType
-    const lines = typeof q?.writingLines === 'number' ? q.writingLines : 0
-    if (itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || lines >= 2) {
-      total += 3.0
-    } else {
-      total += 1.5
-    }
+    total += computeQuestionDuration(q)
   }
   return Math.max(5, Math.min(90, Math.round(total)))
 }
@@ -76,10 +70,24 @@ export function computeDeterministicPlanMinutes(pkg: Record<string, any>): numbe
   const wordCount = typeof lesson.reading?.wordCount === 'number' ? lesson.reading.wordCount : 250
   const vocabCount = Array.isArray(lesson.vocabulary) ? lesson.vocabulary.length : 8
 
-  const readingMinutes = Math.round(wordCount / 70) + 2
+  const readingStrategyMinutes = Array.isArray(lesson.reading?.readingTipsZh)
+    ? lesson.reading.readingTipsZh.length
+    : 0
+  const readingMinutes = Math.round(wordCount / 70) + 2 + readingStrategyMinutes
   const vocabMinutes = vocabCount * 1.0
-  const instructionMinutes = 7
-  const baseMinutes = 4
+  const instructionMinutes = Array.isArray(lesson.instruction)
+    ? lesson.instruction.reduce((total: number, section: any) => {
+      const examples = Array.isArray(section?.workedExamples) ? section.workedExamples.length : 0
+      const mistakes = Array.isArray(section?.commonMistakes) ? section.commonMistakes.length : 0
+      return total + 4 + examples + mistakes
+    }, 0)
+    : 7
+  const warmUpMinutes = typeof lesson.opening?.warmUp === 'string' && lesson.opening.warmUp.trim() ? 2 : 0
+  const selfCheckMinutes = Array.isArray(lesson.selfCheckZh) ? Math.ceil(lesson.selfCheckZh.length * 0.5) : 0
+  const adaptiveExtensionMinutes = lesson.adaptiveExtension
+    ? 2 + (lesson.adaptiveExtension.taskZh ? 2 : 0) + Math.ceil((lesson.adaptiveExtension.taskWritingLines ?? 0) * 0.5)
+    : 0
+  const transitionMinutes = 2
 
   let practiceMinutes = 0
   if (Array.isArray(lesson.practice)) {
@@ -93,7 +101,7 @@ export function computeDeterministicPlanMinutes(pkg: Record<string, any>): numbe
   }
 
   const homeworkMinutes = computeDeterministicHomeworkMinutes(lesson.homework)
-  const total = readingMinutes + vocabMinutes + instructionMinutes + baseMinutes + practiceMinutes + homeworkMinutes
+  const total = readingMinutes + vocabMinutes + instructionMinutes + warmUpMinutes + selfCheckMinutes + adaptiveExtensionMinutes + transitionMinutes + practiceMinutes + homeworkMinutes
 
   return Math.max(30, Math.min(240, Math.round(total)))
 }

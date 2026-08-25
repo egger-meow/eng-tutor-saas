@@ -154,5 +154,9 @@ Output a JSON object matching `learningPlan`:
   "reviewStrategy": ["do / does 助動詞還原間隔複習", "前週核心單字語境提取"],
   "personalizationStrategy": "以機器人感測器除錯情境承載時間副詞子句與推論證據整理，維持國中會考挑戰度。",
   "exclusions": ["passive-voice", "relative-clauses"]
+
 }
 ```
+
+## Weekly workload fit
+Plan useful reading, scaffolding, practice, production, retrieval, homework, and extension from `weekly_minutes`/`targetMinutes` for the 85%-115% band. Scale needs-support vocabulary work without filler; never copy target into `estimatedMinutes`.

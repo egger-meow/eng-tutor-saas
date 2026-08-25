@@ -33,6 +33,9 @@ export type GenerationContext = {
     materialWeek: string
     ruleVersion: string
   }
+  profile?: {
+    weekly_minutes?: number | null
+  }
   vocabularyCapsule?: {
     dueForReview: string[]
     weakRecent: string[]
@@ -544,7 +547,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       failureType: 'QUALITY_REJECTED',
       findings: progressionFindings,
     })
-    const audit = auditCurriculumPackage(pkg)
+    const audit = auditCurriculumPackage(pkg, { targetMinutes: input.context.profile?.weekly_minutes ?? undefined })
     if (!audit.passed) {
       const findings = audit.findings.filter((finding) => finding.severity === 'critical')
       const qualityError = new CurriculumQualityError({

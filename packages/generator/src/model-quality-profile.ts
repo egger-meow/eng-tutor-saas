@@ -22,7 +22,9 @@ export interface ModelQualityProfileOptions {
   surgicalRepairHook?: (
     pkg: CurriculumPackage,
     profile: QualityProfile,
+    findings: CurriculumAuditFinding[],
   ) => Promise<CurriculumPackage> | CurriculumPackage
+  targetMinutes?: number
 }
 
 export interface ProfileProvenance {
@@ -150,9 +152,18 @@ export async function applyModelQualityProfile(
     }
 
     let pkg = initialValidation.curriculumPackage
-    const initialAudit = auditCurriculumPackage(pkg)
+    const initialAudit = auditCurriculumPackage(pkg, options?.targetMinutes)
+    const workloadRepair = initialAudit.findings.some(
+      (finding) => finding.severity === 'critical' && finding.dimension === 'workload-calibration',
+    )
     if (!initialAudit.passed) {
-      return { success: false, issues: auditFindingsToIssues(initialAudit.findings) }
+      const criticalFindings = initialAudit.findings.filter((finding) => finding.severity === 'critical')
+      const workloadOnly = criticalFindings.length > 0 && criticalFindings.every(
+        (finding) => finding.dimension === 'workload-calibration',
+      )
+      if (!workloadOnly || !options?.surgicalRepairHook) {
+        return { success: false, issues: auditFindingsToIssues(initialAudit.findings) }
+      }
     }
 
     // 2. Model Quality Profile Resolution
@@ -165,7 +176,9 @@ export async function applyModelQualityProfile(
       ...pkg.studentLesson.practice.flatMap((s) => s.questions.map((q) => q.id)),
       ...pkg.studentLesson.homework.questions.map((q) => q.id),
     ]
-    const originalBlockCount = pkg.studentLesson.reading.blocks.length
+    const originalReadingBlocks = structuredClone(pkg.studentLesson.reading.blocks)
+    const originalGrounding = 'grounding' in pkg ? structuredClone(pkg.grounding) : undefined
+    const originalStages = pkg.studentLesson.practice.map((stage) => stage.stage)
     const originalFingerprint = pkg.metadata.inputFingerprint
     const originalJobId = pkg.metadata.jobId
     const originalChildId = pkg.metadata.childId
@@ -180,7 +193,7 @@ export async function applyModelQualityProfile(
     }
 
     if (options?.surgicalRepairHook) {
-      const customRepaired = await options.surgicalRepairHook(pkg, profile)
+      const customRepaired = await options.surgicalRepairHook(pkg, profile, initialAudit.findings)
       if (customRepaired && typeof customRepaired === 'object') {
         pkg = customRepaired
         repairedFields.push('customRepairHook')
@@ -220,23 +233,29 @@ export async function applyModelQualityProfile(
       ...pkg.studentLesson.practice.flatMap((s) => s.questions.map((q) => q.id)),
       ...pkg.studentLesson.homework.questions.map((q) => q.id),
     ]
-    if (
+    if (!workloadRepair && (
       currentQuestionIds.length !== originalQuestionIds.length ||
       !currentQuestionIds.every((id, idx) => id === originalQuestionIds[idx])
-    ) {
+    )) {
       return {
         success: false,
         issues: [{ path: 'studentLesson.practice', message: 'Surgical repair corrupted question identifiers' }],
       }
     }
 
-    if (pkg.studentLesson.reading.blocks.length !== originalBlockCount) {
+    if (JSON.stringify(pkg.studentLesson.reading.blocks) !== JSON.stringify(originalReadingBlocks)) {
       return {
         success: false,
-        issues: [{ path: 'studentLesson.reading.blocks', message: 'Surgical repair corrupted reading blocks structure' }],
+        issues: [{ path: 'studentLesson.reading.blocks', message: 'Surgical repair mutated valid reading or grounding-dependent prose' }],
       }
     }
 
+    if (workloadRepair && 'grounding' in pkg && JSON.stringify(pkg.grounding) !== JSON.stringify(originalGrounding)) {
+      return { success: false, issues: [{ path: 'grounding', message: 'Workload repair mutated valid grounding' }] }
+    }
+    if (!originalStages.every((stage) => pkg.studentLesson.practice.some((current) => current.stage === stage))) {
+      return { success: false, issues: [{ path: 'studentLesson.practice', message: 'Surgical repair deleted a required curriculum stage' }] }
+    }
     // 5. Deterministic Validation on Final Output
     const finalValidation = validateCurriculumPackage(pkg)
     if (!finalValidation.success) {
@@ -244,7 +263,7 @@ export async function applyModelQualityProfile(
     }
     pkg = finalValidation.curriculumPackage
 
-    const finalAudit = auditCurriculumPackage(pkg)
+    const finalAudit = auditCurriculumPackage(pkg, options?.targetMinutes)
     if (!finalAudit.passed) {
       return { success: false, issues: auditFindingsToIssues(finalAudit.findings) }
     }

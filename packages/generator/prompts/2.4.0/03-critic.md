@@ -67,3 +67,6 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
   }
 }
 ```
+
+## Workload-fit responsibility
+Using normalized actual workload, reject below 85% or above 115% of `targetMinutes` without filler or overload. Never falsify duration. Only approve `workload-budget-exception` with specific learner evidence; rerun normalization, critic, and audit after repair.

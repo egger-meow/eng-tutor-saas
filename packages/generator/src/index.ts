@@ -77,7 +77,14 @@ export {
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
-export { countWords, extractBlockTexts, cleanOptionPrefix, normalizeCurriculumPackage, stripTrailingTotalDuration } from './normalize-curriculum-package.js'
+export { countWords, extractBlockTexts, cleanOptionPrefix, computeQuestionDuration, computeDeterministicHomeworkMinutes, computeDeterministicPlanMinutes, normalizeCurriculumPackage, stripTrailingTotalDuration } from './normalize-curriculum-package.js'
+export {
+  DEFAULT_WORKLOAD_LOWER_RATIO,
+  DEFAULT_WORKLOAD_UPPER_RATIO,
+  WORKLOAD_BUDGET_EXCEPTION_CHECK_ID,
+  evaluateWorkloadFit,
+} from './workload-fit.js'
+export type { WorkloadFitCode, WorkloadFitResult } from './workload-fit.js'
 
 // CAP Curriculum Maps & Coverage Tracking
 export {

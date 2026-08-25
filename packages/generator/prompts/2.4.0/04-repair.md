@@ -25,3 +25,6 @@ When fixing validation or critic findings in a curriculum package:
 ## 2. Output Contract
 
 Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.2.0).
+
+## 3. Workload-only surgical repair
+Underfill: add useful dependent practice/reasoning/writing/retrieval/extension. Overfill: remove redundancy, never required stages. Preserve valid grounding, reading, targets, Q&A, and tracking; avoid re-research. Normalize, recompute, criticize, and audit; never copy target into estimate.

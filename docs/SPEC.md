@@ -3959,6 +3959,7 @@ For an eligible child:
 10. parent can download them;
 11. metadata records generation version.
 12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance.
+13. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or a bounded exception is explicitly justified with evidence.
 
 ---
 
@@ -4185,6 +4186,10 @@ For weekly-material work specifically:
 16. Require real grounding for every new production 2.3.0 primary reading; never use null or N/A.
 17. Bind every factual claim to exact canonical lesson prose and verify current-event freshness.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
+19. Treat profile `weekly_minutes` as `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`.
+20. After authoring, normalize and compare deterministic workload with the inclusive 85%-115% target band; emit `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` outside it.
+21. Repair workload surgically with useful dependent learning work or removal of redundancy, then normalize, recompute, criticize, and audit again; never falsify duration metadata or delete required stages.
+22. Permit a bounded workload exception only through an explicit passing `workload-budget-exception` check with specific evidence.
 
 ---
 

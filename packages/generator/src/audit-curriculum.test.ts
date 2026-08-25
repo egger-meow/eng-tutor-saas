@@ -391,15 +391,15 @@ describe('curriculum audit & lexical contract', () => {
     const reportUnder = auditCurriculumPackage(pkg, 100)
     const underFinding = reportUnder.findings.find((f) => f.dimension === 'workload-calibration')
     expect(underFinding).toBeDefined()
-    expect(underFinding?.severity).toBe('warning')
-    expect(underFinding?.message).toContain('低於孩子每週設定預算 (100 分鐘 -20% = 80 分鐘)')
+    expect(underFinding?.severity).toBe('critical')
+    expect(underFinding?.message).toContain('BUDGET_UNDERFILLED')
 
     // 3. Declared budget = 50 min (±20% range is [40, 60]) -> 69 min > 60 min (over-budget warning)
     const reportOver = auditCurriculumPackage(pkg, { declaredWeeklyMinutes: 50 })
     const overFinding = reportOver.findings.find((f) => f.dimension === 'workload-calibration')
     expect(overFinding).toBeDefined()
-    expect(overFinding?.severity).toBe('warning')
-    expect(overFinding?.message).toContain('高於孩子每週設定預算 (50 分鐘 +20% = 60 分鐘)')
+    expect(overFinding?.severity).toBe('critical')
+    expect(overFinding?.message).toContain('BUDGET_OVERFILLED')
   })
 
   it('validates presence of core evidence organizer task in independent practice stage', () => {
@@ -447,3 +447,24 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.findings.some((item) => item.tier === 'structural-critical' && item.severity === 'critical')).toBe(true)
   })
 })
+
+  it('requires explicit substantive evidence for a workload exception', () => {
+    const pkg = canonicalPackage()
+    pkg.qualityEvidence.criticalChecks.push({
+      id: 'workload-budget-exception',
+      passed: true,
+      evidence: 'Temporary exception.',
+    })
+
+    const report = auditCurriculumPackage(pkg, 100)
+    expect(report.passed).toBe(false)
+    expect(report.findings.some((finding) => finding.message.includes('requires at least 80 characters'))).toBe(true)
+
+    pkg.qualityEvidence.criticalChecks.at(-1)!.evidence =
+      'The independent critic confirms a temporary learner-specific fatigue constraint this week; the bounded workload preserves every required stage and remains safe and useful.'
+    const excepted = auditCurriculumPackage(pkg, 100)
+    expect(excepted.findings.some((finding) => finding.message.includes('BUDGET_UNDERFILLED'))).toBe(false)
+    expect(excepted.findings.some(
+      (finding) => finding.severity === 'critical' && finding.dimension === 'workload-calibration',
+    )).toBe(false)
+  })

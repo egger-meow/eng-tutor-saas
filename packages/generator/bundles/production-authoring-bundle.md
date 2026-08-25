@@ -5,10 +5,10 @@ promptVersion: "2.5.0"
 engineVersion: "1.1.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
-  "packages/generator/prompts/2.4.0/02-author.md": "592198831ffbdf16ffbe6708bc11c6df9c571d925299982f81bd452327e68b8a"
-  "packages/generator/prompts/2.4.0/03-critic.md": "51061cde89dd0daf38a31602373079dfd642f734572260a4559fb2674f5362d7"
-  "packages/generator/prompts/2.4.0/04-repair.md": "bbc436ce2df940425f1259cb74ec00bd566e5bb7fdd9f68058301cac51a77702"
+  "packages/generator/prompts/2.4.0/01-plan.md": "0a3b40811eff961a68106da172dd4caedbe404341177f8425a07660f361c28ec"
+  "packages/generator/prompts/2.4.0/02-author.md": "cdeb01b26df22fee0106eaa02924fc80468997fedf38faf118af0e3c33ce7e65"
+  "packages/generator/prompts/2.4.0/03-critic.md": "5a3538b36dc0e0d58e9e5f720becac0d152a07f64353b9319ef9ac2df785f131"
+  "packages/generator/prompts/2.4.0/04-repair.md": "9d73d3dbb49750a921ff9349964fc460cd49d3f883d6fc35c4ccbd0de0321e2d"
   "packages/generator/prompts/2.5.0/01-plan.md": "bfad89bdbb0fa64d821cf86a57a606dd12adee2d1508861a7e9abfae85884bc5"
   "packages/generator/prompts/2.5.0/02-author.md": "fcdfe17881606f4830dbac5d7edd5123dbfd5fda7acdd1518d4b985b89db9822"
   "packages/generator/prompts/2.5.0/03-critic.md": "2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05"
@@ -16,7 +16,7 @@ sourceHashes:
   "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "db156a95b50ddf59174ca9018e509ac7c0bb711b7b9009fc2e06510ad3dee193"
+  "docs/curriculum-quality-rubric.md": "fb9d9cac8892aceb97cc54ef871f579f339fff8de80210e74933189c576f9812"
   "docs/product-rules.md": "b190a1c62733b79628015f9879ac4361381df73188c23afcab500758dfb197e7"
 ---
 
@@ -92,7 +92,7 @@ This is the review contract for every weekly package. It distills the teaching r
 - The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
 - Reading practice covers detail, main idea, inference, and context clues over time. Difficulty comes from evidence and reasoning, not trivia or hidden words.
 - Global Answer Integrity: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options must never combine separately mentioned true facts from different places into an unsupported composite claim.
-- Estimated duration represents computed workload truth derived formulaically from content metrics, never the learner's requested budget. Budget mismatch triggers surgical content expansion or trimming before recomputation.
+- Profile `weekly_minutes` is `targetMinutes`; `estimatedMinutes` remains deterministic, represented-work truth. Never copy them. Require the rounded inclusive 85%-115% band, otherwise emit `BUDGET_UNDERFILLED`/`BUDGET_OVERFILLED`, repair useful content surgically, recompute, and re-audit. Exceptions require specific passed `workload-budget-exception` evidence.
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
 
 ## The weekly improvement loop
@@ -719,8 +719,12 @@ Output a JSON object matching `learningPlan`:
   "reviewStrategy": ["do / does 助動詞還原間隔複習", "前週核心單字語境提取"],
   "personalizationStrategy": "以機器人感測器除錯情境承載時間副詞子句與推論證據整理，維持國中會考挑戰度。",
   "exclusions": ["passive-voice", "relative-clauses"]
+
 }
 ```
+
+## Weekly workload fit
+Plan useful reading, scaffolding, practice, production, retrieval, homework, and extension from `weekly_minutes`/`targetMinutes` for the 85%-115% band. Scale needs-support vocabulary work without filler; never copy target into `estimatedMinutes`.
 
 ---
 
@@ -1002,6 +1006,9 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 ---
 
+
+## Workload fit
+Author useful work to `targetMinutes`; normalize, then surgically repair `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` while preserving valid content. Recompute; never add filler or edit duration metadata.
 ## 10. Output Contract (Strict JSON Only)
 
 Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.3.0).
@@ -1111,6 +1118,9 @@ Output a valid JSON object conforming to `CurriculumAuditReport`:
 }
 ```
 
+## Workload-fit responsibility
+Using normalized actual workload, reject below 85% or above 115% of `targetMinutes` without filler or overload. Never falsify duration. Only approve `workload-budget-exception` with specific learner evidence; rerun normalization, critic, and audit after repair.
+
 ---
 
 # Prompt 03 Overlay: Grounding Critic (v2.5.0)
@@ -1159,6 +1169,9 @@ When fixing validation or critic findings in a curriculum package:
 ## 2. Output Contract
 
 Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.3.0).
+
+## 3. Workload-only surgical repair
+Underfill: add useful dependent practice/reasoning/writing/retrieval/extension. Overfill: remove redundancy, never required stages. Preserve valid grounding, reading, targets, Q&A, and tracking; avoid re-research. Normalize, recompute, criticize, and audit; never copy target into estimate.
 
 ---
 
