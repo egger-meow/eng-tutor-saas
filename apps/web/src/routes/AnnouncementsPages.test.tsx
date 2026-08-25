@@ -30,7 +30,8 @@ describe('Announcements page rendering', () => {
   it('renders announcement page structure and friendly headings', () => {
     const html = renderToStaticMarkup(<AnnouncementsPage session={mockSession} />)
     expect(html).toContain('最新消息')
-    expect(html).toContain('紙屬英文最近在忙什麼 🌱')
+    expect(html).toContain('紙屬英文最近在忙什麼')
+    expect(html).toContain('🌱')
     expect(html).toContain('這裡會不定期分享紙屬英文的新功能、教材更新與維護通知。')
   })
 

@@ -78,7 +78,10 @@ export function AnnouncementsPage({ session }: { session: Session }) {
         <section className="announcements-page">
           <header className="announcements-header">
             <p className="overline">最新消息</p>
-            <h1>紙屬英文最近在忙什麼 🌱</h1>
+            <h1>
+              <span style={{ display: 'inline-block' }}>紙屬英文最近在忙什麼</span>{' '}
+              <span style={{ display: 'inline-block' }}>🌱</span>
+            </h1>
             <p className="lede">
               這裡會不定期分享紙屬英文的新功能、教材更新與維護通知。
             </p>
