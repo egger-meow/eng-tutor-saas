@@ -264,7 +264,9 @@ export interface PipelineJobRow {
   materialWeek: string
   attemptNumber: number
   maxAttempts: number
-  retryState: 'first_attempt' | 'retry_waiting' | 'retry_in_progress' | 'exhausted'
+  retryState: 'first_attempt' | 'retry_waiting' | 'retry_in_progress' | 'exhausted' | 'delivered_first_try' | 'delivered_after_retry'
+  feedbackStatus?: 'onboarding' | 'received' | 'waiting_feedback' | 'cutoff_passed'
+  feedbackCutoffAt?: string | null
   createdAt: string
   updatedAt: string
   relevantTimestamp: string | null

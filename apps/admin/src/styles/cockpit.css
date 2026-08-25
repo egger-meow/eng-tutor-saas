@@ -598,6 +598,13 @@
 .pipeline-job:hover { background: var(--bg-elevated); }
 .pipeline-job-head, .pipeline-job-meta { display: flex; justify-content: space-between; gap: 8px; }
 .pipeline-job-head span, .pipeline-job-meta { color: var(--text-muted); font-size: 11px; }
+.pipeline-job-feedback { margin: 6px 0 2px 0; display: flex; flex-direction: column; gap: 2px; }
+.feedback-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; width: fit-content; }
+.feedback-tag.waiting { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.feedback-tag.received { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.feedback-tag.cutoff { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.feedback-tag.onboarding { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+.cutoff-hint { color: var(--text-dim); font-size: 10px; margin-top: 1px; }
 .pipeline-job-status { margin: 7px 0; font-size: 12px; font-weight: 700; }
 .pipeline-job-meta { flex-wrap: wrap; }
 .pipeline-job-meta time { width: 100%; }

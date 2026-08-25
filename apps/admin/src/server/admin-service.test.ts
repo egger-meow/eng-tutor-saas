@@ -240,6 +240,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     const ready = new Map(pipeline.readyToClaim.map((row) => [row.jobId, row.status]))
     const awaiting = new Map(pipeline.awaitingFinisher.map((row) => [row.jobId, row.status]))
     const done = new Map(pipeline.finisherDone.map((row) => [row.jobId, row.status]))
+    const doneRows = new Map(pipeline.finisherDone.map((row) => [row.jobId, row]))
 
     expect([...ready.keys()]).toEqual(['pending-new', 'pending-retry', 'claimed-unsubmitted', 'generation-failed'])
     expect(ready.get('pending-retry')).toBe('RETRY READY')
@@ -252,6 +253,10 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(done.get('quality-override')).toBe('DELIVERED WITH QUALITY OVERRIDE')
     expect(done.has('finisher-technical')).toBe(false)
     expect(pipeline.readyToClaim.length + pipeline.awaitingFinisher.length + pipeline.finisherDone.length).toBe(11)
+
+    // Completed jobs must never be labeled retry_in_progress
+    expect(doneRows.get('completed-released')?.retryState).toBe('delivered_first_try')
+    expect(doneRows.get('quality-override')?.retryState).toBe('delivered_after_retry')
   })
 
   it('never treats generator_version as schema provenance and labels missing components unobservable', async () => {

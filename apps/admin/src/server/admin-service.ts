@@ -12,6 +12,8 @@ type PipelineInput = {
   childNames: Map<string, string>
   maskName: (name: string | undefined, id: string) => string
   now: string
+  feedbackMaterialIds?: Set<string>
+  childMaterialCounts?: Map<string, number>
 }
 
 export function deriveOperationsPipeline(input: PipelineInput): OperationsOverview['pipeline'] {
@@ -31,46 +33,90 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
     const current = latest && Number(latest.authoring_attempt) === Number(job.attempt_count) ? latest : null
     const attempt = Number(job.attempt_count) || 0
     const maxAttempts = Number(job.max_attempts) || 5
-    const row: OperationsOverview['pipeline']['readyToClaim'][number] = {
+
+    // Feedback status computation
+    let feedbackStatus: PipelineJobRow['feedbackStatus'] = undefined
+    if (job.status === 'pending') {
+      const hasFeedback = (job.source_material_id && input.feedbackMaterialIds?.has(job.source_material_id)) || false
+      const isWeek1 = !job.source_material_id && (!input.childMaterialCounts?.get(job.child_id) || input.childMaterialCounts.get(job.child_id) === 0)
+
+      if (isWeek1) {
+        feedbackStatus = 'onboarding'
+      } else if (hasFeedback) {
+        feedbackStatus = 'received'
+      } else if (job.feedback_missing || (job.feedback_cutoff_at && job.feedback_cutoff_at <= input.now)) {
+        feedbackStatus = 'cutoff_passed'
+      } else {
+        feedbackStatus = 'waiting_feedback'
+      }
+    }
+
+    // Determine status
+    let status = job.status
+    if (job.status === 'pending') {
+      if (feedbackStatus === 'waiting_feedback') {
+        status = 'WAITING FEEDBACK'
+      } else {
+        status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
+      }
+    } else if (job.status === 'claimed' && !current) {
+      status = 'AUTHORING CLAIMED — AWAITING SUBMISSION'
+    } else if (current?.status === 'technical_failed') {
+      status = 'TECHNICAL FAILURE — RETRYABLE'
+    } else if (current && ['pending', 'processing'].includes(current.status)) {
+      status = current.status === 'processing' ? 'FINISHER PROCESSING' : 'AWAITING FINISHER'
+    } else if (overrideByJob.has(job.id)) {
+      status = 'DELIVERED WITH QUALITY OVERRIDE'
+    } else if (current?.status === 'completed' || job.status === 'completed') {
+      status = job.release_at
+        ? (job.release_at <= input.now ? 'RELEASED' : 'AWAITING RELEASE')
+        : 'COMPLETED'
+    } else if (current?.status === 'quality_rejected') {
+      status = 'QUALITY REJECTED'
+    } else {
+      status = job.status === 'failed' ? 'GENERATION FAILED — RETRY REQUIRED' : job.status.replaceAll('_', ' ').toUpperCase()
+    }
+
+    // Retry state determination: completed jobs must NEVER be labeled as 'retry_in_progress'
+    let retryState: PipelineJobRow['retryState']
+    const isCompletedOutcome = ['RELEASED', 'AWAITING RELEASE', 'COMPLETED', 'DELIVERED WITH QUALITY OVERRIDE'].includes(status)
+
+    if (isCompletedOutcome) {
+      retryState = attempt > 1 ? 'delivered_after_retry' : 'delivered_first_try'
+    } else if (attempt >= maxAttempts) {
+      retryState = 'exhausted'
+    } else if (job.status === 'pending') {
+      retryState = attempt > 0 ? 'retry_waiting' : 'first_attempt'
+    } else if (['AWAITING FINISHER', 'FINISHER PROCESSING'].includes(status) || job.status === 'claimed') {
+      retryState = attempt > 1 ? 'retry_in_progress' : 'first_attempt'
+    } else if (status === 'QUALITY REJECTED' || status === 'TECHNICAL FAILURE — RETRYABLE' || job.status === 'failed') {
+      retryState = attempt >= maxAttempts ? 'exhausted' : 'retry_waiting'
+    } else {
+      retryState = attempt > 1 ? 'retry_in_progress' : 'first_attempt'
+    }
+
+    const row: PipelineJobRow = {
       jobId: job.id,
       childId: job.child_id,
       childPseudonym: input.maskName(input.childNames.get(job.child_id), job.child_id),
       materialWeek: job.material_week,
       attemptNumber: current ? Number(current.authoring_attempt) : attempt,
       maxAttempts,
-      retryState: attempt >= maxAttempts ? 'exhausted' : attempt > 0 ? (job.status === 'pending' ? 'retry_waiting' : 'retry_in_progress') : 'first_attempt',
+      retryState,
+      feedbackStatus,
+      feedbackCutoffAt: job.feedback_cutoff_at || null,
       createdAt: job.created_at,
       updatedAt: current?.processed_at || current?.submitted_at || job.completed_at || job.started_at || job.updated_at || job.created_at,
       relevantTimestamp: current?.processed_at || current?.submitted_at || job.generation_due_at || job.scheduled_for || null,
-      status: job.status,
+      status,
     }
 
-    if (job.status === 'pending') {
-      row.status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
+    if (['WAITING FEEDBACK', 'READY TO CLAIM', 'RETRY READY', 'AUTHORING CLAIMED — AWAITING SUBMISSION', 'GENERATION FAILED — RETRY REQUIRED'].includes(status) || job.status === 'pending') {
       pipeline.readyToClaim.push(row)
-    } else if (job.status === 'claimed' && !current) {
-      row.status = 'AUTHORING CLAIMED — AWAITING SUBMISSION'
-      pipeline.readyToClaim.push(row)
-    } else if (current?.status === 'technical_failed') {
-      row.status = 'TECHNICAL FAILURE — RETRYABLE'
+    } else if (['AWAITING FINISHER', 'FINISHER PROCESSING', 'TECHNICAL FAILURE — RETRYABLE'].includes(status)) {
       pipeline.awaitingFinisher.push(row)
-    } else if (current && ['pending', 'processing'].includes(current.status)) {
-      row.status = current.status === 'processing' ? 'FINISHER PROCESSING' : 'AWAITING FINISHER'
-      pipeline.awaitingFinisher.push(row)
-    } else if (overrideByJob.has(job.id)) {
-      row.status = 'DELIVERED WITH QUALITY OVERRIDE'
-      pipeline.finisherDone.push(row)
-    } else if (current?.status === 'completed' || job.status === 'completed') {
-      row.status = job.release_at
-        ? (job.release_at <= input.now ? 'RELEASED' : 'AWAITING RELEASE')
-        : 'COMPLETED'
-      pipeline.finisherDone.push(row)
-    } else if (current?.status === 'quality_rejected') {
-      row.status = 'QUALITY REJECTED'
-      pipeline.finisherDone.push(row)
     } else {
-      row.status = job.status === 'failed' ? 'GENERATION FAILED — RETRY REQUIRED' : job.status.replaceAll('_', ' ').toUpperCase()
-      pipeline.readyToClaim.push(row)
+      pipeline.finisherDone.push(row)
     }
   }
   return pipeline
@@ -1145,6 +1191,7 @@ export class AdminService {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []
 
+    const localFeedbackSources: DataSourceStatus[] = []
     const [
       childrenData,
       subsData,
@@ -1152,6 +1199,7 @@ export class AdminService {
       materialsData,
       enrollmentData,
       submissionsData,
+      feedbackData,
     ] = await Promise.all([
       this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active, is_internal_test'), dataSources),
       this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
@@ -1162,6 +1210,7 @@ export class AdminService {
         error: result.error,
       })), dataSources),
       this.queryCurriculumSubmissions(undefined, 200, dataSources),
+      this.safeQuery<any[]>('feedback', () => client.from('feedback').select('id, child_id, material_id, created_at').order('created_at', { ascending: false }).limit(200), localFeedbackSources),
     ])
 
     const children = (childrenData as any[]) || []
@@ -1205,6 +1254,13 @@ export class AdminService {
     const jobs = (jobsData as any[]) || []
     const materials = (materialsData as any[]) || []
     const submissions = (submissionsData as any[]) || []
+    const feedbackList = (feedbackData as any[]) || []
+    const feedbackMaterialIds = new Set<string>(feedbackList.map((f: any) => f.material_id).filter(Boolean))
+    const childMaterialCounts = new Map<string, number>()
+    for (const m of materials) {
+      childMaterialCounts.set(m.child_id, (childMaterialCounts.get(m.child_id) || 0) + 1)
+    }
+
     const overrideResult = await client.from('material_quality_overrides').select('*').order('created_at', { ascending: false }).limit(200)
     const overrides = overrideResult.error ? [] : (overrideResult.data ?? [])
 
@@ -1358,6 +1414,8 @@ export class AdminService {
       childNames: childMap,
       maskName: (name, id) => this.maskName(name, id),
       now,
+      feedbackMaterialIds,
+      childMaterialCounts,
     })
     const expected = { ...CURRENT_ENGINE_MANIFEST } as Record<string, string>
     const drift: OperationsOverview['engineInspector']['drift'] = []
