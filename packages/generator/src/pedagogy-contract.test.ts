@@ -9,7 +9,7 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.6.0 active invariant contract with frozen 2.4.0 and 2.5.0 inheritance', () => {
+describe('Prompt 2.7.0 active invariant contract with frozen 2.4.0, 2.5.0, and 2.6.0 inheritance', () => {
   it('enforces active Prompt 2.4.0 Wave 2 pedagogy invariants (Trigger-Pattern-Trap-Try, distractor reasoning, non-tautological explanations)', async () => {
     const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
     const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
@@ -115,9 +115,9 @@ describe('Prompt 2.6.0 active invariant contract with frozen 2.4.0 and 2.5.0 inh
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.6.0-prod"')
+    expect(bundle).toContain('bundleVersion: "2.7.0-prod"')
     expect(bundle).toContain('schemaVersion: "2.3.0"')
-    expect(bundle).toContain('engineVersion: "1.2.0"')
+    expect(bundle).toContain('engineVersion: "1.3.0"')
 
     // Assert adaptiveExtension is optional in Schema 2.2 studentLesson
     const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape

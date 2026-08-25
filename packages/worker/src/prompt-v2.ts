@@ -4,15 +4,16 @@ import type { GenerationContext } from './pipeline.js'
 const basePromptRoot = new URL('../../generator/prompts/2.4.0/', import.meta.url)
 const groundingPromptRoot = new URL('../../generator/prompts/2.5.0/', import.meta.url)
 const workloadPromptRoot = new URL('../../generator/prompts/2.6.0/', import.meta.url)
+const mcqPromptRoot = new URL('../../generator/prompts/2.7.0/', import.meta.url)
 const promptFiles = ['01-plan.md', '02-author.md', '03-critic.md', '04-repair.md']
 
 export async function buildCurriculumPromptBundle(context: GenerationContext): Promise<string> {
   const prompts = await Promise.all(promptFiles.map(async (file) => ({
     file,
-    content: `${(await readFile(new URL(file, basePromptRoot), 'utf8')).replaceAll('2.2.0', '2.3.0').replaceAll('2.4.0', '2.6.0')}\n\n---\n\n${await readFile(new URL(file, groundingPromptRoot), 'utf8')}\n\n---\n\n${await readFile(new URL(file, workloadPromptRoot), 'utf8')}`,
+    content: `${(await readFile(new URL(file, basePromptRoot), 'utf8')).replaceAll('2.2.0', '2.3.0').replaceAll('2.4.0', '2.7.0')}\n\n---\n\n${await readFile(new URL(file, groundingPromptRoot), 'utf8')}\n\n---\n\n${await readFile(new URL(file, workloadPromptRoot), 'utf8')}\n\n---\n\n${await readFile(new URL(file, mcqPromptRoot), 'utf8')}`,
   })))
   return [
-    '# 紙屬英文 Curriculum Package 2.3.0 · Prompt 2.6.0 · Production Authoring bundle',
+    '# 紙屬英文 Curriculum Package 2.3.0 · Prompt 2.7.0 · Production Authoring bundle',
     '',
     '這是一個 production generation context。只產出符合 `CurriculumPackageSchema` (2.3.0) 的 JSON；不要輸出 Markdown、PDF、解釋文字或另一位孩子的資料。',
     '流程固定為：grounding research → plan → author → deterministic validation → independent critic → targeted repair → deterministic validation。',
@@ -23,7 +24,7 @@ export async function buildCurriculumPromptBundle(context: GenerationContext): P
     JSON.stringify(context, null, 2),
     '```',
     '',
-    '## Versioned prompts (frozen 2.4.0 baseline + frozen 2.5.0 grounding + 2.6.0 workload overlays)',
+    '## Versioned prompts (frozen 2.4.0 baseline + frozen 2.5.0 grounding + frozen 2.6.0 workload + 2.7.0 MCQ overlays)',
     ...prompts.flatMap(({ file, content }) => [`\n### ${file}\n`, content]),
     '',
     '## Final handoff requirements',

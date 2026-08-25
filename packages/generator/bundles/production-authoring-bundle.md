@@ -1,8 +1,8 @@
 ---
-bundleVersion: "2.6.0-prod"
+bundleVersion: "2.7.0-prod"
 schemaVersion: "2.3.0"
-promptVersion: "2.6.0"
-engineVersion: "1.2.0"
+promptVersion: "2.7.0"
+engineVersion: "1.3.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
@@ -14,9 +14,13 @@ sourceHashes:
   "packages/generator/prompts/2.5.0/03-critic.md": "2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05"
   "packages/generator/prompts/2.5.0/04-repair.md": "ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c"
   "packages/generator/prompts/2.6.0/01-plan.md": "a3e75601b5013d7098aa0c9fdcb60cb3e4cee534e3ca2538235315c2433d449a"
-  "packages/generator/prompts/2.6.0/02-author.md": "6f5b82e2d8740837e13cc8fdfd16c9903fea72f49ae45871f578f6075dbf7996"
-  "packages/generator/prompts/2.6.0/03-critic.md": "6409020eb5dfec22cd91d991bf0da4a0b90f62e2b9300051ded6589e8d0b7582"
-  "packages/generator/prompts/2.6.0/04-repair.md": "cc3b82b44d43a51ff515b4cef0709bbcac6791426b809881a6b22db7151628eb"
+  "packages/generator/prompts/2.6.0/02-author.md": "48bddaff5ba7ced05f20c99ba221e728882c86e877ce88608c1f9dbf80183ff7"
+  "packages/generator/prompts/2.6.0/03-critic.md": "5519a35438e1b91fc77b4690d3d5362e8687299761f89dbc7dfaecaaf0998db3"
+  "packages/generator/prompts/2.6.0/04-repair.md": "e227397c176db4b05a2b8c48943f1c7210771797c4353df23d85cc1c58baa16f"
+  "packages/generator/prompts/2.7.0/01-plan.md": "559687e5df14844a5171e21f690e695e9c7608553931ffbf6d077f1ffdda47ce"
+  "packages/generator/prompts/2.7.0/02-author.md": "df7034db3aee85bc1260fac17bc6c0b2f91cef1298074a555d98d33fbecf5695"
+  "packages/generator/prompts/2.7.0/03-critic.md": "0cbce4661fd86238a708fca205d7468a1cf8014155a9ab89b005286c4d207458"
+  "packages/generator/prompts/2.7.0/04-repair.md": "2c8564e6131002e44f392887996197e624984e3c24360f9b296de1ce778cb16b"
   "packages/generator/src/curriculum-package-schema.ts": "6eba282da6fb392a90e3babdcf64c56f3dd16e136e0df949194b37f9474c8fdc"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
@@ -569,9 +573,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.6.0)
+# Prompt 01: Planning (v2.7.0)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
 
 ---
 
@@ -769,10 +773,16 @@ This contract is executor-neutral. A future Responses API `web_search` adapter m
 
 Use `weekly_minutes` as `targetMinutes`. Plan meaningful work for 85%-115% without filler. `estimatedMinutes` stays content-derived and never copies target.
 
-## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.6.0)
+---
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
+# MCQ Answer-Distribution Planning Overlay (v2.7.0)
+
+Plan practice and homework items with balanced, non-predictable multiple-choice answer positions across options (A), (B), (C), and (D).
+
+## 6. Prompt 02: Authoring Engine
+# Prompt 02: Material Authoring (v2.7.0)
+
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
 
 ---
 
@@ -1054,15 +1064,20 @@ Do not self-certify grounding critical checks. Only the independent critic may a
 
 ---
 
-# Workload & Answer-Distribution Authoring Overlay (v2.6.0)
+# Workload Authoring Overlay (v2.6.0)
 
 Scheduled Work estimates fit but cannot run exact normalization. The Finisher is authoritative; its immutable workload finding drives the next targeted retry. Never falsify duration.
-Distribute 4-option MCQ answers across (A), (B), (C), and (D). Never concentrate all/near-all answers in one position (single position <= 60% when N >= 6, or 100% when N >= 4) or author runs of 4+ identical answers.
+
+---
+
+# MCQ Answer-Distribution Authoring Overlay (v2.7.0)
+
+Distribute 4-option multiple-choice answers across (A), (B), (C), and (D). The correct answer share for any single option position must stay <= 60% of total MCQs; 100% in one position is strictly forbidden when N >= 4. Strictly avoid streaks of 4 or more identical consecutive answers (e.g. AAAA).
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.6.0)
+# Prompt 03: Critic (v2.7.0)
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
 
 ---
 
@@ -1152,15 +1167,20 @@ The independent critic is the only stage authorized to add or mark grounding cri
 
 ---
 
-# Workload & Answer-Distribution Critic Overlay (v2.6.0)
+# Workload Critic Overlay (v2.6.0)
 
 Reject underfill, overload, or filler. Exceptions need learner evidence and must remain within 75%-125%. Never claim an exact deterministic pre-submit calculation.
-Reject MCQ answer-position leakage: flag critical if answers are concentrated in a single position (> 60% when N >= 6, or 100% when N >= 4) or contain runs of 4+ identical answers (e.g. AAAA).
+
+---
+
+# MCQ Answer-Distribution Critic Overlay (v2.7.0)
+
+Reject MCQ answer-position leakage: flag critical if correct answers concentrate excessively in a single position (> 60% when N >= 6, or 100% when N >= 4) or contain runs of 4+ identical consecutive answers (e.g. AAAA).
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.6.0)
+# Prompt 04: Repair (v2.7.0)
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.6.0).
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
 
 ---
 
@@ -1200,7 +1220,12 @@ Maintain all existing retry behavior. This repair stage does not claim, submit, 
 
 ---
 
-# Workload & Answer-Distribution Repair Overlay (v2.6.0)
+# Workload Repair Overlay (v2.6.0)
 
 On retry, surgically expand useful work or trim redundancy. Preserve grounding, reading, targets, unaffected Q&A/tracking, and required stages; re-research only changed facts. Finisher recomputes.
-When repairing MCQ answer-position leakage, reorder question options (updating answer key, accepted answers, and explanation letter references) rather than rewriting valid questions.
+
+---
+
+# MCQ Answer-Distribution Repair Overlay (v2.7.0)
+
+When repairing MCQ answer-position leakage, reorder question options (synchronizing the answer key, accepted answers, and explanation letter references) rather than rewriting valid questions or distractors.

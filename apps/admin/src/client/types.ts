@@ -143,7 +143,7 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
   }
 
   const isSchemaCurrent = Boolean(!schema || schema.startsWith('2.2') || schema.startsWith('2.3'))
-  const isPromptCurrent = Boolean(!prompt || prompt.startsWith('2.4') || prompt.startsWith('2.5') || prompt.startsWith('2.6') || prompt === '2.4.0-prod' || prompt === 'prompt/2.4.0')
+  const isPromptCurrent = Boolean(!prompt || prompt.startsWith('2.4') || prompt.startsWith('2.5') || prompt.startsWith('2.6') || prompt.startsWith('2.7') || prompt === '2.4.0-prod' || prompt === 'prompt/2.4.0')
 
   if (isSchemaCurrent && isPromptCurrent && (schema || prompt)) {
     return 'engine_v1'

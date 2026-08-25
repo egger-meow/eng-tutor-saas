@@ -2786,7 +2786,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses schema 2.3.0 and prompt 2.6.0. Prompt 2.4.0 and 2.5.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring.
+New production authoring uses schema 2.3.0 and prompt 2.7.0. Prompt 2.4.0, 2.5.0, and 2.6.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring.
 
 ---
 
@@ -3577,7 +3577,7 @@ The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLA
 
 Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
 
-Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.2.0, Prompt 2.6.0, and canonical Schema 2.3.0.
+Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.3.0, Prompt 2.7.0, and canonical Schema 2.3.0.
 
 ---
 # 173. Manual Recovery

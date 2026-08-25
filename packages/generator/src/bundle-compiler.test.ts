@@ -9,6 +9,7 @@ import {
   computeFrozen230Hashes,
   computeFrozen240Hashes,
   computeFrozen250Hashes,
+  computeFrozen260Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
@@ -20,9 +21,9 @@ describe('bundle-compiler', () => {
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
     expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.6.0')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.6.0-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(17)
+    expect(freshBundle.metadata.promptVersion).toBe('2.7.0')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.7.0-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(21)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
     expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -101,6 +102,15 @@ describe('bundle-compiler', () => {
       'packages/generator/prompts/2.5.0/02-author.md': 'fcdfe17881606f4830dbac5d7edd5123dbfd5fda7acdd1518d4b985b89db9822',
       'packages/generator/prompts/2.5.0/03-critic.md': '2b4b8c75ac52548f8e4ad3a1de13370bd9b7f143dbcbcdb26392d768eb210f05',
       'packages/generator/prompts/2.5.0/04-repair.md': 'ca13d399df2438d75af21c2b9dcb3416d386aac64d8cdce725c552571d556d1c',
+    })
+  })
+
+  it('verifies that prompts/2.6.0 workload overlay remains byte-for-byte frozen', async () => {
+    expect(await computeFrozen260Hashes(REPO_ROOT)).toEqual({
+      'packages/generator/prompts/2.6.0/01-plan.md': 'a3e75601b5013d7098aa0c9fdcb60cb3e4cee534e3ca2538235315c2433d449a',
+      'packages/generator/prompts/2.6.0/02-author.md': '48bddaff5ba7ced05f20c99ba221e728882c86e877ce88608c1f9dbf80183ff7',
+      'packages/generator/prompts/2.6.0/03-critic.md': '5519a35438e1b91fc77b4690d3d5362e8687299761f89dbc7dfaecaaf0998db3',
+      'packages/generator/prompts/2.6.0/04-repair.md': 'e227397c176db4b05a2b8c48943f1c7210771797c4353df23d85cc1c58baa16f',
     })
   })
 
