@@ -1,6 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
-import { getWebhookPlan, type PaddleSubscriptionItem } from '../_shared/paddle-plans.ts'
+import { getWebhookFoundingDiscount, getWebhookPlan, type PaddleSubscriptionDiscount, type PaddleSubscriptionItem } from '../_shared/paddle-plans.ts'
 
 const SIGNATURE_TOLERANCE_SECONDS = 300
 const SUBSCRIPTION_EVENTS = new Set([
@@ -26,6 +26,8 @@ type PaddleEvent = {
     items?: PaddleSubscriptionItem[]
     current_billing_period?: { starts_at?: string; ends_at?: string } | null
     scheduled_change?: { action?: string } | null
+    discount?: PaddleSubscriptionDiscount | null
+    transaction_id?: string
   }
 }
 
@@ -81,7 +83,8 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
   const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
-  if (!webhookSecret || !supabaseUrl || !serviceRoleKey || !monthlyPriceId || !annualPriceId) {
+  const foundingDiscountId = Deno.env.get('PADDLE_FOUNDING_DISCOUNT_ID')
+  if (!webhookSecret || !supabaseUrl || !serviceRoleKey || !monthlyPriceId || !annualPriceId || !foundingDiscountId) {
     console.error('Paddle webhook server configuration is incomplete')
     return jsonResponse(503, { error: 'server_not_configured' })
   }
@@ -110,12 +113,17 @@ Deno.serve(async (request) => {
     const subscription = event.data
     const childId = subscription?.custom_data?.child_id
     if (typeof childId !== 'string') throw new Error('Missing custom_data.child_id')
+    const founderClaimId = subscription?.custom_data?.founder_claim_id
+    if (founderClaimId !== undefined && typeof founderClaimId !== 'string') {
+      throw new Error('Invalid custom_data.founder_claim_id')
+    }
     const plan = getWebhookPlan(subscription?.items, { monthly: monthlyPriceId, annual: annualPriceId })
+    const foundingDiscount = getWebhookFoundingDiscount(subscription?.discount)
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
-    const { data, error } = await supabase.rpc('process_paddle_subscription_event', {
+    const { data, error } = await supabase.rpc('process_paddle_subscription_event_v2', {
       p_event_id: event.event_id,
       p_event_type: event.event_type,
       p_occurred_at: event.occurred_at,
@@ -129,6 +137,14 @@ Deno.serve(async (request) => {
       p_current_period_start: subscription?.current_billing_period?.starts_at ?? null,
       p_current_period_end: subscription?.current_billing_period?.ends_at ?? null,
       p_cancel_at_period_end: subscription?.scheduled_change?.action === 'cancel',
+      p_expected_founding_discount_id: foundingDiscountId,
+      p_discount_id: foundingDiscount.id,
+      p_discount_status: foundingDiscount.status,
+      p_discount_type: foundingDiscount.type,
+      p_discount_ends_at: foundingDiscount.endsAt,
+      p_discount_ends_at_present: foundingDiscount.endsAtPresent,
+      p_founder_claim_id: founderClaimId ?? null,
+      p_originating_transaction_id: subscription?.transaction_id ?? null,
     })
     if (error) throw error
 

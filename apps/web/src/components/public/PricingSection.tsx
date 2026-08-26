@@ -1,10 +1,11 @@
 import { productConfig } from '../../content/site'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, formatPrice } from '../../lib/billing-plans'
-import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
+import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../../lib/enrollment'
 import { CapacityStatus } from './CapacityStatus'
 
-export function PricingSection() {
-  const { state: enrollment } = useEnrollmentState()
+export function PricingSection({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
+  const { state: hookEnrollment } = useEnrollmentState(propEnrollment)
+  const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
 
@@ -23,7 +24,7 @@ export function PricingSection() {
       <div className="pricing-value-proposition" aria-label="每月包含的持續價值">
         <span>每週專屬教材</span>
         <span>學習記憶持續累積</span>
-        <span>系統升級自動享有</span>
+        <span>同一訂閱・系統升級不加價</span>
       </div>
     </aside>
 
@@ -33,14 +34,12 @@ export function PricingSection() {
         <div className="pricing-offer pricing-offer-annual"><p className="price"><span>年繳・每位孩子</span>NT${formatPrice(productConfig.annualPrice)}</p><p className="pricing-cadence">每年續訂・平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}・一年省 NT${formatPrice(annualSavingsTwd)}</p></div>
       </div>
       <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
-      {foundingRemaining === null || (enrollment?.status === 'open' && foundingRemaining > 0) ? (
+      {enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
-          <p className="status-label">月繳限定・前 {productConfig.foundingLimit} 位孩子</p>
-          <div className="founding-copy"><strong>第一週免費，第一個付費月 NT${formatPrice(productConfig.foundingPrice)}</strong><span>第二個付費月起為 NT${formatPrice(productConfig.standardPrice)}／月；年繳固定為 NT${formatPrice(productConfig.annualPrice)}。</span></div>
-          {foundingRemaining !== null && <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個早鳥名額</p>}
+          <p className="status-label">創始 30・月繳限定</p>
+          <div className="founding-copy"><strong>前 30 位，持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong><span>第一週免費。標準月費 NT${formatPrice(productConfig.standardPrice)}；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。</span></div>
+          <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個創始名額</p>
         </div>
-      ) : (
-        <div className="founding-offer founding-offer-closed"><p className="status-label">目前不開放創始優惠</p><div className="founding-copy"><strong>月繳 NT${formatPrice(productConfig.standardPrice)}・年繳 NT${formatPrice(productConfig.annualPrice)}</strong><span>{enrollment?.status === 'open' ? '新加入的孩子不適用創始前 30 位優惠。' : '服務名額開放後，會以當時方案為準。'}</span></div></div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
       <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>

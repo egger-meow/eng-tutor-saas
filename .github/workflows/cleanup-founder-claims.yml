@@ -1,0 +1,36 @@
+name: Cleanup expired checkout claims
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checkout-claims-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate cleanup secrets
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" || { echo 'SUPABASE_URL is missing'; exit 1; }
+          test -n "$SUPABASE_SECRET_KEY" || { echo 'SUPABASE_SECRET_KEY is missing'; exit 1; }
+      - name: Invoke claim cleanup edge function
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          curl -f -s -S -X POST "${SUPABASE_URL}/functions/v1/paddle-founder-claim-cleanup" \
+            -H "Authorization: Bearer ${SUPABASE_SECRET_KEY}" \
+            -H "Content-Type: application/json"

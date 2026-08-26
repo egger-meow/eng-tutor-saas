@@ -54,7 +54,8 @@ describe('Legal & Compliance Pages Rendering', () => {
       expect(html).toContain('服務條款')
       expect(html).toContain(legalConfig.termsVersion)
       expect(html).toContain('契約審閱權重要告知')
-      expect(html).toContain('3 日之合理審閱期間')
+      expect(html).toContain('公告日至生效日前提供')
+      expect(html).toContain('3 日審閱期間')
     })
 
     it('renders distance contract and customized digital content cancellation rules', () => {

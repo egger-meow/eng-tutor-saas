@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage, faqItems } from './LandingPage'
 import { PricingSection } from '../components/public/PricingSection'
 import { PublicFooter } from '../components/layout/PublicFooter'
+import { getEnrollmentCta } from '../lib/enrollment'
 
 describe('Public Footer — Paddle Review Links', () => {
   it('links directly to pricing and all public legal policies', () => {
@@ -122,5 +123,45 @@ describe('Landing Page — Evolving Learning System Positioning', () => {
     expect(html).not.toContain('mini-report 9/15')
     expect(html).not.toContain('lexical-unit')
     expect(html).not.toContain('OBS-')
+  })
+})
+
+describe('Founder 30 and Service Capacity CTA Rules', () => {
+  it('keeps CTA as 免費取得第一週教材 when capacity is open, even if Founder seats are sold out', () => {
+    const ctaOpenWithFounder = getEnrollmentCta({
+      status: 'open',
+      capacity: 100,
+      activeCount: 10,
+      remaining: 90,
+      foundingLimit: 30,
+      foundingCount: 5,
+    })
+    expect(ctaOpenWithFounder.label).toBe('免費取得第一週教材')
+    expect(ctaOpenWithFounder.isWaitlist).toBe(false)
+
+    const ctaOpenFounderSoldOut = getEnrollmentCta({
+      status: 'open',
+      capacity: 100,
+      activeCount: 50,
+      remaining: 50,
+      foundingLimit: 30,
+      foundingCount: 30,
+    })
+    expect(ctaOpenFounderSoldOut.label).toBe('免費取得第一週教材')
+    expect(ctaOpenFounderSoldOut.isWaitlist).toBe(false)
+  })
+
+  it('switches CTA to 登記候補 only when total capacity is full or status is waitlist', () => {
+    const ctaWaitlist = getEnrollmentCta({
+      status: 'waitlist',
+      capacity: 100,
+      activeCount: 100,
+      remaining: 0,
+      foundingLimit: 30,
+      foundingCount: 30,
+    })
+    expect(ctaWaitlist.label).toBe('登記候補')
+    expect(ctaWaitlist.isWaitlist).toBe(true)
+    expect(ctaWaitlist.href).toBe('/waitlist')
   })
 })

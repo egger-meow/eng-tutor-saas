@@ -1,7 +1,7 @@
 # Product Marketing Context
 
-**Document version:** v2
-**Last updated:** 2026-08-15
+**Document version:** v3
+**Last updated:** 2026-08-26
 
 ## Product Overview
 
@@ -13,7 +13,7 @@
 
 **Product type:** Founder-led B2C SaaS，paper-first delivery。
 
-**Business model:** 每位孩子每月 NT$499。前 30 位孩子第一週免費、第一個付費月 NT$299，之後每月 NT$499。初期真實服務容量為 100 位孩子。
+**Business model:** 每位孩子可選 NT$499／月或 NT$4,999／年。Founder 30 為月繳限定：前 30 位實際啟用月繳訂閱的孩子固定 NT$349／月（永遠折抵 NT$150）。第一週免費體驗適用於全部 100 位容量名額；月繳結帳時取得 30 分鐘保留。排定期末取消不會立即失去價格，到期前恢復可保留；真正取消後永久失效且席次不回補。Founder 席次售罄後移除公眾推廣資訊。初期真實服務容量為 100 位孩子。
 
 ## Target Audience
 
@@ -132,6 +132,10 @@
 **Current metrics:** 尚未提供。
 
 ## Changelog
+
+- v4 (2026-08-26) — Founder 30 改為前 30 位實際月繳轉換者固定 NT$349／月（永遠折抵 NT$150）；免費第一週普及至 100 位容量；30 分鐘結帳保留；售罄後公眾推廣自動退場。
+- v3 (2026-08-26) — Founder 30 改為月繳持續訂閱期間固定 NT$299；補充 14 天保留、真正取消後永久失效與席次不回補。
+
 
 - v2 (2026-08-15) — 將「每週一份，只屬於你孩子的英文教材」確立為跨網站、社群與廣告保留的核心品牌主張。
 - v1 (2026-08-14) — Initial context drafted from the repository specification and current product implementation for the landing-page conversion redesign.

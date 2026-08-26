@@ -40,10 +40,13 @@ export async function getEnrollmentState(): Promise<EnrollmentState> {
   }
 }
 
-export function useEnrollmentState() {
-  const [state, setState] = useState<EnrollmentState | null>(null)
+export function useEnrollmentState(initialState?: EnrollmentState | null) {
+  const [state, setState] = useState<EnrollmentState | null>(initialState ?? null)
   const [error, setError] = useState(false)
-  useEffect(() => { void getEnrollmentState().then(setState).catch(() => setError(true)) }, [])
+  useEffect(() => {
+    if (initialState !== undefined) return
+    void getEnrollmentState().then(setState).catch(() => setError(true))
+  }, [initialState])
   return { state, error }
 }
 
@@ -51,6 +54,5 @@ export type EnrollmentCta = { href: '#login' | '/waitlist'; label: string; isWai
 
 export function getEnrollmentCta(state: EnrollmentState | null): EnrollmentCta {
   if (state && (state.status !== 'open' || state.remaining <= 0)) return { href: '/waitlist', label: '登記候補', isWaitlist: true }
-  if (state && state.foundingCount >= state.foundingLimit) return { href: '#login', label: '開始建立孩子資料', isWaitlist: false }
   return { href: '#login', label: '免費取得第一週教材', isWaitlist: false }
 }

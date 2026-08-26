@@ -4,7 +4,7 @@ export const productConfig = {
   name: '紙屬英文',
   standardPrice: billingPlans.monthly.priceTwd,
   annualPrice: billingPlans.annual.priceTwd,
-  foundingPrice: 299,
+  foundingPrice: 349,
   foundingLimit: 30,
   capacity: 100,
 } as const

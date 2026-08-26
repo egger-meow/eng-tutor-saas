@@ -23,10 +23,12 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Paddle production default payment link is configured.
 - [ ] Live monthly price exists: TWD 499 / month.
 - [ ] Live annual price exists: TWD 4,999 / year.
-- [ ] Live Founding 30 discount exists: TWD 200 off the first monthly billing interval only.
+- [ ] Live Founder 30 discount exists: active flat TWD 150, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 499 monthly price.
 - [ ] Live API key is created and stored only as a server secret.
 - [ ] Live client-side token is configured for the production web build.
 - [ ] Live webhook destination points to the production `paddle-webhook` Edge Function.
+- [ ] `REQUIRED_TERMS_VERSION=2026-08-26-v2` is installed for `paddle-checkout`; Terms v2 is published on 2026-08-26 and does not become effective until 2026-08-29 after the stated three-day review window.
+- [ ] `paddle-founder-claim-cleanup` is deployed and invoked with the service-role bearer credential on a five-minute schedule. It may release an expired claim only after Paddle returns `canceled`, accepts removal of the Founder discount from a draft transaction, or accepts cancellation of a ready/billed transaction.
 - [ ] Live webhook secret is installed in Supabase Edge Function secrets.
 - [ ] Production browser config uses `VITE_PADDLE_ENV=production`.
 - [ ] Production server config uses `PADDLE_API_BASE_URL=https://api.paddle.com`.
@@ -35,6 +37,15 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Old test-only Storage objects are cleaned through the Supabase Storage API / Dashboard, not by deleting `storage.objects` through SQL.
 
 Never record API keys, webhook secrets, SMTP passwords, or other credentials in this document or Git.
+
+## Terms v2 and Founder claim rollout order
+
+1. On 2026-08-26, deploy the web build to publish Terms v2 and its review notice. The Billing UI keeps checkout closed and does not offer acceptance before 2026-08-29 00:00 Asia/Taipei.
+2. Keep a checkout maintenance gate during the database/Edge cutover. Do not change the NT$499 monthly catalog price.
+3. On or after 2026-08-29 00:00 Asia/Taipei, apply `20260826210000_founder_30_lifetime_pricing.sql`. The 13-argument deployed-webhook RPC and the first Founder-revision overload remain available; unsafe Founder/annual legacy events fail closed for Paddle retry.
+4. Deploy `paddle-webhook`, then `paddle-checkout`, then `paddle-founder-claim-cleanup`. Install `REQUIRED_TERMS_VERSION=2026-08-26-v2` and retain the verified Founder discount ID.
+5. Configure the service-role invocation of `paddle-founder-claim-cleanup` every five minutes. The already-published web build switches from review notice to v2 acceptance at the effective timestamp; remove the checkout gate only after that switch and the backend cutover are verified.
+6. Verify Terms-only reacceptance, a standard annual checkout without discount, a Founder monthly claim/bind/activation, and claim cleanup in Paddle/Supabase logs before normal traffic.
 
 ## Golden Customer Test
 
@@ -51,10 +62,12 @@ The test should behave exactly like a real customer journey:
 7. [ ] Checkout completes and Paddle creates the expected subscription lifecycle.
 8. [ ] Production webhook signature verification succeeds.
 9. [ ] Exactly one local subscription state is reconciled for that child.
-10. [ ] Founding pricing is correct when applicable; annual checkout does not consume founding eligibility.
-11. [ ] The child receives generation entitlement without manual SQL or admin state repair.
-12. [ ] Week 1 generation job exists through the normal product flow.
-13. [ ] Scheduled authoring claims/submits the job normally.
+10. [ ] Founder pricing is NT$349 every month while the same monthly subscription remains continuous; annual activation never receives the discount.
+11. [ ] A Founder checkout opened immediately before reservation expiry remains counted until its transaction completes or is safely neutralized; a concurrent child cannot become seat 31.
+12. [ ] An account that accepted an older Terms version cannot start checkout until it explicitly accepts v2; unchanged Privacy v1 is not reaccepted.
+13. [ ] The child receives generation entitlement without manual SQL or admin state repair.
+14. [ ] Week 1 generation job exists through the normal product flow.
+15. [ ] Scheduled authoring claims/submits the job normally.
 14. [ ] Deterministic Finisher completes Student + Parent PDFs.
 15. [ ] Material becomes visible only when its release rules permit it.
 16. [ ] The owning parent can download both private PDFs from the dashboard.

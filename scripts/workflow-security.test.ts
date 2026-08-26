@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 const workflow = readFileSync(new URL('../.github/workflows/finish-curriculum-submissions.yml', import.meta.url), 'utf8')
 const materialEmailWorkflow = readFileSync(new URL('../.github/workflows/dispatch-material-emails.yml', import.meta.url), 'utf8')
+const cleanupClaimsWorkflow = readFileSync(new URL('../.github/workflows/cleanup-founder-claims.yml', import.meta.url), 'utf8')
 const productionWorkflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
 const devDeployWorkflow = readFileSync(new URL('../.github/workflows/deploy-cloudflare-workers.yml', import.meta.url), 'utf8')
 const wranglerConfig = JSON.parse(readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')) as {
@@ -43,6 +44,12 @@ describe('Finisher workflow production secret scope', () => {
     expect(materialEmailWorkflow).toContain('MATERIAL_LINK_SECRET: ${{ secrets.MATERIAL_LINK_SECRET }}')
     expect(materialEmailWorkflow).toContain('dispatch-material-emails')
     expect(materialEmailWorkflow).not.toMatch(/RESEND|Playwright|Chromium|pdf:install/u)
+  })
+
+  it('runs a lightweight checkout claims cleanup every five minutes', () => {
+    expect(cleanupClaimsWorkflow).toContain("cron: '*/5 * * * *'")
+    expect(cleanupClaimsWorkflow).toContain('SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}')
+    expect(cleanupClaimsWorkflow).toContain('paddle-founder-claim-cleanup')
   })
 })
 

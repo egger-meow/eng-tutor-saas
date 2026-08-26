@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   clearPendingLegalAcceptance,
+  acceptCurrentTermsVersion,
   flushPendingLegalAcceptance,
   getPendingLegalAcceptance,
   recordPendingLegalAcceptance,
@@ -114,5 +115,19 @@ describe('Legal Acceptance Event Architecture', () => {
 
     clearPendingLegalAcceptance()
     expect(getPendingLegalAcceptance()).toBeNull()
+  })
+
+  it('8. checkout reacceptance updates Terms only and never resubmits Privacy', async () => {
+    rpcMock.mockResolvedValueOnce({ data: null, error: null })
+
+    await acceptCurrentTermsVersion()
+
+    expect(rpcMock).toHaveBeenCalledWith('accept_current_terms', {
+      p_terms_version: '2026-08-26-v2',
+    })
+    expect(rpcMock).not.toHaveBeenCalledWith(
+      'accept_legal_terms',
+      expect.anything(),
+    )
   })
 })

@@ -594,66 +594,42 @@ Do not use a single subscription with `quantity = number of children` for MVP.
 
 ---
 
-# 22. Founding 30 Program
+# 22. Founder 30 Program
 
-The first 30 eligible children form the founding cohort.
-
-The founding offer is:
+Founder 30 is a monthly-only lifetime price attached to the first 30 qualifying children.
 
 ```text
-First 30 children
-
-Week 1:
-Free personalized generation
-
-First paid month:
-NT$299
-
-After first paid month:
-NT$499/month
+First week free (across 100 service capacity)
+↓
+30-minute checkout hold at qualifying monthly Paddle checkout
+↓
+Verified monthly activation with the configured recurring-forever flat TWD 150 discount
+↓
+NT$349/month while that same monthly subscription remains continuously active
 ```
 
-The Founding 30 paid discount applies only when the child chooses the monthly plan. The annual plan remains NT$4,999/year and does not consume or redeem a founding discount.
+The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring flat TWD 150 Paddle discount (amount 15000), not by changing the catalog price.
 
-Founding status belongs to the child, not merely the parent account.
+Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Creating a child or profile does not allocate or reserve a Founder seat; all admitted children have equal access to the free Week 1 personalized trial.
 
-Example:
+Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. At monthly checkout preparation, if `founding_seat_count() < 30`, a 30-minute checkout hold is atomically acquired. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
 
-```text
-Parent joins early
+A redeemed or forfeited seat is permanently consumed. Cancellation never returns it to the public Founder pool, and a forfeited child can never regain Founder eligibility. Founder status belongs to the child and continuing subscription, not merely the parent account.
 
-Child A:
-founding = true
+Annual checkout never receives or consumes a Founder seat.
 
-Parent adds Child B six months later:
-founding = false
-```
+Creating a Founder-discounted Paddle transaction durably binds the 30-minute checkout hold to that transaction. It becomes a permanently consumed seat on verified subscription activation, or releases safely after the Paddle transaction is neutralized. An expired or released hold cannot complete late at the Founder price.
 
 ---
+# 23. Founder Price Requires Continuous Subscription
 
-# 23. Founding Pricing Is Not Permanent NT$299
+The contractual Founder price is fixed at NT$349/month only while the same redeemed monthly subscription remains continuous.
 
-Unless explicitly changed later:
+Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$349/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
 
-> NT$299 applies only to the first paid month.
-
-From the second paid month:
-
-> NT$499/month.
-
-Annual billing is not a discounted founding period. It is a separate standard plan at NT$4,999/year.
-
-The founding offer is designed to:
-
-* reduce first-use friction;
-* allow parents to see real material;
-* reward early adoption;
-* generate early feedback.
-
-It is not intended to permanently reduce ARPU.
+Referral codes and rewards are out of scope.
 
 ---
-
 # 24. Free Week 1
 
 For the founding cohort, the ideal entry flow is:
@@ -814,22 +790,22 @@ Suggested enrollment states:
 
 When under capacity:
 
-> new eligible children may join.
+> new eligible children may acquire service capacity.
 
 When capacity reaches 100:
 
-> new child activation is disabled.
+> new service capacity acquisition is disabled (new profiles enter waitlist; expired beta trials without held seats enter waitlist).
 
-Existing customers continue normally.
+Existing paid customers, paused customers, and returning canceled customers are never rejected solely because occupancy is >= capacity. Revenue and customer continuity take priority over a hard ceiling. Small over-cap occupancy triggers operational review rather than billing failure.
 
 ---
 
 # 31. Full-Capacity Experience
 
-When enrollment is full:
+When enrollment is full for new users:
 
 ```text
-目前 100 / 100，暫停加入。
+目前 100 / 100，暫停新學員加入。
 
 我們會先把教材品質、生成系統與服務能力升級好，
 再開下一批。
@@ -837,9 +813,9 @@ When enrollment is full:
 [加入候補名單]
 ```
 
-Do not automatically raise the cap from 100 to 1,000 simply because demand appears.
+Do not automatically raise the new-enrollment cap from 100 to 1,000 simply because demand appears.
 
-100 is an intentional product review checkpoint.
+100 is an intentional operational review checkpoint and new-enrollment gate, not an absolute invariant that blocks returning customer reactivation. All counters display authentic, un-clamped numbers (e.g. `103 / 100`).
 
 ---
 
@@ -2931,6 +2907,8 @@ Billing webhook must:
 * update subscription state idempotently;
 * never trust arbitrary browser-submitted subscription status.
 
+Founder redemption additionally requires the expected discount, the matching durable checkout claim identity inherited through Paddle custom data, and the exact originating Paddle `transaction_id` on `subscription.created`. Annual subscription events carrying the configured Founder discount fail closed. Database rollout retains compatibility RPC signatures so the deployed webhook and the claim-aware webhook may coexist during a database-first cutover; unsafe Founder/annual events on the legacy signature fail for later Paddle retry rather than being misinterpreted.
+
 The verified Paddle event transaction also records the normalized subscription lifecycle transition with Paddle occurred_at when available. Internal beta/trial and successful internal billing actions record their real transaction time and an explicit non-webhook source. Repeated webhook delivery must not duplicate lifecycle events.
 
 ---
@@ -2970,7 +2948,7 @@ Maintain centralized product configuration for:
 
 * standard monthly price;
 * standard annual price;
-* founding first-month price;
+* Founder continuous monthly price;
 * founding cohort size;
 * capacity.
 
@@ -2979,7 +2957,7 @@ Initial values:
 ```text
 standard_monthly_price = 499 TWD
 standard_annual_price = 4999 TWD
-founding_first_month_price = 299 TWD
+founder_continuous_monthly_price = 349 TWD
 founding_child_limit = 30
 service_child_capacity = 100
 ```
@@ -4002,38 +3980,44 @@ For either monthly or annual checkout, the browser chooses only a semantic plan.
 
 ---
 
-# 196. Definition of Done: Founding Offer
+# 196. Definition of Done: Founder Offer
 
-For an eligible founding child:
+For a qualifying child:
 
 ```text
-Week 1 free
+Free Week 1 trial (across 100 capacity)
 ↓
-First paid month 299
+30-minute checkout hold at qualifying monthly checkout
 ↓
-Following paid months 499
+Verified monthly activation with the configured forever-recurring flat TWD 150 discount
+↓
+NT$349/month while the same subscription remains continuous
 ```
 
-If the child chooses annual billing, the charge is 4,999/year and founding eligibility is neither applied nor redeemed by that annual checkout.
+Scheduling cancellation, past due, pause, and resuming before the actual end preserve a redeemed Founder seat and price. A verified actual cancellation changes `redeemed` to `forfeited` exactly once; the seat remains permanently consumed and the child can never receive Founder pricing again.
 
-The transition must be traceable and not depend on manual memory.
+Expired checkout holds release their temporary hold. Redeemed and forfeited seats never release it. Annual checkout never receives or consumes Founder seats.
+
+An in-flight discounted checkout claim is a server-held seat for 30 minutes. Allocation, checkout preparation, claim expiry, claim completion, and verified abandoned-transaction release share the enrollment-settings-first lock order. No allocator may reuse that seat until Paddle can no longer complete the old transaction with the Founder discount.
+
+The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters.
 
 ---
-
 # 197. Definition of Done: Capacity
-
+ 
 When capacity is below 100:
-
-> activation can proceed.
-
+ 
+> new service capacity acquisition can proceed.
+ 
 When active service reaches 100:
-
-* new activation stops;
-* existing service continues;
-* landing shows full state;
-* visitor can join waitlist.
-
-The displayed count is real.
+ 
+* new service capacity acquisition stops (new profiles and expired beta trials enter waitlist);
+* existing paid subscribers and paused customers continue normally;
+* returning canceled customers can reactivate without billing friction (small over-cap occupancy is accepted and tracked for operational review);
+* landing shows full state for new applicants;
+* visitors can join waitlist.
+ 
+The displayed counts (including honest over-cap numbers like 101/100) are authentic and never artificially clamped.
 
 ---
 
@@ -4245,16 +4229,16 @@ each child has independent subscription
 or 4,999 TWD / year / child
 ```
 
-Founding cohort:
+Founder cohort:
 
 ```text
-First 30 children
+First 30 monthly subscribing children
 ↓
-Week 1 free
+30-minute checkout hold + flat TWD 150 discount
 ↓
-First paid month 299
+349/month while the same subscription remains continuous
 ↓
-Then 499/month
+Actual cancellation permanently forfeits pricing; consumed seat never returns
 ```
 
 Early service capacity:
