@@ -2967,6 +2967,95 @@ begin
 
   update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
 
+  -- 7) Soft capacity operational gate regressions:
+  -- - 99 active + 1 paused => occupancy 100.
+  -- - paused -> active does not increase occupancy above what was already reserved.
+  -- - 100 active + canceled former customer can successfully re-subscribe, producing 101.
+  -- - at 101/100, a genuinely new child is still waitlisted.
+  -- - admin/enrollment state reports 101/100 truthfully.
+
+  select private_generation.locked_capacity_count() into active_count_before;
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000136', '00000000-0000-0000-0000-000000000001', 'Paused Customer', 7, 'grade_7');
+  update public.subscriptions
+  set provider = 'paddle', status = 'paused', provider_subscription_id = 'sub_paused_136'
+  where child_id = '00000000-0000-0000-0000-000000000136';
+
+  -- Paused subscription counts toward occupancy
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 1 then
+    raise exception 'paused subscription was not counted in locked_capacity_count';
+  end if;
+
+  -- Paused -> active does not increase occupancy
+  update public.subscriptions set status = 'active' where child_id = '00000000-0000-0000-0000-000000000136';
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 1 then
+    raise exception 'transitioning paused to active erroneously increased locked_capacity_count';
+  end if;
+
+  -- Canceled former customer is excluded from occupancy
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000137', '00000000-0000-0000-0000-000000000001', 'Canceled Customer', 7, 'grade_7');
+  update public.subscriptions
+  set provider = 'paddle', status = 'canceled', provider_subscription_id = 'sub_canceled_137'
+  where child_id = '00000000-0000-0000-0000-000000000137';
+
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 1 then
+    raise exception 'canceled subscription was erroneously counted in locked_capacity_count';
+  end if;
+
+  -- Set capacity to active_count_before + 1 (i.e. capacity full)
+  update public.enrollment_settings set founding_limit = least(10, active_count_before + 1), capacity = active_count_before + 1 where key = 'default';
+
+  -- Canceled former customer can successfully re-subscribe without capacity claim
+  if (
+    select checkout_allowed from public.prepare_paddle_checkout_v2(
+      '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000137', 'standard_annual', '2026-08-26-v2'
+    )
+  ) is not true then
+    raise exception 'canceled customer was blocked from checkout when capacity was full';
+  end if;
+
+  perform public.process_paddle_subscription_event_v2(
+    p_event_id := 'evt_resub_canceled_137', p_event_type := 'subscription.created', p_occurred_at := now(),
+    p_child_id := '00000000-0000-0000-0000-000000000137', p_provider_subscription_id := 'sub_resub_137',
+    p_provider_customer_id := 'ctm_resub_137', p_status := 'active', p_plan_code := 'standard_annual',
+    p_billing_interval := 'year', p_price_twd := 4999, p_current_period_start := now(),
+    p_current_period_end := now() + interval '1 year', p_cancel_at_period_end := false,
+    p_expected_founding_discount_id := 'dsc_founder_expected', p_discount_id := null,
+    p_discount_status := null, p_discount_type := null, p_discount_ends_at := null,
+    p_discount_ends_at_present := false, p_founder_claim_id := null, p_originating_transaction_id := 'txn_resub_137'
+  );
+
+  -- Now occupancy is active_count_before + 2 (producing 101/100)
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 2 then
+    raise exception 're-subscribed customer did not update locked_capacity_count to over-cap value';
+  end if;
+
+  -- Enrollment state truthfully reports over-cap count without clamping
+  if (select active_count from public.get_enrollment_state()) <> active_count_before + 2
+     or (select remaining from public.get_enrollment_state()) <> 0
+     or (select capacity from public.get_enrollment_state()) <> active_count_before + 1 then
+    raise exception 'enrollment state failed to report truthful over-cap counts';
+  end if;
+
+  -- Genuinely new child at 101/100 is still waitlisted
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000138', '00000000-0000-0000-0000-000000000001', 'New Child At 101', 7, 'grade_7');
+
+  if exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000138'
+  ) then
+    raise exception 'genuinely new child at 101/100 was erroneously granted a trial subscription';
+  end if;
+
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000138' and status = 'waiting'
+  ) then
+    raise exception 'genuinely new child at 101/100 was not placed on waitlist';
+  end if;
+
+  update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
+
   -- Monotonic Founder authority test: hard deletion does not decrease founding_count
   select founding_count into founder_count_before from public.get_enrollment_state();
   delete from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000118';

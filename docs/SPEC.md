@@ -790,22 +790,22 @@ Suggested enrollment states:
 
 When under capacity:
 
-> new eligible children may join.
+> new eligible children may acquire service capacity.
 
 When capacity reaches 100:
 
-> new child activation is disabled.
+> new service capacity acquisition is disabled (new profiles enter waitlist; expired beta trials without held seats enter waitlist).
 
-Existing customers continue normally.
+Existing paid customers, paused customers, and returning canceled customers are never rejected solely because occupancy is >= capacity. Revenue and customer continuity take priority over a hard ceiling. Small over-cap occupancy triggers operational review rather than billing failure.
 
 ---
 
 # 31. Full-Capacity Experience
 
-When enrollment is full:
+When enrollment is full for new users:
 
 ```text
-目前 100 / 100，暫停加入。
+目前 100 / 100，暫停新學員加入。
 
 我們會先把教材品質、生成系統與服務能力升級好，
 再開下一批。
@@ -813,9 +813,9 @@ When enrollment is full:
 [加入候補名單]
 ```
 
-Do not automatically raise the cap from 100 to 1,000 simply because demand appears.
+Do not automatically raise the new-enrollment cap from 100 to 1,000 simply because demand appears.
 
-100 is an intentional product review checkpoint.
+100 is an intentional operational review checkpoint and new-enrollment gate, not an absolute invariant that blocks returning customer reactivation. All counters display authentic, un-clamped numbers (e.g. `103 / 100`).
 
 ---
 
@@ -4004,19 +4004,20 @@ The transition must be locked, idempotent, stale-event-safe, discount-verified, 
 
 ---
 # 197. Definition of Done: Capacity
-
+ 
 When capacity is below 100:
-
-> activation can proceed.
-
+ 
+> new service capacity acquisition can proceed.
+ 
 When active service reaches 100:
-
-* new activation stops;
-* existing service continues;
-* landing shows full state;
-* visitor can join waitlist.
-
-The displayed count is real.
+ 
+* new service capacity acquisition stops (new profiles and expired beta trials enter waitlist);
+* existing paid subscribers and paused customers continue normally;
+* returning canceled customers can reactivate without billing friction (small over-cap occupancy is accepted and tracked for operational review);
+* landing shows full state for new applicants;
+* visitors can join waitlist.
+ 
+The displayed counts (including honest over-cap numbers like 101/100) are authentic and never artificially clamped.
 
 ---
 
