@@ -327,6 +327,11 @@
   line-height: 1.6;
 }
 .capacity-status { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding: var(--space-4); border: 1px solid var(--color-rule); border-left: .25rem solid var(--color-success); border-radius: var(--radius-control); }
+.capacity-status-content { display: grid; gap: var(--space-1); }
+.capacity-status-headline { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+.capacity-status-headline strong { color: var(--color-ink); }
+.capacity-status-headline span { color: var(--color-text); font-size: .9rem; }
+.capacity-status-note { margin: 0; color: var(--color-muted); font-size: .82rem; }
 .capacity-status span { color: var(--color-muted); }
 .capacity-status .button { margin-left: auto; }
 .status-waitlist { border-left-color: var(--color-warning); }

@@ -60,7 +60,13 @@
 .hero-title > span:first-child::after { content: '\A'; white-space: pre; }
 .hero-title > span:nth-child(2) { white-space: nowrap; }
 .hero-copy h1 em { color: var(--color-accent); font-style: normal; }
+.hero-founding-badge { display: grid; gap: var(--space-1); margin-top: var(--space-6); padding: var(--space-3) var(--space-4); border: 1px solid color-mix(in srgb, var(--color-accent) 35%, var(--color-rule)); border-left: 3px solid var(--color-accent); border-radius: var(--radius-control); background: color-mix(in srgb, var(--color-warning-soft) 85%, var(--color-paper)); box-shadow: 0 .25rem 1rem rgb(81 55 34 / 5%); }
+.hero-founding-badge-main { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.hero-founding-tag { display: inline-flex; align-items: center; padding: .15rem .55rem; border-radius: 999px; background: var(--color-accent); color: white; font-size: .72rem; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+.hero-founding-price { color: var(--color-ink); font-size: .95rem; font-weight: 700; }
+.hero-founding-sub { color: var(--color-muted); font-size: .82rem; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); margin-top: var(--space-8); }
+.hero-founding-badge + .hero-actions { margin-top: var(--space-4); }
 .hero-cta { display: inline-flex; align-items: center; margin-top: 0; padding-inline: var(--space-6); text-decoration: none; }
 .text-link { color: var(--color-ink); font-weight: 700; text-decoration-thickness: 1px; }
 .hero-note { margin-top: var(--space-4); color: var(--color-muted); font-size: .82rem; }

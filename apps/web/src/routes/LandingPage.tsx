@@ -59,7 +59,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
   const heroNote = cta.isWaitlist
     ? '目前服務名額已滿；候補不會先收費。'
     : showFounding
-      ? '創始 30 月繳限定：第一週免費；同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。'
+      ? null
       : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
 
   return (
@@ -77,11 +77,20 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <li>孩子用紙筆閱讀、作答與思考</li>
               <li>家長不用找教材、備課或出題</li>
             </ul>
+            {showFounding && (
+              <div className="hero-founding-badge" aria-label="創始優惠說明">
+                <div className="hero-founding-badge-main">
+                  <span className="hero-founding-tag">創始 30 名限定</span>
+                  <strong className="hero-founding-price">月繳 NT$349，持續訂閱期間價格固定不變</strong>
+                </div>
+                <span className="hero-founding-sub">標準價 NT$499/月 · 第一週免費</span>
+              </div>
+            )}
             <div className="hero-actions">
               <a className="button hero-cta" href={cta.href}>{cta.label}</a>
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
-            <p className="hero-note">{heroNote}</p>
+            {heroNote && <p className="hero-note">{heroNote}</p>}
             <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
           </FadeInUp>
 

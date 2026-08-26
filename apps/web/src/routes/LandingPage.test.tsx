@@ -165,3 +165,44 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
     expect(ctaWaitlist.href).toBe('/waitlist')
   })
 })
+
+describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
+  const openWithFounding = {
+    status: 'open' as const,
+    capacity: 100,
+    activeCount: 1,
+    remaining: 99,
+    foundingLimit: 30,
+    foundingCount: 0,
+    waitingCount: 0,
+    releasedCount: 0,
+    totalDemand: 1,
+  }
+
+  it('renders prominent Founding 30 badge above CTA in Hero with clean pricing hierarchy', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={openWithFounding} />)
+
+    expect(html).toContain('hero-founding-badge')
+    expect(html).toContain('創始 30 名限定')
+    expect(html).toContain('月繳 NT$349，持續訂閱期間價格固定不變')
+    expect(html).toContain('標準價 NT$499/月 · 第一週免費')
+    expect(html).toContain('免費取得第一週教材')
+    // No overloaded combined string with annual price in the hero
+    expect(html).not.toContain('同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。')
+  })
+
+  it('clearly separates 30 founding discount seats from 100 system capacity', () => {
+    const html = renderToStaticMarkup(<PricingSection enrollment={openWithFounding} />)
+
+    // Pricing section founding offer
+    expect(html).toContain('創始 30・月繳限定')
+    expect(html).toContain('前 30 位持續訂閱期間固定 NT$349／月')
+    expect(html).toContain('目前剩 <strong>30</strong> 個創始優惠席次')
+
+    // Capacity status operational clarity
+    expect(html).toContain('目前開放加入')
+    expect(html).toContain('第一階段預計服務 <strong>100 位孩子</strong>，目前已有 <strong>1 位加入</strong>。')
+    expect(html).toContain('額滿後新加入者會先進入候補，既有家庭不受影響。')
+    expect(html).not.toContain('還剩 99 個名額')
+  })
+})

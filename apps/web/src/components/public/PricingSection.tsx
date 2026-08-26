@@ -37,14 +37,17 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
       {enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
           <p className="status-label">創始 30・月繳限定</p>
-          <div className="founding-copy"><strong>前 30 位，持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong><span>第一週免費。標準月費 NT${formatPrice(productConfig.standardPrice)}；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。</span></div>
-          <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個創始名額</p>
+          <div className="founding-copy">
+            <strong>前 30 位持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong>
+            <span>第一週免費。標準月費 NT${formatPrice(productConfig.standardPrice)}；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。</span>
+          </div>
+          <p className="founding-remaining">🎟️ 目前剩 <strong>{foundingRemaining}</strong> 個創始優惠席次</p>
         </div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
       <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
     </article>
-    <CapacityStatus />
-    <p className="capacity-explainer">前 100 位是第一階段服務容量。計數以孩子為單位，不是 Email 或家長帳戶；額滿後既有家庭仍會正常收到教材。</p>
+    <CapacityStatus enrollment={enrollment} />
+    <p className="capacity-explainer">第一階段預計服務 100 位孩子，計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補，既有家庭不受影響。</p>
   </section>
 }
