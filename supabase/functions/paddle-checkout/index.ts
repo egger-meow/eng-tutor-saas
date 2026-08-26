@@ -44,6 +44,14 @@ Deno.serve(async (request) => {
     return jsonResponse(503, { error: 'server_not_configured' })
   }
 
+  const termsEffectiveAt = Deno.env.get('TERMS_EFFECTIVE_AT') || '2026-08-29T00:00:00+08:00'
+  if (Date.now() < new Date(termsEffectiveAt).getTime()) {
+    return jsonResponse(403, {
+      error: 'terms_not_yet_effective',
+      message: '新版服務條款仍在三日審閱期間，2026 年 8 月 29 日生效後才會重新開放付款。',
+    })
+  }
+
   try {
     const token = authHeader.slice('Bearer '.length)
     const supabase = createClient(supabaseUrl, serviceRoleKey, {

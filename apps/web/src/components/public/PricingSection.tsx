@@ -1,10 +1,11 @@
 import { productConfig } from '../../content/site'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, formatPrice } from '../../lib/billing-plans'
-import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
+import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../../lib/enrollment'
 import { CapacityStatus } from './CapacityStatus'
 
-export function PricingSection() {
-  const { state: enrollment } = useEnrollmentState()
+export function PricingSection({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
+  const { state: hookEnrollment } = useEnrollmentState(propEnrollment)
+  const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
 
@@ -33,11 +34,11 @@ export function PricingSection() {
         <div className="pricing-offer pricing-offer-annual"><p className="price"><span>年繳・每位孩子</span>NT${formatPrice(productConfig.annualPrice)}</p><p className="pricing-cadence">每年續訂・平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}・一年省 NT${formatPrice(annualSavingsTwd)}</p></div>
       </div>
       <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
-      {(foundingRemaining === null || (enrollment?.status === 'open' && foundingRemaining > 0)) && (
+      {enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
           <p className="status-label">創始 30・月繳限定</p>
           <div className="founding-copy"><strong>前 30 位，持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong><span>第一週免費。標準月費 NT${formatPrice(productConfig.standardPrice)}；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。</span></div>
-          {foundingRemaining !== null && <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個創始名額</p>}
+          <p className="founding-remaining">目前還有 <strong>{foundingRemaining}</strong> 個創始名額</p>
         </div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>

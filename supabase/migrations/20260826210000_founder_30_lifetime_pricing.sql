@@ -2,11 +2,13 @@
 -- Lock order for every Founder-mutating path: enrollment_settings -> subscription -> waitlist.
 
 alter table public.subscriptions
-  add column founding_reserved_until timestamptz,
-  add column founding_redeemed_at timestamptz,
-  add column founding_forfeited_at timestamptz;
+  add column if not exists founding_reserved_until timestamptz,
+  add column if not exists founding_redeemed_at timestamptz,
+  add column if not exists founding_forfeited_at timestamptz;
 
-alter table public.subscriptions drop constraint subscriptions_founding_status_check;
+alter table public.subscriptions
+  drop constraint if exists subscriptions_founding_status_check,
+  drop constraint if exists subscriptions_founding_lifecycle_check;
 
 -- Deterministic backfill:
 -- Subscriptions already redeemed maintain their redeemed status and timestamp.
@@ -99,7 +101,7 @@ $$;
 
 -- Durable Founder checkout claims close the reservation/Paddle transaction race.
 -- Live claims remain counted until completion or verified Paddle neutralization.
-create table private_generation.founder_checkout_claims (
+create table if not exists private_generation.founder_checkout_claims (
   id uuid primary key default gen_random_uuid(),
   child_id uuid not null references public.children(id) on delete cascade,
   paddle_transaction_id text unique,
@@ -117,10 +119,10 @@ create table private_generation.founder_checkout_claims (
   check (status <> 'released' or released_at is not null)
 );
 
-create unique index founder_checkout_claims_one_live_per_child_idx
+create unique index if not exists founder_checkout_claims_one_live_per_child_idx
   on private_generation.founder_checkout_claims(child_id)
   where status in ('pending', 'bound', 'release_pending');
-create index founder_checkout_claims_cleanup_idx
+create index if not exists founder_checkout_claims_cleanup_idx
   on private_generation.founder_checkout_claims(reservation_expires_at, created_at)
   where status in ('pending', 'bound', 'release_pending');
 
@@ -128,12 +130,25 @@ comment on table private_generation.founder_checkout_claims is
   'Server-only Founder seat claims bound to discounted Paddle checkout transactions. Live claims remain counted until completion or verified Paddle neutralization.';
 revoke all on table private_generation.founder_checkout_claims from public, anon, authenticated;
 
+-- Monotonic historical Founder redemptions authority: hard deletion cannot reopen seat 31.
+create table if not exists private_generation.founder_redemptions (
+  id uuid primary key default gen_random_uuid(),
+  child_id uuid not null,
+  provider_subscription_id text not null unique,
+  redeemed_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+revoke all on table private_generation.founder_redemptions from public, anon, authenticated;
+
 create or replace function private_generation.founding_seat_count()
 returns integer
 language sql stable security definer set search_path = ''
 as $$
   select count(distinct seat.child_id)::integer
   from (
+    select redemption.child_id
+    from private_generation.founder_redemptions as redemption
+    union
     select subscription.child_id
     from public.subscriptions as subscription
     join public.children as child on child.id = subscription.child_id
@@ -144,8 +159,10 @@ as $$
     from private_generation.founder_checkout_claims as claim
     join public.children as child on child.id = claim.child_id
     where not child.is_internal_test
-      and claim.status in ('pending', 'bound', 'release_pending')
-      and claim.reservation_expires_at > now()
+      and (
+        (claim.status = 'pending' and claim.reservation_expires_at > now())
+        or claim.status in ('bound', 'release_pending')
+      )
   ) as seat;
 $$;
 revoke all on function private_generation.founding_seat_count() from public, anon, authenticated;
@@ -191,6 +208,7 @@ declare
   founding_count integer;
   active_child_count integer;
   released_child_count integer;
+  parent_email text;
 begin
   if p_user_id is null or p_child_id is null then raise exception 'Authentication and child_id are required'; end if;
   if p_plan_code not in ('standard_monthly', 'standard_annual') then raise exception 'Unsupported subscription plan'; end if;
@@ -222,7 +240,7 @@ begin
     raise exception 'Child already has a Paddle subscription';
   end if;
 
-  -- If returning expired beta child, check if capacity is available.
+  -- If returning expired beta child, atomically check and reserve service capacity, or enter waitlist.
   if child_subscription.provider = 'beta'
     and coalesce(child_subscription.current_period_end, child_subscription.created_at + interval '14 days') <= now()
   then
@@ -243,8 +261,19 @@ begin
     join public.children as child on child.id = entry.child_id
     where entry.status = 'released' and not child.is_internal_test;
 
-    if active_child_count + released_child_count >= settings.capacity then
+    -- If not already holding a released seat and capacity is full, block with waitlist notice.
+    if coalesce(waitlist_entry.status, '') <> 'released' and active_child_count + released_child_count >= settings.capacity then
       raise exception '這個學習名額仍在等候開放中，我們會在開放時以 Email 通知您。';
+    end if;
+
+    -- Atomically reserve service capacity slot for returning expired beta checkout.
+    if coalesce(waitlist_entry.status, '') <> 'released' then
+      select email into parent_email from auth.users where id = p_user_id;
+      insert into public.waitlist (parent_id, child_id, email, status, released_at)
+      values (p_user_id, p_child_id, coalesce(parent_email, ''), 'released', now())
+      on conflict (child_id) do update
+      set status = 'released', released_at = now()
+      where waitlist.status not in ('released', 'converted');
     end if;
   end if;
 
@@ -384,9 +413,6 @@ as $$
 declare settings public.enrollment_settings%rowtype;
 begin
   select * into settings from public.enrollment_settings where key = 'default' for update;
-  update private_generation.founder_checkout_claims
-  set status = 'released', released_at = now(), release_reason = 'not_created'
-  where status = 'pending' and created_at <= now() - interval '10 minutes';
   update private_generation.founder_checkout_claims as claim
   set status = 'release_pending'
   where claim.id in (
@@ -504,6 +530,16 @@ begin
   elsif next_founding_status = 'redeemed' and p_status = 'canceled' then
     next_founding_status := 'forfeited';
     next_forfeited_at := coalesce(existing_subscription.founding_forfeited_at, p_occurred_at);
+  end if;
+
+  if next_founding_status = 'redeemed' and not exists (
+    select 1 from public.children where id = p_child_id and is_internal_test
+  ) then
+    insert into private_generation.founder_redemptions (
+      child_id, provider_subscription_id, redeemed_at
+    ) values (
+      p_child_id, p_provider_subscription_id, coalesce(next_redeemed_at, p_occurred_at, now())
+    ) on conflict (provider_subscription_id) do nothing;
   end if;
 
   if v_waitlist_status = 'released' and p_status in ('trialing', 'active') then

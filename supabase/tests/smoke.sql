@@ -2512,6 +2512,89 @@ begin
   if (select active_count from public.get_enrollment_state()) <> active_count_before - 1 then
     raise exception 'expired beta trial was not released from service active capacity';
   end if;
+
+  -- Item 1 & 2: Expired bound claim remains counted until neutralized; orphan pending is not auto-released by age.
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000115', '00000000-0000-0000-0000-000000000001', 'Bound Expiry Test', 7, 'grade_7');
+  
+  select founding_count into founder_count_before from public.get_enrollment_state();
+
+  select founding_claim_id into test_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000115', 'standard_monthly', '2026-08-26-v2'
+  );
+
+  perform public.bind_founder_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000115', test_claim_id, 'txn_bound_expiry_test'
+  );
+
+  -- Expire the reservation timestamp.
+  update private_generation.founder_checkout_claims set reservation_expires_at = now() - interval '1 second'
+  where id = test_claim_id;
+
+  -- Verify bound claim STILL consumes a seat in founding_seat_count().
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before + 1 then
+    raise exception 'expired bound claim was prematurely excluded from founding_seat_count';
+  end if;
+
+  -- Test claim_expired_founder_checkouts transitions it to release_pending and keeps counting.
+  perform public.claim_expired_founder_checkouts(10);
+  if (select status from private_generation.founder_checkout_claims where id = test_claim_id) <> 'release_pending' then
+    raise exception 'claim_expired_founder_checkouts did not mark expired bound claim as release_pending';
+  end if;
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before + 1 then
+    raise exception 'release_pending bound claim was prematurely excluded from founding_seat_count';
+  end if;
+
+  -- Verified release neutralizes it and only then drops from seat count.
+  perform public.release_founder_checkout_claim(test_claim_id, 'txn_bound_expiry_test', 'transaction_canceled');
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before then
+    raise exception 'released neutralized claim was not subtracted from founding_seat_count';
+  end if;
+
+  -- Item 3: Returning expired beta child checkout reserves service capacity or enters waitlist if full.
+  -- 1) When capacity is available, checkout atomically reserves a released waitlist seat.
+  perform public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000114', 'standard_annual', '2026-08-26-v2'
+  );
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000114' and status = 'released'
+  ) then
+    raise exception 'returning expired beta child checkout did not reserve released waitlist capacity';
+  end if;
+
+  -- 2) When capacity is full, checkout is blocked with waitlist notice.
+  delete from public.waitlist where child_id = '00000000-0000-0000-0000-000000000114';
+  update public.enrollment_settings set capacity = (select active_count from public.get_enrollment_state()), founding_limit = 0 where key = 'default';
+  blocked := false;
+  begin
+    perform public.prepare_paddle_checkout_v2(
+      '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000114', 'standard_annual', '2026-08-26-v2'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'checkout succeeded for expired beta child when capacity was full';
+  end if;
+  -- Child enters normal waitlist queue.
+  insert into public.waitlist (parent_id, child_id, email, status)
+  values ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000114', 'parent@example.com', 'waiting');
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000114' and status = 'waiting'
+  ) then
+    raise exception 'returning expired beta child was not added to waitlist waiting queue when capacity was full';
+  end if;
+  update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
+
+  -- Item 8: Monotonic Founder redemptions authority prevents hard deletion from reopening seats.
+  select founding_count into founder_count_before from public.get_enrollment_state();
+  -- Delete the redeemed child subscription row.
+  delete from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000109';
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before then
+    raise exception 'hard deletion of redeemed subscription decreased founding_count (monotonic authority violated)';
+  end if;
+
   -- Announcement Center Tests
   insert into public.announcements (id, title, body, category, status, published_at)
   values

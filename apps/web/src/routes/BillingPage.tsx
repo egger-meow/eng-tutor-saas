@@ -14,6 +14,7 @@ import { getSupabaseClient } from '../lib/supabase'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
 import { isCurrentTermsEffective, legalConfig } from '../lib/config'
 import { acceptCurrentTermsVersion } from '../lib/legal-acceptance'
+import { useEnrollmentState } from '../lib/enrollment'
 
 export function BillingPage({ session }: { session: Session }) {
   const [children, setChildren] = useState<Child[]>([])
@@ -31,6 +32,9 @@ export function BillingPage({ session }: { session: Session }) {
   const [termsChecked, setTermsChecked] = useState(false)
   const [acceptingTerms, setAcceptingTerms] = useState(false)
   const termsVersionEffective = isCurrentTermsEffective()
+  const { state: enrollment } = useEnrollmentState()
+  const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
+  const foundingAvailable = Boolean(enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0)
 
   async function refreshSubscriptions() {
     const nextSubscriptions = await listOwnedSubscriptions()
@@ -263,6 +267,7 @@ export function BillingPage({ session }: { session: Session }) {
                   waitlist={waitlistEntries.find((item) => item.childId === child.id)}
                   busy={checkoutChildId === child.id || cancelingChildId === child.id || resumingChildId === child.id}
                   activationPending={activatingChildId === child.id}
+                  foundingAvailable={foundingAvailable}
                   onSubscribe={(childId, plan) => void startCheckout(childId, plan)}
                   onCancel={(childId, reason) => void cancelChildSubscription(childId, reason)}
                   onResume={(childId) => void resumeChildSubscription(childId)}

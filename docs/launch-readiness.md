@@ -23,7 +23,7 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Paddle production default payment link is configured.
 - [ ] Live monthly price exists: TWD 499 / month.
 - [ ] Live annual price exists: TWD 4,999 / year.
-- [ ] Live Founder 30 discount exists: active flat TWD 200, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 499 monthly price.
+- [ ] Live Founder 30 discount exists: active flat TWD 150, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 499 monthly price.
 - [ ] Live API key is created and stored only as a server secret.
 - [ ] Live client-side token is configured for the production web build.
 - [ ] Live webhook destination points to the production `paddle-webhook` Edge Function.

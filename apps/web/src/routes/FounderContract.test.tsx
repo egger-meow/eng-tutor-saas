@@ -5,9 +5,21 @@ import { LandingPage } from './LandingPage'
 import { PricingSection } from '../components/public/PricingSection'
 import { TermsPage } from './TermsPage'
 
+const openEnrollment = {
+  status: 'open' as const,
+  capacity: 100,
+  remaining: 50,
+  activeCount: 50,
+  foundingLimit: 30,
+  foundingCount: 0,
+  waitingCount: 0,
+  releasedCount: 0,
+  totalDemand: 50,
+}
+
 const currentCopy = () => [
-  renderToStaticMarkup(<LandingPage />),
-  renderToStaticMarkup(<PricingSection />),
+  renderToStaticMarkup(<LandingPage enrollment={openEnrollment} />),
+  renderToStaticMarkup(<PricingSection enrollment={openEnrollment} />),
   renderToStaticMarkup(<TermsPage />),
 ].join('\n')
 

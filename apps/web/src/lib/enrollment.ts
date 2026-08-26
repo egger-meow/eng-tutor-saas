@@ -40,10 +40,13 @@ export async function getEnrollmentState(): Promise<EnrollmentState> {
   }
 }
 
-export function useEnrollmentState() {
-  const [state, setState] = useState<EnrollmentState | null>(null)
+export function useEnrollmentState(initialState?: EnrollmentState | null) {
+  const [state, setState] = useState<EnrollmentState | null>(initialState ?? null)
   const [error, setError] = useState(false)
-  useEffect(() => { void getEnrollmentState().then(setState).catch(() => setError(true)) }, [])
+  useEffect(() => {
+    if (initialState !== undefined) return
+    void getEnrollmentState().then(setState).catch(() => setError(true))
+  }, [initialState])
   return { state, error }
 }
 

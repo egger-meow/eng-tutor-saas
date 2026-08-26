@@ -8,7 +8,7 @@ import { PricingSection } from '../components/public/PricingSection'
 import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
-import { getEnrollmentCta, useEnrollmentState } from '../lib/enrollment'
+import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import '../landing-evolution.css'
 
 const abilityBenefits = [
@@ -45,14 +45,22 @@ export const faqItems = [
   ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
   ['每個孩子都要各自付費嗎？', '是。每位孩子有獨立的程度、學習記憶、每週教材與訂閱，因此以每位孩子計費，可選月繳 NT$499 或年繳 NT$4,999。'],
-  ['創始 30 的 NT 會維持多久？', '只要同一個月繳訂閱持續有效，NT／月就會保留。排定期末取消時仍保留；若在到期前恢復續訂也不受影響。只有訂閱真正終止後才永久失效，重新加入會依當時標準價格計費。年繳不適用創始價格。'],
+  ['創始 30 的 NT$349 會維持多久？', '只要同一個月繳訂閱持續有效，NT$349／月就會保留。排定期末取消時仍保留；若在到期前恢復續訂也不受影響。只有訂閱真正終止後才永久失效，重新加入會依當時標準價格計費。年繳不適用創始價格。'],
   ['100 位額滿後會怎麼樣？', '新孩子會先進入候補，既有家庭照常收到教材。第一階段上限是真實的服務容量，不會用隨機數字或假倒數製造急迫感。'],
 ] as const
 
-export function LandingPage() {
+export function LandingPage({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
-  const { state: enrollment } = useEnrollmentState()
+  const { state: hookEnrollment } = useEnrollmentState(propEnrollment)
+  const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
+  const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
+  const showFounding = enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0
+  const heroNote = cta.isWaitlist
+    ? '目前服務名額已滿；候補不會先收費。'
+    : showFounding
+      ? '創始 30 月繳限定：第一週免費；同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。'
+      : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
 
   return (
     <AppShell className="landing-page" header={<PublicHeader />}>
@@ -73,7 +81,7 @@ export function LandingPage() {
               <a className="button hero-cta" href={cta.href}>{cta.label}</a>
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
-            <p className="hero-note">{cta.label === '免費取得第一週教材' ? '創始 30 月繳限定：第一週免費；同一訂閱不中斷，固定 NT$299／月。年繳 NT$4,999。' : cta.isWaitlist ? '目前服務名額已滿；候補不會先收費。' : '目前可選月繳 NT$499 或年繳 NT$4,999。'}</p>
+            <p className="hero-note">{heroNote}</p>
             <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
           </FadeInUp>
 
@@ -280,12 +288,12 @@ export function LandingPage() {
         </section>
 
         <FadeInUp reveal="right"><FounderSummary /></FadeInUp>
-        <FadeInUp reveal="left"><PricingSection /></FadeInUp>
+        <FadeInUp reveal="left"><PricingSection enrollment={enrollment} /></FadeInUp>
 
         <section className="public-section faq" id="faq">
           <FadeInUp className="section-heading"><p className="overline">FAQ</p><h2>決定之前，你可能還想確認。</h2></FadeInUp>
           <StaggerContainer staggerDelay={0.06}>
-            {faqItems.map(([question, answer], index) => {
+            {faqItems.filter(([q]) => showFounding || !q.includes('創始 30')).map(([question, answer], index) => {
               const isOpen = openFaqIndex === index
               return (
                 <StaggerItem key={question} delay={(index % 4) * 0.04}>

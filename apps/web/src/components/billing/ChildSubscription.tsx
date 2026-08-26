@@ -25,16 +25,18 @@ type Props = {
   waitlist?: OwnedWaitlistEntry | null
   busy?: boolean
   activationPending?: boolean
+  foundingAvailable?: boolean
   onSubscribe: (childId: string, plan: BillingPlan) => void
   onCancel: (childId: string, reason: string) => void
   onResume: (childId: string) => void
 }
 
-export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
+export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, foundingAvailable, onSubscribe, onCancel, onResume }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
+  const isFounderEligible = Boolean(foundingAvailable && subscription?.foundingStatus !== 'forfeited')
   const [selectedPlan, setSelectedPlan] = useState<BillingPlan>(
-    subscription?.foundingStatus === 'eligible' ? 'monthly' : 'annual',
+    isFounderEligible ? 'monthly' : 'annual',
   )
 
   useEffect(() => {
@@ -43,8 +45,8 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
   }, [subscription?.cancelAtPeriodEnd, subscription?.status])
 
   useEffect(() => {
-    setSelectedPlan(subscription?.foundingStatus === 'eligible' ? 'monthly' : 'annual')
-  }, [child.id, subscription?.foundingStatus])
+    setSelectedPlan(isFounderEligible ? 'monthly' : 'annual')
+  }, [child.id, isFounderEligible])
 
   if (waitlist?.status === 'waiting' && !subscription) {
     return (
@@ -167,7 +169,6 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
   const canResume = isCanceledAutoRenew
   const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
   const isRedeemedFounder = subscription.foundingStatus === 'redeemed'
-  const hasActiveReservation = subscription.foundingStatus === 'eligible' && Boolean(subscription.foundingReservedUntil)
   const displayedPriceTwd = isRedeemedFounder && currentPlan.key === 'monthly' ? 349 : subscription.priceTwd
 
   return (
@@ -189,9 +190,6 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
             <strong>目前方案：</strong>
             {currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(displayedPriceTwd ?? subscription.priceTwd)}
           </p>
-        )}
-        {hasActiveReservation && (
-          <p className="notice"><strong>創始 30 名額已保留</strong><br />保留至 {formatDate(subscription.foundingReservedUntil ?? null)}。完成月繳訂閱後，只要訂閱不中斷，即固定 NT$349／月。</p>
         )}
         {periodEnd && (
           <p>
@@ -304,7 +302,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
               />
               <span>
                 <strong className="plan-price-line">
-                  月繳 {subscription.foundingStatus === 'eligible' ? (
+                  月繳 {isFounderEligible ? (
                     <>
                       <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
                       <ins className="highlight-price">NT$349</ins>
@@ -315,8 +313,8 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
                   )}
                 </strong>
                 <small>
-                  {subscription.foundingStatus === 'eligible'
-                    ? '創始 30 名額已保留：完成月繳後，只要同一訂閱不中斷，即固定 NT$349／月'
+                  {isFounderEligible
+                    ? '創始 30 月繳限定：只要同一訂閱不中斷，固定 NT$349／月（結帳時套用折抵）'
                     : '每月自動續訂；可隨時取消下一期續訂'}
                 </small>
               </span>

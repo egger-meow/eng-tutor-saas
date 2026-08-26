@@ -143,6 +143,7 @@ describe('ChildSubscription Component', () => {
       <ChildSubscription
         child={mockChild}
         subscription={subscription}
+        foundingAvailable={true}
         onSubscribe={vi.fn()}
         onCancel={vi.fn()}
         onResume={vi.fn()}
@@ -152,8 +153,8 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('strike-price')
     expect(html).toContain('NT$499')
     expect(html).toContain('NT$349')
-    expect(html).toContain('創始 30 名額已保留')
-    expect(html).toContain('完成月繳後，只要同一訂閱不中斷，即固定 NT$349／月')
+    expect(html).toContain('創始 30 月繳限定')
+    expect(html).toContain('只要同一訂閱不中斷，固定 NT$349／月')
     expect(html).toMatch(/checked="" value="monthly"/)
   })
 
@@ -174,6 +175,7 @@ describe('ChildSubscription Component', () => {
       <ChildSubscription
         child={mockChild}
         subscription={subscription}
+        foundingAvailable={true}
         onSubscribe={vi.fn()}
         onCancel={vi.fn()}
         onResume={vi.fn()}
@@ -198,7 +200,7 @@ describe('ChildSubscription Component', () => {
       priceTwd: null,
       currentPeriodEnd: '2026-08-20T00:00:00Z',
       cancelAtPeriodEnd: false,
-      foundingStatus: 'eligible',
+      foundingStatus: 'none',
     }
 
     const html = renderToStaticMarkup(
@@ -213,7 +215,6 @@ describe('ChildSubscription Component', () => {
 
     expect(html).toContain('體驗期')
     expect(html).toContain('選擇付款週期')
-    expect(html).toContain('創始 30 名額已保留')
   })
 
   it('7. waitlist status = waiting: shows waiting pill, reassurance copy, and disables billing selector', () => {
