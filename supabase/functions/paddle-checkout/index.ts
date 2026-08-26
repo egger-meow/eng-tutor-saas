@@ -152,7 +152,6 @@ Deno.serve(async (request) => {
           plan: plan.key,
           ...(foundingClaimId ? { founder_claim_id: foundingClaimId } : {}),
         },
-        ...(foundingApplies ? { discount_id: foundingDiscountId } : {}),
       }),
     })
     const paddleBody = await paddleResponse.json()
@@ -169,11 +168,13 @@ Deno.serve(async (request) => {
     }
 
     const transactionId = paddleBody?.data?.id
+    if (typeof transactionId !== 'string') {
+      console.error('Paddle returned a transaction without an id')
+      await releaseUnboundClaim()
+      return jsonResponse(502, { error: 'paddle_transaction_failed' })
+    }
+
     if (foundingClaimId) {
-      if (typeof transactionId !== 'string') {
-        console.error('Paddle returned a Founder transaction without an id')
-        return jsonResponse(502, { error: 'paddle_transaction_failed' })
-      }
       const { error: bindError } = await supabase.rpc('bind_founder_checkout_transaction', {
         p_user_id: user.id,
         p_child_id: body.child_id,
@@ -182,25 +183,27 @@ Deno.serve(async (request) => {
       })
       if (bindError) {
         console.error('Founder transaction binding failed', bindError.message)
-        const neutralizeResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
-          method: 'PATCH',
-          headers: {
-            authorization: `Bearer ${paddleApiKey}`,
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({ discount_id: null }),
-        })
-        if (neutralizeResponse.ok) {
-          const neutralizeBody = await neutralizeResponse.json()
-          if (neutralizeBody?.data?.discount_id !== foundingDiscountId) {
-            await supabase.rpc('release_founder_checkout_claim', {
-              p_claim_id: foundingClaimId,
-              p_transaction_id: transactionId,
-              p_release_reason: 'discount_removed',
-            })
-          }
-        }
+        await releaseUnboundClaim()
         return jsonResponse(503, { error: 'founder_checkout_binding_failed' })
+      }
+
+      const patchResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+        method: 'PATCH',
+        headers: {
+          authorization: `Bearer ${paddleApiKey}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ discount_id: foundingDiscountId }),
+      })
+      const patchBody = await patchResponse.json()
+      if (!patchResponse.ok || patchBody?.data?.discount_id !== foundingDiscountId) {
+        console.error('Applying Founder discount to bound transaction failed', patchResponse.status, patchBody)
+        await supabase.rpc('release_founder_checkout_claim', {
+          p_claim_id: foundingClaimId,
+          p_transaction_id: transactionId,
+          p_release_reason: 'discount_removed',
+        })
+        return jsonResponse(503, { error: 'paddle_discount_application_failed' })
       }
     }
 
@@ -216,6 +219,12 @@ Deno.serve(async (request) => {
     console.error('Paddle checkout preparation failed', errorMessage(error))
     if (errorMessage(error).includes('Current Terms acceptance is required')) {
       return jsonResponse(409, { error: 'legal_acceptance_required' })
+    }
+    if (errorMessage(error).includes('這個學習名額仍在等候開放中')) {
+      return jsonResponse(409, {
+        error: 'capacity_full_waitlisted',
+        message: '這個學習名額仍在等候開放中，我們會在開放時以 Email 通知您。',
+      })
     }
     return jsonResponse(400, { error: 'checkout_not_available' })
   }

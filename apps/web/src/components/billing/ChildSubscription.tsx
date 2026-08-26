@@ -111,9 +111,22 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
               />
               <span>
                 <strong className="plan-price-line">
-                  月繳 NT${formatPrice(billingPlans.monthly.priceTwd)}
+                  {isFounderEligible ? (
+                    <>
+                      <span className="price-original">NT${formatPrice(billingPlans.monthly.priceTwd)}</span>
+                      {' '}
+                      月繳 NT$349
+                      <span className="badge badge-savings">創始早鳥優惠</span>
+                    </>
+                  ) : (
+                    `月繳 NT$${formatPrice(billingPlans.monthly.priceTwd)}`
+                  )}
                 </strong>
-                <small>每月自動續訂；可隨時取消下一期續訂</small>
+                <small>
+                  {isFounderEligible
+                    ? '首 30 位月繳享 NT$349／月；只要同一月繳訂閱不中斷，永久保留'
+                    : '每月自動續訂；可隨時取消下一期續訂'}
+                </small>
               </span>
             </label>
           </fieldset>

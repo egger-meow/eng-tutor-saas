@@ -1,4 +1,4 @@
--- Migration: Hardening release identity in claim snapshots, bridge submission, and admin RPC
+﻿-- Migration: Hardening release identity in claim snapshots, bridge submission, and admin RPC
 -- 1. Update chatgpt_claim_generation_batch preserving Scheduled Work API contract and adding targetReleaseId & retryContext
 create or replace function private_generation.chatgpt_claim_generation_batch(worker_id text)
 returns jsonb

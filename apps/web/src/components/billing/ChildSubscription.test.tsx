@@ -268,6 +268,33 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('月繳 NT$499')
     expect(html).toContain('選擇年繳並開始訂閱')
   })
+
+  it('8b. waitlist.status = released without subscription: shows Founder pricing when foundingAvailable is true', () => {
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        waitlist={{
+          id: 'w-1',
+          childId: 'child-123',
+          status: 'released',
+          createdAt: '2026-08-20T00:00:00Z',
+          releasedAt: '2026-08-20T02:00:00Z',
+          convertedAt: null,
+          notes: null,
+        }}
+        foundingAvailable={true}
+        onSubscribe={vi.fn()}
+        onCancel={vi.fn()}
+        onResume={vi.fn()}
+      />
+    )
+
+    expect(html).toContain('名額已開放')
+    expect(html).toContain('月繳 NT$349')
+    expect(html).toContain('創始早鳥優惠')
+    expect(html).toContain('NT$499')
+    expect(html).toContain('選擇月繳並開始訂閱')
+  })
   it('9. active redeemed Founder shows effective NT$349 price and Founder badge', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
