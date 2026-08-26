@@ -154,4 +154,21 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(checkoutCode).toContain("supabase.rpc('bind_capacity_checkout_transaction'")
     expect(checkoutCode).toContain('capacityClaimId')
   })
+
+  it('7. verifies capacity claim retention on Founder bind failure unless Paddle cancellation is confirmed', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    // Verifies capacityBound flag tracks bound state
+    expect(checkoutCode).toContain('let capacityBound = false')
+    expect(checkoutCode).toContain('capacityBound = true')
+
+    // Verifies releaseUnboundClaims skips bound capacity claims
+    expect(checkoutCode).toContain('!capacityBound')
+
+    // Verifies that after founder bind failure, release_capacity_checkout_claim requires canceled status and transactionId
+    expect(checkoutCode).toContain("cancelBody?.data?.status === 'canceled'")
+    expect(checkoutCode).toContain("p_transaction_id: transactionId")
+    expect(checkoutCode).toContain("p_release_reason: 'transaction_canceled'")
+  })
 })
+

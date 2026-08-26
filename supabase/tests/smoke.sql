@@ -1694,20 +1694,14 @@ begin
   end if;
 
   -- Verify prepare_paddle_checkout is strictly blocked for waiting child
-  blocked := false;
-  begin
-    perform public.prepare_paddle_checkout_v2(
+  if (
+    select checkout_allowed from public.prepare_paddle_checkout_v2(
       '00000000-0000-0000-0000-000000000001',
       '00000000-0000-0000-0000-000000000077',
       'standard_monthly',
       '2026-08-26-v2'
-    );
-  exception
-    when others then
-      blocked := true;
-  end;
-
-  if not blocked then
+    )
+  ) is not false then
     raise exception 'prepare_paddle_checkout should have blocked waiting child';
   end if;
 
@@ -2758,29 +2752,119 @@ begin
   end if;
 
   -- 4) full returning-beta path creates real waiting row
+  -- Create child while capacity is open so they get a real beta trial and no waitlist row
+  update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
+
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values ('00000000-0000-0000-0000-000000000132', '00000000-0000-0000-0000-000000000001', 'Beta Full Returning Waitlist', 7, 'grade_7');
   update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000132';
 
-  blocked := false;
-  begin
-    perform public.prepare_paddle_checkout_v2(
+  -- Verify child starts with real expired beta subscription and NO pre-existing waitlist row
+  if not exists (select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000132' and provider = 'beta') then
+    raise exception 'child 132 does not have a beta subscription';
+  end if;
+  if exists (select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000132') then
+    raise exception 'child 132 unexpectedly already has a waitlist row';
+  end if;
+
+  -- Now fill capacity completely
+  select private_generation.locked_capacity_count() into active_count_before;
+  update public.enrollment_settings set founding_limit = least(10, active_count_before), capacity = active_count_before where key = 'default';
+
+  if (
+    select checkout_allowed from public.prepare_paddle_checkout_v2(
       '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000132', 'standard_annual', '2026-08-26-v2'
-    );
-  exception when others then
-    blocked := true;
-  end;
-  if not blocked then
+    )
+  ) is not false then
     raise exception 'checkout for returning beta was allowed while capacity was full';
+  end if;
+
+  if (
+    select rejection_reason from public.prepare_paddle_checkout_v2(
+      '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000132', 'standard_annual', '2026-08-26-v2'
+    )
+  ) <> 'capacity_full_waitlisted' then
+    raise exception 'checkout for returning beta did not return capacity_full_waitlisted rejection reason';
   end if;
 
   if not exists (
     select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000132' and status = 'waiting'
   ) then
-    raise exception 'full returning-beta path did not create a real waiting row in waitlist';
+    raise exception 'full returning-beta path did not create a real persisted waiting row in waitlist';
   end if;
 
-  update public.enrollment_settings set capacity = 100 where key = 'default';
+  update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
+
+  -- 5) Strict transaction matching for capacity and Founder claim release:
+  -- A bound claim cannot be released with null or mismatched transaction ID.
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000133', '00000000-0000-0000-0000-000000000001', 'Strict Capacity Claim Test', 7, 'grade_7');
+  update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000133';
+
+  select capacity_claim_id into test_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000133', 'standard_annual', '2026-08-26-v2'
+  );
+  perform public.bind_capacity_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000133', test_claim_id, 'txn_strict_cap_133'
+  );
+
+  -- release with null => false, still bound
+  if public.release_capacity_checkout_claim(test_claim_id, null, 'transaction_canceled') is true then
+    raise exception 'bound capacity claim was erroneously released with null transaction ID';
+  end if;
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'bound' then
+    raise exception 'bound capacity claim changed status after null transaction release attempt';
+  end if;
+
+  -- release with wrong transaction => false, still bound
+  if public.release_capacity_checkout_claim(test_claim_id, 'txn_wrong_id', 'transaction_canceled') is true then
+    raise exception 'bound capacity claim was erroneously released with mismatched transaction ID';
+  end if;
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'bound' then
+    raise exception 'bound capacity claim changed status after mismatched transaction release attempt';
+  end if;
+
+  -- release with exact matching transaction => true
+  if public.release_capacity_checkout_claim(test_claim_id, 'txn_strict_cap_133', 'transaction_canceled') is not true then
+    raise exception 'bound capacity claim was not released with exact matching transaction ID';
+  end if;
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'released' then
+    raise exception 'capacity claim was not marked released';
+  end if;
+
+  -- Strict transaction matching for Founder claim release:
+  select founding_claim_id into test_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000133', 'standard_monthly', '2026-08-26-v2'
+  );
+  perform public.bind_founder_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000133', test_claim_id, 'txn_strict_founder_133'
+  );
+
+  -- release with null => false, still bound
+  if public.release_founder_checkout_claim(test_claim_id, null, 'discount_removed') is true then
+    raise exception 'bound founder claim was erroneously released with null transaction ID';
+  end if;
+  if (select status from private_generation.founder_checkout_claims where id = test_claim_id) <> 'bound' then
+    raise exception 'bound founder claim changed status after null transaction release attempt';
+  end if;
+
+  -- release with wrong transaction => false, still bound
+  if public.release_founder_checkout_claim(test_claim_id, 'txn_wrong_id', 'discount_removed') is true then
+    raise exception 'bound founder claim was erroneously released with mismatched transaction ID';
+  end if;
+  if (select status from private_generation.founder_checkout_claims where id = test_claim_id) <> 'bound' then
+    raise exception 'bound founder claim changed status after mismatched transaction release attempt';
+  end if;
+
+  -- release with exact matching transaction => true
+  if public.release_founder_checkout_claim(test_claim_id, 'txn_strict_founder_133', 'discount_removed') is not true then
+    raise exception 'bound founder claim was not released with exact matching transaction ID';
+  end if;
+  if (select status from private_generation.founder_checkout_claims where id = test_claim_id) <> 'released' then
+    raise exception 'founder claim was not marked released';
+  end if;
 
   -- Monotonic Founder authority test: hard deletion does not decrease founding_count
   select founding_count into founder_count_before from public.get_enrollment_state();

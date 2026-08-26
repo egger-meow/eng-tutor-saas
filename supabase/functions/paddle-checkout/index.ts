@@ -79,6 +79,16 @@ Deno.serve(async (request) => {
       .single()
     if (eligibilityError) throw eligibilityError
 
+    if (eligibility.checkout_allowed === false) {
+      if (eligibility.rejection_reason === 'capacity_full_waitlisted') {
+        return jsonResponse(409, {
+          error: 'capacity_full_waitlisted',
+          message: '這個學習名額仍在等候開放中，我們會在開放時以 Email 通知您。',
+        })
+      }
+      return jsonResponse(409, { error: eligibility.rejection_reason || 'checkout_not_available' })
+    }
+
     const foundingApplies = eligibility.founding_applies === true
     const foundingClaimId = typeof eligibility.founding_claim_id === 'string'
       ? eligibility.founding_claim_id
@@ -94,8 +104,11 @@ Deno.serve(async (request) => {
       ? eligibility.capacity_transaction_id
       : null
 
+    let capacityBound = false
+    let founderBound = false
+
     async function releaseUnboundClaims() {
-      if (foundingClaimId && !existingTransactionId) {
+      if (foundingClaimId && !existingTransactionId && !founderBound) {
         const { error } = await supabase.rpc('release_founder_checkout_claim', {
           p_claim_id: foundingClaimId,
           p_transaction_id: null,
@@ -103,7 +116,7 @@ Deno.serve(async (request) => {
         })
         if (error) console.error('Unable to release unbound Founder claim', error.message)
       }
-      if (capacityClaimId && !existingCapacityTransactionId) {
+      if (capacityClaimId && !existingCapacityTransactionId && !capacityBound) {
         const { error } = await supabase.rpc('release_capacity_checkout_claim', {
           p_claim_id: capacityClaimId,
           p_transaction_id: null,
@@ -220,6 +233,7 @@ Deno.serve(async (request) => {
         await releaseUnboundClaims()
         return jsonResponse(503, { error: 'capacity_checkout_binding_failed' })
       }
+      capacityBound = true
     }
 
     if (foundingClaimId) {
@@ -232,8 +246,29 @@ Deno.serve(async (request) => {
       if (bindError) {
         console.error('Founder transaction binding failed', bindError.message)
         await releaseUnboundClaims()
+        // If capacity claim was bound, attempt cancellation and release with exact transaction_id
+        if (capacityBound) {
+          try {
+            const cancelRes = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+              method: 'PATCH',
+              headers: { authorization: `Bearer ${paddleApiKey}`, 'content-type': 'application/json' },
+              body: JSON.stringify({ status: 'canceled' }),
+            })
+            const cancelBody = await cancelRes.json()
+            if (cancelRes.ok && cancelBody?.data?.status === 'canceled') {
+              await supabase.rpc('release_capacity_checkout_claim', {
+                p_claim_id: capacityClaimId,
+                p_transaction_id: transactionId,
+                p_release_reason: 'transaction_canceled',
+              })
+            }
+          } catch (cancelErr) {
+            console.error('Cancellation after founder bind failure failed; retaining capacity claim', cancelErr)
+          }
+        }
         return jsonResponse(503, { error: 'founder_checkout_binding_failed' })
       }
+      founderBound = true
 
       let patchSucceeded = false
       try {
@@ -264,12 +299,17 @@ Deno.serve(async (request) => {
             patchSucceeded = true
           } else if (verifyResponse.ok && verifyBody?.data?.discount_id !== foundingDiscountId) {
             // Explicitly verified that discount is absent
+            let transactionCanceled = false
             try {
-              await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+              const cancelRes = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
                 method: 'PATCH',
                 headers: { authorization: `Bearer ${paddleApiKey}`, 'content-type': 'application/json' },
                 body: JSON.stringify({ status: 'canceled' }),
               })
+              const cancelBody = await cancelRes.json()
+              if (cancelRes.ok && cancelBody?.data?.status === 'canceled') {
+                transactionCanceled = true
+              }
             } catch {
               // Ignore cancellation error
             }
@@ -278,6 +318,13 @@ Deno.serve(async (request) => {
               p_transaction_id: transactionId,
               p_release_reason: 'discount_removed',
             })
+            if (capacityBound && transactionCanceled) {
+              await supabase.rpc('release_capacity_checkout_claim', {
+                p_claim_id: capacityClaimId,
+                p_transaction_id: transactionId,
+                p_release_reason: 'transaction_canceled',
+              })
+            }
             return jsonResponse(503, { error: 'paddle_discount_application_failed' })
           }
         } catch (verifyErr) {
