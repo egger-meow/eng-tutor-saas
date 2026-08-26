@@ -26,12 +26,24 @@ type Props = {
   busy?: boolean
   activationPending?: boolean
   foundingAvailable?: boolean
+  foundingRemaining?: number | null
   onSubscribe: (childId: string, plan: BillingPlan) => void
   onCancel: (childId: string, reason: string) => void
   onResume: (childId: string) => void
 }
 
-export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, foundingAvailable, onSubscribe, onCancel, onResume }: Props) {
+export function ChildSubscription({
+  child,
+  subscription,
+  waitlist,
+  busy,
+  activationPending,
+  foundingAvailable,
+  foundingRemaining,
+  onSubscribe,
+  onCancel,
+  onResume,
+}: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
   const isFounderEligible = Boolean(foundingAvailable && subscription?.foundingStatus !== 'forfeited')
@@ -47,6 +59,85 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
   useEffect(() => {
     setSelectedPlan(isFounderEligible ? 'monthly' : 'annual')
   }, [child.id, isFounderEligible])
+
+  function renderPlanSelector() {
+    return (
+      <div className="subscription-action">
+        {isFounderEligible && (
+          <div className="founder-badge-ribbon">
+            <span>👑 創始 30 名限定</span>
+            {typeof foundingRemaining === 'number' && foundingRemaining > 0 && (
+              <span className="founder-seat-urgency">・目前只剩 {foundingRemaining} 個創始優惠席次</span>
+            )}
+          </div>
+        )}
+        <fieldset className="billing-plan-selector">
+          <legend>選擇付款週期</legend>
+          <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
+            <input
+              type="radio"
+              name={`billing-plan-${child.id}`}
+              value="monthly"
+              checked={selectedPlan === 'monthly'}
+              onChange={() => setSelectedPlan('monthly')}
+            />
+            <span>
+              <strong className="plan-price-line">
+                {isFounderEligible ? (
+                  <>
+                    <ins className="highlight-price">月繳 NT$349</ins>
+                    <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
+                    <span className="badge badge-discount">創始 30 限定</span>
+                  </>
+                ) : (
+                  `月繳 NT$${formatPrice(billingPlans.monthly.priceTwd)}`
+                )}
+              </strong>
+              <small>
+                {isFounderEligible ? (
+                  <>
+                    <strong>持續訂閱期間，NT$349 創始價固定保留。</strong>
+                    若中途取消訂閱且到期未恢復，日後重新訂閱將以當時標準定價（NT$499/月）計算。
+                  </>
+                ) : (
+                  '每月自動續訂；可隨時取消下一期續訂'
+                )}
+              </small>
+            </span>
+          </label>
+          <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
+            <input
+              type="radio"
+              name={`billing-plan-${child.id}`}
+              value="annual"
+              checked={selectedPlan === 'annual'}
+              onChange={() => setSelectedPlan('annual')}
+            />
+            <span>
+              <strong className="plan-price-line">
+                年繳 NT${formatPrice(billingPlans.annual.priceTwd)}
+                <span className="badge badge-savings">省 NT${formatPrice(annualSavingsTwd)}</span>
+              </strong>
+              <small>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}。年繳方案不適用創始優惠。</small>
+            </span>
+          </label>
+        </fieldset>
+        <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
+        <button
+          className="button"
+          type="button"
+          disabled={busy}
+          onClick={() => onSubscribe(child.id, selectedPlan)}
+        >
+          {busy
+            ? '正在準備安全付款…'
+            : selectedPlan === 'monthly' && isFounderEligible
+              ? '鎖定 NT$349 創始價'
+              : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
+        </button>
+      </div>
+    )
+  }
 
   if (waitlist?.status === 'waiting' && !subscription) {
     return (
@@ -82,64 +173,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
           </p>
           <p>🎉 學習名額已為孩子開放！請選擇訂閱方案以啟用每週教材生成。</p>
         </div>
-        <div className="subscription-action">
-          <fieldset className="billing-plan-selector">
-            <legend>選擇付款週期</legend>
-            <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
-              <input
-                type="radio"
-                name={`billing-plan-${child.id}`}
-                value="annual"
-                checked={selectedPlan === 'annual'}
-                onChange={() => setSelectedPlan('annual')}
-              />
-              <span>
-                <strong className="plan-price-line">
-                  年繳 NT${formatPrice(billingPlans.annual.priceTwd)}
-                  <span className="badge badge-savings">省 NT${formatPrice(annualSavingsTwd)}</span>
-                </strong>
-                <small>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}</small>
-              </span>
-            </label>
-            <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
-              <input
-                type="radio"
-                name={`billing-plan-${child.id}`}
-                value="monthly"
-                checked={selectedPlan === 'monthly'}
-                onChange={() => setSelectedPlan('monthly')}
-              />
-              <span>
-                <strong className="plan-price-line">
-                  {isFounderEligible ? (
-                    <>
-                      <span className="price-original">NT${formatPrice(billingPlans.monthly.priceTwd)}</span>
-                      {' '}
-                      月繳 NT$349
-                      <span className="badge badge-savings">創始早鳥優惠</span>
-                    </>
-                  ) : (
-                    `月繳 NT$${formatPrice(billingPlans.monthly.priceTwd)}`
-                  )}
-                </strong>
-                <small>
-                  {isFounderEligible
-                    ? '首 30 位月繳享 NT$349／月；只要同一月繳訂閱不中斷，永久保留'
-                    : '每月自動續訂；可隨時取消下一期續訂'}
-                </small>
-              </span>
-            </label>
-          </fieldset>
-          <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
-          <button
-            className="button"
-            type="button"
-            disabled={busy}
-            onClick={() => onSubscribe(child.id, selectedPlan)}
-          >
-            {busy ? '正在準備安全付款…' : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
-          </button>
-        </div>
+        {renderPlanSelector()}
       </article>
     )
   }
@@ -285,65 +319,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
         </div>
       )}
 
-      {canSubscribe && (
-        <div className="subscription-action">
-          <fieldset className="billing-plan-selector">
-            <legend>選擇付款週期</legend>
-            <label className={selectedPlan === 'annual' ? 'is-selected' : ''}>
-              <input
-                type="radio"
-                name={`billing-plan-${child.id}`}
-                value="annual"
-                checked={selectedPlan === 'annual'}
-                onChange={() => setSelectedPlan('annual')}
-              />
-              <span>
-                <strong className="plan-price-line">
-                  年繳 NT${formatPrice(billingPlans.annual.priceTwd)}
-                  <span className="badge badge-savings">省 NT${formatPrice(annualSavingsTwd)}</span>
-                </strong>
-                <small>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}</small>
-              </span>
-            </label>
-            <label className={selectedPlan === 'monthly' ? 'is-selected' : ''}>
-              <input
-                type="radio"
-                name={`billing-plan-${child.id}`}
-                value="monthly"
-                checked={selectedPlan === 'monthly'}
-                onChange={() => setSelectedPlan('monthly')}
-              />
-              <span>
-                <strong className="plan-price-line">
-                  月繳 {isFounderEligible ? (
-                    <>
-                      <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
-                      <ins className="highlight-price">NT$349</ins>
-                      <span className="badge badge-discount">創始早鳥優惠</span>
-                    </>
-                  ) : (
-                    <>NT${formatPrice(billingPlans.monthly.priceTwd)}</>
-                  )}
-                </strong>
-                <small>
-                  {isFounderEligible
-                    ? '創始 30 月繳限定：只要同一訂閱不中斷，固定 NT$349／月（結帳時套用折抵）'
-                    : '每月自動續訂；可隨時取消下一期續訂'}
-                </small>
-              </span>
-            </label>
-          </fieldset>
-          <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
-          <button
-            className="button"
-            type="button"
-            disabled={busy}
-            onClick={() => onSubscribe(child.id, selectedPlan)}
-          >
-            {busy ? '正在準備安全付款…' : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
-          </button>
-        </div>
-      )}
+      {canSubscribe && renderPlanSelector()}
     </article>
   )
 }

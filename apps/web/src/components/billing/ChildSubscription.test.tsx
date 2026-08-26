@@ -126,7 +126,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('並開始訂閱')
   })
 
-  it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation', () => {
+  it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation and lock CTA', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1',
       childId: 'child-123',
@@ -144,6 +144,7 @@ describe('ChildSubscription Component', () => {
         child={mockChild}
         subscription={subscription}
         foundingAvailable={true}
+        foundingRemaining={7}
         onSubscribe={vi.fn()}
         onCancel={vi.fn()}
         onResume={vi.fn()}
@@ -153,8 +154,10 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('strike-price')
     expect(html).toContain('NT$499')
     expect(html).toContain('NT$349')
-    expect(html).toContain('創始 30 月繳限定')
-    expect(html).toContain('只要同一訂閱不中斷，固定 NT$349／月')
+    expect(html).toContain('創始 30 名限定')
+    expect(html).toContain('目前只剩 7 個創始優惠席次')
+    expect(html).toContain('持續訂閱期間，NT$349 創始價固定保留')
+    expect(html).toContain('鎖定 NT$349 創始價')
     expect(html).toMatch(/checked="" value="monthly"/)
   })
 
@@ -291,9 +294,9 @@ describe('ChildSubscription Component', () => {
 
     expect(html).toContain('名額已開放')
     expect(html).toContain('月繳 NT$349')
-    expect(html).toContain('創始早鳥優惠')
+    expect(html).toContain('創始 30 限定')
     expect(html).toContain('NT$499')
-    expect(html).toContain('選擇月繳並開始訂閱')
+    expect(html).toContain('鎖定 NT$349 創始價')
   })
   it('9. active redeemed Founder shows effective NT$349 price and Founder badge', () => {
     const html = renderToStaticMarkup(

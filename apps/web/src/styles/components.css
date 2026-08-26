@@ -355,6 +355,8 @@
 .highlight-price { text-decoration: none; color: var(--color-action); font-weight: 700; }
 .badge-discount { display: inline-flex; align-items: center; padding: .125rem .45rem; font-size: .75rem; font-weight: 700; border-radius: 999px; background: var(--color-success-soft); color: var(--color-success); }
 .badge-savings { display: inline-flex; align-items: center; padding: .125rem .45rem; font-size: .75rem; font-weight: 700; border-radius: 999px; background: #e0f2fe; color: #0369a1; }
+.founder-badge-ribbon { display: inline-flex; align-items: center; gap: var(--space-2); padding: 0.3rem 0.75rem; font-size: 0.8125rem; font-weight: 700; border-radius: var(--radius-control); background: color-mix(in srgb, var(--color-warning-soft) 85%, #fef3c7); color: #92400e; border: 1px solid #fde68a; margin-bottom: var(--space-2); }
+.founder-seat-urgency { color: #b45309; font-weight: 600; }
 .cancel-confirmation { display: grid; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-5); border: 1px solid var(--color-rule); border-radius: var(--radius-surface); background: var(--color-paper-deep); }
 .cancel-confirmation p { margin: 0; }
 .cancel-confirmation p:first-child strong { color: var(--color-ink); font-size: 1.05rem; }

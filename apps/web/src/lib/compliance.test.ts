@@ -6,9 +6,9 @@ describe('Legal & Compliance Configuration & Invariants', () => {
     expect(legalConfig.reviewPeriodDays).toBeGreaterThanOrEqual(3)
   })
 
-  it('keeps Terms v2 in review until its Taiwan effective timestamp', () => {
-    expect(isCurrentTermsEffective(new Date('2026-08-28T15:59:59Z'))).toBe(false)
-    expect(isCurrentTermsEffective(new Date('2026-08-28T16:00:00Z'))).toBe(true)
+  it('keeps Terms v2 immediately effective upon publication', () => {
+    expect(isCurrentTermsEffective()).toBe(true)
+    expect(legalConfig.termsEffectiveAt).toBe('2026-08-26')
   })
 
   it('has semantic legal version strings for audit tracking', () => {

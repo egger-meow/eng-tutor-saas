@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { BillingPage } from './BillingPage'
 import type { Session } from '@supabase/supabase-js'
@@ -108,9 +108,8 @@ describe('BillingPage Loading & Legal Isolation', () => {
     expect(html).toContain('目前無法確認服務條款同意紀錄，暫時無法開啟付款。')
   })
 
-  it('3. displays review notice before effective date, and prompts for re-acceptance when effective and terms outdated', () => {
-    // A: Before effective date (review notice)
-    const reviewHtml = renderToStaticMarkup(
+  it('3. prompts for terms re-acceptance immediately when terms are outdated without review gate block', () => {
+    const html = renderToStaticMarkup(
       <BillingPage
         session={mockSession}
         initialChildren={[mockChild]}
@@ -120,22 +119,10 @@ describe('BillingPage Loading & Legal Isolation', () => {
         initialLegalLoaded={true}
       />
     )
-    expect(reviewHtml).toContain('新版服務條款審閱期間')
 
-    // B: When effective date arrives (re-acceptance prompt)
-    vi.spyOn(configLib, 'isCurrentTermsEffective').mockReturnValue(true)
-    const effectiveHtml = renderToStaticMarkup(
-      <BillingPage
-        session={mockSession}
-        initialChildren={[mockChild]}
-        initialSubscriptions={[mockSubscription]}
-        initialWaitlist={[]}
-        initialAcceptedTermsVersion={'2026-08-16-v1'}
-        initialLegalLoaded={true}
-      />
-    )
-    expect(effectiveHtml).toContain('付款前請確認新版服務條款')
-    expect(effectiveHtml).toContain('我已閱讀並同意 2026-08-26-v2 服務條款')
+    expect(html).toContain('付款前請確認新版服務條款')
+    expect(html).toContain('我已閱讀並同意 2026-08-26-v2 服務條款')
+    expect(html).not.toContain('新版服務條款審閱期間')
   })
 
   it('4. renders normal subscription interface without re-acceptance prompt when terms version is current', () => {

@@ -48,14 +48,14 @@ describe('Legal & Compliance Pages Rendering', () => {
   })
 
   describe('TermsPage (/terms)', () => {
-    it('renders statutory 3-day review period notice and version', () => {
+    it('renders statutory disclosure notice and version', () => {
       const html = renderToStaticMarkup(<TermsPage />)
 
       expect(html).toContain('服務條款')
       expect(html).toContain(legalConfig.termsVersion)
       expect(html).toContain('契約審閱權重要告知')
-      expect(html).toContain('公告日至生效日前提供')
-      expect(html).toContain('3 日審閱期間')
+      expect(html).toContain('消費者保護法')
+      expect(html).toContain('詳閱本條款全部內容並明確同意')
     })
 
     it('renders distance contract and customized digital content cancellation rules', () => {

@@ -16,7 +16,7 @@ export type LegalConfig = {
 export const legalConfig: LegalConfig = {
   termsVersion: '2026-08-26-v2',
   termsPublishedAt: '2026-08-26',
-  termsEffectiveAt: '2026-08-29',
+  termsEffectiveAt: '2026-08-26',
   privacyVersion: '2026-08-16-v1',
   reviewPeriodDays: 3,
   contactEmail: import.meta.env.VITE_LEGAL_CONTACT_EMAIL || 'jjmow.cs15@nycu.edu.tw',
@@ -31,6 +31,6 @@ export const legalConfig: LegalConfig = {
   ),
 }
 
-export function isCurrentTermsEffective(now: Date = new Date()): boolean {
-  return now.getTime() >= new Date('2026-08-29T00:00:00+08:00').getTime()
+export function isCurrentTermsEffective(_now: Date = new Date()): boolean {
+  return true
 }

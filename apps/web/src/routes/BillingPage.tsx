@@ -12,7 +12,7 @@ import { listOwnedWaitlist, type OwnedWaitlistEntry } from '../lib/waitlist'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
-import { isCurrentTermsEffective, legalConfig } from '../lib/config'
+import { legalConfig } from '../lib/config'
 import { acceptCurrentTermsVersion } from '../lib/legal-acceptance'
 import { useEnrollmentState } from '../lib/enrollment'
 
@@ -49,7 +49,6 @@ export function BillingPage({
   const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<string | null>(initialAcceptedTermsVersion ?? null)
   const [termsChecked, setTermsChecked] = useState(false)
   const [acceptingTerms, setAcceptingTerms] = useState(false)
-  const termsVersionEffective = isCurrentTermsEffective()
   const { state: enrollment } = useEnrollmentState()
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
   const foundingAvailable = Boolean(enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0)
@@ -75,10 +74,6 @@ export function BillingPage({
   }
 
   async function startCheckout(childId: string, plan: BillingPlan) {
-    if (!termsVersionEffective) {
-      setError('新版服務條款仍在三日審閱期間，2026 年 8 月 29 日生效後才會重新開放付款。')
-      return
-    }
     if (!legalLoaded || legalError) {
       setError(legalError || '目前無法確認服務條款同意紀錄，請稍後再試。')
       return
@@ -269,17 +264,7 @@ export function BillingPage({
         {error && <p className="notice notice-error" role="alert">{error}</p>}
         {legalError && <p className="notice notice-error" role="alert">{legalError}</p>}
         {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
-        {!loading && !termsVersionEffective && (
-          <section className="notice" aria-labelledby="terms-review-title">
-            <h2 id="terms-review-title">新版服務條款審閱期間</h2>
-            <p>
-              Founder 30 持續訂閱價格契約已於 2026 年 8 月 26 日公告，將於 2026 年 8 月 29 日生效。
-              審閱期間可先閱讀<a href="/terms" target="_blank" rel="noreferrer">新版服務條款</a>；
-              生效後才會提供明確同意並重新開放付款。
-            </p>
-          </section>
-        )}
-        {!loading && termsVersionEffective && legalLoaded && acceptedTermsVersion !== legalConfig.termsVersion && (
+        {!loading && legalLoaded && acceptedTermsVersion !== legalConfig.termsVersion && (
           <section className="notice" aria-labelledby="terms-reacceptance-title">
             <h2 id="terms-reacceptance-title">付款前請確認新版服務條款</h2>
             <p>
@@ -329,6 +314,7 @@ export function BillingPage({
                   busy={checkoutChildId === child.id || cancelingChildId === child.id || resumingChildId === child.id}
                   activationPending={activatingChildId === child.id}
                   foundingAvailable={foundingAvailable}
+                  foundingRemaining={foundingRemaining}
                   onSubscribe={(childId, plan) => void startCheckout(childId, plan)}
                   onCancel={(childId, reason) => void cancelChildSubscription(childId, reason)}
                   onResume={(childId) => void resumeChildSubscription(childId)}
