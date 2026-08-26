@@ -16,19 +16,37 @@ import { isCurrentTermsEffective, legalConfig } from '../lib/config'
 import { acceptCurrentTermsVersion } from '../lib/legal-acceptance'
 import { useEnrollmentState } from '../lib/enrollment'
 
-export function BillingPage({ session }: { session: Session }) {
-  const [children, setChildren] = useState<Child[]>([])
-  const [subscriptions, setSubscriptions] = useState<SubscriptionView[]>([])
-  const [waitlistEntries, setWaitlistEntries] = useState<OwnedWaitlistEntry[]>([])
-  const [loading, setLoading] = useState(true)
+export function BillingPage({
+  session,
+  initialChildren,
+  initialSubscriptions,
+  initialWaitlist,
+  initialAcceptedTermsVersion,
+  initialLegalLoaded,
+  initialLegalError,
+}: {
+  session: Session
+  initialChildren?: Child[]
+  initialSubscriptions?: SubscriptionView[]
+  initialWaitlist?: OwnedWaitlistEntry[]
+  initialAcceptedTermsVersion?: string | null
+  initialLegalLoaded?: boolean
+  initialLegalError?: string
+}) {
+  const [children, setChildren] = useState<Child[]>(initialChildren ?? [])
+  const [subscriptions, setSubscriptions] = useState<SubscriptionView[]>(initialSubscriptions ?? [])
+  const [waitlistEntries, setWaitlistEntries] = useState<OwnedWaitlistEntry[]>(initialWaitlist ?? [])
+  const [loading, setLoading] = useState(initialChildren === undefined && initialSubscriptions === undefined)
   const [error, setError] = useState('')
+  const [legalError, setLegalError] = useState(initialLegalError ?? '')
+  const [legalLoaded, setLegalLoaded] = useState(initialLegalLoaded ?? (initialAcceptedTermsVersion !== undefined))
   const [checkoutChildId, setCheckoutChildId] = useState<string | null>(null)
   const [activeCheckout, setActiveCheckout] = useState<{ childId: string; plan: BillingPlan; checkoutPriceTwd?: number; foundingApplies?: boolean } | null>(null)
   const [activatingChildId, setActivatingChildId] = useState<string | null>(null)
   const [checkoutNotice, setCheckoutNotice] = useState('')
   const [cancelingChildId, setCancelingChildId] = useState<string | null>(null)
   const [resumingChildId, setResumingChildId] = useState<string | null>(null)
-  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<string | null>(null)
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<string | null>(initialAcceptedTermsVersion ?? null)
   const [termsChecked, setTermsChecked] = useState(false)
   const [acceptingTerms, setAcceptingTerms] = useState(false)
   const termsVersionEffective = isCurrentTermsEffective()
@@ -59,6 +77,10 @@ export function BillingPage({ session }: { session: Session }) {
   async function startCheckout(childId: string, plan: BillingPlan) {
     if (!termsVersionEffective) {
       setError('新版服務條款仍在三日審閱期間，2026 年 8 月 29 日生效後才會重新開放付款。')
+      return
+    }
+    if (!legalLoaded || legalError) {
+      setError(legalError || '目前無法確認服務條款同意紀錄，請稍後再試。')
       return
     }
     if (acceptedTermsVersion !== legalConfig.termsVersion) {
@@ -99,6 +121,8 @@ export function BillingPage({ session }: { session: Session }) {
     try {
       await acceptCurrentTermsVersion()
       setAcceptedTermsVersion(legalConfig.termsVersion)
+      setLegalLoaded(true)
+      setLegalError('')
       setTermsChecked(false)
       setCheckoutNotice('新版服務條款已記錄同意；隱私權政策版本未變更，不需要重新同意。')
     } catch {
@@ -165,22 +189,58 @@ export function BillingPage({ session }: { session: Session }) {
   }
 
   useEffect(() => {
+    let isMounted = true
     const supabase = getSupabaseClient()
-    void Promise.all([
+
+    const loadSubscriptionData = Promise.all([
       listChildren(),
       listOwnedSubscriptions(),
       listOwnedWaitlist(supabase),
-      supabase.from('profiles').select('terms_version').eq('id', session.user.id).single(),
     ])
-      .then(([nextChildren, nextSubscriptions, nextWaitlist, profileResult]) => {
+      .then(([nextChildren, nextSubscriptions, nextWaitlist]) => {
+        if (!isMounted) return
         setChildren(nextChildren)
         setSubscriptions(nextSubscriptions)
         setWaitlistEntries(nextWaitlist)
-        if (profileResult.error) throw profileResult.error
-        setAcceptedTermsVersion(profileResult.data?.terms_version ?? null)
       })
-      .catch(() => setError('目前無法讀取訂閱資料，請稍後再試。'))
-      .finally(() => setLoading(false))
+      .catch(() => {
+        if (!isMounted) return
+        setError('目前無法讀取訂閱資料，請稍後再試。')
+      })
+
+    const loadLegalData = Promise.resolve(
+      supabase
+        .from('profiles')
+        .select('terms_version')
+        .eq('id', session.user.id)
+        .maybeSingle()
+    )
+      .then(({ data, error: profileError }) => {
+        if (!isMounted) return
+        if (profileError) {
+          setLegalLoaded(false)
+          setLegalError('目前無法確認服務條款同意紀錄，暫時無法開啟付款。')
+          return
+        }
+        setAcceptedTermsVersion(data?.terms_version ?? null)
+        setLegalLoaded(true)
+        setLegalError('')
+      })
+      .catch(() => {
+        if (!isMounted) return
+        setLegalLoaded(false)
+        setLegalError('目前無法確認服務條款同意紀錄，暫時無法開啟付款。')
+      })
+
+    void Promise.allSettled([loadSubscriptionData, loadLegalData]).finally(() => {
+      if (isMounted) {
+        setLoading(false)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
   }, [session.user.id])
 
   return (
@@ -207,6 +267,7 @@ export function BillingPage({ session }: { session: Session }) {
         )}
 
         {error && <p className="notice notice-error" role="alert">{error}</p>}
+        {legalError && <p className="notice notice-error" role="alert">{legalError}</p>}
         {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
         {!loading && !termsVersionEffective && (
           <section className="notice" aria-labelledby="terms-review-title">
@@ -218,7 +279,7 @@ export function BillingPage({ session }: { session: Session }) {
             </p>
           </section>
         )}
-        {!loading && termsVersionEffective && acceptedTermsVersion !== legalConfig.termsVersion && (
+        {!loading && termsVersionEffective && legalLoaded && acceptedTermsVersion !== legalConfig.termsVersion && (
           <section className="notice" aria-labelledby="terms-reacceptance-title">
             <h2 id="terms-reacceptance-title">付款前請確認新版服務條款</h2>
             <p>

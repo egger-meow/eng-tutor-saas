@@ -1406,6 +1406,62 @@ begin
     raise exception 'service role cannot execute accept_legal_terms RPC';
   end if;
 
+  if has_function_privilege('anon', 'public.accept_current_terms(text)', 'execute') then
+    raise exception 'anon role can execute accept_current_terms RPC';
+  end if;
+  if not has_function_privilege('authenticated', 'public.accept_current_terms(text)', 'execute') then
+    raise exception 'authenticated role cannot execute accept_current_terms RPC';
+  end if;
+  if not has_function_privilege('service_role', 'public.accept_current_terms(text)', 'execute') then
+    raise exception 'service role cannot execute accept_current_terms RPC';
+  end if;
+
+  -- Verify required public.profiles columns exist
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles' and column_name = 'terms_version'
+  ) or not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles' and column_name = 'privacy_version'
+  ) or not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles' and column_name = 'legal_accepted_at'
+  ) then
+    raise exception 'public.profiles is missing required legal columns (terms_version, privacy_version, legal_accepted_at)';
+  end if;
+
+  -- Verify accept_legal_terms and accept_current_terms state recording
+  insert into auth.users (id, raw_user_meta_data)
+  values ('00000000-0000-0000-0000-000000000099', '{"display_name":"Legal RPC Test"}'::jsonb);
+
+  -- Set auth context to simulate authenticated parent
+  perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000099', true);
+
+  perform public.accept_legal_terms('2026-08-16-v1', '2026-08-16-v1');
+  if not exists (
+    select 1 from public.profiles
+    where id = '00000000-0000-0000-0000-000000000099'
+      and terms_version = '2026-08-16-v1'
+      and privacy_version = '2026-08-16-v1'
+      and legal_accepted_at is not null
+  ) then
+    raise exception 'accept_legal_terms did not record stated terms/privacy versions';
+  end if;
+
+  perform public.accept_current_terms('2026-08-26-v2');
+  if not exists (
+    select 1 from public.profiles
+    where id = '00000000-0000-0000-0000-000000000099'
+      and terms_version = '2026-08-26-v2'
+      and privacy_version = '2026-08-16-v1'
+      and legal_accepted_at is not null
+  ) then
+    raise exception 'accept_current_terms did not update terms_version to 2026-08-26-v2';
+  end if;
+
+  delete from auth.users where id = '00000000-0000-0000-0000-000000000099';
+  perform set_config('request.jwt.claim.sub', '', true);
+
   -- =========================================================================
   -- Longitudinal Generation Test Mode Operational Tests
   -- =========================================================================
