@@ -230,7 +230,33 @@ Deno.serve(async (request) => {
       })
       if (capBindError) {
         console.error('Capacity transaction binding failed', capBindError.message)
-        await releaseUnboundClaims()
+        let transactionCanceled = false
+        try {
+          const cancelRes = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+            method: 'PATCH',
+            headers: { authorization: `Bearer ${paddleApiKey}`, 'content-type': 'application/json' },
+            body: JSON.stringify({ status: 'canceled' }),
+          })
+          const cancelBody = await cancelRes.json()
+          if (cancelRes.ok && cancelBody?.data?.status === 'canceled') {
+            transactionCanceled = true
+          }
+        } catch (cancelErr) {
+          console.error('Cancellation after capacity bind failure failed', cancelErr)
+        }
+
+        if (transactionCanceled) {
+          await releaseUnboundClaims()
+        } else {
+          // If transaction cancellation is ambiguous or failed, retain capacity claim fail-closed!
+          if (foundingClaimId && !existingTransactionId && !founderBound) {
+            await supabase.rpc('release_founder_checkout_claim', {
+              p_claim_id: foundingClaimId,
+              p_transaction_id: null,
+              p_release_reason: 'not_created',
+            })
+          }
+        }
         return jsonResponse(503, { error: 'capacity_checkout_binding_failed' })
       }
       capacityBound = true

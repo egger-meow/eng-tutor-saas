@@ -53,7 +53,7 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(bindIndex).toBeGreaterThan(0)
 
     // Then patches discount
-    const patchIndex = checkoutCode.indexOf("fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`")
+    const patchIndex = checkoutCode.indexOf("discount_id: foundingDiscountId")
     expect(patchIndex).toBeGreaterThan(bindIndex)
   })
 
@@ -170,5 +170,16 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(checkoutCode).toContain("p_transaction_id: transactionId")
     expect(checkoutCode).toContain("p_release_reason: 'transaction_canceled'")
   })
+
+  it('8. verifies capacity claim retention on capacity bind failure unless Paddle cancellation is confirmed', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    // On capacity bind failure, attempts cancellation and only releases if transactionCanceled is true
+    expect(checkoutCode).toContain('if (capBindError)')
+    expect(checkoutCode).toContain("body: JSON.stringify({ status: 'canceled' })")
+    expect(checkoutCode).toContain('if (transactionCanceled)')
+    expect(checkoutCode).toContain('await releaseUnboundClaims()')
+  })
 })
+
 

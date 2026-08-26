@@ -2866,6 +2866,107 @@ begin
     raise exception 'founder claim was not marked released';
   end if;
 
+  -- 6) Hard-cap authority regressions A through G:
+  -- A. capacity=100, locked=99
+  -- B. returning beta obtains final claim
+  -- C. Paddle transaction is created
+  -- D. capacity binding fails and transaction cancellation is unconfirmed (claim remains pending/unresolved in DB)
+  -- E. another child must not gain a usable 100th seat while the first transaction remains unresolved
+  -- F. webhook from an unbound/released/mismatched transaction must not activate the expired-beta child
+  -- G. exact bound transaction webhook activates normally
+
+  -- Step A: Set capacity so remaining capacity is exactly 1
+  select private_generation.locked_capacity_count() into active_count_before;
+  update public.enrollment_settings set founding_limit = least(10, active_count_before + 1), capacity = active_count_before + 1 where key = 'default';
+
+  -- Step B: Returning beta child obtains final claim
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000134', '00000000-0000-0000-0000-000000000001', 'Returning Beta Hard Cap Test', 7, 'grade_7');
+  update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000134';
+
+  select capacity_claim_id into test_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000134', 'standard_annual', '2026-08-26-v2'
+  );
+  if test_claim_id is null then
+    raise exception 'returning beta child did not receive capacity claim';
+  end if;
+
+  -- Steps C & D: Capacity claim remains pending/unresolved (e.g. binding failed and cancellation unconfirmed)
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'pending' then
+    raise exception 'capacity claim is not in pending state';
+  end if;
+
+  -- Step E: Another child tries to create profile or checkout; must not gain the 100th seat
+  if (select remaining from public.get_enrollment_state()) <> 0 then
+    raise exception 'unresolved pending capacity claim failed to consume capacity seat';
+  end if;
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000135', '00000000-0000-0000-0000-000000000001', 'Child Blocked By Unresolved Claim', 7, 'grade_7');
+
+  if exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000135'
+  ) then
+    raise exception 'child 135 was erroneously granted a trial subscription while capacity was consumed by unresolved claim';
+  end if;
+
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000135' and status = 'waiting'
+  ) then
+    raise exception 'child 135 was not placed in waiting status';
+  end if;
+
+  -- Step F: Webhook from unbound/mismatched transaction must not activate expired-beta child
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event_v2(
+      p_event_id := 'evt_unbound_hard_cap_134', p_event_type := 'subscription.created', p_occurred_at := now(),
+      p_child_id := '00000000-0000-0000-0000-000000000134', p_provider_subscription_id := 'sub_unbound_hard_cap_134',
+      p_provider_customer_id := 'ctm_unbound_hard_cap_134', p_status := 'active', p_plan_code := 'standard_annual',
+      p_billing_interval := 'year', p_price_twd := 4999, p_current_period_start := now(),
+      p_current_period_end := now() + interval '1 year', p_cancel_at_period_end := false,
+      p_expected_founding_discount_id := 'dsc_founder_expected', p_discount_id := null,
+      p_discount_status := null, p_discount_type := null, p_discount_ends_at := null,
+      p_discount_ends_at_present := false, p_founder_claim_id := null, p_originating_transaction_id := 'txn_unbound_mismatched_134'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'webhook with unbound/mismatched transaction activated expired-beta child';
+  end if;
+
+  if (select provider from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000134') <> 'beta' then
+    raise exception 'child 134 subscription was altered by rejected webhook';
+  end if;
+
+  -- Step G: Exact bound transaction webhook activates normally
+  perform public.bind_capacity_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000134', test_claim_id, 'txn_exact_bound_134'
+  );
+
+  perform public.process_paddle_subscription_event_v2(
+    p_event_id := 'evt_exact_bound_134', p_event_type := 'subscription.created', p_occurred_at := now(),
+    p_child_id := '00000000-0000-0000-0000-000000000134', p_provider_subscription_id := 'sub_exact_bound_134',
+    p_provider_customer_id := 'ctm_exact_bound_134', p_status := 'active', p_plan_code := 'standard_annual',
+    p_billing_interval := 'year', p_price_twd := 4999, p_current_period_start := now(),
+    p_current_period_end := now() + interval '1 year', p_cancel_at_period_end := false,
+    p_expected_founding_discount_id := 'dsc_founder_expected', p_discount_id := null,
+    p_discount_status := null, p_discount_type := null, p_discount_ends_at := null,
+    p_discount_ends_at_present := false, p_founder_claim_id := null, p_originating_transaction_id := 'txn_exact_bound_134'
+  );
+
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'completed' then
+    raise exception 'capacity claim was not completed by exact bound webhook';
+  end if;
+
+  if (select status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000134') <> 'active' then
+    raise exception 'exact bound webhook did not activate subscription';
+  end if;
+
+  update public.enrollment_settings set capacity = 100, founding_limit = 30 where key = 'default';
+
   -- Monotonic Founder authority test: hard deletion does not decrease founding_count
   select founding_count into founder_count_before from public.get_enrollment_state();
   delete from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000118';
