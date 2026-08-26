@@ -66,6 +66,7 @@ PADDLE_WEBHOOK_SECRET=<notification endpoint secret>
 PADDLE_STANDARD_PRICE_ID=<monthly pri_...>
 PADDLE_ANNUAL_PRICE_ID=<annual pri_...>
 PADDLE_FOUNDING_DISCOUNT_ID=<monthly forever-recurring dsc_...>
+REQUIRED_TERMS_VERSION=2026-08-26-v2
 ```
 
 > **注意**：正式環境使用 `PADDLE_API_BASE_URL=https://api.paddle.com`。若未設定 `PADDLE_API_BASE_URL`，Server-side 函式將拒絕服務（fail closed），不會預設 fallback 至 Sandbox。
@@ -85,6 +86,7 @@ Supabase secrets 儲存方式與更新後立即生效的行為見 [Edge Function
 2. 完成 Sandbox 付款後，確認訂閱頁顯示「年繳方案・每年 NT$4,999」，本期結束時間約一年後。
 3. 用另一位測試孩子選「月繳」，確認一般價格 NT$499；若仍有有效 Founder 30 保留，checkout 與後續同一訂閱每期皆為 NT$299。
 4. 在 Paddle notification delivery logs 確認 webhook 回 HTTP 200；在 Supabase logs 確認沒有 `processing_failed`。
+5. 部署並以 service-role Bearer 每五分鐘呼叫 `paddle-founder-claim-cleanup`。它只會在 Paddle 已取消交易，或已確認移除 draft 交易的 Founder discount 後釋放過期 claim；`paid`／`completed` 或任何不確定狀態都保留席次並等待 webhook／人工對帳。
 5. 分別取消月繳與年繳，確認 UI 顯示「使用至」當期末，且不會立即失去已付款權益。
 6. Webhook Simulator 可做額外傳送驗證，但正式權益驗收應以實際 Sandbox checkout 產生、含本專案 `custom_data.child_id` 的 subscription 為準。
 

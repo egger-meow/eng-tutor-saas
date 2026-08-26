@@ -15,7 +15,7 @@ export function TermsPage() {
             <p className="eyebrow">服務合約與使用者條款</p>
             <h1>服務條款與定型化契約</h1>
             <p className="legal-meta">
-              版本號：{legalConfig.termsVersion} ｜ 生效日期：2026 年 8 月 26 日
+              版本號：{legalConfig.termsVersion} ｜ 公告日期：2026 年 8 月 26 日 ｜ 生效日期：2026 年 8 月 29 日
             </p>
           </FadeInUp>
 
@@ -24,7 +24,7 @@ export function TermsPage() {
               <div className="legal-callout legal-callout-important">
                 <h3>【契約審閱權重要告知】</h3>
                 <p>
-                  依中華民國《消費者保護法》第 11 條之 1 及主管機關公告之定型化契約規範，本定型化契約條款已於官方網站公開提供消費者至少 <strong>3 日之合理審閱期間</strong>。請您於註冊、建立子女學習檔案或付費購買本服務前，詳閱本條款全部內容。當您點擊「註冊」、「同意」或「開始訂閱」時，即表示您已充分審閱並同意受本契約條款之拘束。
+                  依中華民國《消費者保護法》第 11 條之 1 及主管機關公告之定型化契約規範，本版本於 2026 年 8 月 26 日公告，預定於 2026 年 8 月 29 日生效，公告日至生效日前提供 <strong>3 日審閱期間</strong>。請您於本版本生效後註冊、建立子女學習檔案或付費購買本服務前，詳閱本條款全部內容並明確同意。
                 </p>
               </div>
             </section>

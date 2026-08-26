@@ -33,6 +33,9 @@ export async function prepareCheckout(childId: string, plan: BillingPlan): Promi
     if (code === 'paddle_discount_not_verifiable' || code === 'paddle_discount_misconfigured') {
       throw new Error('Founding 30 優惠設定尚未通過驗證，請先確認 Paddle 折扣金額與適用期數。')
     }
+    if (code === 'legal_acceptance_required') {
+      throw new Error('開始付款前，請先閱讀並同意目前版本的服務條款。')
+    }
     throw new Error('目前無法開啟安全付款，請稍後再試。')
   }
   if (!data?.transaction_id) throw new Error('付款交易未成功建立，請稍後再試。')
@@ -98,5 +101,4 @@ export async function resumeSubscription(childId: string): Promise<SubscriptionA
     reconciliationPending: data.reconciliation_pending === true,
   }
 }
-
 

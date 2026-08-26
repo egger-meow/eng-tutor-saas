@@ -12,6 +12,8 @@ import { listOwnedWaitlist, type OwnedWaitlistEntry } from '../lib/waitlist'
 import { closePaddleCheckout, openPaddleCheckout } from '../lib/paddle'
 import { getSupabaseClient } from '../lib/supabase'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, type BillingPlan } from '../lib/billing-plans'
+import { isCurrentTermsEffective, legalConfig } from '../lib/config'
+import { acceptCurrentTermsVersion } from '../lib/legal-acceptance'
 
 export function BillingPage({ session }: { session: Session }) {
   const [children, setChildren] = useState<Child[]>([])
@@ -25,6 +27,10 @@ export function BillingPage({ session }: { session: Session }) {
   const [checkoutNotice, setCheckoutNotice] = useState('')
   const [cancelingChildId, setCancelingChildId] = useState<string | null>(null)
   const [resumingChildId, setResumingChildId] = useState<string | null>(null)
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<string | null>(null)
+  const [termsChecked, setTermsChecked] = useState(false)
+  const [acceptingTerms, setAcceptingTerms] = useState(false)
+  const termsVersionEffective = isCurrentTermsEffective()
 
   async function refreshSubscriptions() {
     const nextSubscriptions = await listOwnedSubscriptions()
@@ -47,6 +53,14 @@ export function BillingPage({ session }: { session: Session }) {
   }
 
   async function startCheckout(childId: string, plan: BillingPlan) {
+    if (!termsVersionEffective) {
+      setError('新版服務條款仍在三日審閱期間，2026 年 8 月 29 日生效後才會重新開放付款。')
+      return
+    }
+    if (acceptedTermsVersion !== legalConfig.termsVersion) {
+      setError('開始付款前，請先閱讀並同意目前版本的服務條款。')
+      return
+    }
     setCheckoutChildId(childId)
     setActiveCheckout({ childId, plan })
     setCheckoutNotice('')
@@ -71,6 +85,22 @@ export function BillingPage({ session }: { session: Session }) {
       setError(caught instanceof Error ? caught.message : '目前無法開啟安全付款，請稍後再試。')
     } finally {
       setCheckoutChildId(null)
+    }
+  }
+
+  async function acceptTermsForCheckout() {
+    if (!termsChecked) return
+    setAcceptingTerms(true)
+    setError('')
+    try {
+      await acceptCurrentTermsVersion()
+      setAcceptedTermsVersion(legalConfig.termsVersion)
+      setTermsChecked(false)
+      setCheckoutNotice('新版服務條款已記錄同意；隱私權政策版本未變更，不需要重新同意。')
+    } catch {
+      setError('目前無法記錄服務條款同意，請稍後再試。')
+    } finally {
+      setAcceptingTerms(false)
     }
   }
 
@@ -131,15 +161,23 @@ export function BillingPage({ session }: { session: Session }) {
   }
 
   useEffect(() => {
-    void Promise.all([listChildren(), listOwnedSubscriptions(), listOwnedWaitlist(getSupabaseClient())])
-      .then(([nextChildren, nextSubscriptions, nextWaitlist]) => {
+    const supabase = getSupabaseClient()
+    void Promise.all([
+      listChildren(),
+      listOwnedSubscriptions(),
+      listOwnedWaitlist(supabase),
+      supabase.from('profiles').select('terms_version').eq('id', session.user.id).single(),
+    ])
+      .then(([nextChildren, nextSubscriptions, nextWaitlist, profileResult]) => {
         setChildren(nextChildren)
         setSubscriptions(nextSubscriptions)
         setWaitlistEntries(nextWaitlist)
+        if (profileResult.error) throw profileResult.error
+        setAcceptedTermsVersion(profileResult.data?.terms_version ?? null)
       })
       .catch(() => setError('目前無法讀取訂閱資料，請稍後再試。'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [session.user.id])
 
   return (
     <AppShell
@@ -166,6 +204,44 @@ export function BillingPage({ session }: { session: Session }) {
 
         {error && <p className="notice notice-error" role="alert">{error}</p>}
         {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
+        {!loading && !termsVersionEffective && (
+          <section className="notice" aria-labelledby="terms-review-title">
+            <h2 id="terms-review-title">新版服務條款審閱期間</h2>
+            <p>
+              Founder 30 持續訂閱價格契約已於 2026 年 8 月 26 日公告，將於 2026 年 8 月 29 日生效。
+              審閱期間可先閱讀<a href="/terms" target="_blank" rel="noreferrer">新版服務條款</a>；
+              生效後才會提供明確同意並重新開放付款。
+            </p>
+          </section>
+        )}
+        {!loading && termsVersionEffective && acceptedTermsVersion !== legalConfig.termsVersion && (
+          <section className="notice" aria-labelledby="terms-reacceptance-title">
+            <h2 id="terms-reacceptance-title">付款前請確認新版服務條款</h2>
+            <p>
+              Founder 30 的持續訂閱價格契約已更新。請先閱讀
+              <a href="/terms" target="_blank" rel="noreferrer">目前版本服務條款</a>；
+              隱私權政策內容與版本沒有變更，不需要重新同意。
+            </p>
+            <label>
+              <input
+                type="checkbox"
+                checked={termsChecked}
+                onChange={(event) => setTermsChecked(event.target.checked)}
+              />
+              我已閱讀並同意 {legalConfig.termsVersion} 服務條款
+            </label>
+            <p>
+              <button
+                className="button"
+                type="button"
+                disabled={!termsChecked || acceptingTerms}
+                onClick={() => void acceptTermsForCheckout()}
+              >
+                {acceptingTerms ? '正在記錄…' : '同意新版服務條款'}
+              </button>
+            </p>
+          </section>
+        )}
 
         {!loading && children.length === 0 && (
           <div className="empty-state">

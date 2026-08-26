@@ -154,6 +154,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('NT$299')
     expect(html).toContain('創始 30 名額已保留')
     expect(html).toContain('完成月繳後，只要同一訂閱不中斷，即固定 NT$299／月')
+    expect(html).toMatch(/checked="" value="monthly"/)
   })
 
   it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$299 discount again', () => {
@@ -184,6 +185,7 @@ describe('ChildSubscription Component', () => {
     expect(html).not.toContain('strike-price')
     expect(html).not.toContain('NT$299')
     expect(html).not.toContain('創始早鳥優惠')
+    expect(html).toMatch(/checked="" value="annual"/)
   })
 
   it('6. trialing status: shows billing interval selector', () => {
@@ -263,7 +265,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('選擇付款週期')
     expect(html).toContain('年繳 NT$4,999')
     expect(html).toContain('月繳 NT$499')
-    expect(html).toContain('選擇月繳並開始訂閱')
+    expect(html).toContain('選擇年繳並開始訂閱')
   })
   it('9. active redeemed Founder shows effective NT$299 price and Founder badge', () => {
     const html = renderToStaticMarkup(

@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { legalConfig } from './config'
+import { isCurrentTermsEffective, legalConfig } from './config'
 
 describe('Legal & Compliance Configuration & Invariants', () => {
   it('enforces statutory review period of at least 3 days for Taiwan standard contracts', () => {
     expect(legalConfig.reviewPeriodDays).toBeGreaterThanOrEqual(3)
+  })
+
+  it('keeps Terms v2 in review until its Taiwan effective timestamp', () => {
+    expect(isCurrentTermsEffective(new Date('2026-08-28T15:59:59Z'))).toBe(false)
+    expect(isCurrentTermsEffective(new Date('2026-08-28T16:00:00Z'))).toBe(true)
   })
 
   it('has semantic legal version strings for audit tracking', () => {

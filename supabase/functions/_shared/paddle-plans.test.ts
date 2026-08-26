@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { getCheckoutPlan, getPaddleApiBaseUrl, getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
+import { getCheckoutPlan, getFounderClaimNeutralizationAction, getPaddleApiBaseUrl, getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
 
 const priceIds = { monthly: 'pri_monthly', annual: 'pri_annual' }
 
 describe('Paddle plan allowlist', () => {
+  it('neutralizes abandoned Founder transactions only through safe Paddle states', () => {
+    expect(getFounderClaimNeutralizationAction('draft', 'dsc_founder', 'dsc_founder')).toBe('remove_discount')
+    expect(getFounderClaimNeutralizationAction('ready', 'dsc_founder', 'dsc_founder')).toBe('cancel')
+    expect(getFounderClaimNeutralizationAction('billed', 'dsc_founder', 'dsc_founder')).toBe('cancel')
+    expect(getFounderClaimNeutralizationAction('canceled', 'dsc_founder', 'dsc_founder')).toBe('release_canceled')
+    expect(getFounderClaimNeutralizationAction('paid', 'dsc_founder', 'dsc_founder')).toBe('retain')
+    expect(getFounderClaimNeutralizationAction('completed', 'dsc_founder', 'dsc_founder')).toBe('retain')
+  })
   it('maps semantic checkout plans to canonical server plans', () => {
     expect(getCheckoutPlan('monthly', priceIds)).toMatchObject({ planCode: 'standard_monthly', billingInterval: 'month', priceTwd: 499 })
     expect(getCheckoutPlan('annual', priceIds)).toMatchObject({ planCode: 'standard_annual', billingInterval: 'year', priceTwd: 4999 })
@@ -105,6 +113,7 @@ describe('Paddle API Base URL configuration & regression', () => {
       'paddle-checkout/index.ts',
       'paddle-cancel-subscription/index.ts',
       'paddle-update-subscription/index.ts',
+      'paddle-founder-claim-cleanup/index.ts',
     ]
 
     for (const relPath of targetFunctions) {
@@ -116,6 +125,19 @@ describe('Paddle API Base URL configuration & regression', () => {
       ).toBe(true)
     }
   })
+
+  it('binds discounted checkout and webhook redemption to the same durable Founder claim', () => {
+    const checkout = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+    const webhook = readFileSync(join(__dirname, '../paddle-webhook/index.ts'), 'utf-8')
+    const cleanup = readFileSync(join(__dirname, '../paddle-founder-claim-cleanup/index.ts'), 'utf-8')
+
+    expect(checkout).toContain("rpc('prepare_paddle_checkout_v2'")
+    expect(checkout).toContain("rpc('bind_founder_checkout_transaction'")
+    expect(checkout).toContain('founder_claim_id: foundingClaimId')
+    expect(webhook).toContain("rpc('process_paddle_subscription_event_v2'")
+    expect(webhook).toContain('p_founder_claim_id: founderClaimId ?? null')
+    expect(webhook).toContain('p_originating_transaction_id: subscription?.transaction_id ?? null')
+    expect(cleanup).toContain("rpc('claim_expired_founder_checkouts'")
+    expect(cleanup).toContain("rpc('release_founder_checkout_claim'")
+  })
 })
-
-

@@ -27,6 +27,7 @@ type PaddleEvent = {
     current_billing_period?: { starts_at?: string; ends_at?: string } | null
     scheduled_change?: { action?: string } | null
     discount?: PaddleSubscriptionDiscount | null
+    transaction_id?: string
   }
 }
 
@@ -112,13 +113,17 @@ Deno.serve(async (request) => {
     const subscription = event.data
     const childId = subscription?.custom_data?.child_id
     if (typeof childId !== 'string') throw new Error('Missing custom_data.child_id')
+    const founderClaimId = subscription?.custom_data?.founder_claim_id
+    if (founderClaimId !== undefined && typeof founderClaimId !== 'string') {
+      throw new Error('Invalid custom_data.founder_claim_id')
+    }
     const plan = getWebhookPlan(subscription?.items, { monthly: monthlyPriceId, annual: annualPriceId })
     const foundingDiscount = getWebhookFoundingDiscount(subscription?.discount)
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
-    const { data, error } = await supabase.rpc('process_paddle_subscription_event', {
+    const { data, error } = await supabase.rpc('process_paddle_subscription_event_v2', {
       p_event_id: event.event_id,
       p_event_type: event.event_type,
       p_occurred_at: event.occurred_at,
@@ -138,6 +143,8 @@ Deno.serve(async (request) => {
       p_discount_type: foundingDiscount.type,
       p_discount_ends_at: foundingDiscount.endsAt,
       p_discount_ends_at_present: foundingDiscount.endsAtPresent,
+      p_founder_claim_id: founderClaimId ?? null,
+      p_originating_transaction_id: subscription?.transaction_id ?? null,
     })
     if (error) throw error
 

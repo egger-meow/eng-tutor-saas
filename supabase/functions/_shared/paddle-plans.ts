@@ -36,6 +36,19 @@ export type PaddleSubscriptionDiscount = {
   ends_at?: string | null
 }
 
+export type FounderClaimNeutralizationAction = 'remove_discount' | 'cancel' | 'release_canceled' | 'retain'
+
+export function getFounderClaimNeutralizationAction(
+  status: unknown,
+  discountId: unknown,
+  expectedDiscountId: string,
+): FounderClaimNeutralizationAction {
+  if (status === 'canceled') return 'release_canceled'
+  if (status === 'draft' && discountId === expectedDiscountId) return 'remove_discount'
+  if (status === 'ready' || status === 'billed') return 'cancel'
+  return 'retain'
+}
+
 export function getCheckoutPlan(
   key: unknown,
   priceIds: { monthly: string; annual: string },

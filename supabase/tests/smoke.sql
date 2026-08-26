@@ -21,12 +21,16 @@ declare
   recovery_child_id uuid;
   recovery_status_result jsonb;
   recovery_release_result jsonb;
+  founder_claim_id uuid;
 begin
   insert into auth.users (id, raw_user_meta_data)
   values (
     '00000000-0000-0000-0000-000000000001',
     '{"display_name":"Migration Test"}'::jsonb
   );
+  update public.profiles
+  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now()
+  where id = '00000000-0000-0000-0000-000000000001';
 
   insert into public.children (id, parent_id, display_name, grade)
   values (
@@ -46,10 +50,18 @@ begin
     raise exception 'new child did not receive a beta trial entitlement';
   end if;
 
-  perform public.prepare_paddle_checkout(
+  select founding_claim_id into founder_claim_id
+  from public.prepare_paddle_checkout_v2(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000002',
-    'standard_monthly'
+    'standard_monthly',
+    '2026-08-26-v2'
+  );
+  perform public.bind_founder_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    founder_claim_id,
+    'txn_checkout_smoke'
   );
   if (
     select founding_status from public.subscriptions
@@ -58,13 +70,14 @@ begin
     raise exception 'checkout preparation did not reserve founding eligibility';
   end if;
 
-  perform public.process_paddle_subscription_event(
+  perform public.process_paddle_subscription_event_v2(
     'evt_checkout_smoke', 'subscription.created', now(),
     '00000000-0000-0000-0000-000000000002',
     'sub_checkout_smoke', 'ctm_checkout_smoke', 'active',
     'standard_monthly', 'month', 499,
     now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true,
+    founder_claim_id, 'txn_checkout_smoke'
   );
   if not exists (
     select 1 from public.subscriptions
@@ -112,11 +125,28 @@ begin
     raise exception 'new trial student was not allocated founding eligibility when under limit';
   end if;
 
-  perform public.prepare_paddle_checkout(
+  perform public.prepare_paddle_checkout_v2(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000004',
-    'standard_annual'
+    'standard_annual',
+    '2026-08-26-v2'
   );
+
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_annual_founder_discount_rejected', 'subscription.created', now(),
+      '00000000-0000-0000-0000-000000000004',
+      'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
+      'standard_annual', 'year', 4999,
+      now(), now() + interval '1 year', false,
+      'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    );
+  exception when others then blocked := true;
+  end;
+  if not blocked then
+    raise exception 'annual subscription accepted the configured Founder discount';
+  end if;
 
   perform public.process_paddle_subscription_event(
     'evt_annual_smoke', 'subscription.created', now(),
@@ -124,7 +154,7 @@ begin
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
     now(), now() + interval '1 year', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
   );
   if not exists (
     select 1 from public.subscriptions
@@ -143,7 +173,7 @@ begin
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
     now(), now() + interval '1 year', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
   );
   if (
     select count(*) from public.billing_webhook_events
@@ -160,7 +190,7 @@ begin
       'sub_annual_duplicate', 'ctm_checkout_smoke', 'active',
       'standard_annual', 'year', 4999,
       now(), now() + interval '1 year', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
     );
   exception when others then
     blocked := true;
@@ -177,7 +207,7 @@ begin
       'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
       'standard_annual', 'month', 499,
       now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
     );
   exception when others then
     blocked := true;
@@ -188,7 +218,7 @@ begin
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
     now(), now() + interval '1 year', true,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
   );
   if (
     select cancel_at_period_end from public.subscriptions
@@ -203,7 +233,7 @@ begin
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
     now(), now() + interval '1 year', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', null, null, null, null, false
   );
   if (
     select cancel_at_period_end from public.subscriptions
@@ -1252,6 +1282,8 @@ declare
   founder_count_before integer;
   founder_count_after integer;
   founder_forfeited_at timestamptz;
+  race_claim_id uuid;
+  founder_lifetime_claim_id uuid;
   blocked boolean := false;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
@@ -1321,6 +1353,25 @@ begin
   end if;
   if not has_function_privilege('service_role', 'public.prepare_paddle_checkout(uuid,uuid,text)', 'execute') then
     raise exception 'service role cannot prepare Paddle checkout';
+  end if;
+  if has_function_privilege('anon', 'public.prepare_paddle_checkout_v2(uuid,uuid,text,text)', 'execute')
+    or has_function_privilege('authenticated', 'public.prepare_paddle_checkout_v2(uuid,uuid,text,text)', 'execute')
+    or has_function_privilege('authenticated', 'public.bind_founder_checkout_transaction(uuid,uuid,uuid,text)', 'execute')
+    or has_function_privilege('authenticated', 'public.release_founder_checkout_claim(uuid,text,text)', 'execute')
+    or has_table_privilege('authenticated', 'private_generation.founder_checkout_claims', 'select') then
+    raise exception 'Founder checkout claims are exposed to browser roles';
+  end if;
+  if not has_function_privilege('service_role', 'public.prepare_paddle_checkout_v2(uuid,uuid,text,text)', 'execute')
+    or not has_function_privilege('service_role', 'public.bind_founder_checkout_transaction(uuid,uuid,uuid,text)', 'execute')
+    or not has_function_privilege('service_role', 'public.release_founder_checkout_claim(uuid,text,text)', 'execute') then
+    raise exception 'service role cannot manage Founder checkout claims';
+  end if;
+  if not has_function_privilege(
+    'service_role',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'execute'
+  ) then
+    raise exception 'deployed webhook compatibility signature was removed';
   end if;
   if has_function_privilege(
     'anon',
@@ -1401,6 +1452,9 @@ begin
     '00000000-0000-0000-0000-000000000001',
     '{"display_name":"Migration Test"}'::jsonb
   );
+  update public.profiles
+  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now()
+  where id = '00000000-0000-0000-0000-000000000001';
 
   insert into public.children (id, parent_id, display_name, grade, grade_stage, textbook_version)
   values (
@@ -1637,10 +1691,11 @@ begin
   -- Verify prepare_paddle_checkout is strictly blocked for waiting child
   blocked := false;
   begin
-    perform public.prepare_paddle_checkout(
+    perform public.prepare_paddle_checkout_v2(
       '00000000-0000-0000-0000-000000000001',
       '00000000-0000-0000-0000-000000000077',
-      'standard_monthly'
+      'standard_monthly',
+      '2026-08-26-v2'
     );
   exception
     when others then
@@ -1675,10 +1730,11 @@ begin
   end if;
 
   -- Verify prepare_paddle_checkout now succeeds for released child
-  perform public.prepare_paddle_checkout(
+  perform public.prepare_paddle_checkout_v2(
     '00000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000077',
-    'standard_monthly'
+    'standard_monthly',
+    '2026-08-26-v2'
   );
 
   -- Process Paddle webhook payment event for released waitlist child
@@ -2194,6 +2250,51 @@ begin
   update public.enrollment_settings set capacity = 1000, founding_limit = 30, status = 'open' where key = 'default';
   select founding_count into founder_count_before from public.get_enrollment_state();
 
+  -- Race regression: a transaction bound immediately before reservation expiry
+  -- keeps its seat counted until completion or verified Paddle neutralization.
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000109', '00000000-0000-0000-0000-000000000001', 'Founder In Flight', 7, 'grade_7');
+  select founding_claim_id into race_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000109',
+    'standard_monthly',
+    '2026-08-26-v2'
+  );
+  perform public.bind_founder_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000109',
+    race_claim_id,
+    'txn_founder_race'
+  );
+  update public.subscriptions set founding_reserved_until = now() - interval '1 second'
+  where child_id = '00000000-0000-0000-0000-000000000109';
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before + 1 then
+    raise exception 'expired reservation released a still-payable Founder transaction claim';
+  end if;
+  update public.enrollment_settings set founding_limit = founder_count_before + 1 where key = 'default';
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000112', '00000000-0000-0000-0000-000000000001', 'Founder Boundary Competitor', 7, 'grade_7');
+  if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000112') <> 'none' then
+    raise exception 'in-flight Founder claim allowed a seat beyond the configured boundary';
+  end if;
+  perform public.process_paddle_subscription_event_v2(
+    'evt_founder_race_complete', 'subscription.created', clock_timestamp(),
+    '00000000-0000-0000-0000-000000000109', 'sub_founder_race', 'ctm_founder_race', 'active',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true,
+    race_claim_id, 'txn_founder_race'
+  );
+  if not exists (
+    select 1 from public.subscriptions
+    where child_id = '00000000-0000-0000-0000-000000000109'
+      and founding_status = 'redeemed'
+  ) or (select founding_count from public.get_enrollment_state()) > founder_count_before + 1 then
+    raise exception 'late Founder checkout completion exceeded the hard seat boundary';
+  end if;
+  update public.enrollment_settings set founding_limit = 30 where key = 'default';
+  select founding_count into founder_count_before from public.get_enrollment_state();
+
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values ('00000000-0000-0000-0000-000000000110', '00000000-0000-0000-0000-000000000001', 'Founder Expiry', 7, 'grade_7');
   if not exists (
@@ -2208,8 +2309,9 @@ begin
   if (select founding_count from public.get_enrollment_state()) <> founder_count_before then
     raise exception 'expired effective reservation did not release its seat in public state';
   end if;
-  perform public.prepare_paddle_checkout(
+  perform public.prepare_paddle_checkout_v2(
     '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000110', 'standard_monthly'
+    , '2026-08-26-v2'
   );
   if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000110') <> 'expired' then
     raise exception 'expired child regained Founder pricing at checkout';
@@ -2217,22 +2319,37 @@ begin
 
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values ('00000000-0000-0000-0000-000000000111', '00000000-0000-0000-0000-000000000001', 'Founder Lifetime', 7, 'grade_7');
+  select founding_claim_id into founder_lifetime_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000111',
+    'standard_monthly',
+    '2026-08-26-v2'
+  );
+  perform public.bind_founder_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000111',
+    founder_lifetime_claim_id,
+    'txn_founder_lifetime'
+  );
   blocked := false;
   begin
-    perform public.process_paddle_subscription_event(
-      'evt_founder_missing_ends_at', 'subscription.activated', clock_timestamp(),
+    perform public.process_paddle_subscription_event_v2(
+      'evt_founder_missing_ends_at', 'subscription.created', clock_timestamp(),
       '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
       'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
-      'dsc_founder', 'dsc_founder', 'active', 'recurring', null, false
+      'dsc_founder', 'dsc_founder', 'active', 'recurring', null, false,
+      founder_lifetime_claim_id, 'txn_founder_lifetime'
     );
   exception when others then blocked := true;
   end;
   if not blocked then raise exception 'Founder redemption accepted a discount without explicit forever ends_at'; end if;
-  perform public.process_paddle_subscription_event(
-    'evt_founder_redeem', 'subscription.activated', clock_timestamp(),
+  perform public.process_paddle_subscription_event_v2(
+    'evt_founder_redeem', 'subscription.created', clock_timestamp(),
     '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
     'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true,
+    founder_lifetime_claim_id, 'txn_founder_lifetime'
   );
   if not exists (
     select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111'
@@ -2290,8 +2407,9 @@ begin
   if (select founding_count from public.get_enrollment_state()) <> founder_count_after then
     raise exception 'forfeited Founder seat was returned to the public pool';
   end if;
-  perform public.prepare_paddle_checkout(
+  perform public.prepare_paddle_checkout_v2(
     '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000111', 'standard_monthly'
+    , '2026-08-26-v2'
   );
   if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111') <> 'forfeited' then
     raise exception 'forfeited child regained Founder pricing';

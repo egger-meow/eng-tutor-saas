@@ -33,12 +33,18 @@ type Props = {
 export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
-  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('monthly')
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>(
+    subscription?.foundingStatus === 'eligible' ? 'monthly' : 'annual',
+  )
 
   useEffect(() => {
     setConfirmingCancel(false)
     setReason('')
   }, [subscription?.cancelAtPeriodEnd, subscription?.status])
+
+  useEffect(() => {
+    setSelectedPlan(subscription?.foundingStatus === 'eligible' ? 'monthly' : 'annual')
+  }, [child.id, subscription?.foundingStatus])
 
   if (waitlist?.status === 'waiting' && !subscription) {
     return (
@@ -330,4 +336,3 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
     </article>
   )
 }
-

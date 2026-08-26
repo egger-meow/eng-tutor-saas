@@ -126,3 +126,10 @@ export async function flushPendingLegalAcceptance(): Promise<{
     return { attempted: true, success: false, error: msg }
   }
 }
+
+export async function acceptCurrentTermsVersion(): Promise<void> {
+  const { error } = await getSupabaseClient().rpc('accept_current_terms', {
+    p_terms_version: legalConfig.termsVersion,
+  })
+  if (error) throw error
+}

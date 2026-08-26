@@ -616,6 +616,8 @@ A redeemed or forfeited seat is permanently consumed. Cancellation never returns
 
 Annual checkout never receives the Founder discount. Opening or abandoning annual checkout does not destroy an active reservation; successful annual activation converts an unredeemed reservation to `expired` and releases it.
 
+Creating a Founder-discounted Paddle transaction durably transfers the temporary seat into a server-only checkout claim tied to that transaction. The claim remains counted even if the 14-day child reservation subsequently expires. It becomes a permanently consumed seat on verified subscription activation, or releases only after the Paddle transaction is independently verified as canceled or unable to complete with the Founder discount. A payable abandoned transaction must never become an uncounted Founder subscription.
+
 ---
 # 23. Founder Price Requires Continuous Subscription
 
@@ -2903,6 +2905,8 @@ Billing webhook must:
 * update subscription state idempotently;
 * never trust arbitrary browser-submitted subscription status.
 
+Founder redemption additionally requires the expected discount, the matching durable checkout claim identity inherited through Paddle custom data, and the exact originating Paddle `transaction_id` on `subscription.created`. Annual subscription events carrying the configured Founder discount fail closed. Database rollout retains compatibility RPC signatures so the deployed webhook and the claim-aware webhook may coexist during a database-first cutover; unsafe Founder/annual events on the legacy signature fail for later Paddle retry rather than being misinterpreted.
+
 The verified Paddle event transaction also records the normalized subscription lifecycle transition with Paddle occurred_at when available. Internal beta/trial and successful internal billing actions record their real transaction time and an explicit non-webhook source. Repeated webhook delivery must not duplicate lifecycle events.
 
 ---
@@ -3991,6 +3995,8 @@ NT$299/month while the same subscription remains continuous
 Scheduling cancellation, past due, pause, and resuming before the actual end preserve a redeemed Founder seat and price. A verified actual cancellation changes `redeemed` to `forfeited` exactly once; the seat remains permanently consumed and the child can never receive Founder pricing again.
 
 Expired reservations release their temporary seat. Redeemed and forfeited seats never release it. Annual checkout never receives the discount, abandoned annual checkout preserves an active reservation, and successful annual activation expires an unredeemed reservation.
+
+An in-flight discounted checkout claim is still a reserved seat after the original 14-day timestamp. Allocation, checkout preparation, expiry cleanup, claim completion, and verified abandoned-transaction release share the enrollment-settings-first lock order. No allocator may reuse that seat until Paddle can no longer complete the old transaction with the Founder discount.
 
 The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters.
 
