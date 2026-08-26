@@ -98,5 +98,47 @@ Deno.serve(async (request) => {
       console.error('Founder checkout claim retained after cleanup failure', transactionId, claimError)
     }
   }
+
+  // Also reconcile expired capacity checkouts
+  const { data: capClaims } = await supabase.rpc('claim_expired_capacity_checkouts', { p_limit: 20 })
+  for (const capClaim of capClaims ?? []) {
+    const transactionId = capClaim.paddle_transaction_id
+    if (typeof transactionId !== 'string') continue
+    try {
+      const getResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+        headers: { authorization: `Bearer ${paddleApiKey}` },
+      })
+      const getBody = await getResponse.json()
+      if (!getResponse.ok) throw new Error(`Paddle GET failed: ${getResponse.status}`)
+      const transaction = getBody?.data
+      if (transaction?.status === 'canceled') {
+        await supabase.rpc('release_capacity_checkout_claim', {
+          p_claim_id: capClaim.claim_id,
+          p_transaction_id: transactionId,
+          p_release_reason: 'transaction_canceled',
+        })
+      } else if (['draft', 'ready'].includes(transaction?.status)) {
+        const cancelResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+          method: 'PATCH',
+          headers: {
+            authorization: `Bearer ${paddleApiKey}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'canceled' }),
+        })
+        const cancelBody = await cancelResponse.json()
+        if (cancelResponse.ok && cancelBody?.data?.status === 'canceled') {
+          await supabase.rpc('release_capacity_checkout_claim', {
+            p_claim_id: capClaim.claim_id,
+            p_transaction_id: transactionId,
+            p_release_reason: 'transaction_canceled',
+          })
+        }
+      }
+    } catch (capError) {
+      console.error('Capacity checkout claim retained after cleanup failure', transactionId, capError)
+    }
+  }
+
   return jsonResponse(200, { examined: claims?.length ?? 0, released, retained })
 })

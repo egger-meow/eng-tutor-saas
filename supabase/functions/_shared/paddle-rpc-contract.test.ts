@@ -6,7 +6,7 @@ import { getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } 
 describe('Paddle RPC Contract & Webhook Integration Tests', () => {
   it('1. verifies paddle-webhook calls process_paddle_subscription_event_v2 with exact named parameters matching migration', () => {
     const webhookCode = readFileSync(join(__dirname, '../paddle-webhook/index.ts'), 'utf-8')
-    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260826230000_repair_founder_billing_authority.sql'), 'utf-8')
+    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260826233000_transaction_safe_capacity_and_patch_hardening.sql'), 'utf-8')
 
     const expectedRpcParams = [
       'p_event_id',
@@ -83,6 +83,7 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
   })
 
   it('4. extracts discount payload with strict endsAtPresent flag', () => {
+    // Verified forever discount: ends_at is explicitly present AND null
     expect(getWebhookFoundingDiscount({
       id: 'dsc_1',
       status: 'active',
@@ -96,6 +97,33 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
       endsAtPresent: true,
     })
 
+    // Expiring discount: ends_at is present and string
+    expect(getWebhookFoundingDiscount({
+      id: 'dsc_1',
+      status: 'active',
+      type: 'flat',
+      ends_at: '2027-08-26T00:00:00Z',
+    })).toEqual({
+      id: 'dsc_1',
+      status: 'active',
+      type: 'flat',
+      endsAt: '2027-08-26T00:00:00Z',
+      endsAtPresent: true,
+    })
+
+    // Omitted discount: ends_at field absent
+    expect(getWebhookFoundingDiscount({
+      id: 'dsc_1',
+      status: 'active',
+      type: 'flat',
+    })).toEqual({
+      id: 'dsc_1',
+      status: 'active',
+      type: 'flat',
+      endsAt: null,
+      endsAtPresent: false,
+    })
+
     expect(getWebhookFoundingDiscount(null)).toEqual({
       id: null,
       status: null,
@@ -103,5 +131,27 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
       endsAt: null,
       endsAtPresent: false,
     })
+  })
+
+  it('5. verifies fail-safe Founder PATCH: verify GET recovers applied discount and ambiguous failure retains claim', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    // Verifies that after PATCH fails, a verify GET is performed
+    expect(checkoutCode).toContain('const verifyResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`')
+    expect(checkoutCode).toContain('verifyBody?.data?.discount_id === foundingDiscountId')
+
+    // Verifies that release_founder_checkout_claim is ONLY called when explicitly verified absent
+    expect(checkoutCode).toContain("p_release_reason: 'discount_removed'")
+    expect(checkoutCode).toContain('verifyBody?.data?.discount_id !== foundingDiscountId')
+
+    // Verifies that ambiguous failures return 503 and retain claim (do NOT release)
+    expect(checkoutCode).toContain("error: 'paddle_discount_application_ambiguous'")
+  })
+
+  it('6. verifies capacity claim binding in paddle-checkout ensures transaction safety', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    expect(checkoutCode).toContain("supabase.rpc('bind_capacity_checkout_transaction'")
+    expect(checkoutCode).toContain('capacityClaimId')
   })
 })

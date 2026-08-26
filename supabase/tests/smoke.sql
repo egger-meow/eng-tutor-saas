@@ -76,7 +76,7 @@ begin
     'sub_checkout_smoke', 'ctm_checkout_smoke', 'active',
     'standard_monthly', 'month', 499,
     now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'flat', null, false,
+    'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
     founder_claim_id, 'txn_checkout_smoke'
   );
   if not exists (
@@ -2315,7 +2315,7 @@ begin
     'evt_founder_race_complete', 'subscription.created', clock_timestamp(),
     '00000000-0000-0000-0000-000000000109', 'sub_founder_race', 'ctm_founder_race', 'active',
     'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'flat', null, false,
+    'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
     race_claim_id, 'txn_founder_race'
   );
   if not exists (
@@ -2382,7 +2382,7 @@ begin
     'evt_founder_redeem', 'subscription.created', clock_timestamp(),
     '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
     'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'flat', null, false,
+    'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
     founder_lifetime_claim_id, 'txn_founder_lifetime'
   );
   if not exists (
@@ -2408,14 +2408,14 @@ begin
     'evt_founder_cancel_scheduled', 'subscription.updated', clock_timestamp() + interval '2 seconds',
     '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
     'standard_monthly', 'month', 499, now(), now() + interval '1 month', true,
-    'dsc_founder', 'dsc_founder', 'active', 'flat', null, false,
+    'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
     null, null
   );
   perform public.process_paddle_subscription_event_v2(
     'evt_founder_resumed', 'subscription.resumed', clock_timestamp() + interval '3 seconds',
     '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
     'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
-    'dsc_founder', 'dsc_founder', 'active', 'flat', null, false,
+    'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
     null, null
   );
   if not exists (
@@ -2622,7 +2622,7 @@ begin
     p_current_period_end := now() + interval '1 month', p_cancel_at_period_end := false,
     p_expected_founding_discount_id := 'dsc_founder_expected', p_discount_id := 'dsc_founder_expected',
     p_discount_status := 'active', p_discount_type := 'flat', p_discount_ends_at := null,
-    p_discount_ends_at_present := false, p_founder_claim_id := test_claim_id, p_originating_transaction_id := 'txn_correct_founder_118'
+    p_discount_ends_at_present := true, p_founder_claim_id := test_claim_id, p_originating_transaction_id := 'txn_correct_founder_118'
   );
   if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000118') <> 'redeemed' then
     raise exception 'verified Founder subscription was not marked redeemed';
@@ -2680,30 +2680,107 @@ begin
   end if;
   update public.enrollment_settings set founding_limit = 30 where key = 'default';
 
-  -- Item 4: Expired beta checkout abandoned -> temporary capacity reservation expires -> capacity returns.
+  -- Regressions: Transaction-safe capacity and waitlist lifecycle
+  -- 1) active=99 + returning-beta capacity claim + new-child creation cannot exceed 100
+  select private_generation.locked_capacity_count() into active_count_before;
+  update public.enrollment_settings set founding_limit = least(10, active_count_before + 1), capacity = active_count_before + 1 where key = 'default';
+
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
-  values ('00000000-0000-0000-0000-000000000121', '00000000-0000-0000-0000-000000000001', 'Beta Abandon Capacity', 7, 'grade_7');
-  update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000121';
+  values ('00000000-0000-0000-0000-000000000130', '00000000-0000-0000-0000-000000000001', 'Beta Returning Capacity', 7, 'grade_7');
+  update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000130';
 
-  select remaining into active_count_before from public.get_enrollment_state();
+  select capacity_claim_id into test_claim_id
+  from public.prepare_paddle_checkout_v2(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000130', 'standard_annual', '2026-08-26-v2'
+  );
+  if test_claim_id is null then
+    raise exception 'returning beta child did not receive a capacity claim';
+  end if;
 
-  -- Prepare checkout sets temporary capacity reservation
-  perform public.prepare_paddle_checkout_v2(
-    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000121', 'standard_annual', '2026-08-26-v2'
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 1 then
+    raise exception 'live capacity claim did not lock capacity';
+  end if;
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000131', '00000000-0000-0000-0000-000000000001', 'Child Over Capacity', 7, 'grade_7');
+
+  if exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000131'
+  ) then
+    raise exception 'new child creation exceeded capacity by creating a trial subscription';
+  end if;
+
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000131' and status = 'waiting'
+  ) then
+    raise exception 'new child creation at capacity was not added to waitlist in waiting status';
+  end if;
+
+  if (select private_generation.locked_capacity_count()) > active_count_before + 1 then
+    raise exception 'locked capacity count exceeded capacity threshold';
+  end if;
+
+  -- 2) expired capacity claim with still-payable transaction cannot free capacity
+  perform public.bind_capacity_checkout_transaction(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000130', test_claim_id, 'txn_payable_cap_130'
   );
 
-  if (select remaining from public.get_enrollment_state()) <> active_count_before - 1 then
-    raise exception 'temporary checkout capacity hold did not decrease available capacity';
+  update private_generation.capacity_checkout_claims set reservation_expires_at = now() - interval '1 second'
+  where id = test_claim_id;
+
+  perform public.claim_expired_capacity_checkouts(10);
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'release_pending' then
+    raise exception 'expired bound capacity claim was not marked release_pending';
   end if;
 
-  -- 30 minutes elapse without checkout completion
-  update private_generation.checkout_capacity_reservations set expires_at = now() - interval '1 second'
-  where child_id = '00000000-0000-0000-0000-000000000121';
-
-  -- Capacity returns immediately to remaining pool
-  if (select remaining from public.get_enrollment_state()) <> active_count_before then
-    raise exception 'abandoned expired beta checkout hold did not return capacity upon expiry';
+  if (select remaining from public.get_enrollment_state()) <> 0 then
+    raise exception 'expired bound capacity claim prematurely freed available capacity';
   end if;
+
+  -- 3) late payment cannot produce 101
+  perform public.process_paddle_subscription_event_v2(
+    p_event_id := 'evt_late_payment_130', p_event_type := 'subscription.created', p_occurred_at := now(),
+    p_child_id := '00000000-0000-0000-0000-000000000130', p_provider_subscription_id := 'sub_late_payment_130',
+    p_provider_customer_id := 'ctm_late_payment_130', p_status := 'active', p_plan_code := 'standard_annual',
+    p_billing_interval := 'year', p_price_twd := 4999, p_current_period_start := now(),
+    p_current_period_end := now() + interval '1 year', p_cancel_at_period_end := false,
+    p_expected_founding_discount_id := 'dsc_founder_expected', p_discount_id := null,
+    p_discount_status := null, p_discount_type := null, p_discount_ends_at := null,
+    p_discount_ends_at_present := false, p_founder_claim_id := null, p_originating_transaction_id := 'txn_payable_cap_130'
+  );
+
+  if (select status from private_generation.capacity_checkout_claims where id = test_claim_id) <> 'completed' then
+    raise exception 'capacity claim was not completed upon payment activation';
+  end if;
+
+  if (select private_generation.locked_capacity_count()) <> active_count_before + 1 then
+    raise exception 'late payment over-counted capacity (produced 101)';
+  end if;
+
+  -- 4) full returning-beta path creates real waiting row
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000132', '00000000-0000-0000-0000-000000000001', 'Beta Full Returning Waitlist', 7, 'grade_7');
+  update public.subscriptions set current_period_end = now() - interval '1 second' where child_id = '00000000-0000-0000-0000-000000000132';
+
+  blocked := false;
+  begin
+    perform public.prepare_paddle_checkout_v2(
+      '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000132', 'standard_annual', '2026-08-26-v2'
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'checkout for returning beta was allowed while capacity was full';
+  end if;
+
+  if not exists (
+    select 1 from public.waitlist where child_id = '00000000-0000-0000-0000-000000000132' and status = 'waiting'
+  ) then
+    raise exception 'full returning-beta path did not create a real waiting row in waitlist';
+  end if;
+
+  update public.enrollment_settings set capacity = 100 where key = 'default';
 
   -- Monotonic Founder authority test: hard deletion does not decrease founding_count
   select founding_count into founder_count_before from public.get_enrollment_state();

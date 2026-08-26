@@ -87,14 +87,30 @@ Deno.serve(async (request) => {
       ? eligibility.founding_transaction_id
       : null
 
-    async function releaseUnboundClaim() {
-      if (!foundingClaimId || existingTransactionId) return
-      const { error } = await supabase.rpc('release_founder_checkout_claim', {
-        p_claim_id: foundingClaimId,
-        p_transaction_id: null,
-        p_release_reason: 'not_created',
-      })
-      if (error) console.error('Unable to release unbound Founder claim', error.message)
+    const capacityClaimId = typeof eligibility.capacity_claim_id === 'string'
+      ? eligibility.capacity_claim_id
+      : null
+    const existingCapacityTransactionId = typeof eligibility.capacity_transaction_id === 'string'
+      ? eligibility.capacity_transaction_id
+      : null
+
+    async function releaseUnboundClaims() {
+      if (foundingClaimId && !existingTransactionId) {
+        const { error } = await supabase.rpc('release_founder_checkout_claim', {
+          p_claim_id: foundingClaimId,
+          p_transaction_id: null,
+          p_release_reason: 'not_created',
+        })
+        if (error) console.error('Unable to release unbound Founder claim', error.message)
+      }
+      if (capacityClaimId && !existingCapacityTransactionId) {
+        const { error } = await supabase.rpc('release_capacity_checkout_claim', {
+          p_claim_id: capacityClaimId,
+          p_transaction_id: null,
+          p_release_reason: 'expired_unbound',
+        })
+        if (error) console.error('Unable to release unbound capacity claim', error.message)
+      }
     }
 
     if (foundingApplies) {
@@ -104,14 +120,14 @@ Deno.serve(async (request) => {
       const discountBody = await discountResponse.json()
       if (!discountResponse.ok) {
         console.error('Paddle founding discount lookup failed', discountResponse.status, discountBody)
-        await releaseUnboundClaim()
+        await releaseUnboundClaims()
         return jsonResponse(503, { error: 'paddle_discount_not_verifiable' })
       }
       try {
         validateFoundingDiscount(discountBody?.data, monthlyPriceId)
       } catch (error) {
         console.error('Paddle founding discount is misconfigured', errorMessage(error))
-        await releaseUnboundClaim()
+        await releaseUnboundClaims()
         return jsonResponse(503, { error: 'paddle_discount_misconfigured' })
       }
     }
@@ -137,6 +153,24 @@ Deno.serve(async (request) => {
       })
     }
 
+    if (!foundingApplies && existingCapacityTransactionId) {
+      const existingResponse = await fetch(`${paddleApiBaseUrl}/transactions/${existingCapacityTransactionId}`, {
+        headers: { authorization: `Bearer ${paddleApiKey}` },
+      })
+      const existingBody = await existingResponse.json()
+      const transaction = existingBody?.data
+      if (existingResponse.ok && ['draft', 'ready'].includes(transaction?.status)) {
+        return jsonResponse(200, {
+          transaction_id: existingCapacityTransactionId,
+          plan: plan.key,
+          billing_interval: plan.billingInterval,
+          price_twd: plan.priceTwd,
+          founding_applies: false,
+          checkout_price_twd: plan.priceTwd,
+        })
+      }
+    }
+
     const paddleResponse = await fetch(`${paddleApiBaseUrl}/transactions`, {
       method: 'POST',
       headers: {
@@ -157,7 +191,7 @@ Deno.serve(async (request) => {
     const paddleBody = await paddleResponse.json()
     if (!paddleResponse.ok) {
       console.error('Paddle transaction creation failed', paddleResponse.status, paddleBody)
-      await releaseUnboundClaim()
+      await releaseUnboundClaims()
       if (paddleBody?.error?.code === 'transaction_default_checkout_url_not_set') {
         return jsonResponse(503, { error: 'paddle_checkout_url_missing' })
       }
@@ -170,8 +204,22 @@ Deno.serve(async (request) => {
     const transactionId = paddleBody?.data?.id
     if (typeof transactionId !== 'string') {
       console.error('Paddle returned a transaction without an id')
-      await releaseUnboundClaim()
+      await releaseUnboundClaims()
       return jsonResponse(502, { error: 'paddle_transaction_failed' })
+    }
+
+    if (capacityClaimId) {
+      const { error: capBindError } = await supabase.rpc('bind_capacity_checkout_transaction', {
+        p_user_id: user.id,
+        p_child_id: body.child_id,
+        p_claim_id: capacityClaimId,
+        p_transaction_id: transactionId,
+      })
+      if (capBindError) {
+        console.error('Capacity transaction binding failed', capBindError.message)
+        await releaseUnboundClaims()
+        return jsonResponse(503, { error: 'capacity_checkout_binding_failed' })
+      }
     }
 
     if (foundingClaimId) {
@@ -183,27 +231,64 @@ Deno.serve(async (request) => {
       })
       if (bindError) {
         console.error('Founder transaction binding failed', bindError.message)
-        await releaseUnboundClaim()
+        await releaseUnboundClaims()
         return jsonResponse(503, { error: 'founder_checkout_binding_failed' })
       }
 
-      const patchResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
-        method: 'PATCH',
-        headers: {
-          authorization: `Bearer ${paddleApiKey}`,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ discount_id: foundingDiscountId }),
-      })
-      const patchBody = await patchResponse.json()
-      if (!patchResponse.ok || patchBody?.data?.discount_id !== foundingDiscountId) {
-        console.error('Applying Founder discount to bound transaction failed', patchResponse.status, patchBody)
-        await supabase.rpc('release_founder_checkout_claim', {
-          p_claim_id: foundingClaimId,
-          p_transaction_id: transactionId,
-          p_release_reason: 'discount_removed',
+      let patchSucceeded = false
+      try {
+        const patchResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+          method: 'PATCH',
+          headers: {
+            authorization: `Bearer ${paddleApiKey}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ discount_id: foundingDiscountId }),
         })
-        return jsonResponse(503, { error: 'paddle_discount_application_failed' })
+        const patchBody = await patchResponse.json()
+        if (patchResponse.ok && patchBody?.data?.discount_id === foundingDiscountId) {
+          patchSucceeded = true
+        }
+      } catch (patchErr) {
+        console.error('Applying Founder discount to bound transaction encountered network/HTTP error', patchErr)
+      }
+
+      if (!patchSucceeded) {
+        // Double check with GET /transactions/${transactionId} before concluding
+        try {
+          const verifyResponse = await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+            headers: { authorization: `Bearer ${paddleApiKey}` },
+          })
+          const verifyBody = await verifyResponse.json()
+          if (verifyResponse.ok && verifyBody?.data?.discount_id === foundingDiscountId) {
+            patchSucceeded = true
+          } else if (verifyResponse.ok && verifyBody?.data?.discount_id !== foundingDiscountId) {
+            // Explicitly verified that discount is absent
+            try {
+              await fetch(`${paddleApiBaseUrl}/transactions/${transactionId}`, {
+                method: 'PATCH',
+                headers: { authorization: `Bearer ${paddleApiKey}`, 'content-type': 'application/json' },
+                body: JSON.stringify({ status: 'canceled' }),
+              })
+            } catch {
+              // Ignore cancellation error
+            }
+            await supabase.rpc('release_founder_checkout_claim', {
+              p_claim_id: foundingClaimId,
+              p_transaction_id: transactionId,
+              p_release_reason: 'discount_removed',
+            })
+            return jsonResponse(503, { error: 'paddle_discount_application_failed' })
+          }
+        } catch (verifyErr) {
+          console.error('Verify GET failed after ambiguous PATCH', verifyErr)
+        }
+
+        if (!patchSucceeded) {
+          // Ambiguous / network failure: DO NOT release the claim! Retain seat to fail closed.
+          console.error('Ambiguous Founder PATCH result; retaining claim to prevent over-allocation', transactionId)
+          return jsonResponse(503, { error: 'paddle_discount_application_ambiguous' })
+        }
       }
     }
 
