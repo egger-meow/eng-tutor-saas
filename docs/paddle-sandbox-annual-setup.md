@@ -1,6 +1,6 @@
 # Paddle Sandbox 月繳／年繳設定
 
-本專案在 Sandbox 使用同一個 Paddle product 的兩個 recurring prices：月繳 NT$499 與年繳 NT$4,999。Founding 30 的第一期 NT$299 discount 只由月繳 checkout 套用。
+本專案在 Sandbox 使用同一個 Paddle product 的兩個 recurring prices：月繳 NT$499 與年繳 NT$4,999。Founder 30 的 NT$299／月 discount 只由符合資格的月繳 checkout 套用，並在同一訂閱持續有效期間永久遞迴。
 
 ## 1. Product 與 prices
 
@@ -15,7 +15,7 @@
 
 - 月繳 price ID → `PADDLE_STANDARD_PRICE_ID`
 - 年繳 price ID → `PADDLE_ANNUAL_PRICE_ID`
-- 現有 Founding 30 discount ID → `PADDLE_FOUNDING_DISCOUNT_ID`。必須是 active、`TWD` flat discount `NT$200`、可 recurring，但 maximum recurring intervals 必須精確為 `1`；這樣月繳第一期才會從 NT$499 變成 NT$299，之後不再折抵。
+- Founder 30 discount ID → `PADDLE_FOUNDING_DISCOUNT_ID`。必須是 active、`TWD` flat discount `NT$200`、`recur = true`、`maximum_recurring_intervals = null`，且只能限制在標準月繳 price；月繳 list price 維持 NT$499，持續訂閱期間每期折抵 NT$200 成為 NT$299。
 
 Paddle 的 product/price 模型允許一個 product 擁有不同 billing cycles 的多個 prices：[Create products and prices](https://developer.paddle.com/build/products/create-products-prices/)。
 
@@ -65,7 +65,7 @@ PADDLE_API_KEY=<Sandbox API key>
 PADDLE_WEBHOOK_SECRET=<notification endpoint secret>
 PADDLE_STANDARD_PRICE_ID=<monthly pri_...>
 PADDLE_ANNUAL_PRICE_ID=<annual pri_...>
-PADDLE_FOUNDING_DISCOUNT_ID=<monthly first-period dsc_...>
+PADDLE_FOUNDING_DISCOUNT_ID=<monthly forever-recurring dsc_...>
 ```
 
 > **注意**：正式環境使用 `PADDLE_API_BASE_URL=https://api.paddle.com`。若未設定 `PADDLE_API_BASE_URL`，Server-side 函式將拒絕服務（fail closed），不會預設 fallback 至 Sandbox。
@@ -83,7 +83,7 @@ Supabase secrets 儲存方式與更新後立即生效的行為見 [Edge Function
 
 1. 用一位尚未訂閱的測試孩子選「年繳」，確認 checkout 顯示 NT$4,999／年且沒有 NT$299 discount。
 2. 完成 Sandbox 付款後，確認訂閱頁顯示「年繳方案・每年 NT$4,999」，本期結束時間約一年後。
-3. 用另一位測試孩子選「月繳」，確認一般價格 NT$499；若仍符合 Founding 30，checkout 第一個付費期才是 NT$299。
+3. 用另一位測試孩子選「月繳」，確認一般價格 NT$499；若仍有有效 Founder 30 保留，checkout 與後續同一訂閱每期皆為 NT$299。
 4. 在 Paddle notification delivery logs 確認 webhook 回 HTTP 200；在 Supabase logs 確認沒有 `processing_failed`。
 5. 分別取消月繳與年繳，確認 UI 顯示「使用至」當期末，且不會立即失去已付款權益。
 6. Webhook Simulator 可做額外傳送驗證，但正式權益驗收應以實際 Sandbox checkout 產生、含本專案 `custom_data.child_id` 的 subscription 為準。

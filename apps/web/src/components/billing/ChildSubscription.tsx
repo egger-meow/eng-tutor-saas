@@ -5,6 +5,8 @@ import type { SubscriptionView } from '../../lib/subscriptions'
 import type { OwnedWaitlistEntry } from '../../lib/waitlist'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
+export const founderCancellationWarning = '本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$299/月資格將永久失效。到期前恢復續訂即可保留。'
+
 const labels = {
   trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
   active: ['訂閱中', '每週教材會依照孩子目前的學習狀態持續準備。'],
@@ -31,7 +33,7 @@ type Props = {
 export function ChildSubscription({ child, subscription, waitlist, busy, activationPending, onSubscribe, onCancel, onResume }: Props) {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const [reason, setReason] = useState('')
-  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('annual')
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlan>('monthly')
 
   useEffect(() => {
     setConfirmingCancel(false)
@@ -158,6 +160,9 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
   const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
   const canResume = isCanceledAutoRenew
   const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
+  const isRedeemedFounder = subscription.foundingStatus === 'redeemed'
+  const hasActiveReservation = subscription.foundingStatus === 'eligible' && Boolean(subscription.foundingReservedUntil)
+  const displayedPriceTwd = isRedeemedFounder && currentPlan.key === 'monthly' ? 299 : subscription.priceTwd
 
   return (
     <article className="subscription-card">
@@ -172,11 +177,15 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
           </span>
         </p>
         <p>{description}</p>
+        {isRedeemedFounder && <p><span className="status-label status-founder">創始 30</span></p>}
         {subscription.priceTwd !== null && (
           <p>
             <strong>目前方案：</strong>
-            {currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(subscription.priceTwd)}
+            {currentPlan.label}・{currentPlan.cadenceLabel} NT${formatPrice(displayedPriceTwd ?? subscription.priceTwd)}
           </p>
+        )}
+        {hasActiveReservation && (
+          <p className="notice"><strong>創始 30 名額已保留</strong><br />保留至 {formatDate(subscription.foundingReservedUntil ?? null)}。完成月繳訂閱後，只要訂閱不中斷，即固定 NT$299／月。</p>
         )}
         {periodEnd && (
           <p>
@@ -208,7 +217,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
             <div className="cancel-confirmation">
               <p><strong>確定要取消續訂嗎？</strong></p>
               <p>
-                取消的是「下一期自動續訂」，本期教材與學習權益會完整保留至 {periodEnd ?? '本期結束'}。孩子的學習紀錄與過去每週教材都不會消失。
+                取消的是「下一期自動續訂」，本期教材與學習權益會完整保留至 {periodEnd ?? '本期結束'}。孩子的學習紀錄與過去每週教材都不會消失。{isRedeemedFounder && <> {founderCancellationWarning}</>}
               </p>
               <p className="cancel-hint">
                 如果只是想改付款週期也沒問題。本期結束後，可以隨時重新選擇月繳或年繳方案。
@@ -301,7 +310,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
                 </strong>
                 <small>
                   {subscription.foundingStatus === 'eligible'
-                    ? 'Founding 30 創始優惠：第一個付費月折為 NT$299，第二個付費月起 NT$499／月'
+                    ? '創始 30 名額已保留：完成月繳後，只要同一訂閱不中斷，即固定 NT$299／月'
                     : '每月自動續訂；可隨時取消下一期續訂'}
                 </small>
               </span>

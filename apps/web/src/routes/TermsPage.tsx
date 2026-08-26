@@ -15,7 +15,7 @@ export function TermsPage() {
             <p className="eyebrow">服務合約與使用者條款</p>
             <h1>服務條款與定型化契約</h1>
             <p className="legal-meta">
-              版本號：{legalConfig.termsVersion} ｜ 生效日期：2026 年 8 月 16 日
+              版本號：{legalConfig.termsVersion} ｜ 生效日期：2026 年 8 月 26 日
             </p>
           </FadeInUp>
 
@@ -73,7 +73,7 @@ export function TermsPage() {
                   </ul>
                 </li>
                 <li>
-                  <strong>創始早鳥優惠（Founding 30）：</strong>首批 30 位孩子享有第一週免費體驗；月繳方案第一個付費月特惠為新臺幣 299 元（NT$299），第二個付費月起恢復為標準月費 NT$499。
+                  <strong>創始 30 優惠（Founder 30）：</strong>符合名額之孩子自建立學習檔案起保留 Founder 名額 14 日。優惠僅適用月繳：完成月繳訂閱後，只要同一訂閱持續有效，每期固定為新臺幣 299 元（NT$299／月）。排定於期末取消不會立即失去優惠；在訂閱實際到期前恢復續訂，創始價格仍保留。只有訂閱實際成為 canceled 時，Founder 資格才永久失效，已使用之 Founder 席次亦不會回補；之後重新訂閱依當時標準方案價格計費，且不得再次取得 Founder 資格。年繳不適用 Founder 價格；僅開啟或放棄年繳結帳不影響有效保留，但年繳訂閱成功啟用時，尚未兌換之 Founder 保留立即失效並釋出名額。
                 </li>
                 <li>
                   <strong>金流處理：</strong>本服務金流委由國際 Merchant of Record 服務商 Paddle.com 安全處理，交易收據及法定稅費依結帳明細開立。

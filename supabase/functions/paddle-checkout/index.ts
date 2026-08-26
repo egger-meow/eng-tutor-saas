@@ -80,7 +80,7 @@ Deno.serve(async (request) => {
         return jsonResponse(503, { error: 'paddle_discount_not_verifiable' })
       }
       try {
-        validateFoundingDiscount(discountBody?.data)
+        validateFoundingDiscount(discountBody?.data, monthlyPriceId)
       } catch (error) {
         console.error('Paddle founding discount is misconfigured', errorMessage(error))
         return jsonResponse(503, { error: 'paddle_discount_misconfigured' })

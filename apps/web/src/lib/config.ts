@@ -12,7 +12,7 @@ export type LegalConfig = {
 }
 
 export const legalConfig: LegalConfig = {
-  termsVersion: '2026-08-16-v1',
+  termsVersion: '2026-08-26-v2',
   privacyVersion: '2026-08-16-v1',
   reviewPeriodDays: 3,
   contactEmail: import.meta.env.VITE_LEGAL_CONTACT_EMAIL || 'jjmow.cs15@nycu.edu.tw',

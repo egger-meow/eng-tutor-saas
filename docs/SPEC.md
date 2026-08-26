@@ -594,66 +594,38 @@ Do not use a single subscription with `quantity = number of children` for MVP.
 
 ---
 
-# 22. Founding 30 Program
+# 22. Founder 30 Program
 
-The first 30 eligible children form the founding cohort.
-
-The founding offer is:
+Founder 30 is a monthly-only lifetime price attached to the first 30 qualifying children.
 
 ```text
-First 30 children
-
-Week 1:
-Free personalized generation
-
-First paid month:
-NT$299
-
-After first paid month:
-NT$499/month
+First week free
+↓
+14-day unredeemed reservation
+↓
+Verified monthly activation with the configured recurring-forever TWD 200 discount
+↓
+NT$299/month while that same monthly subscription remains continuously active
 ```
 
-The Founding 30 paid discount applies only when the child chooses the monthly plan. The annual plan remains NT$4,999/year and does not consume or redeem a founding discount.
+The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring NT$200 Paddle discount, not by changing the catalog price.
 
-Founding status belongs to the child, not merely the parent account.
+Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. An `eligible` reservation lasts exactly 14 days. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
 
-Example:
+A redeemed or forfeited seat is permanently consumed. Cancellation never returns it to the public Founder pool, and an expired or forfeited child can never automatically regain Founder eligibility. Founder status belongs to the child and continuing subscription, not merely the parent account.
 
-```text
-Parent joins early
-
-Child A:
-founding = true
-
-Parent adds Child B six months later:
-founding = false
-```
+Annual checkout never receives the Founder discount. Opening or abandoning annual checkout does not destroy an active reservation; successful annual activation converts an unredeemed reservation to `expired` and releases it.
 
 ---
+# 23. Founder Price Requires Continuous Subscription
 
-# 23. Founding Pricing Is Not Permanent NT$299
+The contractual Founder price is fixed at NT$299/month only while the same redeemed monthly subscription remains continuous.
 
-Unless explicitly changed later:
+Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$299/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
 
-> NT$299 applies only to the first paid month.
-
-From the second paid month:
-
-> NT$499/month.
-
-Annual billing is not a discounted founding period. It is a separate standard plan at NT$4,999/year.
-
-The founding offer is designed to:
-
-* reduce first-use friction;
-* allow parents to see real material;
-* reward early adoption;
-* generate early feedback.
-
-It is not intended to permanently reduce ARPU.
+Referral codes and rewards are out of scope.
 
 ---
-
 # 24. Free Week 1
 
 For the founding cohort, the ideal entry flow is:
@@ -2970,7 +2942,7 @@ Maintain centralized product configuration for:
 
 * standard monthly price;
 * standard annual price;
-* founding first-month price;
+* Founder continuous monthly price;
 * founding cohort size;
 * capacity.
 
@@ -2979,7 +2951,7 @@ Initial values:
 ```text
 standard_monthly_price = 499 TWD
 standard_annual_price = 4999 TWD
-founding_first_month_price = 299 TWD
+founder_continuous_monthly_price = 299 TWD
 founding_child_limit = 30
 service_child_capacity = 100
 ```
@@ -4002,24 +3974,27 @@ For either monthly or annual checkout, the browser chooses only a semantic plan.
 
 ---
 
-# 196. Definition of Done: Founding Offer
+# 196. Definition of Done: Founder Offer
 
-For an eligible founding child:
+For a qualifying child:
 
 ```text
+14-day reservation
+↓
 Week 1 free
 ↓
-First paid month 299
+Verified monthly activation with the configured forever-recurring discount
 ↓
-Following paid months 499
+NT$299/month while the same subscription remains continuous
 ```
 
-If the child chooses annual billing, the charge is 4,999/year and founding eligibility is neither applied nor redeemed by that annual checkout.
+Scheduling cancellation, past due, pause, and resuming before the actual end preserve a redeemed Founder seat and price. A verified actual cancellation changes `redeemed` to `forfeited` exactly once; the seat remains permanently consumed and the child can never receive Founder pricing again.
 
-The transition must be traceable and not depend on manual memory.
+Expired reservations release their temporary seat. Redeemed and forfeited seats never release it. Annual checkout never receives the discount, abandoned annual checkout preserves an active reservation, and successful annual activation expires an unredeemed reservation.
+
+The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters.
 
 ---
-
 # 197. Definition of Done: Capacity
 
 When capacity is below 100:
@@ -4245,16 +4220,16 @@ each child has independent subscription
 or 4,999 TWD / year / child
 ```
 
-Founding cohort:
+Founder cohort:
 
 ```text
-First 30 children
+First 30 monthly children
 ↓
-Week 1 free
+14-day reservation + Week 1 free
 ↓
-First paid month 299
+299/month while the same subscription remains continuous
 ↓
-Then 499/month
+Actual cancellation permanently forfeits pricing; consumed seat never returns
 ```
 
 Early service capacity:

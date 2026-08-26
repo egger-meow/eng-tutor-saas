@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { getCheckoutPlan, getPaddleApiBaseUrl, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
+import { getCheckoutPlan, getPaddleApiBaseUrl, getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } from './paddle-plans'
 
 const priceIds = { monthly: 'pri_monthly', annual: 'pri_annual' }
 
@@ -35,15 +35,28 @@ describe('Paddle plan allowlist', () => {
     }], priceIds)).toThrow('do not match')
   })
 
-  it('accepts only a one-period TWD 200 founding discount', () => {
+  it('accepts only a forever-recurring TWD 200 founding discount restricted to monthly', () => {
     expect(() => validateFoundingDiscount({
       status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
-      recur: true, maximum_recurring_intervals: 1,
-    })).not.toThrow()
+      recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_monthly'],
+    }, 'pri_monthly')).not.toThrow()
     expect(() => validateFoundingDiscount({
       status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
-      recur: true, maximum_recurring_intervals: null,
-    })).toThrow('one recurring interval')
+      recur: true, maximum_recurring_intervals: 1, restrict_to: ['pri_monthly'],
+    }, 'pri_monthly')).toThrow('forever-recurring')
+    expect(() => validateFoundingDiscount({
+      status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
+      recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_annual'],
+    }, 'pri_monthly')).toThrow('standard monthly price')
+  })
+
+  it('normalizes the webhook subscription discount for authoritative reconciliation', () => {
+    expect(getWebhookFoundingDiscount({ id: 'dsc_founder', status: 'active', type: 'recurring', ends_at: null })).toEqual({
+      id: 'dsc_founder', status: 'active', type: 'recurring', endsAt: null, endsAtPresent: true,
+    })
+    expect(getWebhookFoundingDiscount({ id: 'dsc_founder', type: 'recurring' })).toMatchObject({
+      id: 'dsc_founder', endsAt: null, endsAtPresent: false,
+    })
   })
 })
 

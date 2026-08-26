@@ -71,7 +71,7 @@
 20. **Billing Unit**
 21. **Subscription Independence**
 22. **Founding 30 Program**
-23. **Founding Pricing Is Not Permanent NT$299**
+23. **Founder Price Requires Continuous Subscription**
 24. **Free Week 1**
 25. **Week 1 as Calibration**
 26. **Maximum Initial Capacity**

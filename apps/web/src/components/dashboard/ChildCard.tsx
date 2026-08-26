@@ -47,7 +47,9 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             {child.waitlist?.status === 'released' && (
               <span className="status-label status-released" style={{ background: '#064e3b', color: '#a7f3d0' }}>名額已開放</span>
             )}
-            {child.subscription?.status === 'trialing' && (
+            {child.subscription?.foundingStatus === 'redeemed' && (
+              <span className="status-label status-founder">創始 30</span>
+            )}            {child.subscription?.status === 'trialing' && (
               <span className="status-label status-trialing">體驗期</span>
             )}
             {child.subscription?.status === 'canceled' && (

@@ -63,7 +63,8 @@ begin
     '00000000-0000-0000-0000-000000000002',
     'sub_checkout_smoke', 'ctm_checkout_smoke', 'active',
     'standard_monthly', 'month', 499,
-    now(), now() + interval '1 month', false
+    now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
   if not exists (
     select 1 from public.subscriptions
@@ -122,7 +123,8 @@ begin
     '00000000-0000-0000-0000-000000000004',
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
-    now(), now() + interval '1 year', false
+    now(), now() + interval '1 year', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
   if not exists (
     select 1 from public.subscriptions
@@ -130,9 +132,9 @@ begin
       and plan_code = 'standard_annual'
       and billing_interval = 'year'
       and price_twd = 4999
-      and founding_status = 'eligible'
+      and founding_status = 'expired'
   ) then
-    raise exception 'annual Paddle webhook did not persist canonical plan data';
+    raise exception 'annual Paddle webhook did not persist canonical plan data and release Founder reservation';
   end if;
 
   perform public.process_paddle_subscription_event(
@@ -140,7 +142,8 @@ begin
     '00000000-0000-0000-0000-000000000004',
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
-    now(), now() + interval '1 year', false
+    now(), now() + interval '1 year', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
   if (
     select count(*) from public.billing_webhook_events
@@ -156,7 +159,8 @@ begin
       '00000000-0000-0000-0000-000000000004',
       'sub_annual_duplicate', 'ctm_checkout_smoke', 'active',
       'standard_annual', 'year', 4999,
-      now(), now() + interval '1 year', false
+      now(), now() + interval '1 year', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
     );
   exception when others then
     blocked := true;
@@ -172,7 +176,8 @@ begin
       '00000000-0000-0000-0000-000000000004',
       'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
       'standard_annual', 'month', 499,
-      now(), now() + interval '1 month', false
+      now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
     );
   exception when others then
     blocked := true;
@@ -182,7 +187,8 @@ begin
     '00000000-0000-0000-0000-000000000004',
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
-    now(), now() + interval '1 year', true
+    now(), now() + interval '1 year', true,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
   if (
     select cancel_at_period_end from public.subscriptions
@@ -196,7 +202,8 @@ begin
     '00000000-0000-0000-0000-000000000004',
     'sub_annual_smoke', 'ctm_checkout_smoke', 'active',
     'standard_annual', 'year', 4999,
-    now(), now() + interval '1 year', false
+    now(), now() + interval '1 year', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
   if (
     select cancel_at_period_end from public.subscriptions
@@ -205,7 +212,7 @@ begin
     raise exception 'resume webhook did not reset cancel_at_period_end to false';
   end if;
 
-  update public.enrollment_settings set founding_limit = 2 where key = 'default';
+  update public.enrollment_settings set founding_limit = 1 where key = 'default';
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values (
     '00000000-0000-0000-0000-000000000005',
@@ -524,6 +531,9 @@ begin
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ));
   perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', first_package);
+  select canonical_source into first_package
+  from private_generation.curriculum_submissions
+  where job_id = bridge_job_id and authoring_attempt = 1;
   if not exists (
     select 1 from private_generation.curriculum_submissions
     where job_id = bridge_job_id and status = 'pending'
@@ -750,6 +760,9 @@ begin
   perform private_generation.chatgpt_submit_curriculum_package(
     recovery_job_id, 'transport-recovery-worker', first_package
   );
+  select canonical_source into first_package
+  from private_generation.curriculum_submissions
+  where job_id = recovery_job_id and authoring_attempt = 1;
 
   -- 2. Quality rejection for Attempt 1
   perform public.worker_claim_curriculum_submissions('recovery-finisher-1', 5);
@@ -1234,6 +1247,11 @@ declare
   bridge_fingerprint text;
   email_released_material_id uuid;
   email_future_material_id uuid;
+  visible_count integer;
+  test_founding_status text;
+  founder_count_before integer;
+  founder_count_after integer;
+  founder_forfeited_at timestamptz;
   blocked boolean := false;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
@@ -1306,18 +1324,18 @@ begin
   end if;
   if has_function_privilege(
     'anon',
-    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean)',
     'execute'
   ) or has_function_privilege(
     'authenticated',
-    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean)',
     'execute'
   ) then
     raise exception 'browser roles can execute Paddle webhook processing RPC';
   end if;
   if not has_function_privilege(
     'service_role',
-    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean)',
+    'public.process_paddle_subscription_event(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean)',
     'execute'
   ) then
     raise exception 'service role cannot execute Paddle webhook processing RPC';
@@ -1553,6 +1571,8 @@ begin
   end if;
 
   -- 11. Test Reset to Onboarding
+  select founding_status into test_founding_status from public.subscriptions
+  where child_id = '00000000-0000-0000-0000-000000000099';
   test_reset_res := public.admin_reset_test_child_to_onboarding('00000000-0000-0000-0000-000000000099');
   if (test_reset_res->>'success')::boolean is not true then
     raise exception 'failed to reset test child: %', test_reset_res;
@@ -1570,6 +1590,9 @@ begin
   end if;
   if not exists (select 1 from public.children where id = '00000000-0000-0000-0000-000000000099' and grade = 8 and textbook_version = 'hanlin') then
     raise exception 'child profile data was corrupted on reset';
+  end if;
+  if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000099') is distinct from test_founding_status then
+    raise exception 'test-mode reset changed or regranted Founder state';
   end if;
 
   -- 12. Scaling Gate Waitlist Lifecycle (>100 child) verification
@@ -1664,7 +1687,8 @@ begin
     '00000000-0000-0000-0000-000000000077',
     'sub_waitlist_smoke', 'ctm_waitlist_smoke', 'active',
     'standard_monthly', 'month', 499,
-    now(), now() + interval '1 month', false
+    now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
 
   if (
@@ -1775,7 +1799,8 @@ begin
       '00000000-0000-0000-0000-000000000066',
       'sub_block_waiting_01', 'ctm_block_waiting_01', 'active',
       'standard_monthly', 'month', 499,
-      now(), now() + interval '1 month', false
+      now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
     );
   exception
     when others then
@@ -1818,7 +1843,8 @@ begin
     '00000000-0000-0000-0000-000000000066',
     'sub_cancel_test_01', 'ctm_cancel_test_01', 'canceled',
     'standard_monthly', 'month', 499,
-    now(), now() + interval '1 month', false
+    now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
   );
 
   -- Status should remain 'released' (not converted) because canceled is not an activated status
@@ -2164,6 +2190,112 @@ begin
     raise exception 'REGRESSION: internal entitlement or quality overrides are exposed to browser roles';
   end if;
 
+  -- Founder 30 reservation, permanent consumption, cancellation, and integrity regressions.
+  update public.enrollment_settings set capacity = 1000, founding_limit = 30, status = 'open' where key = 'default';
+  select founding_count into founder_count_before from public.get_enrollment_state();
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000110', '00000000-0000-0000-0000-000000000001', 'Founder Expiry', 7, 'grade_7');
+  if not exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000110'
+      and founding_status = 'eligible' and founding_reserved_until = created_at + interval '14 days'
+  ) then raise exception 'Founder reservation is not exactly 14 days from enrollment'; end if;
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before + 1 then
+    raise exception 'active Founder reservation did not consume a seat';
+  end if;
+  update public.subscriptions set founding_reserved_until = now() - interval '1 second'
+  where child_id = '00000000-0000-0000-0000-000000000110';
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_before then
+    raise exception 'expired effective reservation did not release its seat in public state';
+  end if;
+  perform public.prepare_paddle_checkout(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000110', 'standard_monthly'
+  );
+  if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000110') <> 'expired' then
+    raise exception 'expired child regained Founder pricing at checkout';
+  end if;
+
+  insert into public.children (id, parent_id, display_name, grade, grade_stage)
+  values ('00000000-0000-0000-0000-000000000111', '00000000-0000-0000-0000-000000000001', 'Founder Lifetime', 7, 'grade_7');
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_founder_missing_ends_at', 'subscription.activated', clock_timestamp(),
+      '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', 'dsc_founder', 'active', 'recurring', null, false
+    );
+  exception when others then blocked := true;
+  end;
+  if not blocked then raise exception 'Founder redemption accepted a discount without explicit forever ends_at'; end if;
+  perform public.process_paddle_subscription_event(
+    'evt_founder_redeem', 'subscription.activated', clock_timestamp(),
+    '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+  );
+  if not exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111'
+      and founding_status = 'redeemed' and founding_redeemed_at is not null
+  ) then raise exception 'verified recurring-forever discount did not redeem Founder'; end if;
+  select founding_count into founder_count_after from public.get_enrollment_state();
+
+  blocked := false;
+  begin
+    perform public.process_paddle_subscription_event(
+      'evt_founder_wrong_discount', 'subscription.updated', clock_timestamp() + interval '1 second',
+      '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', 'dsc_wrong', 'active', 'recurring', null, true
+    );
+  exception when others then blocked := true;
+  end;
+  if not blocked then raise exception 'redeemed active Founder accepted a missing or wrong discount'; end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_founder_cancel_scheduled', 'subscription.updated', clock_timestamp() + interval '2 seconds',
+    '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', true,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+  );
+  perform public.process_paddle_subscription_event(
+    'evt_founder_resumed', 'subscription.resumed', clock_timestamp() + interval '3 seconds',
+    '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'active',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+    'dsc_founder', 'dsc_founder', 'active', 'recurring', null, true
+  );
+  if not exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111'
+      and founding_status = 'redeemed' and not cancel_at_period_end
+  ) then raise exception 'scheduled cancellation or resume forfeited Founder'; end if;
+
+  perform public.process_paddle_subscription_event(
+    'evt_founder_canceled', 'subscription.canceled', clock_timestamp() + interval '4 seconds',
+    '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'canceled',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+    'dsc_founder', null, null, null, null, false
+  );
+  select founding_forfeited_at into founder_forfeited_at from public.subscriptions
+  where child_id = '00000000-0000-0000-0000-000000000111';
+  perform public.process_paddle_subscription_event(
+    'evt_founder_canceled', 'subscription.canceled', clock_timestamp() + interval '5 seconds',
+    '00000000-0000-0000-0000-000000000111', 'sub_founder_lifetime', 'ctm_founder', 'canceled',
+    'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+    'dsc_founder', null, null, null, null, false
+  );
+  if not exists (
+    select 1 from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111'
+      and founding_status = 'forfeited' and founding_forfeited_at = founder_forfeited_at
+  ) then raise exception 'actual cancellation did not forfeit Founder exactly once'; end if;
+  if (select founding_count from public.get_enrollment_state()) <> founder_count_after then
+    raise exception 'forfeited Founder seat was returned to the public pool';
+  end if;
+  perform public.prepare_paddle_checkout(
+    '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000111', 'standard_monthly'
+  );
+  if (select founding_status from public.subscriptions where child_id = '00000000-0000-0000-0000-000000000111') <> 'forfeited' then
+    raise exception 'forfeited child regained Founder pricing';
+  end if;
   -- Announcement Center Tests
   insert into public.announcements (id, title, body, category, status, published_at)
   values

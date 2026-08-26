@@ -19,12 +19,21 @@ export type PaddleSubscriptionItem = {
 }
 
 export type PaddleDiscount = {
+  id?: string
   type?: string
   amount?: string
   currency_code?: string
   recur?: boolean
   maximum_recurring_intervals?: number | null
   status?: string
+  restrict_to?: string[] | null
+}
+
+export type PaddleSubscriptionDiscount = {
+  id?: string
+  status?: string
+  type?: string
+  ends_at?: string | null
 }
 
 export function getCheckoutPlan(
@@ -73,14 +82,27 @@ export function getPaddleApiBaseUrl(envValue: string | undefined): string {
   return trimmed.replace(/\/+$/, '')
 }
 
-export function validateFoundingDiscount(discount: PaddleDiscount | undefined): void {
+export function validateFoundingDiscount(discount: PaddleDiscount | undefined, monthlyPriceId: string): void {
   if (discount?.status !== 'active'
     || discount.type !== 'flat'
     || discount.amount !== '20000'
     || discount.currency_code !== 'TWD'
     || discount.recur !== true
-    || discount.maximum_recurring_intervals !== 1) {
-    throw new Error('Founding discount must be an active TWD 200 flat discount for one recurring interval')
+    || discount.maximum_recurring_intervals !== null
+    || !Array.isArray(discount.restrict_to)
+    || discount.restrict_to.length !== 1
+    || discount.restrict_to[0] !== monthlyPriceId) {
+    throw new Error('Founding discount must be an active forever-recurring TWD 200 flat discount restricted to the standard monthly price')
   }
 }
 
+
+export function getWebhookFoundingDiscount(discount: PaddleSubscriptionDiscount | null | undefined) {
+  return {
+    id: discount?.id ?? null,
+    status: discount?.status ?? null,
+    type: discount?.type ?? null,
+    endsAt: discount?.ends_at ?? null,
+    endsAtPresent: discount != null && Object.prototype.hasOwnProperty.call(discount, 'ends_at'),
+  }
+}

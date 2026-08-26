@@ -13,7 +13,7 @@
 - `child_profiles`: parent-editable baseline, current levels, goals, school progress, expectations, and preferences.
 - `child_vocab_progress` and `child_grammar_progress`: dynamic mastery keyed by stable text IDs from the Git-owned curriculum.
 - `child_learning_state`: compact weekly history, recurring mistakes, comprehension accuracy, and difficulty trend.
-- `subscriptions`: one entitlement per child, including provider/customer IDs, plan, TWD price, founding status, and billing period state.
+- `subscriptions`: one entitlement per child, including provider/customer IDs, plan, TWD catalog price, Founder lifecycle (`none`/`eligible`/`redeemed`/`expired`/`forfeited`), 14-day reservation expiry, redemption/forfeiture audit timestamps, and billing period state.
 - `feedback`: structured completion, difficulty, weak area, mistakes, and parent/child updates. Its `child_id` and `material_id` are immutable.
 - `materials`: one weekly edition, canonical source, generation summary, prompt/generator/model versions, input snapshot, and private artifact paths.
 - `generation_jobs`: private worker queue with a source material, promised release, 48-hour feedback cutoff, 24-hour generation deadline, idempotency, leases, retries, and sanitized errors. Browser roles cannot read raw jobs.

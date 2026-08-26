@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { ChildSubscription } from './ChildSubscription'
+import { ChildSubscription, founderCancellationWarning } from './ChildSubscription'
 import type { Child } from '../../lib/children'
 import type { SubscriptionView } from '../../lib/subscriptions'
 
@@ -126,11 +126,11 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('並開始訂閱')
   })
 
-  it('4. founding_status = eligible on canceled subscription: displays Founding 30 discount', () => {
+  it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1',
       childId: 'child-123',
-      status: 'canceled',
+      status: 'trialing',
       planCode: 'standard_monthly',
       billingInterval: 'month',
       priceTwd: 499,
@@ -152,11 +152,11 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('strike-price')
     expect(html).toContain('NT$499')
     expect(html).toContain('NT$299')
-    expect(html).toContain('創始早鳥優惠')
-    expect(html).toContain('Founding 30 創始優惠：第一個付費月折為 NT$299')
+    expect(html).toContain('創始 30 名額已保留')
+    expect(html).toContain('完成月繳後，只要同一訂閱不中斷，即固定 NT$299／月')
   })
 
-  it('5. founding_status = redeemed on canceled subscription: does NOT offer NT$299 discount again', () => {
+  it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$299 discount again', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1',
       childId: 'child-123',
@@ -166,7 +166,7 @@ describe('ChildSubscription Component', () => {
       priceTwd: 499,
       currentPeriodEnd: '2026-08-16T00:00:00Z',
       cancelAtPeriodEnd: false,
-      foundingStatus: 'redeemed',
+      foundingStatus: 'forfeited',
     }
 
     const html = renderToStaticMarkup(
@@ -211,7 +211,7 @@ describe('ChildSubscription Component', () => {
 
     expect(html).toContain('體驗期')
     expect(html).toContain('選擇付款週期')
-    expect(html).toContain('創始早鳥優惠')
+    expect(html).toContain('創始 30 名額已保留')
   })
 
   it('7. waitlist status = waiting: shows waiting pill, reassurance copy, and disables billing selector', () => {
@@ -263,6 +263,26 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('選擇付款週期')
     expect(html).toContain('年繳 NT$4,999')
     expect(html).toContain('月繳 NT$499')
-    expect(html).toContain('選擇年繳並開始訂閱')
+    expect(html).toContain('選擇月繳並開始訂閱')
+  })
+  it('9. active redeemed Founder shows effective NT$299 price and Founder badge', () => {
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        subscription={{
+          id: 'sub-founder', childId: 'child-123', status: 'active', planCode: 'standard_monthly',
+          billingInterval: 'month', priceTwd: 499, currentPeriodEnd: '2026-09-16T00:00:00Z',
+          cancelAtPeriodEnd: false, foundingStatus: 'redeemed', foundingRedeemedAt: '2026-08-16T00:00:00Z',
+        }}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
+      />
+    )
+    expect(html).toContain('創始 30')
+    expect(html).toContain('月繳方案・每月 NT$299')
+    expect(html).not.toContain('月繳方案・每月 NT$499')
+  })
+
+  it('10. exports the exact permanent-loss cancellation warning', () => {
+    expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$299/月資格將永久失效。到期前恢復續訂即可保留。')
   })
 })

@@ -2,15 +2,15 @@ import { getSupabaseClient } from './supabase'
 import type { BillingInterval, BillingPlan } from './billing-plans'
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled'
-export type SubscriptionView = { id: string; childId: string; status: SubscriptionStatus; planCode: string | null; billingInterval: BillingInterval | null; priceTwd: number | null; currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; foundingStatus: 'none' | 'eligible' | 'redeemed' }
-type SubscriptionRow = { id: string; child_id: string; status: SubscriptionStatus; plan_code: string | null; billing_interval: BillingInterval | null; price_twd: number | null; current_period_end: string | null; cancel_at_period_end: boolean; founding_status: SubscriptionView['foundingStatus'] }
+export type SubscriptionView = { id: string; childId: string; status: SubscriptionStatus; planCode: string | null; billingInterval: BillingInterval | null; priceTwd: number | null; currentPeriodEnd: string | null; cancelAtPeriodEnd: boolean; foundingStatus: 'none' | 'eligible' | 'redeemed' | 'expired' | 'forfeited'; foundingReservedUntil?: string | null; foundingRedeemedAt?: string | null; foundingForfeitedAt?: string | null }
+type SubscriptionRow = { id: string; child_id: string; status: SubscriptionStatus; plan_code: string | null; billing_interval: BillingInterval | null; price_twd: number | null; current_period_end: string | null; cancel_at_period_end: boolean; founding_status: SubscriptionView['foundingStatus']; founding_reserved_until: string | null; founding_redeemed_at: string | null; founding_forfeited_at: string | null }
 
 export type CheckoutPreparation = { transactionId: string; plan: BillingPlan; billingInterval: BillingInterval; priceTwd: number; foundingApplies: boolean; checkoutPriceTwd: number }
 
 export async function listOwnedSubscriptions(): Promise<SubscriptionView[]> {
-  const { data, error } = await getSupabaseClient().from('subscriptions').select('id, child_id, status, plan_code, billing_interval, price_twd, current_period_end, cancel_at_period_end, founding_status')
+  const { data, error } = await getSupabaseClient().from('subscriptions').select('id, child_id, status, plan_code, billing_interval, price_twd, current_period_end, cancel_at_period_end, founding_status, founding_reserved_until, founding_redeemed_at, founding_forfeited_at')
   if (error) throw error
-  return (data as SubscriptionRow[]).map((row) => ({ id: row.id, childId: row.child_id, status: row.status, planCode: row.plan_code, billingInterval: row.billing_interval, priceTwd: row.price_twd, currentPeriodEnd: row.current_period_end, cancelAtPeriodEnd: row.cancel_at_period_end, foundingStatus: row.founding_status }))
+  return (data as SubscriptionRow[]).map((row) => ({ id: row.id, childId: row.child_id, status: row.status, planCode: row.plan_code, billingInterval: row.billing_interval, priceTwd: row.price_twd, currentPeriodEnd: row.current_period_end, cancelAtPeriodEnd: row.cancel_at_period_end, foundingStatus: row.founding_status, foundingReservedUntil: row.founding_reserved_until, foundingRedeemedAt: row.founding_redeemed_at, foundingForfeitedAt: row.founding_forfeited_at }))
 }
 
 export async function prepareCheckout(childId: string, plan: BillingPlan): Promise<CheckoutPreparation> {

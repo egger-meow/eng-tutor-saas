@@ -97,7 +97,7 @@ export function BillingPage({ session }: { session: Session }) {
     try {
       const result = await cancelSubscription(childId, reason)
       setSubscriptions((current) => current.map((sub) => sub.childId === childId ? { ...sub, cancelAtPeriodEnd: result.cancelAtPeriodEnd } : sub))
-      setCheckoutNotice('已取消續訂。本期結束前仍可使用教材，之後歡迎隨時回來續訂。')
+      setCheckoutNotice('已取消續訂。本期結束前仍保留目前方案；創始 30 若在到期前恢復續訂，NT$299／月價格也會保留。')
       if (result.reconciliationPending) {
         void waitForSubscriptionReconciliation(childId, result.cancelAtPeriodEnd).catch(() => {})
       } else {
@@ -208,11 +208,11 @@ export function BillingPage({ session }: { session: Session }) {
               </div>
               <div className="checkout-plan-summary">
                 <span>紙屬英文{activeCheckout.plan === 'annual' ? '年繳' : '月繳'}方案</span>
-                <strong>NT${formatPrice(activeCheckout.checkoutPriceTwd ?? billingPlans[activeCheckout.plan].priceTwd)} <small>／{activeCheckout.plan === 'annual' ? '年' : activeCheckout.foundingApplies ? '第一個付費月' : '月'}</small></strong>
+                <strong>NT${formatPrice(activeCheckout.checkoutPriceTwd ?? billingPlans[activeCheckout.plan].priceTwd)} <small>／{activeCheckout.plan === 'annual' ? '年' : '月'}</small></strong>
                 {activeCheckout.plan === 'annual'
                   ? <p>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。</p>
                   : activeCheckout.foundingApplies
-                    ? <p>Founding 30 優惠已套用：第一個付費月 NT$299，第二個付費月起 NT$499／月。稅額由 Paddle 依付款資料計算。</p>
+                    ? <p>創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$299／月。稅額由 Paddle 依付款資料計算。</p>
                     : <p>每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。</p>}
               </div>
               <div className="paddle-checkout-frame" />

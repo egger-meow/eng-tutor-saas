@@ -23,7 +23,7 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Paddle production default payment link is configured.
 - [ ] Live monthly price exists: TWD 499 / month.
 - [ ] Live annual price exists: TWD 4,999 / year.
-- [ ] Live Founding 30 discount exists: TWD 200 off the first monthly billing interval only.
+- [ ] Live Founder 30 discount exists: active flat TWD 200, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 499 monthly price.
 - [ ] Live API key is created and stored only as a server secret.
 - [ ] Live client-side token is configured for the production web build.
 - [ ] Live webhook destination points to the production `paddle-webhook` Edge Function.
@@ -51,7 +51,7 @@ The test should behave exactly like a real customer journey:
 7. [ ] Checkout completes and Paddle creates the expected subscription lifecycle.
 8. [ ] Production webhook signature verification succeeds.
 9. [ ] Exactly one local subscription state is reconciled for that child.
-10. [ ] Founding pricing is correct when applicable; annual checkout does not consume founding eligibility.
+10. [ ] Founder pricing is NT$299 every month while the same monthly subscription remains continuous; annual activation releases an unredeemed reservation and never receives the discount.
 11. [ ] The child receives generation entitlement without manual SQL or admin state repair.
 12. [ ] Week 1 generation job exists through the normal product flow.
 13. [ ] Scheduled authoring claims/submits the job normally.
