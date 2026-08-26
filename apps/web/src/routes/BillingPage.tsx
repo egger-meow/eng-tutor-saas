@@ -127,7 +127,7 @@ export function BillingPage({ session }: { session: Session }) {
     try {
       const result = await cancelSubscription(childId, reason)
       setSubscriptions((current) => current.map((sub) => sub.childId === childId ? { ...sub, cancelAtPeriodEnd: result.cancelAtPeriodEnd } : sub))
-      setCheckoutNotice('已取消續訂。本期結束前仍保留目前方案；創始 30 若在到期前恢復續訂，NT$299／月價格也會保留。')
+      setCheckoutNotice('已取消續訂。本期結束前仍保留目前方案；創始 30 若在到期前恢復續訂，NT$349／月價格也會保留。')
       if (result.reconciliationPending) {
         void waitForSubscriptionReconciliation(childId, result.cancelAtPeriodEnd).catch(() => {})
       } else {
@@ -288,7 +288,7 @@ export function BillingPage({ session }: { session: Session }) {
                 {activeCheckout.plan === 'annual'
                   ? <p>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。</p>
                   : activeCheckout.foundingApplies
-                    ? <p>創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$299／月。稅額由 Paddle 依付款資料計算。</p>
+                    ? <p>創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$349／月。稅額由 Paddle 依付款資料計算。</p>
                     : <p>每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。</p>}
               </div>
               <div className="paddle-checkout-frame" />

@@ -62,7 +62,7 @@ The test should behave exactly like a real customer journey:
 7. [ ] Checkout completes and Paddle creates the expected subscription lifecycle.
 8. [ ] Production webhook signature verification succeeds.
 9. [ ] Exactly one local subscription state is reconciled for that child.
-10. [ ] Founder pricing is NT$299 every month while the same monthly subscription remains continuous; annual activation releases an unredeemed reservation and never receives the discount.
+10. [ ] Founder pricing is NT$349 every month while the same monthly subscription remains continuous; annual activation never receives the discount.
 11. [ ] A Founder checkout opened immediately before reservation expiry remains counted until its transaction completes or is safely neutralized; a concurrent child cannot become seat 31.
 12. [ ] An account that accepted an older Terms version cannot start checkout until it explicitly accepts v2; unchanged Privacy v1 is not reaccepted.
 13. [ ] The child receives generation entitlement without manual SQL or admin state repair.

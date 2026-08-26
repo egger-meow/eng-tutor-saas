@@ -5,7 +5,7 @@ import type { SubscriptionView } from '../../lib/subscriptions'
 import type { OwnedWaitlistEntry } from '../../lib/waitlist'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
-export const founderCancellationWarning = '本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$299/月資格將永久失效。到期前恢復續訂即可保留。'
+export const founderCancellationWarning = '本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。'
 
 const labels = {
   trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
@@ -168,7 +168,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
   const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
   const isRedeemedFounder = subscription.foundingStatus === 'redeemed'
   const hasActiveReservation = subscription.foundingStatus === 'eligible' && Boolean(subscription.foundingReservedUntil)
-  const displayedPriceTwd = isRedeemedFounder && currentPlan.key === 'monthly' ? 299 : subscription.priceTwd
+  const displayedPriceTwd = isRedeemedFounder && currentPlan.key === 'monthly' ? 349 : subscription.priceTwd
 
   return (
     <article className="subscription-card">
@@ -191,7 +191,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
           </p>
         )}
         {hasActiveReservation && (
-          <p className="notice"><strong>創始 30 名額已保留</strong><br />保留至 {formatDate(subscription.foundingReservedUntil ?? null)}。完成月繳訂閱後，只要訂閱不中斷，即固定 NT$299／月。</p>
+          <p className="notice"><strong>創始 30 名額已保留</strong><br />保留至 {formatDate(subscription.foundingReservedUntil ?? null)}。完成月繳訂閱後，只要訂閱不中斷，即固定 NT$349／月。</p>
         )}
         {periodEnd && (
           <p>
@@ -307,7 +307,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
                   月繳 {subscription.foundingStatus === 'eligible' ? (
                     <>
                       <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
-                      <ins className="highlight-price">NT$299</ins>
+                      <ins className="highlight-price">NT$349</ins>
                       <span className="badge badge-discount">創始早鳥優惠</span>
                     </>
                   ) : (
@@ -316,7 +316,7 @@ export function ChildSubscription({ child, subscription, waitlist, busy, activat
                 </strong>
                 <small>
                   {subscription.foundingStatus === 'eligible'
-                    ? '創始 30 名額已保留：完成月繳後，只要同一訂閱不中斷，即固定 NT$299／月'
+                    ? '創始 30 名額已保留：完成月繳後，只要同一訂閱不中斷，即固定 NT$349／月'
                     : '每月自動續訂；可隨時取消下一期續訂'}
                 </small>
               </span>

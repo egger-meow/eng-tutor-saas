@@ -98,14 +98,14 @@ export function getPaddleApiBaseUrl(envValue: string | undefined): string {
 export function validateFoundingDiscount(discount: PaddleDiscount | undefined, monthlyPriceId: string): void {
   if (discount?.status !== 'active'
     || discount.type !== 'flat'
-    || discount.amount !== '20000'
+    || discount.amount !== '15000'
     || discount.currency_code !== 'TWD'
     || discount.recur !== true
     || discount.maximum_recurring_intervals !== null
     || !Array.isArray(discount.restrict_to)
     || discount.restrict_to.length !== 1
     || discount.restrict_to[0] !== monthlyPriceId) {
-    throw new Error('Founding discount must be an active forever-recurring TWD 200 flat discount restricted to the standard monthly price')
+    throw new Error('Founding discount must be an active forever-recurring TWD 150 flat discount restricted to the standard monthly price')
   }
 }
 

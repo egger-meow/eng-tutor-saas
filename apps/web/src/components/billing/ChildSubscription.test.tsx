@@ -151,13 +151,13 @@ describe('ChildSubscription Component', () => {
 
     expect(html).toContain('strike-price')
     expect(html).toContain('NT$499')
-    expect(html).toContain('NT$299')
+    expect(html).toContain('NT$349')
     expect(html).toContain('創始 30 名額已保留')
-    expect(html).toContain('完成月繳後，只要同一訂閱不中斷，即固定 NT$299／月')
+    expect(html).toContain('完成月繳後，只要同一訂閱不中斷，即固定 NT$349／月')
     expect(html).toMatch(/checked="" value="monthly"/)
   })
 
-  it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$299 discount again', () => {
+  it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$349 discount again', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1',
       childId: 'child-123',
@@ -183,7 +183,7 @@ describe('ChildSubscription Component', () => {
     // Must show standard NT$499 without strike-through or discount badge
     expect(html).toContain('月繳 NT$499')
     expect(html).not.toContain('strike-price')
-    expect(html).not.toContain('NT$299')
+    expect(html).not.toContain('NT$349')
     expect(html).not.toContain('創始早鳥優惠')
     expect(html).toMatch(/checked="" value="annual"/)
   })
@@ -267,7 +267,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('月繳 NT$499')
     expect(html).toContain('選擇年繳並開始訂閱')
   })
-  it('9. active redeemed Founder shows effective NT$299 price and Founder badge', () => {
+  it('9. active redeemed Founder shows effective NT$349 price and Founder badge', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
         child={mockChild}
@@ -280,11 +280,11 @@ describe('ChildSubscription Component', () => {
       />
     )
     expect(html).toContain('創始 30')
-    expect(html).toContain('月繳方案・每月 NT$299')
+    expect(html).toContain('月繳方案・每月 NT$349')
     expect(html).not.toContain('月繳方案・每月 NT$499')
   })
 
   it('10. exports the exact permanent-loss cancellation warning', () => {
-    expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$299/月資格將永久失效。到期前恢復續訂即可保留。')
+    expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。')
   })
 })

@@ -599,31 +599,33 @@ Do not use a single subscription with `quantity = number of children` for MVP.
 Founder 30 is a monthly-only lifetime price attached to the first 30 qualifying children.
 
 ```text
-First week free
+First week free (across 100 service capacity)
 ↓
-14-day unredeemed reservation
+30-minute checkout hold at qualifying monthly Paddle checkout
 ↓
-Verified monthly activation with the configured recurring-forever TWD 200 discount
+Verified monthly activation with the configured recurring-forever flat TWD 150 discount
 ↓
-NT$299/month while that same monthly subscription remains continuously active
+NT$349/month while that same monthly subscription remains continuously active
 ```
 
-The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring NT$200 Paddle discount, not by changing the catalog price.
+The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring flat TWD 150 Paddle discount (amount 15000), not by changing the catalog price.
 
-Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. An `eligible` reservation lasts exactly 14 days. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
+Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Creating a child or profile does not allocate or reserve a Founder seat; all admitted children have equal access to the free Week 1 personalized trial.
 
-A redeemed or forfeited seat is permanently consumed. Cancellation never returns it to the public Founder pool, and an expired or forfeited child can never automatically regain Founder eligibility. Founder status belongs to the child and continuing subscription, not merely the parent account.
+Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. At monthly checkout preparation, if `founding_seat_count() < 30`, a 30-minute checkout hold is atomically acquired. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
 
-Annual checkout never receives the Founder discount. Opening or abandoning annual checkout does not destroy an active reservation; successful annual activation converts an unredeemed reservation to `expired` and releases it.
+A redeemed or forfeited seat is permanently consumed. Cancellation never returns it to the public Founder pool, and a forfeited child can never regain Founder eligibility. Founder status belongs to the child and continuing subscription, not merely the parent account.
 
-Creating a Founder-discounted Paddle transaction durably transfers the temporary seat into a server-only checkout claim tied to that transaction. The claim remains counted even if the 14-day child reservation subsequently expires. It becomes a permanently consumed seat on verified subscription activation, or releases only after the Paddle transaction is independently verified as canceled or unable to complete with the Founder discount. A payable abandoned transaction must never become an uncounted Founder subscription.
+Annual checkout never receives or consumes a Founder seat.
+
+Creating a Founder-discounted Paddle transaction durably binds the 30-minute checkout hold to that transaction. It becomes a permanently consumed seat on verified subscription activation, or releases safely after the Paddle transaction is neutralized. An expired or released hold cannot complete late at the Founder price.
 
 ---
 # 23. Founder Price Requires Continuous Subscription
 
-The contractual Founder price is fixed at NT$299/month only while the same redeemed monthly subscription remains continuous.
+The contractual Founder price is fixed at NT$349/month only while the same redeemed monthly subscription remains continuous.
 
-Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$299/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
+Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$349/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
 
 Referral codes and rewards are out of scope.
 
@@ -2955,7 +2957,7 @@ Initial values:
 ```text
 standard_monthly_price = 499 TWD
 standard_annual_price = 4999 TWD
-founder_continuous_monthly_price = 299 TWD
+founder_continuous_monthly_price = 349 TWD
 founding_child_limit = 30
 service_child_capacity = 100
 ```
@@ -3983,20 +3985,20 @@ For either monthly or annual checkout, the browser chooses only a semantic plan.
 For a qualifying child:
 
 ```text
-14-day reservation
+Free Week 1 trial (across 100 capacity)
 ↓
-Week 1 free
+30-minute checkout hold at qualifying monthly checkout
 ↓
-Verified monthly activation with the configured forever-recurring discount
+Verified monthly activation with the configured forever-recurring flat TWD 150 discount
 ↓
-NT$299/month while the same subscription remains continuous
+NT$349/month while the same subscription remains continuous
 ```
 
 Scheduling cancellation, past due, pause, and resuming before the actual end preserve a redeemed Founder seat and price. A verified actual cancellation changes `redeemed` to `forfeited` exactly once; the seat remains permanently consumed and the child can never receive Founder pricing again.
 
-Expired reservations release their temporary seat. Redeemed and forfeited seats never release it. Annual checkout never receives the discount, abandoned annual checkout preserves an active reservation, and successful annual activation expires an unredeemed reservation.
+Expired checkout holds release their temporary hold. Redeemed and forfeited seats never release it. Annual checkout never receives or consumes Founder seats.
 
-An in-flight discounted checkout claim is still a reserved seat after the original 14-day timestamp. Allocation, checkout preparation, expiry cleanup, claim completion, and verified abandoned-transaction release share the enrollment-settings-first lock order. No allocator may reuse that seat until Paddle can no longer complete the old transaction with the Founder discount.
+An in-flight discounted checkout claim is a server-held seat for 30 minutes. Allocation, checkout preparation, claim expiry, claim completion, and verified abandoned-transaction release share the enrollment-settings-first lock order. No allocator may reuse that seat until Paddle can no longer complete the old transaction with the Founder discount.
 
 The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters.
 
@@ -4229,11 +4231,11 @@ or 4,999 TWD / year / child
 Founder cohort:
 
 ```text
-First 30 monthly children
+First 30 monthly subscribing children
 ↓
-14-day reservation + Week 1 free
+30-minute checkout hold + flat TWD 150 discount
 ↓
-299/month while the same subscription remains continuous
+349/month while the same subscription remains continuous
 ↓
 Actual cancellation permanently forfeits pricing; consumed seat never returns
 ```

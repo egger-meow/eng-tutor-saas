@@ -1,4 +1,4 @@
-﻿-- Migration: Restore Scheduled Work claim bridge API contract, targetReleaseId hardening, and retryContext construction
+-- Migration: Restore Scheduled Work claim bridge API contract, targetReleaseId hardening, and retryContext construction
 create or replace function private_generation.chatgpt_claim_generation_batch(worker_id text)
 returns jsonb
 language plpgsql

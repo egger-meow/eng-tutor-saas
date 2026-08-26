@@ -43,17 +43,17 @@ describe('Paddle plan allowlist', () => {
     }], priceIds)).toThrow('do not match')
   })
 
-  it('accepts only a forever-recurring TWD 200 founding discount restricted to monthly', () => {
+  it('accepts only a forever-recurring TWD 150 founding discount restricted to monthly', () => {
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_monthly'],
     }, 'pri_monthly')).not.toThrow()
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: 1, restrict_to: ['pri_monthly'],
     }, 'pri_monthly')).toThrow('forever-recurring')
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '20000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_annual'],
     }, 'pri_monthly')).toThrow('standard monthly price')
   })

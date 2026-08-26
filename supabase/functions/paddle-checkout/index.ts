@@ -125,7 +125,7 @@ Deno.serve(async (request) => {
         billing_interval: plan.billingInterval,
         price_twd: plan.priceTwd,
         founding_applies: true,
-        checkout_price_twd: 299,
+        checkout_price_twd: 349,
       })
     }
 
@@ -202,7 +202,7 @@ Deno.serve(async (request) => {
       billing_interval: plan.billingInterval,
       price_twd: plan.priceTwd,
       founding_applies: foundingApplies,
-      checkout_price_twd: foundingApplies ? 299 : plan.priceTwd,
+      checkout_price_twd: foundingApplies ? 349 : plan.priceTwd,
     })
   } catch (error) {
     console.error('Paddle checkout preparation failed', errorMessage(error))
