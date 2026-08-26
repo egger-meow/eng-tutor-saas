@@ -296,7 +296,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     }))
   })
 
-  it('excludes immediately previous production release (Engine 1.2.0 / Schema 2.3.0 / Prompt 2.6.0) from drift against current 1.3.0 / 2.7.0 release', async () => {
+  it('excludes immediately previous production release (Engine 1.3.0 / Schema 2.3.0 / Prompt 2.7.0) from drift against current 1.4.0 / 2.8.0 release', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-prev', display_name: 'Previous Release Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
@@ -307,19 +307,19 @@ describe('AdminService Authoritative Truth Layer', () => {
         material_week: '2026-08-20',
         revision: 1,
         rule_version: 'rules/1',
-        prompt_version: '2.6.0', // immediately previous production prompt
+        prompt_version: '2.7.0', // immediately previous production prompt
         generator_version: '2.3.0',
         model_name: 'model-260',
         student_pdf_path: 'child/job/student.pdf',
         parent_answer_pdf_path: 'child/job/parent-answer.pdf',
         canonical_source: {
           metadata: {
-            releaseId: 'rel_1.2.0', // Historical release identity
+            releaseId: 'rel_1.3.0', // Historical release identity
             schemaVersion: '2.3.0',
-            promptVersion: '2.6.0',
-            engineVersion: '1.2.0', // immediately previous engine
+            promptVersion: '2.7.0',
+            engineVersion: '1.3.0', // immediately previous engine
             rendererVersion: '1.0.0',
-            workerVersion: '1.2.0',
+            workerVersion: '1.3.0',
           },
         },
         created_at: '2026-08-20T00:00:00.000Z',
@@ -357,7 +357,7 @@ describe('AdminService Authoritative Truth Layer', () => {
             promptVersion: '2.6.0', // Drifted
             engineVersion: '1.2.0', // Drifted
             rendererVersion: '1.0.0',
-            workerVersion: '1.3.0',
+            workerVersion: '1.4.0',
           },
         },
         created_at: '2026-08-25T12:00:00.000Z',
@@ -403,7 +403,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(overview.engineInspector.alignmentStatus).toBe('aligned')
   })
 
-  it('proves a freshly completed Engine 1.3.0 / Prompt 2.7.0 material produces a fully ALIGNED inspector', async () => {
+  it('proves a freshly completed Engine 1.4.0 / Prompt 2.8.0 material produces a fully ALIGNED inspector', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-fresh', display_name: 'Fresh Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
@@ -426,7 +426,7 @@ describe('AdminService Authoritative Truth Layer', () => {
             engineVersion: CURRENT_ENGINE_VERSION,
             modelQualityProfile: { qualityProfileVersion: '1.1.0' },
             rendererVersion: '1.0.0',
-            workerVersion: '1.3.0',
+            workerVersion: '1.4.0',
           },
         },
         created_at: '2026-08-25T12:00:00.000Z',
@@ -1246,13 +1246,13 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(classifyQualityEra({})).toBe('historical')
 
       // 4. Central Engine Versioning & Dynamic Label Formatting
-      expect(CURRENT_ENGINE_VERSION).toBe('1.3.0')
+      expect(CURRENT_ENGINE_VERSION).toBe('1.4.0')
       expect(CURRENT_SCHEMA_VERSION).toBe('2.3.0')
-      expect(CURRENT_PROMPT_VERSION).toBe('2.7.0')
+      expect(CURRENT_PROMPT_VERSION).toBe('2.8.0')
       expect(CURRENT_ERA_TAG).toBe('engine_v1')
-      expect(formatEngineVersion()).toBe('Engine v1.3.0')
+      expect(formatEngineVersion()).toBe('Engine v1.4.0')
       expect(formatEngineVersion('1.0.0')).toBe('Engine v1.0.0')
-      expect(formatEngineEraLabel('engine_v1')).toBe('Engine v1.3.0')
+      expect(formatEngineEraLabel('engine_v1')).toBe('Engine v1.4.0')
       expect(formatEngineEraLabel('engine_v1', '1.0.0')).toBe('Engine v1.0.0')
       expect(formatEngineEraLabel('engine_v1', '1.1.0')).toBe('Engine v1.1.0')
       expect(formatEngineEraLabel('historical')).toBe('Historical')
@@ -1440,10 +1440,10 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       expect(currentExport.schemaVersion).toBe('2.3.0')
       expect(currentExport.provenance.era).toBe('current')
-      expect(currentExport.provenance.currentEraName).toBe('Engine v1.3.0')
-      expect(currentExport.provenance.currentEngineVersion).toBe('1.3.0')
+      expect(currentExport.provenance.currentEraName).toBe('Engine v1.4.0')
+      expect(currentExport.provenance.currentEngineVersion).toBe('1.4.0')
       expect(currentExport.provenance.currentSchemaVersion).toBe('2.3.0')
-      expect(currentExport.provenance.currentPromptVersion).toBe('2.7.0')
+      expect(currentExport.provenance.currentPromptVersion).toBe('2.8.0')
     })
   })
 

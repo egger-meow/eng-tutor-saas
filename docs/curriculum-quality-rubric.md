@@ -5,7 +5,7 @@ This is the review contract for every weekly package. It distills the teaching r
 ## Non-negotiable learning contract
 
 - Every new production 2.3.0 primary reading is real-world grounded, including grammar-heavy weeks. It normally teaches 3–5 concrete researched propositions and never uses null or N/A grounding as an escape hatch.
-- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, and a passed freshness review.
+- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, correct event/publication-date distinctions, and a passed topic-aware freshness review.
 - Research queries are privacy-safe generalized public topics. Authored prose is an original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported factual embellishment.
 
 - The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
@@ -20,7 +20,7 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## The weekly improvement loop
 
-Research occurs after the single authoritative batch claim and before lesson planning/authoring: explore several public angles, select one per job, drill down, and verify important propositions. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes factual support, freshness, genericity, copyright transformation, and exact prose-bound provenance; repair updates dependent prose and grounding together.
+Research occurs after the single authoritative batch claim and before lesson planning/authoring. Preserve learning need, target, and genre/information structure first; then judge whether the interest is durable or fast-moving. Fast-moving interests actively discover recent developments, inspect durable angles when useful, compare source quality, age/lexical fit, factual depth, freshness, and teachability, then select, drill down, and verify. Prefer a strong current angle only when it is at least as educationally suitable; otherwise record a principled evergreen fallback. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes ignored strong current angles, unjustified recency, factual support, topic-aware freshness, speculation, genericity, source-shaped news prose, lexical/CAP fit, copyright transformation, and exact prose-bound provenance; repair updates only dependent prose and grounding together.
 
 1. **Observe:** collect school progress, vocabulary status, recurring grammar errors, completion/difficulty, parent feedback, and the previous packet's quality findings.
 2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review (including cumulative previous-week review), and record what changed from last week and why.

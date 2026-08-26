@@ -1,8 +1,8 @@
 ---
-bundleVersion: "2.7.0-prod"
+bundleVersion: "2.8.0-prod"
 schemaVersion: "2.3.0"
-promptVersion: "2.7.0"
-engineVersion: "1.3.0"
+promptVersion: "2.8.0"
+engineVersion: "1.4.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
@@ -21,11 +21,15 @@ sourceHashes:
   "packages/generator/prompts/2.7.0/02-author.md": "df7034db3aee85bc1260fac17bc6c0b2f91cef1298074a555d98d33fbecf5695"
   "packages/generator/prompts/2.7.0/03-critic.md": "0cbce4661fd86238a708fca205d7468a1cf8014155a9ab89b005286c4d207458"
   "packages/generator/prompts/2.7.0/04-repair.md": "2c8564e6131002e44f392887996197e624984e3c24360f9b296de1ce778cb16b"
+  "packages/generator/prompts/2.8.0/01-plan.md": "23286427fd1b7cc9c6cca1509304d7d4a7e5627c562432150bc56b242fd43954"
+  "packages/generator/prompts/2.8.0/02-author.md": "b2c72237b77a437747107818483ac3fa5e5ec08748d4a91aae1ef69118a229f1"
+  "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
+  "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
   "packages/generator/src/curriculum-package-schema.ts": "40114cd21457f67e4ca72491f94b81216de2e0a819a9ed5441495df9f0d45131"
   "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "12a822cfae283750a09afbd5eee4fadb11888489edc16e90644747f686275a3c"
-  "docs/product-rules.md": "9712825db688aa392c92ac944e99b82ade81f1f1b849b0cdf55be2050c27135f"
+  "docs/curriculum-quality-rubric.md": "98b9865405c6c9fe96851d026d3c337915f3c6b0bd8d8d873acdd75506b2966c"
+  "docs/product-rules.md": "2d422b807e1e650980b6eb285eef8b019ff80329a6f9955eb473e7fdda9c6fc1"
 ---
 
 # 紙屬英文 Production Authoring Bundle
@@ -63,9 +67,9 @@ Week 2 and later must demonstrate continuity through selected vocabulary recurre
 
 Every newly authored production CurriculumPackage 2.3.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
 
-The production research funnel is explore, select, drill down, verify, then author. Planning priority remains learning need, target, genre/information structure, then researched topic. Normal factual readings carry 3–5 concrete propositions unless quality evidence records a specific justified exception.
+The production research funnel preserves learning need, target, and genre/information structure before topic selection. Research planning judges whether the generalized interest is durable or fast-moving. Fast-moving interests actively inspect recent developments, compare them with durable angles when useful, then select, drill down, verify, and author. A strong reliable, age-appropriate, lexically feasible recent angle is preferred when it serves the target equally well or better; weak, speculative, trivial, unsafe, too-complex, or pedagogically inferior current candidates require a defensible evergreen fallback. Normal factual readings carry 3–5 concrete propositions unless quality evidence records a specific justified exception.
 
-Canonical provenance closes `Source -> Fact -> Claim -> Actual lesson prose`. Each claim records stable fact IDs, an allowlisted canonical reading-block location, and exact text found at that location. `temporalMode` is explicitly `evergreen` or `current`; current research requires source publication dates, `researchedAt`, and freshness criticism.
+Canonical provenance closes `Source -> Fact -> Claim -> Actual lesson prose`. Each claim records stable fact IDs, an allowlisted canonical reading-block location, and exact text found at that location. `temporalMode` is explicitly `evergreen` or `current`; current research requires source publication dates, `researchedAt`, correct event/publication-date distinctions, and topic-aware freshness criticism. Recency never relaxes source quality, factual density, lexical/CAP control, answer entailment, copyright, workload, or personalization gates.
 
 Web queries contain generalized public topic terms only. Never send child identity, school, level, feedback, mistakes, history, or profile data to search. Research extracts propositions rather than prose; authoring uses original educational synthesis and never reproduces protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
 
@@ -92,7 +96,7 @@ This is the review contract for every weekly package. It distills the teaching r
 ## Non-negotiable learning contract
 
 - Every new production 2.3.0 primary reading is real-world grounded, including grammar-heavy weeks. It normally teaches 3–5 concrete researched propositions and never uses null or N/A grounding as an escape hatch.
-- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, and a passed freshness review.
+- Grounding provenance is closed and auditable: every source supports a fact, every fact supports a claim, and every claim names exact text occurring at its canonical reading-block location. `current` grounding has publication dates, a research date, correct event/publication-date distinctions, and a passed topic-aware freshness review.
 - Research queries are privacy-safe generalized public topics. Authored prose is an original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported factual embellishment.
 
 - The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
@@ -107,7 +111,7 @@ This is the review contract for every weekly package. It distills the teaching r
 
 ## The weekly improvement loop
 
-Research occurs after the single authoritative batch claim and before lesson planning/authoring: explore several public angles, select one per job, drill down, and verify important propositions. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes factual support, freshness, genericity, copyright transformation, and exact prose-bound provenance; repair updates dependent prose and grounding together.
+Research occurs after the single authoritative batch claim and before lesson planning/authoring. Preserve learning need, target, and genre/information structure first; then judge whether the interest is durable or fast-moving. Fast-moving interests actively discover recent developments, inspect durable angles when useful, compare source quality, age/lexical fit, factual depth, freshness, and teachability, then select, drill down, and verify. Prefer a strong current angle only when it is at least as educationally suitable; otherwise record a principled evergreen fallback. The existing observe, plan, teach, critic, repair, and learning-memory loop remains intact. Critic review includes ignored strong current angles, unjustified recency, factual support, topic-aware freshness, speculation, genericity, source-shaped news prose, lexical/CAP fit, copyright transformation, and exact prose-bound provenance; repair updates only dependent prose and grounding together.
 
 1. **Observe:** collect school progress, vocabulary status, recurring grammar errors, completion/difficulty, parent feedback, and the previous packet's quality findings.
 2. **Plan:** choose 3–5 measurable targets, protect prerequisites, select due review (including cumulative previous-week review), and record what changed from last week and why.
@@ -579,9 +583,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.7.0)
+# Prompt 01: Planning (v2.8.0)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.8.0).
 
 ---
 
@@ -785,10 +789,49 @@ Use `weekly_minutes` as `targetMinutes`. Plan meaningful work for 85%-115% witho
 
 Plan practice and homework items with balanced, non-predictable multiple-choice answer positions across options (A), (B), (C), and (D).
 
-## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.7.0)
+---
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
+# Prompt 01 Overlay: Recency-Aware Grounded Planning (v2.8.0)
+
+Apply the complete inherited planning contract, with Curriculum Schema 2.3.0 and Prompt Version 2.8.0.
+
+## Time-sensitivity planning signal
+
+After identifying the learning need, target, and required genre/information structure, judge whether the permitted generalized interest is:
+
+- **durable / primarily evergreen**: recent events are unlikely to materially improve the teaching context; or
+- **fast-moving**: new events, releases, discoveries, results, or public developments may materially change what is interesting, accurate, or educational.
+
+Make this judgment from the nature and current state of the domain, not from a brittle hardcoded list. This is internal research-planning and quality evidence only. Never add it to the canonical learner profile or expose it in Student or Parent PDFs.
+
+## Recency-aware research funnel
+
+Preserve the priority `learning need -> learning target -> genre/information structure -> researched real-world topic`. Then:
+
+1. derive only privacy-safe generalized public interest terms;
+2. for a fast-moving interest, actively discover recent real-world developments using date-aware queries and credible sources;
+3. inspect durable candidate angles when useful, including as a comparison or fallback;
+4. compare candidates by learning-target fit, interest relevance, source reliability, age appropriateness, lexical feasibility, factual depth, freshness, copyright safety, and teachability;
+5. select the strongest grounded context, verify its important propositions, build grounding, and only then author.
+
+Recent discovery must be substantive: do not perform a token search and ignore suitable results by default. When a strongly related, reliable, age-appropriate, lexically feasible, factual recent development serves the target equally well or better, prefer it over generic evergreen noun-skinning.
+
+Do not force `current`. Select an evergreen angle when recent candidates are rumor, prediction, weakly sourced, trivial, too complex, unsafe, developmentally inappropriate, vocabulary-heavy, copyright-dependent, factually thin, or pedagogically inferior. Preserve concise internal planning/quality evidence explaining which recent and durable candidates were compared and why the selected temporal mode best serves this learning target; do not expose internal machinery in learner-facing content.
+
+## Private context never enters search
+
+Private learner context may guide internal selection but never query construction. Search executors receive generalized public topic terms only. Never transmit child or parent names, child IDs, job IDs, school, grade, English level, textbook state, feedback, mistakes, learning history, profile prose, private context notes, or any other identifying/private information. Privacy protects the learner; it does not suppress access to public current information.
+
+## Current source and freshness plan
+
+For a selected current angle, set `temporalMode: current`, record `researchedAt`, and require valid `publishedAt` on every source needed to establish the event or its recency. Distinguish when an event happened from when a source was published. Prefer official/primary sources for what occurred, with reputable news, science, or educational sources for independent verification and context where appropriate. Treat product announcements as evidence of what was announced, not independent proof of marketing claims.
+
+Freshness is topic-aware, not one universal day cutoff. Very fast-moving claims require substantially newer credible evidence; a slower domain may support an older development that remains current for the way the lesson presents it. Cross-check important propositions where appropriate. Exclude rumors, unsupported predictions, speculation, and social-media hearsay from factual lesson claims.
+
+## 6. Prompt 02: Authoring Engine
+# Prompt 02: Material Authoring (v2.8.0)
+
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.8.0).
 
 ---
 
@@ -1080,10 +1123,24 @@ Scheduled Work estimates fit but cannot run exact normalization. The Finisher is
 
 Distribute 4-option multiple-choice answers across (A), (B), (C), and (D). The correct answer share for any single option position must stay <= 60% of total MCQs; 100% in one position is strictly forbidden when N >= 4. Strictly avoid streaks of 4 or more identical consecutive answers (e.g. AAAA).
 
-## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.7.0)
+---
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
+# Prompt 02 Overlay: Current-Event Educational Synthesis (v2.8.0)
+
+Apply the complete inherited authoring contract, with Curriculum Schema 2.3.0 and Prompt Version 2.8.0.
+
+Author only from the selected, verified grounding brief. For `current`, preserve `temporalMode`, `researchedAt`, required source `publishedAt`, and the distinction between event dates and publication dates. Never make a source seem newer, more definitive, or more independent than it is.
+
+Extract and teach factual propositions; do not imitate the source's headline, lead, narrative order, news framing, press-release framing, or distinctive wording. Do not copy dialogue, scripts, subtitles, manga text, or long protected descriptions. Synthesize original level-appropriate educational English whose externally checkable statements close the exact `Source -> Fact -> Claim -> Actual lesson prose` chain.
+
+Recency is a context, not the learning objective unless the plan explicitly makes it one. A topical hook must not displace the CAP target, lexical ceiling, grammar quality, answer entailment, workload integrity, or self-study continuity. Do not add unsupported detail to make a recent event feel more dramatic. Separate verified facts from inference, and do not convert forecasts, rumors, marketing language, or social-media claims into facts.
+
+Current selection grants no quality exemption. Preserve meaningful factual density, source quality, developmental appropriateness, personalization quality, copyright safety, and independently entailed answers. Grounding and selection evidence remain internal; Student and Parent PDFs receive no engineering citations or research machinery.
+
+## 7. Prompt 03: Critic Engine
+# Prompt 03: Critic (v2.8.0)
+
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.8.0).
 
 ---
 
@@ -1183,10 +1240,45 @@ Reject underfill, overload, or filler. Exceptions need learner evidence and must
 
 Reject MCQ answer-position leakage: flag critical if correct answers concentrate excessively in a single position (> 60% when N >= 6, or 100% when N >= 4) or contain runs of 4+ identical consecutive answers (e.g. AAAA).
 
-## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.7.0)
+---
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.7.0).
+# Prompt 03 Overlay: Recency-Aware Grounding Critic (v2.8.0)
+
+Apply the complete inherited independent critic contract. Ask: did research choose the strongest real-world context for this learner's learning target while meaningfully considering freshness where freshness matters?
+
+## Selection criticism
+
+Treat as critical:
+
+- a fast-moving interest whose recent developments were not substantively inspected, unless the evidence gives a defensible pedagogical reason;
+- generic evergreen noun-skinning when a strong, reliable, teachable current angle was available and fit the target equally well or better;
+- a current event selected merely because it is recent even though an evergreen angle is safer, clearer, better sourced, more factual, or pedagogically stronger;
+- internal selection evidence that does not compare current and durable candidates where that comparison was useful;
+- a topical hook that hijacks the diagnosed learning target, or complexity that breaks the lexical ceiling, workload, CAP progression, or answer integrity.
+
+Do not require `current` merely to pass criticism. A well-explained evergreen fallback passes when recent candidates are speculative, trivial, weakly sourced, unsafe, age-inappropriate, vocabulary-heavy, copyright-dependent, factually thin, or otherwise inferior.
+
+## Current-event criticism
+
+For `temporalMode: current`, explicitly evaluate:
+
+- whether every source establishing the event or recency has a valid `publishedAt`, and whether event and publication dates are distinguished correctly;
+- whether the evidence is fresh enough for the exact way the lesson presents the topic, using a topic-aware judgment rather than one universal day cutoff;
+- whether very fast-moving claims rely on the newest credible information reasonably available at research time;
+- whether each recency claim is actually supported by its cited source;
+- whether important propositions are cross-checked where appropriate and marketing claims remain attributed rather than independently asserted;
+- whether rumor, prediction, unsupported speculation, or social-media hearsay was converted into factual prose.
+
+Reject stale material presented as current, required-but-undated sources, inconsistent dates, and recency claims unsupported by the provenance chain. Pass `grounding-freshness` only after recording substantive evidence of publication dates, event timing, topic-sensitive freshness, and presentation accuracy.
+
+## Synthesis criticism
+
+Reject news-shaped prose that follows a source's headline, lead, framing, ordering, or distinctive wording; factual embellishment outside approved facts; and any break in `Source -> Fact -> Claim -> Actual lesson prose`. Current material receives no relaxation of grounding accuracy, copyright, factual density, lexical, grammar, CAP, workload, personalization, or entailment gates.
+
+## 8. Prompt 04: Repair Specialist
+# Prompt 04: Repair (v2.8.0)
+
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.8.0).
 
 ---
 
@@ -1235,3 +1327,15 @@ On retry, surgically expand useful work or trim redundancy. Preserve grounding, 
 # MCQ Answer-Distribution Repair Overlay (v2.7.0)
 
 When repairing MCQ answer-position leakage, reorder question options (synchronizing the answer key, accepted answers, and explanation letter references) rather than rewriting valid questions or distractors.
+
+---
+
+# Prompt 04 Overlay: Recency-Aware Targeted Repair (v2.8.0)
+
+Apply the complete inherited targeted-repair contract, with Curriculum Schema 2.3.0 and Prompt Version 2.8.0.
+
+When rejection concerns freshness, temporal classification, current-topic selection, source adequacy, factual support, or the decision to ignore a strong current angle, re-open only the dependent research decision, grounding facts/claims, and authored prose fragments. Re-run privacy-safe recent discovery or verification only as needed. If the selected angle or a fact changes, update every dependent source, fact, exact claim text/location, question, answer, and quality-evidence fragment atomically.
+
+When a current candidate is pedagogically inferior, preserve or restore the defensible evergreen selection instead of forcing news-shaped filler. When a current angle remains best but its evidence is stale, undated, speculative, or inadequate, replace or verify only the affected research and prose. Never fix recency by fabricating dates, relabeling evergreen material as current, weakening citations, or deleting valid provenance.
+
+Preserve valid research, valid unrelated lesson sections, immutable previous attempts, retry semantics, and all Claim/Submit/Finisher/storage boundaries. This stage does not claim, submit, render, upload, complete, or mutate technical job state.

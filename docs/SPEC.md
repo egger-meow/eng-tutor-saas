@@ -1511,7 +1511,7 @@ The implementation format may differ from the original CSV/Markdown format.
 
 The content model should preserve the same purpose.
 
-Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable.
+Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable. Research planning treats time-sensitivity as an internal signal: durable interests may use evergreen discovery, while fast-moving interests actively inspect recent developments and compare them with durable angles when useful. A strong, reliable, age-appropriate, lexically feasible recent development is preferred only when it serves the learning target equally well or better; otherwise the package preserves an evidence-backed evergreen fallback. This signal is not a canonical learner-profile field.
 
 ---
 
@@ -2767,7 +2767,8 @@ An operator should be able to determine:
 * which feedback was available;
 * which profile state was used;
 * which curriculum state was used.
-* which public sources, facts, and authored prose claims grounded it.
+* which public sources, facts, and authored prose claims grounded it;
+* for a fast-moving interest, which recent and durable candidates were considered and why current or evergreen best served the learning target.
 
 ---
 
@@ -2786,7 +2787,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses schema 2.3.0 and prompt 2.7.0. Prompt 2.4.0, 2.5.0, and 2.6.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring.
+New production authoring uses Engine 1.4.0, schema 2.3.0, and prompt 2.8.0. Prompt 2.4.0, 2.5.0, 2.6.0, and 2.7.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 is an additive recency-aware overlay and does not change the canonical grounding shape.
 
 ---
 
@@ -3577,7 +3578,7 @@ The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLA
 
 Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
 
-Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.3.0, Prompt 2.7.0, and canonical Schema 2.3.0.
+Engine Inspector displays aligned as green 版本一致, unobservable as neutral 尚無可驗證版本資料, and only version_drift as red 版本不一致. The declared hierarchy is Engine 1.4.0, Prompt 2.8.0, and canonical Schema 2.3.0.
 
 ---
 # 173. Manual Recovery
@@ -3733,7 +3734,8 @@ Automated or semi-automated validation should eventually check:
 * schema 2.3.0 grounding exists and is not nullable;
 * source, fact, and claim IDs are unique and fully referenced;
 * claim locations resolve to allowed canonical authored-prose fields and contain the exact claim text;
-* `temporalMode` is explicit, and `current` sources have publication dates plus passed freshness evidence;
+* `temporalMode` is explicit, and `current` sources have publication dates plus independent passed topic-aware freshness evidence;
+* current-event review distinguishes event dates from publication dates, rejects stale/undated required sources and unsupported recency, and never uses one universal age cutoff;
 * provenance timestamps are causal: `publishedAt`, when present, is not later than `accessedAt`, and neither source access nor publication is later than `researchedAt`;
 * required grounding accuracy and copyright critical checks pass.
 
@@ -3761,7 +3763,8 @@ Test explicitly that:
 * Parent A cannot query Parent B's child;
 * siblings do not share learning progress;
 * unsigned public PDF URLs do not work;
-* service-role credentials never appear in frontend bundles.
+* service-role credentials never appear in frontend bundles;
+* public research-query construction receives generalized topic terms only and cannot receive child/parent identity, child/job IDs, school, grade/level, textbook state, feedback, mistakes, history, profile prose, or private notes.
 
 ---
 
@@ -3959,7 +3962,9 @@ For an eligible child:
 10. parent can download them;
 11. metadata records generation version.
 12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance.
-13. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
+13. fast-moving interests actively inspect recent developments and prefer a strong current angle when it improves the target, while preserving a defensible evergreen fallback.
+14. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, or lexical/workload gates.
+15. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
 
 ---
 
@@ -4057,7 +4062,8 @@ The operator can:
 * distinguish the current pipeline stage from historical attempts;
 * inspect exact Finisher rejection rules and immutable evidence;
 * identify any production engine-version drift;
-* identify `delivered_with_quality_override` without treating it as a quality pass.
+* identify `delivered_with_quality_override` without treating it as a quality pass;
+* explain from immutable planning/quality evidence why a fast-moving interest selected a current development or a principled evergreen fallback, without exposing that machinery in Student or Parent PDFs.
 
 ---
 
@@ -4182,14 +4188,17 @@ For weekly-material work specifically:
 12. Include retrieval practice.
 13. Produce Student and Parent outputs separately.
 14. Record why this week differs from the previous week.
-15. Research one real-world interest angle after the single batch claim using privacy-safe public queries.
+15. Research one real-world interest angle after the single batch claim using generalized public topic queries only. Classify its time-sensitivity as an internal planning signal; for fast-moving interests, actively discover recent developments and compare durable candidates when useful.
 16. Require real grounding for every new production 2.3.0 primary reading; never use null or N/A.
-17. Bind every factual claim to exact canonical lesson prose and verify current-event freshness.
+17. Bind every factual claim to exact canonical lesson prose. For current material, require valid publication dates, distinguish event and publication timing, and independently verify topic-aware freshness; reject stale evidence, unsupported recency, rumor, prediction, speculation, and social-media hearsay.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
 19. Treat profile `weekly_minutes` as `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`.
 20. Scheduled Work plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
 21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
-22. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
+22. Prefer a strong, reliable, age-appropriate, lexically feasible current angle only when it serves the learning target equally well or better. Do not force current; preserve an explainable evergreen fallback when recent candidates are weak, unsafe, too complex, factually thin, copyright-dependent, or pedagogically inferior.
+23. Current selection never relaxes source quality, factual density, original synthesis, lexical ceiling, grammar, CAP relevance, answer entailment, workload, copyright, or personalization gates.
+24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and Claim/Submit/Finisher boundaries.
+25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 
 ---
 

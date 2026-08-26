@@ -412,8 +412,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.3.0' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.3.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.4.0' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.4.0: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -592,8 +592,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.3.0' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.3.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.4.0' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.4.0: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
