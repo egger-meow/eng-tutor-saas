@@ -50,7 +50,7 @@ const CompactQuestionSchema = z.object({
   whyTheQuestionWorks: z.string().min(1),
   correctRationale: z.string().min(1),
   correctEvidenceRefs: z.array(EvidenceReferenceSchema).optional(),
-  distractors: z.record(OptionLetterSchema, CompactDistractorSchema),
+  distractors: z.partialRecord(OptionLetterSchema, CompactDistractorSchema),
   studentFailureModes: z.array(z.string().min(1)).min(1),
   misconceptionsTargeted: z.array(z.string().min(1)).min(1),
   shallowRecall: ShallowRecallSchema.optional(),
