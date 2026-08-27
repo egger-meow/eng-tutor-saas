@@ -1,0 +1,32 @@
+name: CAP burn workflow patch v3
+on:
+  push:
+    paths:
+      - .github/workflows/cap-burn-fix3.yml
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/cap-chatgpt-deep-digestion
+          fetch-depth: 0
+      - name: Patch brittle replacement
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/cap-agent-burn.yml')
+          s = p.read_text()
+          s = s.replace("          if old2 not in s: raise SystemExit('visual placeholder anchor not found')", "          if old2.strip() not in s: raise SystemExit('visual placeholder anchor not found')")
+          s = s.replace("          s=s.replace(old2,new2)", "          s=s.replace(old2.strip(),new2.strip())")
+          p.write_text(s)
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/cap-agent-burn.yml
+          git commit -m 'fix(history-exams): normalize visual parser patch anchor'
+          git push origin HEAD:feat/cap-chatgpt-deep-digestion
