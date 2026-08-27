@@ -81,6 +81,7 @@ export function BillingPage({
   const { state: enrollment } = useEnrollmentState()
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
   const foundingAvailable = Boolean(enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0)
+  const capacityFull = Boolean(enrollment && (enrollment.status !== 'open' || enrollment.remaining <= 0))
 
   async function refreshSubscriptions() {
     const nextSubscriptions = await listOwnedSubscriptions()
@@ -324,10 +325,12 @@ export function BillingPage({
 
         {!loading && children.length === 0 && (
           <div className="empty-state">
-            <h2>先新增孩子</h2>
-            <p>方案以每位孩子為單位。完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
+            <h2>{capacityFull ? '目前名額已滿，先建立孩子學習資料' : '先新增孩子'}</h2>
+            <p>{capacityFull
+              ? '先把孩子的學習資料準備好即可，不會收費，也不會先開始訂閱或產生教材。有名額時我們會寄 Email 通知你。'
+              : '方案以每位孩子為單位。完成孩子資料後，第一份專屬教材預計隔天開放下載。'}</p>
             <button className="button" type="button" onClick={() => navigate('/children/new')}>
-              ＋ 新增孩子
+              ＋ {capacityFull ? '建立孩子學習資料' : '新增孩子'}
             </button>
           </div>
         )}
