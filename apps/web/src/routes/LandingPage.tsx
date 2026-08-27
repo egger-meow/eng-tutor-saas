@@ -12,7 +12,7 @@ import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../l
 import '../landing-evolution.css'
 
 const abilityBenefits = [
-  ['願意開始讀', '先用孩子有興趣的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
+  ['願意開始讀', '先用孩子有興趣、也有內容的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
   ['練得到能力', '單字、文法、閱讀理解與推理，都以國中英文與會考能力為長期方向。'],
   ['家長不用備課', '每週直接拿到學生教材與家長解答，不必自己找文章、出題或判斷難度。'],
 ] as const
@@ -129,9 +129,9 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </StaggerContainer>
 
           <FadeInUp delay={0.15} className="inline-objection">
-            <p className="overline">只讀興趣主題，對考試真的有用嗎？</p>
-            <h3>興趣是入口，不是能力的邊界。</h3>
-            <p>主題先讓孩子願意讀；學習目標仍由國中英文能力決定。孩子練的是能轉移到不同文章的單字、文法、上下文理解、細節判讀與推理，不是只會看某一種故事。</p>
+            <p className="overline">不只是換一個有趣主題</p>
+            <h3>興趣是入口，孩子也真的會讀到新東西。</h3>
+            <p>主題先讓孩子願意讀；文章本身也會帶進適合程度的真實知識與可查證內容。遇到科技、AI、運動等快速變動的題材，也會在適合時納入近期發展。英文能力仍是主線，不為了追新聞而追新聞。</p>
           </FadeInUp>
         </section>
 
@@ -163,7 +163,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <FadeInUp reveal="pop" className="section-heading">
             <p className="overline">先看每週實際拿到什麼</p>
             <h2>兩份 PDF：孩子能自己做，家長看得懂怎麼陪。</h2>
-            <ul className="weekly-contents">{weeklyContents.map((item) => <li key={item}>{item}</li>)}</ul>
+            <p>Student PDF 不放答案；Parent Answer PDF 分開提供完整解答、簡短理由與觀察重點。不是一張閱讀測驗，而是一整週能直接拿來學的內容。</p>
           </FadeInUp>
 
           <FadeInUp delay={0.1} className="sample-personalization-explainer">
