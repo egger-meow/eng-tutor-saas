@@ -8,7 +8,7 @@ import { getOfficialAnswer } from '../../scripts/history-exams/src/extractor/off
  * subject rather than by a fixed visual column index.
  */
 const VERIFIED_ENGLISH_READING_KEYS: Record<string, string> = {
-  '111': 'AACCBABBADCB DCB DCA DCCD ACDDBD'.replace(/\s/g, ''),
+  '111': 'AACCBABBAD CBDCBCDCAD CCDCACADBD ADDBDBCBAD CAA'.replace(/\s/g, ''),
   '112': 'BDDBABACCD DCCCDCCBDC ABD BBAACDB AADCB DDBBCBAA'.replace(/\s/g, ''),
   '113': 'ACBBDDBDCD CAAACDCDAC B DCCBADBBA DAABAB BCCABBD'.replace(/\s/g, ''),
   '114': 'DDCBDAABDC ADDAADBABB BACDCCADCD BDABCCCBCCABA'.replace(/\s/g, ''),
