@@ -14,8 +14,18 @@ import {
   deriveDeterministicAnalysis,
   ImageAttachment,
 } from './ai-provider.ts';
-import { computeQuestionContentHash } from './content-hasher.ts';
+import { computeAssetImageHashes, computeQuestionContentHash } from './content-hasher.ts';
 import { buildPedagogicalAnalysisPrompt, PROMPT_VERSION } from './prompt.ts';
+
+export class VisualAssetMissingError extends Error {
+  constructor(examId: string, questionNumber: number, assetPath: string) {
+    super(
+      `[VisualAssetMissingError] Missing required visual asset on disk for Exam ${examId} Q${questionNumber}: "${assetPath}". ` +
+      `AI analysis aborted to prevent ungrounded or blind visual question reverse-engineering.`
+    );
+    this.name = 'VisualAssetMissingError';
+  }
+}
 
 export interface RunAnalysisOptions {
   extractedDir: string;
@@ -97,41 +107,56 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       }
 
       const passage = question.passageId ? passageMap.get(question.passageId) : null;
+
+      // Safeguard 1 & 2: Hard-fail on missing visual assets and hash image bytes
+      const images: ImageAttachment[] = [];
+      let imageHashes: string[] = [];
+
+      if (question.visualEvidenceRequired) {
+        if (question.requiredAssets.length === 0) {
+          throw new Error(
+            `[VisualAssetError] Exam ${examId} Q${question.questionNumber} has visualEvidenceRequired=true but requiredAssets is empty.`
+          );
+        }
+
+        for (const asset of question.requiredAssets) {
+          const absAssetPath = path.isAbsolute(asset.imagePath)
+            ? asset.imagePath
+            : path.resolve(process.cwd(), asset.imagePath);
+
+          if (!fs.existsSync(absAssetPath)) {
+            throw new VisualAssetMissingError(examId, question.questionNumber, absAssetPath);
+          }
+
+          const imgBuffer = fs.readFileSync(absAssetPath);
+          images.push({
+            mimeType: 'image/png',
+            base64Data: imgBuffer.toString('base64'),
+          });
+        }
+
+        imageHashes = computeAssetImageHashes(question.requiredAssets);
+      }
+
       const contentHash = computeQuestionContentHash(
         question,
         passage?.text,
         PROMPT_VERSION,
         aiProvider.name,
-        aiProvider.modelName
+        aiProvider.modelName,
+        imageHashes
       );
 
       const existingRecord = existingMap.get(question.questionNumber);
 
       // Check cache validity (must match hash AND must not be an offline-mock record if running live provider)
-      const isMockCached = existingRecord?.analysis?.explanation?.includes('rule-based') || false;
+      const isMockCached = existingRecord?.modelName === 'rule-based-mock' || existingRecord?.modelName === 'offline-mock';
       const isLiveRun = aiProvider.name !== 'offline-mock';
 
       if (!force && existingRecord && existingRecord.contentHash === contentHash && !(isLiveRun && isMockCached)) {
         analyzedQuestions.push(existingRecord);
         cachedCount++;
         continue;
-      }
-
-      // Collect image attachments if multimodal evidence is required
-      const images: ImageAttachment[] = [];
-      if (question.visualEvidenceRequired && question.requiredAssets.length > 0) {
-        for (const asset of question.requiredAssets) {
-          const absAssetPath = path.isAbsolute(asset.imagePath)
-            ? asset.imagePath
-            : path.resolve(process.cwd(), asset.imagePath);
-          if (fs.existsSync(absAssetPath)) {
-            const imgData = fs.readFileSync(absAssetPath).toString('base64');
-            images.push({
-              mimeType: 'image/png',
-              base64Data: imgData,
-            });
-          }
-        }
       }
 
       const prompt = buildPedagogicalAnalysisPrompt(question, passage);

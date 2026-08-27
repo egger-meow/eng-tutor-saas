@@ -2,14 +2,14 @@
   "examId": "115",
   "year": 115,
   "promptVersion": "v2.0.0",
-  "analyzedAt": "2026-08-27T16:24:28.565Z",
+  "analyzedAt": "2026-08-27T16:31:59.514Z",
   "questions": [
     {
       "examId": "115",
       "questionNumber": 1,
-      "contentHash": "14b595d6ab6d25a274109e3f224c995bde1574be2fc2204e712fcc7333a1d329",
+      "contentHash": "adda5317dcda2de4a357865d47e218c506081699f5915a51d3bbc75dc15d7297",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.624Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -99,9 +99,9 @@
     {
       "examId": "115",
       "questionNumber": 2,
-      "contentHash": "52f78e06f8f9b1a51e9b73da37ec6850c7fdf936ce85ea0c6e491788a5cbaae4",
+      "contentHash": "ee1396815f0168194587cbe34af092cd0651639f959a0708ce270e40e6cbccf6",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -182,9 +182,9 @@
     {
       "examId": "115",
       "questionNumber": 3,
-      "contentHash": "5cbf868e43e4c9a6dd22cc3d9bdaac176ff1c355e987c899208a548b97b2a19f",
+      "contentHash": "5850ba266352c4a0d18fafea909ddb7d9bb5543ffb2d0583c8020c37023ff3ee",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -265,9 +265,9 @@
     {
       "examId": "115",
       "questionNumber": 4,
-      "contentHash": "fb93a1fa20e2c0d5017095eb901458601d7b4a4ded197572ac312febe7ece39a",
+      "contentHash": "dce2608b71f7117517f51431c8dadfddee1394a3cd3d267c99684768240cdd56",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -348,9 +348,9 @@
     {
       "examId": "115",
       "questionNumber": 5,
-      "contentHash": "1407b4e5b5a29136a14641f1e6a9cc470820fe96ecfd936ca01ad34b3021305f",
+      "contentHash": "9f6c824ae60a57218c3a7502d68d869b834d45e5d127d2f35415d8c63a427cc6",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -431,9 +431,9 @@
     {
       "examId": "115",
       "questionNumber": 6,
-      "contentHash": "273bf03062f9532269728895af49199ac0152637969f7c4f41cd03ef4f96b2c3",
+      "contentHash": "abb9838b01423fc2a04bbddf78cd12aa43b1cc2228d1b583939fe99ad68ff4e9",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -514,9 +514,9 @@
     {
       "examId": "115",
       "questionNumber": 7,
-      "contentHash": "683ff9b7b4c5bf955a6e74b1e2aea537c20f9626b82294f204bc00bf73db7ffd",
+      "contentHash": "ab332c93a8310f6ddd119b8bec96a7878046fb3e37fbae67bc3ec440faa5f751",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -597,9 +597,9 @@
     {
       "examId": "115",
       "questionNumber": 8,
-      "contentHash": "d4627ffad66c5fdadc577e3eea77f9ec9ade1f519f6adcadfd2ebf5dbf241c18",
+      "contentHash": "f9d4ae5da25820cc67c3fa50119d68a2a646cf84db5a36527f7fc340fad618aa",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -680,9 +680,9 @@
     {
       "examId": "115",
       "questionNumber": 9,
-      "contentHash": "1e83eeb21654f312069c17f8fd6ce3030d63c14cf63c1528108952a9d6546c80",
+      "contentHash": "f8fbaed5a0a6bfd79b53f7ea3d3980a47fc54de16d24900f0d5976fe9e3a0dc4",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -763,9 +763,9 @@
     {
       "examId": "115",
       "questionNumber": 10,
-      "contentHash": "5520db78b33bcafa463195cf5b74a8269ade5c380cd2b5080a90b814f2d7ab08",
+      "contentHash": "8cf0c7dbf444d46f5d06ecf5e776dac5d975b55bf0d192977cecfe76ba870b91",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -846,9 +846,9 @@
     {
       "examId": "115",
       "questionNumber": 11,
-      "contentHash": "54f30d077e4f729b4e9468737317f0c1d741bf0507ed959ed6a9887d1480644b",
+      "contentHash": "7310934632710216738d04c3bcb67b7c38b8e29b1e4b77279f9aa1cfcb7b81b7",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -929,9 +929,9 @@
     {
       "examId": "115",
       "questionNumber": 12,
-      "contentHash": "7d97f049330f50fd563067d752b58e1bb9e6d4ac5db97e32113476db2565352a",
+      "contentHash": "cd1a822895ed3ec1b5758b89447f9bd552ca4b866d4a44fe68b2c060d005c25a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1012,9 +1012,9 @@
     {
       "examId": "115",
       "questionNumber": 13,
-      "contentHash": "8ce1f00af8f7398085533c2d19f8ca45812472f685b957343bb6b01f8c5f08e6",
+      "contentHash": "21b03c802a76002f81521fa767eb2baa63afb4487c54e320dc15c8d73f978fda",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.625Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1095,9 +1095,9 @@
     {
       "examId": "115",
       "questionNumber": 14,
-      "contentHash": "9ee0b839e417f006b45dd716ac90a1f640ef80414eb728478a3d91d209a2739f",
+      "contentHash": "c03d5f1247b63ca3535bfcc8aebf2a56aa075007000c76ead6f1c3752c3b5ad7",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1178,9 +1178,9 @@
     {
       "examId": "115",
       "questionNumber": 15,
-      "contentHash": "d88b07f54802e0fe300c5d51be1ac84a8be00d3ae8acca61ec88c8cc14c58bbb",
+      "contentHash": "a5f02c5efc175538783f3c0dac97e4aabb8739da7bb280a73c4ec921f974cb1a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1261,9 +1261,9 @@
     {
       "examId": "115",
       "questionNumber": 16,
-      "contentHash": "53badfd3594cdd634ee77a06d6f6b0fb8430d96e8875baed93ab99b86911611f",
+      "contentHash": "3bca178c668723d1fd4079a604cd8735f13f6a942d9ed81fd9a64d5e822d6ba3",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1344,9 +1344,9 @@
     {
       "examId": "115",
       "questionNumber": 17,
-      "contentHash": "c58c07e4b9d8a9108c0655133f96c0aa843e60786cb28399561745b008943f99",
+      "contentHash": "de8f7e36c6e1a2f189afb952d279ccad2320197ff94bf319dff30442fd2ec27a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1427,9 +1427,9 @@
     {
       "examId": "115",
       "questionNumber": 18,
-      "contentHash": "2b0b237f5e998482319c5b19ebcfb2711f12043ca1fe15ddb478fcb2cc319479",
+      "contentHash": "2291719add40f8e6e415129c44faab45e89af64d02e154f283ba789ebcc55d37",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1510,9 +1510,9 @@
     {
       "examId": "115",
       "questionNumber": 19,
-      "contentHash": "265a5ee0caf40c877e6de71d7f50982622f86229056f49c55bcea4a5ffe2051b",
+      "contentHash": "f7aae19aecefe0dc9736648c0fdcb4181d323d99a9448157f4b31974d242871f",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.006Z",
+      "analyzedAt": "2026-08-27T16:31:42.626Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1593,9 +1593,9 @@
     {
       "examId": "115",
       "questionNumber": 20,
-      "contentHash": "ac79dc1c13d0a6f1e0d724cd30861704c40a104589e3d6bf970b09145e11bbc1",
+      "contentHash": "e2f0ddddb0d9c0d10116137c4b6e3ffc852c9c63671bd0205e30b1c595d56107",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.008Z",
+      "analyzedAt": "2026-08-27T16:31:42.627Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1692,9 +1692,9 @@
     {
       "examId": "115",
       "questionNumber": 21,
-      "contentHash": "4bebc9f0fa7f63ffdce0b866d8d384742b93b5cce587e38564d77a7f02b1539c",
+      "contentHash": "d4f8b50f30b72c5fe30194ce531ff3daaa304b96ca76ed8c5906ce476e093a4a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.009Z",
+      "analyzedAt": "2026-08-27T16:31:42.630Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1791,9 +1791,9 @@
     {
       "examId": "115",
       "questionNumber": 22,
-      "contentHash": "9b7ce16a5ef05cd7dfcf2cc2a443b032d3ca6bf73427d628cbe9478e4b448e88",
+      "contentHash": "f130fea0aa43a313cff5a0805d017a1d8b0065cfb1ca7ab80e48a9bb6cb2fdf7",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.010Z",
+      "analyzedAt": "2026-08-27T16:31:42.632Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1890,9 +1890,9 @@
     {
       "examId": "115",
       "questionNumber": 23,
-      "contentHash": "6f4c1466db0da0503c7c6459a2e4bfc8b0c48e8abd29a708d415eaaaaa903e0c",
+      "contentHash": "73addf4b2a797a1310871fc81942754ec93c07a684d5a78fe85240d45330524d",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.011Z",
+      "analyzedAt": "2026-08-27T16:31:42.634Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -1989,9 +1989,9 @@
     {
       "examId": "115",
       "questionNumber": 24,
-      "contentHash": "edaca5887ec4b85ee9c7b59403dfc0aa234d0fcf059dde9b4e36cdf0cdd6c80e",
+      "contentHash": "63d70e1c5dfafd45fd45067d14f9a11bb21402a4e78d0afd29f3fe5dab40599a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.012Z",
+      "analyzedAt": "2026-08-27T16:31:42.636Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2088,9 +2088,9 @@
     {
       "examId": "115",
       "questionNumber": 25,
-      "contentHash": "f647c163d116aec92b2febfe09a5969779012f7e77e8fb47046d4d5f04a95a94",
+      "contentHash": "36d385e2a6ddf72b54374628a7cdec7abce31aa71f9f63017e63201e805a4531",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.013Z",
+      "analyzedAt": "2026-08-27T16:31:42.638Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2187,9 +2187,9 @@
     {
       "examId": "115",
       "questionNumber": 26,
-      "contentHash": "442e480afcbe1a3e44d0eaa26e6c3726092b9462be03771623b96f7174a8c9ba",
+      "contentHash": "e67a8ef8caecbd30f09b06fcc6f6b07a797028115b2d8d89dc6bb5453a6bab6b",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.640Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2286,9 +2286,9 @@
     {
       "examId": "115",
       "questionNumber": 27,
-      "contentHash": "06a2767b22f8a1b50eb12098a9cbd5af1c32c046da1dc14f61e64390f92b6fc9",
+      "contentHash": "e6bb2e00a81961dd5c3f187d89fa07047efca3f07838b535cc7ec84423703c5f",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.640Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2376,9 +2376,9 @@
     {
       "examId": "115",
       "questionNumber": 28,
-      "contentHash": "adca93420fc0c85065a782610da5b031b3aa47d4bac91d6f10d25cbb8ef2bf43",
+      "contentHash": "958679600e8093045923790ac8c10f0e0b07f4cabac8159c21fcf49a0ba08c0a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.640Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2466,9 +2466,9 @@
     {
       "examId": "115",
       "questionNumber": 29,
-      "contentHash": "6e6561c7cec0e3c28a365a655bac7a39963176b6fbbdb2fe845991cec2a6c544",
+      "contentHash": "321d52d3675a000e33cd9ca0d521a4cc9ef0aa957b44d9d1af80a70d91e75d9d",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.640Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2556,9 +2556,9 @@
     {
       "examId": "115",
       "questionNumber": 30,
-      "contentHash": "436a443a1214d9867327e072390c92eb233aca1f6a213d08797d5149f75988b0",
+      "contentHash": "6c3aa750a2ab84295a98d01f4825f8a31a3b4fe877f24975d6fb88fc45428978",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.642Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2580,7 +2580,14 @@
         "answer": "D",
         "evidenceMode": "spatial",
         "visualEvidenceRequired": true,
-        "requiredAssets": [],
+        "requiredAssets": [
+          {
+            "page": 9,
+            "role": "diagram",
+            "imagePath": "history_exams/assets/115/page-9.png",
+            "description": "Visual evidence for question 30 on page 9"
+          }
+        ],
         "extractionConfidence": "partial_visual_pending",
         "extractionWarnings": [
           "Question 30 requires visual evidence from page 9"
@@ -2648,9 +2655,9 @@
     {
       "examId": "115",
       "questionNumber": 31,
-      "contentHash": "e3c2998f961c6863be1761f6098dff9a472e7098f4cf538a27d65941a13230f8",
+      "contentHash": "5700ab7a82ee5cab834709606c9c62b6361233fc2e99ee60df5c69797eea119b",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.014Z",
+      "analyzedAt": "2026-08-27T16:31:42.642Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2738,9 +2745,9 @@
     {
       "examId": "115",
       "questionNumber": 32,
-      "contentHash": "aa91af54d076871b29e375bdc5fd6f0402c8193b989e4fc2fa56713f33996ae2",
+      "contentHash": "d53f204aebb7a371b6fcf502df91cf4877197086f1843a2e05e1ad3e11c40ed1",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.015Z",
+      "analyzedAt": "2026-08-27T16:31:42.644Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2837,9 +2844,9 @@
     {
       "examId": "115",
       "questionNumber": 33,
-      "contentHash": "3981a067d33d8b6892e705bad56bf9f776941185edeac303131424ae5880be45",
+      "contentHash": "561d9623f59955dd5fb0ea96c92cfd8dace6611e1bc4e48f0ef3b70b445ebacc",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.016Z",
+      "analyzedAt": "2026-08-27T16:31:42.647Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -2936,9 +2943,9 @@
     {
       "examId": "115",
       "questionNumber": 34,
-      "contentHash": "d1b09c815547e8c3b8f1d8478b165850828f3980c204aa53a372b7e230849f96",
+      "contentHash": "0c691ee634cc2a4cae20f84d7fcf5531efd1255d6369242a5aefe2946c7f3488",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3035,9 +3042,9 @@
     {
       "examId": "115",
       "questionNumber": 35,
-      "contentHash": "1a8985e320cbc1ecb413647a3096f5d7f0a97c7b6ce35fa9748e06b2e7437a1c",
+      "contentHash": "6394ce3bb3ce6d4bb87a7dcaa92de5a662806312d53753cb5253a5e1f72b3e79",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3136,9 +3143,9 @@
     {
       "examId": "115",
       "questionNumber": 36,
-      "contentHash": "0247af03e052502b74b4e618a4f303eadc360e3028c03112bb800e0414de50ea",
+      "contentHash": "32aa1c9251a1a524281505b438ed04b51348ae98e3f3b914925f050df38c4208",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3237,9 +3244,9 @@
     {
       "examId": "115",
       "questionNumber": 37,
-      "contentHash": "71109131d9c5cf5e87e2d97cba587189a68cf2f6a0922e50aeda394ffdf62cae",
+      "contentHash": "b681e0b1183e78de8f0361d35d6ca6a4af7f8446d93edb6ce784259fe44dc5a7",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3338,9 +3345,9 @@
     {
       "examId": "115",
       "questionNumber": 38,
-      "contentHash": "03327446e1b85e88244982ba751c869e39148aba5c2758d8477d1e0951318df7",
+      "contentHash": "0bd5f697ea96c9ff4fb00ce524f84681566c3cc479f76560068285f2041b3ef9",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3439,9 +3446,9 @@
     {
       "examId": "115",
       "questionNumber": 39,
-      "contentHash": "7e7facfeb8d1b5b00c4d0e526b7c9641c967252d4aa1833b07a65ad3a4efff51",
+      "contentHash": "5079e4213ae9d8b75ddbd389991cca581e83ba7a4bcd3d71a0be18235fe0543a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.017Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3540,9 +3547,9 @@
     {
       "examId": "115",
       "questionNumber": 40,
-      "contentHash": "c2cf5e32f4ea0fe49c4512b6f96aec208d5289a01e4d4fcf11b8eeef31cd7133",
+      "contentHash": "9a7e5d244c260c4f5e2848e30bbcf1006012303726e42c6e034fdd42e4a7b85a",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.018Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3630,9 +3637,9 @@
     {
       "examId": "115",
       "questionNumber": 41,
-      "contentHash": "c4a6a553d33752be17f37f58d57831d38c477446d2d7808a0d0b7bb0d78a514b",
+      "contentHash": "af2edd2e8ffbbfc45a1129e77853534f86531214e50dcdbd10dc4fff47f60c25",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.018Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3720,9 +3727,9 @@
     {
       "examId": "115",
       "questionNumber": 42,
-      "contentHash": "e78232095139cd0a9cc14b0ca580a87c3d6243df5f96e463d93a122eb8de0de7",
+      "contentHash": "efcd92328ccae0d248c6e1afdae8f37c4983b17bc2ff2978948cfcc490747883",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.018Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",
@@ -3810,9 +3817,9 @@
     {
       "examId": "115",
       "questionNumber": 43,
-      "contentHash": "ee8f1570c503056f748cd76b16ae3860cf787865f996009435a3ef89a9dd676f",
+      "contentHash": "df8fef557f0a5c04c344771fb85c130e9be7eb9bc5aff73526b0bed81a39cbe1",
       "promptVersion": "v2.0.0",
-      "analyzedAt": "2026-08-27T16:23:23.018Z",
+      "analyzedAt": "2026-08-27T16:31:42.649Z",
       "modelName": "rule-based-mock",
       "extracted": {
         "examId": "115",

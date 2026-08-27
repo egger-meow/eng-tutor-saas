@@ -20,7 +20,7 @@ function parseArgs(args: string[]) {
   let examId: string | undefined;
   let questionNumber: number | undefined;
   let force = false;
-  let allowOfflineMock = false;
+  let allowProvisionalMock = false;
 
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--exam' && args[i + 1]) {
@@ -31,16 +31,16 @@ function parseArgs(args: string[]) {
       i++;
     } else if (args[i] === '--force') {
       force = true;
-    } else if (args[i] === '--allow-offline-mock') {
-      allowOfflineMock = true;
+    } else if (args[i] === '--allow-offline-mock' || args[i] === '--allow-provisional-mock') {
+      allowProvisionalMock = true;
     }
   }
 
-  return { command, examId, questionNumber, force, allowOfflineMock };
+  return { command, examId, questionNumber, force, allowProvisionalMock };
 }
 
 async function main() {
-  const { command, examId, questionNumber, force, allowOfflineMock } = parseArgs(process.argv.slice(2));
+  const { command, examId, questionNumber, force, allowProvisionalMock } = parseArgs(process.argv.slice(2));
 
   console.log(`[history-exams] Command: ${command}`);
 
@@ -69,7 +69,7 @@ async function main() {
         examIdFilter: examId,
         questionNumberFilter: questionNumber,
         force,
-        allowOfflineMock,
+        allowOfflineMock: allowProvisionalMock,
       });
       console.log(`[history-exams] Analyzed ${results.length} exams.`);
       for (const r of results) {
@@ -83,6 +83,7 @@ async function main() {
       const result = await runSynthesisPipeline({
         analyzedDir,
         knowledgeDir,
+        allowProvisionalMock,
       });
       console.log(`[history-exams] Synthesis complete across ${result.totalExams} exams and ${result.totalQuestions} questions.`);
       console.log(`  - Taxonomy: ${result.taxonomyPath}`);
@@ -100,6 +101,7 @@ async function main() {
       const result = await runBenchmarkPipeline({
         analyzedDir,
         benchmarkDir,
+        allowProvisionalMock,
       });
       console.log(`[history-exams] Benchmark built: ${result.outputPath} (${result.holdoutCount} holdouts).`);
       break;
@@ -139,9 +141,9 @@ async function main() {
     case 'build': {
       console.log(`[history-exams] Running Complete Hardened Pipeline...`);
       await runExtractionPipeline({ rawDir, outputDir: extractedDir, assetsDir, renderImages: true });
-      await runAnalysisPipeline({ extractedDir, analyzedDir, force, allowOfflineMock });
-      await runSynthesisPipeline({ analyzedDir, knowledgeDir });
-      await runBenchmarkPipeline({ analyzedDir, benchmarkDir });
+      await runAnalysisPipeline({ extractedDir, analyzedDir, force, allowOfflineMock: allowProvisionalMock });
+      await runSynthesisPipeline({ analyzedDir, knowledgeDir, allowProvisionalMock });
+      await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock });
       generateSpotCheckReport({ extractedDir, analyzedDir, outputPath: spotCheckPath });
       const report = validateFullCorpus({ extractedDir, analyzedDir, knowledgeDir, benchmarkDir });
       if (!report.valid) {
@@ -169,7 +171,7 @@ Options:
   --exam <id>               Filter by exam ID (e.g. --exam 115)
   --question <num>          Filter by question number (e.g. --question 24)
   --force                   Bypass cache and force re-analysis
-  --allow-offline-mock      Permit offline mock provider (for testing/development only)
+  --allow-provisional-mock  Permit provisional offline mock records (for testing only)
       `);
       break;
     }

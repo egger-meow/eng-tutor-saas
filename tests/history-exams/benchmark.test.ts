@@ -8,10 +8,29 @@ describe('Historical CAP English Exam Benchmark Builder', () => {
   const analyzedDir = path.resolve(__dirname, '../../history_exams/analyzed');
   const benchmarkDir = path.resolve(__dirname, '../../history_exams/benchmark');
 
+  it('rejects offline mock records by default without allowProvisionalMock flag', async () => {
+    const isMockDataPresent = fs.readdirSync(analyzedDir).some((f) => {
+      if (!f.endsWith('.json')) return false;
+      const content = JSON.parse(fs.readFileSync(path.join(analyzedDir, f), 'utf-8'));
+      return content.questions.some((q: any) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock');
+    });
+
+    if (isMockDataPresent) {
+      await expect(
+        runBenchmarkPipeline({
+          analyzedDir,
+          benchmarkDir,
+          allowProvisionalMock: false,
+        })
+      ).rejects.toThrow(/MockDataQuarantinedError/);
+    }
+  });
+
   it('generates a valid benchmark foundation with distributions and holdout reference set', async () => {
     const summary = await runBenchmarkPipeline({
       analyzedDir,
       benchmarkDir,
+      allowProvisionalMock: true,
     });
 
     expect(fs.existsSync(summary.outputPath)).toBe(true);

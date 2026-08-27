@@ -38,11 +38,11 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
       expect(analyzeResults.length).toBe(5);
 
       // 3. Synthesize
-      const synthResult = await runSynthesisPipeline({ analyzedDir, knowledgeDir });
+      const synthResult = await runSynthesisPipeline({ analyzedDir, knowledgeDir, allowProvisionalMock: true });
       expect(synthResult.totalQuestions).toBe(215);
 
       // 4. Benchmark
-      const benchResult = await runBenchmarkPipeline({ analyzedDir, benchmarkDir });
+      const benchResult = await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock: true });
       expect(benchResult.holdoutCount).toBeGreaterThanOrEqual(20);
 
       // 5. Spot-Check Report

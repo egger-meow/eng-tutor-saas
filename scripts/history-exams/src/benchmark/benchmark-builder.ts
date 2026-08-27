@@ -25,6 +25,7 @@ import {
 export interface BenchmarkOptions {
   analyzedDir: string;
   benchmarkDir: string;
+  allowProvisionalMock?: boolean;
 }
 
 export interface BenchmarkSummary {
@@ -35,7 +36,7 @@ export interface BenchmarkSummary {
 }
 
 export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<BenchmarkSummary> {
-  const { analyzedDir, benchmarkDir } = options;
+  const { analyzedDir, benchmarkDir, allowProvisionalMock = false } = options;
 
   if (!fs.existsSync(benchmarkDir)) {
     fs.mkdirSync(benchmarkDir, { recursive: true });
@@ -59,6 +60,18 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
 
   if (allQuestions.length === 0) {
     throw new Error('No analyzed questions available for benchmark construction');
+  }
+
+  // Strict Provenance Gate: Reject offline mock records unless explicitly opted in
+  const mockQuestions = allQuestions.filter(
+    (q) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock'
+  );
+  if (mockQuestions.length > 0 && !allowProvisionalMock) {
+    throw new Error(
+      `[MockDataQuarantinedError] Cannot build benchmark distributions using ${mockQuestions.length} offline mock analyzed record(s). ` +
+      `Benchmark distributions must derive strictly from authentic live AI Reverse-Engineering. ` +
+      `Execute Stage 2 analysis with an API key, or pass --allow-provisional-mock if intentionally running tests.`
+    );
   }
 
   const total = allQuestions.length;

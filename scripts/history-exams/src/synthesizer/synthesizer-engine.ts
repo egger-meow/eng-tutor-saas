@@ -23,9 +23,21 @@ import {
   QuestionRecipe,
 } from '../schemas/knowledge.ts';
 
+export class MockDataQuarantinedError extends Error {
+  constructor(operation: string, mockCount: number) {
+    super(
+      `[MockDataQuarantinedError] Cannot ${operation} using ${mockCount} offline mock analyzed record(s). ` +
+      `Knowledge artifacts and benchmarks must derive strictly from authentic live AI Reverse-Engineering. ` +
+      `Execute Stage 2 analysis with an API key, or pass --allow-provisional-mock if intentionally running tests.`
+    );
+    this.name = 'MockDataQuarantinedError';
+  }
+}
+
 export interface SynthesizeOptions {
   analyzedDir: string;
   knowledgeDir: string;
+  allowProvisionalMock?: boolean;
 }
 
 export interface SynthesisSummary {
@@ -44,7 +56,7 @@ export interface SynthesisSummary {
  * Runs Stage 3: Full Cross-Year Digestion and Knowledge Synthesis
  */
 export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<SynthesisSummary> {
-  const { analyzedDir, knowledgeDir } = options;
+  const { analyzedDir, knowledgeDir, allowProvisionalMock = false } = options;
 
   if (!fs.existsSync(knowledgeDir)) {
     fs.mkdirSync(knowledgeDir, { recursive: true });
@@ -68,6 +80,14 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
 
   if (allQuestions.length === 0) {
     throw new Error('No analyzed questions found to synthesize');
+  }
+
+  // Strict Provenance Gate: Reject offline mock records unless explicitly opted in
+  const mockQuestions = allQuestions.filter(
+    (q) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock'
+  );
+  if (mockQuestions.length > 0 && !allowProvisionalMock) {
+    throw new MockDataQuarantinedError('synthesize authoritative knowledge base', mockQuestions.length);
   }
 
   // 1. Synthesize Taxonomy

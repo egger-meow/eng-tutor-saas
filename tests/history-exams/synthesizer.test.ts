@@ -8,17 +8,37 @@ import {
   DistractorPatternStatSchema,
   QuestionRecipeSchema,
 } from '../../scripts/history-exams/src/schemas';
-import { runSynthesisPipeline } from '../../scripts/history-exams/src/synthesizer';
+import { MockDataQuarantinedError, runSynthesisPipeline } from '../../scripts/history-exams/src/synthesizer';
 import { z } from 'zod';
 
 describe('Historical CAP English Exam Synthesizer', () => {
   const analyzedDir = path.resolve(__dirname, '../../history_exams/analyzed');
   const knowledgeDir = path.resolve(__dirname, '../../history_exams/knowledge');
 
-  it('synthesizes all 6 knowledge base artifacts across 5 years', async () => {
+  it('rejects offline mock records by default without allowProvisionalMock flag', async () => {
+    // If analyzed records are from offline-mock, default run must throw MockDataQuarantinedError
+    const isMockDataPresent = fs.readdirSync(analyzedDir).some((f) => {
+      if (!f.endsWith('.json')) return false;
+      const content = JSON.parse(fs.readFileSync(path.join(analyzedDir, f), 'utf-8'));
+      return content.questions.some((q: any) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock');
+    });
+
+    if (isMockDataPresent) {
+      await expect(
+        runSynthesisPipeline({
+          analyzedDir,
+          knowledgeDir,
+          allowProvisionalMock: false,
+        })
+      ).rejects.toThrow(MockDataQuarantinedError);
+    }
+  });
+
+  it('synthesizes all 6 knowledge base artifacts across 5 years with allowProvisionalMock', async () => {
     const summary = await runSynthesisPipeline({
       analyzedDir,
       knowledgeDir,
+      allowProvisionalMock: true,
     });
 
     expect(summary.totalExams).toBeGreaterThanOrEqual(5);

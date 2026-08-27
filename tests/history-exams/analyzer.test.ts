@@ -3,12 +3,15 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   ApiKeyMissingError,
+  computeAssetImageHashes,
+  computeFileSha256,
   computeQuestionContentHash,
   createAiProvider,
   deriveDeterministicAnalysis,
   OfflineMockProvider,
   PROMPT_VERSION,
   runAnalysisPipeline,
+  VisualAssetMissingError,
 } from '../../scripts/history-exams/src/analyzer';
 import {
   AnalyzedExamSchema,
@@ -42,7 +45,6 @@ describe('Historical CAP English Exam Analyzer (Hardened)', () => {
   };
 
   it('fails fast when no API key is provided and allowOfflineMock is false', () => {
-    // Ensure environment keys are not overriding this test
     const origGemini = process.env.GEMINI_API_KEY;
     const origOpenAI = process.env.OPENAI_API_KEY;
     delete process.env.GEMINI_API_KEY;
@@ -56,7 +58,29 @@ describe('Historical CAP English Exam Analyzer (Hardened)', () => {
     }
   });
 
-  it('computes stable content hashes incorporating provider, model, prompt version, and answer', () => {
+  it('throws VisualAssetMissingError when visualEvidenceRequired is true but asset is missing', async () => {
+    const fakeExtractedDir = path.resolve(__dirname, '../../history_exams/extracted');
+    const visualQWithMissingAsset: ExtractedQuestion = {
+      ...sampleQuestion,
+      questionNumber: 99,
+      visualEvidenceRequired: true,
+      evidenceMode: 'visual_only',
+      requiredAssets: [
+        {
+          page: 99,
+          role: 'single_image',
+          imagePath: 'history_exams/assets/non_existent_page.png',
+        },
+      ],
+    };
+
+    // Attempting analysis with missing image should throw VisualAssetMissingError
+    expect(() => {
+      computeAssetImageHashes(visualQWithMissingAsset.requiredAssets);
+    }).toThrow(/Image asset file not found/);
+  });
+
+  it('computes stable content hashes incorporating image SHA-256 byte hashes', () => {
     const hash1 = computeQuestionContentHash(sampleQuestion, 'Sample passage', PROMPT_VERSION, 'gemini', 'gemini-2.5-flash');
     const hash2 = computeQuestionContentHash(sampleQuestion, 'Sample passage', PROMPT_VERSION, 'gemini', 'gemini-2.5-flash');
     expect(hash1).toBe(hash2);
@@ -66,6 +90,10 @@ describe('Historical CAP English Exam Analyzer (Hardened)', () => {
     const modQ = { ...sampleQuestion, answer: 'A' as const };
     const hashDiffAns = computeQuestionContentHash(modQ, 'Sample passage', PROMPT_VERSION, 'gemini', 'gemini-2.5-flash');
     expect(hashDiffAns).not.toBe(hash1);
+
+    // Changing image byte hash changes hash
+    const hashWithImg = computeQuestionContentHash(sampleQuestion, 'Sample passage', PROMPT_VERSION, 'gemini', 'gemini-2.5-flash', ['abc123sha256']);
+    expect(hashWithImg).not.toBe(hash1);
   });
 
   it('generates valid pedagogical analysis adhering to controlled taxonomy', () => {
