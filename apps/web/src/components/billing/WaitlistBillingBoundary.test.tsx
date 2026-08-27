@@ -29,6 +29,11 @@ const expiredBetaLikeSubscription: SubscriptionView = {
   foundingStatus: 'none',
 }
 
+const releasedWaitlist = {
+  id: 'wait-1', childId: child.id, status: 'released' as const, createdAt: '2026-08-27T00:00:00Z',
+  releasedAt: '2026-08-27T02:00:00Z', convertedAt: null, notes: null,
+}
+
 const callbacks = {
   onSubscribe: vi.fn(),
   onCancel: vi.fn(),
@@ -60,10 +65,7 @@ describe('billing capacity lifecycle boundaries', () => {
       <ChildSubscription
         child={child}
         subscription={expiredBetaLikeSubscription}
-        waitlist={{
-          id: 'wait-1', childId: child.id, status: 'released', createdAt: '2026-08-27T00:00:00Z',
-          releasedAt: '2026-08-27T02:00:00Z', convertedAt: null, notes: null,
-        }}
+        waitlist={releasedWaitlist}
         {...callbacks}
       />
     )
@@ -71,5 +73,21 @@ describe('billing capacity lifecycle boundaries', () => {
     expect(html).toContain('名額已開放')
     expect(html).toContain('請選擇訂閱方案')
     expect(html).toContain('選擇付款週期')
+  })
+
+  it('payment activation state wins after a released waitlist checkout completes', () => {
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={child}
+        subscription={expiredBetaLikeSubscription}
+        waitlist={releasedWaitlist}
+        activationPending
+        {...callbacks}
+      />
+    )
+
+    expect(html).toContain('付款成功・訂閱啟用中')
+    expect(html).toContain('正在同步 Paddle 的確認結果')
+    expect(html).not.toContain('選擇付款週期')
   })
 })
