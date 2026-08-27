@@ -139,7 +139,24 @@ export function ChildSubscription({
     )
   }
 
-  if (waitlist?.status === 'waiting' && !subscription) {
+  if (activationPending) {
+    return (
+      <article className="subscription-card">
+        <div className="subscription-card-body">
+          <div>
+            <p className="overline">{gradeStageLabel(child)}</p>
+            <h2>{child.display_name}</h2>
+          </div>
+          <p><span className="status-label status-success">付款成功・訂閱啟用中</span></p>
+          <p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p>
+        </div>
+      </article>
+    )
+  }
+
+  const hasLivePaidSubscription = Boolean(subscription && ['active', 'past_due', 'paused'].includes(subscription.status))
+
+  if (waitlist?.status === 'waiting' && !hasLivePaidSubscription) {
     return (
       <article className="subscription-card">
         <div className="subscription-card-body">
@@ -158,7 +175,7 @@ export function ChildSubscription({
     )
   }
 
-  if (waitlist?.status === 'released' && !subscription) {
+  if (waitlist?.status === 'released' && !hasLivePaidSubscription) {
     return (
       <article className="subscription-card">
         <div className="subscription-card-body">
@@ -184,21 +201,6 @@ export function ChildSubscription({
         <div className="subscription-card-body">
           <h2>{child.display_name}</h2>
           <p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p>
-        </div>
-      </article>
-    )
-  }
-
-  if (activationPending) {
-    return (
-      <article className="subscription-card">
-        <div className="subscription-card-body">
-          <div>
-            <p className="overline">{gradeStageLabel(child)}</p>
-            <h2>{child.display_name}</h2>
-          </div>
-          <p><span className="status-label status-success">付款成功・訂閱啟用中</span></p>
-          <p>付款已完成，正在同步 Paddle 的確認結果，完成後這個頁面會自動更新。</p>
         </div>
       </article>
     )
