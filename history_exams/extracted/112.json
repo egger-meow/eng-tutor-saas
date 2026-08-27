@@ -223,7 +223,7 @@
         "C": "bowl",
         "D": "box"
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "visual_only",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -275,7 +275,7 @@
         "C": "listen",
         "D": "shout"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -317,7 +317,7 @@
         "C": "shapes",
         "D": "sizes"
       },
-      "answer": "B",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -338,7 +338,7 @@
         "C": "has jogged",
         "D": "would jog"
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -359,7 +359,7 @@
         "C": "remembering",
         "D": "starting"
       },
-      "answer": "B",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -380,7 +380,7 @@
         "C": "full",
         "D": "wrong"
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -401,7 +401,7 @@
         "C": "or",
         "D": "so"
       },
-      "answer": "D",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -422,7 +422,7 @@
         "C": "whether",
         "D": "why"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -443,7 +443,7 @@
         "C": "gift",
         "D": "headache"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -548,7 +548,7 @@
         "C": "possible",
         "D": "special"
       },
-      "answer": "A",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -569,7 +569,7 @@
         "C": "finally",
         "D": "still"
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -590,7 +590,7 @@
         "C": "more boring",
         "D": "more convenient"
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -611,7 +611,7 @@
         "C": "the one she",
         "D": "the one who"
       },
-      "answer": "C",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -632,7 +632,7 @@
         "C": "practiced",
         "D": "would practice"
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -653,7 +653,7 @@
         "C": "notice",
         "D": "plan"
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -674,7 +674,7 @@
         "C": "saving",
         "D": "to save"
       },
-      "answer": "A",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -695,7 +695,7 @@
         "C": "has come and sat",
         "D": "used to come and sit"
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -719,7 +719,7 @@
         "C": "$220.",
         "D": "$160."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -743,7 +743,7 @@
         "C": "3:00 pm, August 13.",
         "D": "2:00 pm, August 28."
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -791,7 +791,7 @@
         "C": "They clean them until the smell goes away.",
         "D": "They leave them behind and move to a new nest."
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -839,7 +839,7 @@
         "C": "North America & Oceania has a higher percentage of food waste at Stage 1 than Europe.",
         "D": "South & Southeast Asia has a higher percentage of food waste at Stage 4 than the other two areas."
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -911,7 +911,7 @@
         "C": "When it is hit by raindrops too many times.",
         "D": "When it drops for more than 6 cm in the rain."
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -935,7 +935,7 @@
         "C": "How “For Elise” became popular.",
         "D": "Why Beethoven wrote “For Elise.”"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -959,7 +959,7 @@
         "C": "The manuscript was found after Beethoven died.",
         "D": "The manuscript is now kept by the city of Vienna."
       },
-      "answer": "A",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1007,7 +1007,7 @@
         "C": "Children should learn about their gender from playing with toys.",
         "D": "We should not let gender decide which toys children can play with."
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1055,7 +1055,7 @@
         "C": "“Some doctors worry that children may use the same kind of thinking when they look for jobs in the future.”",
         "D": "“If they do, they may miss something more important than just getting a chance to play with different toys.”"
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1103,7 +1103,7 @@
         "C": "They are able to understand how other people feel.",
         "D": "They are good at helping people change their own lives."
       },
-      "answer": "D",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1127,7 +1127,7 @@
         "C": "She was killed in Homs when she was interviewing soldiers there for her report.",
         "D": "She was not sure what to do in the future until she worked for the Sunday Times ."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1175,7 +1175,7 @@
         "C": "where they grew up",
         "D": "whether they are men or women"
       },
-      "answer": "B",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
