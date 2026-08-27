@@ -1,0 +1,60 @@
+name: CAP 111 authored batch
+on:
+  push:
+    paths:
+      - .github/workflows/cap-111-authored.yml
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/cap-chatgpt-deep-digestion
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Materialize authored 111 source
+        run: python scripts/history-exams/author-111.py
+      - name: Canonical ingest 111 only
+        run: >-
+          pnpm exec tsx -e "import path from 'node:path'; import { ingestAgentAnalysisFiles } from './scripts/history-exams/src/agent-ingest/index.ts'; const r=ingestAgentAnalysisFiles({sourceDir:path.resolve('history_exams/agent_analysis'),extractedDir:path.resolve('history_exams/extracted'),analyzedDir:path.resolve('history_exams/analyzed'),examIdFilter:'111'}); if(r.ingestedQuestions!==43) throw new Error('expected 43, got '+r.ingestedQuestions); console.log(r);"
+      - name: Verify 111 provenance and official answers
+        run: |
+          python - <<'PY'
+          import json,re
+          d=json.load(open('history_exams/analyzed/111.json'))
+          assert len(d['questions'])==43
+          assert all(q['providerName']=='openai-chatgpt' and q['modelName']=='gpt-5.6-sol' for q in d['questions'])
+          assert all(re.fullmatch(r'[a-f0-9]{64}',q['contentHash']) for q in d['questions'])
+          for q in d['questions']:
+              opts=q['analysis']['optionAnalyses']
+              assert len(opts)==4 and sum(bool(o['isCorrect']) for o in opts)==1
+              assert next(o['option'] for o in opts if o['isCorrect'])==q['extracted']['answer']
+              assert q['analysis']['criticStatus']=='passed'
+          for n in (32,39):
+              q=next(x for x in d['questions'] if x['questionNumber']==n)
+              assert q['extracted']['visualEvidenceRequired'] and q['extracted']['requiredAssets']
+          print('111: 43/43 authored, canonical, official-answer aligned')
+          PY
+      - name: Regression checks
+        run: |
+          pnpm exec vitest run tests/history-exams/agent-ingest.test.ts tests/history-exams/official-answers.test.ts
+          pnpm typecheck
+      - name: Commit safe batch
+        run: |
+          rm scripts/history-exams/author-111.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add history_exams/extracted/111.json history_exams/agent_analysis/111.json history_exams/analyzed/111.json scripts/history-exams/author-111.py
+          git diff --cached --stat
+          git commit -m 'feat(history-exams): replace CAP 111 mocks with authored analyses'
+          git push origin HEAD:feat/cap-chatgpt-deep-digestion
