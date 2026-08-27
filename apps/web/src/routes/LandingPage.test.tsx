@@ -28,13 +28,13 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
   })
 
-  it('includes the first material timing question and answer in FAQ', () => {
+  it('includes a capacity-safe first material timing answer in FAQ', () => {
     const html = renderToStaticMarkup(<LandingPage />)
     expect(html).toContain('多久可以拿到第一份教材？')
     
     const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
     expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe('完成孩子資料後，第一份專屬教材預計於隔天開放下載。之後每週依固定節奏提供新的個人化教材。')
+    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
   })
 
   it('includes next-day expectation in onboarding login steps', () => {
