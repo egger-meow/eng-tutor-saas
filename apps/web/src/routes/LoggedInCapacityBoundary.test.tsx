@@ -28,8 +28,8 @@ vi.mock('../lib/supabase', () => ({
   getSupabaseClient: () => ({ auth: { signOut: vi.fn() } }),
 }))
 vi.mock('../lib/enrollment', () => ({
-  useEnrollmentState: () => ({
-    state: { status: 'open', capacity: 100, activeCount: 100, remaining: 0, foundingLimit: 30, foundingCount: 17 },
+  useEnrollmentState: (initialState?: any) => ({
+    state: initialState !== undefined ? initialState : { status: 'open', capacity: 100, activeCount: 100, remaining: 0, foundingLimit: 30, foundingCount: 17 },
     error: false,
   }),
   getEnrollmentCta: () => ({ label: '登記候補', href: '/waitlist', isWaitlist: true }),
@@ -37,6 +37,8 @@ vi.mock('../lib/enrollment', () => ({
 
 import { BillingPage } from './BillingPage'
 import { DashboardPage } from './DashboardPage'
+import { ChildOnboardingPage } from './ChildOnboardingPage'
+import { emptyProfileDraft } from '../lib/profile-form'
 
 const session: Session = {
   access_token: 'token',
@@ -78,5 +80,61 @@ describe('logged-in 100+ capacity boundary', () => {
     expect(html).toContain('先建立孩子學習資料')
     expect(html).toContain('不會收費')
     expect(html).not.toContain('第一份專屬教材預計隔天開放下載')
+  })
+
+  it('onboarding (/children/new) explains waitlist, free profile creation, no immediate charge/materials, and email notification before submission when capacity is full', () => {
+    const html = renderToStaticMarkup(<ChildOnboardingPage session={session} />)
+
+    expect(html).toContain('目前名額已滿')
+    expect(html).toContain('進入候補名單')
+    expect(html).toContain('不會收費')
+    expect(html).toContain('不會開始訂閱或產生教材')
+    expect(html).toContain('Email')
+    expect(html).toContain('決定是否訂閱')
+    expect(html).toContain('孩子暱稱')
+    expect(html).not.toContain('隔天開放下載')
+  })
+
+  it('onboarding (/children/new) preserves standard onboarding UX without waitlist notice when capacity is open', () => {
+    const html = renderToStaticMarkup(
+      <ChildOnboardingPage
+        session={session}
+        initialEnrollment={{ status: 'open', capacity: 100, activeCount: 40, remaining: 60, foundingLimit: 30, foundingCount: 30 }}
+      />
+    )
+
+    expect(html).not.toContain('候補名單')
+    expect(html).not.toContain('目前名額已滿')
+    expect(html).toContain('先認識孩子')
+    expect(html).toContain('孩子暱稱')
+  })
+
+  it('editing an existing child profile does not show waitlist notice even when capacity is full', () => {
+    const html = renderToStaticMarkup(
+      <ChildOnboardingPage
+        session={session}
+        childId="child-1"
+        initialDraft={{ ...emptyProfileDraft, displayName: 'Jonathan', grade: 7, gradeStage: 'grade_7' }}
+      />
+    )
+
+    expect(html).not.toContain('候補名單')
+    expect(html).not.toContain('目前名額已滿')
+    expect(html).toContain('Jonathan')
+  })
+
+  it('onboarding (/children/new) stays neutral and does not claim waitlist or guaranteed availability while enrollment state is loading', () => {
+    const html = renderToStaticMarkup(
+      <ChildOnboardingPage
+        session={session}
+        initialEnrollment={null}
+      />
+    )
+
+    expect(html).not.toContain('候補名單')
+    expect(html).not.toContain('目前名額已滿')
+    expect(html).not.toContain('隔天開放下載')
+    expect(html).toContain('先認識孩子')
+    expect(html).toContain('孩子暱稱')
   })
 })

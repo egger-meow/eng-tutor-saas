@@ -12,6 +12,7 @@ import { RoutineStep } from '../components/onboarding/steps/RoutineStep'
 import { SchoolStep } from '../components/onboarding/steps/SchoolStep'
 import { listChildProfiles, saveChildProfile } from '../lib/child-profiles'
 import { createChild, listChildren, updateChild } from '../lib/children'
+import { useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { emptyProfileDraft, profileDraftFromChild, profileStepCount, readDraft, saveDraft, toChildProfileInput, validateProfileStep, type ProfileDraft } from '../lib/profile-form'
 import { getSupabaseClient } from '../lib/supabase'
 
@@ -24,25 +25,41 @@ const stepMeta = [
   ['目標與最後確認', '這些資訊會成為第一週教材的起點。'],
 ] as const
 
-type ChildOnboardingPageProps = { session: Session; childId?: string }
+type ChildOnboardingPageProps = {
+  session: Session
+  childId?: string
+  initialEnrollment?: EnrollmentState | null
+  initialDraft?: ProfileDraft
+  initialLoading?: boolean
+}
 
-export function ChildOnboardingPage({ session, childId }: ChildOnboardingPageProps) {
+export function ChildOnboardingPage({
+  session,
+  childId,
+  initialEnrollment,
+  initialDraft,
+  initialLoading,
+}: ChildOnboardingPageProps) {
   const storageKey = `paper-english:profile-draft:${childId ?? 'new'}`
   const [step, setStep] = useState(1)
-  const [draft, setDraft] = useState<ProfileDraft>(() => readDraft(storageKey) ?? emptyProfileDraft)
+  const [draft, setDraft] = useState<ProfileDraft>(() => initialDraft ?? readDraft(storageKey) ?? emptyProfileDraft)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(Boolean(childId))
+  const [loading, setLoading] = useState(initialLoading ?? (Boolean(childId) && !initialDraft && !readDraft(storageKey)))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
+  const { state: enrollment } = useEnrollmentState(initialEnrollment)
+  const isNewChild = !childId
+  const capacityFull = Boolean(enrollment && (enrollment.status !== 'open' || enrollment.remaining <= 0))
+
   useEffect(() => {
-    if (!childId || readDraft(storageKey)) return
+    if (!childId || initialDraft || readDraft(storageKey)) return
     void Promise.all([listChildren(), listChildProfiles([childId])]).then(([children, profiles]) => {
       const child = children.find((item) => item.id === childId)
       if (!child) throw new Error('找不到這位孩子，或你沒有存取權限。')
       setDraft(profileDraftFromChild({ ...child, profile: profiles.find((profile) => profile.child_id === childId) ?? null }))
     }).catch((caught) => setError(caught instanceof Error ? caught.message : '無法載入孩子資料。')).finally(() => setLoading(false))
-  }, [childId, storageKey])
+  }, [childId, initialDraft, storageKey])
 
   function update(patch: Partial<ProfileDraft>) {
     setDraft((current) => {
@@ -85,7 +102,27 @@ export function ChildOnboardingPage({ session, childId }: ChildOnboardingPagePro
   return (
     <AppShell header={<ParentNavigation email={session.user.email} childHref={childId ? `/children/${childId}` : '/dashboard'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
       {loading ? <p className="loading-state" role="status">正在載入學習資料…</p> : error && !draft.displayName && childId ? <p className="notice notice-error">{error}</p> : (
-        <OnboardingLayout step={step} title={title} description={description} actions={<><button className="button button-secondary" type="button" onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}>{step === 1 ? '取消' : '上一步'}</button><button className="button" type="button" disabled={busy} onClick={() => step === profileStepCount ? void save() : next()}>{busy ? '儲存中…' : step === profileStepCount ? '儲存學習資料' : '繼續'}</button></>}>
+        <OnboardingLayout
+          step={step}
+          title={title}
+          description={description}
+          actions={
+            <>
+              <button className="button button-secondary" type="button" onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}>
+                {step === 1 ? '取消' : '上一步'}
+              </button>
+              <button className="button" type="button" disabled={busy} onClick={() => step === profileStepCount ? void save() : next()}>
+                {busy ? '儲存中…' : step === profileStepCount ? '儲存學習資料' : '繼續'}
+              </button>
+            </>
+          }
+        >
+          {isNewChild && capacityFull && (
+            <div className="notice" role="status">
+              <strong>目前名額已滿，完成資料後將先進入候補名單。</strong>
+              <p>建立學習資料不會收費，也不會開始訂閱或產生教材。有名額釋出時我們會寄 Email 通知你，屆時再決定是否訂閱。</p>
+            </div>
+          )}
           <StepComponent draft={draft} errors={errors} update={update} />
           {error && <p className="notice notice-error" role="alert">{error}</p>}
         </OnboardingLayout>
