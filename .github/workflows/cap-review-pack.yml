@@ -1,0 +1,53 @@
+name: CAP review pack one-shot
+
+on:
+  push:
+    branches:
+      - feat/cap-chatgpt-deep-digestion
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    if: ${{ !contains(github.event.head_commit.message, '[review-pack]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/cap-chatgpt-deep-digestion
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build compact review pack
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const out = [];
+          const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+          for (const examId of ['111','112','113','114','115']) {
+            const d = JSON.parse(fs.readFileSync(path.join('history_exams','extracted',`${examId}.json`),'utf8'));
+            out.push(`# EXAM ${examId}`);
+            for (const p of d.passages) {
+              out.push(`P|${p.id}|Q${p.questionNumbers.join(',')}|genre=${p.genre}|mode=${p.evidenceMode}|pages=${p.pageStart}-${p.pageEnd}|TEXT=${clean(p.text)}`);
+            }
+            for (const q of d.questions) {
+              out.push(`Q|${q.questionNumber}|section=${q.section}|page=${q.page}|passage=${q.passageId ?? '-'}|mode=${q.evidenceMode}|visual=${q.visualEvidenceRequired}|ANSWER=${q.answer}|STEM=${clean(q.stem)}|A=${clean(q.options.A)}|B=${clean(q.options.B)}|C=${clean(q.options.C)}|D=${clean(q.options.D)}`);
+            }
+            out.push('');
+          }
+          fs.mkdirSync('history_exams/agent_analysis', { recursive: true });
+          fs.writeFileSync('history_exams/agent_analysis/review-pack.txt', out.join('\n') + '\n');
+          NODE
+      - name: Commit review pack
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history_exams/agent_analysis/review-pack.txt
+          if git diff --cached --quiet; then
+            echo "No review-pack changes"
+          else
+            git commit -m "chore(history-exams): generate compact review pack [review-pack]"
+            git push origin HEAD:feat/cap-chatgpt-deep-digestion
+          fi
