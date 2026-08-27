@@ -1,0 +1,17 @@
+{
+  "gitSha": "6725ae8f99b16315c3af14b32a9053b8179e8fdb",
+  "corpusHash": "f35827dbb579a5535e6eb3462208e787ef352bca3034472706e4651d3c2fb44c",
+  "provider": "offline-mock",
+  "model": "rule-based-mock",
+  "analysisPromptVersion": "v3.0.0",
+  "criticPromptVersion": "v3.0.0",
+  "analysisSchemaVersion": "1.0.0",
+  "startedAt": "2026-08-27T16:45:28.766Z",
+  "completedAt": "2026-08-27T16:45:28.875Z",
+  "totalQuestions": 215,
+  "successfulQuestions": 215,
+  "failedQuestions": 0,
+  "visualQuestionCount": 22,
+  "repairedByCriticCount": 0,
+  "unresolvedCount": 0
+}

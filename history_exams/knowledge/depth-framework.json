@@ -12,12 +12,6 @@
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
-      },
-      {
-        "examId": "111",
         "questionNumber": 3,
         "languageDifficulty": "A1_elementary",
         "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
@@ -26,6 +20,12 @@
         "examId": "111",
         "questionNumber": 4,
         "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 7,
+        "languageDifficulty": "A2_basic",
         "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
       }
     ]
@@ -86,7 +86,7 @@
       },
       {
         "examId": "111",
-        "questionNumber": 26,
+        "questionNumber": 30,
         "languageDifficulty": "B1_intermediate",
         "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
       }

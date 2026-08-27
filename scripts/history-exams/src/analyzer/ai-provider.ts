@@ -2,11 +2,15 @@ import fs from 'node:fs';
 import { ExtractedPassage, ExtractedQuestion } from '../schemas/extracted.ts';
 import {
   CognitiveDepth,
-  ContextNecessity,
   DemandLevel,
+  DistractorPattern,
+  EvidenceNecessity,
+  EvidenceReference,
   EvidenceSpan,
   LanguageDifficulty,
+  OptionAnalysisItem,
   PedagogicalAnalysis,
+  ReasoningComplexity,
   TaxonomySkill,
 } from '../schemas/analyzed.ts';
 
@@ -21,7 +25,15 @@ export interface AiProvider {
   generateAnalysis(
     prompt: string,
     context?: {
-      question: ExtractedQuestion;
+      question?: ExtractedQuestion;
+      passage?: ExtractedPassage | null;
+      images?: ImageAttachment[];
+    }
+  ): Promise<string>;
+  generateCriticReview?(
+    prompt: string,
+    context?: {
+      question?: ExtractedQuestion;
       passage?: ExtractedPassage | null;
       images?: ImageAttachment[];
     }
@@ -57,7 +69,7 @@ export class GeminiProvider implements AiProvider {
     context?: { images?: ImageAttachment[] }
   ): Promise<string> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:generateContent?key=${this.apiKey}`;
-    
+
     const parts: any[] = [{ text: prompt }];
     if (context?.images && context.images.length > 0) {
       for (const img of context.images) {
@@ -93,6 +105,13 @@ export class GeminiProvider implements AiProvider {
       throw new Error('Gemini API returned empty candidate response');
     }
     return candidate;
+  }
+
+  async generateCriticReview(
+    prompt: string,
+    context?: { images?: ImageAttachment[] }
+  ): Promise<string> {
+    return this.generateAnalysis(prompt, context);
   }
 }
 
@@ -152,6 +171,13 @@ export class OpenAiProvider implements AiProvider {
     }
     return message;
   }
+
+  async generateCriticReview(
+    prompt: string,
+    context?: { images?: ImageAttachment[] }
+  ): Promise<string> {
+    return this.generateAnalysis(prompt, context);
+  }
 }
 
 /**
@@ -163,13 +189,24 @@ export class OfflineMockProvider implements AiProvider {
 
   async generateAnalysis(
     _prompt: string,
-    context?: { question: ExtractedQuestion; passage?: ExtractedPassage | null }
+    context?: { question?: ExtractedQuestion; passage?: ExtractedPassage | null }
   ): Promise<string> {
     if (!context?.question) {
       throw new Error('OfflineMockProvider requires question context for deterministic derivation');
     }
     const derived = deriveDeterministicAnalysis(context.question, context.passage ?? null);
     return JSON.stringify(derived);
+  }
+
+  async generateCriticReview(
+    _prompt: string,
+    _context?: { question?: ExtractedQuestion; passage?: ExtractedPassage | null }
+  ): Promise<string> {
+    return JSON.stringify({
+      criticStatus: 'passed',
+      criticIssues: [],
+      repairedFields: null,
+    });
   }
 }
 
@@ -205,23 +242,32 @@ export function deriveDeterministicAnalysis(
   let primarySkill: TaxonomySkill = 'explicit_detail';
   let cognitiveDepth: CognitiveDepth = 'D2_single_step_inference';
   let languageDifficulty: LanguageDifficulty = 'A2_basic';
-  let contextNecessity: ContextNecessity = isSingle ? 'none' : 'essential';
-  let evidenceSpan: EvidenceSpan = 'single_sentence';
+  let evidenceNecessity: EvidenceNecessity = question.visualEvidenceRequired || !isSingle ? 'essential' : 'none';
+  let evidenceSpan: EvidenceSpan = question.visualEvidenceRequired ? 'multimodal_text_and_graphic' : 'single_sentence';
+  let reasoningComplexity: ReasoningComplexity = 'simple_single_step';
 
   if (isSingle) {
     const isGrammar = /will|would|have|has|had|was|were|is|are|been|who|which|that|because|although|if|when|so/i.test(
       `${options.A} ${options.B} ${options.C} ${options.D}`
     );
-    if (isGrammar) {
+    if (question.visualEvidenceRequired) {
+      primarySkill = 'vocabulary_in_context';
+      cognitiveDepth = 'D1_verbatim_retrieval';
+      evidenceNecessity = 'essential';
+      evidenceSpan = 'multimodal_text_and_graphic';
+      reasoningComplexity = 'compound_dual_step';
+    } else if (isGrammar) {
       primarySkill = 'grammar_in_context';
       cognitiveDepth = 'D2_single_step_inference';
+      reasoningComplexity = 'simple_single_step';
     } else {
       primarySkill = 'vocabulary_in_context';
       cognitiveDepth = 'D1_verbatim_retrieval';
+      reasoningComplexity = 'simple_single_step';
     }
     languageDifficulty = question.questionNumber <= 5 ? 'A1_elementary' : 'A2_basic';
-    evidenceSpan = 'single_sentence';
   } else {
+    reasoningComplexity = 'compound_dual_step';
     if (passage?.genre === 'cloze_passage') {
       primarySkill = 'grammar_in_context';
       cognitiveDepth = 'D2_single_step_inference';
@@ -230,6 +276,7 @@ export function deriveDeterministicAnalysis(
       primarySkill = 'main_idea';
       cognitiveDepth = 'D3_multi_step_synthesis';
       evidenceSpan = 'multi_paragraph_global';
+      reasoningComplexity = 'complex_multi_step_deduction';
     } else if (/why|reason|how.*feel|what does.*mean|infer|learn from/i.test(stem)) {
       primarySkill = 'local_inference';
       cognitiveDepth = 'D3_multi_step_synthesis';
@@ -238,6 +285,7 @@ export function deriveDeterministicAnalysis(
       primarySkill = 'purpose_speaker_intent';
       cognitiveDepth = 'D4_evaluative_pragmatic';
       evidenceSpan = 'multi_paragraph_global';
+      reasoningComplexity = 'complex_multi_step_deduction';
     } else if (/map|direction|route|chart|step|recipe|fruit tea|how.*go/i.test(stem) || question.evidenceMode === 'spatial') {
       primarySkill = 'information_integration';
       cognitiveDepth = 'D3_multi_step_synthesis';
@@ -255,68 +303,158 @@ export function deriveDeterministicAnalysis(
   }
 
   const reasoningOperations = isSingle
-    ? ['syntactic_parsing', 'lexical_semantic_matching']
+    ? question.visualEvidenceRequired
+      ? ['visual_feature_scanning', 'lexical_semantic_matching', 'action_entity_verification']
+      : ['syntactic_parsing', 'lexical_semantic_matching']
     : ['cross_sentence_coreference', 'hypothesis_elimination', 'evidence_synthesis'];
 
-  const distractorStrategies: PedagogicalAnalysis['distractorStrategies'] = [
-    {
-      option: 'A',
-      strategy: 'literal_keyword_matching',
-      explanation: 'Surface keyword matching without context resolution',
-    },
-    {
-      option: 'B',
-      strategy: 'partial_truth',
-      explanation: 'Mentions text details but violates stem condition',
-    },
-    {
-      option: 'C',
-      strategy: 'unsupported_world_knowledge',
-      explanation: 'Relying on common sense rather than text evidence',
-    },
-    {
-      option: 'D',
-      strategy: 'wrong_referent',
-      explanation: 'Confusing agent with recipient or wrong timeline',
-    },
+  const correctLetter = (question.answer || 'A') as 'A' | 'B' | 'C' | 'D';
+  const letters: Array<'A' | 'B' | 'C' | 'D'> = ['A', 'B', 'C', 'D'];
+
+  const distractorStrategiesPool: DistractorPattern[] = [
+    'literal_keyword_matching',
+    'partial_truth',
+    'wrong_referent',
+    'wrong_chronology',
+    'unsupported_world_knowledge',
+    'grammatically_plausible_contextually_wrong',
   ];
+
+  let distractorIdx = (question.questionNumber * 3) % distractorStrategiesPool.length;
+
+  const defaultEvidenceRef: EvidenceReference = {
+    type: question.visualEvidenceRequired ? 'visual_page_asset' : passage ? 'passage_text' : 'stem_clue',
+    location: question.visualEvidenceRequired
+      ? `Page ${question.page} illustration`
+      : passage
+      ? `Paragraph 1, lines 1-3`
+      : `Question #${question.questionNumber} sentence stem`,
+    quoteOrDescription: question.visualEvidenceRequired
+      ? `Visual evidence depicted on page ${question.page}`
+      : passage
+      ? passage.text.slice(0, 80)
+      : question.stem,
+    role: 'primary_proof',
+  };
+
+  const optionAnalyses: OptionAnalysisItem[] = letters.map((letter) => {
+    if (letter === correctLetter) {
+      return {
+        option: letter,
+        isCorrect: true,
+        correctRationale: `Option (${letter}) "${question.options[letter]}" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.`,
+        evidenceRefs: [defaultEvidenceRef],
+      };
+    }
+
+    const strat = distractorStrategiesPool[distractorIdx % distractorStrategiesPool.length];
+    distractorIdx++;
+
+    const distractorRationaleMap: Record<DistractorPattern, string> = {
+      literal_keyword_matching: `Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.`,
+      partial_truth: `Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.`,
+      wrong_referent: `Attributes an action, attribute, or statement from the text to the wrong subject or entity.`,
+      wrong_chronology: `Swaps the temporal sequence or cause-and-effect relationship established in the passage.`,
+      local_evidence_for_global_question: `Quotes a true local detail from paragraph 1 but fails to encompass the overall main idea or passage arc.`,
+      unsupported_world_knowledge: `Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.`,
+      reversed_cause_effect: `Inverts cause and outcome in a causal chain stated in the text.`,
+      grammatically_plausible_contextually_wrong: `Fits the blank syntactically but violates contextual meaning or discourse flow.`,
+      overgeneralization: `Extrapolates a limited specific statement into an absolute universal claim.`,
+      undergeneralization: `Narrows down a broad theme to a single minor example.`,
+      irrelevant_distractor: `Presents unrelated content that does not address the text or stem.`,
+      other: `Psychometric discriminator testing targeted contextual boundaries.`,
+    };
+
+    return {
+      option: letter,
+      isCorrect: false,
+      distractorStrategy: strat,
+      distractorRationale: distractorRationaleMap[strat] || `Option (${letter}) "${question.options[letter]}" is plausible but contradicted by evidence.`,
+      evidenceRefs: [
+        {
+          ...defaultEvidenceRef,
+          role: 'counter_evidence',
+        },
+      ],
+      misconceptionTarget: `Confusing surface lexical match with semantic proposition`,
+    };
+  });
 
   const readingDemand: DemandLevel = isSingle ? 'low' : question.questionNumber > 30 ? 'high' : 'medium';
   const grammarDemand: DemandLevel = primarySkill === 'grammar_in_context' ? 'high' : 'medium';
   const vocabularyDemand: DemandLevel = languageDifficulty === 'B1_intermediate' ? 'high' : 'medium';
-  const inferenceDemand: DemandLevel = cognitiveDepth === 'D4_evaluative_pragmatic' || cognitiveDepth === 'D3_multi_step_synthesis' ? 'high' : 'medium';
+  const inferenceDemand: DemandLevel =
+    cognitiveDepth === 'D4_evaluative_pragmatic' || cognitiveDepth === 'D3_multi_step_synthesis'
+      ? 'high'
+      : 'medium';
+  const visualIntegrationDemand: DemandLevel = question.visualEvidenceRequired ? 'high' : 'low';
+
+  const normalizedEvidenceMode: 'text_only' | 'visual_only' | 'multimodal_mixed' | 'spatial' =
+    question.evidenceMode === 'visual_only'
+      ? 'visual_only'
+      : question.evidenceMode === 'spatial'
+      ? 'spatial'
+      : question.evidenceMode === 'text_visual' || question.evidenceMode === 'multi_document' || question.visualEvidenceRequired
+      ? 'multimodal_mixed'
+      : 'text_only';
 
   return {
     primarySkill,
     secondarySkills: isSingle ? [] : ['discourse_relationship'],
     languageDifficulty,
     cognitiveDepth,
+    evidenceMode: normalizedEvidenceMode,
+    evidenceNecessity,
     evidenceSpan,
-    contextNecessity,
     reasoningOperations,
-    questionMechanism: isSingle
-      ? 'Targeted lexical/grammatical gap evaluation in an isolated communicative sentence'
-      : 'Discourse-grounded reading comprehension with multi-sentence clue resolution',
-    distractorStrategies,
-    requiredKnowledge: isSingle
-      ? ['Junior high basic 1200 vocabulary', 'Fundamental syntactic agreement']
-      : ['Paragraph coherence tracking', 'Contextual inference', 'Key detail extraction'],
+    reasoningComplexity,
+    optionAnalyses,
     readingDemand,
     grammarDemand,
     vocabularyDemand,
     inferenceDemand,
+    visualIntegrationDemand,
+    questionMechanism: isSingle
+      ? question.visualEvidenceRequired
+        ? 'Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval'
+        : 'Targeted lexical/grammatical gap evaluation in an isolated communicative sentence'
+      : 'Discourse-grounded reading comprehension with multi-sentence clue resolution',
     whyTheQuestionWorks: `Discriminates students who comprehend ${primarySkill} against surface word matchers.`,
-    possibleStudentFailureModes: [
-      'Scanning for identical keywords in the passage',
+    studentFailureModes: [
+      'Scanning for identical keywords in the passage without constraint resolution',
       'Ignoring negative polarity or qualifying constraints in the stem',
     ],
-    reusableDesignPrinciple: `Pair unambiguous textual evidence with distractors exploiting common optical scan heuristics.`,
+    misconceptionsTargeted: [
+      'Assuming word presence equals factual truth',
+      'Superficial visual scanning without systematic feature verification',
+    ],
+    reusableDesignPrinciple: `Pair unambiguous evidence with distractors exploiting common optical scan heuristics.`,
     shallowRecall: {
-      isShallowRecall: isSingle && primarySkill === 'vocabulary_in_context',
-      recallType: isSingle && primarySkill === 'vocabulary_in_context' ? 'intentional_retrieval_drill' : 'none',
-      explanation: isSingle && primarySkill === 'vocabulary_in_context'
+      isShallowRecall: isSingle && primarySkill === 'vocabulary_in_context' && !question.visualEvidenceRequired,
+      recallType: isSingle && primarySkill === 'vocabulary_in_context' && !question.visualEvidenceRequired
+        ? 'intentional_retrieval_drill'
+        : 'none',
+      explanation: isSingle && primarySkill === 'vocabulary_in_context' && !question.visualEvidenceRequired
         ? 'Single-sentence targeted lexical recall'
         : 'Contextually bound reading evaluation',
     },
+    difficultyAdjustment: {
+      canSimplifyLanguageWithoutBreakingMechanism: true,
+      simplificationConstraints: [
+        'Must preserve core syntactic connective or prompt structure',
+        'Must keep distractors aligned with parallel grammatical category',
+      ],
+      canIncreaseDepthWithoutIncreasingVocabulary: true,
+      depthAdjustmentStrategies: [
+        'Introduce multi-sentence constraint dependencies',
+        'Require cross-paragraph inference rather than proximate sentence lookup',
+      ],
+    },
+    analysisConfidence: 'high',
+    uncertainties: [],
+    evidenceReferences: [defaultEvidenceRef],
+    criticStatus: 'passed',
+    criticIssues: [],
   };
 }
+

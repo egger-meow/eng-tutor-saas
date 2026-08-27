@@ -2,91 +2,110 @@
   {
     "pattern": "literal_keyword_matching",
     "description": "Matches exact surface words from the passage but asserts an incorrect proposition.",
-    "observedCount": 159,
-    "observedPercentage": 24.7,
+    "observedCount": 97,
+    "observedPercentage": 16.6,
     "primaryCognitiveTrigger": "Traps students who visually scan rather than comprehend.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 3,
-        "option": "A",
-        "explanation": "Surface keyword matching without context resolution"
+        "questionNumber": 2,
+        "option": "B",
+        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
       },
       {
         "examId": "111",
         "questionNumber": 4,
         "option": "A",
-        "explanation": "Surface keyword matching without context resolution"
+        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
       },
       {
         "examId": "111",
-        "questionNumber": 5,
-        "option": "A",
-        "explanation": "Surface keyword matching without context resolution"
+        "questionNumber": 6,
+        "option": "B",
+        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
       }
     ]
   },
   {
     "pattern": "partial_truth",
     "description": "States a fact from the text accurately but fails to answer the specific condition in the stem.",
-    "observedCount": 163,
-    "observedPercentage": 25.3,
+    "observedCount": 97,
+    "observedPercentage": 16.6,
     "primaryCognitiveTrigger": "Traps students with incomplete constraint evaluation.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "option": "B",
-        "explanation": "Mentions text details but violates stem condition"
-      },
-      {
-        "examId": "111",
         "questionNumber": 2,
-        "option": "B",
-        "explanation": "Mentions text details but violates stem condition"
+        "option": "C",
+        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
       },
       {
         "examId": "111",
-        "questionNumber": 3,
+        "questionNumber": 4,
         "option": "B",
-        "explanation": "Mentions text details but violates stem condition"
+        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 6,
+        "option": "C",
+        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
       }
     ]
   },
   {
     "pattern": "wrong_referent",
     "description": "Attributes a genuine passage action, feeling, or attribute to the wrong subject.",
-    "observedCount": 163,
-    "observedPercentage": 25.3,
+    "observedCount": 97,
+    "observedPercentage": 16.6,
     "primaryCognitiveTrigger": "Tests pronoun and entity tracking.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "option": "D",
-        "explanation": "Confusing agent with recipient or wrong timeline"
-      },
-      {
-        "examId": "111",
         "questionNumber": 2,
         "option": "D",
-        "explanation": "Confusing agent with recipient or wrong timeline"
+        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
       },
       {
         "examId": "111",
-        "questionNumber": 3,
+        "questionNumber": 4,
         "option": "D",
-        "explanation": "Confusing agent with recipient or wrong timeline"
+        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 6,
+        "option": "D",
+        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
       }
     ]
   },
   {
     "pattern": "wrong_chronology",
     "description": "Inverts event order or mixes up before/after temporal sequences.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 98,
+    "observedPercentage": 16.8,
     "primaryCognitiveTrigger": "Tests timeline reconstruction.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 3,
+        "option": "A",
+        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 5,
+        "option": "A",
+        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 7,
+        "option": "A",
+        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+      }
+    ]
   },
   {
     "pattern": "local_evidence_for_global_question",
@@ -99,27 +118,27 @@
   {
     "pattern": "unsupported_world_knowledge",
     "description": "Plausible common sense in daily life, but explicitly contradicted or absent in text.",
-    "observedCount": 160,
-    "observedPercentage": 24.8,
+    "observedCount": 98,
+    "observedPercentage": 16.8,
     "primaryCognitiveTrigger": "Tests text-grounded reading discipline.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "option": "C",
-        "explanation": "Relying on common sense rather than text evidence"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 2,
-        "option": "C",
-        "explanation": "Relying on common sense rather than text evidence"
+        "questionNumber": 3,
+        "option": "B",
+        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
       },
       {
         "examId": "111",
         "questionNumber": 5,
         "option": "C",
-        "explanation": "Relying on common sense rather than text evidence"
+        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 7,
+        "option": "C",
+        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
       }
     ]
   },
@@ -134,10 +153,29 @@
   {
     "pattern": "grammatically_plausible_contextually_wrong",
     "description": "Fits the blank syntactically but contradicts contextual meaning or discourse flow.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 98,
+    "observedPercentage": 16.8,
     "primaryCognitiveTrigger": "Tests integrated syntax-semantics reasoning.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 3,
+        "option": "D",
+        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 5,
+        "option": "D",
+        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 7,
+        "option": "D",
+        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+      }
+    ]
   },
   {
     "pattern": "overgeneralization",

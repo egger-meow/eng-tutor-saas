@@ -22,12 +22,16 @@ export function computeQuestionContentHash(
   promptVersion: string,
   providerName = 'gemini',
   modelName = 'gemini-2.5-flash',
-  imageHashes: string[] = []
+  imageHashes: string[] = [],
+  criticPromptVersion = 'v3.0.0',
+  analysisSchemaVersion = '1.0.0'
 ): string {
   const payload = {
     provider: providerName,
     model: modelName,
     promptVersion,
+    criticPromptVersion,
+    analysisSchemaVersion,
     examId: question.examId,
     questionNumber: question.questionNumber,
     section: question.section,

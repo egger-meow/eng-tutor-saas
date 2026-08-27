@@ -27,9 +27,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
-  - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
+  - Evidence Necessity: `essential`
+  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "candles" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -46,9 +52,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A1_elementary`
-  - Context Necessity: `none`
+  - Evidence Necessity: `none`
   - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "so" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -68,9 +80,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `explicit_detail`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "Their 20 year of business." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -90,9 +108,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `explicit_detail`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [CORRECT]**: Option (C) "His birthday." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -112,9 +136,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `explicit_detail`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
+    - **(D) [CORRECT]**: Option (D) "400 ml of rice milk has less sugar than 400 ml of grape juice." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -134,9 +164,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `local_inference`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend local_inference against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [CORRECT]**: Option (C) "To tell us that we often have more sugar than we can without knowing it." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -155,9 +191,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "for example" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -176,9 +218,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "it makes" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -197,9 +245,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "strange" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -218,9 +272,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "more than just games" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -240,9 +300,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
-  - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
+  - Evidence Necessity: `essential`
+  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "bowl" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -259,9 +325,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
+  - Evidence Necessity: `none`
   - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "singing" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -280,9 +352,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "what things are called" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -301,9 +379,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [CORRECT]**: Option (B) "who they speak to" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -323,9 +407,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
-  - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
+  - Evidence Necessity: `essential`
+  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "an envelope" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -342,9 +432,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
+  - Evidence Necessity: `none`
   - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [CORRECT]**: Option (C) "neck" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -363,9 +459,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [CORRECT]**: Option (B) "has not been very useful" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -384,9 +486,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "Denver" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -405,9 +513,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "had higher numbers of deaths" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -426,9 +540,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [CORRECT]**: Option (B) "At first" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -448,9 +568,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
-  - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
+  - Evidence Necessity: `essential`
+  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "kite" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -467,9 +593,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
+  - Evidence Necessity: `none`
   - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "shy" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -488,9 +620,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [CORRECT]**: Option (B) "started" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -509,9 +647,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "he couldn’t stop thinking about two things" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -530,9 +674,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "should not be celebrated for just one day, but for nine months" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -551,9 +701,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "first" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -572,9 +728,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "made him give up baking" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -593,9 +755,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [CORRECT]**: Option (C) "has given" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -615,9 +783,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
-  - Context Necessity: `none`
-  - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
+  - Evidence Necessity: `essential`
+  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
   - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [CORRECT]**: Option (B) "glasses" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -634,9 +808,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `grammar_in_context`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A1_elementary`
-  - Context Necessity: `none`
+  - Evidence Necessity: `none`
   - Mechanism: *Targeted lexical/grammatical gap evaluation in an isolated communicative sentence*
   - Function: *Discriminates students who comprehend grammar_in_context against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [CORRECT]**: Option (A) "feeds" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(B) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -656,9 +836,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [CORRECT]**: Option (C) "Apples, oranges and strawberries." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -678,9 +864,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
+    - **(D) [CORRECT]**: Option (D) "Leaving the teabags in the pot of hot water for 2 to 3 minutes." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -700,9 +892,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `explicit_detail`
   - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "He talks about things he can’t do." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -722,9 +920,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `local_inference`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend local_inference against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [CORRECT]**: Option (B) "They failed at it." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
 
 ---
 
@@ -744,9 +948,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "When can I visit the Marigolds’ Home?" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -766,9 +976,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
+    - **(B) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
+    - **(C) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
+    - **(D) [CORRECT]**: Option (D) "Taking pet dogs for a walk on the playground." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 
@@ -788,9 +1004,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [CORRECT]**: Option (B) "Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 
@@ -810,53 +1032,15 @@
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `main_idea`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
+  - Evidence Necessity: `essential`
   - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
   - Function: *Discriminates students who comprehend main_idea against surface word matchers.*
-
----
-
-### Q33 [Section: passage_comprehension | EvidenceMode: `text_visual` | Official Answer: `B`]
-
-- **Page**: 11
-- **Visual Evidence Required**: ✅ Yes
-- **Required Assets**: `history_exams/assets/115/page-10.png` (infographic)
-- **Passage Set**: `115-p32-34` (Genre: `infographic_chart_table`)
-  > *Passage Preview*: SEA GLASS: GLASS BOTTLES’ SECOND LIFE Sea glass is made from the magic of the sea. It usually comes from glass bottles that are thrown into the water. Each piec...
-- **Question Stem**: According to the reading, how is sea glass made?
-- **Options**:
-  - (A) Sea glass becomes rounder after it is pushed up to the beach.
-  - (B) Colder sea water helps pieces of glass become sea glass faster.
-  - (C) Pieces of glass become white on the outside after many years in the sea.
-  - (D) Glass bottles break into pieces when they are dug out from the sea floor.
-- **AI Reverse-Engineered Assessment**:
-  - Primary Skill: `explicit_detail`
-  - Cognitive Depth: `D2_single_step_inference` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
-
----
-
-### Q34 [Section: passage_comprehension | EvidenceMode: `text_visual` | Official Answer: `A`]
-
-- **Page**: 11
-- **Visual Evidence Required**: ✅ Yes
-- **Required Assets**: `history_exams/assets/115/page-10.png` (infographic)
-- **Passage Set**: `115-p32-34` (Genre: `infographic_chart_table`)
-  > *Passage Preview*: SEA GLASS: GLASS BOTTLES’ SECOND LIFE Sea glass is made from the magic of the sea. It usually comes from glass bottles that are thrown into the water. Each piec...
-- **Question Stem**: According to the reading, why will less sea glass be found in the future?
-- **Options**:
-  - (A) People do not make as many glass items as before.
-  - (B) People have learned not to throw garbage into the sea.
-  - (C) Artists are using too much sea glass in their art pieces.
-  - (D) Waves are not big enough to push sea glass up to the beach.
-- **AI Reverse-Engineered Assessment**:
-  - Primary Skill: `local_inference`
-  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `B1_intermediate`
-  - Context Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend local_inference against surface word matchers.*
+  - Critic Status: `undefined` (Confidence: `undefined`)
+  - Option Breakdown:
+    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
+    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
+    - **(C) [CORRECT]**: Option (C) "Glass bottles that are thrown into the sea become the homes of sea animals." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
 
 ---
 

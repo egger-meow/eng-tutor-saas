@@ -7,6 +7,7 @@ import { runSynthesisPipeline } from '../../scripts/history-exams/src/synthesize
 import { runBenchmarkPipeline } from '../../scripts/history-exams/src/benchmark';
 import { validateFullCorpus } from '../../scripts/history-exams/src/validator';
 import { generateSpotCheckReport } from '../../scripts/history-exams/src/spot-check/spot-check-builder';
+import { generatePilotReviewReport } from '../../scripts/history-exams/src/spot-check/pilot-builder';
 
 describe('Historical CAP English Exam Pipeline Smoke Test', () => {
   const rawDir = path.resolve(__dirname, '../../history_exams/raw');
@@ -16,6 +17,7 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
   const knowledgeDir = path.resolve(__dirname, '../../history_exams/knowledge');
   const benchmarkDir = path.resolve(__dirname, '../../history_exams/benchmark');
   const spotCheckPath = path.resolve(__dirname, '../../history_exams/spot-check-report.md');
+  const pilotReviewPath = path.resolve(__dirname, '../../history_exams/pilot-review.md');
 
   it(
     'runs complete lifecycle end-to-end and validates resulting artifacts',
@@ -38,14 +40,23 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
       expect(analyzeResults.length).toBe(5);
 
       // 3. Synthesize
-      const synthResult = await runSynthesisPipeline({ analyzedDir, knowledgeDir, allowProvisionalMock: true });
+      const synthResult = await runSynthesisPipeline({
+        analyzedDir,
+        knowledgeDir,
+        benchmarkDir,
+        allowProvisionalMock: true,
+      });
       expect(synthResult.totalQuestions).toBe(215);
 
       // 4. Benchmark
-      const benchResult = await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock: true });
-      expect(benchResult.holdoutCount).toBeGreaterThanOrEqual(20);
+      const benchResult = await runBenchmarkPipeline({
+        analyzedDir,
+        benchmarkDir,
+        allowProvisionalMock: true,
+      });
+      expect(benchResult.holdoutCount).toBe(20);
 
-      // 5. Spot-Check Report
+      // 5. Spot-Check Report & Pilot Review Report
       const spotPath = generateSpotCheckReport({
         extractedDir,
         analyzedDir,
@@ -53,11 +64,19 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
       });
       expect(fs.existsSync(spotPath)).toBe(true);
 
+      const pilotPath = generatePilotReviewReport({
+        extractedDir,
+        analyzedDir,
+        outputPath: pilotReviewPath,
+      });
+      expect(fs.existsSync(pilotPath)).toBe(true);
+
       // 6. Validate
       const valReport = validateFullCorpus({ extractedDir, analyzedDir, knowledgeDir, benchmarkDir });
       expect(valReport.valid).toBe(true);
       expect(valReport.errors).toEqual([]);
     },
-    30000
+    45000
   );
 });
+

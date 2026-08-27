@@ -5,6 +5,7 @@ import { runSynthesisPipeline } from './synthesizer/index.ts';
 import { runBenchmarkPipeline } from './benchmark/index.ts';
 import { validateFullCorpus } from './validator/index.ts';
 import { generateSpotCheckReport } from './spot-check/spot-check-builder.ts';
+import { generatePilotReviewReport } from './spot-check/pilot-builder.ts';
 
 const rootDir = process.cwd();
 const rawDir = path.resolve(rootDir, 'history_exams/raw');
@@ -14,11 +15,16 @@ const analyzedDir = path.resolve(rootDir, 'history_exams/analyzed');
 const knowledgeDir = path.resolve(rootDir, 'history_exams/knowledge');
 const benchmarkDir = path.resolve(rootDir, 'history_exams/benchmark');
 const spotCheckPath = path.resolve(rootDir, 'history_exams/spot-check-report.md');
+const pilotReviewPath = path.resolve(rootDir, 'history_exams/pilot-review.md');
 
 function parseArgs(args: string[]) {
   const command = args[0] || 'help';
   let examId: string | undefined;
   let questionNumber: number | undefined;
+  let questionNumbers: number[] | undefined;
+  let providerName: 'gemini' | 'openai' | 'offline-mock' | undefined;
+  let modelName: string | undefined;
+  let concurrency: number | undefined;
   let force = false;
   let allowProvisionalMock = false;
 
@@ -29,6 +35,18 @@ function parseArgs(args: string[]) {
     } else if (args[i] === '--question' && args[i + 1]) {
       questionNumber = parseInt(args[i + 1], 10);
       i++;
+    } else if (args[i] === '--questions' && args[i + 1]) {
+      questionNumbers = args[i + 1].split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
+      i++;
+    } else if (args[i] === '--provider' && args[i + 1]) {
+      providerName = args[i + 1] as any;
+      i++;
+    } else if (args[i] === '--model' && args[i + 1]) {
+      modelName = args[i + 1];
+      i++;
+    } else if (args[i] === '--concurrency' && args[i + 1]) {
+      concurrency = parseInt(args[i + 1], 10);
+      i++;
     } else if (args[i] === '--force') {
       force = true;
     } else if (args[i] === '--allow-offline-mock' || args[i] === '--allow-provisional-mock') {
@@ -36,11 +54,31 @@ function parseArgs(args: string[]) {
     }
   }
 
-  return { command, examId, questionNumber, force, allowProvisionalMock };
+  return {
+    command,
+    examId,
+    questionNumber,
+    questionNumbers,
+    providerName,
+    modelName,
+    concurrency,
+    force,
+    allowProvisionalMock,
+  };
 }
 
 async function main() {
-  const { command, examId, questionNumber, force, allowProvisionalMock } = parseArgs(process.argv.slice(2));
+  const {
+    command,
+    examId,
+    questionNumber,
+    questionNumbers,
+    providerName,
+    modelName,
+    concurrency,
+    force,
+    allowProvisionalMock,
+  } = parseArgs(process.argv.slice(2));
 
   console.log(`[history-exams] Command: ${command}`);
 
@@ -62,12 +100,16 @@ async function main() {
     }
 
     case 'analyze': {
-      console.log(`[history-exams] Stage 2: Deep Pedagogical Reverse-Engineering (Live AI)...`);
+      console.log(`[history-exams] Stage 2: Deep Pedagogical Reverse-Engineering (Two-Pass Live AI)...`);
       const results = await runAnalysisPipeline({
         extractedDir,
         analyzedDir,
         examIdFilter: examId,
         questionNumberFilter: questionNumber,
+        questionNumbersFilter: questionNumbers,
+        providerName,
+        modelName,
+        concurrency,
         force,
         allowOfflineMock: allowProvisionalMock,
       });
@@ -78,14 +120,41 @@ async function main() {
       break;
     }
 
+    case 'pilot': {
+      const pilotExamId = examId || '115';
+      const pilotQuestions = questionNumbers || [1, 20, 22, 23, 26, 32, 38, 43];
+      console.log(`[history-exams] Phase 4 Pilot: Running targeted two-pass digestion on Exam ${pilotExamId} (Questions: ${pilotQuestions.join(', ')})...`);
+      await runAnalysisPipeline({
+        extractedDir,
+        analyzedDir,
+        examIdFilter: pilotExamId,
+        questionNumbersFilter: pilotQuestions,
+        providerName,
+        modelName,
+        concurrency,
+        force,
+        allowOfflineMock: allowProvisionalMock,
+      });
+      const outPath = generatePilotReviewReport({
+        extractedDir,
+        analyzedDir,
+        outputPath: pilotReviewPath,
+        targetExamId: pilotExamId,
+        targetQuestions: pilotQuestions,
+      });
+      console.log(`[history-exams] Pilot review report successfully generated: ${outPath}`);
+      break;
+    }
+
     case 'synthesize': {
-      console.log(`[history-exams] Stage 3: Synthesizing Cross-Year Knowledge Base...`);
+      console.log(`[history-exams] Stage 3: Synthesizing Cross-Year Knowledge Base with Holdout Isolation...`);
       const result = await runSynthesisPipeline({
         analyzedDir,
         knowledgeDir,
+        benchmarkDir,
         allowProvisionalMock,
       });
-      console.log(`[history-exams] Synthesis complete across ${result.totalExams} exams and ${result.totalQuestions} questions.`);
+      console.log(`[history-exams] Synthesis complete across ${result.totalExams} exams and ${result.nonHoldoutQuestionsCount} non-holdout questions (${result.excludedHoldoutCount} holdouts isolated).`);
       console.log(`  - Taxonomy: ${result.taxonomyPath}`);
       console.log(`  - Recipes: ${result.recipesPath}`);
       console.log(`  - Distractors: ${result.distractorsPath}`);
@@ -141,16 +210,25 @@ async function main() {
     case 'build': {
       console.log(`[history-exams] Running Complete Hardened Pipeline...`);
       await runExtractionPipeline({ rawDir, outputDir: extractedDir, assetsDir, renderImages: true });
-      await runAnalysisPipeline({ extractedDir, analyzedDir, force, allowOfflineMock: allowProvisionalMock });
-      await runSynthesisPipeline({ analyzedDir, knowledgeDir, allowProvisionalMock });
+      await runAnalysisPipeline({
+        extractedDir,
+        analyzedDir,
+        providerName,
+        modelName,
+        concurrency,
+        force,
+        allowOfflineMock: allowProvisionalMock,
+      });
+      await runSynthesisPipeline({ analyzedDir, knowledgeDir, benchmarkDir, allowProvisionalMock });
       await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock });
       generateSpotCheckReport({ extractedDir, analyzedDir, outputPath: spotCheckPath });
+      generatePilotReviewReport({ extractedDir, analyzedDir, outputPath: pilotReviewPath });
       const report = validateFullCorpus({ extractedDir, analyzedDir, knowledgeDir, benchmarkDir });
       if (!report.valid) {
         console.error('[history-exams] Build validation failed:', report.errors);
         process.exit(1);
       }
-      console.log(`[history-exams] Complete digestion pipeline successfully built, validated, and spot-check report generated!`);
+      console.log(`[history-exams] Complete digestion pipeline successfully built, validated, and spot-check/pilot reports generated!`);
       break;
     }
 
@@ -161,15 +239,20 @@ Usage: pnpm history-exams <command> [options]
 Commands:
   extract      Run multimodal extraction and render page assets for raw exam PDFs
   analyze      Run live AI pedagogical deep analysis (requires GEMINI_API_KEY or OPENAI_API_KEY)
+  pilot        Run targeted two-pass digestion pilot (115 Q1, Q20, Q22, Q23, Q26, Q32, Q38, Q43) and generate history_exams/pilot-review.md
   synthesize   Run cross-year knowledge synthesis producing taxonomy, recipes, distractors, depth framework, anti-patterns, and blueprint
   benchmark    Build CAP benchmark foundation distributions and holdout set
   spot-check   Generate human spot-check report (history_exams/spot-check-report.md)
   validate     Validate integrity, schema, and provenance across all artifacts
-  build        Run extract -> analyze -> synthesize -> benchmark -> spot-check -> validate in sequence
+  build        Run extract -> analyze -> synthesize -> benchmark -> spot-check -> pilot -> validate in sequence
 
 Options:
   --exam <id>               Filter by exam ID (e.g. --exam 115)
   --question <num>          Filter by question number (e.g. --question 24)
+  --questions <q1,q2,...>   Filter by comma-separated question numbers (e.g. --questions 1,20,22,23,26,32,38,43)
+  --provider <name>         AI provider: 'gemini' | 'openai' | 'offline-mock'
+  --model <name>            Model name override
+  --concurrency <num>       Concurrent API request limit (default: 3)
   --force                   Bypass cache and force re-analysis
   --allow-provisional-mock  Permit provisional offline mock records (for testing only)
       `);
@@ -182,3 +265,4 @@ main().catch((err) => {
   console.error('[history-exams] Fatal error:', err);
   process.exit(1);
 });
+

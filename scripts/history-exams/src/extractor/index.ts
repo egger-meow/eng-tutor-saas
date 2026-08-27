@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { ExtractedExam } from '../schemas/extracted.ts';
 import { ExtractionValidationResult, validateExtractedExam } from './extractor-validator.ts';
 import { getOfficialAnswer, OFFICIAL_CAP_ANSWERS } from './official-answers.ts';
@@ -73,6 +74,30 @@ export async function runExtractionPipeline(options: ExtractAllOptions): Promise
       examId,
       sourcePdfPath: pdfPath,
     });
+
+    // 2.5 Compute and embed asset SHA-256 byte hashes
+    for (const q of extractedExam.questions) {
+      for (const asset of q.requiredAssets) {
+        const fullAssetPath = path.isAbsolute(asset.imagePath)
+          ? asset.imagePath
+          : path.resolve(process.cwd(), asset.imagePath);
+        if (fs.existsSync(fullAssetPath)) {
+          const fileBuf = fs.readFileSync(fullAssetPath);
+          asset.sha256 = crypto.createHash('sha256').update(fileBuf).digest('hex');
+        }
+      }
+    }
+    for (const p of extractedExam.passages) {
+      for (const asset of p.requiredAssets) {
+        const fullAssetPath = path.isAbsolute(asset.imagePath)
+          ? asset.imagePath
+          : path.resolve(process.cwd(), asset.imagePath);
+        if (fs.existsSync(fullAssetPath)) {
+          const fileBuf = fs.readFileSync(fullAssetPath);
+          asset.sha256 = crypto.createHash('sha256').update(fileBuf).digest('hex');
+        }
+      }
+    }
 
     // 3. Validate extracted schema
     const validation = validateExtractedExam(extractedExam);

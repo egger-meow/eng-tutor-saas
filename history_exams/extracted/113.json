@@ -226,7 +226,8 @@
           "page": 2,
           "role": "single_image",
           "imagePath": "history_exams/assets/113/page-2.png",
-          "description": "Illustration for single question 1"
+          "description": "Illustration for single question 1",
+          "sha256": "f7fb4d3f310dce5a2b9c5958962827d5748b0d9f700f0a1a2518dc0744009c77"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -799,7 +800,8 @@
           "page": 6,
           "role": "diagram",
           "imagePath": "history_exams/assets/113/page-6.png",
-          "description": "Visual evidence for question 27 on page 6"
+          "description": "Visual evidence for question 27 on page 6",
+          "sha256": "b891f7bb8500b7031aec0303a04a75df1a9d13599fb3cea582a4b4256025dcf9"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1192,6 +1194,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:31:57.191Z",
+  "extractedAt": "2026-08-27T16:45:27.408Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

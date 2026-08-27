@@ -6,8 +6,12 @@
     "description": "A passage or dialogue is presented, but the question stem can be answered using general knowledge or isolated grammar without reading the context.",
     "manifestation": "A 200-word passage is followed by \"What is the capital of Japan?\" or an isolated grammar fill-in that ignores passage narrative.",
     "diagnosticTest": "Delete the entire passage. If a student can still determine the correct answer with >90% confidence, the context is decorative.",
-    "corpusEvidenceOrContrast": "In CAP exams, 100% of passage questions exhibit essential context necessity: reading the passage is strictly mandatory.",
-    "repairStrategy": "Embed unique scenario constraints, character decisions, or data points inside the text that must be referenced to resolve the stem."
+    "whyWeak": "Destroys reading comprehension validity; permits guessing without processing English discourse.",
+    "repairStrategy": "Embed unique scenario constraints, character decisions, or data points inside the text that must be referenced to resolve the stem.",
+    "evidenceBasis": "comparative_inference",
+    "sourceEvidence": [],
+    "confidence": "high",
+    "corpusEvidenceOrContrast": "In CAP exams, 100% of passage questions exhibit essential context necessity: reading the passage is strictly mandatory."
   },
   {
     "antiPatternId": "ANTI_02_SHALLOW_DICTIONARY_RECALL",
@@ -16,8 +20,12 @@
     "description": "Testing whether a student memorized an isolated definition rather than measuring contextual inference ability.",
     "manifestation": "Question asks for the meaning of a rare word with zero contextual explanation or clues in the passage.",
     "diagnosticTest": "Can the meaning of the target word be deduced if replaced with a nonsense word like \"flurg\"? If not, it tests prior recall, not reading.",
-    "corpusEvidenceOrContrast": "CAP vocabulary-in-context questions always embed explicit contrastive, causal, or illustrative clues in surrounding sentences.",
-    "repairStrategy": "Provide explicit contextual scaffolding (e.g. antonyms, examples, cause-and-effect outcomes) in the text allowing deduction."
+    "whyWeak": "Rewards prior rote memorization over active contextual deduction.",
+    "repairStrategy": "Provide explicit contextual scaffolding (e.g. antonyms, examples, cause-and-effect outcomes) in the text allowing deduction.",
+    "evidenceBasis": "comparative_inference",
+    "sourceEvidence": [],
+    "confidence": "high",
+    "corpusEvidenceOrContrast": "CAP vocabulary-in-context questions always embed explicit contrastive, causal, or illustrative clues in surrounding sentences."
   },
   {
     "antiPatternId": "ANTI_03_OPTION_ASYMMETRY_GIVEAWAY",
@@ -26,8 +34,12 @@
     "description": "The correct option is visibly longer, more detailed, or structured differently than the distractors, revealing the answer by format.",
     "manifestation": "Option (A) is 3 words, (B) is 4 words, (C) is 22 words with elaborate qualifiers, (D) is 3 words.",
     "diagnosticTest": "Check word counts and syntactic structures of options A, B, C, D. Standard deviation in length should be minimal.",
-    "corpusEvidenceOrContrast": "CAP exams maintain parallel syntactic structure and closely matched word lengths across all four choices.",
-    "repairStrategy": "Ensure all four options share the same grammatical part of speech, phrasing complexity, and length profile."
+    "whyWeak": "Allows test-wise students to pick the answer based on visual asymmetry without reading.",
+    "repairStrategy": "Ensure all four options share the same grammatical part of speech, phrasing complexity, and length profile.",
+    "evidenceBasis": "comparative_inference",
+    "sourceEvidence": [],
+    "confidence": "high",
+    "corpusEvidenceOrContrast": "CAP exams maintain parallel syntactic structure and closely matched word lengths across all four choices."
   },
   {
     "antiPatternId": "ANTI_04_TRIVIAL_SURFACE_COPY",
@@ -36,8 +48,12 @@
     "description": "Stem and correct option match the exact words in the text verbatim, enabling mechanical visual scanning without understanding.",
     "manifestation": "Passage: \"Ben has a red car.\" Question: \"What color is Ben's car?\" (A) Red (B) Green (C) Blue (D) Yellow.",
     "diagnosticTest": "Does solving the question require paraphrase recognition or inference? If pure optical string matching suffices, cognitive depth is near zero.",
-    "corpusEvidenceOrContrast": "CAP questions consistently paraphrase text concepts in stems and options rather than using identical raw strings.",
-    "repairStrategy": "Use natural synonyms and conceptual paraphrases in the options to require semantic comprehension."
+    "whyWeak": "Fails to discriminate reading comprehension from mechanical pattern matching.",
+    "repairStrategy": "Use natural synonyms and conceptual paraphrases in the options to require semantic comprehension.",
+    "evidenceBasis": "comparative_inference",
+    "sourceEvidence": [],
+    "confidence": "high",
+    "corpusEvidenceOrContrast": "CAP questions consistently paraphrase text concepts in stems and options rather than using identical raw strings."
   },
   {
     "antiPatternId": "ANTI_05_LEXICAL_INFLATION_OVERLOAD",
@@ -46,7 +62,11 @@
     "description": "Making a question difficult by injecting obscure, out-of-syllabus vocabulary rather than requiring sophisticated reasoning.",
     "manifestation": "Using high-school or college vocabulary in a junior-high worksheet to compensate for simplistic question mechanics.",
     "diagnosticTest": "Inspect question vocabulary against the 1200+800 syllabus list. If difficulty stems from unknown words rather than cognitive depth, it fails.",
-    "corpusEvidenceOrContrast": "CAP exams maintain strict A2/B1 lexical ceiling while achieving high psychometric discrimination through multi-step reasoning.",
-    "repairStrategy": "Keep vocabulary strictly within syllabus bounds; increase cognitive depth through multi-paragraph synthesis and subtle distractors."
+    "whyWeak": "Frustrates students with lexical barriers without developing cognitive reading depth.",
+    "repairStrategy": "Keep vocabulary strictly within syllabus bounds; increase cognitive depth through multi-paragraph synthesis and subtle distractors.",
+    "evidenceBasis": "comparative_inference",
+    "sourceEvidence": [],
+    "confidence": "high",
+    "corpusEvidenceOrContrast": "CAP exams maintain strict A2/B1 lexical ceiling while achieving high psychometric discrimination through multi-step reasoning."
   }
 ]

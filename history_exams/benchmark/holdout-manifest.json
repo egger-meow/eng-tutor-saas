@@ -1,0 +1,217 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-08-28T00:00:00.000Z",
+  "description": "Stratified 20-question benchmark holdout set across 5 historical CAP English exams (111-115). Strictly isolated from cross-year knowledge synthesis and recipe induction.",
+  "totalHoldoutQuestions": 20,
+  "stratificationRules": [
+    "Exactly 4 items per year (111, 112, 113, 114, 115)",
+    "Includes Section 1 Visual Single Question (Q1) from every year",
+    "Includes Section 1 Lexical and Syntactic drill items",
+    "Includes Section 2 Multimodal, Spatial, Infographic, and Notice items",
+    "Includes Section 2 Deep Inference, Pragmatic, and Multi-Document sets",
+    "Includes Section 2 Narrative and Cloze discourse items",
+    "Strict Isolation: Holdout items must never appear in question recipe exemplars or synthesis empirical evidence"
+  ],
+  "holdoutQuestions": [
+    {
+      "examId": "111",
+      "questionNumber": 1,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "visual_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D1_verbatim_retrieval",
+      "rationale": "Representative Section 1 visual action identification"
+    },
+    {
+      "examId": "111",
+      "questionNumber": 12,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "grammar_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Representative Section 1 complex clause grammar"
+    },
+    {
+      "examId": "111",
+      "questionNumber": 26,
+      "section": "passage_comprehension",
+      "genre": "notice_announcement",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "explicit_detail",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Authentic notice constraint filtering"
+    },
+    {
+      "examId": "111",
+      "questionNumber": 36,
+      "section": "passage_comprehension",
+      "genre": "narrative",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "cross_sentence_inference",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Deep narrative character arc inference"
+    },
+    {
+      "examId": "112",
+      "questionNumber": 1,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "visual_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D1_verbatim_retrieval",
+      "rationale": "Section 1 multimodal action recognition"
+    },
+    {
+      "examId": "112",
+      "questionNumber": 10,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Single sentence contextual vocabulary deduction"
+    },
+    {
+      "examId": "112",
+      "questionNumber": 23,
+      "section": "passage_comprehension",
+      "genre": "infographic_chart_table",
+      "evidenceMode": "multimodal_mixed",
+      "primarySkillTarget": "information_integration",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Graphic chart coordinate and text reconciliation"
+    },
+    {
+      "examId": "112",
+      "questionNumber": 38,
+      "section": "passage_comprehension",
+      "genre": "article_informational",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "main_idea",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Multi-document comparative viewpoint synthesis"
+    },
+    {
+      "examId": "113",
+      "questionNumber": 1,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "visual_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D1_verbatim_retrieval",
+      "rationale": "Visual object and activity identification"
+    },
+    {
+      "examId": "113",
+      "questionNumber": 14,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "grammar_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Tense and syntactic agreement in sentence context"
+    },
+    {
+      "examId": "113",
+      "questionNumber": 25,
+      "section": "passage_comprehension",
+      "genre": "brochure_flyer",
+      "evidenceMode": "spatial",
+      "primarySkillTarget": "information_integration",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Spatial map routing and directional constraint reasoning"
+    },
+    {
+      "examId": "113",
+      "questionNumber": 35,
+      "section": "passage_comprehension",
+      "genre": "cloze_passage",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "grammar_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Cloze discourse flow and tense sequencing"
+    },
+    {
+      "examId": "114",
+      "questionNumber": 1,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "visual_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D1_verbatim_retrieval",
+      "rationale": "Visual scene interpretation"
+    },
+    {
+      "examId": "114",
+      "questionNumber": 11,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Lexical collocation in communicative sentence"
+    },
+    {
+      "examId": "114",
+      "questionNumber": 27,
+      "section": "passage_comprehension",
+      "genre": "dialogue",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "pragmatic_meaning",
+      "cognitiveDepthTarget": "D4_evaluative_pragmatic",
+      "rationale": "Conversational implicature and speaker intention"
+    },
+    {
+      "examId": "114",
+      "questionNumber": 41,
+      "section": "passage_comprehension",
+      "genre": "article_informational",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "purpose_speaker_intent",
+      "cognitiveDepthTarget": "D4_evaluative_pragmatic",
+      "rationale": "Author rhetorical intent and global evaluative stance"
+    },
+    {
+      "examId": "115",
+      "questionNumber": 1,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "visual_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D1_verbatim_retrieval",
+      "rationale": "Essential visual evidence single question"
+    },
+    {
+      "examId": "115",
+      "questionNumber": 15,
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "grammar_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Syntactic connective and subordinate clause licensing"
+    },
+    {
+      "examId": "115",
+      "questionNumber": 26,
+      "section": "passage_comprehension",
+      "genre": "brochure_flyer",
+      "evidenceMode": "spatial",
+      "primarySkillTarget": "information_integration",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Spatial layout and conditional schedule resolution"
+    },
+    {
+      "examId": "115",
+      "questionNumber": 38,
+      "section": "passage_comprehension",
+      "genre": "article_informational",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "cross_sentence_inference",
+      "cognitiveDepthTarget": "D3_multi_step_synthesis",
+      "rationale": "Cross-perspective viewpoint reconciliation"
+    }
+  ]
+}

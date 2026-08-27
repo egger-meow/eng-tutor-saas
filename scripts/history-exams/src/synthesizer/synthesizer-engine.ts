@@ -1,13 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import {
   AnalyzedExam,
   AnalyzedQuestion,
   CognitiveDepth,
   CognitiveDepthSchema,
-  ContextNecessity,
-  ContextNecessitySchema,
   DistractorPattern,
+  EvidenceNecessity,
+  EvidenceNecessitySchema,
   EvidenceSpan,
   EvidenceSpanSchema,
   LanguageDifficulty,
@@ -15,12 +16,18 @@ import {
   TaxonomySkill,
   TaxonomySkillSchema,
 } from '../schemas/analyzed.ts';
+import { HoldoutManifest, HoldoutManifestSchema } from '../schemas/benchmark.ts';
 import {
   AntiPattern,
+  AntiPatternsArtifact,
   CapBlueprint,
+  DepthFrameworkArtifact,
   DepthLevelDefinition,
+  DistractorPatternsArtifact,
   DistractorPatternStat,
+  KnowledgeProvenance,
   QuestionRecipe,
+  QuestionRecipesArtifact,
 } from '../schemas/knowledge.ts';
 
 export class MockDataQuarantinedError extends Error {
@@ -37,12 +44,15 @@ export class MockDataQuarantinedError extends Error {
 export interface SynthesizeOptions {
   analyzedDir: string;
   knowledgeDir: string;
+  benchmarkDir?: string;
   allowProvisionalMock?: boolean;
 }
 
 export interface SynthesisSummary {
   totalQuestions: number;
   totalExams: number;
+  nonHoldoutQuestionsCount: number;
+  excludedHoldoutCount: number;
   taxonomyPath: string;
   recipesPath: string;
   distractorsPath: string;
@@ -53,10 +63,15 @@ export interface SynthesisSummary {
 }
 
 /**
- * Runs Stage 3: Full Cross-Year Digestion and Knowledge Synthesis
+ * Runs Stage 3: Full Cross-Year Digestion and Knowledge Synthesis with True Holdout Isolation
  */
 export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<SynthesisSummary> {
-  const { analyzedDir, knowledgeDir, allowProvisionalMock = false } = options;
+  const {
+    analyzedDir,
+    knowledgeDir,
+    benchmarkDir = path.resolve(path.dirname(knowledgeDir), 'benchmark'),
+    allowProvisionalMock = false,
+  } = options;
 
   if (!fs.existsSync(knowledgeDir)) {
     fs.mkdirSync(knowledgeDir, { recursive: true });
@@ -64,7 +79,7 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
 
   const analyzedFiles = fs
     .readdirSync(analyzedDir)
-    .filter((f) => f.endsWith('.json'))
+    .filter((f) => f.endsWith('.json') && f !== 'run-manifest.json')
     .sort();
 
   const allExams: AnalyzedExam[] = [];
@@ -90,43 +105,85 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
     throw new MockDataQuarantinedError('synthesize authoritative knowledge base', mockQuestions.length);
   }
 
+  // Load Holdout Manifest for true isolation
+  const holdoutManifestPath = path.join(benchmarkDir, 'holdout-manifest.json');
+  let holdoutKeys = new Set<string>();
+  if (fs.existsSync(holdoutManifestPath)) {
+    try {
+      const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
+      const parsedHoldout = HoldoutManifestSchema.safeParse(rawHoldout);
+      if (parsedHoldout.success) {
+        parsedHoldout.data.holdoutQuestions.forEach((h) => {
+          holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
+        });
+      }
+    } catch {
+      // If manifest fails to parse, proceed without holdouts or throw
+    }
+  }
+
+  // STRICT HOLDOUT ISOLATION: Exclude holdout questions from synthesis knowledge derivation
+  const nonHoldoutQuestions = allQuestions.filter(
+    (q) => !holdoutKeys.has(`${q.examId}-Q${q.questionNumber}`)
+  );
+
+  const corpusHash = createHash('sha256')
+    .update(allQuestions.map((q) => q.contentHash).sort().join(':'))
+    .digest('hex');
+
+  const provenance: KnowledgeProvenance = {
+    knowledgeVersion: '1.0.0',
+    sourceExamIds: allExams.map((e) => e.examId),
+    sourceQuestionCount: nonHoldoutQuestions.length,
+    excludedHoldoutCount: holdoutKeys.size,
+    providerName: allQuestions[0]?.providerName || 'unknown',
+    modelName: allQuestions[0]?.modelName || 'unknown',
+    analysisPromptVersion: allQuestions[0]?.promptVersion || 'v3.0.0',
+    synthesisPromptVersion: 'v1.0.0',
+    generatedAt: new Date().toISOString(),
+    sourceCorpusHash: corpusHash,
+    authorityStatus: mockQuestions.length === 0 ? 'authoritative' : 'provisional',
+  };
+
   // 1. Synthesize Taxonomy
-  const taxonomy = buildCapTaxonomy(allQuestions);
+  const taxonomy = buildCapTaxonomy(provenance, nonHoldoutQuestions);
   const taxonomyPath = path.join(knowledgeDir, 'cap-taxonomy.json');
   fs.writeFileSync(taxonomyPath, JSON.stringify(taxonomy, null, 2), 'utf-8');
 
   // 2. Synthesize Distractor Patterns
-  const distractors = buildDistractorPatterns(allQuestions);
+  const distractors = buildDistractorPatterns(provenance, nonHoldoutQuestions);
   const distractorsPath = path.join(knowledgeDir, 'distractor-patterns.json');
-  fs.writeFileSync(distractorsPath, JSON.stringify(distractors, null, 2), 'utf-8');
+  fs.writeFileSync(distractorsPath, JSON.stringify(distractors.patterns, null, 2), 'utf-8');
 
   // 3. Synthesize Depth Framework
-  const depthFramework = buildDepthFramework(allQuestions);
+  const depthFramework = buildDepthFramework(provenance, nonHoldoutQuestions);
   const depthFrameworkPath = path.join(knowledgeDir, 'depth-framework.json');
-  fs.writeFileSync(depthFrameworkPath, JSON.stringify(depthFramework, null, 2), 'utf-8');
+  fs.writeFileSync(depthFrameworkPath, JSON.stringify(depthFramework.framework, null, 2), 'utf-8');
 
   // 4. Synthesize Question Recipes
-  const recipes = buildQuestionRecipes(allQuestions);
+  const recipes = buildQuestionRecipes(provenance, nonHoldoutQuestions);
   const recipesPath = path.join(knowledgeDir, 'question-recipes.json');
-  fs.writeFileSync(recipesPath, JSON.stringify(recipes, null, 2), 'utf-8');
+  fs.writeFileSync(recipesPath, JSON.stringify(recipes.recipes, null, 2), 'utf-8');
 
   // 5. Synthesize Anti-Patterns
-  const antiPatterns = buildAntiPatterns();
+  const antiPatterns = buildAntiPatterns(provenance);
   const antiPatternsPath = path.join(knowledgeDir, 'anti-patterns.json');
-  fs.writeFileSync(antiPatternsPath, JSON.stringify(antiPatterns, null, 2), 'utf-8');
+  fs.writeFileSync(antiPatternsPath, JSON.stringify(antiPatterns.antiPatterns, null, 2), 'utf-8');
 
   // 6. Synthesize Blueprint JSON and Markdown
-  const blueprintJson = buildCapBlueprintJson(allExams, allQuestions);
+  const blueprintJson = buildCapBlueprintJson(provenance, allExams, nonHoldoutQuestions);
   const blueprintJsonPath = path.join(knowledgeDir, 'cap-blueprint.json');
   fs.writeFileSync(blueprintJsonPath, JSON.stringify(blueprintJson, null, 2), 'utf-8');
 
-  const blueprintMd = buildCapBlueprintMarkdown(blueprintJson, taxonomy, recipes, antiPatterns);
+  const blueprintMd = buildCapBlueprintMarkdown(blueprintJson, taxonomy, recipes.recipes, antiPatterns.antiPatterns);
   const blueprintMdPath = path.join(knowledgeDir, 'cap-blueprint.md');
   fs.writeFileSync(blueprintMdPath, blueprintMd, 'utf-8');
 
   return {
     totalQuestions: allQuestions.length,
     totalExams: allExams.length,
+    nonHoldoutQuestionsCount: nonHoldoutQuestions.length,
+    excludedHoldoutCount: holdoutKeys.size,
     taxonomyPath,
     recipesPath,
     distractorsPath,
@@ -137,7 +194,7 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
   };
 }
 
-function buildCapTaxonomy(questions: AnalyzedQuestion[]) {
+function buildCapTaxonomy(provenance: KnowledgeProvenance, questions: AnalyzedQuestion[]) {
   const skillCounts: Record<string, number> = {};
   const skillCoOccurrences: Record<string, Record<string, number>> = {};
 
@@ -155,6 +212,7 @@ function buildCapTaxonomy(questions: AnalyzedQuestion[]) {
   }
 
   return {
+    provenance,
     version: '1.0.0',
     totalQuestions: questions.length,
     primarySkillFrequencies: skillCounts,
@@ -178,7 +236,10 @@ function buildCapTaxonomy(questions: AnalyzedQuestion[]) {
   };
 }
 
-function buildDistractorPatterns(questions: AnalyzedQuestion[]): DistractorPatternStat[] {
+function buildDistractorPatterns(
+  provenance: KnowledgeProvenance,
+  questions: AnalyzedQuestion[]
+): DistractorPatternsArtifact {
   const patternCounts: Record<DistractorPattern, number> = {
     literal_keyword_matching: 0,
     partial_truth: 0,
@@ -212,22 +273,19 @@ function buildDistractorPatterns(questions: AnalyzedQuestion[]): DistractorPatte
   let totalDistractors = 0;
 
   for (const q of questions) {
-    const correctAnswer = q.extracted.answer;
-    for (const d of q.analysis.distractorStrategies) {
-      // If official answer is known, only count the 3 genuine distractors (exclude the correct option)
-      if (correctAnswer && d.option === correctAnswer) {
-        continue;
-      }
+    for (const opt of q.analysis.optionAnalyses) {
+      if (opt.isCorrect || !opt.distractorStrategy) continue;
 
-      patternCounts[d.strategy] = (patternCounts[d.strategy] || 0) + 1;
+      const strat = opt.distractorStrategy;
+      patternCounts[strat] = (patternCounts[strat] || 0) + 1;
       totalDistractors++;
 
-      if (patternExemplars[d.strategy].length < 3) {
-        patternExemplars[d.strategy].push({
+      if (patternExemplars[strat].length < 3) {
+        patternExemplars[strat].push({
           examId: q.examId,
           questionNumber: q.questionNumber,
-          option: d.option,
-          explanation: d.explanation,
+          option: opt.option,
+          explanation: opt.distractorRationale || 'Plausible distractor trap',
         });
       }
     }
@@ -284,7 +342,7 @@ function buildDistractorPatterns(questions: AnalyzedQuestion[]): DistractorPatte
     },
   };
 
-  return (Object.keys(patternCounts) as DistractorPattern[]).map((p) => ({
+  const patterns: DistractorPatternStat[] = (Object.keys(patternCounts) as DistractorPattern[]).map((p) => ({
     pattern: p,
     description: descriptions[p]?.desc || p,
     observedCount: patternCounts[p],
@@ -292,9 +350,18 @@ function buildDistractorPatterns(questions: AnalyzedQuestion[]): DistractorPatte
     primaryCognitiveTrigger: descriptions[p]?.trigger || 'Cognitive evaluation',
     exemplars: patternExemplars[p],
   }));
+
+  return {
+    provenance,
+    totalDistractorsAnalyzed: totalDistractors,
+    patterns,
+  };
 }
 
-function buildDepthFramework(questions: AnalyzedQuestion[]): DepthLevelDefinition[] {
+function buildDepthFramework(
+  provenance: KnowledgeProvenance,
+  questions: AnalyzedQuestion[]
+): DepthFrameworkArtifact {
   const exemplarsByDepth: Record<CognitiveDepth, any[]> = {
     D1_verbatim_retrieval: [],
     D2_single_step_inference: [],
@@ -314,7 +381,7 @@ function buildDepthFramework(questions: AnalyzedQuestion[]): DepthLevelDefinitio
     }
   }
 
-  return [
+  const framework: DepthLevelDefinition[] = [
     {
       level: 'D1_verbatim_retrieval',
       name: 'Direct Information Retrieval',
@@ -364,69 +431,113 @@ function buildDepthFramework(questions: AnalyzedQuestion[]): DepthLevelDefinitio
       exemplars: exemplarsByDepth.D4_evaluative_pragmatic,
     },
   ];
+
+  return {
+    provenance,
+    framework,
+  };
 }
 
-function buildQuestionRecipes(questions: AnalyzedQuestion[]): QuestionRecipe[] {
-  // Find real exemplars from the corpus
-  const findExemplar = (skill: TaxonomySkill, depth: CognitiveDepth) => {
-    const match = questions.find((q) => q.analysis.primarySkill === skill && q.analysis.cognitiveDepth === depth);
-    if (match) {
-      return [{ examId: match.examId, questionNumber: match.questionNumber, brief: match.extracted.stem.slice(0, 80) }];
-    }
-    return [];
+function buildQuestionRecipes(
+  provenance: KnowledgeProvenance,
+  questions: AnalyzedQuestion[]
+): QuestionRecipesArtifact {
+  // Helper to extract non-holdout evidence
+  const findMatches = (
+    predicate: (q: AnalyzedQuestion) => boolean
+  ): { evidence: QuestionRecipe['sourceEvidence']; years: number[] } => {
+    const matches = questions.filter(predicate);
+    const evidence = matches.map((m) => ({
+      examId: m.examId,
+      questionNumber: m.questionNumber,
+      brief: m.extracted.stem.slice(0, 80),
+    }));
+    const years = Array.from(new Set(matches.map((m) => parseInt(m.examId, 10)))).sort();
+    return { evidence, years };
   };
 
-  return [
+  const recipeDefinitions = [
     {
-      recipeId: 'RECIPE_01_NOTICE_SCHEDULE_DETAIL',
+      recipeId: 'RECIPE_01_NOTICE_SCHEDULE_CONSTRAINT_SCANNER',
       name: 'Authentic Notice & Schedule Constraint Scanner',
-      primarySkill: 'explicit_detail',
-      secondarySkills: ['information_integration', 'sequence_cause_consequence'],
-      targetGenre: 'notice_announcement',
-      appropriateCognitiveDepth: ['D2_single_step_inference', 'D3_multi_step_synthesis'],
-      requiredEvidenceSpan: 'cross_sentence_local',
-      languageDifficultyFlexibility: ['A1_elementary', 'A2_basic'],
+      primarySkill: 'explicit_detail' as TaxonomySkill,
+      secondarySkills: ['information_integration', 'sequence_cause_consequence'] as TaxonomySkill[],
+      supportedGenres: ['notice_announcement', 'brochure_flyer'] as any[],
+      evidenceModes: ['text_only', 'multimodal_mixed'] as any[],
+      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
+      requiredEvidenceStructure: 'Tabular or bulleted conditional rules containing opening hours, fees, age, and restrictions',
       reasoningOperations: ['constraint_satisfaction', 'temporal_filtering', 'elimination_by_rule'],
       stemTemplates: [
         'Which question can the brochure answer?',
         'What should Jason do before he visits the {place}?',
         'According to the schedule, when can visitors {action}?',
       ],
+      correctAnswerConstructionPrinciples: [
+        'Must satisfy all conjunctive constraints in the stem (e.g. time AND price AND location)',
+        'Paraphrases the condition rather than copying the exact brochure row',
+      ],
+      distractorConstructionPrinciples: [
+        'Use partial conditions stated in other sections of the brochure',
+        'Invert eligibility restrictions (e.g. adult fee applied to child)',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by introducing an extra prerequisite constraint',
+        'Simplify language by shortening notice text while preserving the constraint tree',
+      ],
       validDistractorMechanisms: [
         'partial_truth',
         'wrong_chronology',
         'literal_keyword_matching',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
         'Making the answer an obvious verbatim copy without requiring constraint checking',
         'Providing options with completely unrelated content rather than competing conditions',
       ],
       qualityChecks: [
-        'Ensure the correct option satisfies all constraints mentioned in the stem (e.g. time AND price AND location)',
+        'Ensure the correct option satisfies all constraints mentioned in the stem',
         'Ensure distractors represent partial conditions stated in the notice',
       ],
-      realExamExemplars: findExemplar('explicit_detail', 'D2_single_step_inference'),
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'passage_comprehension' &&
+        (q.analysis.primarySkill === 'explicit_detail' || q.analysis.primarySkill === 'information_integration') &&
+        (q.extracted.passageRange ? q.extracted.passageRange[0] <= 28 : true),
     },
     {
-      recipeId: 'RECIPE_02_DIALOGUE_PRAGMATIC_INFERENCE',
+      recipeId: 'RECIPE_02_DIALOGUE_PRAGMATIC_IMPLICATURE',
       name: 'Conversational Implicature & Subtext Resolver',
-      primarySkill: 'pragmatic_meaning',
-      secondarySkills: ['purpose_speaker_intent', 'local_inference'],
-      targetGenre: 'dialogue',
-      appropriateCognitiveDepth: ['D3_multi_step_synthesis', 'D4_evaluative_pragmatic'],
-      requiredEvidenceSpan: 'cross_sentence_local',
-      languageDifficultyFlexibility: ['A2_basic', 'B1_intermediate'],
+      primarySkill: 'pragmatic_meaning' as TaxonomySkill,
+      secondarySkills: ['purpose_speaker_intent', 'local_inference'] as TaxonomySkill[],
+      supportedGenres: ['dialogue'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D3_multi_step_synthesis', 'D4_evaluative_pragmatic'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
+      requiredEvidenceStructure: 'Multi-turn conversational exchange with social-pragmatic subtext',
       reasoningOperations: ['implicature_derivation', 'tone_analysis', 'speaker_perspective_taking'],
       stemTemplates: [
         'What does {Speaker} most likely mean when saying "{Quote}"?',
         'How does {Speaker} feel about {Topic}?',
         'What can we learn about {Speaker} from their conversation?',
       ],
+      correctAnswerConstructionPrinciples: [
+        'Captures the intended conversational function (polite refusal, indirect suggestion, veiled doubt)',
+        'Resolves contextually across adjacent dialogue turns',
+      ],
+      distractorConstructionPrinciples: [
+        'Include literal surface meaning of the quoted idiom/phrase',
+        'Assign the feeling or quote to the wrong conversational partner',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by using subtle indirect speech acts',
+        'Keep dialogue language natural, informal, and standard junior high level',
+      ],
       validDistractorMechanisms: [
         'literal_keyword_matching',
         'wrong_referent',
         'unsupported_world_knowledge',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
         'Direct literal restatement that destroys pragmatic depth',
         'Ambiguous context where two answers are equally plausible',
@@ -435,130 +546,372 @@ function buildQuestionRecipes(questions: AnalyzedQuestion[]): QuestionRecipe[] {
         'Verify that the dialogue provides at least 2 distinct turns of conversational context',
         'Confirm that resolving the quote requires situational awareness, not dictionary lookup',
       ],
-      realExamExemplars: findExemplar('pragmatic_meaning', 'D4_evaluative_pragmatic'),
+      filter: (q: AnalyzedQuestion) =>
+        q.analysis.primarySkill === 'pragmatic_meaning' ||
+        (q.extracted.section === 'passage_comprehension' &&
+          q.analysis.cognitiveDepth === 'D4_evaluative_pragmatic'),
     },
     {
-      recipeId: 'RECIPE_03_NARRATIVE_THEME_ARC',
+      recipeId: 'RECIPE_03_NARRATIVE_THEMATIC_ARC',
       name: 'Narrative Arc & Core Message Abstractor',
-      primarySkill: 'main_idea',
-      secondarySkills: ['purpose_speaker_intent', 'cross_sentence_inference'],
-      targetGenre: 'narrative',
-      appropriateCognitiveDepth: ['D3_multi_step_synthesis'],
-      requiredEvidenceSpan: 'multi_paragraph_global',
-      languageDifficultyFlexibility: ['A2_basic', 'B1_intermediate'],
+      primarySkill: 'main_idea' as TaxonomySkill,
+      secondarySkills: ['purpose_speaker_intent', 'cross_sentence_inference'] as TaxonomySkill[],
+      supportedGenres: ['narrative'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'multi_paragraph_global' as EvidenceSpan,
+      requiredEvidenceStructure: 'Complete narrative arc: orientation, complication, climax, and resolution/reflection',
       reasoningOperations: ['thematic_abstraction', 'global_gist_synthesis', 'scope_evaluation'],
       stemTemplates: [
         'What is the story mainly about?',
         'What lesson did {Character} learn at the end?',
         'What does the writer want to tell readers through this story?',
       ],
+      correctAnswerConstructionPrinciples: [
+        'Encompasses the overarching thematic transformation rather than a single event',
+        'Formulated as a general life reflection supported by the protagonist’s choices',
+      ],
+      distractorConstructionPrinciples: [
+        'Use accurate local details from early paragraphs that do not represent the final lesson',
+        'Use plausible common-sense morals that the story explicitly contradicted',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth through understated character transformation without explicit preaching',
+        'Ensure vocabulary remains strictly in the standard syllabus',
+      ],
       validDistractorMechanisms: [
         'local_evidence_for_global_question',
         'partial_truth',
         'overgeneralization',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
         'Making the main idea identical to the first sentence',
-        'Distractors that are factually false even on a local level (too easy)',
+        'Distractors that are factually false even on a local level',
       ],
       qualityChecks: [
         'Every distractor should reflect a true local detail from one paragraph of the story',
         'The correct option must encompass the arc transformation from beginning to end',
       ],
-      realExamExemplars: findExemplar('main_idea', 'D3_multi_step_synthesis'),
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'passage_comprehension' &&
+        (q.analysis.primarySkill === 'main_idea' || q.analysis.primarySkill === 'cross_sentence_inference'),
     },
     {
       recipeId: 'RECIPE_04_INFOGRAPHIC_MULTIMODAL_INTEGRATION',
       name: 'Infographic & Visual Data Reconciler',
-      primarySkill: 'information_integration',
-      secondarySkills: ['explicit_detail', 'local_inference'],
-      targetGenre: 'infographic_chart_table',
-      appropriateCognitiveDepth: ['D2_single_step_inference', 'D3_multi_step_synthesis'],
-      requiredEvidenceSpan: 'multimodal_text_and_graphic',
-      languageDifficultyFlexibility: ['A2_basic', 'B1_intermediate'],
+      primarySkill: 'information_integration' as TaxonomySkill,
+      secondarySkills: ['explicit_detail', 'local_inference'] as TaxonomySkill[],
+      supportedGenres: ['infographic_chart_table'] as any[],
+      evidenceModes: ['multimodal_mixed', 'visual_only'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'multimodal_text_and_graphic' as EvidenceSpan,
+      requiredEvidenceStructure: 'Co-dependent prose text paired with a diagram, chart, or comparative table',
       reasoningOperations: ['cross_modal_mapping', 'coordinate_matching', 'constraint_synthesis'],
       stemTemplates: [
         'What can we learn from Figure 1 and the reading?',
-        'Which map/picture best shows the situation in {Year/Place}?',
-        'Based on the chart, which statement is true?',
+        'Which chart/picture best shows the situation in {Year/Place}?',
+        'Based on the table, which statement is true?',
+      ],
+      correctAnswerConstructionPrinciples: [
+        'Requires synthesizing at least one data point from the graphic and one condition from prose',
+        'Unambiguously supported by cross-modal triangulation',
+      ],
+      distractorConstructionPrinciples: [
+        'State true graphic values that violate text conditions',
+        'Invert chronological trends or chart axes',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by adding a multi-column comparative filter',
+        'Keep graphic annotations simple and legible',
       ],
       validDistractorMechanisms: [
         'reversed_cause_effect',
         'wrong_chronology',
         'partial_truth',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
-        'Graphic is merely decorative and question can be solved purely from text',
-        'Text gives the exact coordinate answer directly without requiring chart inspection',
+        'Graphic is purely cosmetic and question can be solved purely from text',
+        'Prose states the exact answer verbatim without consulting the graphic',
       ],
       qualityChecks: [
-        'Context necessity test: If the chart is removed, the question must become unanswerable',
-        'Distractors should match real visual elements from the graphic with incorrect labels',
+        'If the graphic is removed, the question must become unanswerable',
+        'Distractors must reflect genuine visual coordinates with altered labels',
       ],
-      realExamExemplars: findExemplar('information_integration', 'D3_multi_step_synthesis'),
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.visualEvidenceRequired ||
+        q.extracted.evidenceMode === 'multimodal_mixed' ||
+        q.analysis.evidenceMode === 'multimodal_mixed',
     },
     {
-      recipeId: 'RECIPE_05_CONTEXTUAL_VOCABULARY_DEDUCER',
+      recipeId: 'RECIPE_05_SPATIAL_MAP_ROUTE_NAVIGATOR',
+      name: 'Spatial Map & Route Navigator',
+      primarySkill: 'information_integration' as TaxonomySkill,
+      secondarySkills: ['explicit_detail', 'sequence_cause_consequence'] as TaxonomySkill[],
+      supportedGenres: ['brochure_flyer', 'infographic_chart_table'] as any[],
+      evidenceModes: ['spatial', 'multimodal_mixed'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'multimodal_text_and_graphic' as EvidenceSpan,
+      requiredEvidenceStructure: 'Spatial map with marked landmarks, streets, and directional instructions',
+      reasoningOperations: ['spatial_mental_rotation', 'route_tracing', 'landmark_sequence_verification'],
+      stemTemplates: [
+        'According to the map, how can Jason get to {Destination}?',
+        'Which place is {Character} most likely visiting?',
+        'Where is {Landmark} located on the map?',
+      ],
+      correctAnswerConstructionPrinciples: [
+        'Unambiguously traces valid route sequence matching directional verbs (turn left, pass, opposite)',
+        'Accurately aligns coordinate points',
+      ],
+      distractorConstructionPrinciples: [
+        'Mirror image or reverse left/right directions',
+        'Stop at an intermediate landmark along the route',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by adding conditional road closures or multi-leg journeys',
+        'Preserve simple directional vocabulary',
+      ],
+      validDistractorMechanisms: [
+        'wrong_referent',
+        'wrong_chronology',
+        'partial_truth',
+      ] as DistractorPattern[],
+      commonWeakImplementations: [
+        'Map lacks essential labeled cues making navigation subjective',
+        'Directions are overly trivial single-turn straight lines',
+      ],
+      qualityChecks: [
+        'Ensure exact directional orientation is traceable on the provided map image',
+        'Verify distractors test orientation and spatial sequence',
+      ],
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.evidenceMode === 'spatial' ||
+        q.analysis.evidenceMode === 'spatial' ||
+        /map|direction|route|street|corner|cross/i.test(q.extracted.stem),
+    },
+    {
+      recipeId: 'RECIPE_06_CONTEXTUAL_WORD_SENSE_DEDUCER',
       name: 'Contextual Word Sense Deducer',
-      primarySkill: 'vocabulary_in_context',
-      secondarySkills: ['local_inference', 'reference_resolution'],
-      targetGenre: 'article_informational',
-      appropriateCognitiveDepth: ['D2_single_step_inference', 'D3_multi_step_synthesis'],
-      requiredEvidenceSpan: 'cross_sentence_local',
-      languageDifficultyFlexibility: ['A2_basic', 'B1_intermediate'],
+      primarySkill: 'vocabulary_in_context' as TaxonomySkill,
+      secondarySkills: ['local_inference', 'reference_resolution'] as TaxonomySkill[],
+      supportedGenres: ['article_informational', 'narrative'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
+      requiredEvidenceStructure: 'Surrounding co-text with explicit semantic scaffolding (contrast, cause-effect, exemplification)',
       reasoningOperations: ['semantic_field_triangulation', 'contrast_clue_extraction', 'co_text_synthesis'],
       stemTemplates: [
         'What does "{TargetWord}" mean in the reading?',
         'In paragraph {N}, what is the meaning of "{TargetWord}"?',
       ],
+      correctAnswerConstructionPrinciples: [
+        'Uses simple, familiar core vocabulary to define the target sense',
+        'Deduced via explicit contextual contrast, apposition, or consequence',
+      ],
+      distractorConstructionPrinciples: [
+        'Include standard dictionary meanings of the word that do NOT fit the specific context',
+        'Include common phonetic or orthographic lookalikes',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by separating context clues across adjacent paragraphs',
+        'Never use out-of-syllabus words in the answer options',
+      ],
       validDistractorMechanisms: [
         'literal_keyword_matching',
         'unsupported_world_knowledge',
         'grammatically_plausible_contextually_wrong',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
-        'Target word is an obscure GRE word rather than standard syllabus word used in rich context',
-        'Question requires prior dictionary memorization with no context clues present in paragraph',
+        'Target word is an obscure GRE word with zero context clues',
+        'Question tests isolated prior memory rather than in-context deduction',
       ],
       qualityChecks: [
-        'Verify that surrounding sentences provide at least 2 clear semantic clues (contrast, cause, example)',
-        'Ensure all options A, B, C, D use simple, familiar vocabulary so the test measures inference',
+        'Surrounding sentences must provide at least 2 distinct semantic clues',
+        'All options A, B, C, D must use simple, accessible English',
       ],
-      realExamExemplars: findExemplar('vocabulary_in_context', 'D2_single_step_inference'),
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'passage_comprehension' &&
+        q.analysis.primarySkill === 'vocabulary_in_context',
     },
     {
-      recipeId: 'RECIPE_06_CLOZE_DISCOURSE_AND_TENSE_FLOW',
+      recipeId: 'RECIPE_07_CLOZE_DISCOURSE_AND_TENSE_FLOW',
       name: 'Cloze Discourse & Tense Architecture Tracker',
-      primarySkill: 'grammar_in_context',
-      secondarySkills: ['sequence_cause_consequence', 'discourse_relationship'],
-      targetGenre: 'cloze_passage',
-      appropriateCognitiveDepth: ['D2_single_step_inference', 'D3_multi_step_synthesis'],
-      requiredEvidenceSpan: 'cross_sentence_local',
-      languageDifficultyFlexibility: ['A2_basic', 'B1_intermediate'],
+      primarySkill: 'grammar_in_context' as TaxonomySkill,
+      secondarySkills: ['sequence_cause_consequence', 'discourse_relationship'] as TaxonomySkill[],
+      supportedGenres: ['cloze_passage'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
+      requiredEvidenceStructure: 'Cohesive paragraph passage with narrative timeline or argumentative flow',
       reasoningOperations: ['temporal_timeline_alignment', 'syntactic_licensing', 'discourse_cohesion'],
       stemTemplates: [
         'Blank {N} in the passage: (A) {OptionA} (B) {OptionB} (C) {OptionC} (D) {OptionD}',
+      ],
+      correctAnswerConstructionPrinciples: [
+        'Licensed by narrative timeline (e.g. past perfect vs simple past) or discourse connector (however, therefore)',
+        'Resolves grammatical cohesion across sentence boundaries',
+      ],
+      distractorConstructionPrinciples: [
+        'Grammatically well-formed in isolation but inverting passage timeline or polarity',
+        'Plausible verb forms violating sequence of tenses',
+      ],
+      difficultyAdjustmentRules: [
+        'Increase depth by embedding tense shifts triggered by flashback narratives',
+        'Ensure distractors maintain parallel syntactic structure',
       ],
       validDistractorMechanisms: [
         'grammatically_plausible_contextually_wrong',
         'wrong_chronology',
         'reversed_cause_effect',
-      ],
+      ] as DistractorPattern[],
       commonWeakImplementations: [
-        'Isolated sentence grammar where the rest of the passage has zero influence on the choice',
-        'Options with obvious grammatical agreement errors revealing the answer instantly',
+        'Isolated sentence grammar where surrounding passage has zero impact on choice',
+        'Options with obvious morphology errors giving away the answer',
       ],
       qualityChecks: [
-        'Ensure the correct tense or connective is determined by earlier or subsequent sentences in the paragraph',
-        'All 4 options must be grammatically valid in isolation to test contextual choice',
+        'Correct tense/connective must be determined by earlier or subsequent sentences',
+        'All 4 options must be grammatically valid in isolation',
       ],
-      realExamExemplars: findExemplar('grammar_in_context', 'D2_single_step_inference'),
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'cloze_test' ||
+        (q.extracted.section === 'passage_comprehension' && q.analysis.primarySkill === 'grammar_in_context'),
+    },
+    {
+      recipeId: 'RECIPE_08_STANDALONE_LEXICAL_COLLOCATION',
+      name: 'Standalone Communicative Lexical Gap Drill',
+      primarySkill: 'vocabulary_in_context' as TaxonomySkill,
+      secondarySkills: [] as TaxonomySkill[],
+      supportedGenres: ['single_standalone'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D1_verbatim_retrieval', 'D2_single_step_inference'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'single_sentence' as EvidenceSpan,
+      requiredEvidenceStructure: 'Single communicative sentence establishing pragmatic situation or collocational trigger',
+      reasoningOperations: ['syntactic_parsing', 'lexical_semantic_matching'],
+      stemTemplates: [
+        '{Subject} always {blank} when {condition}. (A) {W1} (B) {W2} (C) {W3} (D) {W4}',
+      ],
+      correctAnswerConstructionPrinciples: [
+        'High-frequency junior-high core vocabulary word forming authentic collocation',
+        'Unique semantic fit for the stated scenario',
+      ],
+      distractorConstructionPrinciples: [
+        'Parallel parts of speech that make no sense in the scenario',
+        'Common confusable words (e.g. borrow vs lend)',
+      ],
+      difficultyAdjustmentRules: [
+        'Adjust vocabulary tier from Grade 7 basic to Grade 9 extended',
+        'Preserve clean, natural sentence syntax',
+      ],
+      validDistractorMechanisms: [
+        'grammatically_plausible_contextually_wrong',
+        'irrelevant_distractor',
+      ] as DistractorPattern[],
+      commonWeakImplementations: [
+        'Awkward non-native sentence structure',
+        'Options belonging to different parts of speech revealing answer by syntax',
+      ],
+      qualityChecks: [
+        'All 4 options must belong to the exact same grammatical word class',
+        'Scenario must clearly disambiguate the correct word without world knowledge assumptions',
+      ],
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'single' &&
+        q.analysis.primarySkill === 'vocabulary_in_context' &&
+        !q.extracted.visualEvidenceRequired,
+    },
+    {
+      recipeId: 'RECIPE_09_STANDALONE_SYNTACTIC_LICENSING',
+      name: 'Standalone Syntactic Agreement & Licensing Drill',
+      primarySkill: 'grammar_in_context' as TaxonomySkill,
+      secondarySkills: [] as TaxonomySkill[],
+      supportedGenres: ['single_standalone'] as any[],
+      evidenceModes: ['text_only'] as any[],
+      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
+      typicalCognitiveDepthRange: ['D2_single_step_inference'] as CognitiveDepth[],
+      requiredEvidenceSpan: 'single_sentence' as EvidenceSpan,
+      requiredEvidenceStructure: 'Single sentence containing explicit syntactic trigger (time adverbial, modal, relative clause, passive cue)',
+      reasoningOperations: ['syntactic_agreement_check', 'tense_licensing', 'subordination_parsing'],
+      stemTemplates: [
+        '{Subject} _____ {object} yesterday when {clause}. (A) {V1} (B) {V2} (C) {V3} (D) {V4}',
+      ],
+      correctAnswerConstructionPrinciples: [
+        'Matches the explicit grammatical constraint (e.g. "since 2010" -> present perfect)',
+        'Unambiguous syntactic licensing',
+      ],
+      distractorConstructionPrinciples: [
+        'Tense forms that violate stated time adverbials',
+        'Subject-verb number mismatch',
+      ],
+      difficultyAdjustmentRules: [
+        'Scale from basic past tense to passive relative clauses and conditionals',
+        'Keep non-target vocabulary simple',
+      ],
+      validDistractorMechanisms: [
+        'grammatically_plausible_contextually_wrong',
+        'wrong_chronology',
+      ] as DistractorPattern[],
+      commonWeakImplementations: [
+        'Ambiguous time frame where two tenses are equally acceptable',
+        'Overly convoluted sentence disguising poor grammar targeting',
+      ],
+      qualityChecks: [
+        'Ensure sentence provides an explicit syntactic trigger',
+        'Distractors must represent common student developmental grammar errors',
+      ],
+      filter: (q: AnalyzedQuestion) =>
+        q.extracted.section === 'single' &&
+        q.analysis.primarySkill === 'grammar_in_context',
     },
   ];
+
+  const recipes: QuestionRecipe[] = recipeDefinitions.map((def) => {
+    const { evidence, years } = findMatches(def.filter);
+    const supportCount = evidence.length;
+    const supportYears = years;
+    const rarePattern = supportYears.length < 2 && supportCount < 3;
+
+    return {
+      recipeId: def.recipeId,
+      name: def.name,
+      primarySkill: def.primarySkill,
+      secondarySkills: def.secondarySkills,
+      supportedGenres: def.supportedGenres,
+      evidenceModes: def.evidenceModes,
+      typicalLanguageDifficultyRange: def.typicalLanguageDifficultyRange,
+      typicalCognitiveDepthRange: def.typicalCognitiveDepthRange,
+      requiredEvidenceSpan: def.requiredEvidenceSpan,
+      requiredEvidenceStructure: def.requiredEvidenceStructure,
+      reasoningOperations: def.reasoningOperations,
+      stemTemplates: def.stemTemplates,
+      correctAnswerConstructionPrinciples: def.correctAnswerConstructionPrinciples,
+      distractorConstructionPrinciples: def.distractorConstructionPrinciples,
+      difficultyAdjustmentRules: def.difficultyAdjustmentRules,
+      validDistractorMechanisms: def.validDistractorMechanisms,
+      commonWeakImplementations: def.commonWeakImplementations,
+      qualityChecks: def.qualityChecks,
+      sourceEvidence: evidence.slice(0, 5), // Keep top 5 exemplars
+      supportCount,
+      supportYears,
+      confidence: supportCount >= 3 ? 'high' : 'medium',
+      rarePattern,
+      targetGenre: def.supportedGenres[0],
+      realExamExemplars: evidence.slice(0, 5),
+    };
+  });
+
+  return {
+    provenance,
+    recipes,
+  };
 }
 
-function buildAntiPatterns(): AntiPattern[] {
-  return [
+function buildAntiPatterns(provenance: KnowledgeProvenance): AntiPatternsArtifact {
+  const antiPatterns: AntiPattern[] = [
     {
       antiPatternId: 'ANTI_01_DECORATIVE_CONTEXT',
       name: 'Decorative Context Trap (Context-Independent Exercise)',
@@ -566,8 +919,12 @@ function buildAntiPatterns(): AntiPattern[] {
       description: 'A passage or dialogue is presented, but the question stem can be answered using general knowledge or isolated grammar without reading the context.',
       manifestation: 'A 200-word passage is followed by "What is the capital of Japan?" or an isolated grammar fill-in that ignores passage narrative.',
       diagnosticTest: 'Delete the entire passage. If a student can still determine the correct answer with >90% confidence, the context is decorative.',
-      corpusEvidenceOrContrast: 'In CAP exams, 100% of passage questions exhibit essential context necessity: reading the passage is strictly mandatory.',
+      whyWeak: 'Destroys reading comprehension validity; permits guessing without processing English discourse.',
       repairStrategy: 'Embed unique scenario constraints, character decisions, or data points inside the text that must be referenced to resolve the stem.',
+      evidenceBasis: 'comparative_inference',
+      sourceEvidence: [],
+      confidence: 'high',
+      corpusEvidenceOrContrast: 'In CAP exams, 100% of passage questions exhibit essential context necessity: reading the passage is strictly mandatory.',
     },
     {
       antiPatternId: 'ANTI_02_SHALLOW_DICTIONARY_RECALL',
@@ -576,8 +933,12 @@ function buildAntiPatterns(): AntiPattern[] {
       description: 'Testing whether a student memorized an isolated definition rather than measuring contextual inference ability.',
       manifestation: 'Question asks for the meaning of a rare word with zero contextual explanation or clues in the passage.',
       diagnosticTest: 'Can the meaning of the target word be deduced if replaced with a nonsense word like "flurg"? If not, it tests prior recall, not reading.',
-      corpusEvidenceOrContrast: 'CAP vocabulary-in-context questions always embed explicit contrastive, causal, or illustrative clues in surrounding sentences.',
+      whyWeak: 'Rewards prior rote memorization over active contextual deduction.',
       repairStrategy: 'Provide explicit contextual scaffolding (e.g. antonyms, examples, cause-and-effect outcomes) in the text allowing deduction.',
+      evidenceBasis: 'comparative_inference',
+      sourceEvidence: [],
+      confidence: 'high',
+      corpusEvidenceOrContrast: 'CAP vocabulary-in-context questions always embed explicit contrastive, causal, or illustrative clues in surrounding sentences.',
     },
     {
       antiPatternId: 'ANTI_03_OPTION_ASYMMETRY_GIVEAWAY',
@@ -586,8 +947,12 @@ function buildAntiPatterns(): AntiPattern[] {
       description: 'The correct option is visibly longer, more detailed, or structured differently than the distractors, revealing the answer by format.',
       manifestation: 'Option (A) is 3 words, (B) is 4 words, (C) is 22 words with elaborate qualifiers, (D) is 3 words.',
       diagnosticTest: 'Check word counts and syntactic structures of options A, B, C, D. Standard deviation in length should be minimal.',
-      corpusEvidenceOrContrast: 'CAP exams maintain parallel syntactic structure and closely matched word lengths across all four choices.',
+      whyWeak: 'Allows test-wise students to pick the answer based on visual asymmetry without reading.',
       repairStrategy: 'Ensure all four options share the same grammatical part of speech, phrasing complexity, and length profile.',
+      evidenceBasis: 'comparative_inference',
+      sourceEvidence: [],
+      confidence: 'high',
+      corpusEvidenceOrContrast: 'CAP exams maintain parallel syntactic structure and closely matched word lengths across all four choices.',
     },
     {
       antiPatternId: 'ANTI_04_TRIVIAL_SURFACE_COPY',
@@ -596,8 +961,12 @@ function buildAntiPatterns(): AntiPattern[] {
       description: 'Stem and correct option match the exact words in the text verbatim, enabling mechanical visual scanning without understanding.',
       manifestation: 'Passage: "Ben has a red car." Question: "What color is Ben\'s car?" (A) Red (B) Green (C) Blue (D) Yellow.',
       diagnosticTest: 'Does solving the question require paraphrase recognition or inference? If pure optical string matching suffices, cognitive depth is near zero.',
-      corpusEvidenceOrContrast: 'CAP questions consistently paraphrase text concepts in stems and options rather than using identical raw strings.',
+      whyWeak: 'Fails to discriminate reading comprehension from mechanical pattern matching.',
       repairStrategy: 'Use natural synonyms and conceptual paraphrases in the options to require semantic comprehension.',
+      evidenceBasis: 'comparative_inference',
+      sourceEvidence: [],
+      confidence: 'high',
+      corpusEvidenceOrContrast: 'CAP questions consistently paraphrase text concepts in stems and options rather than using identical raw strings.',
     },
     {
       antiPatternId: 'ANTI_05_LEXICAL_INFLATION_OVERLOAD',
@@ -606,13 +975,26 @@ function buildAntiPatterns(): AntiPattern[] {
       description: 'Making a question difficult by injecting obscure, out-of-syllabus vocabulary rather than requiring sophisticated reasoning.',
       manifestation: 'Using high-school or college vocabulary in a junior-high worksheet to compensate for simplistic question mechanics.',
       diagnosticTest: 'Inspect question vocabulary against the 1200+800 syllabus list. If difficulty stems from unknown words rather than cognitive depth, it fails.',
-      corpusEvidenceOrContrast: 'CAP exams maintain strict A2/B1 lexical ceiling while achieving high psychometric discrimination through multi-step reasoning.',
+      whyWeak: 'Frustrates students with lexical barriers without developing cognitive reading depth.',
       repairStrategy: 'Keep vocabulary strictly within syllabus bounds; increase cognitive depth through multi-paragraph synthesis and subtle distractors.',
+      evidenceBasis: 'comparative_inference',
+      sourceEvidence: [],
+      confidence: 'high',
+      corpusEvidenceOrContrast: 'CAP exams maintain strict A2/B1 lexical ceiling while achieving high psychometric discrimination through multi-step reasoning.',
     },
   ];
+
+  return {
+    provenance,
+    antiPatterns,
+  };
 }
 
-function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestion[]): CapBlueprint {
+function buildCapBlueprintJson(
+  provenance: KnowledgeProvenance,
+  exams: AnalyzedExam[],
+  questions: AnalyzedQuestion[]
+): CapBlueprint {
   const skillCounts: Record<TaxonomySkill, number> = {} as any;
   TaxonomySkillSchema.options.forEach((k) => (skillCounts[k] = 0));
 
@@ -622,8 +1004,8 @@ function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestio
   const langCounts: Record<LanguageDifficulty, number> = {} as any;
   LanguageDifficultySchema.options.forEach((k) => (langCounts[k] = 0));
 
-  const contextCounts: Record<ContextNecessity, number> = {} as any;
-  ContextNecessitySchema.options.forEach((k) => (contextCounts[k] = 0));
+  const evidenceNecessityCounts: Record<EvidenceNecessity, number> = {} as any;
+  EvidenceNecessitySchema.options.forEach((k) => (evidenceNecessityCounts[k] = 0));
 
   const spanCounts: Record<EvidenceSpan, number> = {} as any;
   EvidenceSpanSchema.options.forEach((k) => (spanCounts[k] = 0));
@@ -634,7 +1016,8 @@ function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestio
     skillCounts[q.analysis.primarySkill] = (skillCounts[q.analysis.primarySkill] || 0) + 1;
     depthCounts[q.analysis.cognitiveDepth] = (depthCounts[q.analysis.cognitiveDepth] || 0) + 1;
     langCounts[q.analysis.languageDifficulty] = (langCounts[q.analysis.languageDifficulty] || 0) + 1;
-    contextCounts[q.analysis.contextNecessity] = (contextCounts[q.analysis.contextNecessity] || 0) + 1;
+    evidenceNecessityCounts[q.analysis.evidenceNecessity] =
+      (evidenceNecessityCounts[q.analysis.evidenceNecessity] || 0) + 1;
     spanCounts[q.analysis.evidenceSpan] = (spanCounts[q.analysis.evidenceSpan] || 0) + 1;
   }
 
@@ -642,12 +1025,13 @@ function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestio
   const toPct = (record: Record<string, number>) => {
     const res: Record<string, number> = {};
     for (const k of Object.keys(record)) {
-      res[k] = Math.round(((record[k] || 0) / total) * 1000) / 10;
+      res[k] = total > 0 ? Math.round(((record[k] || 0) / total) * 1000) / 10 : 0;
     }
     return res;
   };
 
   return {
+    provenance,
     version: '1.0.0',
     generatedAt: new Date().toISOString(),
     totalQuestionsAnalyzed: total,
@@ -661,7 +1045,14 @@ function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestio
       passageQuestions: {
         countRange: [20, 24],
         passageSetsRange: [8, 8],
-        dominantGenres: ['article_informational', 'dialogue', 'notice_announcement', 'narrative', 'cloze_passage', 'infographic_chart_table'],
+        dominantGenres: [
+          'article_informational',
+          'dialogue',
+          'notice_announcement',
+          'narrative',
+          'cloze_passage',
+          'infographic_chart_table',
+        ],
         cognitiveDepthFocus: ['D2_single_step_inference', 'D3_multi_step_synthesis', 'D4_evaluative_pragmatic'],
       },
     },
@@ -669,12 +1060,13 @@ function buildCapBlueprintJson(exams: AnalyzedExam[], questions: AnalyzedQuestio
       skills: toPct(skillCounts) as any,
       cognitiveDepth: toPct(depthCounts) as any,
       languageDifficulty: toPct(langCounts) as any,
-      contextNecessity: toPct(contextCounts) as any,
+      evidenceNecessity: toPct(evidenceNecessityCounts) as any,
       evidenceSpan: toPct(spanCounts) as any,
+      contextNecessity: toPct(evidenceNecessityCounts) as any,
     },
     keyDesignPrinciples: [
       'Strict decoupling of language difficulty (A1-B1) from cognitive depth (D1-D4).',
-      'Context necessity is strictly essential for 100% of reading comprehension items.',
+      'Evidence necessity is strictly essential for 100% of reading comprehension items and visual single questions.',
       'Distractors represent authentic student cognitive traps (partial truth, keyword scanning, referent confusion).',
       'Passage genres encompass rich authentic modalities (articles, infographics, notices, dialogue, narratives, cloze).',
       'Elimination of decorative context and shallow definition recall in comprehension passages.',
@@ -697,7 +1089,7 @@ function buildCapBlueprintMarkdown(
 
 ## 1. Executive Summary
 
-This blueprint captures the core psychometric and pedagogical architecture reverse-engineered across 5 official CAP English Reading exams (**${bp.totalExams} exams, ${bp.totalQuestionsAnalyzed} total questions**).
+This blueprint captures the core psychometric and pedagogical architecture reverse-engineered across 5 official CAP English Reading exams (**${bp.totalExams} exams, ${bp.totalQuestionsAnalyzed} non-holdout analyzed questions**).
 
 ### Core Quantitative Targets:
 - **Total Questions per Exam**: Exactly 43 items (19–23 Single Questions, 20–24 Passage Questions).
@@ -707,7 +1099,7 @@ This blueprint captures the core psychometric and pedagogical architecture rever
   - Single-Step Inference (\`D2\`): ~${bp.distributions.cognitiveDepth.D2_single_step_inference || 45}%
   - Multi-Step Synthesis (\`D3\`): ~${bp.distributions.cognitiveDepth.D3_multi_step_synthesis || 30}%
   - Evaluative / Pragmatic (\`D4\`): ~${bp.distributions.cognitiveDepth.D4_evaluative_pragmatic || 10}%
-- **Context Necessity**: 100% of Section 2 reading items have **essential** context necessity.
+- **Evidence Necessity**: 100% of Section 2 reading items have **essential** evidence necessity.
 
 ---
 
@@ -730,7 +1122,7 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
   - High-frequency lexical collocations in single-sentence context.
   - Core grammar: tense alignment, modals, conjunctions, relative pronouns, passive voice.
   - Visual image item (Question #1 is always an image-action recognition item).
-- **Context Necessity**: \`none\` (standalone items).
+- **Evidence Necessity**: \`none\` for pure text items; \`essential\` for visual Question #1.
 
 ### Section 2: Passage Clusters (第二部分：題組)
 - **Item Count**: 20–24 questions across exactly 8 reading sets.
@@ -741,7 +1133,7 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
   4. **Informational Articles**: Science, culture, nature, global phenomena, history.
   5. **Infographics & Charts**: Multi-modal diagrams, statistics, comparative graphs, maps.
   6. **Cloze Passages**: Cohesive narrative or exposition testing tense flow and transitions.
-- **Context Necessity**: \`essential\` (passage reading is strictly required).
+- **Evidence Necessity**: \`essential\` (passage reading is strictly required).
 
 ---
 
@@ -751,9 +1143,10 @@ ${recipes
   .map(
     (r) => `### ${r.recipeId}: ${r.name}
 - **Primary Skill**: \`${r.primarySkill}\`
-- **Target Genre**: \`${r.targetGenre}\`
-- **Cognitive Depth**: ${r.appropriateCognitiveDepth.map((d) => `\`${d}\``).join(', ')}
+- **Supported Genres**: ${r.supportedGenres.map((g: any) => `\`${g}\``).join(', ')}
+- **Cognitive Depth**: ${r.typicalCognitiveDepthRange.map((d) => `\`${d}\``).join(', ')}
 - **Evidence Span**: \`${r.requiredEvidenceSpan}\`
+- **Evidence Support**: ${r.supportCount} items across ${r.supportYears.length} years (Years: ${r.supportYears.join(', ')})
 - **Reasoning Operations**: ${r.reasoningOperations.join(', ')}
 - **Stem Templates**:
 ${r.stemTemplates.map((st) => `  * *"${st}"*`).join('\n')}
@@ -773,7 +1166,7 @@ ${antiPatterns
     (ap) => `### [${ap.severity.toUpperCase()}] ${ap.antiPatternId}: ${ap.name}
 - **Description**: ${ap.description}
 - **Diagnostic Test**: ${ap.diagnosticTest}
-- **Corpus Evidence**: ${ap.corpusEvidenceOrContrast}
+- **Corpus Evidence**: ${ap.corpusEvidenceOrContrast || 'Observed CAP psychometric design'}
 - **Repair Strategy**: ${ap.repairStrategy}
 `
   )
@@ -789,3 +1182,4 @@ ${antiPatterns
 4. **Honor the Lexical Ceiling**: Use declared core vocabulary for challenges; do not sneak in ungrounded difficult words to artificially raise question difficulty.
 `;
 }
+

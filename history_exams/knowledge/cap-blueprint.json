@@ -1,7 +1,26 @@
 {
+  "provenance": {
+    "knowledgeVersion": "1.0.0",
+    "sourceExamIds": [
+      "111",
+      "112",
+      "113",
+      "114",
+      "115"
+    ],
+    "sourceQuestionCount": 195,
+    "excludedHoldoutCount": 20,
+    "providerName": "offline-mock",
+    "modelName": "rule-based-mock",
+    "analysisPromptVersion": "v3.0.0",
+    "synthesisPromptVersion": "v1.0.0",
+    "generatedAt": "2026-08-27T16:45:28.883Z",
+    "sourceCorpusHash": "f35827dbb579a5535e6eb3462208e787ef352bca3034472706e4651d3c2fb44c",
+    "authorityStatus": "provisional"
+  },
   "version": "1.0.0",
-  "generatedAt": "2026-08-27T16:31:59.526Z",
-  "totalQuestionsAnalyzed": 215,
+  "generatedAt": "2026-08-27T16:45:28.886Z",
+  "totalQuestionsAnalyzed": 195,
   "totalExams": 5,
   "sectionComposition": {
     "singleQuestions": {
@@ -45,50 +64,56 @@
   },
   "distributions": {
     "skills": {
-      "vocabulary_in_context": 24.2,
-      "grammar_in_context": 33.5,
+      "vocabulary_in_context": 23.6,
+      "grammar_in_context": 33.8,
       "explicit_detail": 25.1,
       "reference_resolution": 0,
-      "local_inference": 12.6,
+      "local_inference": 12.8,
       "cross_sentence_inference": 0,
-      "main_idea": 0.9,
+      "main_idea": 1,
       "purpose_speaker_intent": 0,
       "discourse_relationship": 0,
       "sequence_cause_consequence": 0,
       "text_structure": 0,
-      "information_integration": 3.7,
+      "information_integration": 3.6,
       "pragmatic_meaning": 0,
       "other_uncertain": 0
     },
     "cognitiveDepth": {
-      "D1_verbatim_retrieval": 23.3,
-      "D2_single_step_inference": 59.5,
-      "D3_multi_step_synthesis": 17.2,
+      "D1_verbatim_retrieval": 22.6,
+      "D2_single_step_inference": 60,
+      "D3_multi_step_synthesis": 17.4,
       "D4_evaluative_pragmatic": 0
     },
     "languageDifficulty": {
-      "A1_elementary": 11.6,
-      "A2_basic": 46.5,
-      "B1_intermediate": 41.9
+      "A1_elementary": 10.3,
+      "A2_basic": 47.7,
+      "B1_intermediate": 42.1
     },
-    "contextNecessity": {
-      "essential": 52.6,
+    "evidenceNecessity": {
+      "essential": 53.3,
       "helpful": 0,
       "decorative": 0,
-      "none": 47.4
+      "none": 46.7
     },
     "evidenceSpan": {
       "single_word": 0,
       "single_clause": 0,
-      "single_sentence": 47.4,
-      "cross_sentence_local": 47.9,
-      "multi_paragraph_global": 0.9,
-      "multimodal_text_and_graphic": 3.7
+      "single_sentence": 46.7,
+      "cross_sentence_local": 48.7,
+      "multi_paragraph_global": 1,
+      "multimodal_text_and_graphic": 3.6
+    },
+    "contextNecessity": {
+      "essential": 53.3,
+      "helpful": 0,
+      "decorative": 0,
+      "none": 46.7
     }
   },
   "keyDesignPrinciples": [
     "Strict decoupling of language difficulty (A1-B1) from cognitive depth (D1-D4).",
-    "Context necessity is strictly essential for 100% of reading comprehension items.",
+    "Evidence necessity is strictly essential for 100% of reading comprehension items and visual single questions.",
     "Distractors represent authentic student cognitive traps (partial truth, keyword scanning, referent confusion).",
     "Passage genres encompass rich authentic modalities (articles, infographics, notices, dialogue, narratives, cloze).",
     "Elimination of decorative context and shallow definition recall in comprehension passages."

@@ -224,7 +224,8 @@
           "page": 2,
           "role": "single_image",
           "imagePath": "history_exams/assets/114/page-2.png",
-          "description": "Illustration for single question 1"
+          "description": "Illustration for single question 1",
+          "sha256": "68cd574e29061070b4b02d44fbfb15b6e00b83b940979322982a6975381e80c3"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1187,6 +1188,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:31:58.583Z",
+  "extractedAt": "2026-08-27T16:45:28.008Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

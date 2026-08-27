@@ -31,7 +31,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-4.png",
-          "description": "Fruit tea recipe ingredients and preparation chart"
+          "description": "Fruit tea recipe ingredients and preparation chart",
+          "sha256": "70d561b198b36c43083c5a5e2b32f6c93f7ed6a805dc5269da341bb7c7aa6321"
         }
       ],
       "glossary": {
@@ -61,7 +62,8 @@
           "page": 5,
           "role": "comic",
           "imagePath": "history_exams/assets/115/page-5.png",
-          "description": "4-panel comic strip dialogue and visual narrative"
+          "description": "4-panel comic strip dialogue and visual narrative",
+          "sha256": "46ed46e6eeb5849045cd57408af85ce12f923872ea427ff67b07f4816e446ae0"
         }
       ],
       "pageStart": 5,
@@ -88,7 +90,8 @@
           "page": 6,
           "role": "map",
           "imagePath": "history_exams/assets/115/page-6.png",
-          "description": "Marigolds' Home map layout, opening hours, and visitor rules"
+          "description": "Marigolds' Home map layout, opening hours, and visitor rules",
+          "sha256": "6efeb83f5261390f96a1cf7ce65b57912496a9dfddd60b70aab7252b3a9f552a"
         }
       ],
       "glossary": {
@@ -163,7 +166,8 @@
           "page": 10,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-10.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "4b5f03053ee0c2d5132af174886436c5318a55b272398866ccb09b89005892ff"
         }
       ],
       "glossary": {
@@ -193,12 +197,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "glossary": {
@@ -274,7 +280,8 @@
           "page": 2,
           "role": "single_image",
           "imagePath": "history_exams/assets/115/page-2.png",
-          "description": "Illustration for single question 1"
+          "description": "Illustration for single question 1",
+          "sha256": "ad861ba81799dae9cf8ada0553fe62faabb3398fd080f5fa71956fded0fec1c7"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -685,7 +692,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-4.png",
-          "description": "Fruit tea recipe ingredients and preparation chart"
+          "description": "Fruit tea recipe ingredients and preparation chart",
+          "sha256": "70d561b198b36c43083c5a5e2b32f6c93f7ed6a805dc5269da341bb7c7aa6321"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -718,7 +726,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-4.png",
-          "description": "Fruit tea recipe ingredients and preparation chart"
+          "description": "Fruit tea recipe ingredients and preparation chart",
+          "sha256": "70d561b198b36c43083c5a5e2b32f6c93f7ed6a805dc5269da341bb7c7aa6321"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -751,7 +760,8 @@
           "page": 5,
           "role": "comic",
           "imagePath": "history_exams/assets/115/page-5.png",
-          "description": "4-panel comic strip dialogue and visual narrative"
+          "description": "4-panel comic strip dialogue and visual narrative",
+          "sha256": "46ed46e6eeb5849045cd57408af85ce12f923872ea427ff67b07f4816e446ae0"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -784,7 +794,8 @@
           "page": 5,
           "role": "comic",
           "imagePath": "history_exams/assets/115/page-5.png",
-          "description": "4-panel comic strip dialogue and visual narrative"
+          "description": "4-panel comic strip dialogue and visual narrative",
+          "sha256": "46ed46e6eeb5849045cd57408af85ce12f923872ea427ff67b07f4816e446ae0"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -817,7 +828,8 @@
           "page": 6,
           "role": "map",
           "imagePath": "history_exams/assets/115/page-6.png",
-          "description": "Marigolds' Home map layout, opening hours, and visitor rules"
+          "description": "Marigolds' Home map layout, opening hours, and visitor rules",
+          "sha256": "6efeb83f5261390f96a1cf7ce65b57912496a9dfddd60b70aab7252b3a9f552a"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -850,7 +862,8 @@
           "page": 6,
           "role": "map",
           "imagePath": "history_exams/assets/115/page-6.png",
-          "description": "Marigolds' Home map layout, opening hours, and visitor rules"
+          "description": "Marigolds' Home map layout, opening hours, and visitor rules",
+          "sha256": "6efeb83f5261390f96a1cf7ce65b57912496a9dfddd60b70aab7252b3a9f552a"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -883,7 +896,8 @@
           "page": 6,
           "role": "map",
           "imagePath": "history_exams/assets/115/page-6.png",
-          "description": "Marigolds' Home map layout, opening hours, and visitor rules"
+          "description": "Marigolds' Home map layout, opening hours, and visitor rules",
+          "sha256": "6efeb83f5261390f96a1cf7ce65b57912496a9dfddd60b70aab7252b3a9f552a"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -988,7 +1002,8 @@
           "page": 9,
           "role": "diagram",
           "imagePath": "history_exams/assets/115/page-9.png",
-          "description": "Visual evidence for question 30 on page 9"
+          "description": "Visual evidence for question 30 on page 9",
+          "sha256": "8b59b6b4e105aa2339165f9bd300636653ae8328fb0156ca4491e48765a99fec"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1045,7 +1060,8 @@
           "page": 10,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-10.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "4b5f03053ee0c2d5132af174886436c5318a55b272398866ccb09b89005892ff"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1078,7 +1094,8 @@
           "page": 10,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-10.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "4b5f03053ee0c2d5132af174886436c5318a55b272398866ccb09b89005892ff"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1111,7 +1128,8 @@
           "page": 10,
           "role": "infographic",
           "imagePath": "history_exams/assets/115/page-10.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "4b5f03053ee0c2d5132af174886436c5318a55b272398866ccb09b89005892ff"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1143,12 +1161,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "extractionConfidence": "high",
@@ -1178,12 +1198,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "extractionConfidence": "high",
@@ -1213,12 +1235,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "extractionConfidence": "high",
@@ -1248,12 +1272,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "extractionConfidence": "high",
@@ -1283,12 +1309,14 @@
         {
           "page": 12,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-12.png"
+          "imagePath": "history_exams/assets/115/page-12.png",
+          "sha256": "96956ca3e7cca66f9a9f483220491b59582e737750b9caa1bbc5b0f8ea426445"
         },
         {
           "page": 13,
           "role": "full_page",
-          "imagePath": "history_exams/assets/115/page-13.png"
+          "imagePath": "history_exams/assets/115/page-13.png",
+          "sha256": "a53a58b50b35d17afdb7c5254625a192e13ee2cf302f0799c4149307e7a52693"
         }
       ],
       "extractionConfidence": "high",
@@ -1391,6 +1419,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:31:59.457Z",
+  "extractedAt": "2026-08-27T16:45:28.755Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

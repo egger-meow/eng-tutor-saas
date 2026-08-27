@@ -1,14 +1,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import {
   AnalyzedExam,
   AnalyzedQuestion,
   CognitiveDepth,
   CognitiveDepthSchema,
-  ContextNecessity,
-  ContextNecessitySchema,
   DistractorPattern,
   DistractorPatternSchema,
+  EvidenceNecessity,
+  EvidenceNecessitySchema,
   EvidenceSpan,
   EvidenceSpanSchema,
   LanguageDifficulty,
@@ -20,6 +21,8 @@ import {
   BenchmarkHoldoutItem,
   CapBenchmark,
   CapBenchmarkSchema,
+  HoldoutManifest,
+  HoldoutManifestSchema,
 } from '../schemas/benchmark.ts';
 
 export interface BenchmarkOptions {
@@ -44,7 +47,7 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
 
   const analyzedFiles = fs
     .readdirSync(analyzedDir)
-    .filter((f) => f.endsWith('.json'))
+    .filter((f) => f.endsWith('.json') && f !== 'run-manifest.json')
     .sort();
 
   const allExams: AnalyzedExam[] = [];
@@ -74,6 +77,21 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     );
   }
 
+  // Load holdout manifest
+  const manifestPath = path.join(benchmarkDir, 'holdout-manifest.json');
+  let holdoutItemsManifest: HoldoutManifest['holdoutQuestions'] = [];
+  if (fs.existsSync(manifestPath)) {
+    const rawManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    const parsedManifest = HoldoutManifestSchema.safeParse(rawManifest);
+    if (parsedManifest.success) {
+      holdoutItemsManifest = parsedManifest.data.holdoutQuestions;
+    }
+  }
+
+  const holdoutKeys = new Set(
+    holdoutItemsManifest.map((h) => `${h.examId}-Q${h.questionNumber}`)
+  );
+
   const total = allQuestions.length;
 
   const skillCounts: Record<TaxonomySkill, number> = {} as any;
@@ -85,8 +103,8 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
   const langCounts: Record<LanguageDifficulty, number> = {} as any;
   LanguageDifficultySchema.options.forEach((k) => (langCounts[k] = 0));
 
-  const contextCounts: Record<ContextNecessity, number> = {} as any;
-  ContextNecessitySchema.options.forEach((k) => (contextCounts[k] = 0));
+  const evidenceNecessityCounts: Record<EvidenceNecessity, number> = {} as any;
+  EvidenceNecessitySchema.options.forEach((k) => (evidenceNecessityCounts[k] = 0));
 
   const spanCounts: Record<EvidenceSpan, number> = {} as any;
   EvidenceSpanSchema.options.forEach((k) => (spanCounts[k] = 0));
@@ -106,13 +124,13 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     skillCounts[q.analysis.primarySkill] = (skillCounts[q.analysis.primarySkill] || 0) + 1;
     depthCounts[q.analysis.cognitiveDepth] = (depthCounts[q.analysis.cognitiveDepth] || 0) + 1;
     langCounts[q.analysis.languageDifficulty] = (langCounts[q.analysis.languageDifficulty] || 0) + 1;
-    contextCounts[q.analysis.contextNecessity] = (contextCounts[q.analysis.contextNecessity] || 0) + 1;
+    evidenceNecessityCounts[q.analysis.evidenceNecessity] =
+      (evidenceNecessityCounts[q.analysis.evidenceNecessity] || 0) + 1;
     spanCounts[q.analysis.evidenceSpan] = (spanCounts[q.analysis.evidenceSpan] || 0) + 1;
 
-    const correctAnswer = q.extracted.answer;
-    for (const d of q.analysis.distractorStrategies) {
-      if (correctAnswer && d.option === correctAnswer) continue;
-      distractorCounts[d.strategy] = (distractorCounts[d.strategy] || 0) + 1;
+    for (const opt of q.analysis.optionAnalyses) {
+      if (opt.isCorrect || !opt.distractorStrategy) continue;
+      distractorCounts[opt.distractorStrategy] = (distractorCounts[opt.distractorStrategy] || 0) + 1;
       totalDistractors++;
     }
 
@@ -126,7 +144,7 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     } else {
       passageCount++;
       if (q.analysis.shallowRecall.isShallowRecall) shallowPassage++;
-      if (q.analysis.contextNecessity === 'essential') essentialPassage++;
+      if (q.analysis.evidenceNecessity === 'essential') essentialPassage++;
     }
   }
 
@@ -138,49 +156,71 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     return res;
   };
 
-  // Build isolated holdout set: 4 items per exam representing varied types
+  // Build isolated holdout set
   const holdoutReferenceSet: BenchmarkHoldoutItem[] = [];
 
-  for (const exam of allExams) {
-    // Pick Q1 (visual image single), Q10 (mid-single grammar/vocab), Q25 (early passage), Q35 (deep passage)
-    const candidates = [1, 10, 25, 35];
-    for (const qNum of candidates) {
-      const match = exam.questions.find((q) => q.questionNumber === qNum);
-      if (match) {
-        holdoutReferenceSet.push({
-          examId: match.examId,
-          questionNumber: match.questionNumber,
-          section: match.extracted.section,
-          primarySkill: match.analysis.primarySkill,
-          cognitiveDepth: match.analysis.cognitiveDepth,
-          languageDifficulty: match.analysis.languageDifficulty,
-          contextNecessity: match.analysis.contextNecessity,
-          evidenceSpan: match.analysis.evidenceSpan,
-          benchmarkEvaluationFocus: `Evaluate generated materials on ${match.analysis.primarySkill} at ${match.analysis.cognitiveDepth} depth with ${match.analysis.contextNecessity} context.`,
-        });
-      }
+  for (const holdoutQ of holdoutItemsManifest) {
+    const match = allQuestions.find(
+      (q) => q.examId === holdoutQ.examId && q.questionNumber === holdoutQ.questionNumber
+    );
+    if (match) {
+      holdoutReferenceSet.push({
+        examId: match.examId,
+        questionNumber: match.questionNumber,
+        section: match.extracted.section,
+        evidenceMode: match.extracted.evidenceMode,
+        primarySkill: match.analysis.primarySkill,
+        cognitiveDepth: match.analysis.cognitiveDepth,
+        languageDifficulty: match.analysis.languageDifficulty,
+        evidenceNecessity: match.analysis.evidenceNecessity,
+        evidenceSpan: match.analysis.evidenceSpan,
+        contextNecessity: match.analysis.evidenceNecessity,
+        benchmarkEvaluationFocus: `Evaluate generated materials on ${match.analysis.primarySkill} at ${match.analysis.cognitiveDepth} depth with ${match.analysis.evidenceNecessity} evidence necessity.`,
+      });
     }
   }
 
+  const nonHoldoutCount = total - holdoutReferenceSet.length;
+  const isAuthoritative = mockQuestions.length === 0;
+  const corpusHash = createHash('sha256')
+    .update(allQuestions.map((q) => q.contentHash).sort().join(':'))
+    .digest('hex');
+
   const benchmarkObj: CapBenchmark = {
+    provenance: {
+      knowledgeVersion: '1.0.0',
+      sourceExamIds: allExams.map((e) => e.examId),
+      sourceQuestionCount: total,
+      excludedHoldoutCount: holdoutReferenceSet.length,
+      providerName: allQuestions[0]?.providerName || 'unknown',
+      modelName: allQuestions[0]?.modelName || 'unknown',
+      analysisPromptVersion: allQuestions[0]?.promptVersion || 'v3.0.0',
+      synthesisPromptVersion: 'v1.0.0',
+      generatedAt: new Date().toISOString(),
+      sourceCorpusHash: corpusHash,
+      authorityStatus: isAuthoritative ? 'authoritative' : 'provisional',
+    },
     benchmarkVersion: '1.0.0',
     generatedAt: new Date().toISOString(),
     referenceCorpus: {
       examIds: allExams.map((e) => e.examId),
       totalQuestions: total,
+      nonHoldoutQuestions: nonHoldoutCount,
     },
     distributions: {
       skillDistribution: toPct(skillCounts, total) as any,
       cognitiveDepthDistribution: toPct(depthCounts, total) as any,
       languageDifficultyDistribution: toPct(langCounts, total) as any,
-      contextNecessityDistribution: toPct(contextCounts, total) as any,
+      evidenceNecessityDistribution: toPct(evidenceNecessityCounts, total) as any,
       evidenceSpanDistribution: toPct(spanCounts, total) as any,
       distractorPatternDistribution: toPct(distractorCounts, totalDistractors) as any,
+      contextNecessityDistribution: toPct(evidenceNecessityCounts, total) as any,
     },
     rates: {
       shallowRecallRateOverall: total > 0 ? Math.round((shallowOverall / total) * 1000) / 10 : 0,
       shallowRecallRateSingleSection: singleCount > 0 ? Math.round((shallowSingle / singleCount) * 1000) / 10 : 0,
       shallowRecallRatePassageSection: passageCount > 0 ? Math.round((shallowPassage / passageCount) * 1000) / 10 : 0,
+      essentialEvidenceRatePassageSection: passageCount > 0 ? Math.round((essentialPassage / passageCount) * 1000) / 10 : 0,
       essentialContextRatePassageSection: passageCount > 0 ? Math.round((essentialPassage / passageCount) * 1000) / 10 : 0,
     },
     holdoutReferenceSet,
@@ -198,3 +238,4 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     benchmark: benchmarkObj,
   };
 }
+

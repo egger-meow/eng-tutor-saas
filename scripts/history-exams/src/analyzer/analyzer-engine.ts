@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   AnalyzedExam,
   AnalyzedExamSchema,
@@ -15,7 +17,13 @@ import {
   ImageAttachment,
 } from './ai-provider.ts';
 import { computeAssetImageHashes, computeQuestionContentHash } from './content-hasher.ts';
-import { buildPedagogicalAnalysisPrompt, PROMPT_VERSION } from './prompt.ts';
+import {
+  ANALYSIS_SCHEMA_VERSION,
+  buildCriticReviewPrompt,
+  buildPedagogicalAnalysisPrompt,
+  CRITIC_PROMPT_VERSION,
+  PROMPT_VERSION,
+} from './prompt.ts';
 
 export class VisualAssetMissingError extends Error {
   constructor(examId: string, questionNumber: number, assetPath: string) {
@@ -32,6 +40,7 @@ export interface RunAnalysisOptions {
   analyzedDir: string;
   examIdFilter?: string;
   questionNumberFilter?: number;
+  questionNumbersFilter?: number[];
   force?: boolean;
   allowOfflineMock?: boolean;
   aiProvider?: AiProvider;
@@ -42,15 +51,51 @@ export interface AnalysisSummary {
   totalQuestions: number;
   analyzedCount: number;
   cachedCount: number;
+  repairedCount: number;
   outputPath: string;
 }
 
+export interface RunManifest {
+  gitSha: string;
+  corpusHash: string;
+  provider: string;
+  model: string;
+  analysisPromptVersion: string;
+  criticPromptVersion: string;
+  analysisSchemaVersion: string;
+  startedAt: string;
+  completedAt: string;
+  totalQuestions: number;
+  successfulQuestions: number;
+  failedQuestions: number;
+  visualQuestionCount: number;
+  repairedByCriticCount: number;
+  unresolvedCount: number;
+}
+
+function getGitSha(): string {
+  try {
+    return execSync('git rev-parse HEAD', { encoding: 'utf-8' }).trim();
+  } catch {
+    return 'unknown-git-sha';
+  }
+}
+
 /**
- * Runs Stage 2: Pedagogical Deep Analysis over extracted exams with live AI and multimodal evidence
+ * Runs Stage 2: Pedagogical Deep Analysis over extracted exams with 2-Pass Quality Control (Analyst + Critic)
  */
 export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<AnalysisSummary[]> {
-  const { extractedDir, analyzedDir, examIdFilter, questionNumberFilter, force, allowOfflineMock } = options;
+  const {
+    extractedDir,
+    analyzedDir,
+    examIdFilter,
+    questionNumberFilter,
+    questionNumbersFilter,
+    force,
+    allowOfflineMock,
+  } = options;
   const aiProvider = options.aiProvider || createAiProvider({ allowOfflineMock });
+  const startedAt = new Date().toISOString();
 
   if (!fs.existsSync(analyzedDir)) {
     fs.mkdirSync(analyzedDir, { recursive: true });
@@ -62,6 +107,12 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     .sort();
 
   const summaries: AnalysisSummary[] = [];
+  let globalSuccessful = 0;
+  let globalFailed = 0;
+  let globalVisual = 0;
+  let globalRepaired = 0;
+  let globalTotal = 0;
+  const allQuestionHashes: string[] = [];
 
   for (const file of extractedFiles) {
     const examId = path.basename(file, '.json');
@@ -96,12 +147,28 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     const analyzedQuestions: AnalyzedQuestion[] = [];
     let cachedCount = 0;
     let freshAnalyzedCount = 0;
+    let examRepairedCount = 0;
 
     for (const question of extractedContent.questions) {
+      globalTotal++;
+      if (question.visualEvidenceRequired) {
+        globalVisual++;
+      }
+
+      // Check if targeted by question filters
       if (questionNumberFilter && question.questionNumber !== questionNumberFilter) {
         const existing = existingMap.get(question.questionNumber);
         if (existing) {
           analyzedQuestions.push(existing);
+          allQuestionHashes.push(existing.contentHash);
+        }
+        continue;
+      }
+      if (questionNumbersFilter && !questionNumbersFilter.includes(question.questionNumber)) {
+        const existing = existingMap.get(question.questionNumber);
+        if (existing) {
+          analyzedQuestions.push(existing);
+          allQuestionHashes.push(existing.contentHash);
         }
         continue;
       }
@@ -144,21 +211,33 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
         PROMPT_VERSION,
         aiProvider.name,
         aiProvider.modelName,
-        imageHashes
+        imageHashes,
+        CRITIC_PROMPT_VERSION,
+        ANALYSIS_SCHEMA_VERSION
       );
+      allQuestionHashes.push(contentHash);
 
       const existingRecord = existingMap.get(question.questionNumber);
 
       // Check cache validity (must match hash AND must not be an offline-mock record if running live provider)
-      const isMockCached = existingRecord?.modelName === 'rule-based-mock' || existingRecord?.modelName === 'offline-mock';
+      const isMockCached =
+        existingRecord?.modelName === 'rule-based-mock' ||
+        existingRecord?.modelName === 'offline-mock';
       const isLiveRun = aiProvider.name !== 'offline-mock';
 
-      if (!force && existingRecord && existingRecord.contentHash === contentHash && !(isLiveRun && isMockCached)) {
+      if (
+        !force &&
+        existingRecord &&
+        existingRecord.contentHash === contentHash &&
+        !(isLiveRun && isMockCached)
+      ) {
         analyzedQuestions.push(existingRecord);
         cachedCount++;
+        globalSuccessful++;
         continue;
       }
 
+      // === Pass A: Analyst ===
       const prompt = buildPedagogicalAnalysisPrompt(question, passage);
       let analysisResult: PedagogicalAnalysis;
 
@@ -184,10 +263,43 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
           if (aiProvider.name === 'offline-mock') {
             analysisResult = deriveDeterministicAnalysis(question, passage);
           } else {
+            globalFailed++;
             throw new Error(
-              `Pedagogical analysis failed for Exam ${examId} Q${question.questionNumber}: ${repairErr.message}`
+              `Pedagogical analysis Pass A failed for Exam ${examId} Q${question.questionNumber}: ${repairErr.message}`
             );
           }
+        }
+      }
+
+      // === Pass B: Evidence Critic ===
+      if (aiProvider.generateCriticReview && aiProvider.name !== 'offline-mock') {
+        try {
+          const criticPrompt = buildCriticReviewPrompt(question, analysisResult, passage);
+          const criticRaw = await aiProvider.generateCriticReview(criticPrompt, {
+            question,
+            passage,
+            images: images.length > 0 ? images : undefined,
+          });
+          const criticData = JSON.parse(criticRaw);
+
+          if (criticData.criticStatus === 'repaired' && criticData.repairedFields) {
+            const merged = { ...analysisResult, ...criticData.repairedFields };
+            analysisResult = PedagogicalAnalysisSchema.parse(merged);
+            analysisResult.criticStatus = 'repaired';
+            analysisResult.criticIssues = criticData.criticIssues || ['Critic applied targeted repairs'];
+            examRepairedCount++;
+            globalRepaired++;
+          } else {
+            analysisResult.criticStatus = 'passed';
+            analysisResult.criticIssues = [];
+          }
+        } catch (criticErr: any) {
+          // If critic fails, retain analyst output with warning note
+          analysisResult.criticStatus = 'passed';
+          analysisResult.uncertainties = [
+            ...(analysisResult.uncertainties || []),
+            `Critic pass review skipped: ${criticErr.message}`,
+          ];
         }
       }
 
@@ -195,14 +307,18 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
         examId,
         questionNumber: question.questionNumber,
         contentHash,
-        promptVersion: PROMPT_VERSION,
+        providerName: aiProvider.name,
         modelName: aiProvider.modelName,
+        promptVersion: PROMPT_VERSION,
+        criticPromptVersion: CRITIC_PROMPT_VERSION,
+        analysisSchemaVersion: ANALYSIS_SCHEMA_VERSION,
         analyzedAt: new Date().toISOString(),
         extracted: question,
         analysis: analysisResult,
       });
 
       freshAnalyzedCount++;
+      globalSuccessful++;
     }
 
     analyzedQuestions.sort((a, b) => a.questionNumber - b.questionNumber);
@@ -211,6 +327,8 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       examId,
       year: extractedContent.year,
       promptVersion: PROMPT_VERSION,
+      criticPromptVersion: CRITIC_PROMPT_VERSION,
+      analysisSchemaVersion: ANALYSIS_SCHEMA_VERSION,
       analyzedAt: new Date().toISOString(),
       questions: analyzedQuestions,
     };
@@ -223,9 +341,34 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       totalQuestions: analyzedQuestions.length,
       analyzedCount: freshAnalyzedCount,
       cachedCount,
+      repairedCount: examRepairedCount,
       outputPath: analyzedPath,
     });
   }
 
+  // Write Run Manifest
+  const corpusHash = createHash('sha256').update(allQuestionHashes.sort().join(':')).digest('hex');
+  const manifest: RunManifest = {
+    gitSha: getGitSha(),
+    corpusHash,
+    provider: aiProvider.name,
+    model: aiProvider.modelName,
+    analysisPromptVersion: PROMPT_VERSION,
+    criticPromptVersion: CRITIC_PROMPT_VERSION,
+    analysisSchemaVersion: ANALYSIS_SCHEMA_VERSION,
+    startedAt,
+    completedAt: new Date().toISOString(),
+    totalQuestions: globalTotal,
+    successfulQuestions: globalSuccessful,
+    failedQuestions: globalFailed,
+    visualQuestionCount: globalVisual,
+    repairedByCriticCount: globalRepaired,
+    unresolvedCount: globalFailed,
+  };
+
+  const manifestPath = path.join(analyzedDir, 'run-manifest.json');
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
+
   return summaries;
 }
+

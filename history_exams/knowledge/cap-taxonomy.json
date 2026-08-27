@@ -1,29 +1,48 @@
 {
+  "provenance": {
+    "knowledgeVersion": "1.0.0",
+    "sourceExamIds": [
+      "111",
+      "112",
+      "113",
+      "114",
+      "115"
+    ],
+    "sourceQuestionCount": 195,
+    "excludedHoldoutCount": 20,
+    "providerName": "offline-mock",
+    "modelName": "rule-based-mock",
+    "analysisPromptVersion": "v3.0.0",
+    "synthesisPromptVersion": "v1.0.0",
+    "generatedAt": "2026-08-27T16:45:28.883Z",
+    "sourceCorpusHash": "f35827dbb579a5535e6eb3462208e787ef352bca3034472706e4651d3c2fb44c",
+    "authorityStatus": "provisional"
+  },
   "version": "1.0.0",
-  "totalQuestions": 215,
+  "totalQuestions": 195,
   "primarySkillFrequencies": {
-    "vocabulary_in_context": 52,
-    "grammar_in_context": 72,
-    "explicit_detail": 54,
-    "local_inference": 27,
-    "information_integration": 8,
+    "grammar_in_context": 66,
+    "vocabulary_in_context": 46,
+    "explicit_detail": 49,
+    "local_inference": 25,
+    "information_integration": 7,
     "main_idea": 2
   },
   "skillCoOccurrences": {
+    "grammar_in_context": {
+      "discourse_relationship": 19
+    },
     "vocabulary_in_context": {
       "discourse_relationship": 2
     },
-    "grammar_in_context": {
-      "discourse_relationship": 20
-    },
     "explicit_detail": {
-      "discourse_relationship": 54
+      "discourse_relationship": 49
     },
     "local_inference": {
-      "discourse_relationship": 27
+      "discourse_relationship": 25
     },
     "information_integration": {
-      "discourse_relationship": 8
+      "discourse_relationship": 7
     },
     "main_idea": {
       "discourse_relationship": 2

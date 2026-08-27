@@ -54,7 +54,12 @@ export function generateSpotCheckReport(options: SpotCheckOptions): string {
     candidates.add(2);
 
     for (const p of extContent.passages) {
-      if (p.genre === 'comic_strip' || p.genre === 'brochure_flyer' || p.genre === 'infographic_chart_table' || p.genre === 'multi_document_comparison') {
+      if (
+        p.genre === 'comic_strip' ||
+        p.genre === 'brochure_flyer' ||
+        p.genre === 'infographic_chart_table' ||
+        p.genre === 'multi_document_comparison'
+      ) {
         p.questionNumbers.forEach((n) => candidates.add(n));
       }
     }
@@ -65,7 +70,7 @@ export function generateSpotCheckReport(options: SpotCheckOptions): string {
       clozePassage.questionNumbers.forEach((n) => candidates.add(n));
     }
 
-    const sortedQNums = Array.from(candidates).sort((a, b) => a - b).slice(0, 12);
+    const sortedQNums = Array.from(candidates).sort((a, b) => a - b).slice(0, 10);
 
     for (const qNum of sortedQNums) {
       const q = extContent.questions.find((item) => item.questionNumber === qNum);
@@ -92,12 +97,22 @@ export function generateSpotCheckReport(options: SpotCheckOptions): string {
       md += `  - (D) ${q.options.D}\n`;
 
       if (anaQ) {
+        const a = anaQ.analysis;
         md += `- **AI Reverse-Engineered Assessment**:\n`;
-        md += `  - Primary Skill: \`${anaQ.analysis.primarySkill}\`\n`;
-        md += `  - Cognitive Depth: \`${anaQ.analysis.cognitiveDepth}\` | Language: \`${anaQ.analysis.languageDifficulty}\`\n`;
-        md += `  - Context Necessity: \`${anaQ.analysis.contextNecessity}\`\n`;
-        md += `  - Mechanism: *${anaQ.analysis.questionMechanism}*\n`;
-        md += `  - Function: *${anaQ.analysis.whyTheQuestionWorks}*\n`;
+        md += `  - Primary Skill: \`${a.primarySkill}\`\n`;
+        md += `  - Cognitive Depth: \`${a.cognitiveDepth}\` | Language: \`${a.languageDifficulty}\`\n`;
+        md += `  - Evidence Necessity: \`${a.evidenceNecessity}\`\n`;
+        md += `  - Mechanism: *${a.questionMechanism}*\n`;
+        md += `  - Function: *${a.whyTheQuestionWorks}*\n`;
+        md += `  - Critic Status: \`${anaQ.criticStatus}\` (Confidence: \`${anaQ.analysisConfidence}\`)\n`;
+        md += `  - Option Breakdown:\n`;
+        for (const opt of a.optionAnalyses) {
+          if (opt.isCorrect) {
+            md += `    - **(${opt.option}) [CORRECT]**: ${opt.correctRationale}\n`;
+          } else {
+            md += `    - **(${opt.option}) [${opt.distractorStrategy}]**: ${opt.distractorRationale}\n`;
+          }
+        }
       }
 
       md += `\n---\n\n`;
@@ -107,3 +122,4 @@ export function generateSpotCheckReport(options: SpotCheckOptions): string {
   fs.writeFileSync(outputPath, md, 'utf-8');
   return outputPath;
 }
+

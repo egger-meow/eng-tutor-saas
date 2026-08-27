@@ -1,14 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { AnalyzedExam, AnalyzedExamSchema } from '../schemas/analyzed.ts';
-import { CapBenchmarkSchema } from '../schemas/benchmark.ts';
-import { ExtractedExam, ExtractedExamSchema } from '../schemas/extracted.ts';
+import {
+  CapBenchmarkSchema,
+  HoldoutManifest,
+  HoldoutManifestSchema,
+} from '../schemas/benchmark.ts';
+import { ExtractedExam } from '../schemas/extracted.ts';
 import {
   AntiPatternSchema,
-  CapBlueprint,
   CapBlueprintSchema,
   DepthLevelDefinitionSchema,
-  DistractorPatternStat,
   DistractorPatternStatSchema,
   QuestionRecipeSchema,
 } from '../schemas/knowledge.ts';
@@ -52,13 +54,21 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
         }
         warnings.push(...examVal.warnings.map((w) => `[Extracted ${f}] ${w}`));
 
-        // Validate official answer coverage
+        // Validate official answer coverage & asset hashes
         for (const q of (content as ExtractedExam).questions) {
           if (!q.answer) {
             errors.push(`[Extracted ${f}] Question ${q.questionNumber} is missing official answer key`);
           }
-          if (q.visualEvidenceRequired && q.requiredAssets.length === 0) {
-            errors.push(`[Extracted ${f}] Question ${q.questionNumber} requires visual evidence but has no requiredAssets`);
+          if (q.visualEvidenceRequired) {
+            if (q.requiredAssets.length === 0) {
+              errors.push(`[Extracted ${f}] Question ${q.questionNumber} requires visual evidence but has no requiredAssets`);
+            } else {
+              for (const asset of q.requiredAssets) {
+                if (!asset.sha256 || asset.sha256.length !== 64) {
+                  errors.push(`[Extracted ${f}] Question ${q.questionNumber} asset ${asset.imagePath} missing valid SHA-256 hash`);
+                }
+              }
+            }
           }
         }
       } catch (err: any) {
@@ -73,7 +83,9 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
   let analyzedCount = 0;
   const allAnalyzedExams: AnalyzedExam[] = [];
   if (fs.existsSync(analyzedDir)) {
-    const files = fs.readdirSync(analyzedDir).filter((f) => f.endsWith('.json'));
+    const files = fs
+      .readdirSync(analyzedDir)
+      .filter((f) => f.endsWith('.json') && f !== 'run-manifest.json');
     analyzedCount = files.length;
     for (const f of files) {
       try {
@@ -85,6 +97,27 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
           if (parsed.data.questions.length !== 43) {
             errors.push(`[Analyzed ${f}] Expected 43 analyzed questions, found ${parsed.data.questions.length}`);
           }
+          for (const q of parsed.data.questions) {
+            // Check exactly 4 option analyses
+            if (q.analysis.optionAnalyses.length !== 4) {
+              errors.push(
+                `[Analyzed ${f}] Question ${q.questionNumber} must have exactly 4 optionAnalyses, found ${q.analysis.optionAnalyses.length}`
+              );
+            }
+            // Check visual question 1 has essential evidence necessity
+            if (q.extracted.visualEvidenceRequired && q.analysis.evidenceNecessity !== 'essential') {
+              errors.push(
+                `[Analyzed ${f}] Question ${q.questionNumber} has visual evidence required but evidenceNecessity is '${q.analysis.evidenceNecessity}' instead of 'essential'`
+              );
+            }
+            // Check correct answer rationale
+            const correctOpt = q.analysis.optionAnalyses.find((o) => o.isCorrect);
+            if (!correctOpt || correctOpt.option !== q.extracted.answer) {
+              errors.push(
+                `[Analyzed ${f}] Question ${q.questionNumber} correct option (${correctOpt?.option}) does not match extracted answer (${q.extracted.answer})`
+              );
+            }
+          }
           allAnalyzedExams.push(parsed.data);
         }
       } catch (err: any) {
@@ -94,6 +127,31 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
   } else {
     errors.push(`Analyzed directory does not exist: ${analyzedDir}`);
   }
+
+  // Load holdout manifest for holdout leakage checks
+  const holdoutKeys = new Set<string>();
+  const holdoutManifestPath = path.join(benchmarkDir, 'holdout-manifest.json');
+  if (fs.existsSync(holdoutManifestPath)) {
+    try {
+      const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
+      const parsedHoldout = HoldoutManifestSchema.safeParse(rawHoldout);
+      if (parsedHoldout.success) {
+        parsedHoldout.data.holdoutQuestions.forEach((h) => {
+          holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
+        });
+      } else {
+        errors.push(`[Benchmark holdout-manifest.json] Invalid schema: ${parsedHoldout.error.message}`);
+      }
+    } catch (err: any) {
+      errors.push(`[Benchmark holdout-manifest.json] Parse error: ${err.message}`);
+    }
+  }
+
+  // Filter non-holdout questions
+  const allAnalyzedQuestions = allAnalyzedExams.flatMap((e) => e.questions);
+  const nonHoldoutQuestions = allAnalyzedQuestions.filter(
+    (q) => !holdoutKeys.has(`${q.examId}-Q${q.questionNumber}`)
+  );
 
   // 3. Validate Knowledge Artifacts
   let knowledgeCount = 0;
@@ -124,30 +182,49 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
             const res = z.array(QuestionRecipeSchema).safeParse(raw);
             if (!res.success) {
               errors.push(...res.error.issues.map((i) => `[Knowledge ${kf}] ${i.path.join('.')}: ${i.message}`));
+            } else {
+              // Check HOLDOUT LEAKAGE in recipes
+              for (const recipe of res.data) {
+                for (const ev of recipe.sourceEvidence) {
+                  const key = `${ev.examId}-Q${ev.questionNumber}`;
+                  if (holdoutKeys.has(key)) {
+                    errors.push(
+                      `[Knowledge ${kf}] Holdout leakage detected: Recipe ${recipe.recipeId} contains holdout question ${key}`
+                    );
+                  }
+                }
+              }
             }
           } else if (kf === 'distractor-patterns.json') {
             const res = z.array(DistractorPatternStatSchema).safeParse(raw);
             if (!res.success) {
               errors.push(...res.error.issues.map((i) => `[Knowledge ${kf}] ${i.path.join('.')}: ${i.message}`));
-            } else if (allAnalyzedExams.length > 0) {
-              // Provenance check: verify observed counts match ground truth sum
+            } else if (nonHoldoutQuestions.length > 0) {
+              // Provenance check: verify observed counts match ground truth non-holdout sum
               const groundTruthDistractorCounts: Record<string, number> = {};
-              for (const exam of allAnalyzedExams) {
-                for (const q of exam.questions) {
-                  const correctAns = q.extracted.answer;
-                  for (const d of q.analysis.distractorStrategies) {
-                    if (correctAns && d.option === correctAns) continue;
-                    groundTruthDistractorCounts[d.strategy] = (groundTruthDistractorCounts[d.strategy] || 0) + 1;
-                  }
+              let totalGroundTruthDistractors = 0;
+              for (const q of nonHoldoutQuestions) {
+                for (const opt of q.analysis.optionAnalyses) {
+                  if (opt.isCorrect || !opt.distractorStrategy) continue;
+                  groundTruthDistractorCounts[opt.distractorStrategy] =
+                    (groundTruthDistractorCounts[opt.distractorStrategy] || 0) + 1;
+                  totalGroundTruthDistractors++;
                 }
               }
+              let sumObserved = 0;
               for (const item of res.data) {
                 const expected = groundTruthDistractorCounts[item.pattern] || 0;
+                sumObserved += item.observedCount;
                 if (item.observedCount !== expected) {
                   errors.push(
-                    `[Knowledge ${kf}] Provenance mismatch for ${item.pattern}: blueprint has ${item.observedCount}, ground truth sum is ${expected}`
+                    `[Knowledge ${kf}] Provenance mismatch for ${item.pattern}: artifact has ${item.observedCount}, ground truth non-holdout sum is ${expected}`
                   );
                 }
+              }
+              if (sumObserved !== nonHoldoutQuestions.length * 3) {
+                errors.push(
+                  `[Knowledge ${kf}] Distractor sum mismatch: artifact total observed is ${sumObserved}, expected ${nonHoldoutQuestions.length * 3} (3 per non-holdout question)`
+                );
               }
             }
           } else if (kf === 'depth-framework.json') {
@@ -189,6 +266,9 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
       const res = CapBenchmarkSchema.safeParse(raw);
       if (res.success) {
         benchmarkValid = true;
+        if (res.data.holdoutReferenceSet.length !== 20) {
+          errors.push(`[Benchmark] Expected 20 holdout reference questions, found ${res.data.holdoutReferenceSet.length}`);
+        }
       } else {
         errors.push(...res.error.issues.map((i) => `[Benchmark] ${i.path.join('.')}: ${i.message}`));
       }
@@ -209,3 +289,4 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
     warnings,
   };
 }
+

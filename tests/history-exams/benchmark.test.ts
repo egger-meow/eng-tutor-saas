@@ -10,7 +10,7 @@ describe('Historical CAP English Exam Benchmark Builder', () => {
 
   it('rejects offline mock records by default without allowProvisionalMock flag', async () => {
     const isMockDataPresent = fs.readdirSync(analyzedDir).some((f) => {
-      if (!f.endsWith('.json')) return false;
+      if (!f.endsWith('.json') || f === 'run-manifest.json') return false;
       const content = JSON.parse(fs.readFileSync(path.join(analyzedDir, f), 'utf-8'));
       return content.questions.some((q: any) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock');
     });
@@ -40,13 +40,16 @@ describe('Historical CAP English Exam Benchmark Builder', () => {
     const benchmark = CapBenchmarkSchema.parse(json);
 
     expect(benchmark.referenceCorpus.totalQuestions).toBe(summary.totalQuestions);
-    expect(benchmark.holdoutReferenceSet.length).toBeGreaterThanOrEqual(20);
+    expect(benchmark.holdoutReferenceSet.length).toBe(20);
+    expect(benchmark.provenance).toBeDefined();
+    expect(benchmark.provenance.excludedHoldoutCount).toBe(20);
 
     // Verify holdout questions span all 5 exams
     const holdoutExamIds = new Set(benchmark.holdoutReferenceSet.map((h) => h.examId));
     expect(holdoutExamIds.size).toBe(5);
 
-    // Verify essential context rate in passage section is 100%
-    expect(benchmark.rates.essentialContextRatePassageSection).toBe(100);
+    // Verify essential evidence rate in passage section is 100%
+    expect(benchmark.rates.essentialEvidenceRatePassageSection).toBe(100);
   });
 });
+

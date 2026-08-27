@@ -31,7 +31,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-4.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "3aec28c1cae059b2c2fcf06a1ea5109bbd2c7d9570ab6959fc20c03edf7bbc8e"
         }
       ],
       "glossary": {
@@ -61,7 +62,8 @@
           "page": 5,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-5.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "f20c9526ffa82fec3f886f7f98ebea57836d10b65692d0a218f11a7df35d6877"
         }
       ],
       "glossary": {
@@ -242,7 +244,8 @@
           "page": 2,
           "role": "single_image",
           "imagePath": "history_exams/assets/111/page-2.png",
-          "description": "Illustration for single question 1"
+          "description": "Illustration for single question 1",
+          "sha256": "089c81d1d178b9ce77faebf5f65c6d2aa888d46d92c222b140321db22d9ade20"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -674,7 +677,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-4.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "3aec28c1cae059b2c2fcf06a1ea5109bbd2c7d9570ab6959fc20c03edf7bbc8e"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -707,7 +711,8 @@
           "page": 4,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-4.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "3aec28c1cae059b2c2fcf06a1ea5109bbd2c7d9570ab6959fc20c03edf7bbc8e"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -740,7 +745,8 @@
           "page": 5,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-5.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "f20c9526ffa82fec3f886f7f98ebea57836d10b65692d0a218f11a7df35d6877"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -773,7 +779,8 @@
           "page": 5,
           "role": "infographic",
           "imagePath": "history_exams/assets/111/page-5.png",
-          "description": "Process infographic and diagram"
+          "description": "Process infographic and diagram",
+          "sha256": "f20c9526ffa82fec3f886f7f98ebea57836d10b65692d0a218f11a7df35d6877"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -998,7 +1005,8 @@
           "page": 12,
           "role": "diagram",
           "imagePath": "history_exams/assets/111/page-12.png",
-          "description": "Visual evidence for question 33 on page 12"
+          "description": "Visual evidence for question 33 on page 12",
+          "sha256": "64eb4c04c7c55141d2ba23cbbc220518d63df78660e8ce4e8701c2595369adfc"
         }
       ],
       "extractionConfidence": "partial_visual_pending",
@@ -1247,6 +1255,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:31:54.182Z",
+  "extractedAt": "2026-08-27T16:45:26.375Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }
