@@ -16,6 +16,35 @@ import { legalConfig } from '../lib/config'
 import { acceptCurrentTermsVersion } from '../lib/legal-acceptance'
 import { useEnrollmentState } from '../lib/enrollment'
 
+export function getCheckoutPriceDisplay(
+  plan: BillingPlan,
+  checkoutPriceTwd: number | undefined,
+  foundingAvailable: boolean,
+) {
+  if (plan === 'monthly' && checkoutPriceTwd === undefined && foundingAvailable) {
+    return '正在確認付款金額…'
+  }
+  return `NT$${formatPrice(checkoutPriceTwd ?? billingPlans[plan].priceTwd)}`
+}
+
+export function getCheckoutPriceDescription(
+  plan: BillingPlan,
+  checkoutPriceTwd: number | undefined,
+  foundingApplies: boolean | undefined,
+  foundingAvailable: boolean,
+) {
+  if (plan === 'annual') {
+    return `平均每月約 NT$${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT$${formatPrice(annualSavingsTwd)}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。`
+  }
+  if (checkoutPriceTwd === undefined && foundingAvailable) {
+    return '正在確認這次月繳的實際付款金額與創始 30 優惠。'
+  }
+  if (foundingApplies) {
+    return '創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$349／月。稅額由 Paddle 依付款資料計算。'
+  }
+  return '每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。'
+}
+
 export function BillingPage({
   session,
   initialChildren,
@@ -336,12 +365,16 @@ export function BillingPage({
               </div>
               <div className="checkout-plan-summary">
                 <span>紙屬英文{activeCheckout.plan === 'annual' ? '年繳' : '月繳'}方案</span>
-                <strong>NT${formatPrice(activeCheckout.checkoutPriceTwd ?? billingPlans[activeCheckout.plan].priceTwd)} <small>／{activeCheckout.plan === 'annual' ? '年' : '月'}</small></strong>
-                {activeCheckout.plan === 'annual'
-                  ? <p>平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}，相較月繳一年省 NT${formatPrice(annualSavingsTwd)}。年繳不套用 Founding 30 月繳優惠；稅額由 Paddle 依付款資料計算。</p>
-                  : activeCheckout.foundingApplies
-                    ? <p>創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$349／月。稅額由 Paddle 依付款資料計算。</p>
-                    : <p>每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。</p>}
+                <strong>
+                  {getCheckoutPriceDisplay(activeCheckout.plan, activeCheckout.checkoutPriceTwd, foundingAvailable)}
+                  {' '}<small>／{activeCheckout.plan === 'annual' ? '年' : '月'}</small>
+                </strong>
+                <p>{getCheckoutPriceDescription(
+                  activeCheckout.plan,
+                  activeCheckout.checkoutPriceTwd,
+                  activeCheckout.foundingApplies,
+                  foundingAvailable,
+                )}</p>
               </div>
               <div className="paddle-checkout-frame" />
               <p className="checkout-security-note">
