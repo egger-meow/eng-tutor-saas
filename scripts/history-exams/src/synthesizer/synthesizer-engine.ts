@@ -17,6 +17,7 @@ import {
   TaxonomySkillSchema,
 } from '../schemas/analyzed.ts';
 import { HoldoutManifest, HoldoutManifestSchema } from '../schemas/benchmark.ts';
+import { AiProvider } from '../analyzer/ai-provider.ts';
 import {
   AntiPattern,
   AntiPatternsArtifact,
@@ -49,6 +50,7 @@ export interface SynthesizeOptions {
   knowledgeDir: string;
   benchmarkDir?: string;
   allowProvisionalMock?: boolean;
+  aiProvider?: AiProvider;
 }
 
 /**
@@ -255,8 +257,8 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
   const depthFrameworkPath = path.join(knowledgeDir, 'depth-framework.json');
   fs.writeFileSync(depthFrameworkPath, JSON.stringify(depthFramework.framework, null, 2), 'utf-8');
 
-  // 4. Synthesize Question Recipes
-  const recipes = buildQuestionRecipes(provenance, nonHoldoutQuestions);
+  // 4. Synthesize Question Recipes (Cross-Year Inductive Clustering + Optional Live AI Synthesis & Critic)
+  const recipes = await buildQuestionRecipes(provenance, nonHoldoutQuestions, options.aiProvider);
   const recipesPath = path.join(knowledgeDir, 'question-recipes.json');
   fs.writeFileSync(recipesPath, JSON.stringify(recipes.recipes, null, 2), 'utf-8');
 
@@ -771,10 +773,11 @@ function resolveQuestionArchetype(q: AnalyzedQuestion): ArchetypeMeta {
   };
 }
 
-function buildQuestionRecipes(
+async function buildQuestionRecipes(
   provenance: KnowledgeProvenance,
-  questions: AnalyzedQuestion[]
-): QuestionRecipesArtifact {
+  questions: AnalyzedQuestion[],
+  aiProvider?: AiProvider
+): Promise<QuestionRecipesArtifact> {
   // Bottom-up clustering of non-holdout questions
   const clusterMap = new Map<string, { meta: ArchetypeMeta; members: AnalyzedQuestion[] }>();
 
@@ -875,7 +878,7 @@ function buildQuestionRecipes(
       brief: m.extracted.stem.slice(0, 80),
     }));
 
-    recipes.push({
+    let recipeObj: QuestionRecipe = {
       recipeId: meta.recipeId,
       name: meta.name,
       primarySkill: meta.primarySkill,
@@ -901,7 +904,46 @@ function buildQuestionRecipes(
       rarePattern,
       targetGenre: meta.supportedGenres[0],
       realExamExemplars: sourceEvidence,
-    });
+    };
+
+    // 7. Live AI Cross-Year Synthesis and Recipe Critic (when live AI provider is connected)
+    if (aiProvider && aiProvider.name !== 'offline-mock' && aiProvider.generateCrossYearSynthesis) {
+      try {
+        const prompt = buildCrossYearRecipeSynthesisPrompt(meta.recipeId, members);
+        const rawAiSynthesis = await aiProvider.generateCrossYearSynthesis(prompt);
+        const aiData = JSON.parse(rawAiSynthesis);
+        if (aiData && typeof aiData === 'object') {
+          if (Array.isArray(aiData.stemTemplates) && aiData.stemTemplates.length > 0) {
+            recipeObj.stemTemplates = aiData.stemTemplates;
+          }
+          if (Array.isArray(aiData.correctAnswerConstructionPrinciples) && aiData.correctAnswerConstructionPrinciples.length > 0) {
+            recipeObj.correctAnswerConstructionPrinciples = aiData.correctAnswerConstructionPrinciples;
+          }
+          if (Array.isArray(aiData.distractorConstructionPrinciples) && aiData.distractorConstructionPrinciples.length > 0) {
+            recipeObj.distractorConstructionPrinciples = aiData.distractorConstructionPrinciples;
+          }
+          if (Array.isArray(aiData.difficultyAdjustmentRules) && aiData.difficultyAdjustmentRules.length > 0) {
+            recipeObj.difficultyAdjustmentRules = aiData.difficultyAdjustmentRules;
+          }
+          if (Array.isArray(aiData.qualityChecks) && aiData.qualityChecks.length > 0) {
+            recipeObj.qualityChecks = aiData.qualityChecks;
+          }
+        }
+      } catch {}
+
+      if (aiProvider.generateRecipeCriticReview) {
+        try {
+          const criticPrompt = buildRecipeCriticPrompt(recipeObj, members);
+          const rawCritic = await aiProvider.generateRecipeCriticReview(criticPrompt);
+          const criticData = JSON.parse(rawCritic);
+          if (criticData && criticData.repairedFields) {
+            recipeObj = { ...recipeObj, ...criticData.repairedFields };
+          }
+        } catch {}
+      }
+    }
+
+    recipes.push(recipeObj);
   }
 
   // Sort recipes deterministically by recipeId

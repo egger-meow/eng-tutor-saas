@@ -69,6 +69,10 @@ export interface RunManifest {
   successfulQuestions: number;
   failedQuestions: number;
   visualQuestionCount: number;
+  criticPassedCount: number;
+  criticRepairedCount: number;
+  criticFailedCount: number;
+  criticNotReviewedCount: number;
   repairedByCriticCount: number;
   unresolvedCount: number;
 }
@@ -350,7 +354,27 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     });
   }
 
-  // Write Run Manifest
+  // Write Run Manifest: Scan all analyzed files in directory for comprehensive ledger
+  const allAnalyzedInDir: AnalyzedQuestion[] = [];
+  const analyzedJsonFiles = fs
+    .readdirSync(analyzedDir)
+    .filter((f) => f.endsWith('.json') && f !== 'run-manifest.json');
+  for (const f of analyzedJsonFiles) {
+    try {
+      const examData = JSON.parse(fs.readFileSync(path.join(analyzedDir, f), 'utf-8'));
+      if (examData && Array.isArray(examData.questions)) {
+        allAnalyzedInDir.push(...examData.questions);
+      }
+    } catch {}
+  }
+
+  const criticPassedCount = allAnalyzedInDir.filter((q) => q.analysis?.criticStatus === 'passed').length;
+  const criticRepairedCount = allAnalyzedInDir.filter((q) => q.analysis?.criticStatus === 'repaired').length;
+  const criticFailedCount = allAnalyzedInDir.filter((q) => q.analysis?.criticStatus === 'failed').length;
+  const criticNotReviewedCount = allAnalyzedInDir.filter(
+    (q) => !q.analysis?.criticStatus || q.analysis.criticStatus === 'not_reviewed'
+  ).length;
+
   const corpusHash = createHash('sha256').update(allQuestionHashes.sort().join(':')).digest('hex');
   const manifest: RunManifest = {
     gitSha: getGitSha(),
@@ -366,8 +390,12 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     successfulQuestions: globalSuccessful,
     failedQuestions: globalFailed,
     visualQuestionCount: globalVisual,
-    repairedByCriticCount: globalRepaired,
-    unresolvedCount: globalFailed,
+    criticPassedCount,
+    criticRepairedCount,
+    criticFailedCount,
+    criticNotReviewedCount,
+    repairedByCriticCount: criticRepairedCount,
+    unresolvedCount: globalFailed + criticFailedCount + criticNotReviewedCount,
   };
 
   const manifestPath = path.join(analyzedDir, 'run-manifest.json');

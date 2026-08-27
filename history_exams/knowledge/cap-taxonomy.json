@@ -14,7 +14,7 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T17:03:24.211Z",
+    "generatedAt": "2026-08-27T17:12:33.970Z",
     "sourceCorpusHash": "f35827dbb579a5535e6eb3462208e787ef352bca3034472706e4651d3c2fb44c",
     "authorityStatus": "provisional"
   },

@@ -47,6 +47,7 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
 
   // 1. Validate Extracted Exams
   let extractedCount = 0;
+  const allExtractedExams: ExtractedExam[] = [];
   if (fs.existsSync(extractedDir)) {
     const files = fs.readdirSync(extractedDir).filter((f) => f.endsWith('.json'));
     extractedCount = files.length;
@@ -76,6 +77,7 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
             }
           }
         }
+        allExtractedExams.push(content as ExtractedExam);
       } catch (err: any) {
         errors.push(`[Extracted ${f}] JSON parse error: ${err.message}`);
       }
@@ -141,16 +143,39 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
       const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
       const parsedHoldout = HoldoutManifestSchema.safeParse(rawHoldout);
       if (parsedHoldout.success) {
-        if (parsedHoldout.data.holdoutQuestions.length !== 20) {
-          errors.push(
-            `[Benchmark holdout-manifest.json] Must contain exactly 20 holdout questions, found ${parsedHoldout.data.holdoutQuestions.length}`
-          );
-        }
+        // Code-level verification of stratification and grounding in extracted corpus
+        const extractedQuestionsMap = new Map<string, { section: string; evidenceMode: string }>();
+        allExtractedExams.forEach((exam) => {
+          exam.questions.forEach((q) => {
+            extractedQuestionsMap.set(`${exam.examId}-Q${q.questionNumber}`, {
+              section: q.section,
+              evidenceMode: q.evidenceMode,
+            });
+          });
+        });
+
         parsedHoldout.data.holdoutQuestions.forEach((h) => {
-          holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
+          const key = `${h.examId}-Q${h.questionNumber}`;
+          holdoutKeys.add(key);
+
+          const extractedQ = extractedQuestionsMap.get(key);
+          if (!extractedQ) {
+            errors.push(`[Benchmark holdout-manifest.json] Holdout item ${key} does not exist in extracted corpus.`);
+          } else {
+            if (h.section !== extractedQ.section) {
+              errors.push(
+                `[Benchmark holdout-manifest.json] Holdout item ${key} section mismatch: declared '${h.section}', corpus has '${extractedQ.section}'.`
+              );
+            }
+            if (h.evidenceMode !== extractedQ.evidenceMode) {
+              errors.push(
+                `[Benchmark holdout-manifest.json] Holdout item ${key} evidenceMode mismatch: declared '${h.evidenceMode}', corpus has '${extractedQ.evidenceMode}'.`
+              );
+            }
+          }
         });
       } else {
-        errors.push(`[Benchmark holdout-manifest.json] Invalid schema: ${parsedHoldout.error.message}`);
+        errors.push(`[Benchmark holdout-manifest.json] Invalid schema or stratification: ${parsedHoldout.error.message}`);
       }
     } catch (err: any) {
       errors.push(`[Benchmark holdout-manifest.json] Parse error: ${err.message}`);

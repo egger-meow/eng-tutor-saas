@@ -38,6 +38,8 @@ export interface AiProvider {
       images?: ImageAttachment[];
     }
   ): Promise<string>;
+  generateCrossYearSynthesis?(prompt: string): Promise<string>;
+  generateRecipeCriticReview?(prompt: string): Promise<string>;
 }
 
 export class ApiKeyMissingError extends Error {
@@ -113,6 +115,14 @@ export class GeminiProvider implements AiProvider {
   ): Promise<string> {
     return this.generateAnalysis(prompt, context);
   }
+
+  async generateCrossYearSynthesis(prompt: string): Promise<string> {
+    return this.generateAnalysis(prompt);
+  }
+
+  async generateRecipeCriticReview(prompt: string): Promise<string> {
+    return this.generateAnalysis(prompt);
+  }
 }
 
 /**
@@ -177,6 +187,14 @@ export class OpenAiProvider implements AiProvider {
     context?: { images?: ImageAttachment[] }
   ): Promise<string> {
     return this.generateAnalysis(prompt, context);
+  }
+
+  async generateCrossYearSynthesis(prompt: string): Promise<string> {
+    return this.generateAnalysis(prompt);
+  }
+
+  async generateRecipeCriticReview(prompt: string): Promise<string> {
+    return this.generateAnalysis(prompt);
   }
 }
 

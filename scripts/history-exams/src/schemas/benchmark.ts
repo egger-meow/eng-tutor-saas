@@ -27,25 +27,63 @@ export const BenchmarkHoldoutItemSchema = z.object({
 });
 export type BenchmarkHoldoutItem = z.infer<typeof BenchmarkHoldoutItemSchema>;
 
-export const HoldoutManifestSchema = z.object({
-  version: z.string(),
-  generatedAt: z.string(),
-  description: z.string(),
-  totalHoldoutQuestions: z.number().int(),
-  stratificationRules: z.array(z.string()),
-  holdoutQuestions: z.array(
-    z.object({
-      examId: z.string(),
-      questionNumber: z.number().int(),
-      section: z.string(),
-      genre: z.string().optional(),
-      evidenceMode: z.string(),
-      primarySkillTarget: TaxonomySkillSchema,
-      cognitiveDepthTarget: CognitiveDepthSchema,
-      rationale: z.string(),
-    })
-  ),
-});
+export const HoldoutManifestSchema = z
+  .object({
+    version: z.string(),
+    generatedAt: z.string(),
+    description: z.string(),
+    totalHoldoutQuestions: z.number().int(),
+    stratificationRules: z.array(z.string()),
+    holdoutQuestions: z.array(
+      z.object({
+        examId: z.string(),
+        questionNumber: z.number().int(),
+        section: z.string(),
+        genre: z.string().optional(),
+        evidenceMode: z.string(),
+        primarySkillTarget: TaxonomySkillSchema,
+        cognitiveDepthTarget: CognitiveDepthSchema,
+        rationale: z.string(),
+      })
+    ),
+  })
+  .superRefine((data, ctx) => {
+    if (data.totalHoldoutQuestions !== 20) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `totalHoldoutQuestions must be exactly 20, found ${data.totalHoldoutQuestions}`,
+        path: ['totalHoldoutQuestions'],
+      });
+    }
+    if (data.holdoutQuestions.length !== 20) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `holdoutQuestions array must contain exactly 20 items, found ${data.holdoutQuestions.length}`,
+        path: ['holdoutQuestions'],
+      });
+    }
+    const uniqueKeys = new Set(data.holdoutQuestions.map((h) => `${h.examId}-Q${h.questionNumber}`));
+    if (uniqueKeys.size !== data.holdoutQuestions.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `holdoutQuestions contains duplicate keys, unique count is ${uniqueKeys.size}`,
+        path: ['holdoutQuestions'],
+      });
+    }
+    const yearCounts: Record<string, number> = {};
+    for (const h of data.holdoutQuestions) {
+      yearCounts[h.examId] = (yearCounts[h.examId] || 0) + 1;
+    }
+    for (const yr of ['111', '112', '113', '114', '115']) {
+      if (yearCounts[yr] !== 4) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Year ${yr} must have exactly 4 holdout items, found ${yearCounts[yr] || 0}`,
+          path: ['holdoutQuestions'],
+        });
+      }
+    }
+  });
 export type HoldoutManifest = z.infer<typeof HoldoutManifestSchema>;
 
 export const CapBenchmarkSchema = z.object({

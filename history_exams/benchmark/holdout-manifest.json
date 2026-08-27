@@ -76,12 +76,12 @@
     {
       "examId": "112",
       "questionNumber": 23,
-      "section": "passage_comprehension",
-      "genre": "infographic_chart_table",
-      "evidenceMode": "multimodal_mixed",
-      "primarySkillTarget": "information_integration",
-      "cognitiveDepthTarget": "D3_multi_step_synthesis",
-      "rationale": "Graphic chart coordinate and text reconciliation"
+      "section": "single",
+      "genre": "single_standalone",
+      "evidenceMode": "text_only",
+      "primarySkillTarget": "vocabulary_in_context",
+      "cognitiveDepthTarget": "D2_single_step_inference",
+      "rationale": "Section 1 communicative vocabulary in dialogue context"
     },
     {
       "examId": "112",
@@ -118,7 +118,7 @@
       "questionNumber": 25,
       "section": "passage_comprehension",
       "genre": "brochure_flyer",
-      "evidenceMode": "spatial",
+      "evidenceMode": "text_only",
       "primarySkillTarget": "information_integration",
       "cognitiveDepthTarget": "D3_multi_step_synthesis",
       "rationale": "Spatial map routing and directional constraint reasoning"
@@ -166,8 +166,8 @@
     {
       "examId": "114",
       "questionNumber": 41,
-      "section": "passage_comprehension",
-      "genre": "article_informational",
+      "section": "cloze",
+      "genre": "cloze_passage",
       "evidenceMode": "text_only",
       "primarySkillTarget": "purpose_speaker_intent",
       "cognitiveDepthTarget": "D4_evaluative_pragmatic",
@@ -208,7 +208,7 @@
       "questionNumber": 38,
       "section": "passage_comprehension",
       "genre": "article_informational",
-      "evidenceMode": "text_only",
+      "evidenceMode": "multi_document",
       "primarySkillTarget": "cross_sentence_inference",
       "cognitiveDepthTarget": "D3_multi_step_synthesis",
       "rationale": "Cross-perspective viewpoint reconciliation"

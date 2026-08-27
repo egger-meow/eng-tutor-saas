@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { runExtractionPipeline } from './extractor/index.ts';
-import { runAnalysisPipeline } from './analyzer/index.ts';
+import { runAnalysisPipeline, createAiProvider } from './analyzer/index.ts';
 import { runSynthesisPipeline } from './synthesizer/index.ts';
 import { runBenchmarkPipeline } from './benchmark/index.ts';
 import { validateFullCorpus } from './validator/index.ts';
@@ -148,11 +148,17 @@ async function main() {
 
     case 'synthesize': {
       console.log(`[history-exams] Stage 3: Synthesizing Cross-Year Knowledge Base with Holdout Isolation...`);
+      let aiProvider;
+      try {
+        aiProvider = createAiProvider({ allowOfflineMock: allowProvisionalMock });
+      } catch {}
+
       const result = await runSynthesisPipeline({
         analyzedDir,
         knowledgeDir,
         benchmarkDir,
         allowProvisionalMock,
+        aiProvider,
       });
       console.log(`[history-exams] Synthesis complete across ${result.totalExams} exams and ${result.nonHoldoutQuestionsCount} non-holdout questions (${result.excludedHoldoutCount} holdouts isolated).`);
       console.log(`  - Taxonomy: ${result.taxonomyPath}`);
@@ -230,7 +236,11 @@ async function main() {
         force,
         allowOfflineMock: allowProvisionalMock,
       });
-      await runSynthesisPipeline({ analyzedDir, knowledgeDir, benchmarkDir, allowProvisionalMock });
+      let aiProvider;
+      try {
+        aiProvider = createAiProvider({ allowOfflineMock: allowProvisionalMock });
+      } catch {}
+      await runSynthesisPipeline({ analyzedDir, knowledgeDir, benchmarkDir, allowProvisionalMock, aiProvider });
       await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock });
       generateSpotCheckReport({ extractedDir, analyzedDir, outputPath: spotCheckPath });
       generatePilotReviewReport({ extractedDir, analyzedDir, outputPath: pilotReviewPath });
