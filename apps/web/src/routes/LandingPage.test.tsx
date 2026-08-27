@@ -89,6 +89,18 @@ describe('Landing Page — Evolving Learning System Positioning', () => {
     expect(html).toContain('AI 進步，教材也跟著進步')
   })
 
+  it('makes clear that interest leads into worthwhile real-world content without exposing research machinery', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+
+    expect(html).toContain('興趣是入口，孩子也真的會讀到新東西。')
+    expect(html).toContain('真實知識與可查證內容')
+    expect(html).toContain('科技、AI、運動等快速變動的題材')
+    expect(html).toContain('適合時納入近期發展')
+    expect(html).not.toContain('temporalMode')
+    expect(html).not.toContain('Source -&gt; Fact')
+    expect(html).not.toContain('grounding')
+  })
+
   it('renders all three flexible usage modes', () => {
     const html = renderToStaticMarkup(<LandingPage />)
 
@@ -187,19 +199,15 @@ describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
     expect(html).toContain('月繳 NT$349，持續訂閱期間價格固定不變')
     expect(html).toContain('標準價 NT$499/月 · 第一週免費')
     expect(html).toContain('免費取得第一週教材')
-    // No overloaded combined string with annual price in the hero
     expect(html).not.toContain('同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。')
   })
 
   it('clearly separates 30 founding discount seats from 100 system capacity', () => {
     const html = renderToStaticMarkup(<PricingSection enrollment={openWithFounding} />)
 
-    // Pricing section founding offer
     expect(html).toContain('創始 30・月繳限定')
     expect(html).toContain('前 30 位持續訂閱期間固定 NT$349／月')
     expect(html).toContain('目前剩 <strong>30</strong> 個創始優惠席次')
-
-    // Capacity status operational clarity
     expect(html).toContain('目前開放加入')
     expect(html).toContain('第一階段預計服務 <strong>100 位孩子</strong>，目前已有 <strong>1 位加入</strong>。')
     expect(html).toContain('額滿後新加入者會先進入候補，既有家庭不受影響。')
