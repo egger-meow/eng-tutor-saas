@@ -101,4 +101,55 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     expect(pIce.glossary?.['Icelander']).toBe('冰島人');
     expect(pIce.glossary?.['product']).toBe('商品');
   });
+
+  it('preserves verified official-source visual and malformed-text fidelity overrides', () => {
+    const y111 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '111.json'), 'utf-8')));
+    const y112 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '112.json'), 'utf-8')));
+    const y113 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '113.json'), 'utf-8')));
+    const y114 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '114.json'), 'utf-8')));
+    const y115 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '115.json'), 'utf-8')));
+
+    const q = (exam: any, n: number) => exam.questions.find((item: any) => item.questionNumber === n);
+    const passage = (exam: any, id: string) => exam.passages.find((item: any) => item.id === id);
+
+    expect(q(y111, 21).stem).toBe('What does Tea-Rock celebrate?');
+    expect(q(y111, 21).options.C).toBe('Their 20th year of business.');
+    expect(q(y111, 32).visualEvidenceRequired).toBe(true);
+    expect(q(y111, 39).evidenceMode).toBe('spatial');
+    expect(q(y111, 41).visualEvidenceRequired).toBe(true);
+    expect(passage(y111, '111-p23-24').text).toContain('rice milk');
+
+    for (const n of [24, 25, 26, 27, 28, 29]) {
+      expect(q(y112, n).visualEvidenceRequired).toBe(true);
+    }
+    expect(passage(y112, '112-p24-25').text).toContain("Four Seasons' Kitchen");
+    expect(passage(y112, '112-p26-27').text).toContain("Birds don't care");
+    expect(passage(y112, '112-p28-29').text).toContain('4.6');
+
+    expect(q(y113, 26).stem).toBe('What is recommended to people who want to visit the festival?');
+    expect(q(y113, 28).options.B).toBe("They don’t like to share.");
+    expect(q(y113, 41).visualEvidenceRequired).toBe(true);
+    expect(q(y113, 42).visualEvidenceRequired).toBe(true);
+
+    expect(q(y114, 23).options.C).toContain("Ivy is still telling them about her baby");
+    expect(q(y114, 27).stem).toBe('What do we learn from the first paragraph?');
+    for (const n of [29, 30, 31]) {
+      expect(q(y114, n).visualEvidenceRequired).toBe(true);
+    }
+    expect(q(y114, 36).visualEvidenceRequired).toBe(true);
+
+    expect(q(y115, 26).answer).toBe('C');
+    expect(q(y115, 26).evidenceMode).toBe('spatial');
+    expect(q(y115, 30).evidenceMode).toBe('text_only');
+    expect(q(y115, 30).visualEvidenceRequired).toBe(false);
+
+    const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
+    expect(allQuestions.filter((item: any) => item.visualEvidenceRequired)).toHaveLength(40);
+    for (const item of allQuestions) {
+      expect(item.stem).not.toMatch(/\[Option [A-D]\]|\(Comprehension question \d+\)/);
+      for (const option of Object.values(item.options)) {
+        expect(String(option)).not.toMatch(/^\[Option [A-D]\]$/);
+      }
+    }
+  });
 });
