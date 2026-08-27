@@ -57,147 +57,124 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 
 ## 4. Reusable Question Recipes
 
-### RECIPE_01_NOTICE_SCHEDULE_CONSTRAINT_SCANNER: Authentic Notice & Schedule Constraint Scanner
-- **Primary Skill**: `explicit_detail`
-- **Supported Genres**: `notice_announcement`, `brochure_flyer`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
-- **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 28 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: constraint_satisfaction, temporal_filtering, elimination_by_rule
-- **Stem Templates**:
-  * *"Which question can the brochure answer?"*
-  * *"What should Jason do before he visits the {place}?"*
-  * *"According to the schedule, when can visitors {action}?"*
-- **Distractor Mechanisms**: `partial_truth`, `wrong_chronology`, `literal_keyword_matching`
-- **Quality Checks**:
-  * Ensure the correct option satisfies all constraints mentioned in the stem
-  * Ensure distractors represent partial conditions stated in the notice
-
-
-### RECIPE_02_DIALOGUE_PRAGMATIC_IMPLICATURE: Conversational Implicature & Subtext Resolver
-- **Primary Skill**: `pragmatic_meaning`
-- **Supported Genres**: `dialogue`
-- **Cognitive Depth**: `D3_multi_step_synthesis`, `D4_evaluative_pragmatic`
-- **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 0 items across 0 years (Years: )
-- **Reasoning Operations**: implicature_derivation, tone_analysis, speaker_perspective_taking
-- **Stem Templates**:
-  * *"What does {Speaker} most likely mean when saying "{Quote}"?"*
-  * *"How does {Speaker} feel about {Topic}?"*
-  * *"What can we learn about {Speaker} from their conversation?"*
-- **Distractor Mechanisms**: `literal_keyword_matching`, `wrong_referent`, `unsupported_world_knowledge`
-- **Quality Checks**:
-  * Verify that the dialogue provides at least 2 distinct turns of conversational context
-  * Confirm that resolving the quote requires situational awareness, not dictionary lookup
-
-
-### RECIPE_03_NARRATIVE_THEMATIC_ARC: Narrative Arc & Core Message Abstractor
-- **Primary Skill**: `main_idea`
-- **Supported Genres**: `narrative`
-- **Cognitive Depth**: `D3_multi_step_synthesis`
-- **Evidence Span**: `multi_paragraph_global`
-- **Evidence Support**: 2 items across 2 years (Years: 114, 115)
-- **Reasoning Operations**: thematic_abstraction, global_gist_synthesis, scope_evaluation
-- **Stem Templates**:
-  * *"What is the story mainly about?"*
-  * *"What lesson did {Character} learn at the end?"*
-  * *"What does the writer want to tell readers through this story?"*
-- **Distractor Mechanisms**: `local_evidence_for_global_question`, `partial_truth`, `overgeneralization`
-- **Quality Checks**:
-  * Every distractor should reflect a true local detail from one paragraph of the story
-  * The correct option must encompass the arc transformation from beginning to end
-
-
-### RECIPE_04_INFOGRAPHIC_MULTIMODAL_INTEGRATION: Infographic & Visual Data Reconciler
-- **Primary Skill**: `information_integration`
-- **Supported Genres**: `infographic_chart_table`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
-- **Evidence Span**: `multimodal_text_and_graphic`
-- **Evidence Support**: 20 items across 3 years (Years: 111, 113, 115)
-- **Reasoning Operations**: cross_modal_mapping, coordinate_matching, constraint_synthesis
-- **Stem Templates**:
-  * *"What can we learn from Figure 1 and the reading?"*
-  * *"Which chart/picture best shows the situation in {Year/Place}?"*
-  * *"Based on the table, which statement is true?"*
-- **Distractor Mechanisms**: `reversed_cause_effect`, `wrong_chronology`, `partial_truth`
-- **Quality Checks**:
-  * If the graphic is removed, the question must become unanswerable
-  * Distractors must reflect genuine visual coordinates with altered labels
-
-
-### RECIPE_05_SPATIAL_MAP_ROUTE_NAVIGATOR: Spatial Map & Route Navigator
-- **Primary Skill**: `information_integration`
-- **Supported Genres**: `brochure_flyer`, `infographic_chart_table`
-- **Cognitive Depth**: `D3_multi_step_synthesis`
-- **Evidence Span**: `multimodal_text_and_graphic`
-- **Evidence Support**: 6 items across 4 years (Years: 111, 112, 113, 115)
-- **Reasoning Operations**: spatial_mental_rotation, route_tracing, landmark_sequence_verification
-- **Stem Templates**:
-  * *"According to the map, how can Jason get to {Destination}?"*
-  * *"Which place is {Character} most likely visiting?"*
-  * *"Where is {Landmark} located on the map?"*
-- **Distractor Mechanisms**: `wrong_referent`, `wrong_chronology`, `partial_truth`
-- **Quality Checks**:
-  * Ensure exact directional orientation is traceable on the provided map image
-  * Verify distractors test orientation and spatial sequence
-
-
-### RECIPE_06_CONTEXTUAL_WORD_SENSE_DEDUCER: Contextual Word Sense Deducer
-- **Primary Skill**: `vocabulary_in_context`
-- **Supported Genres**: `article_informational`, `narrative`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
-- **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 2 items across 1 years (Years: 115)
-- **Reasoning Operations**: semantic_field_triangulation, contrast_clue_extraction, co_text_synthesis
-- **Stem Templates**:
-  * *"What does "{TargetWord}" mean in the reading?"*
-  * *"In paragraph {N}, what is the meaning of "{TargetWord}"?"*
-- **Distractor Mechanisms**: `literal_keyword_matching`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
-- **Quality Checks**:
-  * Surrounding sentences must provide at least 2 distinct semantic clues
-  * All options A, B, C, D must use simple, accessible English
-
-
-### RECIPE_07_CLOZE_DISCOURSE_AND_TENSE_FLOW: Cloze Discourse & Tense Architecture Tracker
+### RECIPE_CLOZE_DISCOURSE_AND_TENSE_FLOW: Cloze Discourse Architecture & Tense Flow Tracker
 - **Primary Skill**: `grammar_in_context`
 - **Supported Genres**: `cloze_passage`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
+- **Cognitive Depth**: `D2_single_step_inference`
 - **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 0 items across 0 years (Years: )
-- **Reasoning Operations**: temporal_timeline_alignment, syntactic_licensing, discourse_cohesion
+- **Evidence Support**: 19 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
 - **Stem Templates**:
-  * *"Blank {N} in the passage: (A) {OptionA} (B) {OptionB} (C) {OptionC} (D) {OptionD}"*
-- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `wrong_chronology`, `reversed_cause_effect`
+  * *"(Cloze blank 40)"*
+  * *"(Cloze blank 41)"*
+  * *"(Cloze blank 42)"*
+  * *"(Cloze blank 43)"*
+- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
 - **Quality Checks**:
   * Correct tense/connective must be determined by earlier or subsequent sentences
   * All 4 options must be grammatically valid in isolation
 
 
-### RECIPE_08_STANDALONE_LEXICAL_COLLOCATION: Standalone Communicative Lexical Gap Drill
+### RECIPE_INFOGRAPHIC_CROSS_MODAL_RECONCILER: Infographic, Chart & Diagram Cross-Modal Reconciler
+- **Primary Skill**: `explicit_detail`
+- **Supported Genres**: `infographic_chart_table`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
+- **Evidence Span**: `multimodal_text_and_graphic`
+- **Evidence Support**: 20 items across 3 years (Years: 111, 113, 115)
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Stem Templates**:
+  * *"What does Tea-Rock celebrate? th"*
+  * *"Here is the postcard {Character} is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?"*
+  * *"What can we learn about sugar from the infographic?"*
+  * *"What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?"*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+- **Quality Checks**:
+  * If the graphic is removed, the question must become unanswerable
+  * Distractors must reflect genuine visual coordinates with altered labels
+
+
+### RECIPE_INFORMATIONAL_EXPLICIT_DETAIL_PARAPHRASE: Informational Article Detail & Proposition Verification
+- **Primary Skill**: `explicit_detail`
+- **Supported Genres**: `article_informational`, `narrative`
+- **Cognitive Depth**: `D2_single_step_inference`
+- **Evidence Span**: `cross_sentence_local`
+- **Evidence Support**: 43 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Stem Templates**:
+  * *"Which idea is talked about in the first paragraph of the reading?"*
+  * *"Who might find that Tabata training is right for them?"*
+  * *"Which is true about Tabata training?"*
+  * *"What does Cameroon’s government most likely think of Ambazonia?"*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+- **Quality Checks**:
+  * Correct answer must be an authentic paraphrase of the stated passage evidence
+  * Distractors must use true entities with altered predicates or inverted scopes
+
+
+### RECIPE_INFORMATIONAL_LOCAL_AND_GLOBAL_INFERENCE: Informational Article Deductive Inference & Clue Synthesis
+- **Primary Skill**: `local_inference`
+- **Supported Genres**: `article_informational`, `narrative`
+- **Cognitive Depth**: `D3_multi_step_synthesis`
+- **Evidence Span**: `cross_sentence_local`
+- **Evidence Support**: 21 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Stem Templates**:
+  * *"Why did Darrell tell Marina to go to Pinterest ?"*
+  * *"There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?"*
+  * *"What does this mean in the report?"*
+  * *"What can we learn from Figure 1 and Figure 2?"*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+- **Quality Checks**:
+  * Must require bridging at least two stated facts in the text
+  * Distractors must target common unwarranted deductive leaps
+
+
+### RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE: Informational Article Main Idea & Rhetorical Purpose Synthesis
+- **Primary Skill**: `main_idea`
+- **Supported Genres**: `article_informational`, `narrative`
+- **Cognitive Depth**: `D3_multi_step_synthesis`
+- **Evidence Span**: `multi_paragraph_global`
+- **Evidence Support**: 1 items across 1 years (Years: 114)
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Stem Templates**:
+  * *"What is the reading mainly about?"*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
+- **Quality Checks**:
+  * Every distractor should reflect a true local detail from one paragraph of the passage
+  * The correct option must encompass the global theme of the passage
+
+
+### RECIPE_SINGLE_LEXICAL_COMMUNICATIVE_COLLOCATION: Standalone Communicative Lexical Gap Drill
 - **Primary Skill**: `vocabulary_in_context`
 - **Supported Genres**: `single_standalone`
-- **Cognitive Depth**: `D1_verbatim_retrieval`, `D2_single_step_inference`
+- **Cognitive Depth**: `D1_verbatim_retrieval`
 - **Evidence Span**: `single_sentence`
 - **Evidence Support**: 44 items across 5 years (Years: 111, 112, 113, 114, 115)
 - **Reasoning Operations**: syntactic_parsing, lexical_semantic_matching
 - **Stem Templates**:
-  * *"{Subject} always {blank} when {condition}. (A) {W1} (B) {W2} (C) {W3} (D) {W4}"*
-- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `irrelevant_distractor`
+  * *"{Character} is afraid of the dark. He even leaves the _____ on when sleeping."*
+  * *"Pam is a _____ baseball player; she has more fans than any other player on her team."*
+  * *"It was _____ for us to answer the math question because we’ve done the same kind of questions many times."*
+  * *"Don’t let the children swim in the river. We don’t know how _____ it is. It could be dangerous."*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
 - **Quality Checks**:
   * All 4 options must belong to the exact same grammatical word class
   * Scenario must clearly disambiguate the correct word without world knowledge assumptions
 
 
-### RECIPE_09_STANDALONE_SYNTACTIC_LICENSING: Standalone Syntactic Agreement & Licensing Drill
+### RECIPE_SINGLE_SYNTACTIC_AGREEMENT_LICENSING: Standalone Syntactic Agreement & Clause Licensing Drill
 - **Primary Skill**: `grammar_in_context`
 - **Supported Genres**: `single_standalone`
 - **Cognitive Depth**: `D2_single_step_inference`
 - **Evidence Span**: `single_sentence`
 - **Evidence Support**: 47 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: syntactic_agreement_check, tense_licensing, subordination_parsing
+- **Reasoning Operations**: syntactic_parsing, lexical_semantic_matching
 - **Stem Templates**:
-  * *"{Subject} _____ {object} yesterday when {clause}. (A) {V1} (B) {V2} (C) {V3} (D) {V4}"*
-- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `wrong_chronology`
+  * *"The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five."*
+  * *"I did not do my homework, so my teacher said I _____ stay after school to finish it."*
+  * *"Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both."*
+  * *"Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it."*
+- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
 - **Quality Checks**:
   * Ensure sentence provides an explicit syntactic trigger
   * Distractors must represent common student developmental grammar errors

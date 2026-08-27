@@ -195,13 +195,24 @@ async function main() {
         knowledgeDir,
         benchmarkDir,
       });
-      console.log(`[history-exams] Validation Report: Valid = ${report.valid}`);
-      console.log(`  - Extracted exams: ${report.extractedExamsCount}`);
-      console.log(`  - Analyzed exams: ${report.analyzedExamsCount}`);
-      console.log(`  - Knowledge artifacts: ${report.knowledgeArtifactsCount}`);
-      console.log(`  - Benchmark valid: ${report.benchmarkValid}`);
+      console.log(`[history-exams] Validation Report:`);
+      console.log(`  - Structurally Valid: ${report.structurallyValid ? '✅ YES' : '❌ NO'}`);
+      console.log(`  - Authority Eligible: ${report.authorityEligible ? '✅ YES (Authoritative CAP Brain)' : '❌ NO (Provisional)'}`);
+      console.log(`  - Authority Status:   ${report.authorityStatus.toUpperCase()}`);
+      console.log(`  - Extracted exams:    ${report.extractedExamsCount} / 5`);
+      console.log(`  - Analyzed exams:     ${report.analyzedExamsCount} / 5`);
+      console.log(`  - Knowledge artifacts:${report.knowledgeArtifactsCount} / 7`);
+      console.log(`  - Benchmark valid:    ${report.benchmarkValid ? '✅ YES' : '❌ NO'}`);
+
+      if (report.authorityBlockers.length > 0) {
+        console.log(`\n[history-exams] Blockers for Authoritative Certification:`);
+        for (const blocker of report.authorityBlockers) {
+          console.log(`  * ${blocker}`);
+        }
+      }
+
       if (report.errors.length > 0) {
-        console.error('[history-exams] Errors:', report.errors);
+        console.error('\n[history-exams] Structural Errors:', report.errors);
         process.exit(1);
       }
       break;

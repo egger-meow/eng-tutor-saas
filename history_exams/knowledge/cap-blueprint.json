@@ -14,12 +14,12 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T16:45:28.883Z",
+    "generatedAt": "2026-08-27T16:52:34.876Z",
     "sourceCorpusHash": "f35827dbb579a5535e6eb3462208e787ef352bca3034472706e4651d3c2fb44c",
     "authorityStatus": "provisional"
   },
   "version": "1.0.0",
-  "generatedAt": "2026-08-27T16:45:28.886Z",
+  "generatedAt": "2026-08-27T16:52:34.890Z",
   "totalQuestionsAnalyzed": 195,
   "totalExams": 5,
   "sectionComposition": {

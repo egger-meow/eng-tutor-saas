@@ -46,15 +46,17 @@ export const QuestionRecipeSchema = z.object({
   validDistractorMechanisms: z.array(DistractorPatternSchema),
   commonWeakImplementations: z.array(z.string()),
   qualityChecks: z.array(z.string()),
-  sourceEvidence: z.array(
-    z.object({
-      examId: z.string(),
-      questionNumber: z.number().int(),
-      brief: z.string(),
-    })
-  ),
-  supportCount: z.number().int().default(1),
-  supportYears: z.array(z.number().int()).default([]),
+  sourceEvidence: z
+    .array(
+      z.object({
+        examId: z.string(),
+        questionNumber: z.number().int(),
+        brief: z.string(),
+      })
+    )
+    .min(1),
+  supportCount: z.number().int().min(1),
+  supportYears: z.array(z.number().int()).min(1),
   confidence: z.enum(['high', 'medium', 'low']).default('high'),
   rarePattern: z.boolean().default(false),
   // Backward compatibility alias

@@ -210,7 +210,7 @@ export const PedagogicalAnalysisSchema = z.object({
   analysisConfidence: z.enum(['high', 'medium', 'low']).default('high'),
   uncertainties: z.array(z.string()).default([]),
   evidenceReferences: z.array(EvidenceReferenceSchema).default([]),
-  criticStatus: z.enum(['passed', 'repaired']).default('passed'),
+  criticStatus: z.enum(['passed', 'repaired', 'failed', 'not_reviewed']).default('passed'),
   criticIssues: z.array(z.string()).default([]),
 });
 export type PedagogicalAnalysis = z.infer<typeof PedagogicalAnalysisSchema>;

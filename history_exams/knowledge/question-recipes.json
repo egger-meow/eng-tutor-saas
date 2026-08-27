@@ -1,93 +1,93 @@
 [
   {
-    "recipeId": "RECIPE_01_NOTICE_SCHEDULE_CONSTRAINT_SCANNER",
-    "name": "Authentic Notice & Schedule Constraint Scanner",
-    "primarySkill": "explicit_detail",
+    "recipeId": "RECIPE_CLOZE_DISCOURSE_AND_TENSE_FLOW",
+    "name": "Cloze Discourse Architecture & Tense Flow Tracker",
+    "primarySkill": "grammar_in_context",
     "secondarySkills": [
-      "information_integration",
+      "discourse_relationship",
       "sequence_cause_consequence"
     ],
     "supportedGenres": [
-      "notice_announcement",
-      "brochure_flyer"
+      "cloze_passage"
     ],
     "evidenceModes": [
-      "text_only",
-      "multimodal_mixed"
+      "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "A1_elementary",
-      "A2_basic"
+      "B1_intermediate"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference",
-      "D3_multi_step_synthesis"
+      "D2_single_step_inference"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
-    "requiredEvidenceStructure": "Tabular or bulleted conditional rules containing opening hours, fees, age, and restrictions",
+    "requiredEvidenceStructure": "Cohesive paragraph passage with narrative timeline or argumentative flow",
     "reasoningOperations": [
-      "constraint_satisfaction",
-      "temporal_filtering",
-      "elimination_by_rule"
+      "cross_sentence_coreference",
+      "hypothesis_elimination",
+      "evidence_synthesis"
     ],
     "stemTemplates": [
-      "Which question can the brochure answer?",
-      "What should Jason do before he visits the {place}?",
-      "According to the schedule, when can visitors {action}?"
+      "(Cloze blank 40)",
+      "(Cloze blank 41)",
+      "(Cloze blank 42)",
+      "(Cloze blank 43)"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Must satisfy all conjunctive constraints in the stem (e.g. time AND price AND location)",
-      "Paraphrases the condition rather than copying the exact brochure row"
+      "Discriminates students who comprehend grammar_in_context against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Use partial conditions stated in other sections of the brochure",
-      "Invert eligibility restrictions (e.g. adult fee applied to child)"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Increase depth by introducing an extra prerequisite constraint",
-      "Simplify language by shortening notice text while preserving the constraint tree"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
+      "literal_keyword_matching",
       "partial_truth",
+      "wrong_referent",
       "wrong_chronology",
-      "literal_keyword_matching"
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong"
     ],
     "commonWeakImplementations": [
-      "Making the answer an obvious verbatim copy without requiring constraint checking",
-      "Providing options with completely unrelated content rather than competing conditions"
+      "Isolated sentence grammar where surrounding passage has zero impact on choice",
+      "Options with obvious morphology errors giving away the answer"
     ],
     "qualityChecks": [
-      "Ensure the correct option satisfies all constraints mentioned in the stem",
-      "Ensure distractors represent partial conditions stated in the notice"
+      "Correct tense/connective must be determined by earlier or subsequent sentences",
+      "All 4 options must be grammatically valid in isolation"
     ],
     "sourceEvidence": [
       {
         "examId": "111",
-        "questionNumber": 21,
-        "brief": "What does Tea-Rock celebrate? th"
+        "questionNumber": 40,
+        "brief": "(Cloze blank 40)"
       },
       {
         "examId": "111",
-        "questionNumber": 22,
-        "brief": "Here is the postcard Jason is going to send to Tea-Rock 20. What else does he ne"
+        "questionNumber": 41,
+        "brief": "(Cloze blank 41)"
       },
       {
         "examId": "111",
-        "questionNumber": 23,
-        "brief": "What can we learn about sugar from the infographic?"
+        "questionNumber": 42,
+        "brief": "(Cloze blank 42)"
       },
       {
         "examId": "111",
-        "questionNumber": 27,
-        "brief": "Which idea is talked about in the first paragraph of the reading?"
+        "questionNumber": 43,
+        "brief": "(Cloze blank 43)"
       },
       {
-        "examId": "111",
-        "questionNumber": 28,
-        "brief": "Who might find that Tabata training is right for them?"
+        "examId": "112",
+        "questionNumber": 42,
+        "brief": "(Cloze blank 42)"
       }
     ],
-    "supportCount": 28,
+    "supportCount": 19,
     "supportYears": [
       111,
       112,
@@ -97,197 +97,39 @@
     ],
     "confidence": "high",
     "rarePattern": false,
-    "targetGenre": "notice_announcement",
+    "targetGenre": "cloze_passage",
     "realExamExemplars": [
       {
         "examId": "111",
-        "questionNumber": 21,
-        "brief": "What does Tea-Rock celebrate? th"
+        "questionNumber": 40,
+        "brief": "(Cloze blank 40)"
       },
       {
         "examId": "111",
-        "questionNumber": 22,
-        "brief": "Here is the postcard Jason is going to send to Tea-Rock 20. What else does he ne"
+        "questionNumber": 41,
+        "brief": "(Cloze blank 41)"
       },
       {
         "examId": "111",
-        "questionNumber": 23,
-        "brief": "What can we learn about sugar from the infographic?"
+        "questionNumber": 42,
+        "brief": "(Cloze blank 42)"
       },
       {
         "examId": "111",
-        "questionNumber": 27,
-        "brief": "Which idea is talked about in the first paragraph of the reading?"
+        "questionNumber": 43,
+        "brief": "(Cloze blank 43)"
       },
       {
-        "examId": "111",
-        "questionNumber": 28,
-        "brief": "Who might find that Tabata training is right for them?"
+        "examId": "112",
+        "questionNumber": 42,
+        "brief": "(Cloze blank 42)"
       }
     ]
   },
   {
-    "recipeId": "RECIPE_02_DIALOGUE_PRAGMATIC_IMPLICATURE",
-    "name": "Conversational Implicature & Subtext Resolver",
-    "primarySkill": "pragmatic_meaning",
-    "secondarySkills": [
-      "purpose_speaker_intent",
-      "local_inference"
-    ],
-    "supportedGenres": [
-      "dialogue"
-    ],
-    "evidenceModes": [
-      "text_only"
-    ],
-    "typicalLanguageDifficultyRange": [
-      "A2_basic",
-      "B1_intermediate"
-    ],
-    "typicalCognitiveDepthRange": [
-      "D3_multi_step_synthesis",
-      "D4_evaluative_pragmatic"
-    ],
-    "requiredEvidenceSpan": "cross_sentence_local",
-    "requiredEvidenceStructure": "Multi-turn conversational exchange with social-pragmatic subtext",
-    "reasoningOperations": [
-      "implicature_derivation",
-      "tone_analysis",
-      "speaker_perspective_taking"
-    ],
-    "stemTemplates": [
-      "What does {Speaker} most likely mean when saying \"{Quote}\"?",
-      "How does {Speaker} feel about {Topic}?",
-      "What can we learn about {Speaker} from their conversation?"
-    ],
-    "correctAnswerConstructionPrinciples": [
-      "Captures the intended conversational function (polite refusal, indirect suggestion, veiled doubt)",
-      "Resolves contextually across adjacent dialogue turns"
-    ],
-    "distractorConstructionPrinciples": [
-      "Include literal surface meaning of the quoted idiom/phrase",
-      "Assign the feeling or quote to the wrong conversational partner"
-    ],
-    "difficultyAdjustmentRules": [
-      "Increase depth by using subtle indirect speech acts",
-      "Keep dialogue language natural, informal, and standard junior high level"
-    ],
-    "validDistractorMechanisms": [
-      "literal_keyword_matching",
-      "wrong_referent",
-      "unsupported_world_knowledge"
-    ],
-    "commonWeakImplementations": [
-      "Direct literal restatement that destroys pragmatic depth",
-      "Ambiguous context where two answers are equally plausible"
-    ],
-    "qualityChecks": [
-      "Verify that the dialogue provides at least 2 distinct turns of conversational context",
-      "Confirm that resolving the quote requires situational awareness, not dictionary lookup"
-    ],
-    "sourceEvidence": [],
-    "supportCount": 0,
-    "supportYears": [],
-    "confidence": "medium",
-    "rarePattern": true,
-    "targetGenre": "dialogue",
-    "realExamExemplars": []
-  },
-  {
-    "recipeId": "RECIPE_03_NARRATIVE_THEMATIC_ARC",
-    "name": "Narrative Arc & Core Message Abstractor",
-    "primarySkill": "main_idea",
-    "secondarySkills": [
-      "purpose_speaker_intent",
-      "cross_sentence_inference"
-    ],
-    "supportedGenres": [
-      "narrative"
-    ],
-    "evidenceModes": [
-      "text_only"
-    ],
-    "typicalLanguageDifficultyRange": [
-      "A2_basic",
-      "B1_intermediate"
-    ],
-    "typicalCognitiveDepthRange": [
-      "D3_multi_step_synthesis"
-    ],
-    "requiredEvidenceSpan": "multi_paragraph_global",
-    "requiredEvidenceStructure": "Complete narrative arc: orientation, complication, climax, and resolution/reflection",
-    "reasoningOperations": [
-      "thematic_abstraction",
-      "global_gist_synthesis",
-      "scope_evaluation"
-    ],
-    "stemTemplates": [
-      "What is the story mainly about?",
-      "What lesson did {Character} learn at the end?",
-      "What does the writer want to tell readers through this story?"
-    ],
-    "correctAnswerConstructionPrinciples": [
-      "Encompasses the overarching thematic transformation rather than a single event",
-      "Formulated as a general life reflection supported by the protagonist’s choices"
-    ],
-    "distractorConstructionPrinciples": [
-      "Use accurate local details from early paragraphs that do not represent the final lesson",
-      "Use plausible common-sense morals that the story explicitly contradicted"
-    ],
-    "difficultyAdjustmentRules": [
-      "Increase depth through understated character transformation without explicit preaching",
-      "Ensure vocabulary remains strictly in the standard syllabus"
-    ],
-    "validDistractorMechanisms": [
-      "local_evidence_for_global_question",
-      "partial_truth",
-      "overgeneralization"
-    ],
-    "commonWeakImplementations": [
-      "Making the main idea identical to the first sentence",
-      "Distractors that are factually false even on a local level"
-    ],
-    "qualityChecks": [
-      "Every distractor should reflect a true local detail from one paragraph of the story",
-      "The correct option must encompass the arc transformation from beginning to end"
-    ],
-    "sourceEvidence": [
-      {
-        "examId": "114",
-        "questionNumber": 35,
-        "brief": "What is the reading mainly about?"
-      },
-      {
-        "examId": "115",
-        "questionNumber": 32,
-        "brief": "Why does the title say “Glass Bottles’ Second Life” ?"
-      }
-    ],
-    "supportCount": 2,
-    "supportYears": [
-      114,
-      115
-    ],
-    "confidence": "medium",
-    "rarePattern": false,
-    "targetGenre": "narrative",
-    "realExamExemplars": [
-      {
-        "examId": "114",
-        "questionNumber": 35,
-        "brief": "What is the reading mainly about?"
-      },
-      {
-        "examId": "115",
-        "questionNumber": 32,
-        "brief": "Why does the title say “Glass Bottles’ Second Life” ?"
-      }
-    ]
-  },
-  {
-    "recipeId": "RECIPE_04_INFOGRAPHIC_MULTIMODAL_INTEGRATION",
-    "name": "Infographic & Visual Data Reconciler",
-    "primarySkill": "information_integration",
+    "recipeId": "RECIPE_INFOGRAPHIC_CROSS_MODAL_RECONCILER",
+    "name": "Infographic, Chart & Diagram Cross-Modal Reconciler",
+    "primarySkill": "explicit_detail",
     "secondarySkills": [
       "explicit_detail",
       "local_inference"
@@ -310,31 +152,37 @@
     "requiredEvidenceSpan": "multimodal_text_and_graphic",
     "requiredEvidenceStructure": "Co-dependent prose text paired with a diagram, chart, or comparative table",
     "reasoningOperations": [
-      "cross_modal_mapping",
-      "coordinate_matching",
-      "constraint_synthesis"
+      "cross_sentence_coreference",
+      "hypothesis_elimination",
+      "evidence_synthesis"
     ],
     "stemTemplates": [
-      "What can we learn from Figure 1 and the reading?",
-      "Which chart/picture best shows the situation in {Year/Place}?",
-      "Based on the table, which statement is true?"
+      "What does Tea-Rock celebrate? th",
+      "Here is the postcard {Character} is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?",
+      "What can we learn about sugar from the infographic?",
+      "What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Requires synthesizing at least one data point from the graphic and one condition from prose",
-      "Unambiguously supported by cross-modal triangulation"
+      "Discriminates students who comprehend explicit_detail against surface word matchers.",
+      "Discriminates students who comprehend local_inference against surface word matchers.",
+      "Discriminates students who comprehend information_integration against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "State true graphic values that violate text conditions",
-      "Invert chronological trends or chart axes"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Increase depth by adding a multi-column comparative filter",
-      "Keep graphic annotations simple and legible"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
-      "reversed_cause_effect",
       "wrong_chronology",
-      "partial_truth"
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong",
+      "literal_keyword_matching",
+      "partial_truth",
+      "wrong_referent"
     ],
     "commonWeakImplementations": [
       "Graphic is purely cosmetic and question can be solved purely from text",
@@ -409,137 +257,141 @@
     ]
   },
   {
-    "recipeId": "RECIPE_05_SPATIAL_MAP_ROUTE_NAVIGATOR",
-    "name": "Spatial Map & Route Navigator",
-    "primarySkill": "information_integration",
+    "recipeId": "RECIPE_INFORMATIONAL_EXPLICIT_DETAIL_PARAPHRASE",
+    "name": "Informational Article Detail & Proposition Verification",
+    "primarySkill": "explicit_detail",
     "secondarySkills": [
-      "explicit_detail",
-      "sequence_cause_consequence"
+      "local_inference"
     ],
     "supportedGenres": [
-      "brochure_flyer",
-      "infographic_chart_table"
+      "article_informational",
+      "narrative"
     ],
     "evidenceModes": [
-      "spatial",
-      "multimodal_mixed"
+      "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "A2_basic",
-      "B1_intermediate"
+      "B1_intermediate",
+      "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
-      "D3_multi_step_synthesis"
+      "D2_single_step_inference"
     ],
-    "requiredEvidenceSpan": "multimodal_text_and_graphic",
-    "requiredEvidenceStructure": "Spatial map with marked landmarks, streets, and directional instructions",
+    "requiredEvidenceSpan": "cross_sentence_local",
+    "requiredEvidenceStructure": "Informational paragraph containing specific factual assertions, qualifications, and constraints",
     "reasoningOperations": [
-      "spatial_mental_rotation",
-      "route_tracing",
-      "landmark_sequence_verification"
+      "cross_sentence_coreference",
+      "hypothesis_elimination",
+      "evidence_synthesis"
     ],
     "stemTemplates": [
-      "According to the map, how can Jason get to {Destination}?",
-      "Which place is {Character} most likely visiting?",
-      "Where is {Landmark} located on the map?"
+      "Which idea is talked about in the first paragraph of the reading?",
+      "Who might find that Tabata training is right for them?",
+      "Which is true about Tabata training?",
+      "What does Cameroon’s government most likely think of Ambazonia?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Unambiguously traces valid route sequence matching directional verbs (turn left, pass, opposite)",
-      "Accurately aligns coordinate points"
+      "Discriminates students who comprehend explicit_detail against surface word matchers.",
+      "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Mirror image or reverse left/right directions",
-      "Stop at an intermediate landmark along the route"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Increase depth by adding conditional road closures or multi-leg journeys",
-      "Preserve simple directional vocabulary"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
-      "wrong_referent",
       "wrong_chronology",
-      "partial_truth"
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong",
+      "literal_keyword_matching",
+      "partial_truth",
+      "wrong_referent"
     ],
     "commonWeakImplementations": [
-      "Map lacks essential labeled cues making navigation subjective",
-      "Directions are overly trivial single-turn straight lines"
+      "Copying exact verbatim wording without paraphrased vocabulary",
+      "Distractors that have no topical relationship to the passage"
     ],
     "qualityChecks": [
-      "Ensure exact directional orientation is traceable on the provided map image",
-      "Verify distractors test orientation and spatial sequence"
+      "Correct answer must be an authentic paraphrase of the stated passage evidence",
+      "Distractors must use true entities with altered predicates or inverted scopes"
     ],
     "sourceEvidence": [
       {
         "examId": "111",
-        "questionNumber": 33,
-        "brief": "Which map is most likely the map of Cameroon in 1962?"
-      },
-      {
-        "examId": "112",
-        "questionNumber": 18,
-        "brief": "Business at Jane’s shop has not been good these days. And the new supermarket ac"
-      },
-      {
-        "examId": "113",
         "questionNumber": 27,
-        "brief": "What can we learn about the farmers’ market from the map?"
+        "brief": "Which idea is talked about in the first paragraph of the reading?"
       },
       {
-        "examId": "115",
-        "questionNumber": 24,
-        "brief": "Which question can the brochure answer?"
+        "examId": "111",
+        "questionNumber": 28,
+        "brief": "Who might find that Tabata training is right for them?"
       },
       {
-        "examId": "115",
-        "questionNumber": 25,
-        "brief": "What breaks the rules for visitors to the Marigolds’ Home?"
+        "examId": "111",
+        "questionNumber": 29,
+        "brief": "Which is true about Tabata training?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 35,
+        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 37,
+        "brief": "What is recommended to people who are visiting the Southend Trail?"
       }
     ],
-    "supportCount": 6,
+    "supportCount": 43,
     "supportYears": [
       111,
       112,
       113,
+      114,
       115
     ],
     "confidence": "high",
     "rarePattern": false,
-    "targetGenre": "brochure_flyer",
+    "targetGenre": "article_informational",
     "realExamExemplars": [
       {
         "examId": "111",
-        "questionNumber": 33,
-        "brief": "Which map is most likely the map of Cameroon in 1962?"
-      },
-      {
-        "examId": "112",
-        "questionNumber": 18,
-        "brief": "Business at Jane’s shop has not been good these days. And the new supermarket ac"
-      },
-      {
-        "examId": "113",
         "questionNumber": 27,
-        "brief": "What can we learn about the farmers’ market from the map?"
+        "brief": "Which idea is talked about in the first paragraph of the reading?"
       },
       {
-        "examId": "115",
-        "questionNumber": 24,
-        "brief": "Which question can the brochure answer?"
+        "examId": "111",
+        "questionNumber": 28,
+        "brief": "Who might find that Tabata training is right for them?"
       },
       {
-        "examId": "115",
-        "questionNumber": 25,
-        "brief": "What breaks the rules for visitors to the Marigolds’ Home?"
+        "examId": "111",
+        "questionNumber": 29,
+        "brief": "Which is true about Tabata training?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 35,
+        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 37,
+        "brief": "What is recommended to people who are visiting the Southend Trail?"
       }
     ]
   },
   {
-    "recipeId": "RECIPE_06_CONTEXTUAL_WORD_SENSE_DEDUCER",
-    "name": "Contextual Word Sense Deducer",
-    "primarySkill": "vocabulary_in_context",
+    "recipeId": "RECIPE_INFORMATIONAL_LOCAL_AND_GLOBAL_INFERENCE",
+    "name": "Informational Article Deductive Inference & Clue Synthesis",
+    "primarySkill": "local_inference",
     "secondarySkills": [
-      "local_inference",
-      "reference_resolution"
+      "explicit_detail",
+      "sequence_cause_consequence"
     ],
     "supportedGenres": [
       "article_informational",
@@ -553,144 +405,195 @@
       "B1_intermediate"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference",
       "D3_multi_step_synthesis"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
-    "requiredEvidenceStructure": "Surrounding co-text with explicit semantic scaffolding (contrast, cause-effect, exemplification)",
+    "requiredEvidenceStructure": "Informational article with implicit causal connections, comparative criteria, or chronological sequences",
     "reasoningOperations": [
-      "semantic_field_triangulation",
-      "contrast_clue_extraction",
-      "co_text_synthesis"
+      "cross_sentence_coreference",
+      "hypothesis_elimination",
+      "evidence_synthesis"
     ],
     "stemTemplates": [
-      "What does \"{TargetWord}\" mean in the reading?",
-      "In paragraph {N}, what is the meaning of \"{TargetWord}\"?"
+      "Why did Darrell tell Marina to go to Pinterest ?",
+      "There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?",
+      "What does this mean in the report?",
+      "What can we learn from Figure 1 and Figure 2?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Uses simple, familiar core vocabulary to define the target sense",
-      "Deduced via explicit contextual contrast, apposition, or consequence"
+      "Discriminates students who comprehend local_inference against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Include standard dictionary meanings of the word that do NOT fit the specific context",
-      "Include common phonetic or orthographic lookalikes"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Increase depth by separating context clues across adjacent paragraphs",
-      "Never use out-of-syllabus words in the answer options"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
-      "literal_keyword_matching",
+      "wrong_chronology",
       "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong"
+      "grammatically_plausible_contextually_wrong",
+      "literal_keyword_matching",
+      "partial_truth",
+      "wrong_referent"
     ],
     "commonWeakImplementations": [
-      "Target word is an obscure GRE word with zero context clues",
-      "Question tests isolated prior memory rather than in-context deduction"
+      "Inference requires unverifiable external domain knowledge",
+      "Direct word-matching in the text without deductive step"
     ],
     "qualityChecks": [
-      "Surrounding sentences must provide at least 2 distinct semantic clues",
-      "All options A, B, C, D must use simple, accessible English"
+      "Must require bridging at least two stated facts in the text",
+      "Distractors must target common unwarranted deductive leaps"
     ],
     "sourceEvidence": [
       {
-        "examId": "115",
-        "questionNumber": 28,
-        "brief": "Which is NOT used in the reading to mean the nightingale(s) ?"
+        "examId": "111",
+        "questionNumber": 25,
+        "brief": "Why did Darrell tell Marina to go to Pinterest ?"
       },
       {
-        "examId": "115",
-        "questionNumber": 37,
-        "brief": "Which words in the second reading are NOT used to describe Icelandic?"
+        "examId": "111",
+        "questionNumber": 30,
+        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 31,
+        "brief": "What does this mean in the report?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 32,
+        "brief": "What can we learn from Figure 1 and Figure 2?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 34,
+        "brief": "What does resentful mean in the reading?"
       }
     ],
-    "supportCount": 2,
+    "supportCount": 21,
     "supportYears": [
+      111,
+      112,
+      113,
+      114,
       115
     ],
-    "confidence": "medium",
-    "rarePattern": true,
+    "confidence": "high",
+    "rarePattern": false,
     "targetGenre": "article_informational",
     "realExamExemplars": [
       {
-        "examId": "115",
-        "questionNumber": 28,
-        "brief": "Which is NOT used in the reading to mean the nightingale(s) ?"
+        "examId": "111",
+        "questionNumber": 25,
+        "brief": "Why did Darrell tell Marina to go to Pinterest ?"
       },
       {
-        "examId": "115",
-        "questionNumber": 37,
-        "brief": "Which words in the second reading are NOT used to describe Icelandic?"
+        "examId": "111",
+        "questionNumber": 30,
+        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 31,
+        "brief": "What does this mean in the report?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 32,
+        "brief": "What can we learn from Figure 1 and Figure 2?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 34,
+        "brief": "What does resentful mean in the reading?"
       }
     ]
   },
   {
-    "recipeId": "RECIPE_07_CLOZE_DISCOURSE_AND_TENSE_FLOW",
-    "name": "Cloze Discourse & Tense Architecture Tracker",
-    "primarySkill": "grammar_in_context",
+    "recipeId": "RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE",
+    "name": "Informational Article Main Idea & Rhetorical Purpose Synthesis",
+    "primarySkill": "main_idea",
     "secondarySkills": [
-      "sequence_cause_consequence",
+      "cross_sentence_inference",
       "discourse_relationship"
     ],
     "supportedGenres": [
-      "cloze_passage"
+      "article_informational",
+      "narrative"
     ],
     "evidenceModes": [
       "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "A2_basic",
       "B1_intermediate"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference",
       "D3_multi_step_synthesis"
     ],
-    "requiredEvidenceSpan": "cross_sentence_local",
-    "requiredEvidenceStructure": "Cohesive paragraph passage with narrative timeline or argumentative flow",
+    "requiredEvidenceSpan": "multi_paragraph_global",
+    "requiredEvidenceStructure": "Complete multiparagraph discourse structure with distinct introduction, body development, and conclusion",
     "reasoningOperations": [
-      "temporal_timeline_alignment",
-      "syntactic_licensing",
-      "discourse_cohesion"
+      "cross_sentence_coreference",
+      "hypothesis_elimination",
+      "evidence_synthesis"
     ],
     "stemTemplates": [
-      "Blank {N} in the passage: (A) {OptionA} (B) {OptionB} (C) {OptionC} (D) {OptionD}"
+      "What is the reading mainly about?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Licensed by narrative timeline (e.g. past perfect vs simple past) or discourse connector (however, therefore)",
-      "Resolves grammatical cohesion across sentence boundaries"
+      "Discriminates students who comprehend main_idea against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Grammatically well-formed in isolation but inverting passage timeline or polarity",
-      "Plausible verb forms violating sequence of tenses"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Increase depth by embedding tense shifts triggered by flashback narratives",
-      "Ensure distractors maintain parallel syntactic structure"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
-      "grammatically_plausible_contextually_wrong",
       "wrong_chronology",
-      "reversed_cause_effect"
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong"
     ],
     "commonWeakImplementations": [
-      "Isolated sentence grammar where surrounding passage has zero impact on choice",
-      "Options with obvious morphology errors giving away the answer"
+      "Making the main idea identical to a single introductory sentence",
+      "Distractors that are factually false even on a local level"
     ],
     "qualityChecks": [
-      "Correct tense/connective must be determined by earlier or subsequent sentences",
-      "All 4 options must be grammatically valid in isolation"
+      "Every distractor should reflect a true local detail from one paragraph of the passage",
+      "The correct option must encompass the global theme of the passage"
     ],
-    "sourceEvidence": [],
-    "supportCount": 0,
-    "supportYears": [],
-    "confidence": "medium",
+    "sourceEvidence": [
+      {
+        "examId": "114",
+        "questionNumber": 35,
+        "brief": "What is the reading mainly about?"
+      }
+    ],
+    "supportCount": 1,
+    "supportYears": [
+      114
+    ],
+    "confidence": "low",
     "rarePattern": true,
-    "targetGenre": "cloze_passage",
-    "realExamExemplars": []
+    "targetGenre": "article_informational",
+    "realExamExemplars": [
+      {
+        "examId": "114",
+        "questionNumber": 35,
+        "brief": "What is the reading mainly about?"
+      }
+    ]
   },
   {
-    "recipeId": "RECIPE_08_STANDALONE_LEXICAL_COLLOCATION",
+    "recipeId": "RECIPE_SINGLE_LEXICAL_COMMUNICATIVE_COLLOCATION",
     "name": "Standalone Communicative Lexical Gap Drill",
     "primarySkill": "vocabulary_in_context",
     "secondarySkills": [],
@@ -705,8 +608,7 @@
       "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
-      "D1_verbatim_retrieval",
-      "D2_single_step_inference"
+      "D1_verbatim_retrieval"
     ],
     "requiredEvidenceSpan": "single_sentence",
     "requiredEvidenceStructure": "Single communicative sentence establishing pragmatic situation or collocational trigger",
@@ -715,23 +617,30 @@
       "lexical_semantic_matching"
     ],
     "stemTemplates": [
-      "{Subject} always {blank} when {condition}. (A) {W1} (B) {W2} (C) {W3} (D) {W4}"
+      "{Character} is afraid of the dark. He even leaves the _____ on when sleeping.",
+      "Pam is a _____ baseball player; she has more fans than any other player on her team.",
+      "It was _____ for us to answer the math question because we’ve done the same kind of questions many times.",
+      "Don’t let the children swim in the river. We don’t know how _____ it is. It could be dangerous."
     ],
     "correctAnswerConstructionPrinciples": [
-      "High-frequency junior-high core vocabulary word forming authentic collocation",
-      "Unique semantic fit for the stated scenario"
+      "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Parallel parts of speech that make no sense in the scenario",
-      "Common confusable words (e.g. borrow vs lend)"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Adjust vocabulary tier from Grade 7 basic to Grade 9 extended",
-      "Preserve clean, natural sentence syntax"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
+      "wrong_chronology",
+      "unsupported_world_knowledge",
       "grammatically_plausible_contextually_wrong",
-      "irrelevant_distractor"
+      "literal_keyword_matching",
+      "partial_truth",
+      "wrong_referent"
     ],
     "commonWeakImplementations": [
       "Awkward non-native sentence structure",
@@ -808,8 +717,8 @@
     ]
   },
   {
-    "recipeId": "RECIPE_09_STANDALONE_SYNTACTIC_LICENSING",
-    "name": "Standalone Syntactic Agreement & Licensing Drill",
+    "recipeId": "RECIPE_SINGLE_SYNTACTIC_AGREEMENT_LICENSING",
+    "name": "Standalone Syntactic Agreement & Clause Licensing Drill",
     "primarySkill": "grammar_in_context",
     "secondarySkills": [],
     "supportedGenres": [
@@ -820,8 +729,7 @@
     ],
     "typicalLanguageDifficultyRange": [
       "A1_elementary",
-      "A2_basic",
-      "B1_intermediate"
+      "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
       "D2_single_step_inference"
@@ -829,28 +737,34 @@
     "requiredEvidenceSpan": "single_sentence",
     "requiredEvidenceStructure": "Single sentence containing explicit syntactic trigger (time adverbial, modal, relative clause, passive cue)",
     "reasoningOperations": [
-      "syntactic_agreement_check",
-      "tense_licensing",
-      "subordination_parsing"
+      "syntactic_parsing",
+      "lexical_semantic_matching"
     ],
     "stemTemplates": [
-      "{Subject} _____ {object} yesterday when {clause}. (A) {V1} (B) {V2} (C) {V3} (D) {V4}"
+      "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five.",
+      "I did not do my homework, so my teacher said I _____ stay after school to finish it.",
+      "Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both.",
+      "Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it."
     ],
     "correctAnswerConstructionPrinciples": [
-      "Matches the explicit grammatical constraint (e.g. \"since 2010\" -> present perfect)",
-      "Unambiguous syntactic licensing"
+      "Discriminates students who comprehend grammar_in_context against surface word matchers."
     ],
     "distractorConstructionPrinciples": [
-      "Tense forms that violate stated time adverbials",
-      "Subject-verb number mismatch"
+      "Scanning for identical keywords in the passage without constraint resolution",
+      "Ignoring negative polarity or qualifying constraints in the stem"
     ],
     "difficultyAdjustmentRules": [
-      "Scale from basic past tense to passive relative clauses and conditionals",
-      "Keep non-target vocabulary simple"
+      "Introduce multi-sentence constraint dependencies",
+      "Require cross-paragraph inference rather than proximate sentence lookup",
+      "Must preserve core syntactic connective or prompt structure"
     ],
     "validDistractorMechanisms": [
-      "grammatically_plausible_contextually_wrong",
-      "wrong_chronology"
+      "literal_keyword_matching",
+      "partial_truth",
+      "wrong_referent",
+      "wrong_chronology",
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong"
     ],
     "commonWeakImplementations": [
       "Ambiguous time frame where two tenses are equally acceptable",

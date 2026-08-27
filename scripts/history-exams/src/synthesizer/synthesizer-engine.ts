@@ -438,379 +438,87 @@ function buildDepthFramework(
   };
 }
 
-function buildQuestionRecipes(
-  provenance: KnowledgeProvenance,
-  questions: AnalyzedQuestion[]
-): QuestionRecipesArtifact {
-  // Helper to extract non-holdout evidence
-  const findMatches = (
-    predicate: (q: AnalyzedQuestion) => boolean
-  ): { evidence: QuestionRecipe['sourceEvidence']; years: number[] } => {
-    const matches = questions.filter(predicate);
-    const evidence = matches.map((m) => ({
-      examId: m.examId,
-      questionNumber: m.questionNumber,
-      brief: m.extracted.stem.slice(0, 80),
-    }));
-    const years = Array.from(new Set(matches.map((m) => parseInt(m.examId, 10)))).sort();
-    return { evidence, years };
-  };
+function generalizeStem(stem: string): string {
+  return stem
+    .replace(/\b(19|20)\d{2}\b/g, '{Year}')
+    .replace(/\b(Jason|Linda|David|Emma|Mary|John|Sam|Alex|Sarah|Amy|Peter|Eric|Lisa|Tom|Helen)\b/gi, '{Character}')
+    .replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/gi, '{Day}')
+    .replace(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/gi, '{Month}')
+    .trim();
+}
 
-  const recipeDefinitions = [
-    {
-      recipeId: 'RECIPE_01_NOTICE_SCHEDULE_CONSTRAINT_SCANNER',
-      name: 'Authentic Notice & Schedule Constraint Scanner',
-      primarySkill: 'explicit_detail' as TaxonomySkill,
-      secondarySkills: ['information_integration', 'sequence_cause_consequence'] as TaxonomySkill[],
-      supportedGenres: ['notice_announcement', 'brochure_flyer'] as any[],
-      evidenceModes: ['text_only', 'multimodal_mixed'] as any[],
-      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
-      requiredEvidenceStructure: 'Tabular or bulleted conditional rules containing opening hours, fees, age, and restrictions',
-      reasoningOperations: ['constraint_satisfaction', 'temporal_filtering', 'elimination_by_rule'],
-      stemTemplates: [
-        'Which question can the brochure answer?',
-        'What should Jason do before he visits the {place}?',
-        'According to the schedule, when can visitors {action}?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Must satisfy all conjunctive constraints in the stem (e.g. time AND price AND location)',
-        'Paraphrases the condition rather than copying the exact brochure row',
-      ],
-      distractorConstructionPrinciples: [
-        'Use partial conditions stated in other sections of the brochure',
-        'Invert eligibility restrictions (e.g. adult fee applied to child)',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by introducing an extra prerequisite constraint',
-        'Simplify language by shortening notice text while preserving the constraint tree',
-      ],
-      validDistractorMechanisms: [
-        'partial_truth',
-        'wrong_chronology',
-        'literal_keyword_matching',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Making the answer an obvious verbatim copy without requiring constraint checking',
-        'Providing options with completely unrelated content rather than competing conditions',
-      ],
-      qualityChecks: [
-        'Ensure the correct option satisfies all constraints mentioned in the stem',
-        'Ensure distractors represent partial conditions stated in the notice',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'passage_comprehension' &&
-        (q.analysis.primarySkill === 'explicit_detail' || q.analysis.primarySkill === 'information_integration') &&
-        (q.extracted.passageRange ? q.extracted.passageRange[0] <= 28 : true),
-    },
-    {
-      recipeId: 'RECIPE_02_DIALOGUE_PRAGMATIC_IMPLICATURE',
-      name: 'Conversational Implicature & Subtext Resolver',
-      primarySkill: 'pragmatic_meaning' as TaxonomySkill,
-      secondarySkills: ['purpose_speaker_intent', 'local_inference'] as TaxonomySkill[],
-      supportedGenres: ['dialogue'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D3_multi_step_synthesis', 'D4_evaluative_pragmatic'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
-      requiredEvidenceStructure: 'Multi-turn conversational exchange with social-pragmatic subtext',
-      reasoningOperations: ['implicature_derivation', 'tone_analysis', 'speaker_perspective_taking'],
-      stemTemplates: [
-        'What does {Speaker} most likely mean when saying "{Quote}"?',
-        'How does {Speaker} feel about {Topic}?',
-        'What can we learn about {Speaker} from their conversation?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Captures the intended conversational function (polite refusal, indirect suggestion, veiled doubt)',
-        'Resolves contextually across adjacent dialogue turns',
-      ],
-      distractorConstructionPrinciples: [
-        'Include literal surface meaning of the quoted idiom/phrase',
-        'Assign the feeling or quote to the wrong conversational partner',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by using subtle indirect speech acts',
-        'Keep dialogue language natural, informal, and standard junior high level',
-      ],
-      validDistractorMechanisms: [
-        'literal_keyword_matching',
-        'wrong_referent',
-        'unsupported_world_knowledge',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Direct literal restatement that destroys pragmatic depth',
-        'Ambiguous context where two answers are equally plausible',
-      ],
-      qualityChecks: [
-        'Verify that the dialogue provides at least 2 distinct turns of conversational context',
-        'Confirm that resolving the quote requires situational awareness, not dictionary lookup',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.analysis.primarySkill === 'pragmatic_meaning' ||
-        (q.extracted.section === 'passage_comprehension' &&
-          q.analysis.cognitiveDepth === 'D4_evaluative_pragmatic'),
-    },
-    {
-      recipeId: 'RECIPE_03_NARRATIVE_THEMATIC_ARC',
-      name: 'Narrative Arc & Core Message Abstractor',
-      primarySkill: 'main_idea' as TaxonomySkill,
-      secondarySkills: ['purpose_speaker_intent', 'cross_sentence_inference'] as TaxonomySkill[],
-      supportedGenres: ['narrative'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'multi_paragraph_global' as EvidenceSpan,
-      requiredEvidenceStructure: 'Complete narrative arc: orientation, complication, climax, and resolution/reflection',
-      reasoningOperations: ['thematic_abstraction', 'global_gist_synthesis', 'scope_evaluation'],
-      stemTemplates: [
-        'What is the story mainly about?',
-        'What lesson did {Character} learn at the end?',
-        'What does the writer want to tell readers through this story?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Encompasses the overarching thematic transformation rather than a single event',
-        'Formulated as a general life reflection supported by the protagonist’s choices',
-      ],
-      distractorConstructionPrinciples: [
-        'Use accurate local details from early paragraphs that do not represent the final lesson',
-        'Use plausible common-sense morals that the story explicitly contradicted',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth through understated character transformation without explicit preaching',
-        'Ensure vocabulary remains strictly in the standard syllabus',
-      ],
-      validDistractorMechanisms: [
-        'local_evidence_for_global_question',
-        'partial_truth',
-        'overgeneralization',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Making the main idea identical to the first sentence',
-        'Distractors that are factually false even on a local level',
-      ],
-      qualityChecks: [
-        'Every distractor should reflect a true local detail from one paragraph of the story',
-        'The correct option must encompass the arc transformation from beginning to end',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'passage_comprehension' &&
-        (q.analysis.primarySkill === 'main_idea' || q.analysis.primarySkill === 'cross_sentence_inference'),
-    },
-    {
-      recipeId: 'RECIPE_04_INFOGRAPHIC_MULTIMODAL_INTEGRATION',
-      name: 'Infographic & Visual Data Reconciler',
-      primarySkill: 'information_integration' as TaxonomySkill,
-      secondarySkills: ['explicit_detail', 'local_inference'] as TaxonomySkill[],
-      supportedGenres: ['infographic_chart_table'] as any[],
-      evidenceModes: ['multimodal_mixed', 'visual_only'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'multimodal_text_and_graphic' as EvidenceSpan,
-      requiredEvidenceStructure: 'Co-dependent prose text paired with a diagram, chart, or comparative table',
-      reasoningOperations: ['cross_modal_mapping', 'coordinate_matching', 'constraint_synthesis'],
-      stemTemplates: [
-        'What can we learn from Figure 1 and the reading?',
-        'Which chart/picture best shows the situation in {Year/Place}?',
-        'Based on the table, which statement is true?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Requires synthesizing at least one data point from the graphic and one condition from prose',
-        'Unambiguously supported by cross-modal triangulation',
-      ],
-      distractorConstructionPrinciples: [
-        'State true graphic values that violate text conditions',
-        'Invert chronological trends or chart axes',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by adding a multi-column comparative filter',
-        'Keep graphic annotations simple and legible',
-      ],
-      validDistractorMechanisms: [
-        'reversed_cause_effect',
-        'wrong_chronology',
-        'partial_truth',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Graphic is purely cosmetic and question can be solved purely from text',
-        'Prose states the exact answer verbatim without consulting the graphic',
-      ],
-      qualityChecks: [
-        'If the graphic is removed, the question must become unanswerable',
-        'Distractors must reflect genuine visual coordinates with altered labels',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.visualEvidenceRequired ||
-        q.extracted.evidenceMode === 'multimodal_mixed' ||
-        q.analysis.evidenceMode === 'multimodal_mixed',
-    },
-    {
-      recipeId: 'RECIPE_05_SPATIAL_MAP_ROUTE_NAVIGATOR',
-      name: 'Spatial Map & Route Navigator',
-      primarySkill: 'information_integration' as TaxonomySkill,
-      secondarySkills: ['explicit_detail', 'sequence_cause_consequence'] as TaxonomySkill[],
-      supportedGenres: ['brochure_flyer', 'infographic_chart_table'] as any[],
-      evidenceModes: ['spatial', 'multimodal_mixed'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'multimodal_text_and_graphic' as EvidenceSpan,
-      requiredEvidenceStructure: 'Spatial map with marked landmarks, streets, and directional instructions',
-      reasoningOperations: ['spatial_mental_rotation', 'route_tracing', 'landmark_sequence_verification'],
-      stemTemplates: [
-        'According to the map, how can Jason get to {Destination}?',
-        'Which place is {Character} most likely visiting?',
-        'Where is {Landmark} located on the map?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Unambiguously traces valid route sequence matching directional verbs (turn left, pass, opposite)',
-        'Accurately aligns coordinate points',
-      ],
-      distractorConstructionPrinciples: [
-        'Mirror image or reverse left/right directions',
-        'Stop at an intermediate landmark along the route',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by adding conditional road closures or multi-leg journeys',
-        'Preserve simple directional vocabulary',
-      ],
-      validDistractorMechanisms: [
-        'wrong_referent',
-        'wrong_chronology',
-        'partial_truth',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Map lacks essential labeled cues making navigation subjective',
-        'Directions are overly trivial single-turn straight lines',
-      ],
-      qualityChecks: [
-        'Ensure exact directional orientation is traceable on the provided map image',
-        'Verify distractors test orientation and spatial sequence',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.evidenceMode === 'spatial' ||
-        q.analysis.evidenceMode === 'spatial' ||
-        /map|direction|route|street|corner|cross/i.test(q.extracted.stem),
-    },
-    {
-      recipeId: 'RECIPE_06_CONTEXTUAL_WORD_SENSE_DEDUCER',
-      name: 'Contextual Word Sense Deducer',
-      primarySkill: 'vocabulary_in_context' as TaxonomySkill,
-      secondarySkills: ['local_inference', 'reference_resolution'] as TaxonomySkill[],
-      supportedGenres: ['article_informational', 'narrative'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
-      requiredEvidenceStructure: 'Surrounding co-text with explicit semantic scaffolding (contrast, cause-effect, exemplification)',
-      reasoningOperations: ['semantic_field_triangulation', 'contrast_clue_extraction', 'co_text_synthesis'],
-      stemTemplates: [
-        'What does "{TargetWord}" mean in the reading?',
-        'In paragraph {N}, what is the meaning of "{TargetWord}"?',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Uses simple, familiar core vocabulary to define the target sense',
-        'Deduced via explicit contextual contrast, apposition, or consequence',
-      ],
-      distractorConstructionPrinciples: [
-        'Include standard dictionary meanings of the word that do NOT fit the specific context',
-        'Include common phonetic or orthographic lookalikes',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by separating context clues across adjacent paragraphs',
-        'Never use out-of-syllabus words in the answer options',
-      ],
-      validDistractorMechanisms: [
-        'literal_keyword_matching',
-        'unsupported_world_knowledge',
-        'grammatically_plausible_contextually_wrong',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Target word is an obscure GRE word with zero context clues',
-        'Question tests isolated prior memory rather than in-context deduction',
-      ],
-      qualityChecks: [
-        'Surrounding sentences must provide at least 2 distinct semantic clues',
-        'All options A, B, C, D must use simple, accessible English',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'passage_comprehension' &&
-        q.analysis.primarySkill === 'vocabulary_in_context',
-    },
-    {
-      recipeId: 'RECIPE_07_CLOZE_DISCOURSE_AND_TENSE_FLOW',
-      name: 'Cloze Discourse & Tense Architecture Tracker',
-      primarySkill: 'grammar_in_context' as TaxonomySkill,
-      secondarySkills: ['sequence_cause_consequence', 'discourse_relationship'] as TaxonomySkill[],
-      supportedGenres: ['cloze_passage'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D2_single_step_inference', 'D3_multi_step_synthesis'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'cross_sentence_local' as EvidenceSpan,
-      requiredEvidenceStructure: 'Cohesive paragraph passage with narrative timeline or argumentative flow',
-      reasoningOperations: ['temporal_timeline_alignment', 'syntactic_licensing', 'discourse_cohesion'],
-      stemTemplates: [
-        'Blank {N} in the passage: (A) {OptionA} (B) {OptionB} (C) {OptionC} (D) {OptionD}',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Licensed by narrative timeline (e.g. past perfect vs simple past) or discourse connector (however, therefore)',
-        'Resolves grammatical cohesion across sentence boundaries',
-      ],
-      distractorConstructionPrinciples: [
-        'Grammatically well-formed in isolation but inverting passage timeline or polarity',
-        'Plausible verb forms violating sequence of tenses',
-      ],
-      difficultyAdjustmentRules: [
-        'Increase depth by embedding tense shifts triggered by flashback narratives',
-        'Ensure distractors maintain parallel syntactic structure',
-      ],
-      validDistractorMechanisms: [
-        'grammatically_plausible_contextually_wrong',
-        'wrong_chronology',
-        'reversed_cause_effect',
-      ] as DistractorPattern[],
-      commonWeakImplementations: [
-        'Isolated sentence grammar where surrounding passage has zero impact on choice',
-        'Options with obvious morphology errors giving away the answer',
-      ],
-      qualityChecks: [
-        'Correct tense/connective must be determined by earlier or subsequent sentences',
-        'All 4 options must be grammatically valid in isolation',
-      ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'cloze_test' ||
-        (q.extracted.section === 'passage_comprehension' && q.analysis.primarySkill === 'grammar_in_context'),
-    },
-    {
-      recipeId: 'RECIPE_08_STANDALONE_LEXICAL_COLLOCATION',
+interface ArchetypeMeta {
+  recipeId: string;
+  name: string;
+  primarySkill: TaxonomySkill;
+  defaultSecondarySkills: TaxonomySkill[];
+  supportedGenres: (PassageGenre | 'single_standalone')[];
+  evidenceModes: ('text_only' | 'visual_only' | 'multimodal_mixed' | 'spatial')[];
+  requiredEvidenceSpan: EvidenceSpan;
+  requiredEvidenceStructure: string;
+  commonWeakImplementations: string[];
+  qualityChecks: string[];
+}
+
+function resolveQuestionArchetype(q: AnalyzedQuestion): ArchetypeMeta {
+  const section = q.extracted.section;
+  const genre = q.extracted.passageGenre || 'article_informational';
+  const skill = q.analysis.primarySkill;
+  const isVisual = q.extracted.visualEvidenceRequired || q.extracted.evidenceMode === 'visual_only' || q.analysis.evidenceMode === 'visual_only';
+  const isMultimodal = q.extracted.evidenceMode === 'multimodal_mixed' || q.analysis.evidenceMode === 'multimodal_mixed';
+
+  if (section === 'single') {
+    if (isVisual) {
+      return {
+        recipeId: 'RECIPE_SINGLE_VISUAL_ACTION_IDENTIFICATION',
+        name: 'Standalone Visual Action & Object Identification',
+        primarySkill: 'vocabulary_in_context',
+        defaultSecondarySkills: [],
+        supportedGenres: ['single_standalone'],
+        evidenceModes: ['visual_only', 'multimodal_mixed'],
+        requiredEvidenceSpan: 'single_sentence',
+        requiredEvidenceStructure: 'Single prompt sentence paired with a clear, unambiguous situational illustration',
+        commonWeakImplementations: [
+          'Visual detail is too small or ambiguous for unambiguous feature identification',
+          'Stem contains distracting idioms that override visual scanning',
+        ],
+        qualityChecks: [
+          'Ensure the target noun or action is unambiguously depicted in the illustration',
+          'All 4 options must represent distinct plausible items/actions within the visual domain',
+        ],
+      };
+    }
+
+    if (skill === 'grammar_in_context') {
+      return {
+        recipeId: 'RECIPE_SINGLE_SYNTACTIC_AGREEMENT_LICENSING',
+        name: 'Standalone Syntactic Agreement & Clause Licensing Drill',
+        primarySkill: 'grammar_in_context',
+        defaultSecondarySkills: [],
+        supportedGenres: ['single_standalone'],
+        evidenceModes: ['text_only'],
+        requiredEvidenceSpan: 'single_sentence',
+        requiredEvidenceStructure: 'Single sentence containing explicit syntactic trigger (time adverbial, modal, relative clause, passive cue)',
+        commonWeakImplementations: [
+          'Ambiguous time frame where two tenses are equally acceptable',
+          'Overly convoluted sentence disguising poor grammar targeting',
+        ],
+        qualityChecks: [
+          'Ensure sentence provides an explicit syntactic trigger',
+          'Distractors must represent common student developmental grammar errors',
+        ],
+      };
+    }
+
+    return {
+      recipeId: 'RECIPE_SINGLE_LEXICAL_COMMUNICATIVE_COLLOCATION',
       name: 'Standalone Communicative Lexical Gap Drill',
-      primarySkill: 'vocabulary_in_context' as TaxonomySkill,
-      secondarySkills: [] as TaxonomySkill[],
-      supportedGenres: ['single_standalone'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D1_verbatim_retrieval', 'D2_single_step_inference'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'single_sentence' as EvidenceSpan,
+      primarySkill: 'vocabulary_in_context',
+      defaultSecondarySkills: [],
+      supportedGenres: ['single_standalone'],
+      evidenceModes: ['text_only'],
+      requiredEvidenceSpan: 'single_sentence',
       requiredEvidenceStructure: 'Single communicative sentence establishing pragmatic situation or collocational trigger',
-      reasoningOperations: ['syntactic_parsing', 'lexical_semantic_matching'],
-      stemTemplates: [
-        '{Subject} always {blank} when {condition}. (A) {W1} (B) {W2} (C) {W3} (D) {W4}',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'High-frequency junior-high core vocabulary word forming authentic collocation',
-        'Unique semantic fit for the stated scenario',
-      ],
-      distractorConstructionPrinciples: [
-        'Parallel parts of speech that make no sense in the scenario',
-        'Common confusable words (e.g. borrow vs lend)',
-      ],
-      difficultyAdjustmentRules: [
-        'Adjust vocabulary tier from Grade 7 basic to Grade 9 extended',
-        'Preserve clean, natural sentence syntax',
-      ],
-      validDistractorMechanisms: [
-        'grammatically_plausible_contextually_wrong',
-        'irrelevant_distractor',
-      ] as DistractorPattern[],
       commonWeakImplementations: [
         'Awkward non-native sentence structure',
         'Options belonging to different parts of speech revealing answer by syntax',
@@ -819,90 +527,290 @@ function buildQuestionRecipes(
         'All 4 options must belong to the exact same grammatical word class',
         'Scenario must clearly disambiguate the correct word without world knowledge assumptions',
       ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'single' &&
-        q.analysis.primarySkill === 'vocabulary_in_context' &&
-        !q.extracted.visualEvidenceRequired,
-    },
-    {
-      recipeId: 'RECIPE_09_STANDALONE_SYNTACTIC_LICENSING',
-      name: 'Standalone Syntactic Agreement & Licensing Drill',
-      primarySkill: 'grammar_in_context' as TaxonomySkill,
-      secondarySkills: [] as TaxonomySkill[],
-      supportedGenres: ['single_standalone'] as any[],
-      evidenceModes: ['text_only'] as any[],
-      typicalLanguageDifficultyRange: ['A1_elementary', 'A2_basic', 'B1_intermediate'] as LanguageDifficulty[],
-      typicalCognitiveDepthRange: ['D2_single_step_inference'] as CognitiveDepth[],
-      requiredEvidenceSpan: 'single_sentence' as EvidenceSpan,
-      requiredEvidenceStructure: 'Single sentence containing explicit syntactic trigger (time adverbial, modal, relative clause, passive cue)',
-      reasoningOperations: ['syntactic_agreement_check', 'tense_licensing', 'subordination_parsing'],
-      stemTemplates: [
-        '{Subject} _____ {object} yesterday when {clause}. (A) {V1} (B) {V2} (C) {V3} (D) {V4}',
-      ],
-      correctAnswerConstructionPrinciples: [
-        'Matches the explicit grammatical constraint (e.g. "since 2010" -> present perfect)',
-        'Unambiguous syntactic licensing',
-      ],
-      distractorConstructionPrinciples: [
-        'Tense forms that violate stated time adverbials',
-        'Subject-verb number mismatch',
-      ],
-      difficultyAdjustmentRules: [
-        'Scale from basic past tense to passive relative clauses and conditionals',
-        'Keep non-target vocabulary simple',
-      ],
-      validDistractorMechanisms: [
-        'grammatically_plausible_contextually_wrong',
-        'wrong_chronology',
-      ] as DistractorPattern[],
+    };
+  }
+
+  if (genre === 'cloze_passage' || section === 'cloze') {
+    return {
+      recipeId: 'RECIPE_CLOZE_DISCOURSE_AND_TENSE_FLOW',
+      name: 'Cloze Discourse Architecture & Tense Flow Tracker',
+      primarySkill: 'grammar_in_context',
+      defaultSecondarySkills: ['discourse_relationship', 'sequence_cause_consequence'],
+      supportedGenres: ['cloze_passage'],
+      evidenceModes: ['text_only'],
+      requiredEvidenceSpan: 'cross_sentence_local',
+      requiredEvidenceStructure: 'Cohesive paragraph passage with narrative timeline or argumentative flow',
       commonWeakImplementations: [
-        'Ambiguous time frame where two tenses are equally acceptable',
-        'Overly convoluted sentence disguising poor grammar targeting',
+        'Isolated sentence grammar where surrounding passage has zero impact on choice',
+        'Options with obvious morphology errors giving away the answer',
       ],
       qualityChecks: [
-        'Ensure sentence provides an explicit syntactic trigger',
-        'Distractors must represent common student developmental grammar errors',
+        'Correct tense/connective must be determined by earlier or subsequent sentences',
+        'All 4 options must be grammatically valid in isolation',
       ],
-      filter: (q: AnalyzedQuestion) =>
-        q.extracted.section === 'single' &&
-        q.analysis.primarySkill === 'grammar_in_context',
-    },
-  ];
+    };
+  }
 
-  const recipes: QuestionRecipe[] = recipeDefinitions.map((def) => {
-    const { evidence, years } = findMatches(def.filter);
-    const supportCount = evidence.length;
-    const supportYears = years;
+  if (genre === 'infographic_chart_table' || isMultimodal || isVisual) {
+    return {
+      recipeId: 'RECIPE_INFOGRAPHIC_CROSS_MODAL_RECONCILER',
+      name: 'Infographic, Chart & Diagram Cross-Modal Reconciler',
+      primarySkill: skill === 'explicit_detail' ? 'explicit_detail' : 'information_integration',
+      defaultSecondarySkills: ['explicit_detail', 'local_inference'],
+      supportedGenres: ['infographic_chart_table'],
+      evidenceModes: ['multimodal_mixed', 'visual_only'],
+      requiredEvidenceSpan: 'multimodal_text_and_graphic',
+      requiredEvidenceStructure: 'Co-dependent prose text paired with a diagram, chart, or comparative table',
+      commonWeakImplementations: [
+        'Graphic is purely cosmetic and question can be solved purely from text',
+        'Prose states the exact answer verbatim without consulting the graphic',
+      ],
+      qualityChecks: [
+        'If the graphic is removed, the question must become unanswerable',
+        'Distractors must reflect genuine visual coordinates with altered labels',
+      ],
+    };
+  }
+
+  if (genre === 'brochure_flyer' || q.analysis.evidenceMode === 'spatial') {
+    return {
+      recipeId: 'RECIPE_NOTICE_SCHEDULE_SPATIAL_SCANNER',
+      name: 'Notice, Schedule & Spatial Constraint Scanner',
+      primarySkill: skill === 'information_integration' ? 'information_integration' : 'explicit_detail',
+      defaultSecondarySkills: ['information_integration', 'sequence_cause_consequence'],
+      supportedGenres: ['brochure_flyer', 'notice_announcement'],
+      evidenceModes: ['text_only', 'multimodal_mixed', 'spatial'],
+      requiredEvidenceSpan: 'cross_sentence_local',
+      requiredEvidenceStructure: 'Tabular or bulleted conditional rules containing opening hours, fees, age, and restrictions',
+      commonWeakImplementations: [
+        'Making the answer an obvious verbatim copy without requiring constraint checking',
+        'Providing options with completely unrelated content rather than competing conditions',
+      ],
+      qualityChecks: [
+        'Ensure the correct option satisfies all constraints mentioned in the stem',
+        'Ensure distractors represent partial conditions stated in the notice',
+      ],
+    };
+  }
+
+  if (genre === 'dialogue') {
+    return {
+      recipeId: 'RECIPE_DIALOGUE_CONVERSATIONAL_INFERENCE',
+      name: 'Conversational Dialogue Subtext & In-Context Inference',
+      primarySkill: skill,
+      defaultSecondarySkills: ['purpose_speaker_intent', 'pragmatic_meaning'],
+      supportedGenres: ['dialogue'],
+      evidenceModes: ['text_only'],
+      requiredEvidenceSpan: 'cross_sentence_local',
+      requiredEvidenceStructure: 'Multi-turn conversational exchange with social-pragmatic subtext',
+      commonWeakImplementations: [
+        'Direct literal restatement that destroys pragmatic depth',
+        'Ambiguous context where two answers are equally plausible',
+      ],
+      qualityChecks: [
+        'Verify that the dialogue provides at least 2 distinct turns of conversational context',
+        'Confirm that resolving the quote requires situational awareness, not dictionary lookup',
+      ],
+    };
+  }
+
+  if (skill === 'main_idea' || skill === 'purpose_speaker_intent') {
+    return {
+      recipeId: 'RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE',
+      name: 'Informational Article Main Idea & Rhetorical Purpose Synthesis',
+      primarySkill: skill,
+      defaultSecondarySkills: ['cross_sentence_inference', 'discourse_relationship'],
+      supportedGenres: ['article_informational', 'narrative'],
+      evidenceModes: ['text_only'],
+      requiredEvidenceSpan: 'multi_paragraph_global',
+      requiredEvidenceStructure: 'Complete multiparagraph discourse structure with distinct introduction, body development, and conclusion',
+      commonWeakImplementations: [
+        'Making the main idea identical to a single introductory sentence',
+        'Distractors that are factually false even on a local level',
+      ],
+      qualityChecks: [
+        'Every distractor should reflect a true local detail from one paragraph of the passage',
+        'The correct option must encompass the global theme of the passage',
+      ],
+    };
+  }
+
+  if (skill === 'local_inference' || skill === 'cross_sentence_inference') {
+    return {
+      recipeId: 'RECIPE_INFORMATIONAL_LOCAL_AND_GLOBAL_INFERENCE',
+      name: 'Informational Article Deductive Inference & Clue Synthesis',
+      primarySkill: skill,
+      defaultSecondarySkills: ['explicit_detail', 'sequence_cause_consequence'],
+      supportedGenres: ['article_informational', 'narrative'],
+      evidenceModes: ['text_only'],
+      requiredEvidenceSpan: 'cross_sentence_local',
+      requiredEvidenceStructure: 'Informational article with implicit causal connections, comparative criteria, or chronological sequences',
+      commonWeakImplementations: [
+        'Inference requires unverifiable external domain knowledge',
+        'Direct word-matching in the text without deductive step',
+      ],
+      qualityChecks: [
+        'Must require bridging at least two stated facts in the text',
+        'Distractors must target common unwarranted deductive leaps',
+      ],
+    };
+  }
+
+  return {
+    recipeId: 'RECIPE_INFORMATIONAL_EXPLICIT_DETAIL_PARAPHRASE',
+    name: 'Informational Article Detail & Proposition Verification',
+    primarySkill: 'explicit_detail',
+    defaultSecondarySkills: ['local_inference'],
+    supportedGenres: ['article_informational', 'narrative'],
+    evidenceModes: ['text_only'],
+    requiredEvidenceSpan: 'cross_sentence_local',
+    requiredEvidenceStructure: 'Informational paragraph containing specific factual assertions, qualifications, and constraints',
+    commonWeakImplementations: [
+      'Copying exact verbatim wording without paraphrased vocabulary',
+      'Distractors that have no topical relationship to the passage',
+    ],
+    qualityChecks: [
+      'Correct answer must be an authentic paraphrase of the stated passage evidence',
+      'Distractors must use true entities with altered predicates or inverted scopes',
+    ],
+  };
+}
+
+function buildQuestionRecipes(
+  provenance: KnowledgeProvenance,
+  questions: AnalyzedQuestion[]
+): QuestionRecipesArtifact {
+  // Bottom-up clustering of non-holdout questions
+  const clusterMap = new Map<string, { meta: ArchetypeMeta; members: AnalyzedQuestion[] }>();
+
+  for (const q of questions) {
+    const meta = resolveQuestionArchetype(q);
+    if (!clusterMap.has(meta.recipeId)) {
+      clusterMap.set(meta.recipeId, { meta, members: [] });
+    }
+    clusterMap.get(meta.recipeId)!.members.push(q);
+  }
+
+  // Inductively generate recipes ONLY for clusters with at least 1 verified member question
+  const recipes: QuestionRecipe[] = [];
+
+  for (const [, cluster] of clusterMap.entries()) {
+    const { meta, members } = cluster;
+    if (members.length === 0) continue; // Guaranteed inductive requirement: no phantom recipes
+
+    const supportCount = members.length;
+    const supportYears = Array.from(new Set(members.map((m) => parseInt(m.examId, 10)))).sort();
     const rarePattern = supportYears.length < 2 && supportCount < 3;
 
-    return {
-      recipeId: def.recipeId,
-      name: def.name,
-      primarySkill: def.primarySkill,
-      secondarySkills: def.secondarySkills,
-      supportedGenres: def.supportedGenres,
-      evidenceModes: def.evidenceModes,
-      typicalLanguageDifficultyRange: def.typicalLanguageDifficultyRange,
-      typicalCognitiveDepthRange: def.typicalCognitiveDepthRange,
-      requiredEvidenceSpan: def.requiredEvidenceSpan,
-      requiredEvidenceStructure: def.requiredEvidenceStructure,
-      reasoningOperations: def.reasoningOperations,
-      stemTemplates: def.stemTemplates,
-      correctAnswerConstructionPrinciples: def.correctAnswerConstructionPrinciples,
-      distractorConstructionPrinciples: def.distractorConstructionPrinciples,
-      difficultyAdjustmentRules: def.difficultyAdjustmentRules,
-      validDistractorMechanisms: def.validDistractorMechanisms,
-      commonWeakImplementations: def.commonWeakImplementations,
-      qualityChecks: def.qualityChecks,
-      sourceEvidence: evidence.slice(0, 5), // Keep top 5 exemplars
+    // 1. Dynamic Stem Templates from real stems
+    const uniqueStems = Array.from(new Set(members.map((m) => generalizeStem(m.extracted.stem))));
+    const stemTemplates = uniqueStems.slice(0, 4);
+    if (stemTemplates.length === 0) {
+      stemTemplates.push('According to the reading, which statement is true?');
+    }
+
+    // 2. Dynamic Reasoning Operations
+    const reasoningSet = new Set<string>();
+    for (const m of members) {
+      for (const op of m.analysis.reasoningOperations) {
+        reasoningSet.add(op);
+      }
+    }
+    const reasoningOperations = Array.from(reasoningSet).slice(0, 6);
+
+    // 3. Dynamic Valid Distractor Mechanisms
+    const distractorSet = new Set<DistractorPattern>();
+    for (const m of members) {
+      for (const opt of m.analysis.optionAnalyses) {
+        if (!opt.isCorrect && opt.distractorStrategy) {
+          distractorSet.add(opt.distractorStrategy);
+        }
+      }
+    }
+    const validDistractorMechanisms = Array.from(distractorSet);
+    if (validDistractorMechanisms.length === 0) {
+      validDistractorMechanisms.push('partial_truth', 'literal_keyword_matching');
+    }
+
+    // 4. Dynamic Difficulty Ranges
+    const langDiffSet = new Set<LanguageDifficulty>(members.map((m) => m.analysis.languageDifficulty));
+    const cogDepthSet = new Set<CognitiveDepth>(members.map((m) => m.analysis.cognitiveDepth));
+
+    // 5. Dynamic Principles from Member Question Analyses
+    const correctPrinciples = Array.from(
+      new Set(
+        members
+          .map((m) => m.analysis.whyTheQuestionWorks)
+          .filter((w) => w && w.length > 10)
+      )
+    ).slice(0, 3);
+    if (correctPrinciples.length === 0) {
+      correctPrinciples.push('Option directly fulfills all stem constraints based on verified passage evidence.');
+    }
+
+    const distractorPrinciples = Array.from(
+      new Set(
+        members
+          .flatMap((m) => m.analysis.studentFailureModes)
+          .filter((f) => f && f.length > 10)
+      )
+    ).slice(0, 3);
+    if (distractorPrinciples.length === 0) {
+      distractorPrinciples.push('Distractors exploit surface word-matching without resolving sentence constraints.');
+    }
+
+    const diffRules = Array.from(
+      new Set(
+        members
+          .flatMap((m) => [
+            ...m.analysis.difficultyAdjustment.depthAdjustmentStrategies,
+            ...m.analysis.difficultyAdjustment.simplificationConstraints,
+          ])
+          .filter((r) => r && r.length > 10)
+      )
+    ).slice(0, 3);
+    if (diffRules.length === 0) {
+      diffRules.push('Adjust difficulty by modulating constraint density while preserving vocabulary within syllabus.');
+    }
+
+    // 6. Source Evidence
+    const sourceEvidence = members.slice(0, 5).map((m) => ({
+      examId: m.examId,
+      questionNumber: m.questionNumber,
+      brief: m.extracted.stem.slice(0, 80),
+    }));
+
+    recipes.push({
+      recipeId: meta.recipeId,
+      name: meta.name,
+      primarySkill: meta.primarySkill,
+      secondarySkills: meta.defaultSecondarySkills,
+      supportedGenres: meta.supportedGenres,
+      evidenceModes: meta.evidenceModes,
+      typicalLanguageDifficultyRange: Array.from(langDiffSet),
+      typicalCognitiveDepthRange: Array.from(cogDepthSet),
+      requiredEvidenceSpan: meta.requiredEvidenceSpan,
+      requiredEvidenceStructure: meta.requiredEvidenceStructure,
+      reasoningOperations,
+      stemTemplates,
+      correctAnswerConstructionPrinciples: correctPrinciples,
+      distractorConstructionPrinciples: distractorPrinciples,
+      difficultyAdjustmentRules: diffRules,
+      validDistractorMechanisms,
+      commonWeakImplementations: meta.commonWeakImplementations,
+      qualityChecks: meta.qualityChecks,
+      sourceEvidence,
       supportCount,
       supportYears,
-      confidence: supportCount >= 3 ? 'high' : 'medium',
+      confidence: supportCount >= 5 ? 'high' : supportCount >= 2 ? 'medium' : 'low',
       rarePattern,
-      targetGenre: def.supportedGenres[0],
-      realExamExemplars: evidence.slice(0, 5),
-    };
-  });
+      targetGenre: meta.supportedGenres[0],
+      realExamExemplars: sourceEvidence,
+    });
+  }
+
+  // Sort recipes deterministically by recipeId
+  recipes.sort((a, b) => a.recipeId.localeCompare(b.recipeId));
 
   return {
     provenance,

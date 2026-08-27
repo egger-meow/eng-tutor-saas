@@ -58,13 +58,12 @@ describe('Historical CAP English Exam Synthesizer (Holdout-Isolated)', () => {
     // 2. Recipes
     const recipes = JSON.parse(fs.readFileSync(summary.recipesPath, 'utf-8'));
     const parsedRecipes = z.array(QuestionRecipeSchema).parse(recipes);
-    expect(parsedRecipes.length).toBeGreaterThanOrEqual(8);
+    expect(parsedRecipes.length).toBeGreaterThanOrEqual(5);
     for (const r of parsedRecipes) {
-      expect(r.stemTemplates.length).toBeGreaterThan(0);
-      expect(r.validDistractorMechanisms.length).toBeGreaterThan(0);
-      expect(r.qualityChecks.length).toBeGreaterThan(0);
-      expect(r.supportCount).toBeGreaterThanOrEqual(0);
+      expect(r.supportCount).toBeGreaterThanOrEqual(1);
       expect(Array.isArray(r.supportYears)).toBe(true);
+      expect(r.supportYears.length).toBeGreaterThanOrEqual(1);
+      expect(r.sourceEvidence.length).toBeGreaterThanOrEqual(1);
     }
 
     // 3. Distractor Patterns

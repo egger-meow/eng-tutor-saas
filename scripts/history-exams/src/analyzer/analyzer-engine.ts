@@ -289,16 +289,20 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
             analysisResult.criticIssues = criticData.criticIssues || ['Critic applied targeted repairs'];
             examRepairedCount++;
             globalRepaired++;
+          } else if (criticData.criticStatus === 'failed') {
+            analysisResult.criticStatus = 'failed';
+            analysisResult.criticIssues = criticData.criticIssues || ['Critic flagged unrepairable grounding or distractor defect'];
           } else {
             analysisResult.criticStatus = 'passed';
             analysisResult.criticIssues = [];
           }
         } catch (criticErr: any) {
-          // If critic fails, retain analyst output with warning note
-          analysisResult.criticStatus = 'passed';
+          // If critic fails or errors, explicitly record not_reviewed (never falsely claim passed)
+          analysisResult.criticStatus = 'not_reviewed';
+          analysisResult.criticIssues = [`Critic review execution failed: ${criticErr.message}`];
           analysisResult.uncertainties = [
             ...(analysisResult.uncertainties || []),
-            `Critic pass review skipped: ${criticErr.message}`,
+            `Critic pass review skipped due to execution error: ${criticErr.message}`,
           ];
         }
       }

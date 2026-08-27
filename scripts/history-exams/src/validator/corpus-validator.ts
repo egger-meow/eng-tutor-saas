@@ -25,7 +25,11 @@ export interface CorpusValidationOptions {
 }
 
 export interface CorpusValidationReport {
-  valid: boolean;
+  valid: boolean; // Backwards-compatible alias for structurallyValid
+  structurallyValid: boolean;
+  authorityEligible: boolean;
+  authorityStatus: 'authoritative' | 'provisional' | 'invalid';
+  authorityBlockers: string[];
   extractedExamsCount: number;
   analyzedExamsCount: number;
   knowledgeArtifactsCount: number;
@@ -37,6 +41,7 @@ export interface CorpusValidationReport {
 export function validateFullCorpus(options: CorpusValidationOptions): CorpusValidationReport {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const authorityBlockers: string[] = [];
 
   const { extractedDir, analyzedDir, knowledgeDir, benchmarkDir } = options;
 
@@ -279,8 +284,62 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
     errors.push(`Benchmark file does not exist: ${benchmarkFile}`);
   }
 
+  // 5. Authoritative Eligibility & Provenance Audit
+  let mockCount = 0;
+  let unreviewedCriticCount = 0;
+  let failedCriticCount = 0;
+
+  for (const q of allAnalyzedQuestions) {
+    if (q.providerName === 'offline-mock' || q.modelName.toLowerCase().includes('mock')) {
+      mockCount++;
+    }
+    if (q.analysis.criticStatus === 'not_reviewed') {
+      unreviewedCriticCount++;
+    } else if (q.analysis.criticStatus === 'failed') {
+      failedCriticCount++;
+    }
+  }
+
+  if (mockCount > 0) {
+    authorityBlockers.push(
+      `[Provenance Quarantine] ${mockCount} analyzed questions were generated using offline-mock provider instead of live multimodal AI.`
+    );
+  }
+  if (unreviewedCriticCount > 0) {
+    authorityBlockers.push(
+      `[Critic Incomplete] ${unreviewedCriticCount} analyzed questions have criticStatus 'not_reviewed'.`
+    );
+  }
+  if (failedCriticCount > 0) {
+    authorityBlockers.push(
+      `[Critic Defect] ${failedCriticCount} analyzed questions failed the Pass B evidence critic audit.`
+    );
+  }
+
+  const structurallyValid =
+    errors.length === 0 &&
+    extractedCount === 5 &&
+    analyzedCount === 5 &&
+    benchmarkValid &&
+    knowledgeCount >= 7;
+
+  if (!structurallyValid && errors.length > 0) {
+    authorityBlockers.unshift(`[Structural Defects] Corpus failed ${errors.length} structural/schema validation check(s).`);
+  }
+
+  const authorityEligible = structurallyValid && authorityBlockers.length === 0;
+  const authorityStatus = !structurallyValid
+    ? 'invalid'
+    : authorityEligible
+    ? 'authoritative'
+    : 'provisional';
+
   return {
-    valid: errors.length === 0,
+    valid: structurallyValid,
+    structurallyValid,
+    authorityEligible,
+    authorityStatus,
+    authorityBlockers,
     extractedExamsCount: extractedCount,
     analyzedExamsCount: analyzedCount,
     knowledgeArtifactsCount: knowledgeCount,
