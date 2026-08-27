@@ -180,6 +180,22 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(checkoutCode).toContain('if (transactionCanceled)')
     expect(checkoutCode).toContain('await releaseUnboundClaims()')
   })
+
+  it('9. verifies paddle-checkout does not contain terms effective waiting gate', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    expect(checkoutCode).not.toContain('TERMS_EFFECTIVE_AT')
+    expect(checkoutCode).not.toContain('terms_not_yet_effective')
+    expect(checkoutCode).not.toContain('三日審閱期間')
+  })
+
+  it('10. verifies paddle-checkout passes REQUIRED_TERMS_VERSION to prepare_paddle_checkout_v2 and handles legal error', () => {
+    const checkoutCode = readFileSync(join(__dirname, '../paddle-checkout/index.ts'), 'utf-8')
+
+    expect(checkoutCode).toContain('p_required_terms_version: requiredTermsVersion')
+    expect(checkoutCode).toContain("errorMessage(error).includes('Current Terms acceptance is required')")
+    expect(checkoutCode).toContain("error: 'legal_acceptance_required'")
+  })
 })
 
 

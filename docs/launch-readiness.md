@@ -27,7 +27,7 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Live API key is created and stored only as a server secret.
 - [ ] Live client-side token is configured for the production web build.
 - [ ] Live webhook destination points to the production `paddle-webhook` Edge Function.
-- [ ] `REQUIRED_TERMS_VERSION=2026-08-26-v2` is installed for `paddle-checkout`; Terms v2 is published on 2026-08-26 and does not become effective until 2026-08-29 after the stated three-day review window.
+- [ ] `REQUIRED_TERMS_VERSION=2026-08-26-v2` is installed for `paddle-checkout`; Terms v2 is effective immediately upon publication and acceptance.
 - [ ] `paddle-founder-claim-cleanup` is deployed and invoked with the service-role bearer credential on a five-minute schedule. It may release an expired claim only after Paddle returns `canceled`, accepts removal of the Founder discount from a draft transaction, or accepts cancellation of a ready/billed transaction.
 - [ ] Live webhook secret is installed in Supabase Edge Function secrets.
 - [ ] Production browser config uses `VITE_PADDLE_ENV=production`.
@@ -40,12 +40,11 @@ Never record API keys, webhook secrets, SMTP passwords, or other credentials in 
 
 ## Terms v2 and Founder claim rollout order
 
-1. On 2026-08-26, deploy the web build to publish Terms v2 and its review notice. The Billing UI keeps checkout closed and does not offer acceptance before 2026-08-29 00:00 Asia/Taipei.
-2. Keep a checkout maintenance gate during the database/Edge cutover. Do not change the NT$499 monthly catalog price.
-3. On or after 2026-08-29 00:00 Asia/Taipei, apply `20260826210000_founder_30_lifetime_pricing.sql`. The 13-argument deployed-webhook RPC and the first Founder-revision overload remain available; unsafe Founder/annual legacy events fail closed for Paddle retry.
-4. Deploy `paddle-webhook`, then `paddle-checkout`, then `paddle-founder-claim-cleanup`. Install `REQUIRED_TERMS_VERSION=2026-08-26-v2` and retain the verified Founder discount ID.
-5. Configure the service-role invocation of `paddle-founder-claim-cleanup` every five minutes. The already-published web build switches from review notice to v2 acceptance at the effective timestamp; remove the checkout gate only after that switch and the backend cutover are verified.
-6. Verify Terms-only reacceptance, a standard annual checkout without discount, a Founder monthly claim/bind/activation, and claim cleanup in Paddle/Supabase logs before normal traffic.
+1. Deploy the web build with Terms v2 immediately effective upon publication and acceptance.
+2. Apply database migrations including Founder lifetime pricing and capacity authority.
+3. Deploy `paddle-webhook`, then `paddle-checkout`, then `paddle-founder-claim-cleanup`. Install `REQUIRED_TERMS_VERSION=2026-08-26-v2` and retain the verified Founder discount ID.
+4. Configure the service-role invocation of `paddle-founder-claim-cleanup` every five minutes.
+5. Verify Terms-only reacceptance, a standard annual checkout without discount, a Founder monthly claim/bind/activation, and claim cleanup in Paddle/Supabase logs before normal traffic.
 
 ## Golden Customer Test
 
