@@ -888,7 +888,7 @@
         "C": "Turn right and go straight to the Farmyard, then turn right and go straight, then turn left at the corner.",
         "D": "Turn right and walk through the Butterfly Garden, then walk past the Rabbit’s Temple and the café."
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "spatial",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -922,7 +922,7 @@
         "C": "She taught nightingales to sing in a radio show.",
         "D": "She was famous for playing music with nightingales."
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -946,7 +946,7 @@
         "C": "The artist.",
         "D": "Her garden friends."
       },
-      "answer": "A",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -994,7 +994,7 @@
         "C": "They worked in the same office.",
         "D": "They took a course on movies together."
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "spatial",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -1028,7 +1028,7 @@
         "C": "They give interesting information about actors.",
         "D": "They are good examples of how to write stories."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1154,7 +1154,7 @@
         "C": "That English is easy and simple.",
         "D": "That English is not a national language."
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "multi_document",
       "visualEvidenceRequired": false,
       "requiredAssets": [
@@ -1228,7 +1228,7 @@
         "C": "Our first language.",
         "D": "This beautiful language."
       },
-      "answer": "A",
+      "answer": "B",
       "evidenceMode": "multi_document",
       "visualEvidenceRequired": false,
       "requiredAssets": [
@@ -1302,7 +1302,7 @@
         "C": "Whether school subjects should be taught only in Icelandic.",
         "D": "Whether Iceland should allow more foreigners to work in Iceland."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "multi_document",
       "visualEvidenceRequired": false,
       "requiredAssets": [

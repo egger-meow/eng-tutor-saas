@@ -270,7 +270,7 @@
         "C": "sorry for",
         "D": "worried about"
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -312,7 +312,7 @@
         "C": "habit",
         "D": "weather"
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -354,7 +354,7 @@
         "C": "have",
         "D": "will"
       },
-      "answer": "A",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -375,7 +375,7 @@
         "C": "finally",
         "D": "still"
       },
-      "answer": "C",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -396,7 +396,7 @@
         "C": "lucky",
         "D": "ready"
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -501,7 +501,7 @@
         "C": "or",
         "D": "so"
       },
-      "answer": "C",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -543,7 +543,7 @@
         "C": "radio",
         "D": "robot"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -564,7 +564,7 @@
         "C": "miss",
         "D": "notice"
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -585,7 +585,7 @@
         "C": "smartest",
         "D": "worst"
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -606,7 +606,7 @@
         "C": "shares",
         "D": "share"
       },
-      "answer": "C",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -627,7 +627,7 @@
         "C": "mine",
         "D": "myself"
       },
-      "answer": "D",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -672,7 +672,7 @@
         "C": "To ask the police for help.",
         "D": "To buy food for his brother."
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -720,7 +720,7 @@
         "C": "5:00pm.",
         "D": "7:00pm."
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -744,7 +744,7 @@
         "C": "Its croissants and pretzels are sold on weekends.",
         "D": "Its members can save $100 when they shop on Fridays."
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -792,7 +792,7 @@
         "C": "You can go to the farmers’ market by taking Bus No. 157 to Puppy Street.",
         "D": "The nearest metro station to the farmers’ market is the Koala Street Station."
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "spatial",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -826,7 +826,7 @@
         "C": "[Option C]",
         "D": "[Option D]"
       },
-      "answer": "D",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -850,7 +850,7 @@
         "C": "Lunch.",
         "D": "One of Chang’s ducks or chickens."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -874,7 +874,7 @@
         "C": "To explain Chen’s love for books.",
         "D": "To show why bookstores are important."
       },
-      "answer": "C",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -898,7 +898,7 @@
         "C": "It gives people hope to follow their dreams.",
         "D": "It helps people think of special moments in the past."
       },
-      "answer": "A",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -922,7 +922,7 @@
         "C": "Finding books that are long lost.",
         "D": "Changing his bookstore into a library."
       },
-      "answer": "D",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -994,7 +994,7 @@
         "C": "They cannot speak for others.",
         "D": "They do not notice something."
       },
-      "answer": "C",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1042,7 +1042,7 @@
         "C": "It eats its babies when it cannot find food.",
         "D": "It is the first extinct animal that people studied."
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1066,7 +1066,7 @@
         "C": "To make her idea clearer.",
         "D": "To invite people to take action."
       },
-      "answer": "D",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1090,7 +1090,7 @@
         "C": "It is not possible.",
         "D": "It is not dangerous."
       },
-      "answer": "A",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1114,7 +1114,7 @@
         "C": "may bring some problems",
         "D": "is not welcomed by everyone"
       },
-      "answer": "B",
+      "answer": "A",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1138,7 +1138,7 @@
         "C": "Denver",
         "D": "Pittsburgh"
       },
-      "answer": "C",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1162,7 +1162,7 @@
         "C": "began social distancing a second time",
         "D": "had the most days of social distancing"
       },
-      "answer": "A",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1186,7 +1186,7 @@
         "C": "However",
         "D": "For example"
       },
-      "answer": "B",
+      "answer": "D",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
