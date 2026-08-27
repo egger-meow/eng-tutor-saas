@@ -15,5 +15,5 @@ supabase/.temp/
 generated/
 output/
 tmp/pdfs/
-*.pdf
+
 !apps/web/public/samples/*.pdf
