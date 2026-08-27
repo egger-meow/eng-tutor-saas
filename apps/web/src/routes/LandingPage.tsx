@@ -48,12 +48,15 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
   const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
-  const showFounding = enrollment !== null && enrollment.status === 'open' && enrollment.remaining > 0 && foundingRemaining !== null && foundingRemaining > 0
-  const heroNote = cta.isWaitlist
-    ? '目前服務名額已滿；候補不會先收費。'
-    : showFounding
-      ? null
-      : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
+  const capacityOpen = Boolean(enrollment && enrollment.status === 'open' && enrollment.remaining > 0)
+  const showFounding = capacityOpen && foundingRemaining !== null && foundingRemaining > 0
+  const heroNote = enrollment === null
+    ? '正在確認目前名額與優惠…'
+    : cta.isWaitlist
+      ? '目前服務名額已滿；候補不會先收費。'
+      : showFounding
+        ? null
+        : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
 
   return (
     <AppShell className="landing-page" header={<PublicHeader />}>
@@ -84,7 +87,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
-            {!cta.isWaitlist && <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
+            {capacityOpen && <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
           </FadeInUp>
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
@@ -318,7 +321,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
         </section>
 
         <section className="public-section login-section" id="login">
-          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{!cta.isWaitlist && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
+          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : enrollment === null ? '可以先建立或登入家長帳號；目前正在確認服務名額。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{capacityOpen && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
           <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
         <section className="public-section improvement-note" aria-labelledby="improvement-note-title">
