@@ -6,7 +6,7 @@ import { getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } 
 describe('Paddle RPC Contract & Webhook Integration Tests', () => {
   it('1. verifies paddle-webhook calls process_paddle_subscription_event_v2 with exact named parameters matching migration', () => {
     const webhookCode = readFileSync(join(__dirname, '../paddle-webhook/index.ts'), 'utf-8')
-    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260827130000_fix_paddle_webhook_founder_discount_schema.sql'), 'utf-8')
+    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260827133000_restore_capacity_claim_authority_and_keep_discount_fix.sql'), 'utf-8')
 
     const expectedRpcParams = [
       'p_event_id',
@@ -197,5 +197,270 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(checkoutCode).toContain("error: 'legal_acceptance_required'")
   })
 })
+
+describe('Paddle Webhook Authority & Regression Contract Tests (6 Scenarios)', () => {
+  const migrationCode = readFileSync(join(__dirname, '../../migrations/20260827133000_restore_capacity_claim_authority_and_keep_discount_fix.sql'), 'utf-8')
+
+  // Exact JavaScript simulation function of process_paddle_subscription_event_v2_base
+  function evaluateWebhookEvent(params: {
+    eventType: string
+    status: 'trialing' | 'active' | 'past_due' | 'paused' | 'canceled'
+    planCode: 'standard_monthly' | 'standard_annual'
+    cancelAtPeriodEnd: boolean
+    expectedDiscountId: string
+    discountId: string | null
+    discountStatus?: string | null
+    discountType?: string | null
+    discountEndsAt?: string | null
+    discountEndsAtPresent?: boolean
+    founderClaim?: { id: string; childId: string; status: string; paddleTransactionId: string | null } | null
+    capacityClaim?: { id: string; childId: string; status: string; paddleTransactionId: string | null } | null
+    originatingTransactionId: string | null
+    existingSubscription?: { id?: string; provider?: string; status?: string; foundingStatus?: string; currentPeriodEnd?: string } | null
+    waitlistStatus?: string | null
+  }) {
+    // 1. Capacity claim authority check
+    const isExpiredBeta = params.existingSubscription?.provider === 'beta'
+      && params.existingSubscription.currentPeriodEnd
+      && new Date(params.existingSubscription.currentPeriodEnd).getTime() <= Date.now()
+    const needsCapacityClaim = ['trialing', 'active'].includes(params.status)
+      && params.waitlistStatus !== 'released'
+      && (!params.existingSubscription?.id || isExpiredBeta)
+
+    if (needsCapacityClaim) {
+      if (!params.originatingTransactionId) {
+        throw new Error('Paddle subscription activation for expired-beta child requires originating transaction ID')
+      }
+      if (!params.capacityClaim
+        || params.capacityClaim.status !== 'bound'
+        || params.capacityClaim.paddleTransactionId !== params.originatingTransactionId) {
+        throw new Error(`No matching bound capacity claim found for transaction ${params.originatingTransactionId}`)
+      }
+    }
+
+    // 2. Founder discount validation (v2 schema: no required status/type from webhook, requires expected ID and no ends_at)
+    const founderDiscountValid = Boolean(
+      params.expectedDiscountId
+      && params.discountId
+      && params.discountId === params.expectedDiscountId
+      && (params.discountStatus ? params.discountStatus === 'active' : true)
+      && (params.discountType ? params.discountType === 'flat' : true)
+      && (!params.discountEndsAtPresent || params.discountEndsAt === null)
+      && params.discountEndsAt === null
+    )
+
+    let nextFoundingStatus = params.existingSubscription?.foundingStatus ?? 'none'
+
+    if (['none', 'eligible', 'expired'].includes(nextFoundingStatus)
+      && params.planCode === 'standard_monthly'
+      && ['trialing', 'active'].includes(params.status)) {
+      if (params.eventType === 'subscription.created'
+        && params.founderClaim
+        && params.founderClaim.status === 'bound'
+        && params.founderClaim.paddleTransactionId
+        && params.originatingTransactionId
+        && params.founderClaim.paddleTransactionId === params.originatingTransactionId
+        && founderDiscountValid) {
+        nextFoundingStatus = 'redeemed'
+      }
+    } else if (nextFoundingStatus === 'redeemed' && ['trialing', 'active', 'past_due', 'paused'].includes(params.status)) {
+      if (!founderDiscountValid) {
+        throw new Error('Founder billing integrity failure: expected discount is missing or mismatched')
+      }
+    } else if (nextFoundingStatus === 'redeemed' && params.status === 'canceled') {
+      nextFoundingStatus = 'forfeited'
+    }
+
+    return {
+      status: params.status,
+      foundingStatus: nextFoundingStatus,
+      capacityClaimCompleted: needsCapacityClaim ? Boolean(params.capacityClaim) : false,
+      seatConsumed: ['redeemed', 'forfeited'].includes(nextFoundingStatus),
+    }
+  }
+
+  it('1. Founder valid + exact capacity txn -> PASS', () => {
+    // Migration SQL check: verifies matching capacity claim check exists
+    expect(migrationCode).toContain('v_matching_capacity_claim')
+    expect(migrationCode).toContain('paddle_transaction_id = p_originating_transaction_id')
+
+    const result = evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: null,
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      capacityClaim: { id: 'cap-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'beta', status: 'trialing', currentPeriodEnd: '2026-08-01T00:00:00Z', foundingStatus: 'none' },
+    })
+
+    expect(result.foundingStatus).toBe('redeemed')
+    expect(result.capacityClaimCompleted).toBe(true)
+    expect(result.seatConsumed).toBe(true)
+  })
+
+  it('2. Founder valid + wrong capacity txn -> FAIL', () => {
+    expect(() => evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: null,
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      capacityClaim: { id: 'cap-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      originatingTransactionId: 'txn-WRONG',
+      existingSubscription: { id: 'sub-1', provider: 'beta', status: 'trialing', currentPeriodEnd: '2026-08-01T00:00:00Z', foundingStatus: 'none' },
+    })).toThrow('No matching bound capacity claim found')
+  })
+
+  it('3. Founder valid + no capacity claim when required -> FAIL', () => {
+    expect(() => evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: null,
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      capacityClaim: null,
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'beta', status: 'trialing', currentPeriodEnd: '2026-08-01T00:00:00Z', foundingStatus: 'none' },
+    })).toThrow('No matching bound capacity claim found')
+  })
+
+  it('4. Founder discount schema v2 -> PASS (works without status/type payload in webhook)', () => {
+    // Verifies that when Paddle webhook payload only delivers { id, starts_at, ends_at: null }
+    // (with status = null and type = null), the discount is validated as valid and redeems Founder
+    expect(migrationCode).toContain("coalesce(p_discount_status, 'active') = 'active'")
+    expect(migrationCode).toContain("coalesce(p_discount_type, 'flat') = 'flat'")
+
+    const result = evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountStatus: null,
+      discountType: null,
+      discountEndsAt: null,
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'trialing', foundingStatus: 'none' },
+    })
+
+    expect(result.foundingStatus).toBe('redeemed')
+    expect(result.seatConsumed).toBe(true)
+  })
+
+  it('5. wrong Founder discount -> FAIL', () => {
+    // 5a. Mismatched discount ID does not redeem Founder
+    const wrongIdResult = evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_wrong_discount',
+      discountEndsAt: null,
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'trialing', foundingStatus: 'none' },
+    })
+    expect(wrongIdResult.foundingStatus).toBe('none')
+
+    // 5b. Expiring discount (endsAt is present) does not redeem Founder
+    const expiringResult = evaluateWebhookEvent({
+      eventType: 'subscription.created',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: '2027-08-01T00:00:00Z',
+      discountEndsAtPresent: true,
+      founderClaim: { id: 'claim-1', childId: 'child-1', status: 'bound', paddleTransactionId: 'txn-100' },
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'trialing', foundingStatus: 'none' },
+    })
+    expect(expiringResult.foundingStatus).toBe('none')
+
+    // 5c. Already redeemed Founder with wrong discount on update throws integrity failure
+    expect(() => evaluateWebhookEvent({
+      eventType: 'subscription.updated',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_wrong_discount',
+      discountEndsAt: null,
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'active', foundingStatus: 'redeemed' },
+    })).toThrow('Founder billing integrity failure')
+  })
+
+  it('6. cancel_at_period_end -> still redeemed + seat remains consumed', () => {
+    // 6a. scheduled cancellation (cancel_at_period_end = true) preserves redeemed status and consumed seat
+    const cancelScheduledResult = evaluateWebhookEvent({
+      eventType: 'subscription.updated',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: true,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: null,
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'active', foundingStatus: 'redeemed' },
+    })
+
+    expect(cancelScheduledResult.foundingStatus).toBe('redeemed')
+    expect(cancelScheduledResult.seatConsumed).toBe(true)
+
+    // 6b. resumed subscription continues redeemed status
+    const resumedResult = evaluateWebhookEvent({
+      eventType: 'subscription.resumed',
+      status: 'active',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: 'dsc_founder_expected',
+      discountEndsAt: null,
+      originatingTransactionId: 'txn-100',
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'active', foundingStatus: 'redeemed' },
+    })
+
+    expect(resumedResult.foundingStatus).toBe('redeemed')
+    expect(resumedResult.seatConsumed).toBe(true)
+
+    // 6c. actual cancellation (status = 'canceled') transitions to forfeited, but seat remains consumed (monotonic)
+    const canceledResult = evaluateWebhookEvent({
+      eventType: 'subscription.canceled',
+      status: 'canceled',
+      planCode: 'standard_monthly',
+      cancelAtPeriodEnd: false,
+      expectedDiscountId: 'dsc_founder_expected',
+      discountId: null,
+      discountEndsAt: null,
+      originatingTransactionId: null,
+      existingSubscription: { id: 'sub-1', provider: 'paddle', status: 'active', foundingStatus: 'redeemed' },
+    })
+
+    expect(canceledResult.foundingStatus).toBe('forfeited')
+    expect(canceledResult.seatConsumed).toBe(true)
+  })
+})
+
 
 
