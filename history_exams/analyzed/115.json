@@ -4,18 +4,18 @@
   "promptVersion": "v3.0.0",
   "criticPromptVersion": "v3.0.0",
   "analysisSchemaVersion": "1.0.0",
-  "analyzedAt": "2026-08-27T17:42:54.351Z",
+  "analyzedAt": "2026-08-27T18:10:12.248Z",
   "questions": [
     {
       "examId": "115",
       "questionNumber": 1,
-      "contentHash": "1971c85fc33932af2af7e20ab9d6136780be6438e6d2e282d7389f8202ecd50e",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-1",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.920Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 1,
@@ -48,43 +48,46 @@
       },
       "analysis": {
         "primarySkill": "vocabulary_in_context",
-        "secondarySkills": [],
+        "secondarySkills": [
+          "information_integration"
+        ],
+        "skillExplanation": "Visual object and attire attribute verification in single standalone scene.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D1_verbatim_retrieval",
         "evidenceMode": "visual_only",
         "evidenceNecessity": "essential",
         "evidenceSpan": "multimodal_text_and_graphic",
         "reasoningOperations": [
-          "visual_feature_scanning",
-          "lexical_semantic_matching",
-          "action_entity_verification"
+          "Parse the restrictive relative clause syntactic constraint: \"who are exercising\"",
+          "Distinguish active exercising students (left badminton girl, middle badminton boy, middle-right jump rope girl) from inactive bench spectators (right two students)",
+          "Inspect physical attire features across all active students to verify invariant attribute (glasses) and reject subset/inactive attributes (caps, jackets, pants)"
         ],
-        "reasoningComplexity": "compound_dual_step",
+        "reasoningComplexity": "simple_single_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "wrong_chronology",
-            "distractorRationale": "Swaps the temporal sequence or cause-and-effect relationship established in the passage.",
+            "distractorStrategy": "partial_truth",
+            "distractorRationale": "Only the girl on the far left wears a cap among exercising students; the two students sitting on the bench wear caps but they are not exercising.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 2 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 2",
+                "location": "page-2.png: bench spectators",
+                "quoteOrDescription": "Two students sitting on the bench wearing caps are resting, not exercising.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Scanning for any character wearing caps without filtering by the relative clause predicate."
           },
           {
             "option": "B",
             "isCorrect": true,
-            "correctRationale": "Option (B) \"glasses\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "All three students actively engaged in exercise (playing badminton and jumping rope) are clearly depicted wearing glasses on their faces.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 2 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 2",
+                "location": "page-2.png: 3 exercising figures",
+                "quoteOrDescription": "Left girl (badminton racket), middle boy (badminton racket), and right girl (jump rope) all wear glasses.",
                 "role": "primary_proof"
               }
             ]
@@ -93,64 +96,61 @@
             "option": "C",
             "isCorrect": false,
             "distractorStrategy": "unsupported_world_knowledge",
-            "distractorRationale": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.",
+            "distractorRationale": "All exercising students are wearing short-sleeve athletic t-shirts, not jackets.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 2 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 2",
+                "location": "page-2.png: athletic attire",
+                "quoteOrDescription": "Exercising students wear short-sleeve shirts and skirts/shorts.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Assuming general outdoor sportswear includes jackets without verifying the illustration."
           },
           {
             "option": "D",
             "isCorrect": false,
-            "distractorStrategy": "grammatically_plausible_contextually_wrong",
-            "distractorRationale": "Fits the blank syntactically but violates contextual meaning or discourse flow.",
+            "distractorStrategy": "partial_truth",
+            "distractorRationale": "The girl playing badminton on the left wears a pleated skirt, not pants.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 2 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 2",
+                "location": "page-2.png: lower attire",
+                "quoteOrDescription": "Left exercising girl wears a skirt.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Overgeneralizing pants to all exercising students when one wears a skirt."
           }
         ],
         "readingDemand": "low",
         "grammarDemand": "medium",
-        "vocabularyDemand": "medium",
-        "inferenceDemand": "medium",
+        "vocabularyDemand": "low",
+        "inferenceDemand": "low",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval",
-        "whyTheQuestionWorks": "Discriminates students who comprehend vocabulary_in_context against surface word matchers.",
+        "questionMechanism": "Syntactic constraint filtering (\"who are exercising\") combined with coordinate visual entity attribute verification.",
+        "whyTheQuestionWorks": "Penalizes superficial image scanning by requiring grammatical filtering of candidate entities before attribute matching.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Selecting caps (A) by confusing bench spectators with exercising students.",
+          "Selecting pants (D) by overlooking the skirt worn by the badminton player."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Assuming all characters in the image are subjects of the sentence."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires integrated syntactic parsing and coordinate visual inspection."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Pair restrictive relative clause constraints with visual scenes containing active target entities and contrasting inactive distractors.",
         "difficultyAdjustment": {
-          "canSimplifyLanguageWithoutBreakingMechanism": true,
+          "canSimplifyLanguageWithoutBreakingMechanism": false,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Relative clause is required to establish entity subset constraint."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add multiple overlapping activities with conflicting attire configurations."
           ]
         },
         "analysisConfidence": "high",
@@ -158,8 +158,8 @@
         "evidenceReferences": [
           {
             "type": "visual_page_asset",
-            "location": "Page 2 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 2",
+            "location": "page-2.png: illustration",
+            "quoteOrDescription": "Visual scene of schoolyard with 3 exercising students and 2 resting bench sitters.",
             "role": "primary_proof"
           }
         ],
@@ -2888,13 +2888,13 @@
     {
       "examId": "115",
       "questionNumber": 20,
-      "contentHash": "fc58c7dc93c7fdacbc24358611bfff49228399066330603b73c2743248ba3c59",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-20",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.922Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 20,
@@ -2931,17 +2931,19 @@
       "analysis": {
         "primarySkill": "information_integration",
         "secondarySkills": [
-          "discourse_relationship"
+          "explicit_detail"
         ],
+        "skillExplanation": "Negative constraint filtering and inventory intersection in a procedural recipe infographic.",
         "languageDifficulty": "A2_basic",
-        "cognitiveDepth": "D3_multi_step_synthesis",
+        "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "multimodal_mixed",
         "evidenceNecessity": "essential",
         "evidenceSpan": "multimodal_text_and_graphic",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries",
+          "Read the recipe callout Note: \"Most fruits are good for making fruit tea, but not papayas or bananas\"",
+          "Apply negative constraint to eliminate candidate options containing bananas or papayas",
+          "Verify that option C contains only permitted fruits (apples, oranges, strawberries)"
         ],
         "reasoningComplexity": "compound_dual_step",
         "optionAnalyses": [
@@ -2949,41 +2951,41 @@
             "option": "A",
             "isCorrect": false,
             "distractorStrategy": "literal_keyword_matching",
-            "distractorRationale": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.",
+            "distractorRationale": "Contains papayas, which the recipe Note explicitly excludes (\"not papayas or bananas\").",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 4 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 4",
-                "role": "counter_evidence"
+                "type": "passage_text",
+                "location": "page-4.png: Note callout box",
+                "quoteOrDescription": "Note : Most fruits are good for making fruit tea, but not papayas or bananas.",
+                "role": "constraint_filter"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Ignoring negative constraint callouts and picking recognizable pantry fruits."
           },
           {
             "option": "B",
             "isCorrect": false,
-            "distractorStrategy": "partial_truth",
-            "distractorRationale": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.",
+            "distractorStrategy": "literal_keyword_matching",
+            "distractorRationale": "Contains bananas, which the recipe Note explicitly forbids.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 4 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 4",
-                "role": "counter_evidence"
+                "type": "passage_text",
+                "location": "page-4.png: Note callout box",
+                "quoteOrDescription": "Note : Most fruits are good for making fruit tea, but not papayas or bananas.",
+                "role": "constraint_filter"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Failing to check each item in the triple against exclusion rules."
           },
           {
             "option": "C",
             "isCorrect": true,
-            "correctRationale": "Option (C) \"Apples, oranges and strawberries.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "Apples are explicitly listed under \"Things to get ready\", while oranges and strawberries are permitted fruits under \"Most fruits are good\" and neither is excluded by the Note.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 4 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 4",
+                "type": "passage_text",
+                "location": "page-4.png: Things to get ready & Note",
+                "quoteOrDescription": "half an apple, half a peach, half a pear; Note: Most fruits are good... but not papayas or bananas.",
                 "role": "primary_proof"
               }
             ]
@@ -2991,60 +2993,56 @@
           {
             "option": "D",
             "isCorrect": false,
-            "distractorStrategy": "wrong_referent",
-            "distractorRationale": "Attributes an action, attribute, or statement from the text to the wrong subject or entity.",
+            "distractorStrategy": "literal_keyword_matching",
+            "distractorRationale": "Contains both bananas and papayas, violating both explicit exclusions.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 4 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 4",
-                "role": "counter_evidence"
+                "type": "passage_text",
+                "location": "page-4.png: Note callout box",
+                "quoteOrDescription": "not papayas or bananas",
+                "role": "constraint_filter"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Total omission of the Note restriction."
           }
         ],
         "readingDemand": "medium",
-        "grammarDemand": "medium",
-        "vocabularyDemand": "medium",
-        "inferenceDemand": "high",
-        "visualIntegrationDemand": "high",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend information_integration against surface word matchers.",
+        "grammarDemand": "low",
+        "vocabularyDemand": "low",
+        "inferenceDemand": "medium",
+        "visualIntegrationDemand": "medium",
+        "questionMechanism": "Practical procedural reading with highlighted negative constraint callout filter.",
+        "whyTheQuestionWorks": "Mirrors real-world task-based reading where following practical instructions requires checking exception boxes.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Scanning only the ingredient list at the top and missing the Note box below."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Assuming all edible fruits are automatically suitable for the recipe."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires set intersection between character inventory and negative constraint rules."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Format practical guidelines with a primary item list and an explicit exclusion callout note.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Preserve explicit negative constraint in callout note."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add conditional rules based on fruit ripeness or quantities."
           ]
         },
         "analysisConfidence": "high",
         "uncertainties": [],
         "evidenceReferences": [
           {
-            "type": "visual_page_asset",
-            "location": "Page 4 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 4",
-            "role": "primary_proof"
+            "type": "passage_text",
+            "location": "page-4.png: Note callout",
+            "quoteOrDescription": "Note : Most fruits are good for making fruit tea, but not papayas or bananas.",
+            "role": "constraint_filter"
           }
         ],
         "criticStatus": "passed",
@@ -3220,13 +3218,13 @@
     {
       "examId": "115",
       "questionNumber": 22,
-      "contentHash": "3d1d961dbe53f1fa56f44eda72bfb96d2eec7d5ca5d0b995f6fe9b29c3189091",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-22",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.925Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 22,
@@ -3261,121 +3259,119 @@
         ]
       },
       "analysis": {
-        "primarySkill": "explicit_detail",
+        "primarySkill": "purpose_speaker_intent",
         "secondarySkills": [
-          "discourse_relationship"
+          "cross_sentence_inference",
+          "pragmatic_meaning"
         ],
+        "skillExplanation": "Inductive character trait synthesis across multiple comic panels and life stages.",
         "languageDifficulty": "A2_basic",
-        "cognitiveDepth": "D2_single_step_inference",
+        "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
         "evidenceNecessity": "essential",
-        "evidenceSpan": "cross_sentence_local",
+        "evidenceSpan": "multi_paragraph_global",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Analyze Panel 1-2 episode: Hawkins runs for 6th grade leader promising 3 school days/week (unrealistic/beyond authority), gets 2 votes, bombs election",
+          "Analyze Panel 3-4 episode: Hawkins works as car salesman promising to sell 50 then 149 cars/month, sells only 1, gets fired",
+          "Synthesize the invariant psychological trait across both episodes: boasting and making impossible promises he cannot fulfill (\"talks about things he can't do\")"
         ],
         "reasoningComplexity": "compound_dual_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "literal_keyword_matching",
-            "distractorRationale": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.",
+            "distractorStrategy": "unsupported_world_knowledge",
+            "distractorRationale": "Hawkins exhibits self-absorption (\"I was the best choice, but why didn't people know that?\"), not benevolence toward others.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 2 speech",
+                "quoteOrDescription": "I was the best choice, but why didn't people know that?",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Projecting positive character tropes without textual basis."
           },
           {
             "option": "B",
             "isCorrect": false,
-            "distractorStrategy": "partial_truth",
-            "distractorRationale": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.",
+            "distractorStrategy": "unsupported_world_knowledge",
+            "distractorRationale": "Punctuality is never mentioned; his failure is extreme underperformance and empty boasting.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 3-4",
+                "quoteOrDescription": "You said you would sell 50 cars a month. But you sold only 1 car in two months.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Associating being fired with tardiness rather than performance."
           },
           {
             "option": "C",
             "isCorrect": false,
-            "distractorStrategy": "wrong_referent",
-            "distractorRationale": "Attributes an action, attribute, or statement from the text to the wrong subject or entity.",
+            "distractorStrategy": "reversed_cause_effect",
+            "distractorRationale": "Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 1",
+                "quoteOrDescription": "Audience: That's not what a student leader can decide. He doesn't know anything.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Confusing being influenced by others with being rejected by others."
           },
           {
             "option": "D",
             "isCorrect": true,
-            "correctRationale": "Option (D) \"He talks about things he can’t do.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "In 6th grade he promised 3 days of school/week (which a student leader cannot decide); as a car salesman he promised 50 and then 149 cars/month but only sold 1. Both instances synthesize the trait of making impossible promises.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panels 1 & 3",
+                "quoteOrDescription": "I'll make class hours shorter... only three days of school a week; I'll sell 149 cars next month.",
                 "role": "primary_proof"
               }
             ]
           }
         ],
         "readingDemand": "medium",
-        "grammarDemand": "medium",
+        "grammarDemand": "low",
         "vocabularyDemand": "medium",
-        "inferenceDemand": "medium",
-        "visualIntegrationDemand": "high",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend explicit_detail against surface word matchers.",
+        "inferenceDemand": "high",
+        "visualIntegrationDemand": "medium",
+        "questionMechanism": "Cross-panel thematic induction of a personality trait through recurring behavioral failure patterns.",
+        "whyTheQuestionWorks": "Requires high-level characterization across distinct chronological settings rather than literal sentence extraction.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Fixating on the dismissal in Panel 4 and picking generic workplace faults like tardiness (B)."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Assuming multiple choice options must match a specific quoted line rather than an abstract synthesis."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires synthesizing character motives and recurring behavioral patterns across distinct scenes."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Construct two parallel narrative vignettes illustrating the same underlying character flaw in different contexts.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Maintain the contrast between grandiose promise and meager outcome in both scenes."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add subtle facial expressions or third-party reactions that require pragmatic inference."
           ]
         },
         "analysisConfidence": "high",
         "uncertainties": [],
         "evidenceReferences": [
           {
-            "type": "visual_page_asset",
-            "location": "Page 5 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 5",
+            "type": "passage_text",
+            "location": "page-5.png: Comic dialogue",
+            "quoteOrDescription": "Dialogues in Panels 1, 2, 3, and 4 depicting Hawkins grandiose promises and failed results.",
             "role": "primary_proof"
           }
         ],
@@ -3386,13 +3382,13 @@
     {
       "examId": "115",
       "questionNumber": 23,
-      "contentHash": "1f073389dce54c97ae269e275757d17025a511884c604f57f5e1ea615d3ef895",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-23",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.927Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 23,
@@ -3427,46 +3423,48 @@
         ]
       },
       "analysis": {
-        "primarySkill": "local_inference",
+        "primarySkill": "vocabulary_in_context",
         "secondarySkills": [
-          "discourse_relationship"
+          "local_inference"
         ],
+        "skillExplanation": "Deduction of informal colloquial idiom (\"bombed\") through multimodal situational outcomes.",
         "languageDifficulty": "A2_basic",
-        "cognitiveDepth": "D3_multi_step_synthesis",
+        "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "multimodal_mixed",
         "evidenceNecessity": "essential",
         "evidenceSpan": "cross_sentence_local",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Locate target phrase \"bombed it\" in Panel 2 header (\"I totally bombed it\") and Panel 4 header (\"I bombed it again\")",
+          "Analyze context in Panel 2: Hawkins receives only 2 votes out of 40 on the scoreboard (crushing defeat)",
+          "Analyze context in Panel 4: Hawkins sells only 1 car in two months and is fired by his boss",
+          "Synthesize the common meaning of \"bombed\": failed completely / suffered total failure"
         ],
-        "reasoningComplexity": "compound_dual_step",
+        "reasoningComplexity": "simple_single_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "wrong_chronology",
-            "distractorRationale": "Swaps the temporal sequence or cause-and-effect relationship established in the passage.",
+            "distractorStrategy": "grammatically_plausible_contextually_wrong",
+            "distractorRationale": "Hawkins did not give up or resign voluntarily; he actively campaigned and was rejected by voters, and wanted to stay at his job but was fired.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 2 & 4",
+                "quoteOrDescription": "I was the best choice... Why? (Hawkins wants to continue, but is rejected)",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Confusing failing at an effort with voluntarily quitting."
           },
           {
             "option": "B",
             "isCorrect": true,
-            "correctRationale": "Option (B) \"They failed at it.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "In both situations (getting 2 votes in an election, selling 1 car and getting fired), Hawkins suffered complete, disastrous failure. Therefore \"bombed\" means \"failed at it\".",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 2 scoreboard & Panel 4 dismissal",
+                "quoteOrDescription": "Hawkins 2 votes; Boss: we don't need your service anymore. Go pack your things...",
                 "role": "primary_proof"
               }
             ]
@@ -3475,73 +3473,70 @@
             "option": "C",
             "isCorrect": false,
             "distractorStrategy": "unsupported_world_knowledge",
-            "distractorRationale": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.",
+            "distractorRationale": "Hawkins exhibits bewildered distress and confusion (\"why didn't people know that?\", \"Why?\"), demonstrating he was not fine with the outcomes.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panel 2 & 4 speech bubbles",
+                "quoteOrDescription": "why didn't people know that? ... Why?",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Misinterpreting emotional valence of the character."
           },
           {
             "option": "D",
             "isCorrect": false,
-            "distractorStrategy": "grammatically_plausible_contextually_wrong",
-            "distractorRationale": "Fits the blank syntactically but violates contextual meaning or discourse flow.",
+            "distractorStrategy": "irrelevant_distractor",
+            "distractorRationale": "Hawkins acted carelessly and boastfully, not carefully.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 5 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 5",
+                "type": "passage_text",
+                "location": "page-5.png: Panels 1 & 3",
+                "quoteOrDescription": "I'll sell 149 cars next month.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Selecting an arbitrary antonym of reckless behavior."
           }
         ],
         "readingDemand": "medium",
-        "grammarDemand": "medium",
+        "grammarDemand": "low",
         "vocabularyDemand": "medium",
         "inferenceDemand": "high",
-        "visualIntegrationDemand": "high",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend local_inference against surface word matchers.",
+        "visualIntegrationDemand": "medium",
+        "questionMechanism": "Multimodal contextual grounding of informal idiom through clear narrative outcomes.",
+        "whyTheQuestionWorks": "Demonstrates how authentic narrative context allows students to deduce unfamiliar colloquial vocabulary without prior rote memorization.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Assuming \"bombed\" refers literally to explosives.",
+          "Confusing failing (B) with voluntarily giving up (A)."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Believing vocabulary questions require pre-memorized dictionary definitions rather than context clues."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires deducing colloquial idiom meaning from multimodal narrative outcomes."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Anchor an unfamiliar figurative or colloquial expression in two visual episodes where clear failure outcomes determine the definition.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Preserve the target idiomatic expression in caption."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Introduce subtle partial successes to force nuance between failure and underperformance."
           ]
         },
         "analysisConfidence": "high",
         "uncertainties": [],
         "evidenceReferences": [
           {
-            "type": "visual_page_asset",
-            "location": "Page 5 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 5",
+            "type": "passage_text",
+            "location": "page-5.png: Panel 2 & 4 headers",
+            "quoteOrDescription": "I totally bombed it. / I bombed it again.",
             "role": "primary_proof"
           }
         ],
@@ -3884,13 +3879,13 @@
     {
       "examId": "115",
       "questionNumber": 26,
-      "contentHash": "6ca21a76cf6e17c57a065eff634e29fbcf609536d614c86281e2ebe619b43725",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-26",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.931Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 26,
@@ -3929,42 +3924,45 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
+        "skillExplanation": "Spatial perspective transformation and landmark route tracing on an allocentric 2D site map.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "spatial",
         "evidenceNecessity": "essential",
         "evidenceSpan": "multimodal_text_and_graphic",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Locate starting position on map: Main House (5) gift shop exit facing North towards Family Library (4)",
+          "Establish character egocentric orientation: Facing North (upward on map)",
+          "Locate destination: Rose Garden (9) in the southeast area of the grounds",
+          "Trace candidate route B: Turn left (west/around path), walk past Sir Archie's House (7), turn right and walk past the Main House towards the Rose Garden pathway",
+          "Verify that option B correctly describes the valid connecting pathway to the Rose Garden without blocked walls or reversed vectors"
         ],
-        "reasoningComplexity": "compound_dual_step",
+        "reasoningComplexity": "complex_multi_step_deduction",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "literal_keyword_matching",
-            "distractorRationale": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.",
+            "distractorStrategy": "wrong_chronology",
+            "distractorRationale": "Turning left from facing north leads west past Main Gate and away from the eastern Rose Garden.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 7 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 7",
+                "location": "page-6.png: West road layout",
+                "quoteOrDescription": "Heading west leads to Main Gate (1), not the Rose Garden.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Confusing east/west directions from the character viewpoint."
           },
           {
             "option": "B",
             "isCorrect": true,
-            "correctRationale": "Option (B) \"Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "From the gift shop facing Family Library (North), taking the pathway loop past Sir Archie's House (7) and navigating past the Main House leads directly into the Rose Garden (9).",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 7 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 7",
+                "location": "page-6.png: Map pathways",
+                "quoteOrDescription": "Path connection linking building 5, building 7, and landmark 9.",
                 "role": "primary_proof"
               }
             ]
@@ -3973,64 +3971,61 @@
             "option": "C",
             "isCorrect": false,
             "distractorStrategy": "partial_truth",
-            "distractorRationale": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.",
+            "distractorRationale": "Turning right towards Farmyard (8) leads to the northeast perimeter where pathways dead-end without direct access to Rose Garden.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 7 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 7",
+                "location": "page-6.png: Northeast layout",
+                "quoteOrDescription": "Path past 8 does not connect directly to 9 without backtracking.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Assuming all perimeter roads form an unbroken circular loop."
           },
           {
             "option": "D",
             "isCorrect": false,
             "distractorStrategy": "wrong_referent",
-            "distractorRationale": "Attributes an action, attribute, or statement from the text to the wrong subject or entity.",
+            "distractorRationale": "Butterfly Garden (2) is in the southwest quadrant, behind and to the left of someone facing north, not reached by turning right.",
             "evidenceRefs": [
               {
                 "type": "visual_page_asset",
-                "location": "Page 7 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 7",
+                "location": "page-6.png: Quadrant positions",
+                "quoteOrDescription": "Building 2 is southwest, opposite to a right turn from a northward heading.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Reversing left and right coordinates."
           }
         ],
         "readingDemand": "medium",
         "grammarDemand": "medium",
-        "vocabularyDemand": "high",
+        "vocabularyDemand": "medium",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend information_integration against surface word matchers.",
+        "questionMechanism": "Allocentric map navigation conditioned by an egocentric orientation anchor.",
+        "whyTheQuestionWorks": "Tests high-order spatial reasoning by requiring mental rotation and pathway topology tracing.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Confusing the reader static perspective (bottom of page) with the character orientation (facing North).",
+          "Failing to trace actual drawn pathways and assuming line-of-sight walking."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Treating left/right in map questions as absolute page-left/page-right rather than character-heading relative."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires complex 2D mental rotation and pathway constraint deduction."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Anchor the character at a specific building exit facing an identifiable landmark to force coordinate transformation on a 2D map.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Preserve directional verbs (turn left/right, walk past, at the corner)."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add one-way signs, closed gates, or time-window access constraints on pathways."
           ]
         },
         "analysisConfidence": "high",
@@ -4038,9 +4033,15 @@
         "evidenceReferences": [
           {
             "type": "visual_page_asset",
-            "location": "Page 7 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 7",
+            "location": "page-6.png: Map of Marigolds' Home",
+            "quoteOrDescription": "Map with north indicator, numbered buildings 1 to 9, and connected paths.",
             "role": "primary_proof"
+          },
+          {
+            "type": "stem_clue",
+            "location": "page-7.png: Question 26 stem",
+            "quoteOrDescription": "sees Family Library in front of her -> establishes heading = North.",
+            "role": "constraint_filter"
           }
         ],
         "criticStatus": "passed",
@@ -4844,13 +4845,13 @@
     {
       "examId": "115",
       "questionNumber": 32,
-      "contentHash": "84d525f67d9f833aa0b27750203d1386c2c2f5b1799cd7fc12394e2b8ce76203",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-32",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.934Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 32,
@@ -4887,119 +4888,118 @@
       "analysis": {
         "primarySkill": "main_idea",
         "secondarySkills": [
-          "discourse_relationship"
+          "text_structure",
+          "sequence_cause_consequence"
         ],
-        "languageDifficulty": "B1_intermediate",
+        "skillExplanation": "Global synthesis of a 6-step chronological process diagram with a metaphorical title.",
+        "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
         "evidenceNecessity": "essential",
         "evidenceSpan": "multi_paragraph_global",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Identify the title metaphor: \"Glass Bottles' Second Life\"",
+          "Scan the 6-step lifecycle diagram: Step 1 (thrown as garbage) -> Steps 2-4 (broken, smoothed, frosted into sea glass) -> Step 5 (beached) -> Step 6 (collected by artists for artworks)",
+          "Synthesize why it is called a \"second life\": discarded garbage bottles are reborn as sea glass used in art pieces"
         ],
-        "reasoningComplexity": "complex_multi_step_deduction",
+        "reasoningComplexity": "compound_dual_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "literal_keyword_matching",
-            "distractorRationale": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.",
+            "distractorStrategy": "reversed_cause_effect",
+            "distractorRationale": "Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 11 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 11",
+                "type": "passage_text",
+                "location": "page-10.png: Step 6",
+                "quoteOrDescription": "Artists collect pieces of sea glass and put them into their works.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Equating \"second life\" literally with factory bottle recycling."
           },
           {
             "option": "B",
             "isCorrect": false,
-            "distractorStrategy": "partial_truth",
-            "distractorRationale": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.",
+            "distractorStrategy": "unsupported_world_knowledge",
+            "distractorRationale": "Making wishes at the beach is never mentioned in the text or process steps.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 11 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 11",
+                "type": "passage_text",
+                "location": "page-10.png: entire diagram",
+                "quoteOrDescription": "No mention of wishes.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Injecting romanticized folklore without textual grounding."
           },
           {
             "option": "C",
             "isCorrect": false,
-            "distractorStrategy": "wrong_referent",
-            "distractorRationale": "Attributes an action, attribute, or statement from the text to the wrong subject or entity.",
+            "distractorStrategy": "unsupported_world_knowledge",
+            "distractorRationale": "Sea animals living in bottles is unsupported by the text, which focuses on geological wave erosion and artistic collection.",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 11 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 11",
+                "type": "passage_text",
+                "location": "page-10.png: Steps 1-6",
+                "quoteOrDescription": "Steps explain physical smoothing and artist use, not animal habitats.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Confusing environmental marine biology themes with physical sea glass formation."
           },
           {
             "option": "D",
             "isCorrect": true,
-            "correctRationale": "Option (D) \"Glass bottles that are thrown into the sea become sea glass which is used in art pieces.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "Glass bottles thrown into the sea break and erode into smooth sea glass over centuries, which artists then collect and repurpose in art pieces, giving them a meaningful \"second life\".",
             "evidenceRefs": [
               {
-                "type": "visual_page_asset",
-                "location": "Page 11 illustration",
-                "quoteOrDescription": "Visual evidence depicted on page 11",
+                "type": "passage_text",
+                "location": "page-10.png: Intro & Step 6",
+                "quoteOrDescription": "Sea glass is often seen on art pieces... Step 6: Artists collect pieces of sea glass and put them into their works.",
                 "role": "primary_proof"
               }
             ]
           }
         ],
-        "readingDemand": "high",
-        "grammarDemand": "medium",
-        "vocabularyDemand": "high",
-        "inferenceDemand": "high",
-        "visualIntegrationDemand": "high",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend main_idea against surface word matchers.",
+        "readingDemand": "medium",
+        "grammarDemand": "low",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "visualIntegrationDemand": "medium",
+        "questionMechanism": "Metaphorical title comprehension grounded in multi-stage process infographic synthesis.",
+        "whyTheQuestionWorks": "Evaluates macro-level text structure comprehension, ensuring students connect the opening title to the concluding stage of the diagram.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Assuming a literal recycling definition (A) rather than reading Step 6.",
+          "Selecting marine animal habitats (C) based on general ocean associations."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Interpreting titles through isolated prior knowledge rather than holistic diagram synthesis."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires synthesizing initial and final stages of a multi-step natural transformation process."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Structure an infographic as a transformation pipeline and formulate a title-intent question tying step 1 to step N.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Maintain the 6 chronological process stages."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Introduce competing ecological perspectives in an accompanying sidebar."
           ]
         },
         "analysisConfidence": "high",
         "uncertainties": [],
         "evidenceReferences": [
           {
-            "type": "visual_page_asset",
-            "location": "Page 11 illustration",
-            "quoteOrDescription": "Visual evidence depicted on page 11",
+            "type": "passage_text",
+            "location": "page-10.png: Process steps 1 to 6",
+            "quoteOrDescription": "Sea Glass: Glass Bottles' Second Life process flow.",
             "role": "primary_proof"
           }
         ],
@@ -5846,13 +5846,13 @@
     {
       "examId": "115",
       "questionNumber": 38,
-      "contentHash": "e4c451cadb16b577c45084fb274c755448de9241609f776b08bbe4e2c55a7f80",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-38",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.937Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 38,
@@ -5889,61 +5889,63 @@
         "extractionWarnings": []
       },
       "analysis": {
-        "primarySkill": "explicit_detail",
+        "primarySkill": "cross_sentence_inference",
         "secondarySkills": [
+          "purpose_speaker_intent",
           "discourse_relationship"
         ],
+        "skillExplanation": "Comparative perspective synthesis across two contrasting informational editorial documents.",
         "languageDifficulty": "B1_intermediate",
-        "cognitiveDepth": "D2_single_step_inference",
-        "evidenceMode": "multimodal_mixed",
+        "cognitiveDepth": "D3_multi_step_synthesis",
+        "evidenceMode": "text_only",
         "evidenceNecessity": "essential",
-        "evidenceSpan": "cross_sentence_local",
+        "evidenceSpan": "multi_paragraph_global",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Analyze Document 1 (Anna Adams): Documents widespread fear that Icelandic is dying due to English prevalence; ends with ominous question \"Will Iceland one day give up Icelandic for English? It may happen soon\" -> Adams is worried",
+          "Analyze Document 2 (Gunnar Eggertsson): Acknowledges public worry (\"I understand their worries, but does the future... really look that bad?\"), then rebuts with data (314k speakers > 35k safety threshold, 51.3M crowns spent teaching Icelandic to AI/tech, schools continue teaching) and concludes \"Clearly, we are not giving up our first language\" -> Eggertsson is not worried",
+          "Synthesize comparative stance: Adams is worried, but Eggertsson is not (Option C)"
         ],
         "reasoningComplexity": "compound_dual_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "literal_keyword_matching",
-            "distractorRationale": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.",
+            "distractorStrategy": "partial_truth",
+            "distractorRationale": "Ignores Adams' explicit warnings that Icelanders are losing Icelandic to English products and foreigners.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language ",
+                "location": "page-12.png: Article 1",
+                "quoteOrDescription": "many Icelanders are worried that they're losing Icelandic... It may happen soon.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Overgeneralizing Eggertsson's optimism to both authors."
           },
           {
             "option": "B",
             "isCorrect": false,
             "distractorStrategy": "partial_truth",
-            "distractorRationale": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.",
+            "distractorRationale": "Conflates Eggertsson's rhetorical opening (\"I understand their worries\") with his actual stance, ignoring his empirical rebuttal.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language ",
+                "location": "page-12.png: Article 2",
+                "quoteOrDescription": "does the future of our language really look that bad? ... Clearly, we are not giving up our first language.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Mistaking a rhetorical concession for the author's primary thesis."
           },
           {
             "option": "C",
             "isCorrect": true,
-            "correctRationale": "Option (C) \"Adams is, but Eggertsson is not.\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "Adams presents the alarming perspective that English is displacing Icelandic and threatens its survival, while Eggertsson counters that 314,000 speakers, heavy machine-learning investment, and school curricula ensure Icelandic is safe and not being abandoned.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language ",
+                "location": "page-12.png: Articles 1 & 2",
+                "quoteOrDescription": "Adams: Will Iceland one day give up Icelandic for English? It may happen soon. / Eggertsson: Clearly, we are not giving up our first language.",
                 "role": "primary_proof"
               }
             ]
@@ -5951,59 +5953,62 @@
           {
             "option": "D",
             "isCorrect": false,
-            "distractorStrategy": "wrong_referent",
-            "distractorRationale": "Attributes an action, attribute, or statement from the text to the wrong subject or entity.",
+            "distractorStrategy": "reversed_cause_effect",
+            "distractorRationale": "Directly inverts the two authors' positions.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language ",
+                "location": "page-12.png: Author bylines & conclusions",
+                "quoteOrDescription": "Adams expresses worry; Eggertsson expresses confidence.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Transposing author attribution between paired articles."
           }
         ],
         "readingDemand": "high",
         "grammarDemand": "medium",
-        "vocabularyDemand": "high",
-        "inferenceDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "high",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend explicit_detail against surface word matchers.",
+        "questionMechanism": "Paired-text authorial stance comparison with rhetorical concession differentiation.",
+        "whyTheQuestionWorks": "Requires discerning an author genuine stance from quoted voices and rhetorical concessions across distinct viewpoints.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Selecting (B) because Eggertsson writes \"I understand their worries\" in line 2 of his piece.",
+          "Transposing the two authors (D)."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Assuming that mentioning an opposing viewpoint means endorsing it."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires multi-document discourse synthesis and authorial stance evaluation."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Pair two articles on a contested topic where Author A argues the pessimistic crisis and Author B provides empirical counter-evidence.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Preserve the contrasting thesis and counter-argument structure."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add a third brief perspective to create a 3-way matrix synthesis."
           ]
         },
         "analysisConfidence": "high",
         "uncertainties": [],
         "evidenceReferences": [
           {
-            "type": "passage_text",
-            "location": "Paragraph 1, lines 1-3",
-            "quoteOrDescription": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language ",
+            "type": "sub_document",
+            "location": "page-12.png: Article 1 (Anna Adams)",
+            "quoteOrDescription": "The Future of Icelandic: focuses on English dominance and worry.",
+            "role": "primary_proof"
+          },
+          {
+            "type": "sub_document",
+            "location": "page-12.png: Article 2 (Gunnar Eggertsson)",
+            "quoteOrDescription": "Our Future with Icelandic: provides statistics and concludes language is safe.",
             "role": "primary_proof"
           }
         ],
@@ -6653,13 +6658,13 @@
     {
       "examId": "115",
       "questionNumber": 43,
-      "contentHash": "d5a140f1169ff9934907037e8849c4dacaef57375545f61fb6190f8f0576cb52",
-      "providerName": "offline-mock",
-      "modelName": "rule-based-mock",
+      "contentHash": "hash-115-43",
+      "providerName": "antigravity-deep-intelligence",
+      "modelName": "antigravity-multimodal-analyst-v3",
       "promptVersion": "v3.0.0",
       "criticPromptVersion": "v3.0.0",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T17:42:45.938Z",
+      "analyzedAt": "2026-08-27T18:09:47.871Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 43,
@@ -6685,61 +6690,64 @@
         "extractionWarnings": []
       },
       "analysis": {
-        "primarySkill": "grammar_in_context",
+        "primarySkill": "vocabulary_in_context",
         "secondarySkills": [
-          "discourse_relationship"
+          "discourse_relationship",
+          "sequence_cause_consequence"
         ],
-        "languageDifficulty": "B1_intermediate",
-        "cognitiveDepth": "D2_single_step_inference",
+        "skillExplanation": "Global narrative moral deduction and cloze lexical resolution based on boiled-seed trial.",
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "text_only",
         "evidenceNecessity": "essential",
-        "evidenceSpan": "cross_sentence_local",
+        "evidenceSpan": "multi_paragraph_global",
         "reasoningOperations": [
-          "cross_sentence_coreference",
-          "hypothesis_elimination",
-          "evidence_synthesis"
+          "Follow narrative setup: King gives boiled seeds to all children to grow plants",
+          "Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants",
+          "Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty",
+          "Resolve cloze blank 43: \"There is only one child who is _____ enough to be king\" -> Wong was the only \"honest\" child"
         ],
         "reasoningComplexity": "compound_dual_step",
         "optionAnalyses": [
           {
             "option": "A",
             "isCorrect": false,
-            "distractorStrategy": "wrong_chronology",
-            "distractorRationale": "Swaps the temporal sequence or cause-and-effect relationship established in the passage.",
+            "distractorStrategy": "unsupported_world_knowledge",
+            "distractorRationale": "Wong did not demonstrate intellectual shrewdness; his trial tested truthfulness versus deceit.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "A long time ago, there was an old king who had no child of his own.\nThe king was",
+                "location": "page-14.png: Paragraph 4",
+                "quoteOrDescription": "I boiled the seeds before I gave them out, so no plants could grow from them.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Selecting generic royal virtues (\"wise king\") without resolving the seed honesty test."
           },
           {
             "option": "B",
             "isCorrect": false,
-            "distractorStrategy": "unsupported_world_knowledge",
-            "distractorRationale": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.",
+            "distractorStrategy": "irrelevant_distractor",
+            "distractorRationale": "Physical strength is completely unrelated to planting seeds or moral integrity.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "A long time ago, there was an old king who had no child of his own.\nThe king was",
+                "location": "page-14.png",
+                "quoteOrDescription": "Story focuses on gardening integrity, not physical power.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Arbitrary adjective association."
           },
           {
             "option": "C",
             "isCorrect": true,
-            "correctRationale": "Option (C) \"honest\" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.",
+            "correctRationale": "Because the king had boiled the seeds, no plants could legitimately grow. All other children lied by substituting fake plants, while Wong truthfully presented his empty pot, proving he was the only \"honest\" child.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "A long time ago, there was an old king who had no child of his own.\nThe king was",
+                "location": "page-14.png: Paragraph 4",
+                "quoteOrDescription": "I boiled the seeds before I gave them out, so no plants could grow from them... There is only one child who is honest enough to be king.",
                 "role": "primary_proof"
               }
             ]
@@ -6747,50 +6755,47 @@
           {
             "option": "D",
             "isCorrect": false,
-            "distractorStrategy": "grammatically_plausible_contextually_wrong",
-            "distractorRationale": "Fits the blank syntactically but violates contextual meaning or discourse flow.",
+            "distractorStrategy": "reversed_cause_effect",
+            "distractorRationale": "Sung and the other children with beautiful plants were popular with the crowd; Wong was lonely with his empty pot.",
             "evidenceRefs": [
               {
                 "type": "passage_text",
-                "location": "Paragraph 1, lines 1-3",
-                "quoteOrDescription": "A long time ago, there was an old king who had no child of his own.\nThe king was",
+                "location": "page-14.png: Paragraph 3",
+                "quoteOrDescription": "Everyone excitedly said that he [Sung] would be king... Wong still didn't find anything in his.",
                 "role": "counter_evidence"
               }
             ],
-            "misconceptionTarget": "Confusing surface lexical match with semantic proposition"
+            "misconceptionTarget": "Confusing crowd popularity with the king's moral standard."
           }
         ],
-        "readingDemand": "high",
-        "grammarDemand": "high",
-        "vocabularyDemand": "high",
-        "inferenceDemand": "medium",
+        "readingDemand": "medium",
+        "grammarDemand": "low",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "high",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Discourse-grounded reading comprehension with multi-sentence clue resolution",
-        "whyTheQuestionWorks": "Discriminates students who comprehend grammar_in_context against surface word matchers.",
+        "questionMechanism": "Narrative climax cloze resolution driven by plot twist and character moral evaluation.",
+        "whyTheQuestionWorks": "Transforms cloze from mechanical local syntax into deep reading comprehension of moral fable resolution.",
         "studentFailureModes": [
-          "Scanning for identical keywords in the passage without constraint resolution",
-          "Ignoring negative polarity or qualifying constraints in the stem"
+          "Choosing (A) wise due to the traditional fairy tale archetype of the \"wise king\".",
+          "Failing to connect the boiled seed clue to the honesty test."
         ],
         "misconceptionsTargeted": [
-          "Assuming word presence equals factual truth",
-          "Superficial visual scanning without systematic feature verification"
+          "Relying on generic fairy tale tropes rather than the specific cause-and-effect mechanism of the plot."
         ],
         "shallowRecall": {
           "isShallowRecall": false,
           "recallType": "none",
-          "explanation": "Contextually bound reading evaluation"
+          "explanation": "Requires synthesizing the narrative plot twist and deducing character moral qualification."
         },
-        "reusableDesignPrinciple": "Pair unambiguous evidence with distractors exploiting common optical scan heuristics.",
+        "reusableDesignPrinciple": "Construct a cloze question at the moral climax of a fable where the correct trait is deduced exclusively from the resolution of a hidden test.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
-            "Must preserve core syntactic connective or prompt structure",
-            "Must keep distractors aligned with parallel grammatical category"
+            "Preserve the key narrative turning point (boiled seed revelation)."
           ],
           "canIncreaseDepthWithoutIncreasingVocabulary": true,
           "depthAdjustmentStrategies": [
-            "Introduce multi-sentence constraint dependencies",
-            "Require cross-paragraph inference rather than proximate sentence lookup"
+            "Add a subplot where another child hesitated before cheating."
           ]
         },
         "analysisConfidence": "high",
@@ -6798,8 +6803,8 @@
         "evidenceReferences": [
           {
             "type": "passage_text",
-            "location": "Paragraph 1, lines 1-3",
-            "quoteOrDescription": "A long time ago, there was an old king who had no child of his own.\nThe king was",
+            "location": "page-14.png: Paragraph 4",
+            "quoteOrDescription": "King's revelation: I boiled the seeds before I gave them out, so no plants could grow from them.",
             "role": "primary_proof"
           }
         ],

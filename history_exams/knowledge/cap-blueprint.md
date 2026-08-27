@@ -60,16 +60,16 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_CLOZE_DISCOURSE_AND_TENSE_FLOW: Cloze Discourse Architecture & Tense Flow Tracker
 - **Primary Skill**: `grammar_in_context`
 - **Supported Genres**: `cloze_passage`
-- **Cognitive Depth**: `D2_single_step_inference`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
 - **Evidence Span**: `cross_sentence_local`
 - **Evidence Support**: 19 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis, Follow narrative setup: King gives boiled seeds to all children to grow plants, Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants, Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty
 - **Stem Templates**:
   * *"(Cloze blank 40)"*
   * *"(Cloze blank 41)"*
   * *"(Cloze blank 42)"*
   * *"(Cloze blank 43)"*
-- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
+- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `irrelevant_distractor`, `reversed_cause_effect`
 - **Quality Checks**:
   * Correct tense/connective must be determined by earlier or subsequent sentences
   * All 4 options must be grammatically valid in isolation
@@ -81,13 +81,13 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 - **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
 - **Evidence Span**: `multimodal_text_and_graphic`
 - **Evidence Support**: 20 items across 3 years (Years: 111, 113, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis, Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries, Read the recipe callout Note: "Most fruits are good for making fruit tea, but not papayas or bananas", Apply negative constraint to eliminate candidate options containing bananas or papayas
 - **Stem Templates**:
   * *"What does Tea-Rock celebrate? th"*
   * *"Here is the postcard {Character} is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?"*
   * *"What can we learn about sugar from the infographic?"*
   * *"What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?"*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `reversed_cause_effect`, `irrelevant_distractor`
 - **Quality Checks**:
   * If the graphic is removed, the question must become unanswerable
   * Distractors must reflect genuine visual coordinates with altered labels

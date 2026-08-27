@@ -784,14 +784,14 @@
   - Primary Skill: `vocabulary_in_context`
   - Cognitive Depth: `D1_verbatim_retrieval` | Language: `A1_elementary`
   - Evidence Necessity: `essential`
-  - Mechanism: *Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval*
-  - Function: *Discriminates students who comprehend vocabulary_in_context against surface word matchers.*
+  - Mechanism: *Syntactic constraint filtering ("who are exercising") combined with coordinate visual entity attribute verification.*
+  - Function: *Penalizes superficial image scanning by requiring grammatical filtering of candidate entities before attribute matching.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
-    - **(B) [CORRECT]**: Option (B) "glasses" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
-    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
-    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
+    - **(A) [partial_truth]**: Only the girl on the far left wears a cap among exercising students; the two students sitting on the bench wear caps but they are not exercising.
+    - **(B) [CORRECT]**: All three students actively engaged in exercise (playing badminton and jumping rope) are clearly depicted wearing glasses on their faces.
+    - **(C) [unsupported_world_knowledge]**: All exercising students are wearing short-sleeve athletic t-shirts, not jackets.
+    - **(D) [partial_truth]**: The girl playing badminton on the left wears a pleated skirt, not pants.
 
 ---
 
@@ -835,16 +835,16 @@
   - (D) Bananas, papayas and strawberries.
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `information_integration`
-  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
+  - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
   - Evidence Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Mechanism: *Practical procedural reading with highlighted negative constraint callout filter.*
+  - Function: *Mirrors real-world task-based reading where following practical instructions requires checking exception boxes.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
-    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
-    - **(C) [CORRECT]**: Option (C) "Apples, oranges and strawberries." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
-    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(A) [literal_keyword_matching]**: Contains papayas, which the recipe Note explicitly excludes ("not papayas or bananas").
+    - **(B) [literal_keyword_matching]**: Contains bananas, which the recipe Note explicitly forbids.
+    - **(C) [CORRECT]**: Apples are explicitly listed under "Things to get ready", while oranges and strawberries are permitted fruits under "Most fruits are good" and neither is excluded by the Note.
+    - **(D) [literal_keyword_matching]**: Contains both bananas and papayas, violating both explicit exclusions.
 
 ---
 
@@ -890,17 +890,17 @@
   - (C) He blindly follows other people.
   - (D) He talks about things he can’t do.
 - **AI Reverse-Engineered Assessment**:
-  - Primary Skill: `explicit_detail`
-  - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
+  - Primary Skill: `purpose_speaker_intent`
+  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
   - Evidence Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend explicit_detail against surface word matchers.*
+  - Mechanism: *Cross-panel thematic induction of a personality trait through recurring behavioral failure patterns.*
+  - Function: *Requires high-level characterization across distinct chronological settings rather than literal sentence extraction.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
-    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
-    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
-    - **(D) [CORRECT]**: Option (D) "He talks about things he can’t do." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(A) [unsupported_world_knowledge]**: Hawkins exhibits self-absorption ("I was the best choice, but why didn't people know that?"), not benevolence toward others.
+    - **(B) [unsupported_world_knowledge]**: Punctuality is never mentioned; his failure is extreme underperformance and empty boasting.
+    - **(C) [reversed_cause_effect]**: Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment.
+    - **(D) [CORRECT]**: In 6th grade he promised 3 days of school/week (which a student leader cannot decide); as a car salesman he promised 50 and then 149 cars/month but only sold 1. Both instances synthesize the trait of making impossible promises.
 
 ---
 
@@ -918,17 +918,17 @@
   - (C) They were fine with it.
   - (D) They were careful about it.
 - **AI Reverse-Engineered Assessment**:
-  - Primary Skill: `local_inference`
-  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
+  - Primary Skill: `vocabulary_in_context`
+  - Cognitive Depth: `D2_single_step_inference` | Language: `A2_basic`
   - Evidence Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend local_inference against surface word matchers.*
+  - Mechanism: *Multimodal contextual grounding of informal idiom through clear narrative outcomes.*
+  - Function: *Demonstrates how authentic narrative context allows students to deduce unfamiliar colloquial vocabulary without prior rote memorization.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [wrong_chronology]**: Swaps the temporal sequence or cause-and-effect relationship established in the passage.
-    - **(B) [CORRECT]**: Option (B) "They failed at it." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
-    - **(C) [unsupported_world_knowledge]**: Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts.
-    - **(D) [grammatically_plausible_contextually_wrong]**: Fits the blank syntactically but violates contextual meaning or discourse flow.
+    - **(A) [grammatically_plausible_contextually_wrong]**: Hawkins did not give up or resign voluntarily; he actively campaigned and was rejected by voters, and wanted to stay at his job but was fired.
+    - **(B) [CORRECT]**: In both situations (getting 2 votes in an election, selling 1 car and getting fired), Hawkins suffered complete, disastrous failure. Therefore "bombed" means "failed at it".
+    - **(C) [unsupported_world_knowledge]**: Hawkins exhibits bewildered distress and confusion ("why didn't people know that?", "Why?"), demonstrating he was not fine with the outcomes.
+    - **(D) [irrelevant_distractor]**: Hawkins acted carelessly and boastfully, not carefully.
 
 ---
 
@@ -1005,14 +1005,14 @@
   - Primary Skill: `information_integration`
   - Cognitive Depth: `D3_multi_step_synthesis` | Language: `B1_intermediate`
   - Evidence Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend information_integration against surface word matchers.*
+  - Mechanism: *Allocentric map navigation conditioned by an egocentric orientation anchor.*
+  - Function: *Tests high-order spatial reasoning by requiring mental rotation and pathway topology tracing.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
-    - **(B) [CORRECT]**: Option (B) "Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
-    - **(C) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
-    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(A) [wrong_chronology]**: Turning left from facing north leads west past Main Gate and away from the eastern Rose Garden.
+    - **(B) [CORRECT]**: From the gift shop facing Family Library (North), taking the pathway loop past Sir Archie's House (7) and navigating past the Main House leads directly into the Rose Garden (9).
+    - **(C) [partial_truth]**: Turning right towards Farmyard (8) leads to the northeast perimeter where pathways dead-end without direct access to Rose Garden.
+    - **(D) [wrong_referent]**: Butterfly Garden (2) is in the southwest quadrant, behind and to the left of someone facing north, not reached by turning right.
 
 ---
 
@@ -1031,16 +1031,16 @@
   - (D) Glass bottles that are thrown into the sea become sea glass which is used in art pieces.
 - **AI Reverse-Engineered Assessment**:
   - Primary Skill: `main_idea`
-  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `B1_intermediate`
+  - Cognitive Depth: `D3_multi_step_synthesis` | Language: `A2_basic`
   - Evidence Necessity: `essential`
-  - Mechanism: *Discourse-grounded reading comprehension with multi-sentence clue resolution*
-  - Function: *Discriminates students who comprehend main_idea against surface word matchers.*
+  - Mechanism: *Metaphorical title comprehension grounded in multi-stage process infographic synthesis.*
+  - Function: *Evaluates macro-level text structure comprehension, ensuring students connect the opening title to the concluding stage of the diagram.*
   - Critic Status: `undefined` (Confidence: `undefined`)
   - Option Breakdown:
-    - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
-    - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
-    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
-    - **(D) [CORRECT]**: Option (D) "Glass bottles that are thrown into the sea become sea glass which is used in art pieces." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
+    - **(A) [reversed_cause_effect]**: Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles.
+    - **(B) [unsupported_world_knowledge]**: Making wishes at the beach is never mentioned in the text or process steps.
+    - **(C) [unsupported_world_knowledge]**: Sea animals living in bottles is unsupported by the text, which focuses on geological wave erosion and artistic collection.
+    - **(D) [CORRECT]**: Glass bottles thrown into the sea break and erode into smooth sea glass over centuries, which artists then collect and repurpose in art pieces, giving them a meaningful "second life".
 
 ---
 

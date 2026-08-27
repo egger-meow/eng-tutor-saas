@@ -14,12 +14,12 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T17:42:54.475Z",
-    "sourceCorpusHash": "5dbb82f2d347f5f27987bf7af783f5a015dc71e9ce29af4f7cb457e54c09ac91",
+    "generatedAt": "2026-08-27T18:10:12.338Z",
+    "sourceCorpusHash": "b2c802470c37c07effc2a5dde76201d4baf0a655f9310edd3dc1360a9242abee",
     "authorityStatus": "provisional"
   },
   "version": "1.0.0",
-  "generatedAt": "2026-08-27T17:42:54.489Z",
+  "generatedAt": "2026-08-27T18:10:12.350Z",
   "totalQuestionsAnalyzed": 195,
   "totalExams": 5,
   "sectionComposition": {
@@ -64,14 +64,14 @@
   },
   "distributions": {
     "skills": {
-      "vocabulary_in_context": 23.6,
-      "grammar_in_context": 33.8,
-      "explicit_detail": 25.1,
+      "vocabulary_in_context": 24.6,
+      "grammar_in_context": 33.3,
+      "explicit_detail": 24.6,
       "reference_resolution": 0,
-      "local_inference": 12.8,
+      "local_inference": 12.3,
       "cross_sentence_inference": 0,
       "main_idea": 1,
-      "purpose_speaker_intent": 0,
+      "purpose_speaker_intent": 0.5,
       "discourse_relationship": 0,
       "sequence_cause_consequence": 0,
       "text_structure": 0,
@@ -87,8 +87,8 @@
     },
     "languageDifficulty": {
       "A1_elementary": 10.3,
-      "A2_basic": 47.7,
-      "B1_intermediate": 42.1
+      "A2_basic": 48.7,
+      "B1_intermediate": 41
     },
     "evidenceNecessity": {
       "essential": 53.3,
@@ -100,8 +100,8 @@
       "single_word": 0,
       "single_clause": 0,
       "single_sentence": 46.7,
-      "cross_sentence_local": 48.7,
-      "multi_paragraph_global": 1,
+      "cross_sentence_local": 47.7,
+      "multi_paragraph_global": 2.1,
       "multimodal_text_and_graphic": 3.6
     },
     "contextNecessity": {

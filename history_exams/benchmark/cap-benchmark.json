@@ -14,12 +14,12 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T17:42:54.506Z",
-    "sourceCorpusHash": "5dbb82f2d347f5f27987bf7af783f5a015dc71e9ce29af4f7cb457e54c09ac91",
+    "generatedAt": "2026-08-27T18:10:12.360Z",
+    "sourceCorpusHash": "b2c802470c37c07effc2a5dde76201d4baf0a655f9310edd3dc1360a9242abee",
     "authorityStatus": "provisional"
   },
   "benchmarkVersion": "1.0.0",
-  "generatedAt": "2026-08-27T17:42:54.506Z",
+  "generatedAt": "2026-08-27T18:10:12.360Z",
   "referenceCorpus": {
     "examIds": [
       "111",
@@ -33,14 +33,14 @@
   },
   "distributions": {
     "skillDistribution": {
-      "vocabulary_in_context": 24.2,
-      "grammar_in_context": 33.5,
-      "explicit_detail": 25.1,
+      "vocabulary_in_context": 25.1,
+      "grammar_in_context": 33,
+      "explicit_detail": 24.2,
       "reference_resolution": 0,
-      "local_inference": 12.6,
-      "cross_sentence_inference": 0,
+      "local_inference": 12.1,
+      "cross_sentence_inference": 0.5,
       "main_idea": 0.9,
-      "purpose_speaker_intent": 0,
+      "purpose_speaker_intent": 0.5,
       "discourse_relationship": 0,
       "sequence_cause_consequence": 0,
       "text_structure": 0,
@@ -50,14 +50,14 @@
     },
     "cognitiveDepthDistribution": {
       "D1_verbatim_retrieval": 23.3,
-      "D2_single_step_inference": 59.5,
-      "D3_multi_step_synthesis": 17.2,
+      "D2_single_step_inference": 59.1,
+      "D3_multi_step_synthesis": 17.7,
       "D4_evaluative_pragmatic": 0
     },
     "languageDifficultyDistribution": {
       "A1_elementary": 11.6,
-      "A2_basic": 46.5,
-      "B1_intermediate": 41.9
+      "A2_basic": 47.4,
+      "B1_intermediate": 40.9
     },
     "evidenceNecessityDistribution": {
       "essential": 54.9,
@@ -69,22 +69,22 @@
       "single_word": 0,
       "single_clause": 0,
       "single_sentence": 45.1,
-      "cross_sentence_local": 47.9,
-      "multi_paragraph_global": 0.9,
+      "cross_sentence_local": 46.5,
+      "multi_paragraph_global": 2.3,
       "multimodal_text_and_graphic": 6
     },
     "distractorPatternDistribution": {
-      "literal_keyword_matching": 16.3,
+      "literal_keyword_matching": 16,
       "partial_truth": 16.3,
-      "wrong_referent": 16.3,
-      "wrong_chronology": 17.1,
+      "wrong_referent": 15.7,
+      "wrong_chronology": 16.7,
       "local_evidence_for_global_question": 0,
-      "unsupported_world_knowledge": 17.1,
-      "reversed_cause_effect": 0,
-      "grammatically_plausible_contextually_wrong": 17.1,
+      "unsupported_world_knowledge": 17.7,
+      "reversed_cause_effect": 0.6,
+      "grammatically_plausible_contextually_wrong": 16.7,
       "overgeneralization": 0,
       "undergeneralization": 0,
-      "irrelevant_distractor": 0,
+      "irrelevant_distractor": 0.3,
       "other": 0
     },
     "contextNecessityDistribution": {
@@ -354,13 +354,13 @@
       "questionNumber": 38,
       "section": "passage_comprehension",
       "evidenceMode": "multi_document",
-      "primarySkill": "explicit_detail",
-      "cognitiveDepth": "D2_single_step_inference",
+      "primarySkill": "cross_sentence_inference",
+      "cognitiveDepth": "D3_multi_step_synthesis",
       "languageDifficulty": "B1_intermediate",
       "evidenceNecessity": "essential",
-      "evidenceSpan": "cross_sentence_local",
+      "evidenceSpan": "multi_paragraph_global",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on explicit_detail at D2_single_step_inference depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on cross_sentence_inference at D3_multi_step_synthesis depth with essential evidence necessity."
     }
   ]
 }

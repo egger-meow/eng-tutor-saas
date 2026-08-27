@@ -227,7 +227,19 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       const isMockCached =
         existingRecord?.modelName === 'rule-based-mock' ||
         existingRecord?.modelName === 'offline-mock';
+      const isExistingLiveOrAgent =
+        existingRecord &&
+        existingRecord.modelName !== 'rule-based-mock' &&
+        existingRecord.modelName !== 'offline-mock';
       const isLiveRun = aiProvider.name !== 'offline-mock';
+
+      // Strict Real Data Rule: Offline mock must NEVER overwrite live or agent-authored records under any circumstances
+      if (aiProvider.name === 'offline-mock' && isExistingLiveOrAgent) {
+        analyzedQuestions.push(existingRecord);
+        cachedCount++;
+        globalSuccessful++;
+        continue;
+      }
 
       if (
         !force &&

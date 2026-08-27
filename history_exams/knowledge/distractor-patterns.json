@@ -29,8 +29,8 @@
   {
     "pattern": "partial_truth",
     "description": "States a fact from the text accurately but fails to answer the specific condition in the stem.",
-    "observedCount": 97,
-    "observedPercentage": 16.6,
+    "observedCount": 94,
+    "observedPercentage": 16.1,
     "primaryCognitiveTrigger": "Traps students with incomplete constraint evaluation.",
     "exemplars": [
       {
@@ -56,8 +56,8 @@
   {
     "pattern": "wrong_referent",
     "description": "Attributes a genuine passage action, feeling, or attribute to the wrong subject.",
-    "observedCount": 97,
-    "observedPercentage": 16.6,
+    "observedCount": 94,
+    "observedPercentage": 16.1,
     "primaryCognitiveTrigger": "Tests pronoun and entity tracking.",
     "exemplars": [
       {
@@ -83,8 +83,8 @@
   {
     "pattern": "wrong_chronology",
     "description": "Inverts event order or mixes up before/after temporal sequences.",
-    "observedCount": 98,
-    "observedPercentage": 16.8,
+    "observedCount": 96,
+    "observedPercentage": 16.4,
     "primaryCognitiveTrigger": "Tests timeline reconstruction.",
     "exemplars": [
       {
@@ -118,8 +118,8 @@
   {
     "pattern": "unsupported_world_knowledge",
     "description": "Plausible common sense in daily life, but explicitly contradicted or absent in text.",
-    "observedCount": 98,
-    "observedPercentage": 16.8,
+    "observedCount": 102,
+    "observedPercentage": 17.4,
     "primaryCognitiveTrigger": "Tests text-grounded reading discipline.",
     "exemplars": [
       {
@@ -145,16 +145,35 @@
   {
     "pattern": "reversed_cause_effect",
     "description": "Swaps cause and result in a causal relationship.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 3,
+    "observedPercentage": 0.5,
     "primaryCognitiveTrigger": "Tests causal reasoning.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "115",
+        "questionNumber": 22,
+        "option": "C",
+        "explanation": "Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment."
+      },
+      {
+        "examId": "115",
+        "questionNumber": 32,
+        "option": "A",
+        "explanation": "Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles."
+      },
+      {
+        "examId": "115",
+        "questionNumber": 43,
+        "option": "D",
+        "explanation": "Sung and the other children with beautiful plants were popular with the crowd; Wong was lonely with his empty pot."
+      }
+    ]
   },
   {
     "pattern": "grammatically_plausible_contextually_wrong",
     "description": "Fits the blank syntactically but contradicts contextual meaning or discourse flow.",
-    "observedCount": 98,
-    "observedPercentage": 16.8,
+    "observedCount": 97,
+    "observedPercentage": 16.6,
     "primaryCognitiveTrigger": "Tests integrated syntax-semantics reasoning.",
     "exemplars": [
       {
@@ -196,10 +215,23 @@
   {
     "pattern": "irrelevant_distractor",
     "description": "Content completely unrelated to passage theme.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 2,
+    "observedPercentage": 0.3,
     "primaryCognitiveTrigger": "Weak baseline distractor (rarely used in high-quality CAP questions).",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "115",
+        "questionNumber": 23,
+        "option": "D",
+        "explanation": "Hawkins acted carelessly and boastfully, not carefully."
+      },
+      {
+        "examId": "115",
+        "questionNumber": 43,
+        "option": "B",
+        "explanation": "Physical strength is completely unrelated to planting seeds or moral integrity."
+      }
+    ]
   },
   {
     "pattern": "other",

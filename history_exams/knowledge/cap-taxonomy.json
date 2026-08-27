@@ -14,38 +14,48 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T17:42:54.475Z",
-    "sourceCorpusHash": "5dbb82f2d347f5f27987bf7af783f5a015dc71e9ce29af4f7cb457e54c09ac91",
+    "generatedAt": "2026-08-27T18:10:12.338Z",
+    "sourceCorpusHash": "b2c802470c37c07effc2a5dde76201d4baf0a655f9310edd3dc1360a9242abee",
     "authorityStatus": "provisional"
   },
   "version": "1.0.0",
   "totalQuestions": 195,
   "primarySkillFrequencies": {
-    "grammar_in_context": 66,
-    "vocabulary_in_context": 46,
-    "explicit_detail": 49,
-    "local_inference": 25,
+    "grammar_in_context": 65,
+    "vocabulary_in_context": 48,
+    "explicit_detail": 48,
+    "local_inference": 24,
     "information_integration": 7,
-    "main_idea": 2
+    "main_idea": 2,
+    "purpose_speaker_intent": 1
   },
   "skillCoOccurrences": {
     "grammar_in_context": {
-      "discourse_relationship": 19
+      "discourse_relationship": 18
     },
     "vocabulary_in_context": {
-      "discourse_relationship": 2
+      "local_inference": 1,
+      "discourse_relationship": 3,
+      "sequence_cause_consequence": 1
     },
     "explicit_detail": {
-      "discourse_relationship": 49
+      "discourse_relationship": 48
     },
     "local_inference": {
-      "discourse_relationship": 25
+      "discourse_relationship": 24
     },
     "information_integration": {
-      "discourse_relationship": 7
+      "discourse_relationship": 6,
+      "explicit_detail": 1
     },
     "main_idea": {
-      "discourse_relationship": 2
+      "discourse_relationship": 1,
+      "text_structure": 1,
+      "sequence_cause_consequence": 1
+    },
+    "purpose_speaker_intent": {
+      "cross_sentence_inference": 1,
+      "pragmatic_meaning": 1
     }
   },
   "descriptions": {

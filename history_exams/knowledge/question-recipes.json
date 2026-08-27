@@ -14,17 +14,22 @@
       "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "B1_intermediate"
+      "B1_intermediate",
+      "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference"
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
     "requiredEvidenceStructure": "Cohesive paragraph passage with narrative timeline or argumentative flow",
     "reasoningOperations": [
       "cross_sentence_coreference",
       "hypothesis_elimination",
-      "evidence_synthesis"
+      "evidence_synthesis",
+      "Follow narrative setup: King gives boiled seeds to all children to grow plants",
+      "Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants",
+      "Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty"
     ],
     "stemTemplates": [
       "(Cloze blank 40)",
@@ -33,11 +38,13 @@
       "(Cloze blank 43)"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend grammar_in_context against surface word matchers."
+      "Discriminates students who comprehend grammar_in_context against surface word matchers.",
+      "Transforms cloze from mechanical local syntax into deep reading comprehension of moral fable resolution."
     ],
     "distractorConstructionPrinciples": [
       "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Ignoring negative polarity or qualifying constraints in the stem",
+      "Choosing (A) wise due to the traditional fairy tale archetype of the \"wise king\"."
     ],
     "difficultyAdjustmentRules": [
       "Introduce multi-sentence constraint dependencies",
@@ -50,7 +57,9 @@
       "wrong_referent",
       "wrong_chronology",
       "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong"
+      "grammatically_plausible_contextually_wrong",
+      "irrelevant_distractor",
+      "reversed_cause_effect"
     ],
     "commonWeakImplementations": [
       "Isolated sentence grammar where surrounding passage has zero impact on choice",
@@ -154,7 +163,10 @@
     "reasoningOperations": [
       "cross_sentence_coreference",
       "hypothesis_elimination",
-      "evidence_synthesis"
+      "evidence_synthesis",
+      "Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries",
+      "Read the recipe callout Note: \"Most fruits are good for making fruit tea, but not papayas or bananas\"",
+      "Apply negative constraint to eliminate candidate options containing bananas or papayas"
     ],
     "stemTemplates": [
       "What does Tea-Rock celebrate? th",
@@ -169,7 +181,8 @@
     ],
     "distractorConstructionPrinciples": [
       "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Ignoring negative polarity or qualifying constraints in the stem",
+      "Scanning only the ingredient list at the top and missing the Note box below."
     ],
     "difficultyAdjustmentRules": [
       "Introduce multi-sentence constraint dependencies",
@@ -182,7 +195,9 @@
       "grammatically_plausible_contextually_wrong",
       "literal_keyword_matching",
       "partial_truth",
-      "wrong_referent"
+      "wrong_referent",
+      "reversed_cause_effect",
+      "irrelevant_distractor"
     ],
     "commonWeakImplementations": [
       "Graphic is purely cosmetic and question can be solved purely from text",

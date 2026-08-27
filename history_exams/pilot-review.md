@@ -30,46 +30,43 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `vocabulary_in_context`
-- **Secondary Skills**: None
+- **Secondary Skills**: `information_integration`
 - **Cognitive Depth Target**: `D1_verbatim_retrieval`
 - **Language Difficulty**: `A1_elementary`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `visual_feature_scanning`, `lexical_semantic_matching`, `action_entity_verification`
+- **Reasoning Operations**: `Parse the restrictive relative clause syntactic constraint: "who are exercising"`, `Distinguish active exercising students (left badminton girl, middle badminton boy, middle-right jump rope girl) from inactive bench spectators (right two students)`, `Inspect physical attire features across all active students to verify invariant attribute (glasses) and reject subset/inactive attributes (caps, jackets, pants)`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Multimodal visual-lexical integration evaluating direct visual perception and vocabulary retrieval
-- **Why The Question Works**: Discriminates students who comprehend vocabulary_in_context against surface word matchers.
+- **Mechanism**: Syntactic constraint filtering ("who are exercising") combined with coordinate visual entity attribute verification.
+- **Why The Question Works**: Penalizes superficial image scanning by requiring grammatical filtering of candidate entities before attribute matching.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `wrong_chronology` | Swaps the temporal sequence or cause-and-effect relationship established in the passage. | Confusing surface lexical match with semantic proposition | Page 2 illustration |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | Option (B) "glasses" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 2 illustration |
-| **(C)** | ❌ No | `unsupported_world_knowledge` | Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts. | Confusing surface lexical match with semantic proposition | Page 2 illustration |
-| **(D)** | ❌ No | `grammatically_plausible_contextually_wrong` | Fits the blank syntactically but violates contextual meaning or discourse flow. | Confusing surface lexical match with semantic proposition | Page 2 illustration |
+| **(A)** | ❌ No | `partial_truth` | Only the girl on the far left wears a cap among exercising students; the two students sitting on the bench wear caps but they are not exercising. | Scanning for any character wearing caps without filtering by the relative clause predicate. | page-2.png: bench spectators |
+| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | All three students actively engaged in exercise (playing badminton and jumping rope) are clearly depicted wearing glasses on their faces. | *None* | page-2.png: 3 exercising figures |
+| **(C)** | ❌ No | `unsupported_world_knowledge` | All exercising students are wearing short-sleeve athletic t-shirts, not jackets. | Assuming general outdoor sportswear includes jackets without verifying the illustration. | page-2.png: athletic attire |
+| **(D)** | ❌ No | `partial_truth` | The girl playing badminton on the left wears a pleated skirt, not pants. | Overgeneralizing pants to all exercising students when one wears a skirt. | page-2.png: lower attire |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
-- **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
+- **Can Simplify Language Without Breaking Mechanism**: ❌ No
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Relative clause is required to establish entity subset constraint.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add multiple overlapping activities with conflicting attire configurations.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Selecting caps (A) by confusing bench spectators with exercising students.*
+  - *Selecting pants (D) by overlooking the skirt worn by the badminton player.*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Assuming all characters in the image are subjects of the sentence.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `1971c85fc33932af2af7e20ab9d6136780be6438e6d2e282d7389f8202ecd50e`
+- **Content Hash**: `hash-115-1`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -95,46 +92,42 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `information_integration`
-- **Secondary Skills**: `discourse_relationship`
-- **Cognitive Depth Target**: `D3_multi_step_synthesis`
+- **Secondary Skills**: `explicit_detail`
+- **Cognitive Depth Target**: `D2_single_step_inference`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Reasoning Operations**: `Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries`, `Read the recipe callout Note: "Most fruits are good for making fruit tea, but not papayas or bananas"`, `Apply negative constraint to eliminate candidate options containing bananas or papayas`, `Verify that option C contains only permitted fruits (apples, oranges, strawberries)`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend information_integration against surface word matchers.
+- **Mechanism**: Practical procedural reading with highlighted negative constraint callout filter.
+- **Why The Question Works**: Mirrors real-world task-based reading where following practical instructions requires checking exception boxes.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Page 4 illustration |
-| **(B)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Page 4 illustration |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Option (C) "Apples, oranges and strawberries." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 4 illustration |
-| **(D)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 4 illustration |
+| **(A)** | ❌ No | `literal_keyword_matching` | Contains papayas, which the recipe Note explicitly excludes ("not papayas or bananas"). | Ignoring negative constraint callouts and picking recognizable pantry fruits. | page-4.png: Note callout box |
+| **(B)** | ❌ No | `literal_keyword_matching` | Contains bananas, which the recipe Note explicitly forbids. | Failing to check each item in the triple against exclusion rules. | page-4.png: Note callout box |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Apples are explicitly listed under "Things to get ready", while oranges and strawberries are permitted fruits under "Most fruits are good" and neither is excluded by the Note. | *None* | page-4.png: Things to get ready & Note |
+| **(D)** | ❌ No | `literal_keyword_matching` | Contains both bananas and papayas, violating both explicit exclusions. | Total omission of the Note restriction. | page-4.png: Note callout box |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Preserve explicit negative constraint in callout note.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add conditional rules based on fruit ripeness or quantities.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Scanning only the ingredient list at the top and missing the Note box below.*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Assuming all edible fruits are automatically suitable for the recipe.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `fc58c7dc93c7fdacbc24358611bfff49228399066330603b73c2743248ba3c59`
+- **Content Hash**: `hash-115-20`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -188,47 +181,43 @@
   - **(D)**: He talks about things he can’t do.
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `explicit_detail`
-- **Secondary Skills**: `discourse_relationship`
-- **Cognitive Depth Target**: `D2_single_step_inference`
+- **Primary Skill**: `purpose_speaker_intent`
+- **Secondary Skills**: `cross_sentence_inference`, `pragmatic_meaning`
+- **Cognitive Depth Target**: `D3_multi_step_synthesis`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `cross_sentence_local`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Evidence Span**: `multi_paragraph_global`
+- **Reasoning Operations**: `Analyze Panel 1-2 episode: Hawkins runs for 6th grade leader promising 3 school days/week (unrealistic/beyond authority), gets 2 votes, bombs election`, `Analyze Panel 3-4 episode: Hawkins works as car salesman promising to sell 50 then 149 cars/month, sells only 1, gets fired`, `Synthesize the invariant psychological trait across both episodes: boasting and making impossible promises he cannot fulfill ("talks about things he can't do")`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend explicit_detail against surface word matchers.
+- **Mechanism**: Cross-panel thematic induction of a personality trait through recurring behavioral failure patterns.
+- **Why The Question Works**: Requires high-level characterization across distinct chronological settings rather than literal sentence extraction.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
-| **(B)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
-| **(C)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
-| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Option (D) "He talks about things he can’t do." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 5 illustration |
+| **(A)** | ❌ No | `unsupported_world_knowledge` | Hawkins exhibits self-absorption ("I was the best choice, but why didn't people know that?"), not benevolence toward others. | Projecting positive character tropes without textual basis. | page-5.png: Panel 2 speech |
+| **(B)** | ❌ No | `unsupported_world_knowledge` | Punctuality is never mentioned; his failure is extreme underperformance and empty boasting. | Associating being fired with tardiness rather than performance. | page-5.png: Panel 3-4 |
+| **(C)** | ❌ No | `reversed_cause_effect` | Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment. | Confusing being influenced by others with being rejected by others. | page-5.png: Panel 1 |
+| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | In 6th grade he promised 3 days of school/week (which a student leader cannot decide); as a car salesman he promised 50 and then 149 cars/month but only sold 1. Both instances synthesize the trait of making impossible promises. | *None* | page-5.png: Panels 1 & 3 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Maintain the contrast between grandiose promise and meager outcome in both scenes.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add subtle facial expressions or third-party reactions that require pragmatic inference.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Fixating on the dismissal in Panel 4 and picking generic workplace faults like tardiness (B).*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Assuming multiple choice options must match a specific quoted line rather than an abstract synthesis.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `3d1d961dbe53f1fa56f44eda72bfb96d2eec7d5ca5d0b995f6fe9b29c3189091`
+- **Content Hash**: `hash-115-22`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -282,47 +271,44 @@
   - **(D)**: They were careful about it.
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `local_inference`
-- **Secondary Skills**: `discourse_relationship`
-- **Cognitive Depth Target**: `D3_multi_step_synthesis`
+- **Primary Skill**: `vocabulary_in_context`
+- **Secondary Skills**: `local_inference`
+- **Cognitive Depth Target**: `D2_single_step_inference`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `cross_sentence_local`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Reasoning Operations**: `Locate target phrase "bombed it" in Panel 2 header ("I totally bombed it") and Panel 4 header ("I bombed it again")`, `Analyze context in Panel 2: Hawkins receives only 2 votes out of 40 on the scoreboard (crushing defeat)`, `Analyze context in Panel 4: Hawkins sells only 1 car in two months and is fired by his boss`, `Synthesize the common meaning of "bombed": failed completely / suffered total failure`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend local_inference against surface word matchers.
+- **Mechanism**: Multimodal contextual grounding of informal idiom through clear narrative outcomes.
+- **Why The Question Works**: Demonstrates how authentic narrative context allows students to deduce unfamiliar colloquial vocabulary without prior rote memorization.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `wrong_chronology` | Swaps the temporal sequence or cause-and-effect relationship established in the passage. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | Option (B) "They failed at it." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 5 illustration |
-| **(C)** | ❌ No | `unsupported_world_knowledge` | Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
-| **(D)** | ❌ No | `grammatically_plausible_contextually_wrong` | Fits the blank syntactically but violates contextual meaning or discourse flow. | Confusing surface lexical match with semantic proposition | Page 5 illustration |
+| **(A)** | ❌ No | `grammatically_plausible_contextually_wrong` | Hawkins did not give up or resign voluntarily; he actively campaigned and was rejected by voters, and wanted to stay at his job but was fired. | Confusing failing at an effort with voluntarily quitting. | page-5.png: Panel 2 & 4 |
+| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | In both situations (getting 2 votes in an election, selling 1 car and getting fired), Hawkins suffered complete, disastrous failure. Therefore "bombed" means "failed at it". | *None* | page-5.png: Panel 2 scoreboard & Panel 4 dismissal |
+| **(C)** | ❌ No | `unsupported_world_knowledge` | Hawkins exhibits bewildered distress and confusion ("why didn't people know that?", "Why?"), demonstrating he was not fine with the outcomes. | Misinterpreting emotional valence of the character. | page-5.png: Panel 2 & 4 speech bubbles |
+| **(D)** | ❌ No | `irrelevant_distractor` | Hawkins acted carelessly and boastfully, not carefully. | Selecting an arbitrary antonym of reckless behavior. | page-5.png: Panels 1 & 3 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Preserve the target idiomatic expression in caption.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Introduce subtle partial successes to force nuance between failure and underperformance.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Assuming "bombed" refers literally to explosives.*
+  - *Confusing failing (B) with voluntarily giving up (A).*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Believing vocabulary questions require pre-memorized dictionary definitions rather than context clues.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `1f073389dce54c97ae269e275757d17025a511884c604f57f5e1ea615d3ef895`
+- **Content Hash**: `hash-115-23`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -368,41 +354,38 @@
 - **Language Difficulty**: `B1_intermediate`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Reasoning Operations**: `Locate starting position on map: Main House (5) gift shop exit facing North towards Family Library (4)`, `Establish character egocentric orientation: Facing North (upward on map)`, `Locate destination: Rose Garden (9) in the southeast area of the grounds`, `Trace candidate route B: Turn left (west/around path), walk past Sir Archie's House (7), turn right and walk past the Main House towards the Rose Garden pathway`, `Verify that option B correctly describes the valid connecting pathway to the Rose Garden without blocked walls or reversed vectors`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend information_integration against surface word matchers.
+- **Mechanism**: Allocentric map navigation conditioned by an egocentric orientation anchor.
+- **Why The Question Works**: Tests high-order spatial reasoning by requiring mental rotation and pathway topology tracing.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Page 7 illustration |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | Option (B) "Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 7 illustration |
-| **(C)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Page 7 illustration |
-| **(D)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 7 illustration |
+| **(A)** | ❌ No | `wrong_chronology` | Turning left from facing north leads west past Main Gate and away from the eastern Rose Garden. | Confusing east/west directions from the character viewpoint. | page-6.png: West road layout |
+| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | From the gift shop facing Family Library (North), taking the pathway loop past Sir Archie's House (7) and navigating past the Main House leads directly into the Rose Garden (9). | *None* | page-6.png: Map pathways |
+| **(C)** | ❌ No | `partial_truth` | Turning right towards Farmyard (8) leads to the northeast perimeter where pathways dead-end without direct access to Rose Garden. | Assuming all perimeter roads form an unbroken circular loop. | page-6.png: Northeast layout |
+| **(D)** | ❌ No | `wrong_referent` | Butterfly Garden (2) is in the southwest quadrant, behind and to the left of someone facing north, not reached by turning right. | Reversing left and right coordinates. | page-6.png: Quadrant positions |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Preserve directional verbs (turn left/right, walk past, at the corner).*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add one-way signs, closed gates, or time-window access constraints on pathways.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Confusing the reader static perspective (bottom of page) with the character orientation (facing North).*
+  - *Failing to trace actual drawn pathways and assuming line-of-sight walking.*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Treating left/right in map questions as absolute page-left/page-right rather than character-heading relative.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `6ca21a76cf6e17c57a065eff634e29fbcf609536d614c86281e2ebe619b43725`
+- **Content Hash**: `hash-115-26`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -453,46 +436,43 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `main_idea`
-- **Secondary Skills**: `discourse_relationship`
+- **Secondary Skills**: `text_structure`, `sequence_cause_consequence`
 - **Cognitive Depth Target**: `D3_multi_step_synthesis`
-- **Language Difficulty**: `B1_intermediate`
+- **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multi_paragraph_global`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Reasoning Operations**: `Identify the title metaphor: "Glass Bottles' Second Life"`, `Scan the 6-step lifecycle diagram: Step 1 (thrown as garbage) -> Steps 2-4 (broken, smoothed, frosted into sea glass) -> Step 5 (beached) -> Step 6 (collected by artists for artworks)`, `Synthesize why it is called a "second life": discarded garbage bottles are reborn as sea glass used in art pieces`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend main_idea against surface word matchers.
+- **Mechanism**: Metaphorical title comprehension grounded in multi-stage process infographic synthesis.
+- **Why The Question Works**: Evaluates macro-level text structure comprehension, ensuring students connect the opening title to the concluding stage of the diagram.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
-| **(B)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
-| **(C)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
-| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Option (D) "Glass bottles that are thrown into the sea become sea glass which is used in art pieces." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 11 illustration |
+| **(A)** | ❌ No | `reversed_cause_effect` | Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles. | Equating "second life" literally with factory bottle recycling. | page-10.png: Step 6 |
+| **(B)** | ❌ No | `unsupported_world_knowledge` | Making wishes at the beach is never mentioned in the text or process steps. | Injecting romanticized folklore without textual grounding. | page-10.png: entire diagram |
+| **(C)** | ❌ No | `unsupported_world_knowledge` | Sea animals living in bottles is unsupported by the text, which focuses on geological wave erosion and artistic collection. | Confusing environmental marine biology themes with physical sea glass formation. | page-10.png: Steps 1-6 |
+| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Glass bottles thrown into the sea break and erode into smooth sea glass over centuries, which artists then collect and repurpose in art pieces, giving them a meaningful "second life". | *None* | page-10.png: Intro & Step 6 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Maintain the 6 chronological process stages.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Introduce competing ecological perspectives in an accompanying sidebar.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Assuming a literal recycling definition (A) rather than reading Step 6.*
+  - *Selecting marine animal habitats (C) based on general ocean associations.*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Interpreting titles through isolated prior knowledge rather than holistic diagram synthesis.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `84d525f67d9f833aa0b27750203d1386c2c2f5b1799cd7fc12394e2b8ce76203`
+- **Content Hash**: `hash-115-32`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -553,47 +533,44 @@
   - **(D)**: Adams is not, but Eggertsson is.
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `explicit_detail`
-- **Secondary Skills**: `discourse_relationship`
-- **Cognitive Depth Target**: `D2_single_step_inference`
+- **Primary Skill**: `cross_sentence_inference`
+- **Secondary Skills**: `purpose_speaker_intent`, `discourse_relationship`
+- **Cognitive Depth Target**: `D3_multi_step_synthesis`
 - **Language Difficulty**: `B1_intermediate`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `cross_sentence_local`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Evidence Span**: `multi_paragraph_global`
+- **Reasoning Operations**: `Analyze Document 1 (Anna Adams): Documents widespread fear that Icelandic is dying due to English prevalence; ends with ominous question "Will Iceland one day give up Icelandic for English? It may happen soon" -> Adams is worried`, `Analyze Document 2 (Gunnar Eggertsson): Acknowledges public worry ("I understand their worries, but does the future... really look that bad?"), then rebuts with data (314k speakers > 35k safety threshold, 51.3M crowns spent teaching Icelandic to AI/tech, schools continue teaching) and concludes "Clearly, we are not giving up our first language" -> Eggertsson is not worried`, `Synthesize comparative stance: Adams is worried, but Eggertsson is not (Option C)`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend explicit_detail against surface word matchers.
+- **Mechanism**: Paired-text authorial stance comparison with rhetorical concession differentiation.
+- **Why The Question Works**: Requires discerning an author genuine stance from quoted voices and rhetorical concessions across distinct viewpoints.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(B)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Option (C) "Adams is, but Eggertsson is not." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Paragraph 1, lines 1-3 |
-| **(D)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
+| **(A)** | ❌ No | `partial_truth` | Ignores Adams' explicit warnings that Icelanders are losing Icelandic to English products and foreigners. | Overgeneralizing Eggertsson's optimism to both authors. | page-12.png: Article 1 |
+| **(B)** | ❌ No | `partial_truth` | Conflates Eggertsson's rhetorical opening ("I understand their worries") with his actual stance, ignoring his empirical rebuttal. | Mistaking a rhetorical concession for the author's primary thesis. | page-12.png: Article 2 |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Adams presents the alarming perspective that English is displacing Icelandic and threatens its survival, while Eggertsson counters that 314,000 speakers, heavy machine-learning investment, and school curricula ensure Icelandic is safe and not being abandoned. | *None* | page-12.png: Articles 1 & 2 |
+| **(D)** | ❌ No | `reversed_cause_effect` | Directly inverts the two authors' positions. | Transposing author attribution between paired articles. | page-12.png: Author bylines & conclusions |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Preserve the contrasting thesis and counter-argument structure.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add a third brief perspective to create a 3-way matrix synthesis.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Selecting (B) because Eggertsson writes "I understand their worries" in line 2 of his piece.*
+  - *Transposing the two authors (D).*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Assuming that mentioning an opposing viewpoint means endorsing it.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `e4c451cadb16b577c45084fb274c755448de9241609f776b08bbe4e2c55a7f80`
+- **Content Hash**: `hash-115-38`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -639,47 +616,44 @@
   - **(D)**: popular
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `grammar_in_context`
-- **Secondary Skills**: `discourse_relationship`
-- **Cognitive Depth Target**: `D2_single_step_inference`
-- **Language Difficulty**: `B1_intermediate`
+- **Primary Skill**: `vocabulary_in_context`
+- **Secondary Skills**: `discourse_relationship`, `sequence_cause_consequence`
+- **Cognitive Depth Target**: `D3_multi_step_synthesis`
+- **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `cross_sentence_local`
-- **Reasoning Operations**: `cross_sentence_coreference`, `hypothesis_elimination`, `evidence_synthesis`
+- **Evidence Span**: `multi_paragraph_global`
+- **Reasoning Operations**: `Follow narrative setup: King gives boiled seeds to all children to grow plants`, `Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants`, `Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty`, `Resolve cloze blank 43: "There is only one child who is _____ enough to be king" -> Wong was the only "honest" child`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Discourse-grounded reading comprehension with multi-sentence clue resolution
-- **Why The Question Works**: Discriminates students who comprehend grammar_in_context against surface word matchers.
+- **Mechanism**: Narrative climax cloze resolution driven by plot twist and character moral evaluation.
+- **Why The Question Works**: Transforms cloze from mechanical local syntax into deep reading comprehension of moral fable resolution.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `wrong_chronology` | Swaps the temporal sequence or cause-and-effect relationship established in the passage. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(B)** | ❌ No | `unsupported_world_knowledge` | Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Option (C) "honest" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Paragraph 1, lines 1-3 |
-| **(D)** | ❌ No | `grammatically_plausible_contextually_wrong` | Fits the blank syntactically but violates contextual meaning or discourse flow. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
+| **(A)** | ❌ No | `unsupported_world_knowledge` | Wong did not demonstrate intellectual shrewdness; his trial tested truthfulness versus deceit. | Selecting generic royal virtues ("wise king") without resolving the seed honesty test. | page-14.png: Paragraph 4 |
+| **(B)** | ❌ No | `irrelevant_distractor` | Physical strength is completely unrelated to planting seeds or moral integrity. | Arbitrary adjective association. | page-14.png |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Because the king had boiled the seeds, no plants could legitimately grow. All other children lied by substituting fake plants, while Wong truthfully presented his empty pot, proving he was the only "honest" child. | *None* | page-14.png: Paragraph 4 |
+| **(D)** | ❌ No | `reversed_cause_effect` | Sung and the other children with beautiful plants were popular with the crowd; Wong was lonely with his empty pot. | Confusing crowd popularity with the king's moral standard. | page-14.png: Paragraph 3 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Must preserve core syntactic connective or prompt structure*
-  - *Must keep distractors aligned with parallel grammatical category*
+  - *Preserve the key narrative turning point (boiled seed revelation).*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce multi-sentence constraint dependencies*
-  - *Require cross-paragraph inference rather than proximate sentence lookup*
+  - *Add a subplot where another child hesitated before cheating.*
 - **Student Failure Modes**:
-  - *Scanning for identical keywords in the passage without constraint resolution*
-  - *Ignoring negative polarity or qualifying constraints in the stem*
+  - *Choosing (A) wise due to the traditional fairy tale archetype of the "wise king".*
+  - *Failing to connect the boiled seed clue to the honesty test.*
 - **Targeted Misconceptions**:
-  - *Assuming word presence equals factual truth*
-  - *Superficial visual scanning without systematic feature verification*
+  - *Relying on generic fairy tale tropes rather than the specific cause-and-effect mechanism of the plot.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `d5a140f1169ff9934907037e8849c4dacaef57375545f61fb6190f8f0576cb52`
+- **Content Hash**: `hash-115-43`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
