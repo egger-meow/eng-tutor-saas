@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "totalQuestions": 215,
+  "primarySkillFrequencies": {
+    "information_integration": 7,
+    "grammar_in_context": 63,
+    "vocabulary_in_context": 55,
+    "explicit_detail": 56,
+    "local_inference": 12,
+    "sequence_cause_consequence": 10,
+    "discourse_relationship": 11,
+    "main_idea": 1
+  },
+  "skillCoOccurrences": {
+    "information_integration": {
+      "explicit_detail": 2
+    },
+    "grammar_in_context": {
+      "vocabulary_in_context": 52,
+      "sequence_cause_consequence": 11
+    },
+    "vocabulary_in_context": {
+      "grammar_in_context": 45,
+      "local_inference": 10
+    },
+    "explicit_detail": {
+      "local_inference": 56
+    },
+    "local_inference": {
+      "cross_sentence_inference": 12
+    },
+    "sequence_cause_consequence": {
+      "local_inference": 10
+    },
+    "discourse_relationship": {
+      "vocabulary_in_context": 11
+    },
+    "main_idea": {
+      "purpose_speaker_intent": 1
+    }
+  },
+  "descriptions": {
+    "vocabulary_in_context": "Inferring word or idiom meaning from paragraph and discourse cues.",
+    "grammar_in_context": "Testing sentence structure, tense shifts, voice, and connective syntax.",
+    "explicit_detail": "Locating and confirming factual propositions directly stated in the text.",
+    "reference_resolution": "Identifying pronoun or phrase referents across clauses or paragraphs.",
+    "local_inference": "Synthesizing unstated facts from adjacent sentences.",
+    "cross_sentence_inference": "Integrating clues across distant paragraphs or narrative arcs.",
+    "main_idea": "Abstracting the overall theme, gist, communicative goal, or optimal title.",
+    "purpose_speaker_intent": "Analyzing why the author/speaker included a detail or adopted a tone.",
+    "discourse_relationship": "Evaluating logical connectors and transitions between clauses.",
+    "sequence_cause_consequence": "Reconstructing event timelines or cause-and-effect chains.",
+    "text_structure": "Analyzing paragraph organization and structural roles in the reading.",
+    "information_integration": "Reconciling multi-modal data from tables, diagrams, maps, or charts.",
+    "pragmatic_meaning": "Interpreting communicative implicature and social dialogue intentions.",
+    "other_uncertain": "Unclassified question designs requiring custom explanation."
+  }
+}

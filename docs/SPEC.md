@@ -1489,6 +1489,8 @@ The content model should preserve the same purpose.
 
 Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable. Research planning treats time-sensitivity as an internal signal: durable interests may use evergreen discovery, while fast-moving interests actively inspect recent developments and compare them with durable angles when useful. A strong, reliable, age-appropriate, lexically feasible recent development is preferred only when it serves the learning target equally well or better; otherwise the package preserves an evidence-backed evergreen fallback. This signal is not a canonical learner-profile field.
 
+Historical CAP English exam design knowledge (taxonomy, question recipes, distractor patterns, cognitive depth framework, and benchmark foundation) lives independently under `history_exams/` and `docs/history-exams/` as an assessment-design reference.
+
 ---
 
 # 62. Vocabulary Source

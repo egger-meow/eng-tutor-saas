@@ -1,0 +1,88 @@
+[
+  {
+    "level": "D1_verbatim_retrieval",
+    "name": "Direct Information Retrieval",
+    "description": "Locating stated facts or vocabulary in text with direct 1-to-1 surface alignment.",
+    "distinguishingFeatures": [
+      "Single-clause evidence span",
+      "Literal matching without conceptual transformation",
+      "Direct factual verification"
+    ],
+    "languageDecouplingRule": "Can use A1 or A2 vocabulary; shallow cognitive demand is defined by the absence of deduction, not word simplicity.",
+    "exemplars": []
+  },
+  {
+    "level": "D2_single_step_inference",
+    "name": "Single-Step Deductive Inference",
+    "description": "Connecting two proximate facts, resolving synonyms, or calculating simple relationships.",
+    "distinguishingFeatures": [
+      "Paraphrased evidence in options",
+      "Local context clue synthesis (1-2 sentences)",
+      "Basic logical consequence or reason identification"
+    ],
+    "languageDecouplingRule": "Standard junior-high core. Tests reading comprehension through paraphrase rather than obscure terminology.",
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 2,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 3,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 4,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty."
+      }
+    ]
+  },
+  {
+    "level": "D3_multi_step_synthesis",
+    "name": "Multi-Step Information Synthesis",
+    "description": "Integrating clues across distant paragraphs, reconciling multi-modal data, or resolving main idea.",
+    "distinguishingFeatures": [
+      "Multi-paragraph global evidence span",
+      "Reconciling text with charts, maps, tables, or schedules",
+      "Distinguishing overall communicative purpose from sub-points"
+    ],
+    "languageDecouplingRule": "High cognitive depth with controlled A2/B1 lexical ceiling. Uses simple English to construct complex reasoning challenges.",
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 1,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 24,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 1,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+      }
+    ]
+  },
+  {
+    "level": "D4_evaluative_pragmatic",
+    "name": "Evaluative & Pragmatic Judgment",
+    "description": "Inferring unstated author attitudes, tone, rhetorical intent, or situational communicative meaning.",
+    "distinguishingFeatures": [
+      "Discourse-level pragmatics and conversational implicature",
+      "Hypothetical scenario application based on passage principles",
+      "Evaluating speaker motivation and subtext"
+    ],
+    "languageDecouplingRule": "Relies on social-linguistic reasoning rather than vocabulary obscurity. Questions remain fully solvable within standard vocabulary.",
+    "exemplars": []
+  }
+]

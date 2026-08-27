@@ -1,0 +1,1038 @@
+{
+  "examId": "111",
+  "year": 111,
+  "title": "111 年國中教育會考英語科閱讀試題",
+  "sourcePdf": "111P_English.pdf",
+  "pageCount": 14,
+  "questionCount": 43,
+  "singleQuestionRange": [
+    1,
+    20
+  ],
+  "passageQuestionRange": [
+    21,
+    43
+  ],
+  "passages": [
+    {
+      "id": "111-p21-22",
+      "examId": "111",
+      "questionRange": [
+        21,
+        22
+      ],
+      "genre": "infographic_chart_table",
+      "title": null,
+      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "glossary": {
+        "address": "地址"
+      },
+      "pageStart": 4,
+      "pageEnd": 4,
+      "questionNumbers": [
+        21,
+        22
+      ]
+    },
+    {
+      "id": "111-p23-24",
+      "examId": "111",
+      "questionRange": [
+        23,
+        24
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "Below is an infographic.",
+      "glossary": {
+        "infographic": "資訊圖表"
+      },
+      "pageStart": 5,
+      "pageEnd": 6,
+      "questionNumbers": [
+        23,
+        24
+      ]
+    },
+    {
+      "id": "111-p25-26",
+      "examId": "111",
+      "questionRange": [
+        25,
+        26
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "Darrell : Marina…Marina…MARINA!\nMarina : Oh, sorry. I didn’t hear you. I was thinking about my homework.\nDarrell : What’s it about?\nMarina : Well, I need to draw a future house for my art class, but I haven’t got any\nideas. Maybe I should go to the library and look for something useful.\nDarrell : Or you can try Pinterest .\nMarina : Isn’t it a shopping app?\nDarrell : Not really. Many people share their works on Pinterest and tell you how\nthey made them. I’m sure you can get some ideas there.\nMarina : Sounds like you use it often.\nDarrell : Yeah. Just last week I went there and found the A to Z of making\nchocolate cake—from choosing good chocolate to baking the cake to making\nsugar flowers on top.\nMarina : Really? I’ll check it out later. Thanks a lot.",
+      "pageStart": 7,
+      "pageEnd": 7,
+      "questionNumbers": [
+        25,
+        26
+      ]
+    },
+    {
+      "id": "111-p27-29",
+      "examId": "111",
+      "questionRange": [
+        27,
+        29
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "Tabata training is a very popular way of exercising these days. It doesn’t take\nmuch time or space, and it burns calories faster than other ways of exercising.\nThe idea of Tabata training is simple: exercise for 20 seconds, rest for 10 seconds,\nand then repeat (at least eight times). The moves for the 20-second exercise are not\ndifficult to learn. Jumping jacks, high knees, squats, and planks are some of the most\ncommon moves. You can decide yourself what moves to do in your Tabata training.\nFor example, you can do more leg exercises if you want strong legs.\nOne great thing about Tabata training is that your body will keep burning\ncalories for at least an hour after 4 minutes of Tabata training. But to have this\nwonderful “afterburn,” you need to exercise really hard during each 20 seconds.\nIf you seldom exercise or have heart problems, this exercise may not be good for\nyou. But for people who enjoy exercising but are too busy to go to the gym, Tabata\ntraining might just be the answer.",
+      "glossary": {
+        "calorie": "卡路里 ( 熱 量單位 )"
+      },
+      "pageStart": 8,
+      "pageEnd": 8,
+      "questionNumbers": [
+        27,
+        28,
+        29
+      ]
+    },
+    {
+      "id": "111-p30-32",
+      "examId": "111",
+      "questionRange": [
+        30,
+        32
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "The problem of long working hours is a real headache in our country. It\nkills many people every year (see Figure 1), and many companies are trying\nto change that. They have at least one “No Overtime Day” in a week, and it\nis often Wednesday. On “No Overtime Day,” workers are asked to leave their\noffices before 8 p.m. At 8 p.m., companies play the song “There’s Always\nTomorrow” and turn off all the lights.\nHowever, after the workers walk out of their offices, they don’t go home.\nSome go back later, turn on their table lamps, and keep working, and others\nfind somewhere else to work until very late at night. Restaurants and coffee\nshops are busier on Wednesday evenings, and they have started selling drinks\nand meals for these workers.\nBut why do these people keep working? A study shows that workers who\nwork more hours often have a bigger chance to get paid more and rise higher\nin their companies. This is true for both men and women (see Figure 2).\nWorking long hours has become a way to show that people are hard-working.\nClearly, this must be changed before the problem gets any worse.\nFigure 1\nFigure 2",
+      "glossary": {
+        "average": "平均"
+      },
+      "pageStart": 9,
+      "pageEnd": 10,
+      "questionNumbers": [
+        30,
+        31,
+        32
+      ]
+    },
+    {
+      "id": "111-p33-36",
+      "examId": "111",
+      "questionRange": [
+        33,
+        36
+      ],
+      "genre": "dialogue",
+      "title": null,
+      "text": "http://www.aab.com/news/language-and-power-756315\nLanguage and Power: Cameroon’s Story\nBy Elisa Grant, 2 Oct 2017\nIn the modern world, being able to speak English\nis often a way to get power. However, this is not\ntrue for English speakers in Cameroon. To know\nwhy things are different in this African country,\nwe need to go back one hundred years.\nIn 1919, Kamerun (the name of Cameroon at\nthe time) was cut into two parts: one belonged\nto France, and the other belonged to the UK. In\n1960, the French Cameroon became the Republic of Cameroun , and the UK’s\npart joined it in 1961. The new country changed its name to the Federal\nRepublic of Cameroon . Although both French and English are Cameroon’s\nofficial languages, only around 20% of its people speak English. Also, the\ngovernment has been in French speakers’ hands since the two parts became\none country.\nFor a long time, Cameroon’s English speakers have felt they are not welcome\nin their own country. For example, it is very difficult for them to find jobs\nin the government, and they are often asked to speak French in business and\nat official events. They have become more resentful at the government and\ndecided to fight for themselves. Since last year, the English speakers have\ntried to build their own country. Yesterday, they said in a public meeting\nthat they were not part of Cameroon anymore. They are now a new country,\n“Ambazonia.” When the police tried to stop the meeting, at least eight people\nwere killed.\nRead more",
+      "glossary": {
+        "official": "官方的 government 政府"
+      },
+      "pageStart": 11,
+      "pageEnd": 12,
+      "questionNumbers": [
+        33,
+        34,
+        35,
+        36
+      ]
+    },
+    {
+      "id": "111-p37-39",
+      "examId": "111",
+      "questionRange": [
+        37,
+        39
+      ],
+      "genre": "narrative",
+      "title": null,
+      "text": "THE SOUTHEND TRAIL has been popular with nature lovers for years.\nThe 120-km trail passes beautiful lakes, crosses rivers, and goes through\nmountains and hills. This gives bird lovers some of the best places for\nbirdwatching. The trail also takes you to the Southend Museum and to two\nfamous castles, Edward Castle and\nSloan Castle.\nIt’s best to plan one day for one part\nof the trail and start your hike early\nin the morning, because each part\ntakes at least seven hours. If you\ndon’t want to walk, you can bike, but\nmake sure you stay on the main trail,\nbecause the side trails are not wide\nenough for biking.\nThere are two types of lodging\nfor visitors. Camping is popular in\nsummer, but it is only allowed on a few campgrounds (see the map). A more\ncomfortable one is to stay at a hotel in one of the towns. You can find some\nvery nice ones that also have breakfast.",
+      "glossary": {
+        "trail": "步道"
+      },
+      "pageStart": 13,
+      "pageEnd": 13,
+      "questionNumbers": [
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "id": "111-p40-43",
+      "examId": "111",
+      "questionRange": [
+        40,
+        43
+      ],
+      "genre": "cloze_passage",
+      "title": null,
+      "text": "English words are made of 26 letters, and palindromes and anagrams are two kinds\nof word games about spelling. A palindrome is a word or a sentence that reads the\nsame from left to right or from right to left, 40 , “eye,” “Bob,” “my gym,” and\n“Was it a car or a cat I saw?” An anagram of a word or words is made by putting the\nletters of the word or words in a different way. Look at the words and their anagrams\nbelow. Can you think of other possible anagrams of these words?\nAnagrams are often longer words that don’t really mean anything but are fun to\nsay. Sometimes they can even mean something 42 , like when a common word,\n“restaurant,” becomes “Eat rats, run!”\nActually, palindromes and anagrams are 43 . Palindromes can be used to learn\nmathematics and make music. Anagrams are also a good way to hide something . In\nhistory, people often hid their important studies in anagrams. Can you think of any\nother way to use them?",
+      "pageStart": 14,
+      "pageEnd": 14,
+      "questionNumbers": [
+        40,
+        41,
+        42,
+        43
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "examId": "111",
+      "questionNumber": 1,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Look at the picture. The woman is putting _____ on the cake.",
+      "options": {
+        "A": "candles",
+        "B": "forks",
+        "C": "plates",
+        "D": "strawberries"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 2,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five.",
+      "options": {
+        "A": "so",
+        "B": "or",
+        "C": "if",
+        "D": "because"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 3,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Peter is afraid of the dark. He even leaves the _____ on when sleeping.",
+      "options": {
+        "A": "computer",
+        "B": "fans",
+        "C": "lights",
+        "D": "music"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 4,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Pam is a _____ baseball player; she has more fans than any other player on her team.",
+      "options": {
+        "A": "boring",
+        "B": "heavy",
+        "C": "popular",
+        "D": "rich"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 5,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "I did not do my homework, so my teacher said I _____ stay after school to finish it.",
+      "options": {
+        "A": "failed to",
+        "B": "had to",
+        "C": "hoped to",
+        "D": "used to"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 6,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both.",
+      "options": {
+        "A": "choice",
+        "B": "gift",
+        "C": "rule",
+        "D": "trick"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 7,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "It was _____ for us to answer the math question because we’ve done the same kind of questions many times.",
+      "options": {
+        "A": "common",
+        "B": "easy",
+        "C": "safe",
+        "D": "special"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 8,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it.",
+      "options": {
+        "A": "prepare",
+        "B": "to prepare",
+        "C": "preparing",
+        "D": "prepared"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 9,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Don’t let the children swim in the river. We don’t know how _____ it is. It could be dangerous.",
+      "options": {
+        "A": "deep",
+        "B": "far",
+        "C": "long",
+        "D": "thick"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 10,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Bob is _____ of the boys in the family. He never does any housework. His brothers at least take out the garbage sometimes.",
+      "options": {
+        "A": "lazier",
+        "B": "the lazy",
+        "C": "the lazier",
+        "D": "the laziest"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 11,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Aunt Gina has lived in this town for more than sixty years, so she _____ it very well.",
+      "options": {
+        "A": "will know",
+        "B": "knew",
+        "C": "knows",
+        "D": "was going to know"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 12,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "We won’t see the sun even after the typhoon leaves, because the news said that heavier rain will soon _____ .",
+      "options": {
+        "A": "catch",
+        "B": "follow",
+        "C": "move",
+        "D": "stop"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 13,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Yesterday when I got home from work, my brother _____ for dinner, so he invited me to join him.",
+      "options": {
+        "A": "goes out",
+        "B": "went out",
+        "C": "has gone out",
+        "D": "was going out"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 14,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "You were _____ not to lend Amy money. She never gives back what she borrows.",
+      "options": {
+        "A": "crazy",
+        "B": "helpful",
+        "C": "wise",
+        "D": "wrong"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 15,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Have you found a summer job yet? Mr. Firth _____ someone to take care of his kids during the vacation. Maybe you can talk to him.",
+      "options": {
+        "A": "has looked for",
+        "B": "is looking for",
+        "C": "looks for",
+        "D": "was looking for"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 16,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "David looked out of the balcony window and saw a woman get in his car _____ away.",
+      "options": {
+        "A": "drive",
+        "B": "drove",
+        "C": "and drive",
+        "D": "and drove"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 17,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "The police haven’t found the little girl who _____ at a supermarket. They’ll keep doing all they can to find her.",
+      "options": {
+        "A": "took away",
+        "B": "taken away",
+        "C": "has taken away",
+        "D": "was taken away"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 18,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Buses to the airport only come once every hour, and we just missed _____ . Why don’t we take a taxi?",
+      "options": {
+        "A": "another",
+        "B": "it",
+        "C": "one",
+        "D": "them"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 19,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Ariel _____ every night for a week before her Chinese test and got a very good grade.",
+      "options": {
+        "A": "studied",
+        "B": "studies",
+        "C": "has studied",
+        "D": "was going to study"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 20,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "While reading this story, Brad saw the word “trolling” and didn’t know what it meant. Josh turned off the screen and sat back. “Why are they trolling me like this?” He didn’t understand. They wanted him to share what he thought about the show, and he did. And now look what he got. In the end, all they wanted was nice words. He found several meanings of the word in a dictionary. Which one should Brad choose?",
+      "options": {
+        "A": "To celebrate in song.",
+        "B": "To make someone or something move around.",
+        "C": "To pull a fishing line through the water, often from a boat.",
+        "D": "To write something on the Internet to hurt someone or make them angry."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 21,
+      "section": "passage_comprehension",
+      "page": 4,
+      "passageId": "111-p21-22",
+      "passageRange": [
+        21,
+        22
+      ],
+      "stem": "What does Tea-Rock celebrate? th",
+      "options": {
+        "A": "Their sales in 20 countries.",
+        "B": "The coming out of their 20 kind of tea. th _____ th",
+        "C": "Their 20 year of business.",
+        "D": "The opening of their 20 store in the USA."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 22,
+      "section": "passage_comprehension",
+      "page": 4,
+      "passageId": "111-p21-22",
+      "passageRange": [
+        21,
+        22
+      ],
+      "stem": "Here is the postcard Jason is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?",
+      "options": {
+        "A": "His age.",
+        "B": "His address.",
+        "C": "His birthday.",
+        "D": "Another picture of the tea cup."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 23,
+      "section": "passage_comprehension",
+      "page": 6,
+      "passageId": "111-p23-24",
+      "passageRange": [
+        23,
+        24
+      ],
+      "stem": "What can we learn about sugar from the infographic?",
+      "options": {
+        "A": "There are 4 g of sugar in 66 g of ice cream.",
+        "B": "A woman can eat as much sugar a day as a man can.",
+        "C": "Taiwan eats more sugar for each person than the US does.",
+        "D": "400 ml of rice milk has less sugar than 400 ml of grape juice."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 24,
+      "section": "passage_comprehension",
+      "page": 6,
+      "passageId": "111-p23-24",
+      "passageRange": [
+        23,
+        24
+      ],
+      "stem": "What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?",
+      "options": {
+        "A": "To help us understand how sugar hurts our body.",
+        "B": "To show what kinds of foods and drinks are popular with children.",
+        "C": "To tell us that we often have more sugar than we can without knowing it.",
+        "D": "To let us know how much sugar is enough to make foods and drinks taste good."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 25,
+      "section": "passage_comprehension",
+      "page": 7,
+      "passageId": "111-p25-26",
+      "passageRange": [
+        25,
+        26
+      ],
+      "stem": "Why did Darrell tell Marina to go to Pinterest ?",
+      "options": {
+        "A": "To find some examples for her homework.",
+        "B": "To shop for things that are needed for art classes.",
+        "C": "To meet new friends who have the same interests.",
+        "D": "To share her works and tell people how they are made."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 26,
+      "section": "passage_comprehension",
+      "page": 7,
+      "passageId": "111-p25-26",
+      "passageRange": [
+        25,
+        26
+      ],
+      "stem": "What does it mean when you learn something from A to Z ?",
+      "options": {
+        "A": "You can learn it at any time.",
+        "B": "You learn it in a baking class.",
+        "C": "You learn everything about it.",
+        "D": "You spend all your life learning it."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 27,
+      "section": "passage_comprehension",
+      "page": 8,
+      "passageId": "111-p27-29",
+      "passageRange": [
+        27,
+        29
+      ],
+      "stem": "Which idea is talked about in the first paragraph of the reading?",
+      "options": {
+        "A": "How you should do Tabata training.",
+        "B": "What is the best time for Tabata training.",
+        "C": "Who first had the idea of Tabata training.",
+        "D": "How often you should do Tabata training."
+      },
+      "answer": null,
+      "glossary": {
+        "paragraph": "段落"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 28,
+      "section": "passage_comprehension",
+      "page": 8,
+      "passageId": "111-p27-29",
+      "passageRange": [
+        27,
+        29
+      ],
+      "stem": "Who might find that Tabata training is right for them?",
+      "options": {
+        "A": "People who enjoy team sports.",
+        "B": "People who want to start exercising.",
+        "C": "People who want to fix their heart problems.",
+        "D": "People who already have a habit of exercising."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 29,
+      "section": "passage_comprehension",
+      "page": 8,
+      "passageId": "111-p27-29",
+      "passageRange": [
+        27,
+        29
+      ],
+      "stem": "Which is true about Tabata training?",
+      "options": {
+        "A": "It is difficult to learn the moves.",
+        "B": "You are free to choose your own moves.",
+        "C": "You need a large space to do the exercises.",
+        "D": "You cannot rest between moves if you want the afterburn."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 30,
+      "section": "passage_comprehension",
+      "page": 10,
+      "passageId": "111-p30-32",
+      "passageRange": [
+        30,
+        32
+      ],
+      "stem": "There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?",
+      "options": {
+        "A": "a  c  d  b.",
+        "B": "a  d  c  b.",
+        "C": "c  a  b  d.",
+        "D": "c  a  d  b."
+      },
+      "answer": null,
+      "glossary": {
+        "order": "排序"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 31,
+      "section": "passage_comprehension",
+      "page": 10,
+      "passageId": "111-p30-32",
+      "passageRange": [
+        30,
+        32
+      ],
+      "stem": "What does this mean in the report?",
+      "options": {
+        "A": "The way workers show they are hard-working.",
+        "B": "Restaurants and coffee shops open until very late at night.",
+        "C": "Workers do not go home when they walk out of the office.",
+        "D": "The number of workers who get paid more and rise higher in the company."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 32,
+      "section": "passage_comprehension",
+      "page": 10,
+      "passageId": "111-p30-32",
+      "passageRange": [
+        30,
+        32
+      ],
+      "stem": "What can we learn from Figure 1 and Figure 2?",
+      "options": {
+        "A": "Long working hours killed more women than men in 2014.",
+        "B": "Long working hours kills more and more workers every year.",
+        "C": "Men usually have a bigger chance to get paid more and rise higher when they work the same hours as women.",
+        "D": "Men and women have almost the same chance to get paid more and rise higher when they work 2,200 hours."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 33,
+      "section": "passage_comprehension",
+      "page": 12,
+      "passageId": "111-p33-36",
+      "passageRange": [
+        33,
+        36
+      ],
+      "stem": "Which map is most likely the map of Cameroon in 1962?",
+      "options": {
+        "A": "[Image/Diagram Option A]",
+        "B": "[Image/Diagram Option B]",
+        "C": "[Image/Diagram Option C]",
+        "D": "[Image/Diagram Option D]"
+      },
+      "answer": null,
+      "glossary": {
+        "likely": "可能"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 34,
+      "section": "passage_comprehension",
+      "page": 12,
+      "passageId": "111-p33-36",
+      "passageRange": [
+        33,
+        36
+      ],
+      "stem": "What does resentful mean in the reading?",
+      "options": {
+        "A": "Sad.",
+        "B": "Angry.",
+        "C": "Careful.",
+        "D": "Worried."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 35,
+      "section": "passage_comprehension",
+      "page": 12,
+      "passageId": "111-p33-36",
+      "passageRange": [
+        33,
+        36
+      ],
+      "stem": "What does Cameroon’s government most likely think of Ambazonia?",
+      "options": {
+        "A": "It plans to do business with Ambazonia.",
+        "B": "It needs Ambazonia for money and help.",
+        "C": "It does not want to be part of Ambazonia.",
+        "D": "It does not agree that Ambazonia is a country."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 36,
+      "section": "passage_comprehension",
+      "page": 12,
+      "passageId": "111-p33-36",
+      "passageRange": [
+        33,
+        36
+      ],
+      "stem": "What does Elisa Grant try to tell readers by talking about the history of Cameroon?",
+      "options": {
+        "A": "Why speaking English is a way to get power.",
+        "B": "Why English speakers in Cameroon have less power.",
+        "C": "Why the two parts of Cameroon became one country.",
+        "D": "Why only 20% of the people in Cameroon speak English."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 37,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "111-p37-39",
+      "passageRange": [
+        37,
+        39
+      ],
+      "stem": "What is recommended to people who are visiting the Southend Trail?",
+      "options": {
+        "A": "Camping on the side trails.",
+        "B": "Biking along the side trails.",
+        "C": "Hiking one part of the trail a day.",
+        "D": "Visiting the museum in the morning."
+      },
+      "answer": null,
+      "glossary": {
+        "recommend": "推薦"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 38,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "111-p37-39",
+      "passageRange": [
+        37,
+        39
+      ],
+      "stem": "What does lodging mean in the reading?",
+      "options": {
+        "A": "A meal to have.",
+        "B": "A place to stay in.",
+        "C": "A time for visiting.",
+        "D": "A way of moving around."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 39,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "111-p37-39",
+      "passageRange": [
+        37,
+        39
+      ],
+      "stem": "Kaylen will start his trip from Cove. He plans to visit one of the old castles. He also wants to go birdwatching near the river. Which parts of the trail should Kaylen go on?",
+      "options": {
+        "A": "Parts 1 and 2.",
+        "B": "Parts 1 and 2a.",
+        "C": "Parts 2 and 3.",
+        "D": "Parts 4 and 4a."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 40,
+      "section": "cloze",
+      "page": 14,
+      "passageId": "111-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 40",
+      "options": {
+        "A": "in fact",
+        "B": "at first",
+        "C": "of course",
+        "D": "for example"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 41,
+      "section": "cloze",
+      "page": 14,
+      "passageId": "111-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 41",
+      "options": {
+        "A": "take sit",
+        "B": "Ms Easy",
+        "C": "it makes",
+        "D": "me steak"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 42,
+      "section": "cloze",
+      "page": 14,
+      "passageId": "111-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 42",
+      "options": {
+        "A": "strange",
+        "B": "difficult",
+        "C": "delicious",
+        "D": "important"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "111",
+      "questionNumber": 43,
+      "section": "cloze",
+      "page": 14,
+      "passageId": "111-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 43",
+      "options": {
+        "A": "more than just games",
+        "B": "often played in public",
+        "C": "not so popular as before",
+        "D": "not first used to learn words"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    }
+  ],
+  "extractedAt": "2026-08-27T16:08:45.189Z",
+  "extractorVersion": "1.0.0"
+}

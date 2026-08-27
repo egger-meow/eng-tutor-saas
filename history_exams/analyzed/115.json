@@ -1,0 +1,3653 @@
+{
+  "examId": "115",
+  "year": 115,
+  "promptVersion": "v1.0.0",
+  "analyzedAt": "2026-08-27T16:08:46.098Z",
+  "questions": [
+    {
+      "examId": "115",
+      "questionNumber": 1,
+      "contentHash": "fc272f7e0732a375ebf02f6f872ca2bd039fac4211c69f498c604965399267ee",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 1,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Look at the picture. All of the students who are exercising are wearing _____ .",
+        "options": {
+          "A": "caps",
+          "B": "glasses",
+          "C": "jackets",
+          "D": "pants"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "information_integration",
+        "secondarySkills": [],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D3_multi_step_synthesis",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in information_integration with D3_multi_step_synthesis depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "information_integration junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "high",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in information_integration, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 2,
+      "contentHash": "51911ab98d3fedb0f06a63f4b2347593fe7147dd042471c818399a2ca6a80e84",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 2,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Rita _____ her dogs many times a day. That’s why they’re too fat.",
+        "options": {
+          "A": "feeds",
+          "B": "kisses",
+          "C": "walks",
+          "D": "washes"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 3,
+      "contentHash": "7c82c69f9544269bea0e3c0061fe7eda1ec07082bebdd0d5475e748e9b5a9c55",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 3,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "You can ask Sophia anything about butterflies and bees. She has great _____ of insects.",
+        "options": {
+          "A": "chances",
+          "B": "knowledge",
+          "C": "news",
+          "D": "power"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 4,
+      "contentHash": "37ead60a6ac0e74c6a13ccba3b77c4436b72e8ea9fd97772927a33205a6791b7",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 4,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Adam slept _____ last night because he kept waking up from bad dreams.",
+        "options": {
+          "A": "deeply",
+          "B": "early",
+          "C": "terribly",
+          "D": "quickly"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 5,
+      "contentHash": "98486c283c3dd2e1c3b4c25c0086a0903c985b7f2771c55c9aee9fa70a5b3c85",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 5,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Tara enjoys being with all kinds of animals; she even _____ a snake as a pet.",
+        "options": {
+          "A": "drops",
+          "B": "gives",
+          "C": "keeps",
+          "D": "makes"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 6,
+      "contentHash": "b02060260fa19695d60381e7bbabf956669f4b3430706ecb887b280a629f336d",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.532Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 6,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Little Eric chose the doll _____ big brown eyes because it was the cutest in the store.",
+        "options": {
+          "A": "at",
+          "B": "in",
+          "C": "on",
+          "D": "with"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 7,
+      "contentHash": "99a1e9a962200995391c3334feb90cf412932e38648a6ada3c55693ed8d77849",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 7,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "After four hours of mountain climbing, Rosa’s legs got _____ , so she took a rest on the top of the mountain.",
+        "options": {
+          "A": "dirty",
+          "B": "sick",
+          "C": "sore",
+          "D": "strong"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 8,
+      "contentHash": "bbaf6bc2633140cfad6d1bd47fb8dbc6d3b5839236f421f3de0b4ed7f8227963",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 8,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Having three cups of coffee a day can’t be bad for our health, _____ ?",
+        "options": {
+          "A": "can it",
+          "B": "can they",
+          "C": "is it",
+          "D": "are they"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 9,
+      "contentHash": "7102e9460393e8fd0093d8b28e2c3ccb5e452f53970d19cbf0ac8ccd0aa878e0",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 9,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "You can’t push that door open with only one hand. It’s too heavy. You have to use _____ !",
+        "options": {
+          "A": "all",
+          "B": "another",
+          "C": "both",
+          "D": "one"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 10,
+      "contentHash": "fb805ee31e2258a87fbba42c211ec894708aa56c85f19257440da3a77d38c589",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 10,
+        "section": "single",
+        "page": 2,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Alan works hard in his new job, and he wants to know _____ his boss feels about him.",
+        "options": {
+          "A": "how",
+          "B": "that",
+          "C": "whether",
+          "D": "why"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A1_elementary",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A1_elementary lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 11,
+      "contentHash": "dd3a2982385197f3ae5a6b8dc113f0ac0847ecbf6f28a292b42c5a263c5e7c6c",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 11,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "I thought the girl _____ was Kate, but it was her sister, Candy. They sounded almost the same.",
+        "options": {
+          "A": "answered the phone",
+          "B": "she answered the phone",
+          "C": "who answered the phone",
+          "D": "and answered the phone"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 12,
+      "contentHash": "706cdc24a2308b2d436c00eba63f81d14e4e418785c31b3fa077a7d5cd66c83e",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 12,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Ken is going abroad with a woman he met online, though he doesn’t know _____ well.",
+        "options": {
+          "A": "her",
+          "B": "each other",
+          "C": "any",
+          "D": "another"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 13,
+      "contentHash": "ad3946f0ae8046397030ed91e5ff8c433d13c0fb93cf2fddd4c6f794b0d321a4",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 13,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Joe is happy he is not at the _____ of the class now. His grades are better than half of his classmates’ this school year.",
+        "options": {
+          "A": "side",
+          "B": "front",
+          "C": "center",
+          "D": "bottom"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 14,
+      "contentHash": "fff894abd1b7efb18159bf20ce3cad0b755d39d653ab12e84af68d7cb9bc9ee5",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 14,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Look! There is not a cloud in the sky. I think the chances of getting some rain today are really _____ .",
+        "options": {
+          "A": "far",
+          "B": "good",
+          "C": "possible",
+          "D": "small"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 15,
+      "contentHash": "32a6ed475a0f7ded63583828e099825426a5c1a72d9fe03ef76286f31bc62cfe",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 15,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "On windy days, the flowers in my garden _____ like shy children with their heads down.",
+        "options": {
+          "A": "bow",
+          "B": "fall",
+          "C": "rise",
+          "D": "smell"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 16,
+      "contentHash": "4ce5c5783fae6c00bdfe12c16db2bc1a63b263c5331a8a0484994aaecef6ae33",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 16,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Mr. Olson went to the doctor when he found he _____ his hair. He hoped he would be able to keep his thick hair.",
+        "options": {
+          "A": "was losing",
+          "B": "is losing",
+          "C": "will lose",
+          "D": "has lost"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 17,
+      "contentHash": "255d4fc75cddbf7e0f935b3d3d4d0ab788f13707ad9e10f48da439a545b2f2fe",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 17,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Do you know what Lindsey’s first job was? Before becoming a movie star, she _____ the floors at the supermarket.",
+        "options": {
+          "A": "mops",
+          "B": "is mopping",
+          "C": "has mopped",
+          "D": "mopped"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 18,
+      "contentHash": "d26c8ff958250bf688e48f20c75c786478560f7142be5ffdabeb4dd2aed7e485",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 18,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Our dog Lassie hides under the bed every time the moon comes out. She has been _____ for years, but we don’t know why.",
+        "options": {
+          "A": "it",
+          "B": "like this",
+          "C": "like us",
+          "D": "that"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "grammar_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 19,
+      "contentHash": "93738835a346fb8f959f014eab0ea0550192aa419a6b6fbd9b116b4f056a76c5",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 19,
+        "section": "single",
+        "page": 3,
+        "passageId": null,
+        "passageRange": null,
+        "stem": "Tom: Sam, could you help me in the kitchen now? Sam: No, I _____ TV. It’s the most important game of the season.",
+        "options": {
+          "A": "watch",
+          "B": "watched",
+          "C": "have watched",
+          "D": "am watching"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_clause",
+        "contextNecessity": "none",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of single_clause.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "grammatically_plausible_contextually_wrong",
+            "explanation": "Plausible word class but does not fit the semantic collocation"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "low",
+        "grammarDemand": "high",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "intentional_retrieval_drill",
+          "explanation": "Standard junior-high curriculum vocabulary retrieval in a single sentence context"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 20,
+      "contentHash": "202511059c4eefecace4ffdef4fb10ab8579fcef1e35090922895236ab397958",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 20,
+        "section": "passage_comprehension",
+        "page": 4,
+        "passageId": "115-p20-21",
+        "passageRange": [
+          20,
+          21
+        ],
+        "stem": "Amanda wants to make fruit tea by following The Best Fruit Tea You Can Make at Home . She has several kinds of fruit in the kitchen: apples, bananas, oranges, papayas, pears, and strawberries. Which are some of the fruits she can use to make the fruit tea?",
+        "options": {
+          "A": "Oranges, papayas and pears.",
+          "B": "Apples, bananas and oranges.",
+          "C": "Apples, oranges and strawberries.",
+          "D": "Bananas, papayas and strawberries."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "medium",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 21,
+      "contentHash": "08b5793818868a34a43adf39446d5a8788dc5d9efb3f0ba88b777c68c5712e00",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 21,
+        "section": "passage_comprehension",
+        "page": 4,
+        "passageId": "115-p20-21",
+        "passageRange": [
+          20,
+          21
+        ],
+        "stem": "According to the reading, which is correct when we make the fruit tea?",
+        "options": {
+          "A": "Boiling water with sugar in it.",
+          "B": "Making sure to take out the fruit.",
+          "C": "Putting in the fruit and the lemon juice at the same time.",
+          "D": "Leaving the teabags in the pot of hot water for 2 to 3 minutes."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "medium",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 22,
+      "contentHash": "57f0ef85cdbf52ed631f88578916a373ca2e40ce2d610ac9a260c8020b204347",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 22,
+        "section": "cloze",
+        "page": 5,
+        "passageId": "115-p22-23",
+        "passageRange": [
+          22,
+          23
+        ],
+        "stem": "According to the comics, what kind of person is Hawkins?",
+        "options": {
+          "A": "He sees good things in people.",
+          "B": "He never goes to work on time.",
+          "C": "He blindly follows other people.",
+          "D": "He talks about things he can’t do."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "discourse_relationship",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in discourse_relationship with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "discourse_relationship junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine discourse_relationship understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in discourse_relationship, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 23,
+      "contentHash": "cfa77be382c625aa84abdcc1300069e33498844993c951fa2555f9db61878587",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 23,
+        "section": "cloze",
+        "page": 5,
+        "passageId": "115-p22-23",
+        "passageRange": [
+          22,
+          23
+        ],
+        "stem": "What does it mean when we say someone bombed something?",
+        "options": {
+          "A": "They gave it up.",
+          "B": "They failed at it.",
+          "C": "They were fine with it.",
+          "D": "They were careful about it."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "discourse_relationship",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in discourse_relationship with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "discourse_relationship junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine discourse_relationship understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in discourse_relationship, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 24,
+      "contentHash": "4337fbb3068b1f777511405699d147bc029e8d6c7553f144a8db97309708a8ee",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:44.745Z",
+      "modelName": "flaky-test-provider",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 24,
+        "section": "passage_comprehension",
+        "page": 7,
+        "passageId": "115-p24-26",
+        "passageRange": [
+          24,
+          26
+        ],
+        "stem": "Which question can the brochure answer?",
+        "options": {
+          "A": "Can I order tickets online?",
+          "B": "How much are the tickets?",
+          "C": "How can I get to the Marigolds’ Home?",
+          "D": "When can I visit the Marigolds’ Home?"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "medium",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 25,
+      "contentHash": "88ea51fbe3148168dc69f593191cef053507988f8c33157bbede477dbabfd087",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 25,
+        "section": "passage_comprehension",
+        "page": 7,
+        "passageId": "115-p24-26",
+        "passageRange": [
+          24,
+          26
+        ],
+        "stem": "What breaks the rules for visitors to the Marigolds’ Home?",
+        "options": {
+          "A": "Eating burgers in the Rose Garden.",
+          "B": "Taking pictures in the Main House.",
+          "C": "Entering the Rabbit’s Temple without shoes.",
+          "D": "Taking pet dogs for a walk on the playground."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 26,
+      "contentHash": "6cd107575546fa4a798ffb1ad20dc12c50706ccf3a1a0ac2b9d04eb54130f4f2",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 26,
+        "section": "passage_comprehension",
+        "page": 7,
+        "passageId": "115-p24-26",
+        "passageRange": [
+          24,
+          26
+        ],
+        "stem": "After shopping at the gift shop of the Main House, Lizzy walks out and sees the Family Library in front of her. She wants to visit the Rose Garden. How can she get there?",
+        "options": {
+          "A": "Turn left and walk past the Main House, then go straight and turn right at the corner.",
+          "B": "Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House.",
+          "C": "Turn right and go straight to the Farmyard, then turn right and go straight, then turn left at the corner.",
+          "D": "Turn right and walk through the Butterfly Garden, then walk past the Rabbit’s Temple and the café."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "A2_basic",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "A2_basic lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "medium",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 27,
+      "contentHash": "87404b7f2029d5b06d270f9485033a53d85de693c846afca3a53161cdd866609",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 27,
+        "section": "passage_comprehension",
+        "page": 8,
+        "passageId": "115-p27-28",
+        "passageRange": [
+          27,
+          28
+        ],
+        "stem": "Why was Beatrice Harrison called the Nightingale Lady?",
+        "options": {
+          "A": "She wrote songs about nightingales.",
+          "B": "She sang as beautifully as a nightingale did.",
+          "C": "She taught nightingales to sing in a radio show.",
+          "D": "She was famous for playing music with nightingales."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 28,
+      "contentHash": "ee10297bdc2b5d44170032cc5c4126df01de2778bdfc7b2518a2aa6771fceaf4",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 28,
+        "section": "passage_comprehension",
+        "page": 8,
+        "passageId": "115-p27-28",
+        "passageRange": [
+          27,
+          28
+        ],
+        "stem": "Which is NOT used in the reading to mean the nightingale(s) ?",
+        "options": {
+          "A": "Her visitor.",
+          "B": "The little singers.",
+          "C": "The artist.",
+          "D": "Her garden friends."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 29,
+      "contentHash": "4babcac685317266d2833d775c58a85dc818f502037c9d04680f474adf076ef0",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 29,
+        "section": "passage_comprehension",
+        "page": 9,
+        "passageId": "115-p29-31",
+        "passageRange": [
+          29,
+          31
+        ],
+        "stem": "Why does Alex Jackson write about Rose Lacey?",
+        "options": {
+          "A": "Because she died.",
+          "B": "Because she is very sick.",
+          "C": "Because she is moving away.",
+          "D": "Because she is leaving for another job."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "sequence_cause_consequence",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in sequence_cause_consequence with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "sequence_cause_consequence junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine sequence_cause_consequence understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in sequence_cause_consequence, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 30,
+      "contentHash": "3f12222b490435670df8b03e5f4916428d568ef0433d39c20d09b695593cc5a6",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 30,
+        "section": "passage_comprehension",
+        "page": 9,
+        "passageId": "115-p29-31",
+        "passageRange": [
+          29,
+          31
+        ],
+        "stem": "How did Rose Lacey and Alex Jackson get to know each other?",
+        "options": {
+          "A": "They met at a party.",
+          "B": "They were relatives.",
+          "C": "They worked in the same office.",
+          "D": "They took a course on movies together."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 31,
+      "contentHash": "806c81957d18709aa529332a8964c6bf2eda9c6fcf7c6e347412d9840d952887",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.575Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 31,
+        "section": "passage_comprehension",
+        "page": 9,
+        "passageId": "115-p29-31",
+        "passageRange": [
+          29,
+          31
+        ],
+        "stem": "What is special about Rose Lacey’s articles?",
+        "options": {
+          "A": "They are important to movie makers.",
+          "B": "They talk about movies from a fresh angle.",
+          "C": "They give interesting information about actors.",
+          "D": "They are good examples of how to write stories."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 32,
+      "contentHash": "78ced8ab4de40ae059bf07a5f2b1d273805799242c5a0fe07d522e4e92ea9a72",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 32,
+        "section": "passage_comprehension",
+        "page": 11,
+        "passageId": "115-p32-34",
+        "passageRange": [
+          32,
+          34
+        ],
+        "stem": "Why does the title say “Glass Bottles’ Second Life” ?",
+        "options": {
+          "A": "People collect sea glass and use it to make new glass bottles.",
+          "B": "People collect sea glass at the beach and use it to make wishes.",
+          "C": "Glass bottles that are thrown into the sea become the homes of sea animals.",
+          "D": "Glass bottles that are thrown into the sea become sea glass which is used in art pieces."
+        },
+        "answer": null,
+        "glossary": {
+          "title": "標題"
+        },
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "sequence_cause_consequence",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in sequence_cause_consequence with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "sequence_cause_consequence junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine sequence_cause_consequence understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in sequence_cause_consequence, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 33,
+      "contentHash": "00b337412776d576e220368f5e2442f641ddab35411fbd792ed9b0333f2e014d",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 33,
+        "section": "passage_comprehension",
+        "page": 11,
+        "passageId": "115-p32-34",
+        "passageRange": [
+          32,
+          34
+        ],
+        "stem": "According to the reading, how is sea glass made?",
+        "options": {
+          "A": "Sea glass becomes rounder after it is pushed up to the beach.",
+          "B": "Colder sea water helps pieces of glass become sea glass faster.",
+          "C": "Pieces of glass become white on the outside after many years in the sea.",
+          "D": "Glass bottles break into pieces when they are dug out from the sea floor."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 34,
+      "contentHash": "399d7582f8606bd38db1e47145e2b384fe5d78a42cb9848578e1fccebee28216",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:08:41.533Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 34,
+        "section": "passage_comprehension",
+        "page": 11,
+        "passageId": "115-p32-34",
+        "passageRange": [
+          32,
+          34
+        ],
+        "stem": "According to the reading, why will less sea glass be found in the future?",
+        "options": {
+          "A": "People do not make as many glass items as before.",
+          "B": "People have learned not to throw garbage into the sea.",
+          "C": "Artists are using too much sea glass in their art pieces.",
+          "D": "Waves are not big enough to push sea glass up to the beach."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 35,
+      "contentHash": "9725ca703d1d766749ae8c7db12fd711009ec0c7304e472511ea3af8049e7dc4",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 35,
+        "section": "passage_comprehension",
+        "page": 13,
+        "passageId": "115-p35-39",
+        "passageRange": [
+          35,
+          39
+        ],
+        "stem": "What does the prevalence of English mean?",
+        "options": {
+          "A": "That English is very common.",
+          "B": "That English is not welcomed.",
+          "C": "That English is easy and simple.",
+          "D": "That English is not a national language."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "vocabulary_in_context",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in vocabulary_in_context with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "vocabulary_in_context junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in vocabulary_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 36,
+      "contentHash": "86ec14919a28eaec78229ef46bab83c9b58144dc6935e65f36a26593a68c6d5b",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 36,
+        "section": "passage_comprehension",
+        "page": 13,
+        "passageId": "115-p35-39",
+        "passageRange": [
+          35,
+          39
+        ],
+        "stem": "In the first reading, which is one of the ways that Anna Adams uses to make readers believe in her ideas?",
+        "options": {
+          "A": "Sharing her own life stories.",
+          "B": "Borrowing from people’s experience.",
+          "C": "Using examples from another language.",
+          "D": "Showing information from news reports."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 37,
+      "contentHash": "01d8427690c98c81d156b61b558fdd6f12ae5b7b834f8b1d9a279f5fb58a0eec",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 37,
+        "section": "passage_comprehension",
+        "page": 13,
+        "passageId": "115-p35-39",
+        "passageRange": [
+          35,
+          39
+        ],
+        "stem": "Which words in the second reading are NOT used to describe Icelandic?",
+        "options": {
+          "A": "A language in its sickbed.",
+          "B": "A dying language.",
+          "C": "Our first language.",
+          "D": "This beautiful language."
+        },
+        "answer": null,
+        "glossary": {
+          "describe": "形容"
+        },
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 38,
+      "contentHash": "387e81b4a9704440a484b90faca30fdd3c64a762f031b582807cd3152aeec94b",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 38,
+        "section": "passage_comprehension",
+        "page": 13,
+        "passageId": "115-p35-39",
+        "passageRange": [
+          35,
+          39
+        ],
+        "stem": "Are Anna Adams and Gunnar Eggertsson worried about the future of Icelandic?",
+        "options": {
+          "A": "No, they are not.",
+          "B": "Yes, they both are.",
+          "C": "Adams is, but Eggertsson is not.",
+          "D": "Adams is not, but Eggertsson is."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 39,
+      "contentHash": "59ee835e5db40ef3f73acb75bb727780e484a36ab9842161c9f7d52a1ebfbbc9",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 39,
+        "section": "passage_comprehension",
+        "page": 13,
+        "passageId": "115-p35-39",
+        "passageRange": [
+          35,
+          39
+        ],
+        "stem": "Which idea do Anna Adams and Gunnar Eggertsson both talk about in the readings?",
+        "options": {
+          "A": "Whether Icelanders speak better English than Icelandic.",
+          "B": "Whether the number of Icelandic speakers is big enough.",
+          "C": "Whether school subjects should be taught only in Icelandic.",
+          "D": "Whether Iceland should allow more foreigners to work in Iceland."
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "explicit_detail",
+        "secondarySkills": [
+          "local_inference"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "single_sentence",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in explicit_detail with D2_single_step_inference depth, requiring synthesis of single_sentence.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "explicit_detail junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine explicit_detail understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in explicit_detail, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 40,
+      "contentHash": "d514095bc32001670f893264ecc8ad3bf7885455d44301f14a272225e62c7cde",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 40,
+        "section": "cloze",
+        "page": 15,
+        "passageId": "115-p40-43",
+        "passageRange": [
+          40,
+          43
+        ],
+        "stem": "Question 40",
+        "options": {
+          "A": "give you a piece of good land",
+          "B": "choose a person to be the next king",
+          "C": "put the beautiful ones in my castle",
+          "D": "decide who will work in my garden"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "discourse_relationship",
+        "secondarySkills": [
+          "vocabulary_in_context"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in discourse_relationship with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "discourse_relationship junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "medium",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine discourse_relationship understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in discourse_relationship, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 41,
+      "contentHash": "833b05076645d1e0fc475b93d569db05a285f6fe46e0b5bf48e0c206a36a3f04",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 41,
+        "section": "cloze",
+        "page": 15,
+        "passageId": "115-p40-43",
+        "passageRange": [
+          40,
+          43
+        ],
+        "stem": "Question 41",
+        "options": {
+          "A": "But he lost his pot a few weeks later",
+          "B": "Months passed but nothing grew from it",
+          "C": "But soon the plant that grew from it died",
+          "D": "The seed grew into a big tree in a short time"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "sequence_cause_consequence"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "high",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 42,
+      "contentHash": "7cb067875802c566148227c8cd0def292e78666a7b03a8b49f80d9ffba62111e",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 42,
+        "section": "cloze",
+        "page": 15,
+        "passageId": "115-p40-43",
+        "passageRange": [
+          40,
+          43
+        ],
+        "stem": "Question 42",
+        "options": {
+          "A": "the last one to give up",
+          "B": "the first one to share good news",
+          "C": "the first one to bring his pot to the king",
+          "D": "the only one to take good care of his plant"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "sequence_cause_consequence"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "high",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    },
+    {
+      "examId": "115",
+      "questionNumber": 43,
+      "contentHash": "bf5d72f62354036f2d0e87783fdc5c5e1029d137618ae7547e33519c59feca76",
+      "promptVersion": "v1.0.0",
+      "analyzedAt": "2026-08-27T16:06:03.576Z",
+      "modelName": "offline-deterministic",
+      "extracted": {
+        "examId": "115",
+        "questionNumber": 43,
+        "section": "cloze",
+        "page": 15,
+        "passageId": "115-p40-43",
+        "passageRange": [
+          40,
+          43
+        ],
+        "stem": "Question 43",
+        "options": {
+          "A": "wise",
+          "B": "strong",
+          "C": "honest",
+          "D": "popular"
+        },
+        "answer": null,
+        "extractionConfidence": "high",
+        "extractionWarnings": []
+      },
+      "analysis": {
+        "primarySkill": "grammar_in_context",
+        "secondarySkills": [
+          "sequence_cause_consequence"
+        ],
+        "languageDifficulty": "B1_intermediate",
+        "cognitiveDepth": "D2_single_step_inference",
+        "evidenceSpan": "cross_sentence_local",
+        "contextNecessity": "essential",
+        "reasoningOperations": [
+          "contextual_clue_extraction",
+          "distractor_elimination_by_constraint",
+          "syntactic_semantic_alignment"
+        ],
+        "questionMechanism": "Tests learner ability in grammar_in_context with D2_single_step_inference depth, requiring synthesis of cross_sentence_local.",
+        "distractorStrategies": [
+          {
+            "option": "A",
+            "strategy": "literal_keyword_matching",
+            "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+          },
+          {
+            "option": "B",
+            "strategy": "partial_truth",
+            "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+          },
+          {
+            "option": "C",
+            "strategy": "wrong_referent",
+            "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+          },
+          {
+            "option": "D",
+            "strategy": "unsupported_world_knowledge",
+            "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+          }
+        ],
+        "requiredKnowledge": [
+          "grammar_in_context junior high syllabus standard",
+          "B1_intermediate lexical and grammatical range"
+        ],
+        "readingDemand": "high",
+        "grammarDemand": "high",
+        "vocabularyDemand": "high",
+        "inferenceDemand": "medium",
+        "whyTheQuestionWorks": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty.",
+        "possibleStudentFailureModes": [
+          "Over-reliance on literal keyword matching from the passage",
+          "Failing to notice tense or referent shifts across sentence boundaries"
+        ],
+        "reusableDesignPrinciple": "Anchor the stem to a key communicative target in grammar_in_context, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.",
+        "shallowRecall": {
+          "isShallowRecall": false,
+          "recallType": "none",
+          "explanation": "Passage comprehension requiring multi-sentence contextual reasoning"
+        }
+      }
+    }
+  ]
+}

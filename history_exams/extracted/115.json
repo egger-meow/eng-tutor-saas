@@ -1,0 +1,1030 @@
+{
+  "examId": "115",
+  "year": 115,
+  "title": "115 年國中教育會考英語科閱讀試題",
+  "sourcePdf": "115P_English.pdf",
+  "pageCount": 15,
+  "questionCount": 43,
+  "singleQuestionRange": [
+    1,
+    19
+  ],
+  "passageQuestionRange": [
+    20,
+    43
+  ],
+  "passages": [
+    {
+      "id": "115-p20-21",
+      "examId": "115",
+      "questionRange": [
+        20,
+        21
+      ],
+      "genre": "infographic_chart_table",
+      "title": null,
+      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "glossary": {
+        "stir": "攪拌"
+      },
+      "pageStart": 4,
+      "pageEnd": 4,
+      "questionNumbers": [
+        20,
+        21
+      ]
+    },
+    {
+      "id": "115-p22-23",
+      "examId": "115",
+      "questionRange": [
+        22,
+        23
+      ],
+      "genre": "cloze_passage",
+      "title": null,
+      "text": "th\nIn 6 grade, I tried to get the students\nI totally bombed it.\n\u0014 to pick me as student leader. _____ \u0015\nI’ll make class hours shorter.\nAnd we’ll have only three\ndays of school a week…\nWhat? That’s not\nwhat a student\nleader can decide.\nHe doesn’t\nknow anything. _____ I was the best choice,\nbut why didn’t people\nknow that?\nI became a salesperson when I was 23,\nI bombed it again.\n\u0016 and I believed I could be Number 1. _____ \u0017\nYou said you would\nHawkins, we don’t need\nsell 50 cars a month.\nyour service anymore.\nDon’t worry.\nBut you sold only 1\nGo pack your things…\nI’ll sell 149 cars\ncar in two months.\nnext month.\nWhy ?\nYou said that\na year ago.",
+      "pageStart": 5,
+      "pageEnd": 5,
+      "questionNumbers": [
+        22,
+        23
+      ]
+    },
+    {
+      "id": "115-p24-26",
+      "examId": "115",
+      "questionRange": [
+        24,
+        26
+      ],
+      "genre": "brochure_flyer",
+      "title": null,
+      "text": "This is a brochure for the Marigolds’ Home.\nThe Marigolds’ Home\nOpening times:\nMarch to October\n10:00-17:00\nNovember to February\n10:00-16:00\nClosed on Mondays\nTo make sure you enjoy your visit to The Marigolds’ Home, we’d like to ask you to follow\nthe rules below:\n1. Pets are not allowed in any areas of the Marigolds’ Home.\n2. Eating and drinking are not allowed inside the buildings, except in the café.\n3. Picture-taking is not allowed inside Sir Archie’s House.\n4. Please take off your shoes before entering the Rabbit’s Temple.\nBecome a member and save 10% on tickets and 30% on all items in the gift shops.\nTo join, visit www.themarigoldshome.com .",
+      "glossary": {
+        "brochure": "宣傳手冊"
+      },
+      "pageStart": 6,
+      "pageEnd": 7,
+      "questionNumbers": [
+        24,
+        25,
+        26
+      ]
+    },
+    {
+      "id": "115-p27-28",
+      "examId": "115",
+      "questionRange": [
+        27,
+        28
+      ],
+      "genre": "dialogue",
+      "title": null,
+      "text": "One summer evening when English cello player Beatrice\nHarrison was practicing in her garden, she was joined by a\nvisitor she did not expect.\nThe visitor was a nightingale. The small brown bird sang\ntogether with Harrison’s cello music, and the birdsong\nsounded like the piece she was playing. For the next few\nevenings, her visitor kept coming back, sometimes with\nseveral of its friends. Harrison decided that more people\nshould hear the little singers.\nPhoto: Ms. Harrison with the cello\nSo, on May 19, 1924, Harrison worked with the BBC, the UK’s national TV and radio\nstation, and played in her garden. At first, the artist was playing alone. Fifteen minutes\nbefore the end of her playing, the nightingales began to sing with the cello.\nThe nightingale show was popular with radio listeners. It was repeated the next week, and\nfor the next twelve years Harrison played on the radio with her garden friends. During this\ntime, she got 50,000 fan letters. People called her “the Nightingale Lady.”",
+      "pageStart": 8,
+      "pageEnd": 8,
+      "questionNumbers": [
+        27,
+        28
+      ]
+    },
+    {
+      "id": "115-p29-31",
+      "examId": "115",
+      "questionRange": [
+        29,
+        31
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "With heavy hearts, we are here to say goodbye to Rose Lacey, a wonderful\nwriter who will be sadly missed.\nRose and I first met in 2010. I was at a party to pick up my wife when I heard\nRose explaining to her and her friends why Get Across was a great movie. Her\nideas were so interesting that I invited her to write some articles about movies\nfor Action! US . Rose was very excited and agreed right away.\nOver the next ten years, Rose wrote more than 150 articles. Rose could\nalways bring out something new from movies that we thought we knew so well.\nPeople often told me that Rose never failed to surprise them. Her articles often\nmade them think whether they actually saw the same movie, but if they went\nto see it again, they experienced the movie in a whole new way.\nIn her short life of 40 years, Rose has made her mark on the world of movies\nwith her articles for Action! US . We are lucky to have had her in our lives. She\nwas a very special person.\nAlex Jackson\nHead of Action! US",
+      "glossary": {
+        "article": "文章"
+      },
+      "pageStart": 9,
+      "pageEnd": 9,
+      "questionNumbers": [
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "id": "115-p32-34",
+      "examId": "115",
+      "questionRange": [
+        32,
+        34
+      ],
+      "genre": "article_informational",
+      "title": null,
+      "text": "SEA GLASS: GLASS BOTTLES’ SECOND LIFE\nSea glass is made from the magic of the sea. It usually comes from glass bottles\nthat are thrown into the water. Each piece of sea glass looks different, and sea\nglass is often seen on art pieces. The pictures below explain how sea glass is\nborn.\nGlass bottles are thrown as garbage\n1 _____ into the sea.\nWhen these bottles ride the waves of\nthe sea, they hit each other or other\n2 _____ garbage in the sea and break into\nsmall pieces of glass.\nPieces of glass are pushed by sea water\nand move along the sea floor. The\n3 _____ sharp pieces slowly become rounder\nand rounder.\nAfter tens or hundreds of years in the\nsea, the pieces of glass grow an ice-like\n4 _____ white color on the outside and become\nsea glass.\nSea glass is finally pushed up to the\n5 _____ beach.\nArtists collect pieces of sea glass and\n6 _____ put them into their works.\nHowever, people now seldom use glass to make bottles and bowls—paper bowls\nand cups have become more popular these days. This means there are fewer\nglass items in the sea, so less and less sea glass will be found in the future.",
+      "pageStart": 10,
+      "pageEnd": 11,
+      "questionNumbers": [
+        32,
+        33,
+        34
+      ]
+    },
+    {
+      "id": "115-p35-39",
+      "examId": "115",
+      "questionRange": [
+        35,
+        39
+      ],
+      "genre": "dialogue",
+      "title": null,
+      "text": "Scandinavian News\nThe Future of Icelandic\nby Anna Adams\nIcelandic is a language that is spoken only in Iceland.\nIt has a long history. But many Icelanders are worried that\nthey’re losing Icelandic.\nThe reason for their worry is the prevalence of English\nin Iceland. “I use English when I talk to my housework\nrobot, use my phone, and watch movies,” said Helgi\nAtlason, an engineer. There is a reason for that. Most\nof these products use English, and few companies care to change the language into\nIcelandic because there are only a small number of Icelandic speakers (314,000 people).\nActually, you see English everywhere in Iceland.\nIcelanders also speak and hear more English than Icelandic these days because many\nforeigners who come to live and work in Iceland speak only English. “We can’t use\nIcelandic abroad, and we’re not using it much in Iceland, either. How do you expect our\nkids will want to learn it?” said Eirikur Wilson, a teacher.\nWill Iceland one day give up Icelandic for English? It may happen soon.\nScandinavian News\nOur Future with Icelandic\nby Gunnar Eggertsson\nMany people think Icelandic is a language in its\nsickbed and that it needs to be saved. I understand their\nworries, but does the future of our language really look\nthat bad?\nAccording to Dr. David Clingingsmith, a language\nneeds at least 35,000 speakers to be “safe” from becoming\na dying language. There are now 314,000 Icelandic\nspeakers. Also, every year Iceland spends 51.3 million Icelandic crowns (3.7 million\nUS dollars) teaching Icelandic to machines: phones, computers, and robots. Icelandic\nis appearing more often in products. Most importantly, schools still teach Icelandic to\nchildren. Clearly, we are not giving up our first language.\nHowever, I’m not saying that Iceland has done enough for Icelandic. Our country\ncan do a better job at getting more people to speak this beautiful language. One way to\ndo so is to give more language courses to foreigners. With much more work, I’m sure\nIcelandic can grow and even reach farther into the world.",
+      "glossary": {
+        "Icelander": "冰島人 product 商品"
+      },
+      "pageStart": 12,
+      "pageEnd": 13,
+      "questionNumbers": [
+        35,
+        36,
+        37,
+        38,
+        39
+      ]
+    },
+    {
+      "id": "115-p40-43",
+      "examId": "115",
+      "questionRange": [
+        40,
+        43
+      ],
+      "genre": "cloze_passage",
+      "title": null,
+      "text": "A long time ago, there was an old king who had no child of his own.\nThe king was worried that his land would fall into the wrong hands\nafter his death, so he decided to pick a child in his land to take the\nhigh seat. One day, he called all the children to his castle and gave\neach of them a seed. “Come back on New Year’s Day and show me\nwhat you have grown,” he said to them, “and I will 40 .”\nEvery child brought their seeds home carefully. One of the children,\nWong, planted his seed in a pot. He gave it water every day and made\nsure there was sun to help it grow. 41 .\nThen, Sung, the child of the richest family in the land, told people that\na small plant was growing from his seed. He was 42 . Everyone\nexcitedly said that he would be king. Soon, one after another, more\nand more children were also saying that they had something in their\npots. But Wong still didn’t find anything in his.\nOn the big day, when Wong brought his pot to the castle, he saw all\nthe other children carrying interesting plants. Some had flowers\nin the shape of a bird, and some had grasses of different colors.\nEveryone proudly showed their plants to the king, but the king\nlooked unhappy until he saw Wong’s pot. “I boiled the seeds before\nI gave them out, so no plants could grow from them.” The king\nlooked seriously at the children. “There is only one child who is\n43 enough to be king.”\nTen years later, the king died. On his deathbed, he was not worried\nbecause he knew Wong would be a good king.",
+      "pageStart": 14,
+      "pageEnd": 15,
+      "questionNumbers": [
+        40,
+        41,
+        42,
+        43
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "examId": "115",
+      "questionNumber": 1,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Look at the picture. All of the students who are exercising are wearing _____ .",
+      "options": {
+        "A": "caps",
+        "B": "glasses",
+        "C": "jackets",
+        "D": "pants"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 2,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Rita _____ her dogs many times a day. That’s why they’re too fat.",
+      "options": {
+        "A": "feeds",
+        "B": "kisses",
+        "C": "walks",
+        "D": "washes"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 3,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "You can ask Sophia anything about butterflies and bees. She has great _____ of insects.",
+      "options": {
+        "A": "chances",
+        "B": "knowledge",
+        "C": "news",
+        "D": "power"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 4,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Adam slept _____ last night because he kept waking up from bad dreams.",
+      "options": {
+        "A": "deeply",
+        "B": "early",
+        "C": "terribly",
+        "D": "quickly"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 5,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Tara enjoys being with all kinds of animals; she even _____ a snake as a pet.",
+      "options": {
+        "A": "drops",
+        "B": "gives",
+        "C": "keeps",
+        "D": "makes"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 6,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Little Eric chose the doll _____ big brown eyes because it was the cutest in the store.",
+      "options": {
+        "A": "at",
+        "B": "in",
+        "C": "on",
+        "D": "with"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 7,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "After four hours of mountain climbing, Rosa’s legs got _____ , so she took a rest on the top of the mountain.",
+      "options": {
+        "A": "dirty",
+        "B": "sick",
+        "C": "sore",
+        "D": "strong"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 8,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Having three cups of coffee a day can’t be bad for our health, _____ ?",
+      "options": {
+        "A": "can it",
+        "B": "can they",
+        "C": "is it",
+        "D": "are they"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 9,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "You can’t push that door open with only one hand. It’s too heavy. You have to use _____ !",
+      "options": {
+        "A": "all",
+        "B": "another",
+        "C": "both",
+        "D": "one"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 10,
+      "section": "single",
+      "page": 2,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Alan works hard in his new job, and he wants to know _____ his boss feels about him.",
+      "options": {
+        "A": "how",
+        "B": "that",
+        "C": "whether",
+        "D": "why"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 11,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "I thought the girl _____ was Kate, but it was her sister, Candy. They sounded almost the same.",
+      "options": {
+        "A": "answered the phone",
+        "B": "she answered the phone",
+        "C": "who answered the phone",
+        "D": "and answered the phone"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 12,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Ken is going abroad with a woman he met online, though he doesn’t know _____ well.",
+      "options": {
+        "A": "her",
+        "B": "each other",
+        "C": "any",
+        "D": "another"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 13,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Joe is happy he is not at the _____ of the class now. His grades are better than half of his classmates’ this school year.",
+      "options": {
+        "A": "side",
+        "B": "front",
+        "C": "center",
+        "D": "bottom"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 14,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Look! There is not a cloud in the sky. I think the chances of getting some rain today are really _____ .",
+      "options": {
+        "A": "far",
+        "B": "good",
+        "C": "possible",
+        "D": "small"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 15,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "On windy days, the flowers in my garden _____ like shy children with their heads down.",
+      "options": {
+        "A": "bow",
+        "B": "fall",
+        "C": "rise",
+        "D": "smell"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 16,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Mr. Olson went to the doctor when he found he _____ his hair. He hoped he would be able to keep his thick hair.",
+      "options": {
+        "A": "was losing",
+        "B": "is losing",
+        "C": "will lose",
+        "D": "has lost"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 17,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Do you know what Lindsey’s first job was? Before becoming a movie star, she _____ the floors at the supermarket.",
+      "options": {
+        "A": "mops",
+        "B": "is mopping",
+        "C": "has mopped",
+        "D": "mopped"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 18,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Our dog Lassie hides under the bed every time the moon comes out. She has been _____ for years, but we don’t know why.",
+      "options": {
+        "A": "it",
+        "B": "like this",
+        "C": "like us",
+        "D": "that"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 19,
+      "section": "single",
+      "page": 3,
+      "passageId": null,
+      "passageRange": null,
+      "stem": "Tom: Sam, could you help me in the kitchen now? Sam: No, I _____ TV. It’s the most important game of the season.",
+      "options": {
+        "A": "watch",
+        "B": "watched",
+        "C": "have watched",
+        "D": "am watching"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 20,
+      "section": "passage_comprehension",
+      "page": 4,
+      "passageId": "115-p20-21",
+      "passageRange": [
+        20,
+        21
+      ],
+      "stem": "Amanda wants to make fruit tea by following The Best Fruit Tea You Can Make at Home . She has several kinds of fruit in the kitchen: apples, bananas, oranges, papayas, pears, and strawberries. Which are some of the fruits she can use to make the fruit tea?",
+      "options": {
+        "A": "Oranges, papayas and pears.",
+        "B": "Apples, bananas and oranges.",
+        "C": "Apples, oranges and strawberries.",
+        "D": "Bananas, papayas and strawberries."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 21,
+      "section": "passage_comprehension",
+      "page": 4,
+      "passageId": "115-p20-21",
+      "passageRange": [
+        20,
+        21
+      ],
+      "stem": "According to the reading, which is correct when we make the fruit tea?",
+      "options": {
+        "A": "Boiling water with sugar in it.",
+        "B": "Making sure to take out the fruit.",
+        "C": "Putting in the fruit and the lemon juice at the same time.",
+        "D": "Leaving the teabags in the pot of hot water for 2 to 3 minutes."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 22,
+      "section": "cloze",
+      "page": 5,
+      "passageId": "115-p22-23",
+      "passageRange": [
+        22,
+        23
+      ],
+      "stem": "According to the comics, what kind of person is Hawkins?",
+      "options": {
+        "A": "He sees good things in people.",
+        "B": "He never goes to work on time.",
+        "C": "He blindly follows other people.",
+        "D": "He talks about things he can’t do."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 23,
+      "section": "cloze",
+      "page": 5,
+      "passageId": "115-p22-23",
+      "passageRange": [
+        22,
+        23
+      ],
+      "stem": "What does it mean when we say someone bombed something?",
+      "options": {
+        "A": "They gave it up.",
+        "B": "They failed at it.",
+        "C": "They were fine with it.",
+        "D": "They were careful about it."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 24,
+      "section": "passage_comprehension",
+      "page": 7,
+      "passageId": "115-p24-26",
+      "passageRange": [
+        24,
+        26
+      ],
+      "stem": "Which question can the brochure answer?",
+      "options": {
+        "A": "Can I order tickets online?",
+        "B": "How much are the tickets?",
+        "C": "How can I get to the Marigolds’ Home?",
+        "D": "When can I visit the Marigolds’ Home?"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 25,
+      "section": "passage_comprehension",
+      "page": 7,
+      "passageId": "115-p24-26",
+      "passageRange": [
+        24,
+        26
+      ],
+      "stem": "What breaks the rules for visitors to the Marigolds’ Home?",
+      "options": {
+        "A": "Eating burgers in the Rose Garden.",
+        "B": "Taking pictures in the Main House.",
+        "C": "Entering the Rabbit’s Temple without shoes.",
+        "D": "Taking pet dogs for a walk on the playground."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 26,
+      "section": "passage_comprehension",
+      "page": 7,
+      "passageId": "115-p24-26",
+      "passageRange": [
+        24,
+        26
+      ],
+      "stem": "After shopping at the gift shop of the Main House, Lizzy walks out and sees the Family Library in front of her. She wants to visit the Rose Garden. How can she get there?",
+      "options": {
+        "A": "Turn left and walk past the Main House, then go straight and turn right at the corner.",
+        "B": "Turn left and walk past Sir Archie’s House, then turn right and walk past the Main House.",
+        "C": "Turn right and go straight to the Farmyard, then turn right and go straight, then turn left at the corner.",
+        "D": "Turn right and walk through the Butterfly Garden, then walk past the Rabbit’s Temple and the café."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 27,
+      "section": "passage_comprehension",
+      "page": 8,
+      "passageId": "115-p27-28",
+      "passageRange": [
+        27,
+        28
+      ],
+      "stem": "Why was Beatrice Harrison called the Nightingale Lady?",
+      "options": {
+        "A": "She wrote songs about nightingales.",
+        "B": "She sang as beautifully as a nightingale did.",
+        "C": "She taught nightingales to sing in a radio show.",
+        "D": "She was famous for playing music with nightingales."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 28,
+      "section": "passage_comprehension",
+      "page": 8,
+      "passageId": "115-p27-28",
+      "passageRange": [
+        27,
+        28
+      ],
+      "stem": "Which is NOT used in the reading to mean the nightingale(s) ?",
+      "options": {
+        "A": "Her visitor.",
+        "B": "The little singers.",
+        "C": "The artist.",
+        "D": "Her garden friends."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 29,
+      "section": "passage_comprehension",
+      "page": 9,
+      "passageId": "115-p29-31",
+      "passageRange": [
+        29,
+        31
+      ],
+      "stem": "Why does Alex Jackson write about Rose Lacey?",
+      "options": {
+        "A": "Because she died.",
+        "B": "Because she is very sick.",
+        "C": "Because she is moving away.",
+        "D": "Because she is leaving for another job."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 30,
+      "section": "passage_comprehension",
+      "page": 9,
+      "passageId": "115-p29-31",
+      "passageRange": [
+        29,
+        31
+      ],
+      "stem": "How did Rose Lacey and Alex Jackson get to know each other?",
+      "options": {
+        "A": "They met at a party.",
+        "B": "They were relatives.",
+        "C": "They worked in the same office.",
+        "D": "They took a course on movies together."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 31,
+      "section": "passage_comprehension",
+      "page": 9,
+      "passageId": "115-p29-31",
+      "passageRange": [
+        29,
+        31
+      ],
+      "stem": "What is special about Rose Lacey’s articles?",
+      "options": {
+        "A": "They are important to movie makers.",
+        "B": "They talk about movies from a fresh angle.",
+        "C": "They give interesting information about actors.",
+        "D": "They are good examples of how to write stories."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 32,
+      "section": "passage_comprehension",
+      "page": 11,
+      "passageId": "115-p32-34",
+      "passageRange": [
+        32,
+        34
+      ],
+      "stem": "Why does the title say “Glass Bottles’ Second Life” ?",
+      "options": {
+        "A": "People collect sea glass and use it to make new glass bottles.",
+        "B": "People collect sea glass at the beach and use it to make wishes.",
+        "C": "Glass bottles that are thrown into the sea become the homes of sea animals.",
+        "D": "Glass bottles that are thrown into the sea become sea glass which is used in art pieces."
+      },
+      "answer": null,
+      "glossary": {
+        "title": "標題"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 33,
+      "section": "passage_comprehension",
+      "page": 11,
+      "passageId": "115-p32-34",
+      "passageRange": [
+        32,
+        34
+      ],
+      "stem": "According to the reading, how is sea glass made?",
+      "options": {
+        "A": "Sea glass becomes rounder after it is pushed up to the beach.",
+        "B": "Colder sea water helps pieces of glass become sea glass faster.",
+        "C": "Pieces of glass become white on the outside after many years in the sea.",
+        "D": "Glass bottles break into pieces when they are dug out from the sea floor."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 34,
+      "section": "passage_comprehension",
+      "page": 11,
+      "passageId": "115-p32-34",
+      "passageRange": [
+        32,
+        34
+      ],
+      "stem": "According to the reading, why will less sea glass be found in the future?",
+      "options": {
+        "A": "People do not make as many glass items as before.",
+        "B": "People have learned not to throw garbage into the sea.",
+        "C": "Artists are using too much sea glass in their art pieces.",
+        "D": "Waves are not big enough to push sea glass up to the beach."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 35,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "115-p35-39",
+      "passageRange": [
+        35,
+        39
+      ],
+      "stem": "What does the prevalence of English mean?",
+      "options": {
+        "A": "That English is very common.",
+        "B": "That English is not welcomed.",
+        "C": "That English is easy and simple.",
+        "D": "That English is not a national language."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 36,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "115-p35-39",
+      "passageRange": [
+        35,
+        39
+      ],
+      "stem": "In the first reading, which is one of the ways that Anna Adams uses to make readers believe in her ideas?",
+      "options": {
+        "A": "Sharing her own life stories.",
+        "B": "Borrowing from people’s experience.",
+        "C": "Using examples from another language.",
+        "D": "Showing information from news reports."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 37,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "115-p35-39",
+      "passageRange": [
+        35,
+        39
+      ],
+      "stem": "Which words in the second reading are NOT used to describe Icelandic?",
+      "options": {
+        "A": "A language in its sickbed.",
+        "B": "A dying language.",
+        "C": "Our first language.",
+        "D": "This beautiful language."
+      },
+      "answer": null,
+      "glossary": {
+        "describe": "形容"
+      },
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 38,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "115-p35-39",
+      "passageRange": [
+        35,
+        39
+      ],
+      "stem": "Are Anna Adams and Gunnar Eggertsson worried about the future of Icelandic?",
+      "options": {
+        "A": "No, they are not.",
+        "B": "Yes, they both are.",
+        "C": "Adams is, but Eggertsson is not.",
+        "D": "Adams is not, but Eggertsson is."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 39,
+      "section": "passage_comprehension",
+      "page": 13,
+      "passageId": "115-p35-39",
+      "passageRange": [
+        35,
+        39
+      ],
+      "stem": "Which idea do Anna Adams and Gunnar Eggertsson both talk about in the readings?",
+      "options": {
+        "A": "Whether Icelanders speak better English than Icelandic.",
+        "B": "Whether the number of Icelandic speakers is big enough.",
+        "C": "Whether school subjects should be taught only in Icelandic.",
+        "D": "Whether Iceland should allow more foreigners to work in Iceland."
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 40,
+      "section": "cloze",
+      "page": 15,
+      "passageId": "115-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 40",
+      "options": {
+        "A": "give you a piece of good land",
+        "B": "choose a person to be the next king",
+        "C": "put the beautiful ones in my castle",
+        "D": "decide who will work in my garden"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 41,
+      "section": "cloze",
+      "page": 15,
+      "passageId": "115-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 41",
+      "options": {
+        "A": "But he lost his pot a few weeks later",
+        "B": "Months passed but nothing grew from it",
+        "C": "But soon the plant that grew from it died",
+        "D": "The seed grew into a big tree in a short time"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 42,
+      "section": "cloze",
+      "page": 15,
+      "passageId": "115-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 42",
+      "options": {
+        "A": "the last one to give up",
+        "B": "the first one to share good news",
+        "C": "the first one to bring his pot to the king",
+        "D": "the only one to take good care of his plant"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    },
+    {
+      "examId": "115",
+      "questionNumber": 43,
+      "section": "cloze",
+      "page": 15,
+      "passageId": "115-p40-43",
+      "passageRange": [
+        40,
+        43
+      ],
+      "stem": "Question 43",
+      "options": {
+        "A": "wise",
+        "B": "strong",
+        "C": "honest",
+        "D": "popular"
+      },
+      "answer": null,
+      "extractionConfidence": "high",
+      "extractionWarnings": []
+    }
+  ],
+  "extractedAt": "2026-08-27T16:08:46.412Z",
+  "extractorVersion": "1.0.0"
+}

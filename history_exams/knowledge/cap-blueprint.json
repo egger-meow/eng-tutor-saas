@@ -1,0 +1,96 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-08-27T16:08:46.108Z",
+  "totalQuestionsAnalyzed": 215,
+  "totalExams": 5,
+  "sectionComposition": {
+    "singleQuestions": {
+      "countRange": [
+        19,
+        23
+      ],
+      "dominantSkills": [
+        "grammar_in_context",
+        "vocabulary_in_context",
+        "information_integration"
+      ],
+      "cognitiveDepthFocus": [
+        "D1_verbatim_retrieval",
+        "D2_single_step_inference"
+      ]
+    },
+    "passageQuestions": {
+      "countRange": [
+        20,
+        24
+      ],
+      "passageSetsRange": [
+        8,
+        8
+      ],
+      "dominantGenres": [
+        "article_informational",
+        "dialogue",
+        "notice_announcement",
+        "narrative",
+        "cloze_passage",
+        "infographic_chart_table"
+      ],
+      "cognitiveDepthFocus": [
+        "D2_single_step_inference",
+        "D3_multi_step_synthesis",
+        "D4_evaluative_pragmatic"
+      ]
+    }
+  },
+  "distributions": {
+    "skills": {
+      "vocabulary_in_context": 25.6,
+      "grammar_in_context": 29.3,
+      "explicit_detail": 26,
+      "reference_resolution": 0,
+      "local_inference": 5.6,
+      "cross_sentence_inference": 0,
+      "main_idea": 0.5,
+      "purpose_speaker_intent": 0,
+      "discourse_relationship": 5.1,
+      "sequence_cause_consequence": 4.7,
+      "text_structure": 0,
+      "information_integration": 3.3,
+      "pragmatic_meaning": 0,
+      "other_uncertain": 0
+    },
+    "cognitiveDepth": {
+      "D1_verbatim_retrieval": 0,
+      "D2_single_step_inference": 96.3,
+      "D3_multi_step_synthesis": 3.7,
+      "D4_evaluative_pragmatic": 0
+    },
+    "languageDifficulty": {
+      "A1_elementary": 23.3,
+      "A2_basic": 36.7,
+      "B1_intermediate": 40
+    },
+    "contextNecessity": {
+      "essential": 52.6,
+      "helpful": 0,
+      "decorative": 0,
+      "none": 47.4
+    },
+    "evidenceSpan": {
+      "single_word": 0,
+      "single_clause": 47.4,
+      "single_sentence": 35.3,
+      "cross_sentence_local": 15.8,
+      "multi_paragraph_global": 0.5,
+      "multimodal_text_and_graphic": 0.9
+    }
+  },
+  "keyDesignPrinciples": [
+    "Strict decoupling of language difficulty (A1-B1) from cognitive depth (D1-D4).",
+    "Context necessity is strictly essential for 100% of reading comprehension items.",
+    "Distractors represent authentic student cognitive traps (partial truth, keyword scanning, referent confusion).",
+    "Passage genres encompass rich authentic modalities (articles, infographics, notices, dialogue, narratives, cloze).",
+    "Elimination of decorative context and shallow definition recall in comprehension passages."
+  ]
+}

@@ -21,11 +21,15 @@
     "admin": "pnpm --filter @paper-english/admin dev",
     "admin:build": "pnpm --filter @paper-english/admin build",
     "admin:start": "pnpm --filter @paper-english/admin start",
-    "worker": "pnpm --filter @paper-english/worker worker"
+    "worker": "pnpm --filter @paper-english/worker worker",
+    "history-exams": "tsx scripts/history-exams/src/cli.ts"
   },
   "devDependencies": {
+    "pdfjs-dist": "5.4.149",
     "supabase": "^2.48.3",
+    "tsx": "^4.20.6",
     "typescript": "~6.0.2",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "zod": "^4.0.1"
   }
 }

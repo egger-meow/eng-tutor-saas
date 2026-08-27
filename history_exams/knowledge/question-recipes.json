@@ -1,0 +1,286 @@
+[
+  {
+    "recipeId": "RECIPE_01_NOTICE_SCHEDULE_DETAIL",
+    "name": "Authentic Notice & Schedule Constraint Scanner",
+    "primarySkill": "explicit_detail",
+    "secondarySkills": [
+      "information_integration",
+      "sequence_cause_consequence"
+    ],
+    "targetGenre": "notice_announcement",
+    "appropriateCognitiveDepth": [
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis"
+    ],
+    "requiredEvidenceSpan": "cross_sentence_local",
+    "languageDifficultyFlexibility": [
+      "A1_elementary",
+      "A2_basic"
+    ],
+    "reasoningOperations": [
+      "constraint_satisfaction",
+      "temporal_filtering",
+      "elimination_by_rule"
+    ],
+    "stemTemplates": [
+      "Which question can the brochure answer?",
+      "What should Jason do before he visits the {place}?",
+      "According to the schedule, when can visitors {action}?"
+    ],
+    "validDistractorMechanisms": [
+      "partial_truth",
+      "wrong_chronology",
+      "literal_keyword_matching"
+    ],
+    "commonWeakImplementations": [
+      "Making the answer an obvious verbatim copy without requiring constraint checking",
+      "Providing options with completely unrelated content rather than competing conditions"
+    ],
+    "qualityChecks": [
+      "Ensure the correct option satisfies all constraints mentioned in the stem (e.g. time AND price AND location)",
+      "Ensure distractors represent partial conditions stated in the notice"
+    ],
+    "realExamExemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 21,
+        "brief": "What does Tea-Rock celebrate? th"
+      }
+    ]
+  },
+  {
+    "recipeId": "RECIPE_02_DIALOGUE_PRAGMATIC_INFERENCE",
+    "name": "Conversational Implicature & Subtext Resolver",
+    "primarySkill": "pragmatic_meaning",
+    "secondarySkills": [
+      "purpose_speaker_intent",
+      "local_inference"
+    ],
+    "targetGenre": "dialogue",
+    "appropriateCognitiveDepth": [
+      "D3_multi_step_synthesis",
+      "D4_evaluative_pragmatic"
+    ],
+    "requiredEvidenceSpan": "cross_sentence_local",
+    "languageDifficultyFlexibility": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "reasoningOperations": [
+      "implicature_derivation",
+      "tone_analysis",
+      "speaker_perspective_taking"
+    ],
+    "stemTemplates": [
+      "What does {Speaker} most likely mean when saying \"{Quote}\"?",
+      "How does {Speaker} feel about {Topic}?",
+      "What can we learn about {Speaker} from their conversation?"
+    ],
+    "validDistractorMechanisms": [
+      "literal_keyword_matching",
+      "wrong_referent",
+      "unsupported_world_knowledge"
+    ],
+    "commonWeakImplementations": [
+      "Direct literal restatement that destroys pragmatic depth",
+      "Ambiguous context where two answers are equally plausible"
+    ],
+    "qualityChecks": [
+      "Verify that the dialogue provides at least 2 distinct turns of conversational context",
+      "Confirm that resolving the quote requires situational awareness, not dictionary lookup"
+    ],
+    "realExamExemplars": []
+  },
+  {
+    "recipeId": "RECIPE_03_NARRATIVE_THEME_ARC",
+    "name": "Narrative Arc & Core Message Abstractor",
+    "primarySkill": "main_idea",
+    "secondarySkills": [
+      "purpose_speaker_intent",
+      "cross_sentence_inference"
+    ],
+    "targetGenre": "narrative",
+    "appropriateCognitiveDepth": [
+      "D3_multi_step_synthesis"
+    ],
+    "requiredEvidenceSpan": "multi_paragraph_global",
+    "languageDifficultyFlexibility": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "reasoningOperations": [
+      "thematic_abstraction",
+      "global_gist_synthesis",
+      "scope_evaluation"
+    ],
+    "stemTemplates": [
+      "What is the story mainly about?",
+      "What lesson did {Character} learn at the end?",
+      "What does the writer want to tell readers through this story?"
+    ],
+    "validDistractorMechanisms": [
+      "local_evidence_for_global_question",
+      "partial_truth",
+      "overgeneralization"
+    ],
+    "commonWeakImplementations": [
+      "Making the main idea identical to the first sentence",
+      "Distractors that are factually false even on a local level (too easy)"
+    ],
+    "qualityChecks": [
+      "Every distractor should reflect a true local detail from one paragraph of the story",
+      "The correct option must encompass the arc transformation from beginning to end"
+    ],
+    "realExamExemplars": [
+      {
+        "examId": "114",
+        "questionNumber": 35,
+        "brief": "What is the reading mainly about?"
+      }
+    ]
+  },
+  {
+    "recipeId": "RECIPE_04_INFOGRAPHIC_MULTIMODAL_INTEGRATION",
+    "name": "Infographic & Visual Data Reconciler",
+    "primarySkill": "information_integration",
+    "secondarySkills": [
+      "explicit_detail",
+      "local_inference"
+    ],
+    "targetGenre": "infographic_chart_table",
+    "appropriateCognitiveDepth": [
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis"
+    ],
+    "requiredEvidenceSpan": "multimodal_text_and_graphic",
+    "languageDifficultyFlexibility": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "reasoningOperations": [
+      "cross_modal_mapping",
+      "coordinate_matching",
+      "constraint_synthesis"
+    ],
+    "stemTemplates": [
+      "What can we learn from Figure 1 and the reading?",
+      "Which map/picture best shows the situation in {Year/Place}?",
+      "Based on the chart, which statement is true?"
+    ],
+    "validDistractorMechanisms": [
+      "reversed_cause_effect",
+      "wrong_chronology",
+      "partial_truth"
+    ],
+    "commonWeakImplementations": [
+      "Graphic is merely decorative and question can be solved purely from text",
+      "Text gives the exact coordinate answer directly without requiring chart inspection"
+    ],
+    "qualityChecks": [
+      "Context necessity test: If the chart is removed, the question must become unanswerable",
+      "Distractors should match real visual elements from the graphic with incorrect labels"
+    ],
+    "realExamExemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 1,
+        "brief": "Look at the picture. The woman is putting _____ on the cake."
+      }
+    ]
+  },
+  {
+    "recipeId": "RECIPE_05_CONTEXTUAL_VOCABULARY_DEDUCER",
+    "name": "Contextual Word Sense Deducer",
+    "primarySkill": "vocabulary_in_context",
+    "secondarySkills": [
+      "local_inference",
+      "reference_resolution"
+    ],
+    "targetGenre": "article_informational",
+    "appropriateCognitiveDepth": [
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis"
+    ],
+    "requiredEvidenceSpan": "cross_sentence_local",
+    "languageDifficultyFlexibility": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "reasoningOperations": [
+      "semantic_field_triangulation",
+      "contrast_clue_extraction",
+      "co_text_synthesis"
+    ],
+    "stemTemplates": [
+      "What does \"{TargetWord}\" mean in the reading?",
+      "In paragraph {N}, what is the meaning of \"{TargetWord}\"?"
+    ],
+    "validDistractorMechanisms": [
+      "literal_keyword_matching",
+      "unsupported_world_knowledge",
+      "grammatically_plausible_contextually_wrong"
+    ],
+    "commonWeakImplementations": [
+      "Target word is an obscure GRE word rather than standard syllabus word used in rich context",
+      "Question requires prior dictionary memorization with no context clues present in paragraph"
+    ],
+    "qualityChecks": [
+      "Verify that surrounding sentences provide at least 2 clear semantic clues (contrast, cause, example)",
+      "Ensure all options A, B, C, D use simple, familiar vocabulary so the test measures inference"
+    ],
+    "realExamExemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 4,
+        "brief": "Pam is a _____ baseball player; she has more fans than any other player on her t"
+      }
+    ]
+  },
+  {
+    "recipeId": "RECIPE_06_CLOZE_DISCOURSE_AND_TENSE_FLOW",
+    "name": "Cloze Discourse & Tense Architecture Tracker",
+    "primarySkill": "grammar_in_context",
+    "secondarySkills": [
+      "sequence_cause_consequence",
+      "discourse_relationship"
+    ],
+    "targetGenre": "cloze_passage",
+    "appropriateCognitiveDepth": [
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis"
+    ],
+    "requiredEvidenceSpan": "cross_sentence_local",
+    "languageDifficultyFlexibility": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "reasoningOperations": [
+      "temporal_timeline_alignment",
+      "syntactic_licensing",
+      "discourse_cohesion"
+    ],
+    "stemTemplates": [
+      "Blank {N} in the passage: (A) {OptionA} (B) {OptionB} (C) {OptionC} (D) {OptionD}"
+    ],
+    "validDistractorMechanisms": [
+      "grammatically_plausible_contextually_wrong",
+      "wrong_chronology",
+      "reversed_cause_effect"
+    ],
+    "commonWeakImplementations": [
+      "Isolated sentence grammar where the rest of the passage has zero influence on the choice",
+      "Options with obvious grammatical agreement errors revealing the answer instantly"
+    ],
+    "qualityChecks": [
+      "Ensure the correct tense or connective is determined by earlier or subsequent sentences in the paragraph",
+      "All 4 options must be grammatically valid in isolation to test contextual choice"
+    ],
+    "realExamExemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 2,
+        "brief": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-fi"
+      }
+    ]
+  }
+]
