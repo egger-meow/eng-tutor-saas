@@ -247,6 +247,7 @@ export function ChildSubscription({
         {isCanceledAutoRenew && (
           <p className="notice">
             已取消自動續訂。目前方案仍可使用至 {periodEnd ?? '本期結束'}。到期後可以重新選擇月繳或年繳方案。
+            {isRedeemedFounder && <> {founderCancellationWarning}</>}
           </p>
         )}
       </div>
