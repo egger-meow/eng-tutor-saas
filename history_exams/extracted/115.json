@@ -1052,7 +1052,7 @@
         "C": "Glass bottles that are thrown into the sea become the homes of sea animals.",
         "D": "Glass bottles that are thrown into the sea become sea glass which is used in art pieces."
       },
-      "answer": "C",
+      "answer": "D",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -1086,7 +1086,7 @@
         "C": "Pieces of glass become white on the outside after many years in the sea.",
         "D": "Glass bottles break into pieces when they are dug out from the sea floor."
       },
-      "answer": "B",
+      "answer": "C",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -1339,7 +1339,7 @@
         "C": "put the beautiful ones in my castle",
         "D": "decide who will work in my garden"
       },
-      "answer": "A",
+      "answer": "B",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1411,7 +1411,7 @@
         "C": "honest",
         "D": "popular"
       },
-      "answer": "D",
+      "answer": "C",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -1419,6 +1419,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T17:12:33.824Z",
+  "extractedAt": "2026-08-27T17:42:54.271Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

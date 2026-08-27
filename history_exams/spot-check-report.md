@@ -1016,7 +1016,7 @@
 
 ---
 
-### Q32 [Section: passage_comprehension | EvidenceMode: `text_visual` | Official Answer: `C`]
+### Q32 [Section: passage_comprehension | EvidenceMode: `text_visual` | Official Answer: `D`]
 
 - **Page**: 11
 - **Visual Evidence Required**: ✅ Yes
@@ -1039,8 +1039,8 @@
   - Option Breakdown:
     - **(A) [literal_keyword_matching]**: Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition.
     - **(B) [partial_truth]**: Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem.
-    - **(C) [CORRECT]**: Option (C) "Glass bottles that are thrown into the sea become the homes of sea animals." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
-    - **(D) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(C) [wrong_referent]**: Attributes an action, attribute, or statement from the text to the wrong subject or entity.
+    - **(D) [CORRECT]**: Option (D) "Glass bottles that are thrown into the sea become sea glass which is used in art pieces." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints.
 
 ---
 

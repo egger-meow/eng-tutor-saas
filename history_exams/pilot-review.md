@@ -407,7 +407,7 @@
 
 ---
 
-## Question 32 [Official Answer: `C`]
+## Question 32 [Official Answer: `D`]
 
 ### 1. Corpus Extraction Foundation
 - **Section**: `passage_comprehension`
@@ -470,8 +470,8 @@
 | :---: | :---: | :---: | :--- | :--- | :--- |
 | **(A)** | ❌ No | `literal_keyword_matching` | Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
 | **(B)** | ❌ No | `partial_truth` | Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Option (C) "Glass bottles that are thrown into the sea become the homes of sea animals." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 11 illustration |
-| **(D)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
+| **(C)** | ❌ No | `wrong_referent` | Attributes an action, attribute, or statement from the text to the wrong subject or entity. | Confusing surface lexical match with semantic proposition | Page 11 illustration |
+| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Option (D) "Glass bottles that are thrown into the sea become sea glass which is used in art pieces." directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Page 11 illustration |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
@@ -492,7 +492,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `ec8e0da281b32ce6ccc71ff103631bcf49bec4e2111791fbf0aef2be32413c64`
+- **Content Hash**: `84d525f67d9f833aa0b27750203d1386c2c2f5b1799cd7fc12394e2b8ce76203`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -598,7 +598,7 @@
 
 ---
 
-## Question 43 [Official Answer: `D`]
+## Question 43 [Official Answer: `C`]
 
 ### 1. Corpus Extraction Foundation
 - **Section**: `cloze`
@@ -657,8 +657,8 @@
 | :---: | :---: | :---: | :--- | :--- | :--- |
 | **(A)** | ❌ No | `wrong_chronology` | Swaps the temporal sequence or cause-and-effect relationship established in the passage. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
 | **(B)** | ❌ No | `unsupported_world_knowledge` | Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(C)** | ❌ No | `grammatically_plausible_contextually_wrong` | Fits the blank syntactically but violates contextual meaning or discourse flow. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
-| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Option (D) "popular" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Paragraph 1, lines 1-3 |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Option (C) "honest" directly aligns with the verified evidence in the text/visuals and uniquely fulfills all stem constraints. | *None* | Paragraph 1, lines 1-3 |
+| **(D)** | ❌ No | `grammatically_plausible_contextually_wrong` | Fits the blank syntactically but violates contextual meaning or discourse flow. | Confusing surface lexical match with semantic proposition | Paragraph 1, lines 1-3 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
@@ -679,7 +679,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `ca75f53512c49d3e0082826c42bdc52caa7a638405a03bee84454cff86f9ee47`
+- **Content Hash**: `d5a140f1169ff9934907037e8849c4dacaef57375545f61fb6190f8f0576cb52`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
