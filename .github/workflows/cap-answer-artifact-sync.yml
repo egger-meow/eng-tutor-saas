@@ -1,0 +1,40 @@
+name: CAP answer artifact sync
+
+on:
+  push:
+    branches:
+      - chore/cap-sync-corrected-answers
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: ${{ !contains(github.event.head_commit.message, '[cap-answer-sync]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/cap-sync-corrected-answers
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sync extracted answer fields from verified source of truth
+        run: |
+          pnpm exec tsx -e "import fs from 'node:fs'; import path from 'node:path'; import { OFFICIAL_CAP_ANSWERS } from './scripts/history-exams/src/extractor/official-answers.ts'; for (const examId of Object.keys(OFFICIAL_CAP_ANSWERS)) { const file = path.join('history_exams','extracted',examId + '.json'); const data = JSON.parse(fs.readFileSync(file,'utf8')); for (const q of data.questions) q.answer = OFFICIAL_CAP_ANSWERS[examId][q.questionNumber]; fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n'); }"
+      - name: Commit refreshed generated artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history_exams/extracted/*.json
+          if git diff --cached --quiet; then
+            echo "No extracted answer artifacts changed."
+          else
+            git commit -m "chore(history-exams): sync corrected answer artifacts [cap-answer-sync]"
+            git push origin HEAD:chore/cap-sync-corrected-answers
+          fi
