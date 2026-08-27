@@ -6,7 +6,7 @@ import { getWebhookFoundingDiscount, getWebhookPlan, validateFoundingDiscount } 
 describe('Paddle RPC Contract & Webhook Integration Tests', () => {
   it('1. verifies paddle-webhook calls process_paddle_subscription_event_v2 with exact named parameters matching migration', () => {
     const webhookCode = readFileSync(join(__dirname, '../paddle-webhook/index.ts'), 'utf-8')
-    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260826233000_transaction_safe_capacity_and_patch_hardening.sql'), 'utf-8')
+    const migrationCode = readFileSync(join(__dirname, '../../migrations/20260827130000_fix_paddle_webhook_founder_discount_schema.sql'), 'utf-8')
 
     const expectedRpcParams = [
       'p_event_id',

@@ -33,6 +33,7 @@ export type PaddleSubscriptionDiscount = {
   id?: string
   status?: string
   type?: string
+  starts_at?: string | null
   ends_at?: string | null
 }
 
