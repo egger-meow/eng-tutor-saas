@@ -77,15 +77,26 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     );
   }
 
-  // Load holdout manifest
+  // Hard-Fail Holdout Manifest Gate: Must exist, be valid schema, and contain exactly 20 stratified holdouts
   const manifestPath = path.join(benchmarkDir, 'holdout-manifest.json');
+  if (!fs.existsSync(manifestPath)) {
+    throw new Error(
+      `[HoldoutIsolationError] Holdout manifest not found at ${manifestPath}. Cannot build benchmark distributions without certified holdout isolation.`
+    );
+  }
+
   let holdoutItemsManifest: HoldoutManifest['holdoutQuestions'] = [];
-  if (fs.existsSync(manifestPath)) {
+  try {
     const rawManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    const parsedManifest = HoldoutManifestSchema.safeParse(rawManifest);
-    if (parsedManifest.success) {
-      holdoutItemsManifest = parsedManifest.data.holdoutQuestions;
+    const parsedManifest = HoldoutManifestSchema.parse(rawManifest);
+    if (parsedManifest.holdoutQuestions.length !== 20) {
+      throw new Error(
+        `[HoldoutIsolationError] Holdout manifest must contain exactly 20 holdout questions, found ${parsedManifest.holdoutQuestions.length}`
+      );
     }
+    holdoutItemsManifest = parsedManifest.holdoutQuestions;
+  } catch (err: any) {
+    throw new Error(`[HoldoutIsolationError] Failed to parse valid holdout manifest: ${err.message}`);
   }
 
   const holdoutKeys = new Set(
@@ -181,7 +192,10 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
   }
 
   const nonHoldoutCount = total - holdoutReferenceSet.length;
-  const isAuthoritative = mockQuestions.length === 0;
+  const unreviewedCriticCount = allQuestions.filter(
+    (q) => q.analysis.criticStatus === 'not_reviewed' || q.analysis.criticStatus === 'failed'
+  ).length;
+  const isAuthoritative = mockQuestions.length === 0 && unreviewedCriticCount === 0;
   const corpusHash = createHash('sha256')
     .update(allQuestions.map((q) => q.contentHash).sort().join(':'))
     .digest('hex');

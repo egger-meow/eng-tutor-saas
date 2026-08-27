@@ -141,6 +141,11 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
       const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
       const parsedHoldout = HoldoutManifestSchema.safeParse(rawHoldout);
       if (parsedHoldout.success) {
+        if (parsedHoldout.data.holdoutQuestions.length !== 20) {
+          errors.push(
+            `[Benchmark holdout-manifest.json] Must contain exactly 20 holdout questions, found ${parsedHoldout.data.holdoutQuestions.length}`
+          );
+        }
         parsedHoldout.data.holdoutQuestions.forEach((h) => {
           holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
         });
@@ -150,6 +155,8 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
     } catch (err: any) {
       errors.push(`[Benchmark holdout-manifest.json] Parse error: ${err.message}`);
     }
+  } else {
+    errors.push(`[Benchmark holdout-manifest.json] Missing holdout manifest at ${holdoutManifestPath}. Certified holdout isolation required.`);
   }
 
   // Filter non-holdout questions

@@ -35,6 +35,17 @@ describe('Historical CAP English Exam Synthesizer (Holdout-Isolated)', () => {
     }
   });
 
+  it('hard-fails when holdout-manifest.json is missing', async () => {
+    await expect(
+      runSynthesisPipeline({
+        analyzedDir,
+        knowledgeDir,
+        benchmarkDir: path.resolve(__dirname, 'non-existent-benchmark'),
+        allowProvisionalMock: true,
+      })
+    ).rejects.toThrow(/Holdout manifest not found/);
+  });
+
   it('synthesizes knowledge base with true holdout isolation under allowProvisionalMock', async () => {
     const summary = await runSynthesisPipeline({
       analyzedDir,

@@ -41,11 +41,92 @@ export class MockDataQuarantinedError extends Error {
   }
 }
 
+export const SYNTHESIS_PROMPT_VERSION = 'v1.0.0';
+export const RECIPE_CRITIC_PROMPT_VERSION = 'v1.0.0';
+
 export interface SynthesizeOptions {
   analyzedDir: string;
   knowledgeDir: string;
   benchmarkDir?: string;
   allowProvisionalMock?: boolean;
+}
+
+/**
+ * Builds a prompt for cross-year AI recipe synthesis from a cluster of analyzed questions.
+ */
+export function buildCrossYearRecipeSynthesisPrompt(
+  clusterKey: string,
+  members: AnalyzedQuestion[]
+): string {
+  const memberSummaries = members
+    .slice(0, 10)
+    .map(
+      (m) =>
+        `- [CAP ${m.examId} #${m.questionNumber}] (Section: ${m.extracted.section}, Skill: ${m.analysis.primarySkill}, Depth: ${m.analysis.cognitiveDepth})\n` +
+        `  Stem: "${m.extracted.stem}"\n` +
+        `  Mechanism: ${m.analysis.questionMechanism}\n` +
+        `  Correct Answer Rationale: ${m.analysis.optionAnalyses.find((o) => o.isCorrect)?.correctRationale}\n` +
+        `  Distractor Strategies: ${m.analysis.optionAnalyses.filter((o) => !o.isCorrect).map((o) => o.distractorStrategy).join(', ')}\n` +
+        `  Failure Modes: ${m.analysis.studentFailureModes.join('; ')}`
+    )
+    .join('\n\n');
+
+  return `You are an expert psychometrician and curriculum synthesizer analyzing an emergent cluster of verified historical CAP English exam questions (111–115).
+
+Your mission is to synthesize an authoritative, reusable Question Recipe from this empirical cluster of ${members.length} non-holdout questions.
+
+=== CLUSTER DATA (${clusterKey}) ===
+Total Supporting Questions: ${members.length}
+Exam Years: ${Array.from(new Set(members.map((m) => m.examId))).sort().join(', ')}
+
+Representative Member Questions:
+${memberSummaries}
+
+=== MANDATORY SYNTHESIS REQUIREMENTS ===
+1. Deduce universal design principles (correct answer construction, distractor mechanisms, cognitive constraints).
+2. Synthesize 2-4 generalized stemTemplates by replacing names/dates with placeholders like {Character}, {Place}, {Topic}.
+3. Define valid distractor strategies actually observed in the cluster.
+4. Establish difficulty adjustment rules: how to make it simpler without breaking mechanism, and how to increase cognitive depth without increasing vocabulary.
+5. Provide strict quality checks for AI item generation.
+
+Return a valid JSON object matching the QuestionRecipe schema.`;
+}
+
+/**
+ * Builds a prompt for the Recipe Critic pass.
+ */
+export function buildRecipeCriticPrompt(
+  recipe: QuestionRecipe,
+  members: AnalyzedQuestion[]
+): string {
+  return `You are a Lead Psychometric Reviewer and Quality Critic auditing a synthesized CAP English Question Recipe.
+
+=== SYNTHESIZED RECIPE ===
+Recipe ID: ${recipe.recipeId}
+Name: ${recipe.name}
+Primary Skill: ${recipe.primarySkill}
+Evidence Span: ${recipe.requiredEvidenceSpan}
+Stem Templates: ${JSON.stringify(recipe.stemTemplates)}
+Valid Distractor Mechanisms: ${JSON.stringify(recipe.validDistractorMechanisms)}
+Correct Answer Principles: ${JSON.stringify(recipe.correctAnswerConstructionPrinciples)}
+Distractor Principles: ${JSON.stringify(recipe.distractorConstructionPrinciples)}
+Quality Checks: ${JSON.stringify(recipe.qualityChecks)}
+
+=== EMPIRICAL GROUNDING ===
+Supporting Exam Items: ${members.map((m) => `CAP ${m.examId} #${m.questionNumber}`).join(', ')}
+
+=== CRITIC AUDIT CHECKLIST ===
+1. Evidence Grounding: Are the construction principles strictly grounded in the supporting questions?
+2. Distractor Soundness: Are valid distractor mechanisms authentic to junior high reading assessment?
+3. Template Generality: Are stem templates clean, grammatically natural, and parameterized?
+4. Quality Actionability: Are the quality checks enforceable by automated validators or generative pipelines?
+
+Return JSON:
+{
+  "criticStatus": "passed" | "repaired",
+  "criticIssues": ["..."],
+  "repairedFields": {}
+}`;
 }
 
 export interface SynthesisSummary {
@@ -105,21 +186,28 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
     throw new MockDataQuarantinedError('synthesize authoritative knowledge base', mockQuestions.length);
   }
 
-  // Load Holdout Manifest for true isolation
+  // Hard-Fail Holdout Manifest Gate: Must exist, be valid schema, and contain exactly 20 stratified holdouts
   const holdoutManifestPath = path.join(benchmarkDir, 'holdout-manifest.json');
+  if (!fs.existsSync(holdoutManifestPath)) {
+    throw new Error(
+      `[HoldoutIsolationError] Holdout manifest not found at ${holdoutManifestPath}. Cannot synthesize knowledge base without certified holdout isolation.`
+    );
+  }
+
   let holdoutKeys = new Set<string>();
-  if (fs.existsSync(holdoutManifestPath)) {
-    try {
-      const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
-      const parsedHoldout = HoldoutManifestSchema.safeParse(rawHoldout);
-      if (parsedHoldout.success) {
-        parsedHoldout.data.holdoutQuestions.forEach((h) => {
-          holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
-        });
-      }
-    } catch {
-      // If manifest fails to parse, proceed without holdouts or throw
+  try {
+    const rawHoldout = JSON.parse(fs.readFileSync(holdoutManifestPath, 'utf-8'));
+    const parsedHoldout = HoldoutManifestSchema.parse(rawHoldout);
+    if (parsedHoldout.holdoutQuestions.length !== 20) {
+      throw new Error(
+        `[HoldoutIsolationError] Holdout manifest must contain exactly 20 holdout questions, found ${parsedHoldout.holdoutQuestions.length}`
+      );
     }
+    parsedHoldout.holdoutQuestions.forEach((h) => {
+      holdoutKeys.add(`${h.examId}-Q${h.questionNumber}`);
+    });
+  } catch (err: any) {
+    throw new Error(`[HoldoutIsolationError] Failed to parse valid holdout manifest: ${err.message}`);
   }
 
   // STRICT HOLDOUT ISOLATION: Exclude holdout questions from synthesis knowledge derivation
@@ -130,6 +218,13 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
   const corpusHash = createHash('sha256')
     .update(allQuestions.map((q) => q.contentHash).sort().join(':'))
     .digest('hex');
+
+  // Strict Authoritative Criteria: 0 mock records AND 100% critic pass/repaired status
+  const unreviewedCriticCount = allQuestions.filter(
+    (q) => q.analysis.criticStatus === 'not_reviewed' || q.analysis.criticStatus === 'failed'
+  ).length;
+
+  const isAuthorityEligible = mockQuestions.length === 0 && unreviewedCriticCount === 0;
 
   const provenance: KnowledgeProvenance = {
     knowledgeVersion: '1.0.0',
@@ -142,7 +237,7 @@ export async function runSynthesisPipeline(options: SynthesizeOptions): Promise<
     synthesisPromptVersion: 'v1.0.0',
     generatedAt: new Date().toISOString(),
     sourceCorpusHash: corpusHash,
-    authorityStatus: mockQuestions.length === 0 ? 'authoritative' : 'provisional',
+    authorityStatus: isAuthorityEligible ? 'authoritative' : 'provisional',
   };
 
   // 1. Synthesize Taxonomy
