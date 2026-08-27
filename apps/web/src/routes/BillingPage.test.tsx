@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { BillingPage } from './BillingPage'
+import { BillingPage, getCheckoutPriceDescription, getCheckoutPriceDisplay } from './BillingPage'
 import type { Session } from '@supabase/supabase-js'
 import type { Child } from '../lib/children'
 import type { SubscriptionView } from '../lib/subscriptions'
@@ -97,14 +97,9 @@ describe('BillingPage Loading & Legal Isolation', () => {
       />
     )
 
-    // Subscriptions and child data MUST still render
     expect(html).toContain('小明')
     expect(html).toContain('月繳方案・每月 NT$499')
-
-    // Global subscription load error must NOT be present
     expect(html).not.toContain('目前無法讀取訂閱資料，請稍後再試。')
-
-    // Legal-specific error notice MUST be shown to explain why checkout is restricted
     expect(html).toContain('目前無法確認服務條款同意紀錄，暫時無法開啟付款。')
   })
 
@@ -141,5 +136,27 @@ describe('BillingPage Loading & Legal Isolation', () => {
     expect(html).toContain('小明')
     expect(html).not.toContain('付款前請確認新版服務條款')
     expect(html).not.toContain('目前無法確認服務條款同意紀錄')
+  })
+})
+
+describe('BillingPage Checkout Price Truth', () => {
+  it('does not flash standard NT$499 while a Founder monthly checkout price is still server-unconfirmed', () => {
+    expect(getCheckoutPriceDisplay('monthly', undefined, true)).toBe('正在確認付款金額…')
+    expect(getCheckoutPriceDescription('monthly', undefined, undefined, true)).toBe('正在確認這次月繳的實際付款金額與創始 30 優惠。')
+  })
+
+  it('shows only the server-confirmed Founder monthly amount once returned', () => {
+    expect(getCheckoutPriceDisplay('monthly', 349, true)).toBe('NT$349')
+    expect(getCheckoutPriceDescription('monthly', 349, true, true)).toContain('固定 NT$349／月')
+  })
+
+  it('shows the standard monthly catalog price when Founder does not apply', () => {
+    expect(getCheckoutPriceDisplay('monthly', undefined, false)).toBe('NT$499')
+    expect(getCheckoutPriceDescription('monthly', undefined, false, false)).toContain('每月 NT$499')
+  })
+
+  it('shows the annual catalog price immediately because Founder pricing never applies to annual', () => {
+    expect(getCheckoutPriceDisplay('annual', undefined, true)).toBe('NT$4,999')
+    expect(getCheckoutPriceDescription('annual', undefined, false, true)).toContain('年繳不套用 Founding 30')
   })
 })
