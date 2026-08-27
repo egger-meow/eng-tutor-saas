@@ -1396,6 +1396,24 @@ begin
   ) then
     raise exception 'service role cannot execute Paddle webhook processing RPC';
   end if;
+  if has_function_privilege(
+    'anon',
+    'public.process_paddle_subscription_event_v2(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean,uuid,text)',
+    'execute'
+  ) or has_function_privilege(
+    'authenticated',
+    'public.process_paddle_subscription_event_v2(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean,uuid,text)',
+    'execute'
+  ) then
+    raise exception 'browser roles can execute Paddle webhook processing v2 RPC';
+  end if;
+  if not has_function_privilege(
+    'service_role',
+    'public.process_paddle_subscription_event_v2(text,text,timestamptz,uuid,text,text,public.subscription_status,text,text,integer,timestamptz,timestamptz,boolean,text,text,text,text,timestamptz,boolean,uuid,text)',
+    'execute'
+  ) then
+    raise exception 'service role cannot execute Paddle webhook processing v2 RPC';
+  end if;
   if has_function_privilege('anon', 'public.accept_legal_terms(text,text)', 'execute') then
     raise exception 'anon role can execute accept_legal_terms RPC';
   end if;

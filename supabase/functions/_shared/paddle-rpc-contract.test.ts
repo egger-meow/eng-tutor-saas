@@ -196,6 +196,18 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
     expect(checkoutCode).toContain("errorMessage(error).includes('Current Terms acceptance is required')")
     expect(checkoutCode).toContain("error: 'legal_acceptance_required'")
   })
+
+  it('11. verifies process_paddle_subscription_event_v2 ACL migration revokes browser execution and grants only to service_role', () => {
+    const aclMigrationCode = readFileSync(
+      join(__dirname, '../../migrations/20260827150000_lock_paddle_subscription_event_v2_acl.sql'),
+      'utf-8',
+    )
+
+    expect(aclMigrationCode).toContain('revoke all on function public.process_paddle_subscription_event_v2(')
+    expect(aclMigrationCode).toContain('from public, anon, authenticated;')
+    expect(aclMigrationCode).toContain('grant execute on function public.process_paddle_subscription_event_v2(')
+    expect(aclMigrationCode).toContain('to service_role;')
+  })
 })
 
 describe('Paddle Webhook Authority & Regression Contract Tests (6 Scenarios)', () => {
