@@ -46,7 +46,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
         </div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
-      {!cta.isWaitlist && <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
+      {capacityOpen && <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
     </article>
     <CapacityStatus enrollment={enrollment} />
     <p className="capacity-explainer">第一階段預計服務 100 位孩子，計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補，既有家庭不受影響。</p>
