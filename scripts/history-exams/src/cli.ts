@@ -36,7 +36,7 @@ function parseArgs(args: string[]) {
       questionNumber = parseInt(args[i + 1], 10);
       i++;
     } else if (args[i] === '--questions' && args[i + 1]) {
-      questionNumbers = args[i + 1].split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
+      questionNumbers = args[i + 1].split(/[,\s]+/).map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n));
       i++;
     } else if (args[i] === '--provider' && args[i + 1]) {
       providerName = args[i + 1] as any;
