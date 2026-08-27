@@ -32,7 +32,7 @@ const usageModes = [
 export const faqItems = [
   ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
   ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。'],
-  ['多久可以拿到第一份教材？', '完成孩子資料後，第一份專屬教材預計於隔天開放下載。之後每週依固定節奏提供新的個人化教材。'],
+  ['多久可以拿到第一份教材？', '名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。'],
   ['一定要讓孩子自己學嗎？', '不用。孩子可以自己完成，也可以由家長陪讀，或把 Student PDF 與 Parent Answer PDF 交給家教、老師當作每週教學內容與回家練習。教材準備好，怎麼使用由家庭決定。'],
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
@@ -48,7 +48,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
   const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
-  const showFounding = enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0
+  const showFounding = enrollment !== null && enrollment.status === 'open' && enrollment.remaining > 0 && foundingRemaining !== null && foundingRemaining > 0
   const heroNote = cta.isWaitlist
     ? '目前服務名額已滿；候補不會先收費。'
     : showFounding
@@ -84,7 +84,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <a className="text-link" href="#samples">先看真實教材 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
-            <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
+            {!cta.isWaitlist && <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
           </FadeInUp>
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
