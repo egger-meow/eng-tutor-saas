@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "pdfjs-dist": "5.4.149",
+    "playwright": "^1.61.0",
     "supabase": "^2.48.3",
     "tsx": "^4.20.6",
     "typescript": "~6.0.2",

@@ -1,7 +1,7 @@
 {
   "examId": "114",
   "year": 114,
-  "title": "114 年國中教育會考英語科閱讀試題",
+  "title": "114年國中教育會考英語科試題",
   "sourcePdf": "114P_English.pdf",
   "pageCount": 14,
   "questionCount": 43,
@@ -24,6 +24,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Rex is a dog that lives at the bakery next to our school. He is cute and friendly.\nEvery morning, he stands in front of the school to welcome everybody. We all see Rex\nas one of us. But one Monday morning, I was surprised that Rex was not there to say\nhello to us. “Rex is in the hospital. He was hit by a car last night,” my classmate told me.\nWe went to see Rex in the hospital that day after school. Two weeks later, Rex was much\nbetter, and we decided to take him for a walk every evening. Because of the exercise, Rex\nbecame healthier and stronger. Soon he could happily run and jump again. He is now as\nhandsome and strong as before!",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 4,
       "pageEnd": 4,
       "questionNumbers": [
@@ -38,9 +41,15 @@
         22,
         23
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "glossary": {
+        "likely": "可能"
+      },
       "pageStart": 5,
       "pageEnd": 5,
       "questionNumbers": [
@@ -55,9 +64,12 @@
         24,
         25
       ],
-      "genre": "brochure_flyer",
+      "genre": "article_informational",
       "title": null,
       "text": "Buy a White Lake City Card When You’re in the City\n With any of the Cards, you can\n- visit the city by metro, bus, or train as many times as you want. *\n- take one child under 12 with you for free.\n- save 20% on tickets to public museums.\n The 1-day, 3-day, and 5-day Cards are for trips from Monday to Friday, and the\nWeekend Card is for trips on weekends and holidays.\n Check the map and buy the right Card for the zones you’ll be entering.\nCard Zone 1 Zones 1-2 Zones 1-3\n1-day _____ $20 _____ $40 _____ $60\n3-day _____ $40 _____ $60 _____ $80\n5-day _____ $50 _____ $80 _____ $110\nWeekend $30 _____ $50 _____ $80\n* The Cards are only for trips inside the three zones.\nⓐ White Lake Main Station\nⓑ Museum of White Lake City History\nⓒ Museum of Modern Art\nⓓ White Lake\nⓔ White Lake Castle\nⓕ White Lake Airport",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "zone": "區"
       },
@@ -75,9 +87,15 @@
         26,
         28
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
       "text": "At 5 o’clock every morning, while most people are sleeping,\n16-year-old Libby Larson is already up. She mops the floor, gets\nthe mail and the newspapers, and gets ready for visitors to Rolling\nAcres. Libby’s grandparents started Rolling Acres in 1970, and\nsince then all of the Larson family have been working there.\nRolling Acres used to be just a sheep farm, but now, with its fruit\ntrees, vegetable gardens, and many other kinds of animals, it has\nbecome a popular place for families to go on vacation. Visitors can\npick fruits, collect eggs, and feed the animals. It is one of Libby’s\njobs to show kids how to feed the baby sheep.\nFor her work, Libby is paid $10 an hour. This summer, she expects to make about $1,200\nand plans to buy a cell phone. Her friends think it’s great to make that much money in a\nsummer. However, for Libby, working at a family business also means making sacrifices .\n“I’d love to sleep until noon or go to summer camp like other kids. My friends stopped\ninviting me on trips because I’m always busy in the summer.” However, Libby also said,\n“But it’s better to see both sides. Working with your family is great. You feel closer to\neach other.”",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "glossary": {
+        "paragraph": "段落"
+      },
       "pageStart": 7,
       "pageEnd": 7,
       "questionNumbers": [
@@ -96,6 +114,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Around the year 400, people came to Easter Island.\nSo many trees here!\nIn their free time, they loved\nThey used trees to make fire and _____ making statues with big rocks. With\nbuild houses. Because of the trees, _____ the trees they cut down, they could\npeople had a great life on the island. _____ move the statues around easily.\nTrees were needed and used in every part of their life.\nYears passed, and there were fewer and fewer trees on Easter Island.\nWithout enough trees to keep\nAnd I’m hungry.\nwater under the ground, the land\nI’m thirsty.\nbecame dry, and plants didn’t grow.\nPeople began to fight for water and food. The statues were moved to fighting\ngrounds to show their power. The last trees were probably cut down at this time.\nLet’s not make Earth, our only home,\nThose who cut down\nanother Easter Island.\nthe last trees surely\nunderstood how\nimportant trees were\nto them—but still,\nthey did it . When the\nlast trees fell to the\nground, people on the\nisland fell, too.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 8,
       "pageEnd": 9,
       "questionNumbers": [
@@ -111,11 +132,15 @@
         32,
         34
       ],
-      "genre": "narrative",
+      "genre": "article_informational",
       "title": null,
       "text": "Many years ago, Dan Ariely bought a cabinet from IKEA. IKEA is a\nfamous furniture store that sells boxes of furniture parts. People who\nbuy them have to put all the parts together themselves. It took Ariely hours to build\nhis cabinet. Ariely didn’t really enjoy himself when he was trying to put all the parts\ntogether. However, after he finished, he felt quite good about himself and his cabinet.\nLater, he found that he loved his cabinet more than any of his other furniture.\nAriely wanted to know if anyone shared his feelings, so he did\na fun origami study. He invited two groups of people to join his\nstudy. He called one group “builders” and the other group “buyers.”\nBuilders were told to make origami, like paper frogs or paper birds. When they\nfinished, they were asked how much they would spend on their works. Ariely then\nshowed the origami to buyers and asked them how much they would pay for them.\nThe two groups gave very different answers. Though buyers would pay only five\ncents for builders’ origami, builders would spend 25 cents! Interestingly, builders\nbelieved others would think their works were good enough to cost that much money!\nAriely’s study showed that he was not alone in his IKEA experience — we just love\nthings more, sometimes blindly, when we make them ourselves. Ariely called it “the\nIKEA effect.”",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "effect": "效應 furniture 家具"
+        "effect": "效應",
+        "furniture": "家具"
       },
       "pageStart": 10,
       "pageEnd": 11,
@@ -132,11 +157,16 @@
         35,
         37
       ],
-      "genre": "notice_announcement",
+      "genre": "article_informational",
       "title": null,
       "text": "In the picture is a UK electricity worker in the 1970s. Pictures like this appeared in\nmany newspapers at the time. In 1972, electricity workers in the UK asked to be paid more,\nand they decided to stop working until their wish was answered. The government worried\nthat there wouldn’t be enough electricity for the country if these workers didn’t go to work,\nso it agreed to give them the pay rise. However, the story didn’t end there.\nA year later, the electricity workers asked for another pay rise. To get what they\nwanted, they worked shorter hours and acted like they would walk away from their job\nanytime. But this time, the government decided to fight. To save electricity, it made new\nrules for people to follow. For example, each family could turn on the heat in only one\nroom; TV stations had to stop their shows at 10:30 p.m.; businesses could open only three\ndays a week.\nPeople’s lives were greatly changed. Without enough heat to keep the house warm,\npeople covered themselves in blankets all the time. Hospitals had to use candles because\nthey couldn’t keep all the lights on. Factories couldn’t keep their machines working. Many\npeople lost their jobs. For months, people were paying the price while the electricity\nworkers were fighting for their wish. In the end, the government agreed to the second pay\nrise. This picture shows what many people thought of the electricity workers during the\n“dark” time.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "electricity": "電力 government 政府"
+        "electricity": "電力",
+        "government": "政府",
+        "likely": "可能"
       },
       "pageStart": 12,
       "pageEnd": 13,
@@ -156,6 +186,9 @@
       "genre": "cloze_passage",
       "title": null,
       "text": "Most kids want gifts from their parents on their birthdays, but Cameron doesn’t. On his\nbirthday, he gives his mom a gift. He 38 doing this in his first year of junior high\nschool. That year, during one class, he watched a video about how a baby is pushed from its\nmother’s body. After class, 39 . How brave a woman is to have a baby! Thank God I’ll\nnever have to do that!\nWhen Cameron came home that day, he held his mom in his arms for a long time. He\ndecided that his birthday 40 . During those nine months inside his mom, he just ate and\nslept while his mom was doing all the hard work. So why should he get a birthday gift for\ndoing nothing? If anyone should get a gift on his birthday, it should be his mom.\nThe 41 “birthday gift” Cameron prepared was a bag of cookies he baked. The cookies\ntasted so bad, but his mom said they were the best thing she ever got. Hearing that 42 .\nIt was so much better than getting a gift. Now, on his birthday every year, Cameron makes\na gift for his mother to thank her for giving him life.\nThis year, Cameron 43 his mom a nice dress. A few months ago, he learned to make\ndresses at school and decided to make one for his mom. Now the dress is finished and\nhanging behind Cameron’s bedroom door. He believes the gift will tell his mother how\nmuch he loves her.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 14,
       "pageEnd": 14,
       "questionNumbers": [
@@ -183,9 +216,21 @@
         "C": "kite",
         "D": "plane"
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "C",
+      "evidenceMode": "visual_only",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 2,
+          "role": "single_image",
+          "imagePath": "history_exams/assets/114/page-2.png",
+          "description": "Illustration for single question 1"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 1 requires visual inspection of the picture on page 2"
+      ]
     },
     {
       "examId": "114",
@@ -201,7 +246,10 @@
         "C": "popular",
         "D": "shy"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -219,7 +267,10 @@
         "C": "sailing",
         "D": "shopping"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -237,7 +288,10 @@
         "C": "listen to",
         "D": "listens to"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -255,7 +309,10 @@
         "C": "medium",
         "D": "ready"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -273,7 +330,10 @@
         "C": "rules",
         "D": "tools"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -291,7 +351,10 @@
         "C": "king",
         "D": "stranger"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -309,7 +372,10 @@
         "C": "the one",
         "D": "the next"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -327,7 +393,10 @@
         "C": "follow",
         "D": "grow"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -345,7 +414,10 @@
         "C": "is coming",
         "D": "was coming"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -363,7 +435,10 @@
         "C": "to make",
         "D": "is making"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -381,7 +456,10 @@
         "C": "service",
         "D": "traffic"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -399,7 +477,10 @@
         "C": "never",
         "D": "perhaps"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -417,7 +498,10 @@
         "C": "Most",
         "D": "Some"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -435,7 +519,10 @@
         "C": "Before",
         "D": "If"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -453,7 +540,10 @@
         "C": "keep",
         "D": "save"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -471,7 +561,10 @@
         "C": "do",
         "D": "does"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -489,7 +582,10 @@
         "C": "was asking",
         "D": "will ask"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -507,7 +603,10 @@
         "C": "fallen",
         "D": "and fallen"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -528,7 +627,10 @@
         "C": "He bit people.",
         "D": "He ate too much."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -549,7 +651,10 @@
         "C": "By taking him to see a doctor.",
         "D": "By looking for a new home for him."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -568,9 +673,12 @@
         "A": "He made Linda unhappy.",
         "B": "He is looking for a new job.",
         "C": "He did not like Linda’s cake.",
-        "D": "He is getting married to Jenny."
+        "D": "He is getting married to Jenny. (A) Dennis never changes his mind except when his wife tells him to. (B) Melisa tells Tom she’ll go to the party but tells her mom she’ll stay home. (C) Jeff tells everyone he’ll move abroad when Ivy is still telling them about her baby. (D) Alisa says she doesn’t care what we have for lunch but also doesn’t like the restaurant we chose."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -584,14 +692,17 @@
         22,
         23
       ],
-      "stem": "Which is most likely an example of stealing someone ＇ s thunder ? _____  likely 可能",
+      "stem": "(Comprehension question 23)",
       "options": {
-        "A": "Dennis never changes his mind except when his wife tells him to.",
-        "B": "Melisa tells Tom she’ll go to the party but tells her mom she’ll stay home.",
-        "C": "Jeff tells everyone he’ll move abroad when Ivy is still telling them about her baby.",
-        "D": "Alisa says she doesn’t care what we have for lunch but also doesn’t like the restaurant we chose."
+        "A": "[Option A]",
+        "B": "[Option B]",
+        "C": "[Option C]",
+        "D": "[Option D]"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -612,7 +723,10 @@
         "C": "Take a train to places out of the three zones.",
         "D": "Move around the city by metro as much as you want."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -633,7 +747,10 @@
         "C": "A 1-day Card for Zone 1 and a Weekend Card for Zones 1-2.",
         "D": "A 1-day Card for Zones 1-2 and a Weekend Card for Zones 1-2."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -652,9 +769,12 @@
         "A": "A zoo.",
         "B": "A campground.",
         "C": "A vacation farm.",
-        "D": "A family restaurant."
+        "D": "A family restaurant. (A) What Libby does at Rolling Acres. (B) What visitors think of Rolling Acres. (C) Why Libby’s grandparents started Rolling Acres. (D) What the Larson family’s plans are for Rolling Acres."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -668,14 +788,17 @@
         26,
         28
       ],
-      "stem": "What do we learn from the first paragraph? _____  paragraph 段落",
+      "stem": "(Comprehension question 27)",
       "options": {
-        "A": "What Libby does at Rolling Acres.",
-        "B": "What visitors think of Rolling Acres.",
-        "C": "Why Libby’s grandparents started Rolling Acres.",
-        "D": "What the Larson family’s plans are for Rolling Acres."
+        "A": "[Option A]",
+        "B": "[Option B]",
+        "C": "[Option C]",
+        "D": "[Option D]"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -696,7 +819,10 @@
         "C": "Making excuses for failing to do something difficult.",
         "D": "Giving up something important to do something else."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -717,7 +843,10 @@
         "C": "Save our planet before it’s too late.",
         "D": "Treat others the way we want to be treated."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -738,7 +867,10 @@
         "C": "They prayed to the statues beside a large fire.",
         "D": "They used statues to show how strong they were."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -759,7 +891,10 @@
         "C": "Move the statues to fighting grounds.",
         "D": "Understand how important trees were."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -780,7 +915,10 @@
         "C": "Why IKEA furniture is so famous.",
         "D": "If anyone shared his IKEA experience."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -801,7 +939,10 @@
         "C": "Builders knew others would not pay as much for the origami as they would.",
         "D": "Buyers would spend more on builders’ origami after knowing how they were made."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -822,7 +963,10 @@
         "C": "Give Mia her favorite candy after she eats vegetables.",
         "D": "Ask Mia what vegetables she likes and cook them for her."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -843,7 +987,10 @@
         "C": "The history behind the picture of a UK electricity worker.",
         "D": "The story of a famous UK electricity worker from the 1970s."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -864,10 +1011,10 @@
         "C": "They were asking too much and did not know when to stop.",
         "D": "They did not care whether their job might hurt people’s health."
       },
-      "answer": null,
-      "glossary": {
-        "likely": "可能"
-      },
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -888,7 +1035,10 @@
         "C": "To mean both the days without lights and the difficult lives people lived.",
         "D": "To show that the government and the electricity workers both lost their fights."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -902,14 +1052,17 @@
         38,
         43
       ],
-      "stem": "Question 38",
+      "stem": "(Cloze blank 38)",
       "options": {
         "A": "starts",
         "B": "started",
         "C": "has started",
         "D": "will start"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -923,14 +1076,17 @@
         38,
         43
       ],
-      "stem": "Question 39",
+      "stem": "(Cloze blank 39)",
       "options": {
         "A": "he got quite scared of two things",
         "B": "he still couldn’t understand two things",
         "C": "he couldn’t stop thinking about two things",
         "D": "he did two things that would change his life"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -944,14 +1100,17 @@
         38,
         43
       ],
-      "stem": "Question 40",
+      "stem": "(Cloze blank 40)",
       "options": {
         "A": "should be spent helping his mom",
         "B": "should be a time of welcoming a new start",
         "C": "should not be about him, but about his mom",
         "D": "should not be celebrated for just one day, but for nine months"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -965,14 +1124,17 @@
         38,
         43
       ],
-      "stem": "Question 41",
+      "stem": "(Cloze blank 41)",
       "options": {
         "A": "first",
         "B": "last",
         "C": "only",
         "D": "other"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -986,14 +1148,17 @@
         38,
         43
       ],
-      "stem": "Question 42",
+      "stem": "(Cloze blank 42)",
       "options": {
         "A": "made his head hurt",
         "B": "made his heart sing",
         "C": "made him change his mind",
         "D": "made him give up baking"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -1007,18 +1172,21 @@
         38,
         43
       ],
-      "stem": "Question 43",
+      "stem": "(Cloze blank 43)",
       "options": {
         "A": "is going to give",
         "B": "gives",
         "C": "has given",
         "D": "gave"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:08:45.777Z",
-  "extractorVersion": "1.0.0"
+  "extractedAt": "2026-08-27T16:24:27.471Z",
+  "extractorVersion": "2.0.0-multimodal-hardened"
 }

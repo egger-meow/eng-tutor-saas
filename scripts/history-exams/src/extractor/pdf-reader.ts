@@ -123,8 +123,11 @@ function buildLineWithBlanks(items: TextItemWithPos[]): string {
     const isNextOption = /^\([A-D]\)/.test(it2.str.trim());
     const isCurrentOption = /^\([A-D]\)/.test(it1.str.trim());
 
-    // Only insert blank if this is not an options line and physical gap >= 22 points
-    if (!isOptionLine && !isNextOption && !isCurrentOption && gap >= 22.0) {
+    // Check if it1 is an isolated bullet/step number at start of line (e.g. '1', '2', '3')
+    const isStartStepNumber = i === 0 && /^\d+$/.test(it1.str.trim()) && it1.str.trim().length <= 2;
+
+    // Only insert blank if this is not an options line, not an isolated step bullet, and physical gap >= 22 points
+    if (!isOptionLine && !isNextOption && !isCurrentOption && !isStartStepNumber && gap >= 22.0) {
       res += ' _____ ' + it2.str;
     } else {
       res += ' ' + it2.str;

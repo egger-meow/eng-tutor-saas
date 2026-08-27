@@ -1,7 +1,7 @@
 {
   "examId": "113",
   "year": 113,
-  "title": "113 年國中教育會考英語科閱讀試題",
+  "title": "113年國中教育會考英語科試題",
   "sourcePdf": "113P_English.pdf",
   "pageCount": 15,
   "questionCount": 43,
@@ -24,6 +24,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "It was around eight o’clock on Saturday night. Philip was at home with his little\nbrother, Jason. Jason was hungry and kept crying. But Philip couldn’t cook and their\nfather was not home yet because he was working late in the office. So Philip decided to\ntake Jason out for some food.\nHalf an hour later, when they came back home, Philip was surprised to find that their\nfather was talking to the police and a woman outside their house. He didn’t know who\nthe woman was. She looked scared and stood behind the police. Philip’s father was very\nangry and kept shouting, “I didn’t do anything wrong! I forgot my keys and was just\ntrying to get into MY OWN HOUSE!” But the police didn’t believe him until Philip ran\nto them and explained everything.\nThe police told Philip that the woman called 110 when she saw Philip’s father trying\nto get into a house through a window. That was how it all happened.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 4,
       "pageEnd": 4,
       "questionNumbers": [
@@ -38,9 +41,12 @@
         24,
         25
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "oven": "烤爐"
       },
@@ -58,9 +64,15 @@
         26,
         27
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "(A) Using the free festival bus service.\n(B) Visiting the festival on the weekend.\n(C) Entering Satyr’s Park from Fox Street.\n(D) Parking in Garden Square and walking to the festival.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "glossary": {
+        "recommend": "推薦"
+      },
       "pageStart": 6,
       "pageEnd": 6,
       "questionNumbers": [
@@ -75,9 +87,16 @@
         28,
         29
       ],
-      "genre": "narrative",
+      "genre": "article_informational",
       "title": null,
-      "text": "Yan lived a good life in a big house. One day he invited a friend to dinner at his\nhouse. However, on the dinner table there was only one small dish of one small fish.\nThe friend looked quietly at the fish. It was no bigger than a finger.\nThen he asked Yan if he could borrow a lamp.\n“What for?” Yan asked.\n“Well, it’s so dark in here,” the friend said with a dry smile,\n“I can’t see the other delicious dishes you’ve prepared for me.”\nChang kept a lot of ducks and chickens on his farm. One day, his best friend\ncame to visit him. At noon, Chang told his friend that he couldn’t let him stay for lunch\nbecause there wasn’t much food to eat. The friend looked out at Chang’s farm animals\nfor a moment. Then he asked Chang if he had a big knife.\n“Yes, but what for?” Chang asked.\n“I’m thinking about killing the horse I rode here so we’ll\nhave something for lunch,” the friend said.\n“But how are you going to go home without it?”\n“Well, you wouldn’t mind lending me one of your many\nducks or chickens so I can ride it home, would you?”",
+      "text": "Yan lived a good life in a big house. One day he invited a friend to dinner at his\nhouse. However, on the dinner table there was only one small dish of one small fish.\nThe friend looked quietly at the fish. It was no bigger than a finger.\nThen he asked Yan if he could borrow a lamp.\n“What for?” Yan asked.\n“Well, it’s so dark in here,” the friend said with a dry smile,\n“I can’t see the other delicious dishes you’ve prepared for me.”\nChang kept a lot of ducks and chickens on his farm. One day, his best friend\ncame to visit him. At noon, Chang told his friend that he couldn’t let him stay for lunch\nbecause there wasn’t much food to eat. The friend looked out at Chang’s farm animals\nfor a moment. Then he asked Chang if he had a big knife.\n“Yes, but what for?” Chang asked.\n“I’m thinking about killing the horse I rode here so we’ll\nhave something for lunch,” the friend said.\n“But how are you going to go home without it?”\n“Well, you wouldn’t mind lending me one of your many\nducks or chickens so I can ride it home, would you?”\nYan and Chang are?\n(A) They enjoy good food.\n(B) They don’t like to share.\n(C) They like to make friends.\n(D) They don’t like new things.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "glossary": {
+        "What kind of people do Yan’s and Chang’s friends most likely think": "_____",
+        "likely": "可能"
+      },
       "pageStart": 7,
       "pageEnd": 7,
       "questionNumbers": [
@@ -95,6 +114,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Usually, people visit bookstores to buy books. But those who walk\ninto Cotoha come to see its owner, Chen Bing-Hong. They bring him\nbooks with different problems. Some have lost their covers, some are\nmissing a few pages, and some have pages that are falling out. Chen can\nalways fix the books and make them whole again.\nChen sees himself as a doctor. He says that books, like people, get\nsick and need help. In Taiwan, there are not many “doctors” like him,\nand most of them work for big libraries and museums. If big libraries and\nmuseums are hospitals, Chen’s bookstore is a health center. Big libraries\nand museums fix important old books with serious problems, and Chen\nhelps people with books that have smaller problems. However, the smaller\nsize of the problems doesn’t mean Chen’s job is less important.\nChen gave an example of a science book he once worked on. It was\nvery old and half of its cover was lost. Its owner still wanted to keep it\nbecause it was a gift from a teacher who helped him follow his dream of\nstudying science. When he got his book back, he was very surprised at the\nnew-old book. He felt he was brought back to the days with his teacher.\nSeeing the owner’s smile made Chen happy, because smiles like that are\nwhat his magic is for.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 8,
       "pageEnd": 9,
       "questionNumbers": [
@@ -110,11 +132,15 @@
         33,
         35
       ],
-      "genre": "dialogue",
+      "genre": "article_informational",
       "title": null,
       "text": "A Delicious Surprise and Welcome Change A Delicious Surprise and Welcome Change\nBy Karl Falk, June 1, 2016\nIn Austria, there are not many restaurants like Habibi\n& Hawara. Here you can enjoy Austrian and Syrian\nfood together. Two Austrians, Martin Rohla and\nDavid Kreytenberg, started this yummy plan from\ntheir experience of working with refugees.\nEvery year, thousands of people have to leave\ntheir homes and families because of war in their\ncountries. So many of them go to Austria that some\npeople in the country think they have become a problem. They are afraid refugees\nmay take away their jobs and they don’t feel safe around them, either. But Rohla\nand Kreytenberg would beg to differ: The refugees don’t have to be a problem.\nThey want to help them start a new life. They invited refugees to meetings and\nfound that some of them were cooks back in Syria. So the idea of Habibi & Hawara\nwas born—a restaurant that brings together Austrian and Syrian food. “The two\nworlds far away from each other meet together,” Kreytenberg said.\nBut Rohla and Kreytenberg want to do more than just give the refugees work. They\nwant their best workers to buy the restaurant in the end. They hope that Habibi &\nHawara is not just a one-time plan and that other Austrians will join them and help\nmore refugees.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "refugee": "難民 war 戰爭"
+        "refugee": "難民",
+        "war": "戰爭"
       },
       "pageStart": 10,
       "pageEnd": 11,
@@ -134,8 +160,13 @@
       "genre": "article_informational",
       "title": null,
       "text": "VOICES OF PEOPLE\nIf you want to learn about bringing back extinct animals, reading\nJohn Smith’s Back from the Dead is a good start. But I have to say\nI can’t agree with everything he says.\nEllen Zimmer\nFrom his book, I can see Smith is an advocate of bringing extinct animals back. He\nsays we have lost many animals because we made their living spaces too dirty. He also\nthinks we must do everything we can to bring them back. However, I don’t know how\nmuch time and money we would need to make the world a better place for them, and\nhonestly no one knows if they could actually come back.\nSmith also says that bringing back extinct animals may be good for us. He talks about\nan extinct frog that grew tadpoles in its stomach. Some women’s babies die before they\nare born, and Smith believes bringing back the frog may be an answer to the problem.\nAccording to him, by studying how the tadpoles grow inside the frog’s stomach, we\nmight be able to find new ways to help these women successfully keep their babies. But\nI don’t think things are as easy as Smith thinks. We have spent ten years and millions\nof dollars on this kind of frog, but all we have got are only a few dead frog eggs. If we\ncan’t see a real frog, how can we be sure women will get the help they need?\nDr. Solomon Wang from the Animal Saving Office says the study of bringing back\nextinct animals is “throwing good money after bad.” And he’s right. A lot of hard work\nhas been put into this expensive dream, but we haven’t seen anything come out of it.\nSo should we still keep going down this road?",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "extinct": "絕種的 tadpole 蝌蚪"
+        "extinct": "絕種的",
+        "tadpole": "蝌蚪",
+        "likely": "可能"
       },
       "pageStart": 12,
       "pageEnd": 13,
@@ -156,6 +187,9 @@
       "genre": "cloze_passage",
       "title": null,
       "text": "A HISTORY LESSON ON THE PANDEMIC _____ 2020.10.29\nSince the Covid-19 pandemic started, people have begun “social distancing”—\nkeeping a safe space between you and anyone you don’t live with. Though it\nhas been a very popular topic this year, social distancing 40 . In fact, it was\nwidely used in the U.S. in the flu pandemic in 1918. But how well did it work? The\nAmericans’ experience can tell us whether it really saved lives.\nFrom the picture, we can see that 41 started social distancing earlier than\nthe other three cities. This helped the city keep the number of deaths down. Besides\ntaking early action, keeping the action long enough was also important in fighting\nthe pandemic. The picture shows that Portland and Denver did well in the first few\nweeks. However, both cities 42 , and the numbers of deaths climbed again.\nBut there was one thing Portland did right. The city used several ways of social\ndistancing at the same time to deal with the pandemic. 43 , sick people were kept\naway from healthy ones; schools were closed; public activities were not allowed. All\nthese were useful in keeping people safe.\nThe lessons of the 1918 pandemic bring us hope. While we are still learning to\nfight Covid-19, social distancing may be the best way to get us through the dark days,\nat least for now.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "pandemic": "（疾病的） 大流行 per 每 ( 一 )"
       },
@@ -184,9 +218,21 @@
         "C": "a sign",
         "D": "an umbrella"
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "A",
+      "evidenceMode": "visual_only",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 2,
+          "role": "single_image",
+          "imagePath": "history_exams/assets/113/page-2.png",
+          "description": "Illustration for single question 1"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 1 requires visual inspection of the picture on page 2"
+      ]
     },
     {
       "examId": "113",
@@ -202,7 +248,10 @@
         "C": "neck",
         "D": "stomach"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -220,7 +269,10 @@
         "C": "sorry for",
         "D": "worried about"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -238,7 +290,10 @@
         "C": "pack",
         "D": "walk"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -256,7 +311,10 @@
         "C": "habit",
         "D": "weather"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -274,7 +332,10 @@
         "C": "one",
         "D": "it"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -292,7 +353,10 @@
         "C": "have",
         "D": "will"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -310,7 +374,10 @@
         "C": "finally",
         "D": "still"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -328,7 +395,10 @@
         "C": "lucky",
         "D": "ready"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -346,7 +416,10 @@
         "C": "quick",
         "D": "sharp"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -364,7 +437,10 @@
         "C": "finds",
         "D": "found"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -382,7 +458,10 @@
         "C": "who they want",
         "D": "what they want"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -400,7 +479,10 @@
         "C": "below",
         "D": "in"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -418,7 +500,10 @@
         "C": "or",
         "D": "so"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -436,7 +521,10 @@
         "C": "haven’t seen",
         "D": "won’t see"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -454,7 +542,10 @@
         "C": "radio",
         "D": "robot"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -472,7 +563,10 @@
         "C": "miss",
         "D": "notice"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -490,7 +584,10 @@
         "C": "smartest",
         "D": "worst"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -508,7 +605,10 @@
         "C": "shares",
         "D": "share"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -526,7 +626,10 @@
         "C": "mine",
         "D": "myself"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -544,7 +647,10 @@
         "C": "I was doing",
         "D": "I’ll do"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -565,7 +671,10 @@
         "C": "To ask the police for help.",
         "D": "To buy food for his brother."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -586,7 +695,10 @@
         "C": "The police didn’t believe what he said.",
         "D": "Philip and his brother went out at night."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -607,7 +719,10 @@
         "C": "5:00pm.",
         "D": "7:00pm."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -628,7 +743,10 @@
         "C": "Its croissants and pretzels are sold on weekends.",
         "D": "Its members can save $100 when they shop on Fridays."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -642,14 +760,17 @@
         26,
         27
       ],
-      "stem": "What is recommended to people who want to visit the festival? _____  recommend 推薦",
+      "stem": "(Comprehension question 26)",
       "options": {
-        "A": "Using the free festival bus service.",
-        "B": "Visiting the festival on the weekend.",
-        "C": "Entering Satyr’s Park from Fox Street.",
-        "D": "Parking in Garden Square and walking to the festival."
+        "A": "[Option A]",
+        "B": "[Option B]",
+        "C": "[Option C]",
+        "D": "[Option D]"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -670,9 +791,21 @@
         "C": "You can go to the farmers’ market by taking Bus No. 157 to Puppy Street.",
         "D": "The nearest metro station to the farmers’ market is the Koala Street Station."
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "B",
+      "evidenceMode": "spatial",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 6,
+          "role": "diagram",
+          "imagePath": "history_exams/assets/113/page-6.png",
+          "description": "Visual evidence for question 27 on page 6"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 27 requires visual evidence from page 6"
+      ]
     },
     {
       "examId": "113",
@@ -684,14 +817,17 @@
         28,
         29
       ],
-      "stem": "What kind of people do Yan’s and Chang’s friends most likely think _____  likely 可能 Yan and Chang are?",
+      "stem": "(Comprehension question 28)",
       "options": {
-        "A": "They enjoy good food.",
-        "B": "They don’t like to share.",
-        "C": "They like to make friends.",
-        "D": "They don’t like new things."
+        "A": "[Option A]",
+        "B": "[Option B]",
+        "C": "[Option C]",
+        "D": "[Option D]"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -712,7 +848,10 @@
         "C": "Lunch.",
         "D": "One of Chang’s ducks or chickens."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -733,7 +872,10 @@
         "C": "To explain Chen’s love for books.",
         "D": "To show why bookstores are important."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -754,7 +896,10 @@
         "C": "It gives people hope to follow their dreams.",
         "D": "It helps people think of special moments in the past."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -775,7 +920,10 @@
         "C": "Finding books that are long lost.",
         "D": "Changing his bookstore into a library."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -796,7 +944,10 @@
         "C": "To help Austrians learn about the war in Syria.",
         "D": "To help refugees go back to their home countries."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -817,7 +968,10 @@
         "C": "It has cooking classes in Syrian food.",
         "D": "It is an important meeting place for Syrians."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -838,7 +992,10 @@
         "C": "They cannot speak for others.",
         "D": "They do not notice something."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -859,7 +1016,10 @@
         "C": "They have had some bad experiences with it.",
         "D": "They are one of the first people who have done it."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -880,7 +1040,10 @@
         "C": "It eats its babies when it cannot find food.",
         "D": "It is the first extinct animal that people studied."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -901,7 +1064,10 @@
         "C": "To make her idea clearer.",
         "D": "To invite people to take action."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -922,10 +1088,10 @@
         "C": "It is not possible.",
         "D": "It is not dangerous."
       },
-      "answer": null,
-      "glossary": {
-        "likely": "可能"
-      },
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -939,14 +1105,17 @@
         40,
         43
       ],
-      "stem": "Question 40",
+      "stem": "(Cloze blank 40)",
       "options": {
         "A": "is not a new idea",
         "B": "has not been very useful",
         "C": "may bring some problems",
         "D": "is not welcomed by everyone"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -960,14 +1129,17 @@
         40,
         43
       ],
-      "stem": "Question 41",
+      "stem": "(Cloze blank 41)",
       "options": {
         "A": "Portland",
         "B": "New York",
         "C": "Denver",
         "D": "Pittsburgh"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -981,14 +1153,17 @@
         40,
         43
       ],
-      "stem": "Question 42",
+      "stem": "(Cloze blank 42)",
       "options": {
         "A": "had higher numbers of deaths",
         "B": "stopped social distancing too soon",
         "C": "began social distancing a second time",
         "D": "had the most days of social distancing"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -1002,18 +1177,21 @@
         40,
         43
       ],
-      "stem": "Question 43",
+      "stem": "(Cloze blank 43)",
       "options": {
         "A": "Also",
         "B": "At first",
         "C": "However",
         "D": "For example"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:08:45.558Z",
-  "extractorVersion": "1.0.0"
+  "extractedAt": "2026-08-27T16:24:25.901Z",
+  "extractorVersion": "2.0.0-multimodal-hardened"
 }

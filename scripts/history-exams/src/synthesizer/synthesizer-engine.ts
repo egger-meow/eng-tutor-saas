@@ -192,7 +192,13 @@ function buildDistractorPatterns(questions: AnalyzedQuestion[]): DistractorPatte
   let totalDistractors = 0;
 
   for (const q of questions) {
+    const correctAnswer = q.extracted.answer;
     for (const d of q.analysis.distractorStrategies) {
+      // If official answer is known, only count the 3 genuine distractors (exclude the correct option)
+      if (correctAnswer && d.option === correctAnswer) {
+        continue;
+      }
+
       patternCounts[d.strategy] = (patternCounts[d.strategy] || 0) + 1;
       totalDistractors++;
 

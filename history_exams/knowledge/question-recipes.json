@@ -183,8 +183,8 @@
     "realExamExemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "brief": "Look at the picture. The woman is putting _____ on the cake."
+        "questionNumber": 33,
+        "brief": "Which map is most likely the map of Cameroon in 1962?"
       }
     ]
   },
@@ -230,9 +230,9 @@
     ],
     "realExamExemplars": [
       {
-        "examId": "111",
-        "questionNumber": 4,
-        "brief": "Pam is a _____ baseball player; she has more fans than any other player on her t"
+        "examId": "115",
+        "questionNumber": 28,
+        "brief": "Which is NOT used in the reading to mean the nightingale(s) ?"
       }
     ]
   },

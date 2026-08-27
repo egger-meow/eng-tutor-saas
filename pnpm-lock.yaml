@@ -11,6 +11,9 @@ importers:
       pdfjs-dist:
         specifier: 5.4.149
         version: 5.4.149
+      playwright:
+        specifier: ^1.61.0
+        version: 1.62.1
       supabase:
         specifier: ^2.48.3
         version: 2.113.0

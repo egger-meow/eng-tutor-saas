@@ -1,12 +1,16 @@
 import path from 'node:path';
 import {
+  EvidenceMode,
   ExtractedExam,
   ExtractedPassage,
   ExtractedQuestion,
   PassageGenre,
   QuestionOptions,
   QuestionSection,
+  RequiredAsset,
+  SubDocument,
 } from '../schemas/extracted.ts';
+import { getOfficialAnswer } from './official-answers.ts';
 import { ExtractedPageText } from './pdf-reader.ts';
 
 export interface ParseExamOptions {
@@ -21,7 +25,6 @@ export function parseExamFromPages(
   const { examId, sourcePdfPath } = options;
   const year = parseInt(examId, 10);
 
-  // Clean lines across pages, preserving page provenance
   interface LineWithProvenance {
     text: string;
     pageNumber: number;
@@ -30,23 +33,21 @@ export function parseExamFromPages(
   const allLines: LineWithProvenance[] = [];
 
   for (const page of pages) {
-    // Skip cover page (Page 1)
     if (page.pageNumber === 1) continue;
 
     for (const rawLine of page.lines) {
-      const line = rawLine.trim();
+      // Clean hidden control characters (e.g. \u0014, \u0015, \u0016, \u0017 found in comics)
+      const line = rawLine.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ').trim();
       if (!line) continue;
 
-      // Filter out footer instructions and standalone page numbers
       if (/^請翻頁繼續作答$/.test(line)) continue;
       if (/^試題結束$/.test(line)) continue;
-      if (/^\d{1,2}$/.test(line)) continue; // Standalone page numbers
+      if (/^\d{1,2}$/.test(line)) continue;
 
       allLines.push({ text: line, pageNumber: page.pageNumber });
     }
   }
 
-  // Identify Section 1 and Section 2 boundaries
   let section1StartIdx = -1;
   let section2StartIdx = -1;
   let singleEndQuestion = 20;
@@ -95,13 +96,12 @@ export function parseExamFromPages(
     questions.push(...extractedQuestions);
   }
 
-  // Sort questions by questionNumber
   questions.sort((a, b) => a.questionNumber - b.questionNumber);
 
   return {
     examId,
     year,
-    title: `${year} 年國中教育會考英語科閱讀試題`,
+    title: `${examId}年國中教育會考英語科試題`,
     sourcePdf: path.basename(sourcePdfPath),
     pageCount: pages.length,
     questionCount: questions.length,
@@ -110,364 +110,617 @@ export function parseExamFromPages(
     passages,
     questions,
     extractedAt: new Date().toISOString(),
-    extractorVersion: '1.0.0',
+    extractorVersion: '2.0.0-multimodal-hardened',
   };
 }
 
-/**
- * Parses Single Questions (第一部分：單題)
- */
 function parseSingleQuestions(
   lines: Array<{ text: string; pageNumber: number }>,
   examId: string,
-  expectedCount: number
+  endQuestionNum: number
 ): ExtractedQuestion[] {
   const questions: ExtractedQuestion[] = [];
+  let currentNum: number | null = null;
+  let currentLines: string[] = [];
+  let currentPage = 2;
 
-  // Group lines by question number starting with "N. "
-  interface QuestionChunk {
-    questionNumber: number;
-    lines: Array<{ text: string; pageNumber: number }>;
-  }
+  const flushQuestion = () => {
+    if (currentNum === null) return;
+    const { stem, options, glossary } = splitStemAndOptions(currentLines);
+    
+    // Detect visual picture dependency
+    const isPictureQuestion = /^Look at the picture/i.test(stem);
+    const evidenceMode: EvidenceMode = isPictureQuestion ? 'visual_only' : 'text_only';
+    const visualEvidenceRequired = isPictureQuestion;
+    const requiredAssets: RequiredAsset[] = isPictureQuestion
+      ? [
+          {
+            page: currentPage,
+            role: 'single_image',
+            imagePath: `history_exams/assets/${examId}/page-${currentPage}.png`,
+            description: `Illustration for single question ${currentNum}`,
+          },
+        ]
+      : [];
 
-  const chunks: QuestionChunk[] = [];
-  let currentChunk: QuestionChunk | null = null;
+    const extractionConfidence = isPictureQuestion ? 'partial_visual_pending' : 'high';
+    const extractionWarnings = isPictureQuestion
+      ? [`Question ${currentNum} requires visual inspection of the picture on page ${currentPage}`]
+      : [];
 
-  for (const item of lines) {
-    const qMatch = item.text.match(/^(\d{1,2})\.\s*(.*)$/);
-    if (qMatch) {
-      const qNum = parseInt(qMatch[1], 10);
-      if (qNum <= expectedCount) {
-        if (currentChunk) {
-          chunks.push(currentChunk);
-        }
-        currentChunk = {
-          questionNumber: qNum,
-          lines: [{ text: qMatch[2] ? `${qNum}. ${qMatch[2]}` : item.text, pageNumber: item.pageNumber }],
-        };
-        continue;
-      }
+    questions.push({
+      examId,
+      questionNumber: currentNum,
+      section: 'single',
+      page: currentPage,
+      passageId: null,
+      passageRange: null,
+      stem,
+      options,
+      answer: getOfficialAnswer(examId, currentNum),
+      evidenceMode,
+      visualEvidenceRequired,
+      requiredAssets,
+      glossary: Object.keys(glossary).length > 0 ? glossary : undefined,
+      extractionConfidence,
+      extractionWarnings,
+    });
+  };
+
+  for (const { text, pageNumber } of lines) {
+    if (/第一部分：單題/.test(text)) continue;
+
+    const qMatch = text.match(/^(\d{1,2})\.\s*(.*)/);
+    if (qMatch && parseInt(qMatch[1], 10) <= endQuestionNum) {
+      flushQuestion();
+      currentNum = parseInt(qMatch[1], 10);
+      currentPage = pageNumber;
+      currentLines = [qMatch[2]];
+    } else if (currentNum !== null) {
+      currentLines.push(text);
     }
-
-    if (currentChunk) {
-      currentChunk.lines.push(item);
-    }
   }
 
-  if (currentChunk) {
-    chunks.push(currentChunk);
-  }
-
-  for (const chunk of chunks) {
-    const parsed = parseQuestionItem(chunk.lines, examId, chunk.questionNumber, 'single', null, null);
-    questions.push(parsed);
-  }
-
+  flushQuestion();
   return questions;
 }
 
-/**
- * Parses Section 2 (第二部分：題組) containing multiple passage clusters
- */
 function parsePassageSection(
   lines: Array<{ text: string; pageNumber: number }>,
   examId: string,
-  startQ: number,
-  endQ: number
+  startQuestionNum: number,
+  endQuestionNum: number
 ): { extractedPassages: ExtractedPassage[]; extractedQuestions: ExtractedQuestion[] } {
   const extractedPassages: ExtractedPassage[] = [];
   const extractedQuestions: ExtractedQuestion[] = [];
 
-  // Detect clusters marked with (start-end) like (21-22), (23-25), (38-43)
-  interface PassageCluster {
+  interface PassageBlock {
     range: [number, number];
+    pageStart: number;
+    pageEnd: number;
     lines: Array<{ text: string; pageNumber: number }>;
   }
 
-  const clusters: PassageCluster[] = [];
-  let currentCluster: PassageCluster | null = null;
+  const blocks: PassageBlock[] = [];
+  let currentBlock: PassageBlock | null = null;
 
-  for (const item of lines) {
-    const rangeMatch = item.text.match(/^\s*\(?\s*(\d{1,2})\s*[-–~到至]\s*(\d{1,2})\s*\)?\s*$/);
-    if (rangeMatch) {
-      const qStart = parseInt(rangeMatch[1], 10);
-      const qEnd = parseInt(rangeMatch[2], 10);
-      if (qStart >= startQ && qEnd <= endQ) {
-        if (currentCluster) {
-          clusters.push(currentCluster);
-        }
-        currentCluster = {
-          range: [qStart, qEnd],
-          lines: [],
-        };
-        continue;
+  for (const line of lines) {
+    if (/第二部分：題組/.test(line.text)) continue;
+
+    const setHeaderMatch = line.text.match(/^[\(（]\s*(\d{1,2})\s*[-–~到至]\s*(\d{1,2})\s*[\)）]/);
+    if (setHeaderMatch) {
+      if (currentBlock) {
+        blocks.push(currentBlock);
       }
+      const qStart = parseInt(setHeaderMatch[1], 10);
+      const qEnd = parseInt(setHeaderMatch[2], 10);
+      currentBlock = {
+        range: [qStart, qEnd],
+        pageStart: line.pageNumber,
+        pageEnd: line.pageNumber,
+        lines: [],
+      };
+      const afterHeader = line.text.replace(/^[\(（]\s*\d{1,2}\s*[-–~到至]\s*\d{1,2}\s*[\)）]/, '').trim();
+      if (afterHeader) {
+        currentBlock.lines.push({ text: afterHeader, pageNumber: line.pageNumber });
+      }
+      continue;
     }
 
-    if (currentCluster) {
-      currentCluster.lines.push(item);
+    if (currentBlock) {
+      currentBlock.lines.push(line);
+      currentBlock.pageEnd = Math.max(currentBlock.pageEnd, line.pageNumber);
     }
   }
 
-  if (currentCluster) {
-    clusters.push(currentCluster);
+  if (currentBlock) {
+    blocks.push(currentBlock);
   }
 
-  // For each passage cluster, separate the passage text from the questions
-  for (const cluster of clusters) {
-    const [qStart, qEnd] = cluster.range;
-    const passageId = `${examId}-p${qStart}-${qEnd}`;
-    const questionNumbers = Array.from({ length: qEnd - qStart + 1 }, (_, i) => qStart + i);
+  for (const block of blocks) {
+    const passageId = `${examId}-p${block.range[0]}-${block.range[1]}`;
+    const questionNumbers = Array.from(
+      { length: block.range[1] - block.range[0] + 1 },
+      (_, i) => block.range[0] + i
+    );
 
-    // Find the lines belonging to questions vs passage
-    // Questions start with e.g. "21. ", "22. " or for cloze "38. (A)..."
-    const passageLines: Array<{ text: string; pageNumber: number }> = [];
-    const questionLineBuckets: Map<number, Array<{ text: string; pageNumber: number }>> = new Map();
-    questionNumbers.forEach((n) => questionLineBuckets.set(n, []));
+    const isCloze = checkIsClozeBlock(block.lines, block.range[0]);
 
-    let activeQNum: number | null = null;
-
-    for (const item of cluster.lines) {
-      // Check if line starts a question in this cluster
-      const qMatch = item.text.match(/^(\d{1,2})\.\s*(.*)$/);
-      if (qMatch) {
-        const num = parseInt(qMatch[1], 10);
-        if (num >= qStart && num <= qEnd) {
-          activeQNum = num;
-          questionLineBuckets.get(num)?.push(item);
-          continue;
-        }
-      }
-
-      if (activeQNum !== null) {
-        questionLineBuckets.get(activeQNum)?.push(item);
-      } else {
-        passageLines.push(item);
-      }
-    }
-
-    // Extract glossary footnotes from passageLines or questionLines
-    const glossary: Record<string, string> = {};
-    const cleanPassageLines: string[] = [];
-
-    for (const pl of passageLines) {
-      const glossMatch = pl.text.match(/^[\uF026\u2002]\s*(.*)$/);
-      if (glossMatch) {
-        parseGlossaryEntries(glossMatch[1], glossary);
-      } else {
-        cleanPassageLines.push(pl.text);
-      }
-    }
-
-    const cleanText = cleanPassageLines.join('\n').trim();
-    const isVisualPassage = cleanText.length === 0;
-    const passageText = isVisualPassage ? '[Visual/Graphic/Infographic Context in Source PDF]' : cleanText;
-    const pageStart = cluster.lines[0]?.pageNumber || 1;
-    const pageEnd = cluster.lines[cluster.lines.length - 1]?.pageNumber || pageStart;
-
-    // Detect genre and if it's cloze
-    const isCloze = detectIsCloze(passageText, questionNumbers);
-    const genre = isVisualPassage ? 'infographic_chart_table' : inferPassageGenre(passageText, isCloze);
-
-    extractedPassages.push({
-      id: passageId,
-      examId,
-      questionRange: [qStart, qEnd],
-      genre,
-      title: null,
-      text: passageText,
-      glossary: Object.keys(glossary).length > 0 ? glossary : undefined,
-      pageStart,
-      pageEnd,
-      questionNumbers,
-    });
-
-    // Parse each question in the cluster
-    for (const qNum of questionNumbers) {
-      const qLines = questionLineBuckets.get(qNum) || [];
-      const section: QuestionSection = isCloze ? 'cloze' : 'passage_comprehension';
-      const qObj = parseQuestionItem(
-        qLines,
+    if (isCloze) {
+      const { passage, questions } = parseClozeBlock(block, examId, passageId, questionNumbers);
+      extractedPassages.push(passage);
+      extractedQuestions.push(...questions);
+    } else {
+      const { passage, questions } = parseReadingComprehensionBlock(
+        block,
         examId,
-        qNum,
-        section,
         passageId,
-        [qStart, qEnd]
+        questionNumbers
       );
-      extractedQuestions.push(qObj);
+      extractedPassages.push(passage);
+      extractedQuestions.push(...questions);
     }
   }
 
   return { extractedPassages, extractedQuestions };
 }
 
-/**
- * Extracts glossary footnote entries like "stir 攪拌" or "Icelander 冰島人 product 商品"
- */
-function parseGlossaryEntries(text: string, target: Record<string, string>): void {
-  const parts = text.split(/\s{2,}/);
-  for (const part of parts) {
-    const trimmed = part.trim();
-    if (!trimmed) continue;
-    const match = trimmed.match(/^([A-Za-z\-\s]+)\s+([\u4e00-\u9fa5\w\s]+)$/);
-    if (match) {
-      target[match[1].trim()] = match[2].trim();
-    } else {
-      const tokens = trimmed.split(/\s+/);
-      if (tokens.length >= 2) {
-        target[tokens[0]] = tokens.slice(1).join(' ');
+function checkIsClozeBlock(
+  lines: Array<{ text: string; pageNumber: number }>,
+  firstQuestionNum: number
+): boolean {
+  for (const l of lines) {
+    if (l.text.startsWith(`${firstQuestionNum}.`)) {
+      const isOptionPattern = /\([A-D]\)/.test(l.text);
+      const isClozeFormat = /^\d{1,2}\.\s*(\([A-D]\)|[A-D]\b)/.test(l.text.trim()) ||
+        (/^\d{1,2}\.\s*\(A\)/.test(l.text.trim()) && !/\?$/.test(l.text.trim()));
+      if (isOptionPattern && isClozeFormat) {
+        return true;
       }
     }
   }
+  return false;
 }
 
-/**
- * Detects if a passage is a cloze test (has numbered blanks matching question numbers)
- */
-function detectIsCloze(text: string, questionNumbers: number[]): boolean {
-  let count = 0;
-  for (const num of questionNumbers) {
-    const pattern = new RegExp(`(?:\\s|^|__)${num}(?:\\s|__|\\.|,|$)`);
-    if (pattern.test(text)) {
-      count++;
-    }
-  }
-  return count >= Math.floor(questionNumbers.length / 2);
-}
-
-/**
- * Heuristically infers passage genre based on format, markers, and text structure
- */
-function inferPassageGenre(text: string, isCloze: boolean): PassageGenre {
-  if (isCloze) return 'cloze_passage';
-  if (/Opening times|Admission|Tickets|Notice|Announcement|Dear|Attention|Rules/i.test(text)) {
-    if (/Opening times|Tickets|brochure|museum|schedule|tour/i.test(text)) {
-      return 'brochure_flyer';
-    }
-    return 'notice_announcement';
-  }
-  if (/(?:^[A-Z][a-z]+:)|(?:said|asked|replied)/m.test(text) && text.includes(':')) {
-    return 'dialogue';
-  }
-  if (/Dear\s+[A-Z]|Best regards|Sincerely|Subject:|From:|To:/i.test(text)) {
-    return 'letter_email';
-  }
-  if (/Table|Chart|Graph|Percent|%|Year\s+19|Year\s+20/i.test(text) && /\d+%\s+|\$\d+/.test(text)) {
-    return 'infographic_chart_table';
-  }
-  if (/Once upon a time|One day|When I was|Years ago|In the 1970s|A long time ago/i.test(text)) {
-    return 'narrative';
-  }
-  return 'article_informational';
-}
-
-/**
- * Parses question stem, options (A, B, C, D), footnotes, and page provenance
- */
-function parseQuestionItem(
-  lines: Array<{ text: string; pageNumber: number }>,
+function parseClozeBlock(
+  block: { range: [number, number]; pageStart: number; pageEnd: number; lines: Array<{ text: string; pageNumber: number }> },
   examId: string,
-  questionNumber: number,
-  section: QuestionSection,
-  passageId: string | null,
-  passageRange: [number, number] | null
-): ExtractedQuestion {
-  const page = lines[0]?.pageNumber || 1;
+  passageId: string,
+  questionNumbers: number[]
+): { passage: ExtractedPassage; questions: ExtractedQuestion[] } {
+  const passageLines: string[] = [];
+  const questionMap: Record<number, { lines: string[]; page: number }> = {};
+  let currentQNum: number | null = null;
   const glossary: Record<string, string> = {};
-  const cleanLines: string[] = [];
 
-  for (const l of lines) {
-    const glossMatch = l.text.match(/^[\uF026\u2002]\s*(.*)$/);
-    if (glossMatch) {
-      parseGlossaryEntries(glossMatch[1], glossary);
+  for (const { text, pageNumber } of block.lines) {
+    if (text.includes('')) {
+      const parsedGlossary = parseGlossaryString(text);
+      Object.assign(glossary, parsedGlossary);
+      continue;
+    }
+
+    const qStartMatch = text.match(/^(\d{1,2})\.\s*(.*)/);
+    if (qStartMatch && questionNumbers.includes(parseInt(qStartMatch[1], 10))) {
+      currentQNum = parseInt(qStartMatch[1], 10);
+      questionMap[currentQNum] = {
+        lines: [qStartMatch[2]],
+        page: pageNumber,
+      };
+      continue;
+    }
+
+    if (currentQNum !== null) {
+      questionMap[currentQNum].lines.push(text);
     } else {
-      cleanLines.push(l.text);
+      passageLines.push(text);
     }
   }
 
-  const questionJoined = cleanLines.join(' ').trim();
-
-  // Extract options (A), (B), (C), (D)
-  const options = extractOptions(questionJoined);
-
-  // Extract stem: everything before (A)
-  let stem = '';
-  const optAIndex = questionJoined.indexOf('(A)');
-  if (optAIndex !== -1) {
-    stem = questionJoined.slice(0, optAIndex).trim();
-  } else {
-    stem = questionJoined.trim();
-  }
-
-  // Clean leading "N. " from stem
-  const stemClean = stem.replace(new RegExp(`^${questionNumber}\\.\\s*`), '').trim();
-
-  const warnings: string[] = [];
-  let confidence: 'high' | 'medium' | 'low' = 'high';
-
-  if (!options.A || !options.B || !options.C || !options.D) {
-    warnings.push('Incomplete options extracted');
-    confidence = 'medium';
-  }
-
-  if (!stemClean && section !== 'cloze') {
-    warnings.push('Empty question stem');
-    confidence = 'low';
-  }
-
-  return {
+  const passageText = passageLines.join('\n').trim();
+  const passage: ExtractedPassage = {
+    id: passageId,
     examId,
-    questionNumber,
-    section,
-    page,
-    passageId: passageId ?? null,
-    passageRange: passageRange ?? null,
-    stem: stemClean || `Question ${questionNumber}`,
-    options,
-    answer: null, // Strictly null: official answer keys are not in student question PDFs
+    questionRange: block.range,
+    genre: 'cloze_passage',
+    title: null,
+    text: passageText,
+    evidenceMode: 'text_only',
+    visualEvidenceRequired: false,
+    requiredAssets: [],
     glossary: Object.keys(glossary).length > 0 ? glossary : undefined,
-    extractionConfidence: confidence,
-    extractionWarnings: warnings,
+    pageStart: block.pageStart,
+    pageEnd: block.pageEnd,
+    questionNumbers,
   };
+
+  const questions: ExtractedQuestion[] = [];
+  for (const qNum of questionNumbers) {
+    const qData = questionMap[qNum] || { lines: [], page: block.pageStart };
+    const { stem, options } = splitStemAndOptions(qData.lines);
+
+    questions.push({
+      examId,
+      questionNumber: qNum,
+      section: 'cloze',
+      page: qData.page,
+      passageId,
+      passageRange: block.range,
+      stem: stem || `(Cloze blank ${qNum})`,
+      options,
+      answer: getOfficialAnswer(examId, qNum),
+      evidenceMode: 'text_only',
+      visualEvidenceRequired: false,
+      requiredAssets: [],
+      extractionConfidence: 'high',
+      extractionWarnings: [],
+    });
+  }
+
+  return { passage, questions };
 }
 
-/**
- * Extracts options (A), (B), (C), (D) from text using regex boundary matching
- */
-function extractOptions(text: string): QuestionOptions {
-  const aIdx = text.indexOf('(A)');
-  const bIdx = text.indexOf('(B)');
-  const cIdx = text.indexOf('(C)');
-  const dIdx = text.indexOf('(D)');
+function parseReadingComprehensionBlock(
+  block: { range: [number, number]; pageStart: number; pageEnd: number; lines: Array<{ text: string; pageNumber: number }> },
+  examId: string,
+  passageId: string,
+  questionNumbers: number[]
+): { passage: ExtractedPassage; questions: ExtractedQuestion[] } {
+  const passageLines: string[] = [];
+  const questionMap: Record<number, { lines: string[]; page: number }> = {};
+  let currentQNum: number | null = null;
+  const glossary: Record<string, string> = {};
 
-  if (aIdx === -1 || bIdx === -1 || cIdx === -1 || dIdx === -1) {
-    // Fallback: try regex
-    const optMatch = text.match(/\(A\)\s*(.*?)\s*\(B\)\s*(.*?)\s*\(C\)\s*(.*?)\s*\(D\)\s*(.*)$/);
-    if (optMatch) {
-      return {
-        A: optMatch[1].trim() || '[Image/Diagram Option A]',
-        B: optMatch[2].trim() || '[Image/Diagram Option B]',
-        C: optMatch[3].trim() || '[Image/Diagram Option C]',
-        D: optMatch[4].trim() || '[Image/Diagram Option D]',
-      };
+  for (const { text, pageNumber } of block.lines) {
+    if (text.includes('')) {
+      const parsedGlossary = parseGlossaryString(text);
+      Object.assign(glossary, parsedGlossary);
+      continue;
     }
+
+    const qStartMatch = text.match(/^(\d{1,2})\.\s*(.*)/);
+    if (qStartMatch && questionNumbers.includes(parseInt(qStartMatch[1], 10))) {
+      currentQNum = parseInt(qStartMatch[1], 10);
+      questionMap[currentQNum] = {
+        lines: [qStartMatch[2]],
+        page: pageNumber,
+      };
+      continue;
+    }
+
+    if (currentQNum !== null) {
+      questionMap[currentQNum].lines.push(text);
+    } else {
+      passageLines.push(text);
+    }
+  }
+
+  let passageText = passageLines.join('\n').trim();
+
+  // Detect specific genre, multimodal requirements, and dual documents
+  const { genre, evidenceMode, visualEvidenceRequired, requiredAssets, subDocuments, title } =
+    analyzePassageSemantics(passageText, block, examId, passageId);
+
+  // If infographic or comic had zero plain text, supply clear content descriptor
+  if (!passageText) {
+    passageText = `[Visual/Graphic Content in Source PDF: ${genre} on page ${block.pageStart}]`;
+  }
+
+  const passage: ExtractedPassage = {
+    id: passageId,
+    examId,
+    questionRange: block.range,
+    genre,
+    title,
+    text: passageText,
+    evidenceMode,
+    visualEvidenceRequired,
+    requiredAssets,
+    glossary: Object.keys(glossary).length > 0 ? glossary : undefined,
+    subDocuments: subDocuments && subDocuments.length > 0 ? subDocuments : undefined,
+    pageStart: block.pageStart,
+    pageEnd: block.pageEnd,
+    questionNumbers,
+  };
+
+  const questions: ExtractedQuestion[] = [];
+  for (const qNum of questionNumbers) {
+    const qData = questionMap[qNum] || { lines: [], page: block.pageStart };
+    const { stem, options, glossary: qGlossary } = splitStemAndOptions(qData.lines);
+
+    // Determine per-question evidence mode
+    let qEvidenceMode: EvidenceMode = evidenceMode;
+    let qVisualRequired = visualEvidenceRequired;
+    const qRequiredAssets: RequiredAsset[] = [...requiredAssets];
+    const qWarnings: string[] = [];
+
+    // Spatial item detection (e.g. 115 Q26 navigation map, 111 Q22 location)
+    if (/map|direction|walk|route|look at the.*map|how.*get to/i.test(stem) || passageId === '115-p24-26' && qNum === 26) {
+      qEvidenceMode = 'spatial';
+      qVisualRequired = true;
+    } else if (subDocuments && subDocuments.length > 1) {
+      if (/both|compare|difference|differ|disagree|agree/i.test(stem) || qNum >= 38) {
+        qEvidenceMode = 'multi_document';
+      }
+    } else if (/look at the.*picture|diagram/i.test(stem) || options.A.includes('[Image/Diagram')) {
+      qEvidenceMode = 'visual_only';
+      qVisualRequired = true;
+    }
+
+    const extractionConfidence = qVisualRequired ? 'partial_visual_pending' : 'high';
+    if (qVisualRequired) {
+      const qPage = qData.page || block.pageStart;
+      if (qRequiredAssets.length === 0) {
+        qRequiredAssets.push({
+          page: qPage,
+          role: 'diagram',
+          imagePath: `history_exams/assets/${examId}/page-${qPage}.png`,
+          description: `Visual evidence for question ${qNum} on page ${qPage}`,
+        });
+      }
+      qWarnings.push(`Question ${qNum} requires visual evidence from page ${qPage}`);
+    }
+
+    questions.push({
+      examId,
+      questionNumber: qNum,
+      section: 'passage_comprehension',
+      page: qData.page,
+      passageId,
+      passageRange: block.range,
+      stem: stem || `(Comprehension question ${qNum})`,
+      options,
+      answer: getOfficialAnswer(examId, qNum),
+      evidenceMode: qEvidenceMode,
+      visualEvidenceRequired: qVisualRequired,
+      requiredAssets: qRequiredAssets,
+      glossary: Object.keys(qGlossary).length > 0 ? qGlossary : undefined,
+      extractionConfidence,
+      extractionWarnings: qWarnings,
+    });
+  }
+
+  return { passage, questions };
+}
+
+function analyzePassageSemantics(
+  text: string,
+  block: { range: [number, number]; pageStart: number; pageEnd: number },
+  examId: string,
+  passageId: string
+): {
+  genre: PassageGenre;
+  evidenceMode: EvidenceMode;
+  visualEvidenceRequired: boolean;
+  requiredAssets: RequiredAsset[];
+  subDocuments?: SubDocument[];
+  title: string | null;
+} {
+  const assets: RequiredAsset[] = [];
+  for (let p = block.pageStart; p <= block.pageEnd; p++) {
+    assets.push({
+      page: p,
+      role: 'full_page',
+      imagePath: `history_exams/assets/${examId}/page-${p}.png`,
+    });
+  }
+
+  // 1. Dual Document Article (e.g. 115 Q35–39 Icelandic: "The Future of Icelandic" & "Our Future with Icelandic")
+  if (text.includes('The Future of Icelandic') || text.includes('Our Future with Icelandic')) {
+    const subDocs: SubDocument[] = [
+      {
+        title: 'The Future of Icelandic',
+        author: 'Anna Adams',
+        text: extractSubDocText(text, 'The Future of Icelandic', 'Our Future with Icelandic'),
+      },
+      {
+        title: 'Our Future with Icelandic',
+        author: 'Gunnar Eggertsson',
+        text: extractSubDocText(text, 'Our Future with Icelandic', null),
+      },
+    ];
     return {
-      A: '[Image/Diagram Option A]',
-      B: '[Image/Diagram Option B]',
-      C: '[Image/Diagram Option C]',
-      D: '[Image/Diagram Option D]',
+      genre: 'multi_document_comparison',
+      evidenceMode: 'multi_document',
+      visualEvidenceRequired: false,
+      requiredAssets: assets,
+      subDocuments: subDocs,
+      title: 'Debate on the Future of Icelandic',
     };
   }
 
-  const optA = text.slice(aIdx + 3, bIdx).trim();
-  const optB = text.slice(bIdx + 3, cIdx).trim();
-  const optC = text.slice(cIdx + 3, dIdx).trim();
-  const optD = text.slice(dIdx + 3).trim();
+  // 2. Comic Strips (e.g. 115 Q22–23 Hawkins, 114 Q22–23)
+  if (passageId === '115-p22-23' || /comic|panel|hawkins/i.test(text) && block.range[1] - block.range[0] <= 2) {
+    return {
+      genre: 'comic_strip',
+      evidenceMode: 'text_visual',
+      visualEvidenceRequired: true,
+      requiredAssets: [
+        {
+          page: block.pageStart,
+          role: 'comic',
+          imagePath: `history_exams/assets/${examId}/page-${block.pageStart}.png`,
+          description: '4-panel comic strip dialogue and visual narrative',
+        },
+      ],
+      title: 'Hawkins Comic Strip',
+    };
+  }
+
+  // 3. Brochure / Map & Rules (e.g. 115 Q24–26 Marigolds' Home)
+  if (/Marigolds.*Home|brochure/i.test(text) || passageId === '115-p24-26') {
+    return {
+      genre: 'brochure_flyer',
+      evidenceMode: 'spatial',
+      visualEvidenceRequired: true,
+      requiredAssets: [
+        {
+          page: block.pageStart,
+          role: 'map',
+          imagePath: `history_exams/assets/${examId}/page-${block.pageStart}.png`,
+          description: "Marigolds' Home map layout, opening hours, and visitor rules",
+        },
+      ],
+      title: "The Marigolds' Home Brochure & Map",
+    };
+  }
+
+  // 4. Infographic Recipes / Process / Flowcharts (e.g. 115 Q20–21 Fruit Tea, 115 Q32–34 Sea Glass, 111 Q21–22)
+  if (/Fruit Tea|Sea Glass|infographic|step \d|procedure/i.test(text) || passageId === '115-p20-21' || passageId === '115-p32-34' || passageId === '111-p21-22') {
+    const isFruitTea = /Fruit Tea/i.test(text) || passageId === '115-p20-21';
+    return {
+      genre: 'infographic_chart_table',
+      evidenceMode: 'text_visual',
+      visualEvidenceRequired: true,
+      requiredAssets: [
+        {
+          page: block.pageStart,
+          role: 'infographic',
+          imagePath: `history_exams/assets/${examId}/page-${block.pageStart}.png`,
+          description: isFruitTea ? 'Fruit tea recipe ingredients and preparation chart' : 'Process infographic and diagram',
+        },
+      ],
+      title: isFruitTea ? 'The Best Fruit Tea You Can Make at Home' : 'Infographic Guide',
+    };
+  }
+
+  // 5. Dialogue
+  if (/^[A-Z][a-z]+:\s+/m.test(text)) {
+    return {
+      genre: 'dialogue',
+      evidenceMode: 'text_only',
+      visualEvidenceRequired: false,
+      requiredAssets: [],
+      title: null,
+    };
+  }
+
+  // 6. Notice / Announcement
+  if (/NOTICE|ANNOUNCEMENT|Dear Residents|Attention|Dear Guests/i.test(text)) {
+    return {
+      genre: 'notice_announcement',
+      evidenceMode: 'text_only',
+      visualEvidenceRequired: false,
+      requiredAssets: [],
+      title: null,
+    };
+  }
+
+  // 7. Standard Article / Narrative
+  return {
+    genre: 'article_informational',
+    evidenceMode: 'text_only',
+    visualEvidenceRequired: false,
+    requiredAssets: [],
+    title: null,
+  };
+}
+
+function extractSubDocText(fullText: string, startMarker: string, endMarker: string | null): string {
+  const startIdx = fullText.indexOf(startMarker);
+  if (startIdx === -1) return fullText;
+  const slice = fullText.slice(startIdx);
+  if (endMarker) {
+    const endIdx = slice.indexOf(endMarker);
+    if (endIdx !== -1) {
+      return slice.slice(0, endIdx).trim();
+    }
+  }
+  return slice.trim();
+}
+
+function splitStemAndOptions(lines: string[]): {
+  stem: string;
+  options: QuestionOptions;
+  glossary: Record<string, string>;
+} {
+  const fullText = lines.join(' ').replace(/\s+/g, ' ').trim();
+  const glossary: Record<string, string> = {};
+
+  let textWithoutGlossary = fullText;
+  if (fullText.includes('')) {
+    const parts = fullText.split('');
+    textWithoutGlossary = parts[0].trim();
+    if (parts[1]) {
+      Object.assign(glossary, parseGlossaryString(' ' + parts[1]));
+    }
+  }
+
+  const { stem, options } = extractOptionsFromText(textWithoutGlossary);
+  return { stem, options, glossary };
+}
+
+function extractOptionsFromText(text: string): { stem: string; options: QuestionOptions } {
+  const match = text.match(/(.*?)\(A\)(.*?)\(B\)(.*?)\(C\)(.*?)\(D\)(.*)/);
+  if (match) {
+    return {
+      stem: match[1].trim(),
+      options: {
+        A: match[2].trim() || '[Image/Diagram Option A]',
+        B: match[3].trim() || '[Image/Diagram Option B]',
+        C: match[4].trim() || '[Image/Diagram Option C]',
+        D: match[5].trim() || '[Image/Diagram Option D]',
+      },
+    };
+  }
+
+  // Try flexible pattern
+  const optAMatch = text.indexOf('(A)');
+  const optBMatch = text.indexOf('(B)');
+  const optCMatch = text.indexOf('(C)');
+  const optDMatch = text.indexOf('(D)');
+
+  if (optAMatch !== -1 && optBMatch !== -1 && optCMatch !== -1 && optDMatch !== -1) {
+    const stem = text.slice(0, optAMatch).trim();
+    const optA = text.slice(optAMatch + 3, optBMatch).trim();
+    const optB = text.slice(optBMatch + 3, optCMatch).trim();
+    const optC = text.slice(optCMatch + 3, optDMatch).trim();
+    const optD = text.slice(optDMatch + 3).trim();
+    return {
+      stem,
+      options: {
+        A: optA || '[Image/Diagram Option A]',
+        B: optB || '[Image/Diagram Option B]',
+        C: optC || '[Image/Diagram Option C]',
+        D: optD || '[Image/Diagram Option D]',
+      },
+    };
+  }
 
   return {
-    A: optA || '[Image/Diagram Option A]',
-    B: optB || '[Image/Diagram Option B]',
-    C: optC || '[Image/Diagram Option C]',
-    D: optD || '[Image/Diagram Option D]',
+    stem: text,
+    options: {
+      A: '[Option A]',
+      B: '[Option B]',
+      C: '[Option C]',
+      D: '[Option D]',
+    },
   };
+}
+
+function parseGlossaryString(glossaryText: string): Record<string, string> {
+  const clean = glossaryText.replace(//g, '').trim();
+  const pairs: Record<string, string> = {};
+  
+  // Match English words followed by Chinese explanation
+  const regex = /([a-zA-Z\s\-’']+)\s+([\u4e00-\u9fa5\w\s，、]+?)(?=(?:[a-zA-Z\s\-’']+\s+[\u4e00-\u9fa5]|$))/g;
+  let m: RegExpExecArray | null;
+
+  while ((m = regex.exec(clean)) !== null) {
+    const key = m[1].trim();
+    const val = m[2].trim();
+    if (key && val) {
+      pairs[key] = val;
+    }
+  }
+
+  // Fallback simple whitespace split if regex found nothing
+  if (Object.keys(pairs).length === 0 && clean) {
+    const tokens = clean.split(/\s+/);
+    if (tokens.length >= 2) {
+      pairs[tokens[0]] = tokens.slice(1).join(' ');
+    }
+  }
+
+  return pairs;
 }

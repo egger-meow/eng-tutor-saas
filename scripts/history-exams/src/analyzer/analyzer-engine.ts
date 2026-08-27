@@ -8,7 +8,12 @@ import {
   PedagogicalAnalysisSchema,
 } from '../schemas/analyzed.ts';
 import { ExtractedExam, ExtractedPassage, ExtractedQuestion } from '../schemas/extracted.ts';
-import { AiProvider, createAiProvider, deriveDeterministicAnalysis } from './ai-provider.ts';
+import {
+  AiProvider,
+  createAiProvider,
+  deriveDeterministicAnalysis,
+  ImageAttachment,
+} from './ai-provider.ts';
 import { computeQuestionContentHash } from './content-hasher.ts';
 import { buildPedagogicalAnalysisPrompt, PROMPT_VERSION } from './prompt.ts';
 
@@ -18,6 +23,7 @@ export interface RunAnalysisOptions {
   examIdFilter?: string;
   questionNumberFilter?: number;
   force?: boolean;
+  allowOfflineMock?: boolean;
   aiProvider?: AiProvider;
 }
 
@@ -30,11 +36,11 @@ export interface AnalysisSummary {
 }
 
 /**
- * Runs Stage 2: Pedagogical Deep Analysis over the extracted exams
+ * Runs Stage 2: Pedagogical Deep Analysis over extracted exams with live AI and multimodal evidence
  */
 export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<AnalysisSummary[]> {
-  const { extractedDir, analyzedDir, examIdFilter, questionNumberFilter, force } = options;
-  const aiProvider = options.aiProvider || createAiProvider();
+  const { extractedDir, analyzedDir, examIdFilter, questionNumberFilter, force, allowOfflineMock } = options;
+  const aiProvider = options.aiProvider || createAiProvider({ allowOfflineMock });
 
   if (!fs.existsSync(analyzedDir)) {
     fs.mkdirSync(analyzedDir, { recursive: true });
@@ -83,7 +89,6 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
 
     for (const question of extractedContent.questions) {
       if (questionNumberFilter && question.questionNumber !== questionNumberFilter) {
-        // If filtering by question, preserve existing if present
         const existing = existingMap.get(question.questionNumber);
         if (existing) {
           analyzedQuestions.push(existing);
@@ -92,31 +97,86 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       }
 
       const passage = question.passageId ? passageMap.get(question.passageId) : null;
-      const contentHash = computeQuestionContentHash(question, passage?.text, PROMPT_VERSION);
+      const contentHash = computeQuestionContentHash(
+        question,
+        passage?.text,
+        PROMPT_VERSION,
+        aiProvider.name,
+        aiProvider.modelName
+      );
 
       const existingRecord = existingMap.get(question.questionNumber);
 
-      if (!force && existingRecord && existingRecord.contentHash === contentHash) {
+      // Check cache validity (must match hash AND must not be an offline-mock record if running live provider)
+      const isMockCached = existingRecord?.analysis?.explanation?.includes('rule-based') || false;
+      const isLiveRun = aiProvider.name !== 'offline-mock';
+
+      if (!force && existingRecord && existingRecord.contentHash === contentHash && !(isLiveRun && isMockCached)) {
         analyzedQuestions.push(existingRecord);
         cachedCount++;
         continue;
       }
 
-      // Analyze question
-      const analysis = await analyzeSingleQuestion(question, passage, aiProvider);
+      // Collect image attachments if multimodal evidence is required
+      const images: ImageAttachment[] = [];
+      if (question.visualEvidenceRequired && question.requiredAssets.length > 0) {
+        for (const asset of question.requiredAssets) {
+          const absAssetPath = path.isAbsolute(asset.imagePath)
+            ? asset.imagePath
+            : path.resolve(process.cwd(), asset.imagePath);
+          if (fs.existsSync(absAssetPath)) {
+            const imgData = fs.readFileSync(absAssetPath).toString('base64');
+            images.push({
+              mimeType: 'image/png',
+              base64Data: imgData,
+            });
+          }
+        }
+      }
 
-      const record: AnalyzedQuestion = {
+      const prompt = buildPedagogicalAnalysisPrompt(question, passage);
+      let analysisResult: PedagogicalAnalysis;
+
+      try {
+        const rawResponse = await aiProvider.generateAnalysis(prompt, {
+          question,
+          passage,
+          images: images.length > 0 ? images : undefined,
+        });
+        const parsedJson = JSON.parse(rawResponse);
+        analysisResult = PedagogicalAnalysisSchema.parse(parsedJson);
+      } catch (err: any) {
+        // Attempt single bounded targeted repair
+        try {
+          const repairPrompt = `${prompt}\n\n[ERROR]: Your previous response failed schema validation: ${err.message}.\nReturn strictly valid JSON conforming to PedagogicalAnalysis schema.`;
+          const repairResponse = await aiProvider.generateAnalysis(repairPrompt, {
+            question,
+            passage,
+            images: images.length > 0 ? images : undefined,
+          });
+          analysisResult = PedagogicalAnalysisSchema.parse(JSON.parse(repairResponse));
+        } catch (repairErr: any) {
+          if (aiProvider.name === 'offline-mock') {
+            analysisResult = deriveDeterministicAnalysis(question, passage);
+          } else {
+            throw new Error(
+              `Pedagogical analysis failed for Exam ${examId} Q${question.questionNumber}: ${repairErr.message}`
+            );
+          }
+        }
+      }
+
+      analyzedQuestions.push({
         examId,
         questionNumber: question.questionNumber,
         contentHash,
         promptVersion: PROMPT_VERSION,
+        modelName: aiProvider.modelName,
         analyzedAt: new Date().toISOString(),
-        modelName: aiProvider.name,
         extracted: question,
-        analysis,
-      };
+        analysis: analysisResult,
+      });
 
-      analyzedQuestions.push(record);
       freshAnalyzedCount++;
     }
 
@@ -130,6 +190,7 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
       questions: analyzedQuestions,
     };
 
+    AnalyzedExamSchema.parse(analyzedExam);
     fs.writeFileSync(analyzedPath, JSON.stringify(analyzedExam, null, 2), 'utf-8');
 
     summaries.push({
@@ -142,61 +203,4 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
   }
 
   return summaries;
-}
-
-/**
- * Analyzes a single question with schema validation and bounded targeted repair
- */
-async function analyzeSingleQuestion(
-  question: ExtractedQuestion,
-  passage: ExtractedPassage | null | undefined,
-  aiProvider: AiProvider
-): Promise<PedagogicalAnalysis> {
-  const prompt = buildPedagogicalAnalysisPrompt(question, passage);
-
-  try {
-    const rawOutput = await aiProvider.generateAnalysis(prompt, { question, passage });
-    const cleaned = cleanJsonString(rawOutput);
-    const parsedJson = JSON.parse(cleaned);
-
-    const parseResult = PedagogicalAnalysisSchema.safeParse(parsedJson);
-    if (parseResult.success) {
-      return parseResult.data;
-    }
-
-    // Bounded retry / repair: if model output violates schema, attempt 1 targeted fix
-    const repairPrompt = `${prompt}\n\n[PREVIOUS ATTEMPT OUTPUT FAILED SCHEMA VALIDATION]:\n${JSON.stringify(
-      parseResult.error.issues,
-      null,
-      2
-    )}\nPlease fix all schema errors and return strictly valid JSON.`;
-
-    const repairOutput = await aiProvider.generateAnalysis(repairPrompt, { question, passage });
-    const repairCleaned = cleanJsonString(repairOutput);
-    const repairParsed = JSON.parse(repairCleaned);
-    const repairResult = PedagogicalAnalysisSchema.safeParse(repairParsed);
-
-    if (repairResult.success) {
-      return repairResult.data;
-    }
-
-    // If repair also fails, fallback to deterministic pedagogical rule
-    return deriveDeterministicAnalysis(question, passage);
-  } catch {
-    // On network or parsing failure, derive deterministic analysis
-    return deriveDeterministicAnalysis(question, passage);
-  }
-}
-
-function cleanJsonString(str: string): string {
-  let cleaned = str.trim();
-  if (cleaned.startsWith('```json')) {
-    cleaned = cleaned.slice(7);
-  } else if (cleaned.startsWith('```')) {
-    cleaned = cleaned.slice(3);
-  }
-  if (cleaned.endsWith('```')) {
-    cleaned = cleaned.slice(0, -3);
-  }
-  return cleaned.trim();
 }

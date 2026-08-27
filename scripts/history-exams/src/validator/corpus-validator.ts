@@ -1,12 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { AnalyzedExamSchema } from '../schemas/analyzed.ts';
+import { AnalyzedExam, AnalyzedExamSchema } from '../schemas/analyzed.ts';
 import { CapBenchmarkSchema } from '../schemas/benchmark.ts';
 import { ExtractedExam, ExtractedExamSchema } from '../schemas/extracted.ts';
 import {
   AntiPatternSchema,
+  CapBlueprint,
   CapBlueprintSchema,
   DepthLevelDefinitionSchema,
+  DistractorPatternStat,
   DistractorPatternStatSchema,
   QuestionRecipeSchema,
 } from '../schemas/knowledge.ts';
@@ -49,6 +51,16 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
           errors.push(...examVal.errors.map((e) => `[Extracted ${f}] ${e}`));
         }
         warnings.push(...examVal.warnings.map((w) => `[Extracted ${f}] ${w}`));
+
+        // Validate official answer coverage
+        for (const q of (content as ExtractedExam).questions) {
+          if (!q.answer) {
+            errors.push(`[Extracted ${f}] Question ${q.questionNumber} is missing official answer key`);
+          }
+          if (q.visualEvidenceRequired && q.requiredAssets.length === 0) {
+            errors.push(`[Extracted ${f}] Question ${q.questionNumber} requires visual evidence but has no requiredAssets`);
+          }
+        }
       } catch (err: any) {
         errors.push(`[Extracted ${f}] JSON parse error: ${err.message}`);
       }
@@ -59,6 +71,7 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
 
   // 2. Validate Analyzed Exams
   let analyzedCount = 0;
+  const allAnalyzedExams: AnalyzedExam[] = [];
   if (fs.existsSync(analyzedDir)) {
     const files = fs.readdirSync(analyzedDir).filter((f) => f.endsWith('.json'));
     analyzedCount = files.length;
@@ -72,6 +85,7 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
           if (parsed.data.questions.length !== 43) {
             errors.push(`[Analyzed ${f}] Expected 43 analyzed questions, found ${parsed.data.questions.length}`);
           }
+          allAnalyzedExams.push(parsed.data);
         }
       } catch (err: any) {
         errors.push(`[Analyzed ${f}] JSON parse error: ${err.message}`);
@@ -115,6 +129,26 @@ export function validateFullCorpus(options: CorpusValidationOptions): CorpusVali
             const res = z.array(DistractorPatternStatSchema).safeParse(raw);
             if (!res.success) {
               errors.push(...res.error.issues.map((i) => `[Knowledge ${kf}] ${i.path.join('.')}: ${i.message}`));
+            } else if (allAnalyzedExams.length > 0) {
+              // Provenance check: verify observed counts match ground truth sum
+              const groundTruthDistractorCounts: Record<string, number> = {};
+              for (const exam of allAnalyzedExams) {
+                for (const q of exam.questions) {
+                  const correctAns = q.extracted.answer;
+                  for (const d of q.analysis.distractorStrategies) {
+                    if (correctAns && d.option === correctAns) continue;
+                    groundTruthDistractorCounts[d.strategy] = (groundTruthDistractorCounts[d.strategy] || 0) + 1;
+                  }
+                }
+              }
+              for (const item of res.data) {
+                const expected = groundTruthDistractorCounts[item.pattern] || 0;
+                if (item.observedCount !== expected) {
+                  errors.push(
+                    `[Knowledge ${kf}] Provenance mismatch for ${item.pattern}: blueprint has ${item.observedCount}, ground truth sum is ${expected}`
+                  );
+                }
+              }
             }
           } else if (kf === 'depth-framework.json') {
             const res = z.array(DepthLevelDefinitionSchema).safeParse(raw);

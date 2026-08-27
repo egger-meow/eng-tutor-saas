@@ -1,7 +1,7 @@
 {
   "examId": "112",
   "year": 112,
-  "title": "112 年國中教育會考英語科閱讀試題",
+  "title": "112年國中教育會考英語科試題",
   "sourcePdf": "112P_English.pdf",
   "pageCount": 13,
   "questionCount": 43,
@@ -21,9 +21,15 @@
         24,
         25
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 4]",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "glossary": {
+        "calendar": "月曆"
+      },
       "pageStart": 4,
       "pageEnd": 4,
       "questionNumbers": [
@@ -38,11 +44,15 @@
         26,
         27
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "nest": "鳥巢 feather 羽毛"
+        "nest": "鳥巢",
+        "feather": "羽毛"
       },
       "pageStart": 5,
       "pageEnd": 5,
@@ -58,11 +68,16 @@
         28,
         29
       ],
-      "genre": "infographic_chart_table",
+      "genre": "article_informational",
       "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 6]",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "stage": "階段 waste 浪費 percentage 百分比"
+        "stage": "階段",
+        "waste": "浪費",
+        "percentage": "百分比"
       },
       "pageStart": 6,
       "pageEnd": 7,
@@ -81,6 +96,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Sometimes when the rain falls hard and fast on you, it might hurt a little.\nBut what happens when it hits a mosquito? A 2012 study says when a\nraindrop falls on a mosquito, it’s like when a bus hits a person. Besides,\nthe little insect is hit by a raindrop about once every 20 seconds.\nSo why don’t we see many dead mosquitoes after it rains?\nA mosquito is as big as a raindrop, but it is much lighter — 0.002 g only. This saves its life\nin raindrop attacks. Because the mosquito is so light, when it is hit by a raindrop, it won’t\nexperience a force that is strong enough to kill it.\nThe study also found that when a mosquito is hit by a raindrop, the insect is pushed by\nthe raindrop and falls together with it. But the mosquito doesn’t get wet easily because it\nis covered with hairs which keep off water. After dropping about 6 cm, it will roll off the\nraindrop and fly away.\nHowever, this trick isn’t always successful. If the mosquito flies too low when it is hit by the\nraindrop, it won’t have time to fly off. Then it will hit the ground and meet its death.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "force": "力 量"
       },
@@ -102,8 +120,12 @@
       "genre": "article_informational",
       "title": null,
       "text": "You probably have heard Beethoven’s famous piano piece “For Elise,”\nbut do you know who “Elise” was?\nOne story is that Elise was Elisabeth Röckel. She once sang in\nBeethoven’s opera Fidelio , and the two became very good friends.\nBeethoven called her “Elise.” When Röckel was leaving the city of\nVienna, Beethoven wrote “For Elise” to say goodbye to her. Another\nstory is that Elise was Therese Malfatti. Beethoven was in love with\nher. He wrote a piece for her and put “For Therese” on the manuscript. Malfatti kept the\nmanuscript and left it to her family when she died. Later, a man copied the manuscript\nand wrote “For Elise” by mistake. There is another possible Elise: Elise Barensfeld. She\nlearned the piano from Malfatti, the same Malfatti in the second story. To help Malfatti,\nBeethoven wrote the piece for her to use to teach Barensfeld.\nThese are just some guesses about who Elise was. We may never know the right answer.\nNo one knew about the piece until 1867, when the manuscript was found. This was 40 years\nafter Beethoven’s death, so he wasn’t around to tell us who Elise was. Only one thing is for\nsure: “For Elise” will always be enjoyed.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "opera": "歌劇 manuscript 手稿"
+        "opera": "歌劇",
+        "manuscript": "手稿"
       },
       "pageStart": 9,
       "pageEnd": 9,
@@ -123,8 +145,12 @@
       "genre": "article_informational",
       "title": null,
       "text": "Which would you give a boy for his birthday, a toy truck or a doll? If you choose the\ntruck, well, you’re not alone. Most people think that some toys are for boys and some\nare for girls. We might pick building toys for boys and kitchen toys for girls. But why\ndo we do this? Are boys and girls really born with different interests in toys?\nNo, they are not. Children start to show different interests in toys at age three, but\nonly because at this time, they begin to learn about gender and to follow what others\nof their gender do. If you give a girl kitchen toys, she will think they are girls’ toys\nbecause she sees other girls playing with them. But if you give a girl a toy car and\nshow her a group of girls who are playing with cars, she’ll play with the toy car and\nthink it is a girls’ toy. This “watch and follow” habit often becomes a rule for both\nboys and girls in choosing the “right” toys.\nHowever, this rule can be bad for children. Different toys teach children different\nthings. Dolls help with their early language use, and building toys are good for\nlearning math and science. By playing with different toys, children can find out what\nthey are interested in or what they are good at. If they only play one kind of toy, they\nmay lose this important chance. They may also get a wrong idea about what boys\nor girls are able to do. Some doctors worry that children may use the same kind of\nthinking when they look for jobs in the future. If they do, they may miss something\nmore important than just getting a chance to play with different toys. They may miss\nmany, perhaps better, chances in life.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "gender": "性別"
+        "gender": "性別",
+        "paragraph": "段落"
       },
       "pageStart": 10,
       "pageEnd": 11,
@@ -144,6 +170,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Marie Colvin was a world-famous war reporter. She was born in New York, USA,\nin 1956 and died in Homs, Syria, in 2012.\nWhen she was a student at Yale University, Colvin decided that she wanted to be a\nreporter in the future. She joined the Sunday Times , a UK newspaper, in 1985 and soon\nbecame its Middle East reporter. Besides the Middle East, she also reported from other\nparts of the world: Chechnya, Kosovo and Sri Lanka, for example. When she was reporting\non the war in Sri Lanka, she lost her left eye. But that never stopped her. She still went to\ndangerous places that few reporters wanted to visit and stayed when others left.\nColvin showed great empathy in her stories. For her, war reporting was not just some\nquick interviews and a few photos. She wrote about real people and their real lives. Her\nwriting made you feel so strongly about these people’s stories, just like they were your own.\nShe hoped that through her work the world would understand what really happened in war,\nand would take action to stop the fighting.\nOn February 22, 2012, the day after she gave her report on the war in Homs, Colvin\nwas killed when the house she was staying in was attacked. She always knew what price a\nwar reporter might have to pay. She already lost an eye before. This time, she gave her life\nto the work she could not give up — telling the true stories to the world.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "war": "戰爭"
       },
@@ -165,6 +194,9 @@
       "genre": "cloze_passage",
       "title": null,
       "text": "Speaking American is a great book!\nLucia Leisure ★★★★★\nI just love Josh Katz’s new book! It’s about 42 in different parts of the US.\nThe information in the book was collected from the quiz that Katz built on the\nwebsite in 2013. The quiz asked what words people use for something, and their\nanswers showed interesting facts. For example, there are different names for\nsports shoes. In most parts of the US, people say “tennis shoes.” In the northeast\nof the country, people wear “sneakers.” In some towns, “tennis shoes” and\n“sneakers” become “gym shoes.”\nThe use of words tells us where people are from, like Katz’s book says. But in\nmy experience, it also shows 43 . My family has lived in New York since my\ngrandparents. It’s not surprising that I say “sneakers.” But my grandfather says\n“plimsolls,” and my daughter says “kicks” or “vans.” Maybe Katz can study this\ndifference for his next book.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "website": "網站"
       },
@@ -191,9 +223,21 @@
         "C": "bowl",
         "D": "box"
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "C",
+      "evidenceMode": "visual_only",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 2,
+          "role": "single_image",
+          "imagePath": "history_exams/assets/112/page-2.png",
+          "description": "Illustration for single question 1"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 1 requires visual inspection of the picture on page 2"
+      ]
     },
     {
       "examId": "112",
@@ -209,7 +253,10 @@
         "C": "shopping",
         "D": "singing"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -227,7 +274,10 @@
         "C": "listen",
         "D": "shout"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -245,7 +295,10 @@
         "C": "has danced",
         "D": "to dance"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -263,7 +316,10 @@
         "C": "shapes",
         "D": "sizes"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -281,7 +337,10 @@
         "C": "has jogged",
         "D": "would jog"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -299,7 +358,10 @@
         "C": "remembering",
         "D": "starting"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -317,7 +379,10 @@
         "C": "full",
         "D": "wrong"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -335,7 +400,10 @@
         "C": "or",
         "D": "so"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -353,7 +421,10 @@
         "C": "whether",
         "D": "why"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -371,7 +442,10 @@
         "C": "gift",
         "D": "headache"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -389,7 +463,10 @@
         "C": "are going",
         "D": "have gone"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -407,7 +484,10 @@
         "C": "were bitten",
         "D": "have bitten"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -425,7 +505,10 @@
         "C": "will be",
         "D": "will have"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -443,7 +526,10 @@
         "C": "price",
         "D": "service"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -461,7 +547,10 @@
         "C": "possible",
         "D": "special"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -479,7 +568,10 @@
         "C": "finally",
         "D": "still"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -497,7 +589,10 @@
         "C": "more boring",
         "D": "more convenient"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -515,7 +610,10 @@
         "C": "the one she",
         "D": "the one who"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -533,7 +631,10 @@
         "C": "practiced",
         "D": "would practice"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -551,7 +652,10 @@
         "C": "notice",
         "D": "plan"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -569,7 +673,10 @@
         "C": "saving",
         "D": "to save"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -587,7 +694,10 @@
         "C": "has come and sat",
         "D": "used to come and sit"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -608,7 +718,10 @@
         "C": "$220.",
         "D": "$160."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -629,10 +742,10 @@
         "C": "3:00 pm, August 13.",
         "D": "2:00 pm, August 28."
       },
-      "answer": null,
-      "glossary": {
-        "calendar": "月曆"
-      },
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -653,7 +766,10 @@
         "C": "Call the animal center if you can’t find its nest.",
         "D": "Put it back in its nest if it is not hurt and has few feathers."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -674,7 +790,10 @@
         "C": "They clean them until the smell goes away.",
         "D": "They leave them behind and move to a new nest."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -695,7 +814,10 @@
         "C": "There is no refrigerator on the truck to keep food fresh.",
         "D": "Factories do not have enough trucks to carry food to stores."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -716,7 +838,10 @@
         "C": "North America & Oceania has a higher percentage of food waste at Stage 1 than Europe.",
         "D": "South & Southeast Asia has a higher percentage of food waste at Stage 4 than the other two areas."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -737,7 +862,10 @@
         "C": "It flies behind the raindrop and pushes it away.",
         "D": "It rides on the raindrop and lands on the ground."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -758,7 +886,10 @@
         "C": "It is as big as a raindrop.",
         "D": "It is strong enough to fight the force of a raindrop."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -779,7 +910,10 @@
         "C": "When it is hit by raindrops too many times.",
         "D": "When it drops for more than 6 cm in the rain."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -800,7 +934,10 @@
         "C": "How “For Elise” became popular.",
         "D": "Why Beethoven wrote “For Elise.”"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -821,7 +958,10 @@
         "C": "The manuscript was found after Beethoven died.",
         "D": "The manuscript is now kept by the city of Vienna."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -842,7 +982,10 @@
         "C": "Therese Malfatti changed “For Elise” to “For Therese.”",
         "D": "Elise Barensfeld was Beethoven’s student."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -863,7 +1006,10 @@
         "C": "Children should learn about their gender from playing with toys.",
         "D": "We should not let gender decide which toys children can play with."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -884,10 +1030,10 @@
         "C": "Children may not be able to learn from playing with toys.",
         "D": "Children may miss the chance to find out what they really like."
       },
-      "answer": null,
-      "glossary": {
-        "paragraph": "段落"
-      },
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -908,7 +1054,10 @@
         "C": "“Some doctors worry that children may use the same kind of thinking when they look for jobs in the future.”",
         "D": "“If they do, they may miss something more important than just getting a chance to play with different toys.”"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -929,7 +1078,10 @@
         "C": "Marie Colvin’s schooldays at Yale.",
         "D": "Marie Colvin’s experiences in Homs."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -950,7 +1102,10 @@
         "C": "They are able to understand how other people feel.",
         "D": "They are good at helping people change their own lives."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -971,7 +1126,10 @@
         "C": "She was killed in Homs when she was interviewing soldiers there for her report.",
         "D": "She was not sure what to do in the future until she worked for the Sunday Times ."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -985,14 +1143,17 @@
         42,
         43
       ],
-      "stem": "Question 42",
+      "stem": "(Cloze blank 42)",
       "options": {
         "A": "what things are called",
         "B": "how sports are played",
         "C": "why different languages are spoken",
         "D": "what words are often spelled differently"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -1006,18 +1167,21 @@
         42,
         43
       ],
-      "stem": "Question 43",
+      "stem": "(Cloze blank 43)",
       "options": {
         "A": "how old they are",
         "B": "who they speak to",
         "C": "where they grew up",
         "D": "whether they are men or women"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:08:45.398Z",
-  "extractorVersion": "1.0.0"
+  "extractedAt": "2026-08-27T16:24:24.371Z",
+  "extractorVersion": "2.0.0-multimodal-hardened"
 }

@@ -14,20 +14,57 @@ export type QuestionOptions = z.infer<typeof QuestionOptionsSchema>;
 export const QuestionSectionSchema = z.enum(['single', 'passage_comprehension', 'cloze']);
 export type QuestionSection = z.infer<typeof QuestionSectionSchema>;
 
-export const ExtractionConfidenceSchema = z.enum(['high', 'medium', 'low']);
+export const ExtractionConfidenceSchema = z.enum([
+  'high',
+  'partial_visual_pending',
+  'needs_multimodal_review',
+  'medium',
+  'low',
+]);
 export type ExtractionConfidence = z.infer<typeof ExtractionConfidenceSchema>;
+
+export const EvidenceModeSchema = z.enum([
+  'text_only',
+  'visual_only',
+  'text_visual',
+  'spatial',
+  'multi_document',
+]);
+export type EvidenceMode = z.infer<typeof EvidenceModeSchema>;
+
+export const RequiredAssetRoleSchema = z.enum([
+  'single_image',
+  'comic',
+  'map',
+  'infographic',
+  'diagram',
+  'table',
+  'full_page',
+]);
+export type RequiredAssetRole = z.infer<typeof RequiredAssetRoleSchema>;
+
+export const RequiredAssetSchema = z.object({
+  page: z.number().int().min(1),
+  role: RequiredAssetRoleSchema,
+  imagePath: z.string(),
+  description: z.string().optional(),
+});
+export type RequiredAsset = z.infer<typeof RequiredAssetSchema>;
 
 export const ExtractedQuestionSchema = z.object({
   examId: z.string(), // e.g. "111", "112", "113", "114", "115"
   questionNumber: z.number().int().min(1).max(100),
   section: QuestionSectionSchema,
   page: z.number().int().min(1),
-  passageId: z.string().nullable().optional(), // e.g. "111-p21-22" or null for single
+  passageId: z.string().nullable().optional(), // e.g. "115-p20-21" or null for single
   passageRange: z.tuple([z.number().int(), z.number().int()]).nullable().optional(),
   stem: z.string(),
   options: QuestionOptionsSchema,
-  answer: z.enum(['A', 'B', 'C', 'D']).nullable().optional(), // strict null unless reliably present in source
-  glossary: z.record(z.string(), z.string()).optional(), // per-question footnotes like  stir 攪拌
+  answer: z.enum(['A', 'B', 'C', 'D']).nullable().optional(),
+  evidenceMode: EvidenceModeSchema.default('text_only'),
+  visualEvidenceRequired: z.boolean().default(false),
+  requiredAssets: z.array(RequiredAssetSchema).default([]),
+  glossary: z.record(z.string(), z.string()).optional(),
   extractionConfidence: ExtractionConfidenceSchema,
   extractionWarnings: z.array(z.string()).default([]),
 });
@@ -39,6 +76,8 @@ export const PassageGenreSchema = z.enum([
   'notice_announcement',
   'brochure_flyer',
   'infographic_chart_table',
+  'comic_strip',
+  'multi_document_comparison',
   'article_informational',
   'letter_email',
   'cloze_passage',
@@ -46,14 +85,25 @@ export const PassageGenreSchema = z.enum([
 ]);
 export type PassageGenre = z.infer<typeof PassageGenreSchema>;
 
+export const SubDocumentSchema = z.object({
+  title: z.string().nullable().optional(),
+  author: z.string().nullable().optional(),
+  text: z.string(),
+});
+export type SubDocument = z.infer<typeof SubDocumentSchema>;
+
 export const ExtractedPassageSchema = z.object({
-  id: z.string(), // e.g. "111-p21-22"
+  id: z.string(), // e.g. "115-p20-21"
   examId: z.string(),
   questionRange: z.tuple([z.number().int(), z.number().int()]),
   genre: PassageGenreSchema,
   title: z.string().nullable().optional(),
   text: z.string(),
+  evidenceMode: EvidenceModeSchema.default('text_only'),
+  visualEvidenceRequired: z.boolean().default(false),
+  requiredAssets: z.array(RequiredAssetSchema).default([]),
   glossary: z.record(z.string(), z.string()).optional(),
+  subDocuments: z.array(SubDocumentSchema).optional(),
   pageStart: z.number().int().min(1),
   pageEnd: z.number().int().min(1),
   questionNumbers: z.array(z.number().int()),

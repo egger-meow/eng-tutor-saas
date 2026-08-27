@@ -1,7 +1,7 @@
 {
   "examId": "111",
   "year": 111,
-  "title": "111 年國中教育會考英語科閱讀試題",
+  "title": "111年國中教育會考英語科試題",
   "sourcePdf": "111P_English.pdf",
   "pageCount": 14,
   "questionCount": 43,
@@ -22,8 +22,18 @@
         22
       ],
       "genre": "infographic_chart_table",
-      "title": null,
-      "text": "[Visual/Graphic/Infographic Context in Source PDF]",
+      "title": "Infographic Guide",
+      "text": "[Visual/Graphic Content in Source PDF: infographic_chart_table on page 4]",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-4.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
       "glossary": {
         "address": "地址"
       },
@@ -41,9 +51,19 @@
         23,
         24
       ],
-      "genre": "article_informational",
-      "title": null,
+      "genre": "infographic_chart_table",
+      "title": "Infographic Guide",
       "text": "Below is an infographic.",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-5.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
       "glossary": {
         "infographic": "資訊圖表"
       },
@@ -64,6 +84,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "Darrell : Marina…Marina…MARINA!\nMarina : Oh, sorry. I didn’t hear you. I was thinking about my homework.\nDarrell : What’s it about?\nMarina : Well, I need to draw a future house for my art class, but I haven’t got any\nideas. Maybe I should go to the library and look for something useful.\nDarrell : Or you can try Pinterest .\nMarina : Isn’t it a shopping app?\nDarrell : Not really. Many people share their works on Pinterest and tell you how\nthey made them. I’m sure you can get some ideas there.\nMarina : Sounds like you use it often.\nDarrell : Yeah. Just last week I went there and found the A to Z of making\nchocolate cake—from choosing good chocolate to baking the cake to making\nsugar flowers on top.\nMarina : Really? I’ll check it out later. Thanks a lot.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 7,
       "pageEnd": 7,
       "questionNumbers": [
@@ -81,8 +104,12 @@
       "genre": "article_informational",
       "title": null,
       "text": "Tabata training is a very popular way of exercising these days. It doesn’t take\nmuch time or space, and it burns calories faster than other ways of exercising.\nThe idea of Tabata training is simple: exercise for 20 seconds, rest for 10 seconds,\nand then repeat (at least eight times). The moves for the 20-second exercise are not\ndifficult to learn. Jumping jacks, high knees, squats, and planks are some of the most\ncommon moves. You can decide yourself what moves to do in your Tabata training.\nFor example, you can do more leg exercises if you want strong legs.\nOne great thing about Tabata training is that your body will keep burning\ncalories for at least an hour after 4 minutes of Tabata training. But to have this\nwonderful “afterburn,” you need to exercise really hard during each 20 seconds.\nIf you seldom exercise or have heart problems, this exercise may not be good for\nyou. But for people who enjoy exercising but are too busy to go to the gym, Tabata\ntraining might just be the answer.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "calorie": "卡路里 ( 熱 量單位 )"
+        "calorie": "卡路里 ( 熱 量單位 )",
+        "paragraph": "段落"
       },
       "pageStart": 8,
       "pageEnd": 8,
@@ -102,8 +129,12 @@
       "genre": "article_informational",
       "title": null,
       "text": "The problem of long working hours is a real headache in our country. It\nkills many people every year (see Figure 1), and many companies are trying\nto change that. They have at least one “No Overtime Day” in a week, and it\nis often Wednesday. On “No Overtime Day,” workers are asked to leave their\noffices before 8 p.m. At 8 p.m., companies play the song “There’s Always\nTomorrow” and turn off all the lights.\nHowever, after the workers walk out of their offices, they don’t go home.\nSome go back later, turn on their table lamps, and keep working, and others\nfind somewhere else to work until very late at night. Restaurants and coffee\nshops are busier on Wednesday evenings, and they have started selling drinks\nand meals for these workers.\nBut why do these people keep working? A study shows that workers who\nwork more hours often have a bigger chance to get paid more and rise higher\nin their companies. This is true for both men and women (see Figure 2).\nWorking long hours has become a way to show that people are hard-working.\nClearly, this must be changed before the problem gets any worse.\nFigure 1\nFigure 2",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "average": "平均"
+        "average": "平均",
+        "order": "排序"
       },
       "pageStart": 9,
       "pageEnd": 10,
@@ -120,11 +151,16 @@
         33,
         36
       ],
-      "genre": "dialogue",
+      "genre": "article_informational",
       "title": null,
       "text": "http://www.aab.com/news/language-and-power-756315\nLanguage and Power: Cameroon’s Story\nBy Elisa Grant, 2 Oct 2017\nIn the modern world, being able to speak English\nis often a way to get power. However, this is not\ntrue for English speakers in Cameroon. To know\nwhy things are different in this African country,\nwe need to go back one hundred years.\nIn 1919, Kamerun (the name of Cameroon at\nthe time) was cut into two parts: one belonged\nto France, and the other belonged to the UK. In\n1960, the French Cameroon became the Republic of Cameroun , and the UK’s\npart joined it in 1961. The new country changed its name to the Federal\nRepublic of Cameroon . Although both French and English are Cameroon’s\nofficial languages, only around 20% of its people speak English. Also, the\ngovernment has been in French speakers’ hands since the two parts became\none country.\nFor a long time, Cameroon’s English speakers have felt they are not welcome\nin their own country. For example, it is very difficult for them to find jobs\nin the government, and they are often asked to speak French in business and\nat official events. They have become more resentful at the government and\ndecided to fight for themselves. Since last year, the English speakers have\ntried to build their own country. Yesterday, they said in a public meeting\nthat they were not part of Cameroon anymore. They are now a new country,\n“Ambazonia.” When the police tried to stop the meeting, at least eight people\nwere killed.\nRead more",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "official": "官方的 government 政府"
+        "official": "官方的",
+        "government": "政府",
+        "likely": "可能"
       },
       "pageStart": 11,
       "pageEnd": 12,
@@ -142,11 +178,15 @@
         37,
         39
       ],
-      "genre": "narrative",
+      "genre": "article_informational",
       "title": null,
       "text": "THE SOUTHEND TRAIL has been popular with nature lovers for years.\nThe 120-km trail passes beautiful lakes, crosses rivers, and goes through\nmountains and hills. This gives bird lovers some of the best places for\nbirdwatching. The trail also takes you to the Southend Museum and to two\nfamous castles, Edward Castle and\nSloan Castle.\nIt’s best to plan one day for one part\nof the trail and start your hike early\nin the morning, because each part\ntakes at least seven hours. If you\ndon’t want to walk, you can bike, but\nmake sure you stay on the main trail,\nbecause the side trails are not wide\nenough for biking.\nThere are two types of lodging\nfor visitors. Camping is popular in\nsummer, but it is only allowed on a few campgrounds (see the map). A more\ncomfortable one is to stay at a hotel in one of the towns. You can find some\nvery nice ones that also have breakfast.",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
-        "trail": "步道"
+        "trail": "步道",
+        "recommend": "推薦"
       },
       "pageStart": 13,
       "pageEnd": 13,
@@ -166,6 +206,9 @@
       "genre": "cloze_passage",
       "title": null,
       "text": "English words are made of 26 letters, and palindromes and anagrams are two kinds\nof word games about spelling. A palindrome is a word or a sentence that reads the\nsame from left to right or from right to left, 40 , “eye,” “Bob,” “my gym,” and\n“Was it a car or a cat I saw?” An anagram of a word or words is made by putting the\nletters of the word or words in a different way. Look at the words and their anagrams\nbelow. Can you think of other possible anagrams of these words?\nAnagrams are often longer words that don’t really mean anything but are fun to\nsay. Sometimes they can even mean something 42 , like when a common word,\n“restaurant,” becomes “Eat rats, run!”\nActually, palindromes and anagrams are 43 . Palindromes can be used to learn\nmathematics and make music. Anagrams are also a good way to hide something . In\nhistory, people often hid their important studies in anagrams. Can you think of any\nother way to use them?",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "pageStart": 14,
       "pageEnd": 14,
       "questionNumbers": [
@@ -191,9 +234,21 @@
         "C": "plates",
         "D": "strawberries"
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "A",
+      "evidenceMode": "visual_only",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 2,
+          "role": "single_image",
+          "imagePath": "history_exams/assets/111/page-2.png",
+          "description": "Illustration for single question 1"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 1 requires visual inspection of the picture on page 2"
+      ]
     },
     {
       "examId": "111",
@@ -209,7 +264,10 @@
         "C": "if",
         "D": "because"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -227,7 +285,10 @@
         "C": "lights",
         "D": "music"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -245,7 +306,10 @@
         "C": "popular",
         "D": "rich"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -263,7 +327,10 @@
         "C": "hoped to",
         "D": "used to"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -281,7 +348,10 @@
         "C": "rule",
         "D": "trick"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -299,7 +369,10 @@
         "C": "safe",
         "D": "special"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -317,7 +390,10 @@
         "C": "preparing",
         "D": "prepared"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -335,7 +411,10 @@
         "C": "long",
         "D": "thick"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -353,7 +432,10 @@
         "C": "the lazier",
         "D": "the laziest"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -371,7 +453,10 @@
         "C": "knows",
         "D": "was going to know"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -389,7 +474,10 @@
         "C": "move",
         "D": "stop"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -407,7 +495,10 @@
         "C": "has gone out",
         "D": "was going out"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -425,7 +516,10 @@
         "C": "wise",
         "D": "wrong"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -443,7 +537,10 @@
         "C": "looks for",
         "D": "was looking for"
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -461,7 +558,10 @@
         "C": "and drive",
         "D": "and drove"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -479,7 +579,10 @@
         "C": "has taken away",
         "D": "was taken away"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -497,7 +600,10 @@
         "C": "one",
         "D": "them"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -515,7 +621,10 @@
         "C": "has studied",
         "D": "was going to study"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -533,7 +642,10 @@
         "C": "To pull a fishing line through the water, often from a boat.",
         "D": "To write something on the Internet to hurt someone or make them angry."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -554,9 +666,21 @@
         "C": "Their 20 year of business.",
         "D": "The opening of their 20 store in the USA."
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "C",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-4.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 21 requires visual evidence from page 4"
+      ]
     },
     {
       "examId": "111",
@@ -575,9 +699,21 @@
         "C": "His birthday.",
         "D": "Another picture of the tea cup."
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "C",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-4.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 22 requires visual evidence from page 4"
+      ]
     },
     {
       "examId": "111",
@@ -596,9 +732,21 @@
         "C": "Taiwan eats more sugar for each person than the US does.",
         "D": "400 ml of rice milk has less sugar than 400 ml of grape juice."
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "D",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-5.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 23 requires visual evidence from page 6"
+      ]
     },
     {
       "examId": "111",
@@ -617,9 +765,21 @@
         "C": "To tell us that we often have more sugar than we can without knowing it.",
         "D": "To let us know how much sugar is enough to make foods and drinks taste good."
       },
-      "answer": null,
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "C",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-5.png",
+          "description": "Process infographic and diagram"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 24 requires visual evidence from page 6"
+      ]
     },
     {
       "examId": "111",
@@ -638,7 +798,10 @@
         "C": "To meet new friends who have the same interests.",
         "D": "To share her works and tell people how they are made."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -659,7 +822,10 @@
         "C": "You learn everything about it.",
         "D": "You spend all your life learning it."
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -680,10 +846,10 @@
         "C": "Who first had the idea of Tabata training.",
         "D": "How often you should do Tabata training."
       },
-      "answer": null,
-      "glossary": {
-        "paragraph": "段落"
-      },
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -704,7 +870,10 @@
         "C": "People who want to fix their heart problems.",
         "D": "People who already have a habit of exercising."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -725,7 +894,10 @@
         "C": "You need a large space to do the exercises.",
         "D": "You cannot rest between moves if you want the afterburn."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -746,10 +918,10 @@
         "C": "c  a  b  d.",
         "D": "c  a  d  b."
       },
-      "answer": null,
-      "glossary": {
-        "order": "排序"
-      },
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -770,7 +942,10 @@
         "C": "Workers do not go home when they walk out of the office.",
         "D": "The number of workers who get paid more and rise higher in the company."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -791,7 +966,10 @@
         "C": "Men usually have a bigger chance to get paid more and rise higher when they work the same hours as women.",
         "D": "Men and women have almost the same chance to get paid more and rise higher when they work 2,200 hours."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -812,12 +990,21 @@
         "C": "[Image/Diagram Option C]",
         "D": "[Image/Diagram Option D]"
       },
-      "answer": null,
-      "glossary": {
-        "likely": "可能"
-      },
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "answer": "D",
+      "evidenceMode": "spatial",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 12,
+          "role": "diagram",
+          "imagePath": "history_exams/assets/111/page-12.png",
+          "description": "Visual evidence for question 33 on page 12"
+        }
+      ],
+      "extractionConfidence": "partial_visual_pending",
+      "extractionWarnings": [
+        "Question 33 requires visual evidence from page 12"
+      ]
     },
     {
       "examId": "111",
@@ -836,7 +1023,10 @@
         "C": "Careful.",
         "D": "Worried."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -857,7 +1047,10 @@
         "C": "It does not want to be part of Ambazonia.",
         "D": "It does not agree that Ambazonia is a country."
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -878,7 +1071,10 @@
         "C": "Why the two parts of Cameroon became one country.",
         "D": "Why only 20% of the people in Cameroon speak English."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -899,10 +1095,10 @@
         "C": "Hiking one part of the trail a day.",
         "D": "Visiting the museum in the morning."
       },
-      "answer": null,
-      "glossary": {
-        "recommend": "推薦"
-      },
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -923,7 +1119,10 @@
         "C": "A time for visiting.",
         "D": "A way of moving around."
       },
-      "answer": null,
+      "answer": "B",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -944,7 +1143,10 @@
         "C": "Parts 2 and 3.",
         "D": "Parts 4 and 4a."
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -958,14 +1160,17 @@
         40,
         43
       ],
-      "stem": "Question 40",
+      "stem": "(Cloze blank 40)",
       "options": {
         "A": "in fact",
         "B": "at first",
         "C": "of course",
         "D": "for example"
       },
-      "answer": null,
+      "answer": "D",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -979,14 +1184,17 @@
         40,
         43
       ],
-      "stem": "Question 41",
+      "stem": "(Cloze blank 41)",
       "options": {
         "A": "take sit",
         "B": "Ms Easy",
         "C": "it makes",
         "D": "me steak"
       },
-      "answer": null,
+      "answer": "C",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -1000,14 +1208,17 @@
         40,
         43
       ],
-      "stem": "Question 42",
+      "stem": "(Cloze blank 42)",
       "options": {
         "A": "strange",
         "B": "difficult",
         "C": "delicious",
         "D": "important"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     },
@@ -1021,18 +1232,21 @@
         40,
         43
       ],
-      "stem": "Question 43",
+      "stem": "(Cloze blank 43)",
       "options": {
         "A": "more than just games",
         "B": "often played in public",
         "C": "not so popular as before",
         "D": "not first used to learn words"
       },
-      "answer": null,
+      "answer": "A",
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "extractionConfidence": "high",
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T16:08:45.189Z",
-  "extractorVersion": "1.0.0"
+  "extractedAt": "2026-08-27T16:24:22.853Z",
+  "extractorVersion": "2.0.0-multimodal-hardened"
 }

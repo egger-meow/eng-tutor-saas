@@ -2,81 +2,81 @@
   {
     "pattern": "literal_keyword_matching",
     "description": "Matches exact surface words from the passage but asserts an incorrect proposition.",
-    "observedCount": 113,
-    "observedPercentage": 13.1,
+    "observedCount": 159,
+    "observedPercentage": 24.7,
     "primaryCognitiveTrigger": "Traps students who visually scan rather than comprehend.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 21,
+        "questionNumber": 3,
         "option": "A",
-        "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+        "explanation": "Surface keyword matching without context resolution"
       },
       {
         "examId": "111",
-        "questionNumber": 22,
+        "questionNumber": 4,
         "option": "A",
-        "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+        "explanation": "Surface keyword matching without context resolution"
       },
       {
         "examId": "111",
-        "questionNumber": 23,
+        "questionNumber": 5,
         "option": "A",
-        "explanation": "Direct surface keyword from paragraph 1 creating a scanning trap"
+        "explanation": "Surface keyword matching without context resolution"
       }
     ]
   },
   {
     "pattern": "partial_truth",
     "description": "States a fact from the text accurately but fails to answer the specific condition in the stem.",
-    "observedCount": 215,
-    "observedPercentage": 25,
+    "observedCount": 163,
+    "observedPercentage": 25.3,
     "primaryCognitiveTrigger": "Traps students with incomplete constraint evaluation.",
     "exemplars": [
       {
         "examId": "111",
         "questionNumber": 1,
         "option": "B",
-        "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+        "explanation": "Mentions text details but violates stem condition"
       },
       {
         "examId": "111",
         "questionNumber": 2,
         "option": "B",
-        "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+        "explanation": "Mentions text details but violates stem condition"
       },
       {
         "examId": "111",
         "questionNumber": 3,
         "option": "B",
-        "explanation": "Mentions a fact stated in the passage but fails the specific constraint in the stem"
+        "explanation": "Mentions text details but violates stem condition"
       }
     ]
   },
   {
     "pattern": "wrong_referent",
     "description": "Attributes a genuine passage action, feeling, or attribute to the wrong subject.",
-    "observedCount": 215,
-    "observedPercentage": 25,
+    "observedCount": 163,
+    "observedPercentage": 25.3,
     "primaryCognitiveTrigger": "Tests pronoun and entity tracking.",
     "exemplars": [
       {
         "examId": "111",
         "questionNumber": 1,
-        "option": "C",
-        "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+        "option": "D",
+        "explanation": "Confusing agent with recipient or wrong timeline"
       },
       {
         "examId": "111",
         "questionNumber": 2,
-        "option": "C",
-        "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+        "option": "D",
+        "explanation": "Confusing agent with recipient or wrong timeline"
       },
       {
         "examId": "111",
         "questionNumber": 3,
-        "option": "C",
-        "explanation": "Attributes a stated action or perspective to the wrong speaker/entity"
+        "option": "D",
+        "explanation": "Confusing agent with recipient or wrong timeline"
       }
     ]
   },
@@ -99,27 +99,27 @@
   {
     "pattern": "unsupported_world_knowledge",
     "description": "Plausible common sense in daily life, but explicitly contradicted or absent in text.",
-    "observedCount": 215,
-    "observedPercentage": 25,
+    "observedCount": 160,
+    "observedPercentage": 24.8,
     "primaryCognitiveTrigger": "Tests text-grounded reading discipline.",
     "exemplars": [
       {
         "examId": "111",
         "questionNumber": 1,
-        "option": "D",
-        "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+        "option": "C",
+        "explanation": "Relying on common sense rather than text evidence"
       },
       {
         "examId": "111",
         "questionNumber": 2,
-        "option": "D",
-        "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+        "option": "C",
+        "explanation": "Relying on common sense rather than text evidence"
       },
       {
         "examId": "111",
-        "questionNumber": 3,
-        "option": "D",
-        "explanation": "Appears intuitive based on common sense but is unsupported by the passage text"
+        "questionNumber": 5,
+        "option": "C",
+        "explanation": "Relying on common sense rather than text evidence"
       }
     ]
   },
@@ -134,29 +134,10 @@
   {
     "pattern": "grammatically_plausible_contextually_wrong",
     "description": "Fits the blank syntactically but contradicts contextual meaning or discourse flow.",
-    "observedCount": 102,
-    "observedPercentage": 11.9,
+    "observedCount": 0,
+    "observedPercentage": 0,
     "primaryCognitiveTrigger": "Tests integrated syntax-semantics reasoning.",
-    "exemplars": [
-      {
-        "examId": "111",
-        "questionNumber": 1,
-        "option": "A",
-        "explanation": "Plausible word class but does not fit the semantic collocation"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 2,
-        "option": "A",
-        "explanation": "Plausible word class but does not fit the semantic collocation"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 3,
-        "option": "A",
-        "explanation": "Plausible word class but does not fit the semantic collocation"
-      }
-    ]
+    "exemplars": []
   },
   {
     "pattern": "overgeneralization",

@@ -9,7 +9,26 @@
       "Direct factual verification"
     ],
     "languageDecouplingRule": "Can use A1 or A2 vocabulary; shallow cognitive demand is defined by the absence of deduction, not word simplicity.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 1,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 3,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 4,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      }
+    ]
   },
   {
     "level": "D2_single_step_inference",
@@ -26,19 +45,19 @@
         "examId": "111",
         "questionNumber": 2,
         "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty."
+        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
       },
       {
         "examId": "111",
-        "questionNumber": 3,
+        "questionNumber": 5,
         "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine grammar_in_context understanding without relying on artificial lexical difficulty."
+        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
       },
       {
         "examId": "111",
-        "questionNumber": 4,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine vocabulary_in_context understanding without relying on artificial lexical difficulty."
+        "questionNumber": 6,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
       }
     ]
   },
@@ -55,21 +74,21 @@
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 1,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+        "questionNumber": 24,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
       },
       {
         "examId": "111",
-        "questionNumber": 24,
+        "questionNumber": 25,
         "languageDifficulty": "A2_basic",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
       },
       {
-        "examId": "112",
-        "questionNumber": 1,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Effectively discriminates between superficial word-matching and genuine information_integration understanding without relying on artificial lexical difficulty."
+        "examId": "111",
+        "questionNumber": 26,
+        "languageDifficulty": "B1_intermediate",
+        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
       }
     ]
   },

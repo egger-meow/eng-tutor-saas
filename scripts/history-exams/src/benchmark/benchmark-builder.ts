@@ -96,7 +96,9 @@ export async function runBenchmarkPipeline(options: BenchmarkOptions): Promise<B
     contextCounts[q.analysis.contextNecessity] = (contextCounts[q.analysis.contextNecessity] || 0) + 1;
     spanCounts[q.analysis.evidenceSpan] = (spanCounts[q.analysis.evidenceSpan] || 0) + 1;
 
+    const correctAnswer = q.extracted.answer;
     for (const d of q.analysis.distractorStrategies) {
+      if (correctAnswer && d.option === correctAnswer) continue;
       distractorCounts[d.strategy] = (distractorCounts[d.strategy] || 0) + 1;
       totalDistractors++;
     }

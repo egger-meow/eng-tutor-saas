@@ -2,17 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ExtractedExam } from '../schemas/extracted.ts';
 import { ExtractionValidationResult, validateExtractedExam } from './extractor-validator.ts';
+import { getOfficialAnswer, OFFICIAL_CAP_ANSWERS } from './official-answers.ts';
 import { parseExamFromPages } from './parser.ts';
+import { renderExamPagesToImages } from './pdf-page-renderer.ts';
 import { extractPdfText } from './pdf-reader.ts';
 
 export * from './pdf-reader.ts';
 export * from './parser.ts';
 export * from './extractor-validator.ts';
+export * from './official-answers.ts';
+export * from './pdf-page-renderer.ts';
 
 export interface ExtractAllOptions {
   rawDir: string;
   outputDir: string;
+  assetsDir?: string;
   examIdFilter?: string;
+  renderImages?: boolean;
 }
 
 export interface ExtractSummary {
@@ -20,15 +26,17 @@ export interface ExtractSummary {
   year: number;
   questionCount: number;
   passageCount: number;
+  renderedImagesCount: number;
   validation: ExtractionValidationResult;
   outputPath: string;
 }
 
 /**
- * Runs the deterministic extraction pipeline across all historical exam PDFs
+ * Runs the deterministic extraction and multimodal rendering pipeline across all historical exam PDFs
  */
 export async function runExtractionPipeline(options: ExtractAllOptions): Promise<ExtractSummary[]> {
-  const { rawDir, outputDir, examIdFilter } = options;
+  const { rawDir, outputDir, examIdFilter, renderImages = true } = options;
+  const assetsDir = options.assetsDir || path.resolve(outputDir, '../assets');
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -51,12 +59,22 @@ export async function runExtractionPipeline(options: ExtractAllOptions): Promise
     }
 
     const pdfPath = path.join(rawDir, file);
+
+    // 1. Render high-resolution page images for multimodal AI analysis
+    let renderedImagesCount = 0;
+    if (renderImages) {
+      const renderRes = await renderExamPagesToImages(pdfPath, examId, assetsDir, { scale: 2.0 });
+      renderedImagesCount = renderRes.renderedPages.length;
+    }
+
+    // 2. Extract geometry-aware text
     const pages = await extractPdfText(pdfPath);
     const extractedExam = parseExamFromPages(pages, {
       examId,
       sourcePdfPath: pdfPath,
     });
 
+    // 3. Validate extracted schema
     const validation = validateExtractedExam(extractedExam);
 
     const outputPath = path.join(outputDir, `${examId}.json`);
@@ -67,6 +85,7 @@ export async function runExtractionPipeline(options: ExtractAllOptions): Promise
       year: extractedExam.year,
       questionCount: extractedExam.questions.length,
       passageCount: extractedExam.passages.length,
+      renderedImagesCount,
       validation,
       outputPath,
     });

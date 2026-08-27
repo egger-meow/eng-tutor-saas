@@ -13,9 +13,9 @@ This blueprint captures the core psychometric and pedagogical architecture rever
 - **Total Questions per Exam**: Exactly 43 items (19–23 Single Questions, 20–24 Passage Questions).
 - **Passage Sets per Exam**: Exactly 8 reading sets per year spanning multi-modal authentic genres.
 - **Cognitive Depth Distribution**:
-  - Direct Retrieval (`D1`): ~15% (mostly Section 1)
-  - Single-Step Inference (`D2`): ~96.3%
-  - Multi-Step Synthesis (`D3`): ~3.7%
+  - Direct Retrieval (`D1`): ~23.3% (mostly Section 1)
+  - Single-Step Inference (`D2`): ~59.5%
+  - Multi-Step Synthesis (`D3`): ~17.2%
   - Evaluative / Pragmatic (`D4`): ~10%
 - **Context Necessity**: 100% of Section 2 reading items have **essential** context necessity.
 

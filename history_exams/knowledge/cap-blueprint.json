@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-08-27T16:08:46.108Z",
+  "generatedAt": "2026-08-27T16:24:28.579Z",
   "totalQuestionsAnalyzed": 215,
   "totalExams": 5,
   "sectionComposition": {
@@ -45,31 +45,31 @@
   },
   "distributions": {
     "skills": {
-      "vocabulary_in_context": 25.6,
-      "grammar_in_context": 29.3,
-      "explicit_detail": 26,
+      "vocabulary_in_context": 24.2,
+      "grammar_in_context": 33.5,
+      "explicit_detail": 25.1,
       "reference_resolution": 0,
-      "local_inference": 5.6,
+      "local_inference": 12.6,
       "cross_sentence_inference": 0,
-      "main_idea": 0.5,
+      "main_idea": 0.9,
       "purpose_speaker_intent": 0,
-      "discourse_relationship": 5.1,
-      "sequence_cause_consequence": 4.7,
+      "discourse_relationship": 0,
+      "sequence_cause_consequence": 0,
       "text_structure": 0,
-      "information_integration": 3.3,
+      "information_integration": 3.7,
       "pragmatic_meaning": 0,
       "other_uncertain": 0
     },
     "cognitiveDepth": {
-      "D1_verbatim_retrieval": 0,
-      "D2_single_step_inference": 96.3,
-      "D3_multi_step_synthesis": 3.7,
+      "D1_verbatim_retrieval": 23.3,
+      "D2_single_step_inference": 59.5,
+      "D3_multi_step_synthesis": 17.2,
       "D4_evaluative_pragmatic": 0
     },
     "languageDifficulty": {
-      "A1_elementary": 23.3,
-      "A2_basic": 36.7,
-      "B1_intermediate": 40
+      "A1_elementary": 11.6,
+      "A2_basic": 46.5,
+      "B1_intermediate": 41.9
     },
     "contextNecessity": {
       "essential": 52.6,
@@ -79,11 +79,11 @@
     },
     "evidenceSpan": {
       "single_word": 0,
-      "single_clause": 47.4,
-      "single_sentence": 35.3,
-      "cross_sentence_local": 15.8,
-      "multi_paragraph_global": 0.5,
-      "multimodal_text_and_graphic": 0.9
+      "single_clause": 0,
+      "single_sentence": 47.4,
+      "cross_sentence_local": 47.9,
+      "multi_paragraph_global": 0.9,
+      "multimodal_text_and_graphic": 3.7
     }
   },
   "keyDesignPrinciples": [

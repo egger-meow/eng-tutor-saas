@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { ExtractedPassage, ExtractedQuestion } from '../schemas/extracted.ts';
 import {
   CognitiveDepth,
@@ -9,31 +10,71 @@ import {
   TaxonomySkill,
 } from '../schemas/analyzed.ts';
 
+export interface ImageAttachment {
+  mimeType: string;
+  base64Data: string;
+}
+
 export interface AiProvider {
   name: string;
-  generateAnalysis(prompt: string, context?: { question: ExtractedQuestion; passage?: ExtractedPassage | null }): Promise<string>;
+  modelName: string;
+  generateAnalysis(
+    prompt: string,
+    context?: {
+      question: ExtractedQuestion;
+      passage?: ExtractedPassage | null;
+      images?: ImageAttachment[];
+    }
+  ): Promise<string>;
+}
+
+export class ApiKeyMissingError extends Error {
+  constructor() {
+    super(
+      'Missing AI API key (GEMINI_API_KEY or OPENAI_API_KEY). ' +
+      'Historical exam digestion requires live model execution to prevent synthetic distortion. ' +
+      'Offline mock provider is strictly quarantined to tests.'
+    );
+    this.name = 'ApiKeyMissingError';
+  }
 }
 
 /**
- * Live Google Gemini API Provider
+ * Live Google Gemini API Provider with Multimodal Support
  */
 export class GeminiProvider implements AiProvider {
-  name = 'gemini-api';
+  name = 'gemini';
+  modelName: string;
   private apiKey: string;
-  private model: string;
 
   constructor(apiKey: string, model = 'gemini-2.5-flash') {
     this.apiKey = apiKey;
-    this.model = model;
+    this.modelName = model;
   }
 
-  async generateAnalysis(prompt: string): Promise<string> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+  async generateAnalysis(
+    prompt: string,
+    context?: { images?: ImageAttachment[] }
+  ): Promise<string> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.modelName}:generateContent?key=${this.apiKey}`;
+    
+    const parts: any[] = [{ text: prompt }];
+    if (context?.images && context.images.length > 0) {
+      for (const img of context.images) {
+        parts.push({
+          inlineData: {
+            mimeType: img.mimeType,
+            data: img.base64Data,
+          },
+        });
+      }
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts }],
         generationConfig: {
           temperature: 0.1,
           responseMimeType: 'application/json',
@@ -56,19 +97,35 @@ export class GeminiProvider implements AiProvider {
 }
 
 /**
- * Live OpenAI API Provider
+ * Live OpenAI API Provider with Multimodal Support
  */
 export class OpenAiProvider implements AiProvider {
-  name = 'openai-api';
+  name = 'openai';
+  modelName: string;
   private apiKey: string;
-  private model: string;
 
-  constructor(apiKey: string, model = 'gpt-4o-mini') {
+  constructor(apiKey: string, model = 'gpt-4o') {
     this.apiKey = apiKey;
-    this.model = model;
+    this.modelName = model;
   }
 
-  async generateAnalysis(prompt: string): Promise<string> {
+  async generateAnalysis(
+    prompt: string,
+    context?: { images?: ImageAttachment[] }
+  ): Promise<string> {
+    const content: any[] = [{ type: 'text', text: prompt }];
+
+    if (context?.images && context.images.length > 0) {
+      for (const img of context.images) {
+        content.push({
+          type: 'image_url',
+          image_url: {
+            url: `data:${img.mimeType};base64,${img.base64Data}`,
+          },
+        });
+      }
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -76,10 +133,10 @@ export class OpenAiProvider implements AiProvider {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: this.model,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.1,
+        model: this.modelName,
+        messages: [{ role: 'user', content }],
         response_format: { type: 'json_object' },
+        temperature: 0.1,
       }),
     });
 
@@ -89,227 +146,177 @@ export class OpenAiProvider implements AiProvider {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error('OpenAI API returned empty response');
+    const message = data.choices?.[0]?.message?.content;
+    if (!message) {
+      throw new Error('OpenAI API returned empty response content');
     }
-    return content;
+    return message;
   }
 }
 
 /**
- * Offline Deterministic Provider for CI, automated tests, and offline execution.
- * Derives rigorous pedagogical analysis from structural question features and linguistic markers.
+ * Offline Mock Provider (STRICTLY QUARANTINED TO TEST SUITES)
  */
 export class OfflineMockProvider implements AiProvider {
-  name = 'offline-deterministic';
+  name = 'offline-mock';
+  modelName = 'rule-based-mock';
 
   async generateAnalysis(
     _prompt: string,
     context?: { question: ExtractedQuestion; passage?: ExtractedPassage | null }
   ): Promise<string> {
-    if (!context) {
-      throw new Error('OfflineMockProvider requires question context');
+    if (!context?.question) {
+      throw new Error('OfflineMockProvider requires question context for deterministic derivation');
     }
-
-    const analysis = deriveDeterministicAnalysis(context.question, context.passage);
-    return JSON.stringify(analysis, null, 2);
+    const derived = deriveDeterministicAnalysis(context.question, context.passage ?? null);
+    return JSON.stringify(derived);
   }
 }
 
+export function createAiProvider(options?: { allowOfflineMock?: boolean }): AiProvider {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    return new GeminiProvider(geminiKey);
+  }
+
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey) {
+    return new OpenAiProvider(openaiKey);
+  }
+
+  if (options?.allowOfflineMock) {
+    return new OfflineMockProvider();
+  }
+
+  throw new ApiKeyMissingError();
+}
+
 /**
- * Rule-based pedagogical analysis engine for deterministic offline execution
+ * Deterministic psychometric analysis derivation adhering strictly to PedagogicalAnalysisSchema
  */
 export function deriveDeterministicAnalysis(
   question: ExtractedQuestion,
-  passage?: ExtractedPassage | null
+  passage: ExtractedPassage | null
 ): PedagogicalAnalysis {
   const stem = question.stem.toLowerCase();
   const options = question.options;
   const isSingle = question.section === 'single';
-  const isCloze = question.section === 'cloze';
 
-  // 1. Skill Determination
   let primarySkill: TaxonomySkill = 'explicit_detail';
-  const secondarySkills: TaxonomySkill[] = [];
-
-  if (isSingle) {
-    if (/look at the picture|picture|image/i.test(stem)) {
-      primarySkill = 'information_integration';
-    } else if (/starts at|afraid of|because|although|if|when|who|which|that|tenses|yesterday|tomorrow/i.test(stem) ||
-               /answered|watching|watched|was|were|has|have|had/i.test(options.A + options.B)) {
-      primarySkill = 'grammar_in_context';
-      secondarySkills.push('vocabulary_in_context');
-    } else {
-      primarySkill = 'vocabulary_in_context';
-      secondarySkills.push('grammar_in_context');
-    }
-  } else if (isCloze) {
-    if (/has|have|had|is|are|was|were|will|going to|would|could|should|did|does/i.test(options.A + options.B)) {
-      primarySkill = 'grammar_in_context';
-      secondarySkills.push('sequence_cause_consequence');
-    } else {
-      primarySkill = 'discourse_relationship';
-      secondarySkills.push('vocabulary_in_context');
-    }
-  } else {
-    // Passage comprehension
-    if (/mainly about|main idea|best title|main topic|purpose of/i.test(stem)) {
-      primarySkill = 'main_idea';
-      secondarySkills.push('purpose_speaker_intent');
-    } else if (/what does .* mean|closest in meaning|word .* means/i.test(stem)) {
-      primarySkill = 'vocabulary_in_context';
-      secondarySkills.push('local_inference');
-    } else if (/what does .* refer to|mean by \"this\"|\"they\"/i.test(stem)) {
-      primarySkill = 'reference_resolution';
-    } else if (/why did|why does|why is/i.test(stem)) {
-      primarySkill = 'sequence_cause_consequence';
-      secondarySkills.push('local_inference');
-    } else if (/most likely|can we learn|can we infer|infer|implied/i.test(stem)) {
-      primarySkill = 'local_inference';
-      secondarySkills.push('cross_sentence_inference');
-    } else if (/which map|figure|chart|table|schedule|infographic/i.test(stem)) {
-      primarySkill = 'information_integration';
-      secondarySkills.push('explicit_detail');
-    } else {
-      primarySkill = 'explicit_detail';
-      secondarySkills.push('local_inference');
-    }
-  }
-
-  // 2. Language Difficulty & Cognitive Depth Decoupling
-  let languageDifficulty: LanguageDifficulty = 'A2_basic';
-  if (isSingle && question.questionNumber <= 10) {
-    languageDifficulty = 'A1_elementary';
-  } else if (question.questionNumber > 30 || (passage && passage.text.length > 800)) {
-    languageDifficulty = 'B1_intermediate';
-  }
-
   let cognitiveDepth: CognitiveDepth = 'D2_single_step_inference';
-  if (primarySkill === 'explicit_detail' && isSingle) {
-    cognitiveDepth = 'D1_verbatim_retrieval';
-  } else if (primarySkill === 'main_idea' || primarySkill === 'cross_sentence_inference' || primarySkill === 'information_integration') {
-    cognitiveDepth = 'D3_multi_step_synthesis';
-  } else if (primarySkill === 'purpose_speaker_intent' || primarySkill === 'pragmatic_meaning') {
-    cognitiveDepth = 'D4_evaluative_pragmatic';
-  }
-
-  // 3. Evidence Span & Context Necessity
-  let evidenceSpan: EvidenceSpan = 'single_sentence';
+  let languageDifficulty: LanguageDifficulty = 'A2_basic';
   let contextNecessity: ContextNecessity = isSingle ? 'none' : 'essential';
+  let evidenceSpan: EvidenceSpan = 'single_sentence';
 
   if (isSingle) {
-    evidenceSpan = 'single_clause';
-    contextNecessity = 'none';
-  } else if (isCloze) {
-    evidenceSpan = 'cross_sentence_local';
-    contextNecessity = 'essential';
+    const isGrammar = /will|would|have|has|had|was|were|is|are|been|who|which|that|because|although|if|when|so/i.test(
+      `${options.A} ${options.B} ${options.C} ${options.D}`
+    );
+    if (isGrammar) {
+      primarySkill = 'grammar_in_context';
+      cognitiveDepth = 'D2_single_step_inference';
+    } else {
+      primarySkill = 'vocabulary_in_context';
+      cognitiveDepth = 'D1_verbatim_retrieval';
+    }
+    languageDifficulty = question.questionNumber <= 5 ? 'A1_elementary' : 'A2_basic';
+    evidenceSpan = 'single_sentence';
   } else {
-    if (primarySkill === 'main_idea') {
+    if (passage?.genre === 'cloze_passage') {
+      primarySkill = 'grammar_in_context';
+      cognitiveDepth = 'D2_single_step_inference';
+      evidenceSpan = 'cross_sentence_local';
+    } else if (/main idea|mainly about|title|best title|topic/i.test(stem)) {
+      primarySkill = 'main_idea';
+      cognitiveDepth = 'D3_multi_step_synthesis';
       evidenceSpan = 'multi_paragraph_global';
-    } else if (primarySkill === 'information_integration') {
+    } else if (/why|reason|how.*feel|what does.*mean|infer|learn from/i.test(stem)) {
+      primarySkill = 'local_inference';
+      cognitiveDepth = 'D3_multi_step_synthesis';
+      evidenceSpan = 'cross_sentence_local';
+    } else if (/purpose|author.*write|writer.*tell/i.test(stem)) {
+      primarySkill = 'purpose_speaker_intent';
+      cognitiveDepth = 'D4_evaluative_pragmatic';
+      evidenceSpan = 'multi_paragraph_global';
+    } else if (/map|direction|route|chart|step|recipe|fruit tea|how.*go/i.test(stem) || question.evidenceMode === 'spatial') {
+      primarySkill = 'information_integration';
+      cognitiveDepth = 'D3_multi_step_synthesis';
       evidenceSpan = 'multimodal_text_and_graphic';
-    } else if (primarySkill === 'local_inference' || primarySkill === 'reference_resolution') {
+    } else if (/word|mean|in line|closest in meaning/i.test(stem)) {
+      primarySkill = 'vocabulary_in_context';
+      cognitiveDepth = 'D2_single_step_inference';
       evidenceSpan = 'cross_sentence_local';
     } else {
-      evidenceSpan = 'single_sentence';
+      primarySkill = 'explicit_detail';
+      cognitiveDepth = 'D2_single_step_inference';
+      evidenceSpan = 'cross_sentence_local';
     }
-    contextNecessity = 'essential';
+    languageDifficulty = question.questionNumber <= 25 ? 'A2_basic' : 'B1_intermediate';
   }
 
-  // 4. Distractor Strategies
-  const distractorStrategies = [
+  const reasoningOperations = isSingle
+    ? ['syntactic_parsing', 'lexical_semantic_matching']
+    : ['cross_sentence_coreference', 'hypothesis_elimination', 'evidence_synthesis'];
+
+  const distractorStrategies: PedagogicalAnalysis['distractorStrategies'] = [
     {
-      option: 'A' as const,
-      strategy: isSingle ? ('grammatically_plausible_contextually_wrong' as const) : ('literal_keyword_matching' as const),
-      explanation: isSingle
-        ? 'Plausible word class but does not fit the semantic collocation'
-        : 'Direct surface keyword from paragraph 1 creating a scanning trap',
+      option: 'A',
+      strategy: 'literal_keyword_matching',
+      explanation: 'Surface keyword matching without context resolution',
     },
     {
-      option: 'B' as const,
-      strategy: 'partial_truth' as const,
-      explanation: 'Mentions a fact stated in the passage but fails the specific constraint in the stem',
+      option: 'B',
+      strategy: 'partial_truth',
+      explanation: 'Mentions text details but violates stem condition',
     },
     {
-      option: 'C' as const,
-      strategy: 'wrong_referent' as const,
-      explanation: 'Attributes a stated action or perspective to the wrong speaker/entity',
+      option: 'C',
+      strategy: 'unsupported_world_knowledge',
+      explanation: 'Relying on common sense rather than text evidence',
     },
     {
-      option: 'D' as const,
-      strategy: 'unsupported_world_knowledge' as const,
-      explanation: 'Appears intuitive based on common sense but is unsupported by the passage text',
+      option: 'D',
+      strategy: 'wrong_referent',
+      explanation: 'Confusing agent with recipient or wrong timeline',
     },
   ];
 
-  // 5. Shallow Recall Classification
-  const isShallow = isSingle && primarySkill === 'vocabulary_in_context' && /what is the meaning/i.test(stem);
-  const shallowRecall = {
-    isShallowRecall: isShallow,
-    recallType: isSingle
-      ? ('intentional_retrieval_drill' as const)
-      : isShallow
-      ? ('shallow_comprehension_artifact' as const)
-      : ('none' as const),
-    explanation: isSingle
-      ? 'Standard junior-high curriculum vocabulary retrieval in a single sentence context'
-      : 'Passage comprehension requiring multi-sentence contextual reasoning',
-  };
-
-  const readingDemand: DemandLevel = isSingle ? 'low' : passage && passage.text.length > 600 ? 'high' : 'medium';
+  const readingDemand: DemandLevel = isSingle ? 'low' : question.questionNumber > 30 ? 'high' : 'medium';
   const grammarDemand: DemandLevel = primarySkill === 'grammar_in_context' ? 'high' : 'medium';
   const vocabularyDemand: DemandLevel = languageDifficulty === 'B1_intermediate' ? 'high' : 'medium';
-  const inferenceDemand: DemandLevel = cognitiveDepth === 'D3_multi_step_synthesis' || cognitiveDepth === 'D4_evaluative_pragmatic' ? 'high' : 'medium';
+  const inferenceDemand: DemandLevel = cognitiveDepth === 'D4_evaluative_pragmatic' || cognitiveDepth === 'D3_multi_step_synthesis' ? 'high' : 'medium';
 
   return {
     primarySkill,
-    secondarySkills,
+    secondarySkills: isSingle ? [] : ['discourse_relationship'],
     languageDifficulty,
     cognitiveDepth,
     evidenceSpan,
     contextNecessity,
-    reasoningOperations: [
-      'contextual_clue_extraction',
-      'distractor_elimination_by_constraint',
-      'syntactic_semantic_alignment',
-    ],
-    questionMechanism: `Tests learner ability in ${primarySkill} with ${cognitiveDepth} depth, requiring synthesis of ${evidenceSpan}.`,
+    reasoningOperations,
+    questionMechanism: isSingle
+      ? 'Targeted lexical/grammatical gap evaluation in an isolated communicative sentence'
+      : 'Discourse-grounded reading comprehension with multi-sentence clue resolution',
     distractorStrategies,
-    requiredKnowledge: [
-      `${primarySkill} junior high syllabus standard`,
-      `${languageDifficulty} lexical and grammatical range`,
-    ],
+    requiredKnowledge: isSingle
+      ? ['Junior high basic 1200 vocabulary', 'Fundamental syntactic agreement']
+      : ['Paragraph coherence tracking', 'Contextual inference', 'Key detail extraction'],
     readingDemand,
     grammarDemand,
     vocabularyDemand,
     inferenceDemand,
-    whyTheQuestionWorks: `Effectively discriminates between superficial word-matching and genuine ${primarySkill} understanding without relying on artificial lexical difficulty.`,
+    whyTheQuestionWorks: `Discriminates students who comprehend ${primarySkill} against surface word matchers.`,
     possibleStudentFailureModes: [
-      'Over-reliance on literal keyword matching from the passage',
-      'Failing to notice tense or referent shifts across sentence boundaries',
+      'Scanning for identical keywords in the passage',
+      'Ignoring negative polarity or qualifying constraints in the stem',
     ],
-    reusableDesignPrinciple: `Anchor the stem to a key communicative target in ${primarySkill}, ensuring distractors represent plausible student misconceptions rather than arbitrary decoys.`,
-    shallowRecall,
+    reusableDesignPrinciple: `Pair unambiguous textual evidence with distractors exploiting common optical scan heuristics.`,
+    shallowRecall: {
+      isShallowRecall: isSingle && primarySkill === 'vocabulary_in_context',
+      recallType: isSingle && primarySkill === 'vocabulary_in_context' ? 'intentional_retrieval_drill' : 'none',
+      explanation: isSingle && primarySkill === 'vocabulary_in_context'
+        ? 'Single-sentence targeted lexical recall'
+        : 'Contextually bound reading evaluation',
+    },
   };
-}
-
-export function createAiProvider(options?: {
-  providerType?: 'gemini' | 'openai' | 'offline';
-  apiKey?: string;
-  model?: string;
-}): AiProvider {
-  if (options?.providerType === 'gemini' && options.apiKey) {
-    return new GeminiProvider(options.apiKey, options.model);
-  }
-  if (options?.providerType === 'openai' && options.apiKey) {
-    return new OpenAiProvider(options.apiKey, options.model);
-  }
-  if (process.env.GEMINI_API_KEY) {
-    return new GeminiProvider(process.env.GEMINI_API_KEY, options?.model);
-  }
-  if (process.env.OPENAI_API_KEY) {
-    return new OpenAiProvider(process.env.OPENAI_API_KEY, options?.model);
-  }
-  return new OfflineMockProvider();
 }
