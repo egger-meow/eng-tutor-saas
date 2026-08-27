@@ -69,6 +69,8 @@ export interface RunManifest {
   successfulQuestions: number;
   failedQuestions: number;
   visualQuestionCount: number;
+  liveOrAgentQuestionCount: number;
+  mockQuestionCount: number;
   criticPassedCount: number;
   criticRepairedCount: number;
   criticFailedCount: number;
@@ -387,6 +389,13 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     (q) => !q.analysis?.criticStatus || q.analysis.criticStatus === 'not_reviewed'
   ).length;
 
+  const liveOrAgentQuestionCount = allAnalyzedInDir.filter(
+    (q) => q.modelName !== 'rule-based-mock' && q.modelName !== 'offline-mock'
+  ).length;
+  const mockQuestionCount = allAnalyzedInDir.filter(
+    (q) => q.modelName === 'rule-based-mock' || q.modelName === 'offline-mock'
+  ).length;
+
   const corpusHash = createHash('sha256').update(allQuestionHashes.sort().join(':')).digest('hex');
   const manifest: RunManifest = {
     gitSha: getGitSha(),
@@ -402,6 +411,8 @@ export async function runAnalysisPipeline(options: RunAnalysisOptions): Promise<
     successfulQuestions: globalSuccessful,
     failedQuestions: globalFailed,
     visualQuestionCount: globalVisual,
+    liveOrAgentQuestionCount,
+    mockQuestionCount,
     criticPassedCount,
     criticRepairedCount,
     criticFailedCount,

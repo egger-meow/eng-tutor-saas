@@ -14,12 +14,12 @@
     "modelName": "rule-based-mock",
     "analysisPromptVersion": "v3.0.0",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T18:10:12.360Z",
-    "sourceCorpusHash": "b2c802470c37c07effc2a5dde76201d4baf0a655f9310edd3dc1360a9242abee",
+    "generatedAt": "2026-08-27T18:17:27.308Z",
+    "sourceCorpusHash": "2ed146595a15b14cf1d6b7afe3694d2241ef2d9aba997265994fd184c267a4fe",
     "authorityStatus": "provisional"
   },
   "benchmarkVersion": "1.0.0",
-  "generatedAt": "2026-08-27T18:10:12.360Z",
+  "generatedAt": "2026-08-27T18:17:27.308Z",
   "referenceCorpus": {
     "examIds": [
       "111",

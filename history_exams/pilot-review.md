@@ -66,7 +66,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-1`
+- **Content Hash**: `3906ee180301d8b8ff5cf06f0786f6ff12da7fbdc0af081b62ac2448ffa2a922`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -127,7 +127,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-20`
+- **Content Hash**: `2deea7c6c95ba8039e1c353d9ed07a84f66b8c9d25efd788e4dd2d27cce2af9c`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -217,7 +217,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-22`
+- **Content Hash**: `88f72120d001d71f7bec953f867f9beab872cdfd2a3ec84583c7929d6457bdc8`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -308,7 +308,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-23`
+- **Content Hash**: `97a2ecd307713ae939a7d8e67e31a4fa49f47e251361f66d600eb8738988e891`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -385,7 +385,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-26`
+- **Content Hash**: `fded717407b3f21b57b1116ac0652b0a38cd63f04c32c575940f93278f74e589`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -472,7 +472,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-32`
+- **Content Hash**: `f5b59870266ee201a224720d81b36703336eaf5bcdf48cd61804b5ffc3d83705`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -570,7 +570,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-38`
+- **Content Hash**: `08a47a2dc3edbebb72e7287a1b0bdca19a9369ab753573a0873a53ab190441ee`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -653,7 +653,7 @@
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `hash-115-43`
+- **Content Hash**: `c056502b157a5553af684be3c15f04acf550569afb6c1b2931b67b26c46e740d`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
