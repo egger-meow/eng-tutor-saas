@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { BillingPage, getCheckoutPriceDisplay } from './BillingPage'
+import { BillingPage, getCheckoutPriceDescription, getCheckoutPriceDisplay } from './BillingPage'
 import type { Session } from '@supabase/supabase-js'
 import type { Child } from '../lib/children'
 import type { SubscriptionView } from '../lib/subscriptions'
@@ -142,17 +142,21 @@ describe('BillingPage Loading & Legal Isolation', () => {
 describe('BillingPage Checkout Price Truth', () => {
   it('does not flash standard NT$499 while a Founder monthly checkout price is still server-unconfirmed', () => {
     expect(getCheckoutPriceDisplay('monthly', undefined, true)).toBe('正在確認付款金額…')
+    expect(getCheckoutPriceDescription('monthly', undefined, undefined, true)).toBe('正在確認這次月繳的實際付款金額與創始 30 優惠。')
   })
 
   it('shows only the server-confirmed Founder monthly amount once returned', () => {
     expect(getCheckoutPriceDisplay('monthly', 349, true)).toBe('NT$349')
+    expect(getCheckoutPriceDescription('monthly', 349, true, true)).toContain('固定 NT$349／月')
   })
 
   it('shows the standard monthly catalog price when Founder does not apply', () => {
     expect(getCheckoutPriceDisplay('monthly', undefined, false)).toBe('NT$499')
+    expect(getCheckoutPriceDescription('monthly', undefined, false, false)).toContain('每月 NT$499')
   })
 
   it('shows the annual catalog price immediately because Founder pricing never applies to annual', () => {
     expect(getCheckoutPriceDisplay('annual', undefined, true)).toBe('NT$4,999')
+    expect(getCheckoutPriceDescription('annual', undefined, false, true)).toContain('年繳不套用 Founding 30')
   })
 })
