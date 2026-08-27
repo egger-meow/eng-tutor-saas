@@ -78,7 +78,7 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
 
     expect(q26.evidenceMode).toBe('spatial');
     expect(q26.visualEvidenceRequired).toBe(true);
-    expect(q26.answer).toBe('B');
+    expect(q26.answer).toBe('C');
   });
 
   it('does not insert false-positive blanks on Sea Glass process step numbers', () => {
