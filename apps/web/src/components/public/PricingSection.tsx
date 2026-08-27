@@ -8,6 +8,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
   const enrollment = propEnrollment !== undefined ? propEnrollment : hookEnrollment
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
+  const capacityOpen = Boolean(enrollment && enrollment.status === 'open' && enrollment.remaining > 0)
 
   return <section className="public-section pricing-section" id="pricing" aria-labelledby="pricing-title">
     <div className="pricing-heading">
@@ -34,7 +35,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
         <div className="pricing-offer pricing-offer-annual"><p className="price"><span>年繳・每位孩子</span>NT${formatPrice(productConfig.annualPrice)}</p><p className="pricing-cadence">每年續訂・平均每月約 NT${formatPrice(annualMonthlyEquivalentTwd)}・一年省 NT${formatPrice(annualSavingsTwd)}</p></div>
       </div>
       <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
-      {enrollment !== null && enrollment.status === 'open' && foundingRemaining !== null && foundingRemaining > 0 && (
+      {capacityOpen && foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
           <p className="status-label">創始 30・月繳限定</p>
           <div className="founding-copy">
@@ -45,7 +46,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
         </div>
       )}
       <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
-      <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>
+      {capacityOpen && <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
     </article>
     <CapacityStatus enrollment={enrollment} />
     <p className="capacity-explainer">第一階段預計服務 100 位孩子，計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補，既有家庭不受影響。</p>

@@ -24,6 +24,9 @@ export async function prepareCheckout(childId: string, plan: BillingPlan): Promi
       const body = response ? await response.clone().json() as { error?: string } : null
       code = body?.error ?? ''
     } catch { /* Fall through to the generic message. */ }
+    if (code === 'capacity_full_waitlisted') {
+      throw new Error('目前學習名額已滿，孩子已進入候補；不會收費，有名額時會寄 Email 通知你。')
+    }
     if (code === 'paddle_checkout_url_missing') {
       throw new Error('Paddle Sandbox 尚未設定預設付款連結，設定完成後即可測試付款。')
     }

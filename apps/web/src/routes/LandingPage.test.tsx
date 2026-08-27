@@ -5,6 +5,17 @@ import { PricingSection } from '../components/public/PricingSection'
 import { PublicFooter } from '../components/layout/PublicFooter'
 import { getEnrollmentCta } from '../lib/enrollment'
 
+const confirmedOpenEnrollment = {
+  status: 'open' as const,
+  capacity: 100,
+  activeCount: 1,
+  remaining: 99,
+  foundingLimit: 30,
+  foundingCount: 0,
+  waitingCount: 0,
+  releasedCount: 0,
+}
+
 describe('Public Footer — Paddle Review Links', () => {
   it('links directly to pricing and all public legal policies', () => {
     const html = renderToStaticMarkup(<PublicFooter />)
@@ -18,27 +29,27 @@ describe('Public Footer — Paddle Review Links', () => {
 })
 
 describe('Landing Page — First Delivery Timing Disclosure', () => {
-  it('discloses next-day delivery expectation in hero section', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
+  it('discloses next-day delivery expectation in hero section after open capacity is confirmed', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
   })
 
-  it('discloses next-day delivery expectation in pricing section', () => {
-    const html = renderToStaticMarkup(<PricingSection />)
+  it('discloses next-day delivery expectation in pricing section after open capacity is confirmed', () => {
+    const html = renderToStaticMarkup(<PricingSection enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
   })
 
-  it('includes the first material timing question and answer in FAQ', () => {
+  it('includes a capacity-safe first material timing answer in FAQ', () => {
     const html = renderToStaticMarkup(<LandingPage />)
     expect(html).toContain('多久可以拿到第一份教材？')
     
     const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
     expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe('完成孩子資料後，第一份專屬教材預計於隔天開放下載。之後每週依固定節奏提供新的個人化教材。')
+    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
   })
 
-  it('includes next-day expectation in onboarding login steps', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
+  it('includes next-day expectation in onboarding login steps after open capacity is confirmed', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('第一份專屬教材預計隔天開放下載')
   })
 

@@ -6,10 +6,13 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
 import { useParentData } from '../hooks/use-parent-data'
+import { useEnrollmentState } from '../lib/enrollment'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function DashboardPage({ session }: { session: Session }) {
   const data = useParentData(session.user.id)
+  const { state: enrollment } = useEnrollmentState()
+  const capacityFull = Boolean(enrollment && (enrollment.status !== 'open' || enrollment.remaining <= 0))
 
   return (
     <AppShell
@@ -37,9 +40,11 @@ export function DashboardPage({ session }: { session: Session }) {
           </section>
         ) : data.children.length === 0 ? (
           <section className="zero-state">
-            <p className="eyebrow">從第一週開始</p>
-            <h1>先告訴我們孩子現在的學習狀態</h1>
-            <p>大約幾分鐘即可完成；資料越具體，第一份教材越貼近孩子。</p>
+            <p className="eyebrow">{capacityFull ? '候補資料先準備好' : '從第一週開始'}</p>
+            <h1>{capacityFull ? '目前名額已滿，先建立孩子學習資料' : '先告訴我們孩子現在的學習狀態'}</h1>
+            <p>{capacityFull
+              ? '建立資料不會收費，也不會先開始訂閱或產生教材。有名額時我們會寄 Email 通知你，再決定是否開始。'
+              : '大約幾分鐘即可完成；資料越具體，第一份教材越貼近孩子。'}</p>
             <button className="button" type="button" onClick={() => navigate('/children/new')}>
               建立孩子學習資料
             </button>
