@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
   deployments: write
 
 jobs:
@@ -22,21 +22,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: One-shot sync of corrected CAP extracted answer artifacts
-        if: github.event_name == 'pull_request' && github.head_ref == 'chore/cap-sync-corrected-answers'
-        run: |
-          git fetch origin chore/cap-sync-corrected-answers
-          git checkout -B chore/cap-sync-corrected-answers origin/chore/cap-sync-corrected-answers
-          pnpm exec tsx -e "import fs from 'node:fs'; import path from 'node:path'; import { OFFICIAL_CAP_ANSWERS } from './scripts/history-exams/src/extractor/official-answers.ts'; for (const examId of Object.keys(OFFICIAL_CAP_ANSWERS)) { const file = path.join('history_exams','extracted',examId + '.json'); const data = JSON.parse(fs.readFileSync(file,'utf8')); for (const q of data.questions) q.answer = OFFICIAL_CAP_ANSWERS[examId][q.questionNumber]; fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n'); }"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add history_exams/extracted/*.json
-          if git diff --cached --quiet; then
-            echo "No extracted answer artifacts changed."
-          else
-            git commit -m "chore(history-exams): sync corrected answer artifacts [cap-answer-sync]"
-            git push origin HEAD:chore/cap-sync-corrected-answers
-          fi
       - name: Cache Traditional Chinese PDF fonts
         id: cache-fonts
         uses: actions/cache@v4
