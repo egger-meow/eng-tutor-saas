@@ -159,7 +159,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
       const res = await adminApi.recordTestFeedback(payload)
       if (res.success) {
         setShowFeedbackModal(false)
-        setActionMessage({ type: 'success', text: '✓ 測試學習反饋已成功記錄，將於下次推進時自動注入 Context' })
+        setActionMessage({ type: 'success', text: '✓ 測試學習反饋已成功記錄！下一週任務已具備即時領取資格，ChatGPT Scheduled Worker 可立即領取生成。' })
         await fetchStatus()
         onRefreshTimeline()
       } else {
@@ -254,7 +254,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               )}
             </div>
             <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--text-muted)' }}>
-              長週期測試控制台：在不變更正式生產排程與教材引擎的前提下，對指定測試學員進行原子式週次推進與驗證。
+              長週期測試控制台：忽略時間排程與訂閱限制，填寫回饋後 Worker 可立即領取生成。（全系統限單一測試學員，預設 Pax）
             </p>
           </div>
         </div>

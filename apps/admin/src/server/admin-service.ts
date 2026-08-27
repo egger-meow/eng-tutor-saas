@@ -708,6 +708,12 @@ export class AdminService {
     // Fallback
     try {
       if (isEnabled) {
+        // Enforce single active test child: deactivate other active test sessions
+        await client.from('generation_test_mode_sessions').update({
+          is_enabled: false,
+          updated_at: new Date().toISOString(),
+        }).neq('child_id', childId).eq('is_enabled', true)
+
         await client.from('generation_test_mode_sessions').upsert({
           child_id: childId,
           is_enabled: true,
@@ -1873,25 +1879,50 @@ export class AdminService {
 
     const availableChildren = await this.fetchAvailableChildren(client, dataSources)
 
-    if (!childId) {
-      if (availableChildren.length > 0) {
-        childId = availableChildren[0].id
+    let effectiveChildId: string = childId || ''
+    if (!effectiveChildId) {
+      // 1. Check for active test mode session
+      const activeSessionData = await this.safeQuery<any>(
+        'active_test_session',
+        () => client.from('generation_test_mode_sessions').select('child_id').eq('is_enabled', true).maybeSingle(),
+        dataSources
+      )
+      const activeChildId = activeSessionData?.data?.child_id || activeSessionData?.child_id
+      if (activeChildId && availableChildren.some((c) => c.id === activeChildId)) {
+        effectiveChildId = activeChildId
       } else {
-        return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), 'none', availableChildren, dataSources)
+        // 2. Default to Pax if available (case-insensitive name check on raw children)
+        const paxChildData = await this.safeQuery<any>(
+          'pax_child',
+          () => client.from('children').select('id').ilike('display_name', '%pax%').eq('is_active', true).maybeSingle(),
+          dataSources
+        )
+        const paxId = paxChildData?.data?.id || paxChildData?.id
+        if (paxId && availableChildren.some((c) => c.id === paxId)) {
+          effectiveChildId = paxId
+        } else if (availableChildren.length > 0) {
+          effectiveChildId = availableChildren[0].id
+        } else {
+          return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), 'none', availableChildren, dataSources)
+        }
       }
     }
 
+    if (!effectiveChildId) {
+      return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), 'none', availableChildren, dataSources)
+    }
+
     const [childData, subData, jobsData, learningData, testModeStatus] = await Promise.all([
-      this.safeQuery<any>('child_single', () => client.from('children').select('*').eq('id', childId).maybeSingle(), dataSources),
-      this.safeQuery<any>('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', childId).maybeSingle(), dataSources),
-      this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', childId).order('created_at', { ascending: false }).limit(10), dataSources),
-      this.safeQuery<any>('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', childId).maybeSingle(), dataSources),
-      this.getTestModeStatus(childId).catch(() => null),
+      this.safeQuery<any>('child_single', () => client.from('children').select('*').eq('id', effectiveChildId).maybeSingle(), dataSources),
+      this.safeQuery<any>('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', effectiveChildId).maybeSingle(), dataSources),
+      this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', effectiveChildId).order('created_at', { ascending: false }).limit(10), dataSources),
+      this.safeQuery<any>('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', effectiveChildId).maybeSingle(), dataSources),
+      this.getTestModeStatus(effectiveChildId).catch(() => null),
     ])
 
     const child = childData as any
     if (!child) {
-      return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), childId, availableChildren, dataSources)
+      return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), effectiveChildId, availableChildren, dataSources)
     }
 
     const jobs = (jobsData as any[]) || []

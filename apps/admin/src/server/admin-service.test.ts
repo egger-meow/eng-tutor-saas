@@ -103,23 +103,40 @@ function createMockSupabaseClient(
             then: (resolve: any) => Promise.resolve({ data: items, error: null }).then(resolve),
           }
         },
+        ilike: (col: string, pattern: string) => {
+          const regex = new RegExp(pattern.replace(/%/g, '.*'), 'i')
+          filters.push((r) => regex.test(r[col] || ''))
+          return builder
+        },
         update: (payload: any) => {
-          return {
+          const updateFilters: Array<(row: any) => boolean> = []
+          const updateBuilder: any = {
             eq: (col: string, val: any) => {
-              const matched = rows.filter((r) => r[col] === val)
-              for (const r of matched) {
-                Object.assign(r, payload)
-              }
-              const res = { data: matched, error: null }
-              return {
-                select: () => ({
-                  single: async () => ({ data: matched[0] || null, error: null }),
-                  maybeSingle: async () => ({ data: matched[0] || null, error: null }),
-                }),
-                then: (resolve: any) => Promise.resolve(res).then(resolve),
-              }
+              updateFilters.push((r) => r[col] === val)
+              return updateBuilder
+            },
+            neq: (col: string, val: any) => {
+              updateFilters.push((r) => r[col] !== val)
+              return updateBuilder
+            },
+            select: () => updateBuilder,
+            single: async () => {
+              const matched = rows.filter((r) => updateFilters.every((f) => f(r)))
+              for (const r of matched) Object.assign(r, payload)
+              return { data: matched[0] || null, error: null }
+            },
+            maybeSingle: async () => {
+              const matched = rows.filter((r) => updateFilters.every((f) => f(r)))
+              for (const r of matched) Object.assign(r, payload)
+              return { data: matched[0] || null, error: null }
+            },
+            then: (resolve: any) => {
+              const matched = rows.filter((r) => updateFilters.every((f) => f(r)))
+              for (const r of matched) Object.assign(r, payload)
+              return Promise.resolve({ data: matched, error: null }).then(resolve)
             },
           }
+          return updateBuilder
         },
         delete: () => {
           return {
@@ -917,6 +934,103 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(status.completedWeeksCount).toBe(0)
       expect(status.nextJob?.id).toBe('job-test-1')
       expect(status.advanceEligibility.canAdvance).toBe(true)
+    })
+
+    it('enforces single active test child concurrency by deactivating existing active sessions', async () => {
+      const childOneId = 'child-1111-1111-1111-111111111111'
+      const childTwoId = 'child-2222-2222-2222-222222222222'
+      const testSessions = [
+        { child_id: childOneId, is_enabled: true, target_week: 9 },
+      ]
+
+      const mockClient = createMockSupabaseClient({
+        children: [
+          { id: childOneId, display_name: 'Child One', is_active: true },
+          { id: childTwoId, display_name: 'Child Two', is_active: true },
+        ],
+        generation_test_mode_sessions: testSessions,
+        generation_jobs: [],
+        materials: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+
+      // Enable Child Two -> should automatically deactivate Child One
+      const enableRes = await service.setTestMode(childTwoId, true, 10)
+      expect(enableRes.success).toBe(true)
+      expect(enableRes.isEnabled).toBe(true)
+
+      const sessionOne = testSessions.find((s) => s.child_id === childOneId)
+      const sessionTwo = testSessions.find((s) => s.child_id === childTwoId)
+      expect(sessionOne?.is_enabled).toBe(false)
+      expect(sessionTwo?.is_enabled).toBe(true)
+    })
+
+    it('defaults timeline to active test child, then Pax, then first child when childId is omitted', async () => {
+      const childP = 'child-pax-1111-1111-111111111111'
+      const childOther = 'child-other-2222-2222-222222222222'
+
+      // Scenario 1: Pax exists and no active test session -> defaults to Pax
+      const mockClient1 = createMockSupabaseClient({
+        children: [
+          { id: childOther, display_name: 'Other Child', grade: 5, is_active: true },
+          { id: childP, display_name: 'Pax', grade: 6, is_active: true },
+        ],
+        generation_test_mode_sessions: [],
+        subscriptions: [],
+        generation_jobs: [],
+      })
+
+      const service1 = new AdminService({ client: mockClient1 })
+      const timeline1 = await service1.getChildWeekTimeline()
+      expect(timeline1.childId).toBe(childP)
+
+      // Scenario 2: Active test session exists on another child -> defaults to active test child
+      const mockClient2 = createMockSupabaseClient({
+        children: [
+          { id: childOther, display_name: 'Other Child', grade: 5, is_active: true },
+          { id: childP, display_name: 'Pax', grade: 6, is_active: true },
+        ],
+        generation_test_mode_sessions: [{ child_id: childOther, is_enabled: true }],
+        subscriptions: [],
+        generation_jobs: [],
+      })
+
+      const service2 = new AdminService({ client: mockClient2 })
+      const timeline2 = await service2.getChildWeekTimeline()
+      expect(timeline2.childId).toBe(childOther)
+    })
+
+    it('allows advance without subscription eligibility for children in test mode', async () => {
+      const testSessions = [{ child_id: testChildId, is_enabled: true, target_week: 9 }]
+      const pendingJob = {
+        id: 'job-test-1',
+        child_id: testChildId,
+        material_week: '2026-08-17',
+        status: 'pending',
+        attempt_count: 0,
+        max_attempts: 3,
+        scheduled_for: '2026-08-20T00:00:00Z',
+        feedback_cutoff_at: '2026-08-22T00:00:00Z',
+        generation_due_at: '2026-08-23T00:00:00Z',
+        release_at: '2026-08-24T00:00:00Z',
+      }
+
+      const mockClient = createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: '測試學員 A', is_active: true }],
+        generation_test_mode_sessions: testSessions,
+        subscriptions: [], // No active subscription
+        generation_jobs: [pendingJob],
+        materials: [],
+      })
+
+      const service = new AdminService({ client: mockClient })
+      const status = await service.getTestModeStatus(testChildId)
+      expect(status.isEnabled).toBe(true)
+      expect(status.advanceEligibility.canAdvance).toBe(true)
+
+      const advanceRes = await service.advanceTestWeek(testChildId)
+      expect(advanceRes.success).toBe(true)
     })
 
     it('prevents disabling test mode without reset if test materials already exist (unless force=true)', async () => {
