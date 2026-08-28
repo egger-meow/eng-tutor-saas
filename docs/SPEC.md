@@ -2767,7 +2767,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.4.0, schema 2.3.0, and prompt 2.8.0. Prompt 2.4.0, 2.5.0, 2.6.0, and 2.7.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 is an additive recency-aware overlay and does not change the canonical grounding shape.
+New production authoring uses Engine 1.4.0, schema 2.3.0, and prompt 2.9.0. Prompt 2.4.0 through 2.8.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 remains the inherited recency-aware overlay, while Prompt 2.9.0 adds the authoritative CAP precedent-first assessment contract without changing the canonical grounding shape.
 
 ---
 
@@ -4191,13 +4191,12 @@ For weekly-material work specifically:
 23. Current selection never relaxes source quality, factual density, original synthesis, lexical ceiling, grammar, CAP relevance, answer entailment, workload, copyright, or personalization gates.
 24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and Claim/Submit/Finisher boundaries.
 25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
+26. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP design anchors before writing the item, and preserve mechanics rather than wording.
+27. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
+28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
+29. The deterministic Finisher must fail closed on missing/unknown CAP refs, authority/provenance mismatch, blank-page authoring when a relevant precedent exists, copy overlap, or accidental shallow assessment; repair only the failing item/local cluster.
 
 ---
-
-24. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP design anchors before writing the item, and preserve mechanics rather than wording.
-25. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
-26. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
-27. The deterministic Finisher must fail closed on missing/unknown CAP refs, authority/provenance mismatch, blank-page authoring when a relevant precedent exists, copy overlap, or accidental shallow assessment; repair only the failing item/local cluster.
 
 # 206. Core Architectural Summary
 
