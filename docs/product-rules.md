@@ -35,7 +35,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 
 ## Quality Gates
 
-- Align language and question style with Taiwan junior-high/CAP expectations.
+- Consult authoritative non-holdout CAP precedents before normal assessment. Treat CAP as the Taiwan-quality floor, not a structural mold; semantic criticism prefers justified variety without quotas or sacrificing fit.
 - Keep facts age-appropriate and checkable.
 - Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
