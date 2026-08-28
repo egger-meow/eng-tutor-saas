@@ -7,12 +7,14 @@ import { getOfficialAnswer, OFFICIAL_CAP_ANSWERS } from './official-answers.ts';
 import { parseExamFromPages } from './parser.ts';
 import { renderExamPagesToImages } from './pdf-page-renderer.ts';
 import { extractPdfText } from './pdf-reader.ts';
+import { applySourceFidelityOverrides } from './source-fidelity-overrides.ts';
 
 export * from './pdf-reader.ts';
 export * from './parser.ts';
 export * from './extractor-validator.ts';
 export * from './official-answers.ts';
 export * from './pdf-page-renderer.ts';
+export * from './source-fidelity-overrides.ts';
 
 export interface ExtractAllOptions {
   rawDir: string;
@@ -68,12 +70,15 @@ export async function runExtractionPipeline(options: ExtractAllOptions): Promise
       renderedImagesCount = renderRes.renderedPages.length;
     }
 
-    // 2. Extract geometry-aware text
+    // 2. Extract geometry-aware text, then apply deterministic corrections verified
+    // against the official source PDFs during multimodal corpus review.
     const pages = await extractPdfText(pdfPath);
-    const extractedExam = parseExamFromPages(pages, {
-      examId,
-      sourcePdfPath: pdfPath,
-    });
+    const extractedExam = applySourceFidelityOverrides(
+      parseExamFromPages(pages, {
+        examId,
+        sourcePdfPath: pdfPath,
+      }),
+    );
 
     // 2.5 Compute and embed asset SHA-256 byte hashes
     for (const q of extractedExam.questions) {
