@@ -1,0 +1,971 @@
+{
+  "examId": "115",
+  "providerName": "openai-chatgpt",
+  "modelName": "gpt-5.6-sol",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "analysisSchemaVersion": "1.0.0",
+  "questions": [
+    {
+      "questionNumber": 2,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Notice the explicit cause-effect link created by 'That’s why'.",
+        "Reject actions that fit the syntax but not the consequence."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The causal consequence of being too fat selects 'feeds': frequent feeding can cause weight gain.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "Frequent feeding directly explains why the dogs are too fat. Therefore option A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q2 stem",
+          "quoteOrDescription": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Kissing does not explain weight gain.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q2 stem",
+              "quoteOrDescription": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "Walking usually expends energy rather than causing obesity.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q2 stem",
+              "quoteOrDescription": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Washing has no causal link to becoming too fat.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q2 stem",
+              "quoteOrDescription": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q2 stem",
+          "quoteOrDescription": "The result clause 'That’s why they’re too fat' requires an action that can plausibly cause weight gain.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 3,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Link the evidence 'ask Sophia anything' to expertise.",
+        "Use the collocation 'knowledge of'."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The ability to answer anything about butterflies and bees shows great knowledge of insects.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'Knowledge of insects' is the natural collocation and matches Sophia’s expertise. Therefore option B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q3 stem",
+          "quoteOrDescription": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Chances of insects does not describe expertise.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q3 stem",
+              "quoteOrDescription": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'News of insects' would mean reports, not subject-matter understanding.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q3 stem",
+              "quoteOrDescription": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Power over insects would describe control, not knowing facts.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q3 stem",
+              "quoteOrDescription": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q3 stem",
+          "quoteOrDescription": "The first sentence establishes expertise; the noun phrase '___ of insects' must name what an expert possesses.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 4,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use the because-clause as evidence for sleep quality.",
+        "Distinguish quality adverbs from time/manner distractors."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Repeatedly waking from bad dreams makes the quality of sleep poor, so 'terribly' is the only coherent adverb.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'Terribly' means very badly and matches fragmented sleep. Therefore option C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q4 stem",
+          "quoteOrDescription": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Deep sleep conflicts with repeatedly waking up.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q4 stem",
+              "quoteOrDescription": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Early describes time, not sleep quality.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q4 stem",
+              "quoteOrDescription": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Quickly does not describe the poor quality implied by bad dreams.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q4 stem",
+              "quoteOrDescription": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q4 stem",
+          "quoteOrDescription": "Repeatedly waking from bad dreams makes the quality of sleep poor, so the adverb must evaluate sleep negatively.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 5,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize the fixed meaning of 'keep ... as a pet'."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The phrase 'a snake as a pet' requires the lexical pattern 'keep ... as a pet'.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'Keep an animal as a pet' is the standard construction meaning have it as one’s pet. Therefore option C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q5 stem",
+          "quoteOrDescription": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Dropping a snake does not mean owning it.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q5 stem",
+              "quoteOrDescription": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'Give a snake as a pet' would require a recipient and means transfer, not possession.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q5 stem",
+              "quoteOrDescription": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'Make a snake as a pet' is not idiomatic for ownership.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q5 stem",
+              "quoteOrDescription": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "isolated_dictionary_definition",
+        "explanation": "The core mechanism is a conventional lexical or grammatical pattern, though the sentence supplies a confirming context."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q5 stem",
+          "quoteOrDescription": "The phrase 'a snake as a pet' requires the verb that means own or care for an animal.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 6,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Map 'with + noun' to possession/characteristic."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A doll with big brown eyes means a doll that has big brown eyes.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'With' introduces a possessed feature of the doll. Therefore option D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q6 stem",
+          "quoteOrDescription": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'At big brown eyes' cannot mark possession.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q6 stem",
+              "quoteOrDescription": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'In big brown eyes' would locate something inside the eyes.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q6 stem",
+              "quoteOrDescription": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'On big brown eyes' expresses surface location, not possession.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q6 stem",
+              "quoteOrDescription": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "mechanical_grammar_pattern",
+        "explanation": "The core mechanism is a conventional lexical or grammatical pattern, though the sentence supplies a confirming context."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q6 stem",
+          "quoteOrDescription": "The noun phrase describes a doll characterized by a physical feature, requiring 'with'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 7,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use duration plus consequence to infer muscle soreness.",
+        "Reject plausible outdoor details that do not explain the rest."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "After prolonged climbing, Rosa’s legs got sore, which motivates the rest.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'Sore' means painful from use or exertion and fits four hours of climbing. Therefore option C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q7 stem",
+          "quoteOrDescription": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "partial_truth",
+          "rationale": "Legs might get dirty outdoors, but dirt does not explain needing a rest.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q7 stem",
+              "quoteOrDescription": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Body parts are not normally described as 'sick' in this context.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q7 stem",
+              "quoteOrDescription": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "Getting strong is a longer-term effect and would not explain stopping to rest.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q7 stem",
+              "quoteOrDescription": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q7 stem",
+          "quoteOrDescription": "Four hours of mountain climbing creates muscle pain/fatigue, and taking a rest confirms the physical discomfort.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 8,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "reference_resolution"
+      ],
+      "skillExplanation": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Identify the grammatical subject as the gerund phrase.",
+        "Carry the modal into the tag and reverse polarity."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The statement is negative ('can’t'), so the tag is positive 'can it?'; the proposition 'Having three cups...' is referred to by 'it'.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "The tag repeats modal 'can', flips polarity, and uses singular 'it' for the gerund-clause subject. Therefore option A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q8 stem",
+          "quoteOrDescription": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'They' incorrectly treats 'three cups' as the grammatical subject; the subject is the gerund phrase 'Having three cups of coffee a day'.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q8 stem",
+              "quoteOrDescription": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "The main clause uses modal 'can', not copular 'is'.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q8 stem",
+              "quoteOrDescription": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "It uses both the wrong auxiliary and the wrong pronoun.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q8 stem",
+              "quoteOrDescription": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q8 stem",
+          "quoteOrDescription": "A negative main clause with modal 'can' takes a positive tag using the same modal; the gerund clause functions as singular 'it'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 9,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "reference_resolution"
+      ],
+      "skillExplanation": "The contrast 'only one hand' versus what is required points to using two hands.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Resolve the omitted noun 'hands'.",
+        "Contrast one hand with the complete pair."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "If one hand is insufficient, you have to use both hands.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'Both' refers to the two hands together. Therefore option C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q9 stem",
+          "quoteOrDescription": "The contrast 'only one hand' versus what is required points to using two hands.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "undergeneralization",
+          "rationale": "'All' would require a set larger than two or an explicitly larger set.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q9 stem",
+              "quoteOrDescription": "The contrast 'only one hand' versus what is required points to using two hands.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "undergeneralization",
+          "rationale": "'Another' adds one more hand but does not form the complete two-hand pronoun required by the sentence.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q9 stem",
+              "quoteOrDescription": "The contrast 'only one hand' versus what is required points to using two hands.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'One' repeats the insufficient condition already rejected.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q9 stem",
+              "quoteOrDescription": "The contrast 'only one hand' versus what is required points to using two hands.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q9 stem",
+          "quoteOrDescription": "The contrast 'only one hand' versus what is required points to using two hands.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 10,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "none",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize the embedded wh-question pattern 'how + subject + feels'."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The complement of 'know' asks for the boss’s attitude toward Alan, requiring 'how his boss feels about him'.",
+      "whyTheQuestionWorks": "The item keeps the surface language simple while making one contextual, referential, or grammatical constraint decisive among four plausible forms.",
+      "correctRationale": "'How ... feels' asks about the boss’s opinion or attitude. Therefore option A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q10 stem",
+          "quoteOrDescription": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'Know that' introduces a proposition already asserted, not an unknown attitude.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q10 stem",
+              "quoteOrDescription": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'Whether his boss feels about him' is incomplete because 'feel about' needs a description of attitude, not a yes/no alternative.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q10 stem",
+              "quoteOrDescription": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "grammatically_plausible_contextually_wrong",
+          "rationale": "'Why his boss feels about him' is ungrammatical/semantically incomplete without specifying how the boss feels first.",
+          "misconceptionTarget": "Selecting a grammatically or lexically plausible option without resolving the sentence's decisive contextual constraint.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "115 Q10 stem",
+              "quoteOrDescription": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by isolated word familiarity instead of integrating the full sentence.",
+        "Ignoring the clue that distinguishes the correct option from syntactically plausible distractors."
+      ],
+      "misconceptionsTargeted": [
+        "Local grammatical fit is sufficient even when sentence meaning conflicts.",
+        "Nearby nouns or keywords can be used as the answer target without resolving reference, tense, or discourse relation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires contextual selection rather than answer-key recall."
+      },
+      "reusableDesignPrinciple": "Use a short natural sentence with one decisive semantic or grammatical constraint, then make distractors locally plausible but globally incompatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the decisive context clue and keep all four options in the same grammatical slot."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the decisive clue into a preceding sentence or require one additional reference/causal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "115 Q10 stem",
+          "quoteOrDescription": "The complement of 'know' asks for the boss’s attitude/state toward Alan, so an interrogative meaning 'in what way' is needed.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    }
+  ]
+}
