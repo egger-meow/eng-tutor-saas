@@ -1,0 +1,130 @@
+{
+  "examId": "115",
+  "providerName": "openai-chatgpt",
+  "modelName": "gpt-5.6-sol",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "analysisSchemaVersion": "1.0.0",
+  "questions": [
+    {
+      "questionNumber": 1,
+      "primarySkill": "information_integration",
+      "secondarySkills": [
+        "vocabulary_in_context",
+        "grammar_in_context"
+      ],
+      "skillExplanation": "Q1 requires the learner to use the restrictive clause 'who are exercising' to select the relevant people in the illustration, then find the clothing or accessory shared by every member of that subset.",
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Use 'who are exercising' to exclude the students who are sitting and resting from the comparison set.",
+        "Inspect the three exercising students and identify the one visible attribute shared by all three.",
+        "Reject attributes that are worn by only one exercising student or that belong mainly to the non-exercising students."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "high",
+      "questionMechanism": "The item combines grammatical subset filtering with visual attribute intersection: the learner must first decide who counts as 'students who are exercising' and then test each noun against every person in that subset.",
+      "whyTheQuestionWorks": "Several answer choices are visibly present somewhere in the scene, so superficial picture scanning is insufficient. Only glasses remain true for all of the students who satisfy the stem's activity condition.",
+      "correctRationale": "The three students actively exercising in the picture are the badminton players and the student jumping rope, and all three are wearing glasses. Therefore B is the only option that satisfies the word 'all' after the exercising subset is correctly identified.",
+      "correctEvidenceRefs": [
+        {
+          "type": "visual_page_asset",
+          "location": "115 page 2, Q1 illustration: three exercising students",
+          "quoteOrDescription": "Both badminton players and the student jumping rope are visibly wearing glasses.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "partial_truth",
+          "rationale": "Caps appear in the scene, including on students who are sitting, but a cap is not shared by all three exercising students.",
+          "misconceptionTarget": "Scanning the whole picture for a visible object without first applying the relative-clause filter.",
+          "evidenceRefs": [
+            {
+              "type": "visual_page_asset",
+              "location": "115 page 2, Q1 illustration: exercising and resting students",
+              "quoteOrDescription": "Cap-wearing figures do not match the complete set of students who are exercising.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The exercising students are not all wearing jackets; treating jackets as ordinary sportswear imports a plausible idea instead of checking the drawing.",
+          "misconceptionTarget": "Replacing direct visual verification with an expectation about what people might wear while exercising.",
+          "evidenceRefs": [
+            {
+              "type": "visual_page_asset",
+              "location": "115 page 2, Q1 illustration: upper-body clothing",
+              "quoteOrDescription": "The exercising figures' visible clothing does not provide a jacket shared by all three.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "partial_truth",
+          "rationale": "Pants are not common to the entire exercising subset because the exercising badminton girl is shown in a skirt rather than pants.",
+          "misconceptionTarget": "Checking only some target figures and failing to enforce the universal quantifier 'all'.",
+          "evidenceRefs": [
+            {
+              "type": "visual_page_asset",
+              "location": "115 page 2, Q1 illustration: lower-body clothing",
+              "quoteOrDescription": "At least one exercising student, the badminton girl, is wearing a skirt rather than pants.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Including the students sitting on the bench when interpreting 'students who are exercising'.",
+        "Choosing an attribute after seeing it on one or two students instead of checking every exercising student.",
+        "Ignoring the quantifier 'all' and treating a partial match as sufficient."
+      ],
+      "misconceptionsTargeted": [
+        "Every person visible in a picture is automatically part of the grammatical subject set.",
+        "A visually salient attribute can answer an 'all' question even when one target person lacks it."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Knowing the four clothing/accessory words is insufficient; the learner must combine sentence structure with the illustration and universal-set checking."
+      },
+      "reusableDesignPrinciple": "Place target and non-target people in one scene, define the target subset with a simple relative clause, and make distractors true of only part of the subset or of excluded figures so that grammar and visual evidence must be integrated.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain a grammatical condition equivalent to 'who are exercising'.",
+        "Retain a universal quantifier such as 'all' so every target figure must be checked.",
+        "Keep multiple visible answer attributes in the scene to prevent direct object naming."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Add another non-exercising figure who also wears glasses so subset filtering becomes even more important.",
+        "Ask which option is true of exactly the exercising students but not the resting students, creating a two-set comparison without harder vocabulary."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "history_exams/assets/115/page-2.png, Q1 illustration",
+          "quoteOrDescription": "The scene contains three students actively exercising and additional resting students; glasses are shared by all three exercising students, while the other candidate attributes are not.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "stem_clue",
+          "location": "115 Q1 stem",
+          "quoteOrDescription": "The phrases 'who are exercising' and 'all of the students' jointly require subset filtering followed by an all-members check.",
+          "role": "constraint_filter"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    }
+  ]
+}
