@@ -1,0 +1,126 @@
+name: CAP Finish Once
+
+on:
+  push:
+    branches:
+      - feat/cap-chatgpt-deep-digestion
+    paths:
+      - .github/workflows/cap-finish-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore proven CAP migration runner
+        run: git show 0c8caa8f5537ed7a47c9c1743599ea2d912391ef:scripts/history-exams/.tmp-cap-finish.ts > scripts/history-exams/.tmp-cap-finish.ts
+
+      - name: Repair provenance, normalize authored labels, and ingest 215 canonical analyses
+        run: pnpm exec tsx scripts/history-exams/.tmp-cap-finish.ts
+
+      - name: Consolidate genuine authored fragments into 43-question yearly sources
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const dir = path.resolve('history_exams/agent_analysis');
+          for (const examId of ['112','113','114','115']) {
+            const files = fs.readdirSync(dir).filter(f => f === `${examId}.json` || f.startsWith(`${examId}-`)).sort();
+            if (!files.length) throw new Error(`${examId}: no authored source files`);
+            let metadata = null;
+            const questions = new Map();
+            for (const file of files) {
+              const source = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+              const current = {
+                examId: source.examId,
+                providerName: source.providerName,
+                modelName: source.modelName,
+                promptVersion: source.promptVersion,
+                criticPromptVersion: source.criticPromptVersion,
+                analysisSchemaVersion: source.analysisSchemaVersion,
+              };
+              if (!metadata) metadata = current;
+              if (JSON.stringify(current) !== JSON.stringify(metadata)) throw new Error(`${examId}: metadata mismatch in ${file}`);
+              for (const q of source.questions) {
+                if (questions.has(q.questionNumber) && JSON.stringify(questions.get(q.questionNumber)) !== JSON.stringify(q)) {
+                  throw new Error(`${examId} Q${q.questionNumber}: conflicting authored records`);
+                }
+                questions.set(q.questionNumber, q);
+              }
+            }
+            if (questions.size !== 43) throw new Error(`${examId}: expected 43 unique authored questions, got ${questions.size}`);
+            const merged = {...metadata, questions:[...questions.values()].sort((a,b)=>a.questionNumber-b.questionNumber)};
+            fs.writeFileSync(path.join(dir, `${examId}.json`), JSON.stringify(merged, null, 2) + '\n');
+            for (const file of files) if (file !== `${examId}.json`) fs.unlinkSync(path.join(dir, file));
+          }
+          NODE
+
+      - name: Re-ingest persisted monolithic authored sources
+        run: |
+          pnpm exec tsx -e "import path from 'node:path'; import { ingestAgentAnalysisFiles } from './scripts/history-exams/src/agent-ingest/index.ts'; const o={sourceDir:path.resolve('history_exams/agent_analysis'),extractedDir:path.resolve('history_exams/extracted'),analyzedDir:path.resolve('history_exams/analyzed')}; for (const id of ['112','113','114','115']) { const r=ingestAgentAnalysisFiles({...o,examIdFilter:id}); if(r.ingestedQuestions!==43) throw new Error(id+': expected 43 monolithic records, got '+r.ingestedQuestions); console.log(id, r); }"
+
+      - name: Cross-year synthesis
+        run: pnpm history-exams synthesize
+      - name: Benchmark generation
+        run: pnpm history-exams benchmark
+      - name: Human spot-check report
+        run: pnpm history-exams spot-check
+      - name: Corpus validation
+        run: pnpm history-exams validate
+      - name: Assert authoritative status
+        run: |
+          pnpm exec tsx -e "import path from 'node:path'; import { validateFullCorpus } from './scripts/history-exams/src/validator/index.ts'; const r=validateFullCorpus({extractedDir:path.resolve('history_exams/extracted'),analyzedDir:path.resolve('history_exams/analyzed'),knowledgeDir:path.resolve('history_exams/knowledge'),benchmarkDir:path.resolve('history_exams/benchmark')}); console.log(JSON.stringify(r,null,2)); if(!r.authorityEligible || r.authorityStatus!=='authoritative') process.exit(1);"
+
+      - name: Verify official answer regression lock
+        run: pnpm test tests/history-exams/official-answers.test.ts
+      - name: Verify monolithic deep-analysis quality regression
+        run: pnpm test tests/history-exams/agent-analysis-quality.test.ts
+      - name: Lint
+        run: pnpm lint
+      - name: Full test suite
+        run: pnpm test
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+
+      - name: Commit authoritative CAP corpus and self-clean
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f scripts/history-exams/.tmp-cap-finish.ts
+          git rm .github/workflows/cap-finish-once.yml
+          git add -A history_exams
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+            exit 1
+          fi
+          git commit -m "feat(history-exams): finish authoritative CAP digestion"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      - name: Remove one-shot workflow after failure
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset --hard HEAD
+          git rm -f .github/workflows/cap-finish-once.yml || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(history-exams): remove failed CAP finisher"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
