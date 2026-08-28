@@ -1,0 +1,84 @@
+name: CAP Finish Once
+
+on:
+  push:
+    branches:
+      - feat/cap-chatgpt-deep-digestion
+    paths:
+      - .github/workflows/cap-finish-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Repair provenance, normalize authored labels, and ingest 215 canonical analyses
+        run: pnpm exec tsx scripts/history-exams/.tmp-cap-finish.ts
+
+      - name: Cross-year synthesis
+        run: pnpm history-exams synthesize
+
+      - name: Benchmark generation
+        run: pnpm history-exams benchmark
+
+      - name: Human spot-check report
+        run: pnpm history-exams spot-check
+
+      - name: Corpus validation
+        run: pnpm history-exams validate
+
+      - name: Assert authoritative status
+        run: |
+          pnpm exec tsx -e "import path from 'node:path'; import { validateFullCorpus } from './scripts/history-exams/src/validator/index.ts'; const r=validateFullCorpus({extractedDir:path.resolve('history_exams/extracted'),analyzedDir:path.resolve('history_exams/analyzed'),knowledgeDir:path.resolve('history_exams/knowledge'),benchmarkDir:path.resolve('history_exams/benchmark')}); console.log(JSON.stringify(r,null,2)); if(!r.authorityEligible || r.authorityStatus!=='authoritative') process.exit(1);"
+
+      - name: Verify official answer regression lock
+        run: pnpm test tests/history-exams/official-answer-regression.test.ts
+
+      - name: Lint
+        run: pnpm lint
+      - name: Full test suite
+        run: pnpm test
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+
+      - name: Commit authoritative CAP corpus and self-clean
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/cap-finish-once.yml scripts/history-exams/.tmp-cap-finish.ts
+          git add -A history_exams
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+            exit 1
+          fi
+          git commit -m "feat(history-exams): finish authoritative CAP digestion"
+          git push origin HEAD:${GITHUB_REF_NAME}
+
+      - name: Remove one-shot files after failure
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git reset --hard HEAD
+          git rm -f .github/workflows/cap-finish-once.yml scripts/history-exams/.tmp-cap-finish.ts || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(history-exams): remove failed CAP finisher"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
