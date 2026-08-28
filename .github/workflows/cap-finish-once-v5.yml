@@ -27,6 +27,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      - name: Install PDF test fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          sudo fc-cache -f
+      - name: Install Playwright Chromium
+        run: pnpm --filter @paper-english/pdf pdf:install
+
       - name: Fresh deterministic extraction
         run: |
           pnpm exec tsx -e "import path from 'node:path'; import { runExtractionPipeline } from './scripts/history-exams/src/extractor/index.ts'; (async()=>{ const root=process.cwd(); const r=await runExtractionPipeline({rawDir:path.resolve(root,'history_exams/raw'),outputDir:path.resolve(root,'history_exams/extracted'),assetsDir:path.resolve(root,'history_exams/assets'),renderImages:false}); if(r.length!==5) throw new Error('expected 5 extracted exams, got '+r.length); console.log(r.map(x=>x.examId+':'+x.questionCount).join(',')); })();"
