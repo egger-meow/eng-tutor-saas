@@ -1,0 +1,1106 @@
+{
+  "examId": "113",
+  "providerName": "openai-chatgpt",
+  "modelName": "gpt-5.6-sol",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "analysisSchemaVersion": "1.0.0",
+  "questions": [
+    {
+      "questionNumber": 14,
+      "primarySkill": "discourse_connective",
+      "secondarySkills": [
+        "contrast_relation"
+      ],
+      "skillExplanation": "Q14 tests whether the learner recognizes that extensive planning creates an expectation of speaking, while the actual result is inability to say anything; the clauses therefore stand in contrast.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Identify the expectation created by planning.",
+        "Compare that expectation with the opposite outcome.",
+        "Select an adversative coordinator."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank joins two independent clauses whose propositions conflict, so discourse relation determines the coordinator.",
+      "whyTheQuestionWorks": "All four options are common connectors, but only 'but' preserves the expectation-versus-result contrast.",
+      "correctRationale": "Planning for several days should make speaking more likely, yet she could not say a word; 'but' explicitly marks that contrast, so A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q14 stem",
+          "quoteOrDescription": "'spent several days planning' contrasts with 'couldn’t say a word'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "wrong_logical_relation",
+          "rationale": "'if' introduces a condition, but the second clause is an actual event, not a condition.",
+          "misconceptionTarget": "Treating any clause linker as interchangeable.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "Both events are asserted as facts.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "wrong_logical_relation",
+          "rationale": "'or' presents alternatives, while the sentence describes two events that both happened.",
+          "misconceptionTarget": "Confusing contrast with choice.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The clauses are not alternatives.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "cause_effect_reversal",
+          "rationale": "'so' would say the planning caused her silence, which is opposite to the intended surprising contrast.",
+          "misconceptionTarget": "Assuming chronological sequence implies causation.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "Planning creates an expectation that she would speak.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by punctuation instead of clause meaning.",
+        "Treating 'so' as a generic connector for any second result."
+      ],
+      "misconceptionsTargeted": [
+        "Coordinating conjunctions can be selected without identifying the logical relation.",
+        "Earlier action automatically causes the later event."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The conjunction is selected from the discourse relation between two propositions."
+      },
+      "reusableDesignPrinciple": "Build conjunction items around a strong expectation that the second clause clearly confirms or violates.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the explicit planning-versus-silence contrast."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make the expected outcome implicit and require readers to infer why the second clause is surprising."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q14 stem",
+          "quoteOrDescription": "'spent several days planning' contrasts with 'couldn’t say a word'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 15,
+      "primarySkill": "tense_aspect_in_context",
+      "secondarySkills": [
+        "present_perfect",
+        "temporal_reference"
+      ],
+      "skillExplanation": "Q15 requires locating movie-watching in an unfinished time window extending to now: the speaker cannot give an opinion because the movie has not been watched yet.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use the future plan to infer the viewing has not happened.",
+        "Choose present perfect for a past-to-present experience state."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The future sentence 'I'll probably watch it this Saturday' establishes non-occurrence up to the present, licensing negative present perfect.",
+      "whyTheQuestionWorks": "The distractors are grammatical-looking tense forms, but only present perfect naturally expresses 'not yet experienced by now.'",
+      "correctRationale": "The speaker currently lacks an opinion and plans to watch later, so 'haven’t seen' correctly means the experience has not occurred up to now; C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q15 stem",
+          "quoteOrDescription": "The speaker cannot judge the movie now and will probably watch it this Saturday.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "aspect_mismatch",
+          "rationale": "'am not seeing' describes a current progressive situation, not a missing life/recent experience.",
+          "misconceptionTarget": "Overusing progressive for present-time meaning.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The issue is whether the event has occurred before now.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "simple_present_mismatch",
+          "rationale": "'don’t see' suggests a habitual or general state, not 'have not watched yet.'",
+          "misconceptionTarget": "Using simple present for an unfinished experience window.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "A specific future viewing is planned.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "future_polarity_mismatch",
+          "rationale": "'won’t see' says the speaker will not watch it, contradicting the next sentence.",
+          "misconceptionTarget": "Ignoring explicit future evidence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The next sentence says the speaker probably will watch it.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Ignoring the future sentence.",
+        "Mapping 'now' automatically to present tense."
+      ],
+      "misconceptionsTargeted": [
+        "Present perfect can be replaced by simple present whenever the consequence is current.",
+        "Future context does not constrain the earlier blank."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The tense is determined by a temporal relation spanning present state and future plan."
+      },
+      "reusableDesignPrinciple": "Use a present consequence plus a future plan to force interpretation of an uncompleted experience up to now.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep a clear future plan to watch the movie."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'because' and make the missing experience inferable from a subtler conversational response."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q15 stem",
+          "quoteOrDescription": "The speaker cannot judge the movie now and will probably watch it this Saturday.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 16,
+      "primarySkill": "figurative_vocabulary_in_context",
+      "secondarySkills": [
+        "simile",
+        "prosody_semantics"
+      ],
+      "skillExplanation": "Q16 asks the learner to map a flat, emotionless speaking style onto the stereotypical property of a robot.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Extract the voice properties: no pitch variation and no emotional cue.",
+        "Map those properties to the best comparison noun."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The second sentence defines the relevant features, and the first asks for a comparison entity that bundles those features.",
+      "whyTheQuestionWorks": "'Father,' 'foreigner,' and 'radio' can all answer 'like a ___' grammatically, but they do not entail mechanical, emotionless delivery.",
+      "correctRationale": "No ups and downs in the voice and no detectable emotion describe robotic speech, so D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q16 stem",
+          "quoteOrDescription": "'no ups and downs in his voice' and inability to tell whether he is happy or sad",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "unsupported_stereotype",
+          "rationale": "Being a father does not imply flat or emotionless speech.",
+          "misconceptionTarget": "Using arbitrary person categories as personality cues.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The stem gives vocal, not family-role, evidence.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "unsupported_stereotype",
+          "rationale": "Being foreign does not imply monotone or emotionlessness.",
+          "misconceptionTarget": "Relying on stereotypes rather than stated acoustic features.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The clues concern prosody, not nationality.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "partial_feature_match",
+          "rationale": "A radio can produce voices but does not itself imply flat emotional delivery.",
+          "misconceptionTarget": "Choosing an object associated with sound instead of matching the described manner.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "Radios can broadcast highly expressive voices.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Selecting any noun related to speaking or sound.",
+        "Missing that the second sentence functions as a definition."
+      ],
+      "misconceptionsTargeted": [
+        "Similes can be solved by topic association alone.",
+        "A radio necessarily sounds monotone."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner interprets descriptive features and maps them to a figurative comparison."
+      },
+      "reusableDesignPrinciple": "Define a comparison indirectly through two observable traits rather than naming the trait itself.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep both flat-pitch and emotionless clues."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Use less explicit prosody clues, such as identical delivery of good and bad news."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q16 stem",
+          "quoteOrDescription": "'no ups and downs in his voice' and inability to tell whether he is happy or sad",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 17,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "polysemy",
+        "contrastive_inference"
+      ],
+      "skillExplanation": "Q17 tests the verb 'miss' meaning to feel the absence of something familiar, not fail to hit or fail to notice.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use the move from city to country as a change of environment.",
+        "Infer that the formerly familiar city noise becomes absent and unexpectedly desired."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The context creates a before-after contrast in environment, so the target verb must express reaction to an absent former feature.",
+      "whyTheQuestionWorks": "The surprising object 'the noise in the city' makes 'miss' less formulaic and tests contextual sense selection.",
+      "correctRationale": "Once Jasmine is in the country, city noise is absent; starting to miss it means she feels its absence despite having chosen the country, so C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q17 stem",
+          "quoteOrDescription": "She moved to the country and then reacted to 'the noise in the city.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_temporal_relation",
+          "rationale": "'enjoy' would normally describe experiencing the noise, but she is now away from the city.",
+          "misconceptionTarget": "Ignoring the change of location.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The city noise is no longer present.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "polarity_mismatch",
+          "rationale": "'mind' means be bothered by; the sentence's surprise is that she longs for something she expected to leave behind.",
+          "misconceptionTarget": "Confusing dislike with absence-based longing.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "She is in the country after deliberately leaving the city.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "perception_mismatch",
+          "rationale": "'notice' requires perceiving the noise, yet she has just left the place where it occurs.",
+          "misconceptionTarget": "Ignoring physical availability of the object.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The relevant noise is in the city.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Using only the most familiar dictionary sense of 'miss'.",
+        "Ignoring that the location change controls which actions are possible."
+      ],
+      "misconceptionsTargeted": [
+        "Polysemous verbs have one fixed translation.",
+        "A person must currently perceive something in order to miss it."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires sense disambiguation from a change-of-location context."
+      },
+      "reusableDesignPrinciple": "Test polysemy by placing a familiar verb in a context that blocks its most literal sense.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the city-to-country move."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make the former city feature implicit and require readers to recover it from an earlier sentence."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q17 stem",
+          "quoteOrDescription": "She moved to the country and then reacted to 'the noise in the city.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 18,
+      "primarySkill": "evaluative_vocabulary_in_context",
+      "secondarySkills": [
+        "pragmatic_inference",
+        "superlative"
+      ],
+      "skillExplanation": "Q18 requires judging excuse quality from the boss's knowledge that the employee can walk to work in five minutes; traffic therefore cannot plausibly explain lateness.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Infer that traffic is irrelevant to a five-minute walk.",
+        "Evaluate the excuse negatively.",
+        "Select the superlative adjective expressing the strongest negative judgment."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The item embeds pragmatic contradiction: the offered cause cannot affect the actual commute method.",
+      "whyTheQuestionWorks": "Several superlatives are grammatically possible, but only 'worst' encodes the excuse's lack of credibility.",
+      "correctRationale": "If work is only a five-minute walk away, traffic is an especially implausible reason for lateness, making it the 'worst' excuse; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q18 stem",
+          "quoteOrDescription": "The boss knows it only takes five minutes to walk to work.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_evaluation_dimension",
+          "rationale": "An excuse may be easy to say, but the sentence evaluates plausibility, not production effort.",
+          "misconceptionTarget": "Choosing an adjective that can modify 'excuse' without tracking the intended judgment.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The walking fact makes the excuse unbelievable.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "unsupported_attribute",
+          "rationale": "Nothing establishes the historical age of the excuse.",
+          "misconceptionTarget": "Importing a common phrase instead of using contextual evidence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "No time-history comparison is given.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "polarity_reversal",
+          "rationale": "Calling it smartest conflicts with the boss's knowledge that exposes the excuse immediately.",
+          "misconceptionTarget": "Ignoring pragmatic contradiction.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The boss knows traffic should not matter.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing based on common collocation such as 'oldest excuse'.",
+        "Failing to connect walking with traffic irrelevance."
+      ],
+      "misconceptionsTargeted": [
+        "Any conventional-sounding phrase can override context.",
+        "Traffic can delay all commutes regardless of mode."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must evaluate causal plausibility from world knowledge explicitly activated by the stem."
+      },
+      "reusableDesignPrinciple": "Create evaluative vocabulary items where one concrete fact invalidates an otherwise common excuse.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the five-minute walking fact."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the direct walking statement with two clues that indirectly reveal traffic is irrelevant."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q18 stem",
+          "quoteOrDescription": "The boss knows it only takes five minutes to walk to work.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 19,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "passive_voice",
+        "subject_verb_agreement"
+      ],
+      "skillExplanation": "Q19 jointly tests that 'housework' is an uncountable singular subject and that the work receives the action of sharing, requiring singular passive 'is shared.'",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Identify 'housework' as the grammatical subject.",
+        "Determine that family members distribute the housework rather than housework distributing something.",
+        "Apply singular agreement in passive voice."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Each option manipulates voice and/or agreement, so the learner must satisfy both semantic role and number.",
+      "whyTheQuestionWorks": "The follow-up 'Everyone’s got their own job to do' confirms distribution of tasks, strengthening the passive interpretation.",
+      "correctRationale": "Housework is distributed among the parents and children, so passive voice is needed; 'housework' takes singular agreement, yielding 'is shared,' A.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q19 stem",
+          "quoteOrDescription": "'between them and their kids' plus 'Everyone’s got their own job to do' shows distribution of housework.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "agreement_error",
+          "rationale": "'are shared' has the right passive meaning but wrongly treats uncountable 'housework' as plural.",
+          "misconceptionTarget": "Assuming -work refers to many chores and therefore takes plural agreement.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The head noun 'housework' is grammatically singular/uncountable.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "voice_error",
+          "rationale": "'shares' makes housework the agent doing the sharing.",
+          "misconceptionTarget": "Ignoring semantic roles when active morphology is grammatical.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "People share the housework; the housework is the thing distributed.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "voice_and_agreement_error",
+          "rationale": "'share' is active and also lacks agreement with the singular subject.",
+          "misconceptionTarget": "Selecting a familiar verb form without checking subject and voice.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The subject is singular and receives the action.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Treating meaning and agreement as separate and checking only one.",
+        "Interpreting an uncountable mass noun as plural because it contains many tasks."
+      ],
+      "misconceptionsTargeted": [
+        "Passive voice is optional when the same verb is present.",
+        "Semantic plurality determines grammatical agreement for mass nouns."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Correct selection requires simultaneous role assignment and agreement."
+      },
+      "reusableDesignPrinciple": "Make grammar distractors cross two dimensions so partial knowledge is insufficient.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep 'housework' as subject and an explicit distribution clue."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the second sentence and rely on the prepositional phrase to establish passive roles."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q19 stem",
+          "quoteOrDescription": "'between them and their kids' plus 'Everyone’s got their own job to do' shows distribution of housework.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 20,
+      "primarySkill": "pronoun_reference",
+      "secondarySkills": [
+        "possessive_pronoun",
+        "nominal_ellipsis"
+      ],
+      "skillExplanation": "Q20 tests possessive pronoun substitution: after contrasting 'another dentist' with the previous dentist, 'mine' stands for 'my dentist.'",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_constraint_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Establish that the person who pulled the tooth was the speaker's previous dentist.",
+        "Recognize that a subject noun phrase is required before 'pulled out'.",
+        "Use possessive pronoun 'mine' to replace 'my dentist' without repeating the noun."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank is both the subject of the clause and a contrastive possessive reference to the speaker's dentist.",
+      "whyTheQuestionWorks": "The surface forms I/me/myself are highly familiar, but only 'mine' can stand independently as a possessive noun phrase meaning 'my dentist.'",
+      "correctRationale": "The sentence contrasts another dentist with the speaker's current/previous one; 'mine' independently means 'my dentist' and can serve as the subject, so C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q20 stem",
+          "quoteOrDescription": "'another dentist' supplies the recoverable noun for possessive 'mine.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_referent",
+          "rationale": "'I pulled out a good tooth' would make the speaker, not the dentist, perform the extraction.",
+          "misconceptionTarget": "Ignoring semantic role and antecedent contrast.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The complaint is about a dentist's mistake.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "case_error",
+          "rationale": "Object-case 'me' cannot function as the subject of 'pulled out.'",
+          "misconceptionTarget": "Using pronoun meaning without checking syntactic case.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The blank directly precedes the finite verb as subject.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "reflexive_misuse",
+          "rationale": "'myself' requires a licensed reflexive/emphatic relation to 'I' and would again make the speaker the actor.",
+          "misconceptionTarget": "Treating all first-person pronouns as interchangeable.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The intended actor is the speaker's dentist.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Reading 'mine' only as ownership of objects, not people/roles recoverable from context.",
+        "Selecting 'I' because it is the usual subject form without checking who did the dentistry."
+      ],
+      "misconceptionsTargeted": [
+        "Possessive pronouns cannot replace human-role noun phrases.",
+        "Subject case alone guarantees semantic correctness."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner resolves a contrastive antecedent and nominal ellipsis."
+      },
+      "reusableDesignPrinciple": "Test possessive pronouns with an explicit contrast noun ('another X') that licenses an elliptical 'mine/yours/his.'",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain 'another dentist' as antecedent support."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the antecedent to a previous sentence so the learner must resolve it across discourse."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q20 stem",
+          "quoteOrDescription": "'another dentist' supplies the recoverable noun for possessive 'mine.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 21,
+      "primarySkill": "tense_aspect_in_context",
+      "secondarySkills": [
+        "simple_past",
+        "completed_subevent"
+      ],
+      "skillExplanation": "Q21 asks the learner to distinguish a completed past portion of an unfinished report from ongoing or future actions.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use 'this afternoon' as a completed past reference period in the conversation.",
+        "Interpret 'most of it' as a completed portion.",
+        "Contrast that completion with the future plan to finish the remainder by Friday."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "medium",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The report as a whole is unfinished, but a large subpart was completed earlier; tense choice must track the subevent rather than the whole task.",
+      "whyTheQuestionWorks": "The dialogue tempts learners to overfocus on the unfinished report and choose a future or progressive form.",
+      "correctRationale": "Linda states that most of the report was completed this afternoon and only the remainder is future work; simple past 'I did' fits, so B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q21 stem",
+          "quoteOrDescription": "'this afternoon' marks the completed work; 'I’ll finish it by Friday' reserves only the remainder for the future.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "modal_temporal_mismatch",
+          "rationale": "'would do' needs a conditional, reported-future, or habitual frame absent here.",
+          "misconceptionTarget": "Choosing a modal because the report remains unfinished.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The clause reports an actual completed action.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "aspect_mismatch",
+          "rationale": "'was doing' presents an action in progress and does not naturally assert completion of 'most of it.'",
+          "misconceptionTarget": "Equating duration with completed quantity.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "'most of it' is offered as progress already achieved.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "future_time_conflict",
+          "rationale": "'I’ll do most of it this afternoon' conflicts because the afternoon work is reported as already done in this exchange.",
+          "misconceptionTarget": "Ignoring the temporal adverb's discourse reference.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The future action is separately expressed as finishing by Friday.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Treating an unfinished whole as forcing future tense for every part.",
+        "Choosing progressive merely because the work took time."
+      ],
+      "misconceptionsTargeted": [
+        "Tense must describe the whole project rather than the referenced subevent.",
+        "Past progressive entails completion of a quantified amount."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must segment completed and remaining portions of one task."
+      },
+      "reusableDesignPrinciple": "Use part-whole completion contrasts to test tense without relying on isolated time-word matching.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the completed-part versus future-remainder contrast."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit 'this afternoon' and establish past time through dialogue sequence."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "113 Q21 stem",
+          "quoteOrDescription": "'this afternoon' marks the completed work; 'I’ll finish it by Friday' reserves only the remainder for the future.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 22,
+      "primarySkill": "explicit_information_retrieval",
+      "secondarySkills": [
+        "causal_relation",
+        "pronoun_reference"
+      ],
+      "skillExplanation": "Q22 asks why Philip left the house; the passage states that Jason was hungry, Philip could not cook, and Philip therefore took him out for food.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Locate the causal chain before Philip leaves.",
+        "Resolve Jason as Philip's hungry little brother.",
+        "Map 'take Jason out for some food' to buying/getting food for him."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The answer is near-explicit but requires linking the brother's hunger and Philip's inability to cook to the departure.",
+      "whyTheQuestionWorks": "Distractors reuse later-story entities such as the woman, father, and police, rewarding chronology-aware reading rather than keyword matching.",
+      "correctRationale": "Philip went out because Jason was hungry and Philip could not cook, so he took Jason out for food; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q22 passage",
+          "quoteOrDescription": "Jason was hungry; Philip couldn't cook; 'So Philip decided to take Jason out for some food.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "later_detail_intrusion",
+          "rationale": "Philip did not know the woman and only encountered her after returning home.",
+          "misconceptionTarget": "Pulling a salient later character backward into the cause.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The woman appears after the trip.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "wrong_goal",
+          "rationale": "The father was known to be working late; Philip did not leave to search for him.",
+          "misconceptionTarget": "Substituting a relevant person for the stated purpose.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The passage explicitly gives food as the purpose.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "later_detail_intrusion",
+          "rationale": "The police were already outside when Philip returned and were not the reason he left.",
+          "misconceptionTarget": "Confusing later consequence with earlier motivation.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "Police involvement occurs after Philip comes back.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Answering from the most dramatic later event.",
+        "Ignoring the causal connector 'So.'"
+      ],
+      "misconceptionsTargeted": [
+        "Story importance equals causal relevance.",
+        "Later events can explain earlier motivations without textual support."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer is explicit but requires causal and referential integration across adjacent sentences."
+      },
+      "reusableDesignPrinciple": "Place the true motivation just before a later dramatic event so distractors can exploit salience without being ambiguous.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep Jason's hunger and the explicit decision to get food."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'So' and require readers to infer the causal link from hunger plus inability to cook."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q22 passage",
+          "quoteOrDescription": "Jason was hungry; Philip couldn't cook; 'So Philip decided to take Jason out for some food.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 23,
+      "primarySkill": "causal_inference",
+      "secondarySkills": [
+        "speaker_attitude",
+        "event_sequence"
+      ],
+      "skillExplanation": "Q23 asks why Philip's father was angry; his quoted protest centers on the police treating him as a wrongdoer and refusing to believe that he was entering his own house.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Read the father's quoted protest as evidence of his grievance.",
+        "Connect the police's disbelief to his repeated insistence that he did nothing wrong.",
+        "Distinguish trigger from background facts such as forgotten keys."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The cause of emotion is inferred from dialogue and narration rather than stated in a single 'because' clause.",
+      "whyTheQuestionWorks": "Forgotten keys explain why he used a window, but the anger is directed at being disbelieved; this separates causal layers.",
+      "correctRationale": "The father shouts that he did nothing wrong, and the passage says the police did not believe him until Philip explained; their disbelief is the immediate reason for his anger, so C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q23 passage",
+          "quoteOrDescription": "Father shouted 'I didn’t do anything wrong!' and 'the police didn’t believe him until Philip...explained everything.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "background_cause_not_emotion_trigger",
+          "rationale": "Forgetting the keys caused the unusual entry method, but his anger is expressed toward being treated as suspicious.",
+          "misconceptionTarget": "Confusing an earlier enabling condition with the emotional trigger.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The quoted protest focuses on innocence and disbelief.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "unsupported_claim",
+          "rationale": "The woman stood behind the police because she was scared; she was not described as hiding from the father.",
+          "misconceptionTarget": "Transforming a spatial detail into an unsupported intention.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "The passage says she stood behind the police.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "wrong_event_focus",
+          "rationale": "Nothing in the father's speech shows anger that his sons went out; Philip's explanation actually resolves the police's suspicion.",
+          "misconceptionTarget": "Attributing parental anger by stereotype instead of textual evidence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "113 item context",
+              "quoteOrDescription": "His shouted words concern entering his own house.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing the earliest cause in the chain rather than the cause of anger.",
+        "Projecting common parent-child conflict onto the story."
+      ],
+      "misconceptionsTargeted": [
+        "Any causal predecessor is an acceptable answer to an emotion question.",
+        "Dialogue can be ignored when narration provides background events."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner identifies an emotion trigger by integrating dialogue with the police's behavior."
+      },
+      "reusableDesignPrinciple": "Create layered causal chains where one fact causes an action and a later response causes the character's emotion.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the father's protest and the police disbelief."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make the police disbelief implicit through their actions rather than stating it directly."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q23 passage",
+          "quoteOrDescription": "Father shouted 'I didn’t do anything wrong!' and 'the police didn’t believe him until Philip...explained everything.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    }
+  ]
+}
