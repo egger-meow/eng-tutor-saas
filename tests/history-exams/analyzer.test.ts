@@ -1,6 +1,7 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   ApiKeyMissingError,
   computeAssetImageHashes,
@@ -21,8 +22,12 @@ import {
 import { ExtractedQuestion } from '../../scripts/history-exams/src/schemas/extracted';
 
 describe('Historical CAP English Exam Analyzer (Two-Pass Hardened)', () => {
-  const extractedDir = path.resolve(__dirname, '../../history_exams/extracted');
-  const analyzedDir = path.resolve(__dirname, '../../history_exams/analyzed');
+  const sourceExtractedDir = path.resolve(__dirname, '../../history_exams/extracted');
+  const roots: string[] = [];
+
+  afterEach(() => {
+    for (const root of roots.splice(0)) fs.rmSync(root, { recursive: true, force: true });
+  });
 
   const sampleQuestion: ExtractedQuestion = {
     examId: '115',
@@ -156,6 +161,16 @@ describe('Historical CAP English Exam Analyzer (Two-Pass Hardened)', () => {
   });
 
   it('runs the two-pass analysis pipeline with offline mock provider in test mode', async () => {
+    const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cap-analyzer-'));
+    roots.push(testRoot);
+    const extractedDir = path.join(testRoot, 'extracted');
+    const analyzedDir = path.join(testRoot, 'analyzed');
+    fs.mkdirSync(extractedDir, { recursive: true });
+    fs.copyFileSync(
+      path.join(sourceExtractedDir, '115.json'),
+      path.join(extractedDir, '115.json')
+    );
+
     const summaries = await runAnalysisPipeline({
       extractedDir,
       analyzedDir,
@@ -176,4 +191,3 @@ describe('Historical CAP English Exam Analyzer (Two-Pass Hardened)', () => {
     }
   });
 });
-

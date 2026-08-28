@@ -3,6 +3,7 @@ import cp from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ingestAgentAnalysisFiles } from '../agent-ingest/index.ts';
+import { analyzeReusableFieldDiversity } from '../quality/diversity.ts';
 
 const root = process.cwd();
 const sourceDir = path.resolve(root, 'history_exams/agent_analysis');
@@ -265,19 +266,14 @@ function assertSourceQuality() {
       throw new Error(`${key}: unique=${values.size}, blank=${values.has('')}`);
     }
   }
-  const principleCounts = new Map<string, number>();
-  for (const q of questions) {
-    const principle = String(q.reusableDesignPrinciple ?? '').trim();
-    principleCounts.set(principle, (principleCounts.get(principle) ?? 0) + 1);
-  }
-  const maxFrequency = Math.max(...principleCounts.values());
-  if (principleCounts.size < 150 || maxFrequency > 10 || principleCounts.has('')) {
-    throw new Error(
-      `reusableDesignPrinciple: unique=${principleCounts.size}, maxFrequency=${maxFrequency}, blank=${principleCounts.has('')}`
-    );
+  const principleDiversity = analyzeReusableFieldDiversity(
+    questions.map((q) => q.reusableDesignPrinciple)
+  );
+  if (!principleDiversity.accepted) {
+    throw new Error(`reusableDesignPrinciple diversity: ${JSON.stringify(principleDiversity)}`);
   }
   console.log(
-    `[source-quality] mechanisms>=200, whyWorks>=200, skillExplanations>=200, principles=${principleCounts.size}, maxPrincipleFrequency=${maxFrequency}`
+    `[source-quality] mechanisms>=200, whyWorks>=200, skillExplanations>=200, principleDiversity=${JSON.stringify(principleDiversity)}`
   );
 }
 

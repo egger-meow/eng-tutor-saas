@@ -107,6 +107,7 @@ export const SOURCE_FILES = [
   'docs/product-rules.md',
   'packages/generator/curriculum/cap-precedent-contract.md',
   'packages/generator/curriculum/cap-precedent-cards.json',
+  'packages/generator/curriculum/cap-precedent-routing-index.json',
 ] as const
 
 function compactQualityProfileForBundle(profile: string): string {
@@ -215,7 +216,7 @@ export async function compileProductionBundle(
   const readPromptStage = async (fileName: string) => {
     const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
       .replaceAll('2.2.0', '2.3.0')
-      .replaceAll('2.4.0', '2.8.0')
+      .replaceAll('2.4.0', '2.9.0')
     const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
     const workloadOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.6.0/${fileName}`), 'utf8')
     const mcqOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.7.0/${fileName}`), 'utf8')
@@ -232,14 +233,14 @@ export async function compileProductionBundle(
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
   const precedentContract = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-contract.md'), 'utf8')
-  const precedentCards = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-cards.json'), 'utf8')
+  const precedentRoutingIndex = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-routing-index.json'), 'utf8')
 
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.8.0-prod',
+    bundleVersion: '2.9.0-prod',
     schemaVersion: '2.3.0',
-    promptVersion: '2.8.0',
+    promptVersion: '2.9.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
@@ -291,9 +292,9 @@ export async function compileProductionBundle(
     '## 2A. CAP Precedent-First Contract',
     precedentContract.trim().replace(/\r\n/g, '\n'),
     '',
-    '## 2B. Searchable CAP Precedent Cards',
+    '## 2B. Compact CAP Precedent Routing Index',
     '```json',
-    precedentCards.trim(),
+    precedentRoutingIndex.trim(),
     '```',
     '',
     profileResolutionContract,

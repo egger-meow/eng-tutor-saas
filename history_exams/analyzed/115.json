@@ -1,10 +1,10 @@
 {
   "examId": "115",
   "year": 115,
-  "promptVersion": "v3.0.0",
-  "criticPromptVersion": "v3.0.0",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
   "analysisSchemaVersion": "1.0.0",
-  "analyzedAt": "2026-08-28T04:49:27.614Z",
+  "analyzedAt": "2026-08-28T07:27:40.708Z",
   "questions": [
     {
       "examId": "115",
@@ -15,7 +15,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.067Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 1,
@@ -188,7 +188,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.067Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 2,
@@ -340,7 +340,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.067Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 3,
@@ -490,7 +490,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.067Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 4,
@@ -642,7 +642,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.067Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 5,
@@ -791,7 +791,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 6,
@@ -940,7 +940,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 7,
@@ -1092,7 +1092,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 8,
@@ -1244,7 +1244,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 9,
@@ -1396,7 +1396,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 10,
@@ -1545,7 +1545,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 11,
@@ -1695,7 +1695,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 12,
@@ -1847,7 +1847,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 13,
@@ -1999,7 +1999,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 14,
@@ -2151,7 +2151,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 15,
@@ -2303,7 +2303,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 16,
@@ -2455,7 +2455,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 17,
@@ -2607,7 +2607,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 18,
@@ -2759,7 +2759,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.704Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 19,
@@ -2911,7 +2911,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.068Z",
+      "analyzedAt": "2026-08-28T07:27:40.705Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 20,
@@ -3074,7 +3074,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.069Z",
+      "analyzedAt": "2026-08-28T07:27:40.705Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 21,
@@ -3238,7 +3238,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.069Z",
+      "analyzedAt": "2026-08-28T07:27:40.705Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 22,
@@ -3401,7 +3401,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.070Z",
+      "analyzedAt": "2026-08-28T07:27:40.705Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 23,
@@ -3565,7 +3565,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.070Z",
+      "analyzedAt": "2026-08-28T07:27:40.706Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 24,
@@ -3727,7 +3727,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.706Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 25,
@@ -3889,7 +3889,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 26,
@@ -4054,7 +4054,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 27,
@@ -4209,7 +4209,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 28,
@@ -4365,7 +4365,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 29,
@@ -4520,7 +4520,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 30,
@@ -4673,7 +4673,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.071Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 31,
@@ -4828,7 +4828,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.072Z",
+      "analyzedAt": "2026-08-28T07:27:40.707Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 32,
@@ -4992,7 +4992,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.072Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 33,
@@ -5156,7 +5156,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 34,
@@ -5318,7 +5318,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 35,
@@ -5484,7 +5484,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 36,
@@ -5651,7 +5651,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 37,
@@ -5817,7 +5817,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 38,
@@ -5986,7 +5986,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 39,
@@ -6153,7 +6153,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 40,
@@ -6310,7 +6310,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 41,
@@ -6466,7 +6466,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 42,
@@ -6622,7 +6622,7 @@
       "promptVersion": "chatgpt-agent-digestion-v2",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-28T04:48:59.073Z",
+      "analyzedAt": "2026-08-28T07:27:40.708Z",
       "extracted": {
         "examId": "115",
         "questionNumber": 43,

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { analyzeReusableFieldDiversity } from '../../scripts/history-exams/src/quality/diversity';
 
 const ROOT = path.resolve(__dirname, '../..');
 const AGENT_DIR = path.join(ROOT, 'history_exams/agent_analysis');
@@ -28,6 +29,20 @@ function frequencyStats(values: string[]) {
 }
 
 describe('CAP agent-authored deep digestion quality floor', () => {
+  it('allows principled reuse while rejecting a template-dominated corpus', () => {
+    const legitimateReuse = [
+      ...Array.from({ length: 160 }, (_, index) => `principle-${index}`),
+      ...Array.from({ length: 55 }, (_, index) => `principle-${index % 8}`),
+    ];
+    const templated = [
+      ...Array.from({ length: 150 }, () => 'same boilerplate'),
+      ...Array.from({ length: 65 }, (_, index) => `principle-${index}`),
+    ];
+
+    expect(analyzeReusableFieldDiversity(legitimateReuse).accepted).toBe(true);
+    expect(analyzeReusableFieldDiversity(templated).accepted).toBe(false);
+  });
+
   it('contains a complete 215-question live corpus with truthful provenance and non-template analysis', () => {
     const exams = ['111', '112', '113', '114', '115'].map(loadAgentExam);
     const questions = exams.flatMap((exam) => exam.questions);
@@ -48,7 +63,9 @@ describe('CAP agent-authored deep digestion quality floor', () => {
 
     const mechanisms = frequencyStats(questions.map((q) => q.questionMechanism));
     const whyWorks = frequencyStats(questions.map((q) => q.whyTheQuestionWorks));
-    const principles = frequencyStats(questions.map((q) => q.reusableDesignPrinciple));
+    const principles = analyzeReusableFieldDiversity(
+      questions.map((q) => q.reusableDesignPrinciple)
+    );
     const skillExplanations = frequencyStats(questions.map((q) => q.skillExplanation));
 
     expect(mechanisms.uniqueCount).toBeGreaterThanOrEqual(200);
@@ -56,9 +73,8 @@ describe('CAP agent-authored deep digestion quality floor', () => {
     expect(skillExplanations.uniqueCount).toBeGreaterThanOrEqual(200);
 
     // Reusable principles may legitimately recur across items with the same assessment mechanic.
-    // Block corpus-wide boilerplate instead of forcing cosmetic one-off paraphrases.
-    expect(principles.uniqueCount).toBeGreaterThanOrEqual(150);
-    expect(principles.maxFrequency).toBeLessThanOrEqual(10);
+    // Block concentration and corpus-wide boilerplate instead of forcing cosmetic paraphrases.
+    expect(principles).toMatchObject({ accepted: true, hasBlank: false, totalCount: 215 });
 
     const bannedBoilerplate = [
       'exact wording and evidence configuration',
@@ -109,6 +125,10 @@ describe('CAP agent-authored deep digestion quality floor', () => {
     expect(byKey.get('115-Q26')?.primarySkill).toBe('information_integration');
     expect(byKey.get('115-Q26')?.cognitiveDepth).toBe('D3_multi_step_synthesis');
     expect(byKey.get('115-Q38')?.primarySkill).toBe('cross_sentence_inference');
+    expect(byKey.get('115-Q38')?.secondarySkills).toContain('information_integration');
     expect(byKey.get('115-Q38')?.cognitiveDepth).toBe('D3_multi_step_synthesis');
+
+    const extracted115 = loadExtractedExam('115');
+    expect(extracted115.questions.find((q: any) => q.questionNumber === 26)?.answer).toBe('C');
   });
 });

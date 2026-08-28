@@ -14,7 +14,7 @@
     "modelName": "gpt-5.6-sol",
     "analysisPromptVersion": "chatgpt-agent-digestion-v1",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-28T04:49:27.660Z",
+    "generatedAt": "2026-08-28T07:27:52.251Z",
     "sourceCorpusHash": "c0035a5178b8aae6653e383eb0efd98ef1250fd2e6329209817afc0ff29c9811",
     "authorityStatus": "authoritative"
   },

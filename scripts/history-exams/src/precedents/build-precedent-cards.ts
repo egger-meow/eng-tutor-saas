@@ -44,6 +44,18 @@ export interface PrecedentRuntimeBundle {
   cards: PrecedentCard[]
 }
 
+export interface PrecedentRoutingCard {
+  ref: string
+  genre: string
+  primarySkill: string
+  secondarySkills: string[]
+  cognitiveDepth: string
+  languageDifficulty: string
+  evidenceMode: string
+  evidenceSpan: string
+  shard: string
+}
+
 const compact = (value: string | undefined, max = 160) => {
   const text = (value ?? '').replace(/\s+/g, ' ').trim()
   return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`
@@ -56,7 +68,7 @@ function fiveGramHashes(text: string): string[] {
   const hashes = new Set<string>()
   for (let index = 0; index <= tokens.length - 5; index += 1) {
     hashes.add(hashText(tokens.slice(index, index + 5).join(' ')).slice(0, 16))
-    if (hashes.size >= 16) break
+    if (hashes.size >= 24) break
   }
   return [...hashes]
 }
@@ -83,11 +95,18 @@ function requireAuthoritativeRun(analyzedDir: string): { corpusHash: string } {
   return { corpusHash }
 }
 
-function passageGenresForExam(analyzedDir: string, examId: string): Map<string, string> {
+function passageContextForExam(analyzedDir: string, examId: string): Map<string, { genre: string; copyText: string }> {
   const extractedPath = path.resolve(analyzedDir, '../extracted', `${examId}.json`)
   if (!fs.existsSync(extractedPath)) return new Map()
   const exam = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(extractedPath, 'utf8')))
-  return new Map(exam.passages.map((passage) => [passage.id, passage.genre]))
+  return new Map(exam.passages.map((passage) => [passage.id, {
+    genre: passage.genre,
+    copyText: [
+      passage.title ?? '',
+      passage.text,
+      ...(passage.subDocuments ?? []).flatMap((doc) => [doc.title ?? '', doc.author ?? '', doc.text]),
+    ].join(' '),
+  }]))
 }
 
 export function buildPrecedentCards(analyzedDir: string, benchmarkDir: string): PrecedentCard[] {
@@ -98,34 +117,35 @@ export function buildPrecedentCards(analyzedDir: string, benchmarkDir: string): 
 
   for (const file of fs.readdirSync(analyzedDir).filter((name) => /^\d{3}\.json$/.test(name)).sort()) {
     const exam = AnalyzedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(analyzedDir, file), 'utf8')))
-    const passageGenres = passageGenresForExam(analyzedDir, exam.examId)
+    const passageContext = passageContextForExam(analyzedDir, exam.examId)
     for (const question of exam.questions) {
       const key = `${question.examId}-Q${question.questionNumber}`
       if (holdouts.has(key)) continue
-      const a = question.analysis
-      const sourceText = `${question.extracted.stem} ${Object.values(question.extracted.options).join(' ')}`
+      const analysis = question.analysis
+      const linkedPassage = question.extracted.passageId ? passageContext.get(question.extracted.passageId) : undefined
+      const sourceText = `${linkedPassage?.copyText ?? ''} ${question.extracted.stem} ${Object.values(question.extracted.options).join(' ')}`
       cards.push({
         ref: `cap-${hashText(`${key}:${question.contentHash}`).slice(0, 12)}`,
-        genre: question.extracted.passageId ? (passageGenres.get(question.extracted.passageId) ?? question.extracted.section) : question.extracted.section,
-        primarySkill: a.primarySkill,
-        secondarySkills: a.secondarySkills.slice(0, 3),
-        cognitiveDepth: a.cognitiveDepth,
-        languageDifficulty: a.languageDifficulty,
-        evidenceMode: a.evidenceMode,
-        evidenceNecessity: a.evidenceNecessity,
-        evidenceSpan: a.evidenceSpan,
-        reasoningOperations: a.reasoningOperations.slice(0, 3).map((item) => compact(item, 100)),
-        questionMechanism: compact(a.questionMechanism, 160),
-        whyTheQuestionWorks: compact(a.whyTheQuestionWorks, 140),
+        genre: linkedPassage?.genre ?? question.extracted.section,
+        primarySkill: analysis.primarySkill,
+        secondarySkills: analysis.secondarySkills.slice(0, 3),
+        cognitiveDepth: analysis.cognitiveDepth,
+        languageDifficulty: analysis.languageDifficulty,
+        evidenceMode: analysis.evidenceMode,
+        evidenceNecessity: analysis.evidenceNecessity,
+        evidenceSpan: analysis.evidenceSpan,
+        reasoningOperations: analysis.reasoningOperations.slice(0, 3).map((item) => compact(item, 100)),
+        questionMechanism: compact(analysis.questionMechanism, 160),
+        whyTheQuestionWorks: compact(analysis.whyTheQuestionWorks, 140),
         correctAnswerConstructionPrinciple: compact(
-          `Construct exactly one option supported by the planned ${a.evidenceSpan} evidence after ${a.reasoningOperations.slice(0, 2).join(' + ')}; competing options must fail a specific evidence constraint.`,
+          `Construct exactly one option supported by the planned ${analysis.evidenceSpan} evidence after ${analysis.reasoningOperations.slice(0, 2).join(' + ')}; competing options must fail a specific evidence constraint.`,
           170,
         ),
-        distractorStrategies: [...new Set(a.optionAnalyses.flatMap((option) => option.distractorStrategy ? [option.distractorStrategy] : []))],
-        reusableDesignPrinciple: compact(a.reusableDesignPrinciple, 140),
+        distractorStrategies: [...new Set(analysis.optionAnalyses.flatMap((option) => option.distractorStrategy ? [option.distractorStrategy] : []))],
+        reusableDesignPrinciple: compact(analysis.reusableDesignPrinciple, 140),
         difficultyAdjustment: {
-          simplificationConstraints: a.difficultyAdjustment.simplificationConstraints.slice(0, 2).map((item) => compact(item, 90)),
-          depthAdjustmentStrategies: a.difficultyAdjustment.depthAdjustmentStrategies.slice(0, 2).map((item) => compact(item, 90)),
+          simplificationConstraints: analysis.difficultyAdjustment.simplificationConstraints.slice(0, 2).map((item) => compact(item, 90)),
+          depthAdjustmentStrategies: analysis.difficultyAdjustment.depthAdjustmentStrategies.slice(0, 2).map((item) => compact(item, 90)),
         },
         copyGuardHashes: fiveGramHashes(sourceText),
       })
@@ -151,10 +171,16 @@ export function buildPrecedentRuntimeBundle(analyzedDir: string, benchmarkDir: s
   }
 }
 
+const shardName = (card: Pick<PrecedentCard, 'primarySkill' | 'cognitiveDepth'>) => `${card.primarySkill}--${card.cognitiveDepth}.json`
+
 /**
- * Writes the compact production runtime. Optionally writes a separate debug-only
- * opaque-ref map under history_exams/. The debug map is never compiled into the
- * production authoring bundle.
+ * Write three layers:
+ * 1. full rich runtime for deterministic Finisher auditing;
+ * 2. compact 195-card routing index embedded in the production bundle;
+ * 3. small skill×depth shards that Scheduled Work reads only after routing.
+ *
+ * The optional debug index maps opaque refs back to historical IDs for operator
+ * provenance. It lives under history_exams/ and is never compiled into prompts.
  */
 export function writePrecedentCards(
   analyzedDir: string,
@@ -163,8 +189,48 @@ export function writePrecedentCards(
   indexPath?: string,
 ): PrecedentCard[] {
   const runtime = buildPrecedentRuntimeBundle(analyzedDir, benchmarkDir)
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+  const outputDir = path.dirname(outputPath)
+  const routingPath = path.join(outputDir, 'cap-precedent-routing-index.json')
+  const shardDir = path.join(outputDir, 'cap-precedent-shards')
+  fs.mkdirSync(outputDir, { recursive: true })
+  fs.rmSync(shardDir, { recursive: true, force: true })
+  fs.mkdirSync(shardDir, { recursive: true })
+
   fs.writeFileSync(outputPath, `${JSON.stringify(runtime)}\n`)
+
+  const routingCards: PrecedentRoutingCard[] = runtime.cards.map((card) => ({
+    ref: card.ref,
+    genre: card.genre,
+    primarySkill: card.primarySkill,
+    secondarySkills: card.secondarySkills,
+    cognitiveDepth: card.cognitiveDepth,
+    languageDifficulty: card.languageDifficulty,
+    evidenceMode: card.evidenceMode,
+    evidenceSpan: card.evidenceSpan,
+    shard: `packages/generator/curriculum/cap-precedent-shards/${shardName(card)}`,
+  }))
+  const metadata = {
+    version: runtime.version,
+    authorityStatus: runtime.authorityStatus,
+    capKnowledgeVersion: runtime.capKnowledgeVersion,
+    capCorpusHash: runtime.capCorpusHash,
+    capBundleVersion: runtime.capBundleVersion,
+    plannerVersion: runtime.plannerVersion,
+    qualityFloorVersion: runtime.qualityFloorVersion,
+  }
+  fs.writeFileSync(routingPath, `${JSON.stringify({ ...metadata, cards: routingCards })}\n`)
+
+  const groups = new Map<string, PrecedentCard[]>()
+  for (const card of runtime.cards) {
+    const key = shardName(card)
+    const group = groups.get(key) ?? []
+    group.push(card)
+    groups.set(key, group)
+  }
+  for (const [file, cards] of groups) {
+    const authorCards = cards.map(({ copyGuardHashes: _hidden, ...card }) => card)
+    fs.writeFileSync(path.join(shardDir, file), `${JSON.stringify({ ...metadata, cards: authorCards })}\n`)
+  }
 
   if (indexPath) {
     const manifest = HoldoutManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(benchmarkDir, 'holdout-manifest.json'), 'utf8')))

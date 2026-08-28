@@ -6,7 +6,7 @@ import { runBenchmarkPipeline } from './benchmark/index.ts';
 import { validateFullCorpus } from './validator/index.ts';
 import { generateSpotCheckReport } from './spot-check/spot-check-builder.ts';
 import { generatePilotReviewReport } from './spot-check/pilot-builder.ts';
-import { reconcileRollingWindow } from './corpus/rolling-window.ts';
+import { commitRollingWindowManifest, reconcileRollingWindow } from './corpus/rolling-window.ts';
 import { writePrecedentCards } from './precedents/build-precedent-cards.ts';
 import { rotateHoldoutManifest } from './benchmark/rotate-holdouts.ts';
 
@@ -139,7 +139,6 @@ async function main() {
         force,
         allowOfflineMock: allowProvisionalMock,
       });
-      rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);
       const outPath = generatePilotReviewReport({
         extractedDir,
         analyzedDir,
@@ -243,20 +242,27 @@ async function main() {
         force: false,
         allowOfflineMock: allowProvisionalMock,
       });
+      rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);
       let aiProvider;
       try {
         aiProvider = createAiProvider({ allowOfflineMock: allowProvisionalMock });
       } catch {}
       await runSynthesisPipeline({ analyzedDir, knowledgeDir, benchmarkDir, allowProvisionalMock, aiProvider });
       await runBenchmarkPipeline({ analyzedDir, benchmarkDir, allowProvisionalMock });
-      writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'));
       generateSpotCheckReport({ extractedDir, analyzedDir, outputPath: spotCheckPath });
       generatePilotReviewReport({ extractedDir, analyzedDir, outputPath: pilotReviewPath });
       const report = validateFullCorpus({ extractedDir, analyzedDir, knowledgeDir, benchmarkDir });
-      if (!report.valid) {
+      if (!report.valid || !report.authorityEligible || report.authorityStatus !== 'authoritative') {
         console.error('[history-exams] Build validation failed:', report.errors);
         process.exit(1);
       }
+      writePrecedentCards(
+        analyzedDir,
+        benchmarkDir,
+        path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'),
+        path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'),
+      );
+      commitRollingWindowManifest(rawDir, rolling);
       console.log(`[history-exams] Complete digestion pipeline successfully built, validated, and spot-check/pilot reports generated!`);
       break;
     }
@@ -268,7 +274,7 @@ async function main() {
     }
 
     case 'precedents': {
-      const cards = writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'));
+      const cards = writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'), path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'));
       console.log(`[history-exams] Wrote ${cards.length} authoritative non-holdout precedent cards.`);
       break;
     }

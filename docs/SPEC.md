@@ -1491,6 +1491,8 @@ Production curriculum sources also include per-package public-web research metad
 
 Historical CAP English exam design knowledge (taxonomy, question recipes, distractor patterns, cognitive depth framework, and benchmark foundation) lives independently under `history_exams/` and `docs/history-exams/` as an assessment-design reference.
 
+Production assessment authoring consumes only the deterministically compiled **authoritative non-holdout CAP runtime bundle**. Raw historical PDFs and heavy visual assets never enter normal weekly generation. For normal assessment/application/comprehension items, a relevant authentic CAP precedent is a required design anchor rather than optional inspiration; intentional vocabulary/grammar retrieval remains exempt when explicitly planned as retrieval.
+
 ---
 
 # 62. Vocabulary Source
@@ -3718,6 +3720,10 @@ Automated or semi-automated validation should eventually check:
 * current-event review distinguishes event dates from publication dates, rejects stale/undated required sources and unsupported recency, and never uses one universal age cutoff;
 * provenance timestamps are causal: `publishedAt`, when present, is not later than `accessedAt`, and neither source access nor publication is later than `researchedAt`;
 * required grounding accuracy and copyright critical checks pass.
+* Prompt 2.9+ normal assessment/application/comprehension items have per-item CAP assessment plans; relevant authoritative precedent retrieval cannot be silently skipped.
+* package-level CAP precedent refs equal the union of per-item refs and resolve only to the authoritative non-holdout runtime bundle.
+* CAP language difficulty and cognitive depth are validated independently; simplifying English must not silently erase planned reasoning.
+* deterministic CAP copy-fingerprint and shallow-assessment checks pass before rendering.
 
 ---
 
@@ -4187,6 +4193,11 @@ For weekly-material work specifically:
 25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 
 ---
+
+24. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP design anchors before writing the item, and preserve mechanics rather than wording.
+25. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
+26. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
+27. The deterministic Finisher must fail closed on missing/unknown CAP refs, authority/provenance mismatch, blank-page authoring when a relevant precedent exists, copy overlap, or accidental shallow assessment; repair only the failing item/local cluster.
 
 # 206. Core Architectural Summary
 
