@@ -21,12 +21,20 @@
         24,
         25
       ],
-      "genre": "article_informational",
+      "genre": "infographic_chart_table",
       "title": null,
-      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 4]",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "text": "Four Seasons' Kitchen\nGarden Sandwich $80; Autumn Wind $60; Winter Snow $70.\nStar plan: 15 stars can be used for a $60 drink for free.\nOpening hours: 2:00-8:00 pm Tuesday through Sunday; closed Mondays and the second Sunday of each month.\nThe same page includes Amy’s August calendar for the scheduling question.",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "table",
+          "imagePath": "history_exams/assets/112/page-4.png",
+          "description": "Four Seasons' Kitchen menu, reward rules, and calendar",
+          "sha256": "3b0a0d9d546c3bc7ac62f01a406f137d0bc9b5820ce012ad148e9c14c27077de"
+        }
+      ],
       "glossary": {
         "calendar": "月曆"
       },
@@ -44,12 +52,20 @@
         26,
         27
       ],
-      "genre": "article_informational",
+      "genre": "infographic_chart_table",
       "title": null,
-      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "text": "Baby-bird care decision guide.\nHURT: call the animal center or carefully take the bird to an animal hospital; keep it warm and do not give it any food.\nNOT HURT + HAS FEATHERS: Just leave it there.\nNOT HURT + FEW FEATHERS: put it back if the nest can be reached; otherwise call the animal center.\nMyth correction: Birds don't care about human smell on a baby bird.",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-5.png",
+          "description": "Conditional baby-bird care infographic",
+          "sha256": "b979b9f460844e0ada1ec524c955d4e79f89c254d74f8ebfe578fd4e36fb8660"
+        }
+      ],
       "glossary": {
         "nest": "鳥巢",
         "feather": "羽毛"
@@ -68,12 +84,20 @@
         28,
         29
       ],
-      "genre": "article_informational",
+      "genre": "infographic_chart_table",
       "title": null,
-      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 6]",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "text": "Food-waste infographic/chart showing stage-by-stage quantities and percentages, including the displayed value 4.6.",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 6,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-6.png",
+          "description": "Food-waste process chart and quantitative labels",
+          "sha256": "07ed55b9546e94d06208f81dfe42d33ca8bb9e8595fa13473ac1f0e7e9cdee9f"
+        }
+      ],
       "glossary": {
         "stage": "階段",
         "waste": "浪費",
@@ -720,11 +744,21 @@
         "D": "$160."
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "table",
+          "imagePath": "history_exams/assets/112/page-4.png",
+          "description": "Four Seasons' Kitchen visual task",
+          "sha256": "3b0a0d9d546c3bc7ac62f01a406f137d0bc9b5820ce012ad148e9c14c27077de"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -744,11 +778,21 @@
         "D": "2:00 pm, August 28."
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 4,
+          "role": "table",
+          "imagePath": "history_exams/assets/112/page-4.png",
+          "description": "Four Seasons' Kitchen visual task",
+          "sha256": "3b0a0d9d546c3bc7ac62f01a406f137d0bc9b5820ce012ad148e9c14c27077de"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -768,11 +812,21 @@
         "D": "Put it back in its nest if it is not hurt and has few feathers."
       },
       "answer": "A",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-5.png",
+          "description": "Baby-bird care decision infographic",
+          "sha256": "b979b9f460844e0ada1ec524c955d4e79f89c254d74f8ebfe578fd4e36fb8660"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -792,11 +846,21 @@
         "D": "They leave them behind and move to a new nest."
       },
       "answer": "A",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-5.png",
+          "description": "Baby-bird care decision infographic",
+          "sha256": "b979b9f460844e0ada1ec524c955d4e79f89c254d74f8ebfe578fd4e36fb8660"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -816,11 +880,21 @@
         "D": "Factories do not have enough trucks to carry food to stores."
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 7,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-7.png",
+          "description": "Food-waste chart",
+          "sha256": "289c7426f79646f609032ee50b17532c987858027f82936fa2e7df2cdce031d5"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -840,11 +914,21 @@
         "D": "South & Southeast Asia has a higher percentage of food waste at Stage 4 than the other two areas."
       },
       "answer": "D",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 7,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/112/page-7.png",
+          "description": "Food-waste chart",
+          "sha256": "289c7426f79646f609032ee50b17532c987858027f82936fa2e7df2cdce031d5"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "112",
@@ -1183,6 +1267,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:22.525Z",
+  "extractedAt": "2026-08-28T04:49:23.477Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

@@ -10,52 +10,135 @@
     ],
     "sourceQuestionCount": 195,
     "excludedHoldoutCount": 20,
-    "providerName": "offline-mock",
-    "modelName": "rule-based-mock",
-    "analysisPromptVersion": "v3.0.0",
+    "providerName": "openai-chatgpt",
+    "modelName": "gpt-5.6-sol",
+    "analysisPromptVersion": "chatgpt-agent-digestion-v1",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T18:17:27.277Z",
-    "sourceCorpusHash": "2ed146595a15b14cf1d6b7afe3694d2241ef2d9aba997265994fd184c267a4fe",
-    "authorityStatus": "provisional"
+    "generatedAt": "2026-08-28T04:49:27.660Z",
+    "sourceCorpusHash": "c0035a5178b8aae6653e383eb0efd98ef1250fd2e6329209817afc0ff29c9811",
+    "authorityStatus": "authoritative"
   },
   "version": "1.0.0",
   "totalQuestions": 195,
   "primarySkillFrequencies": {
-    "grammar_in_context": 65,
-    "vocabulary_in_context": 48,
-    "explicit_detail": 48,
-    "local_inference": 24,
-    "information_integration": 7,
-    "main_idea": 2,
-    "purpose_speaker_intent": 1
+    "discourse_relationship": 8,
+    "vocabulary_in_context": 51,
+    "grammar_in_context": 41,
+    "information_integration": 24,
+    "purpose_speaker_intent": 5,
+    "text_structure": 3,
+    "local_inference": 8,
+    "explicit_detail": 16,
+    "reference_resolution": 9,
+    "main_idea": 9,
+    "cross_sentence_inference": 2,
+    "sequence_cause_consequence": 6,
+    "pragmatic_meaning": 7,
+    "other_uncertain": 6
   },
   "skillCoOccurrences": {
-    "grammar_in_context": {
-      "discourse_relationship": 18
+    "discourse_relationship": {
+      "discourse_relationship": 2,
+      "sequence_cause_consequence": 3,
+      "other_uncertain": 2,
+      "local_inference": 2,
+      "reference_resolution": 1
     },
     "vocabulary_in_context": {
-      "local_inference": 1,
-      "discourse_relationship": 3,
-      "sequence_cause_consequence": 1
+      "local_inference": 13,
+      "sequence_cause_consequence": 15,
+      "information_integration": 2,
+      "pragmatic_meaning": 2,
+      "discourse_relationship": 1,
+      "other_uncertain": 15,
+      "grammar_in_context": 3,
+      "reference_resolution": 1
     },
-    "explicit_detail": {
-      "discourse_relationship": 48
-    },
-    "local_inference": {
-      "discourse_relationship": 24
+    "grammar_in_context": {
+      "other_uncertain": 14,
+      "sequence_cause_consequence": 6,
+      "reference_resolution": 7,
+      "pragmatic_meaning": 1
     },
     "information_integration": {
-      "discourse_relationship": 6,
-      "explicit_detail": 1
+      "discourse_relationship": 7,
+      "sequence_cause_consequence": 5,
+      "explicit_detail": 6,
+      "main_idea": 2,
+      "other_uncertain": 2,
+      "cross_sentence_inference": 1
+    },
+    "purpose_speaker_intent": {
+      "information_integration": 1,
+      "discourse_relationship": 1,
+      "sequence_cause_consequence": 1,
+      "pragmatic_meaning": 1,
+      "other_uncertain": 1,
+      "reference_resolution": 1,
+      "local_inference": 1
+    },
+    "text_structure": {
+      "discourse_relationship": 2,
+      "explicit_detail": 1,
+      "purpose_speaker_intent": 1
+    },
+    "local_inference": {
+      "discourse_relationship": 2,
+      "purpose_speaker_intent": 1,
+      "sequence_cause_consequence": 3,
+      "other_uncertain": 3,
+      "information_integration": 1,
+      "pragmatic_meaning": 1
+    },
+    "explicit_detail": {
+      "pragmatic_meaning": 1,
+      "information_integration": 5,
+      "sequence_cause_consequence": 3,
+      "other_uncertain": 5,
+      "reference_resolution": 3,
+      "vocabulary_in_context": 1
+    },
+    "reference_resolution": {
+      "discourse_relationship": 1,
+      "grammar_in_context": 3,
+      "other_uncertain": 3,
+      "text_structure": 1,
+      "local_inference": 1,
+      "sequence_cause_consequence": 1,
+      "information_integration": 1
     },
     "main_idea": {
       "discourse_relationship": 1,
+      "information_integration": 7,
+      "explicit_detail": 1,
+      "sequence_cause_consequence": 2,
       "text_structure": 1,
-      "sequence_cause_consequence": 1
+      "other_uncertain": 2
     },
-    "purpose_speaker_intent": {
+    "cross_sentence_inference": {
+      "sequence_cause_consequence": 1,
+      "information_integration": 1
+    },
+    "sequence_cause_consequence": {
       "cross_sentence_inference": 1,
-      "pragmatic_meaning": 1
+      "other_uncertain": 1,
+      "vocabulary_in_context": 1,
+      "information_integration": 4,
+      "explicit_detail": 2
+    },
+    "pragmatic_meaning": {
+      "local_inference": 2,
+      "information_integration": 4,
+      "other_uncertain": 2,
+      "purpose_speaker_intent": 1,
+      "cross_sentence_inference": 2,
+      "vocabulary_in_context": 1
+    },
+    "other_uncertain": {
+      "purpose_speaker_intent": 2,
+      "reference_resolution": 1,
+      "sequence_cause_consequence": 1,
+      "information_integration": 1
     }
   },
   "descriptions": {

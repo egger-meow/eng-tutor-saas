@@ -54,7 +54,7 @@
       ],
       "genre": "infographic_chart_table",
       "title": "Infographic Guide",
-      "text": "Below is an infographic.",
+      "text": "Visual infographic comparing drinks and their sugar content, including rice milk.",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -131,17 +131,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "The problem of long working hours is a real headache in our country. It\nkills many people every year (see Figure 1), and many companies are trying\nto change that. They have at least one “No Overtime Day” in a week, and it\nis often Wednesday. On “No Overtime Day,” workers are asked to leave their\noffices before 8 p.m. At 8 p.m., companies play the song “There’s Always\nTomorrow” and turn off all the lights.\nHowever, after the workers walk out of their offices, they don’t go home.\nSome go back later, turn on their table lamps, and keep working, and others\nfind somewhere else to work until very late at night. Restaurants and coffee\nshops are busier on Wednesday evenings, and they have started selling drinks\nand meals for these workers.\nBut why do these people keep working? A study shows that workers who\nwork more hours often have a bigger chance to get paid more and rise higher\nin their companies. This is true for both men and women (see Figure 2).\nWorking long hours has become a way to show that people are hard-working.\nClearly, this must be changed before the problem gets any worse.\nFigure 1\nFigure 2",
-      "evidenceMode": "text_visual",
-      "visualEvidenceRequired": true,
-      "requiredAssets": [
-        {
-          "page": 9,
-          "role": "infographic",
-          "imagePath": "history_exams/assets/111/page-9.png",
-          "description": "Figure 1 annual deaths and Figure 2 work-hours/career-advancement graph",
-          "sha256": "de1ec03127fdd9cabd3d75180b3b73432068e869030fee1ace74d9511704a373"
-        }
-      ],
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "average": "平均",
         "order": "排序"
@@ -191,17 +183,9 @@
       "genre": "article_informational",
       "title": null,
       "text": "THE SOUTHEND TRAIL has been popular with nature lovers for years.\nThe 120-km trail passes beautiful lakes, crosses rivers, and goes through\nmountains and hills. This gives bird lovers some of the best places for\nbirdwatching. The trail also takes you to the Southend Museum and to two\nfamous castles, Edward Castle and\nSloan Castle.\nIt’s best to plan one day for one part\nof the trail and start your hike early\nin the morning, because each part\ntakes at least seven hours. If you\ndon’t want to walk, you can bike, but\nmake sure you stay on the main trail,\nbecause the side trails are not wide\nenough for biking.\nThere are two types of lodging\nfor visitors. Camping is popular in\nsummer, but it is only allowed on a few campgrounds (see the map). A more\ncomfortable one is to stay at a hotel in one of the towns. You can find some\nvery nice ones that also have breakfast.",
-      "evidenceMode": "text_visual",
-      "visualEvidenceRequired": true,
-      "requiredAssets": [
-        {
-          "page": 13,
-          "role": "map",
-          "imagePath": "history_exams/assets/111/page-13.png",
-          "description": "Southend Trail map with towns, castles, river, birdwatching sites, and trail parts",
-          "sha256": "1d4a820b24b53658c741b39b9083380c22dbfaff4935119389c41a226a6bb70e"
-        }
-      ],
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
       "glossary": {
         "trail": "步道",
         "recommend": "推薦"
@@ -678,11 +662,11 @@
         21,
         22
       ],
-      "stem": "What does Tea-Rock celebrate? th",
+      "stem": "What does Tea-Rock celebrate?",
       "options": {
         "A": "Their sales in 20 countries.",
         "B": "The coming out of their 20 kind of tea. th _____ th",
-        "C": "Their 20 year of business.",
+        "C": "Their 20th year of business.",
         "D": "The opening of their 20 store in the USA."
       },
       "answer": "C",
@@ -994,15 +978,17 @@
       "visualEvidenceRequired": true,
       "requiredAssets": [
         {
-          "page": 9,
+          "page": 10,
           "role": "infographic",
-          "imagePath": "history_exams/assets/111/page-9.png",
-          "description": "Figure 1 annual deaths and Figure 2 work-hours/career-advancement graph",
-          "sha256": "de1ec03127fdd9cabd3d75180b3b73432068e869030fee1ace74d9511704a373"
+          "imagePath": "history_exams/assets/111/page-10.png",
+          "description": "Figure-based evidence for Q32",
+          "sha256": "aeb992dcd9a6553c07628142411d57bf314fd18c7955c643b4bb3a8a93f86f84"
         }
       ],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1176,19 +1162,21 @@
         "D": "Parts 4 and 4a."
       },
       "answer": "A",
-      "evidenceMode": "text_visual",
+      "evidenceMode": "spatial",
       "visualEvidenceRequired": true,
       "requiredAssets": [
         {
           "page": 13,
           "role": "map",
           "imagePath": "history_exams/assets/111/page-13.png",
-          "description": "Southend Trail map with towns, castles, river, birdwatching sites, and trail parts",
+          "description": "Southend Trail map required for Q39",
           "sha256": "1d4a820b24b53658c741b39b9083380c22dbfaff4935119389c41a226a6bb70e"
         }
       ],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1232,11 +1220,21 @@
         "D": "me steak"
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 14,
+          "role": "table",
+          "imagePath": "history_exams/assets/111/page-14.png",
+          "description": "Anagram examples required for Q41",
+          "sha256": "7a9078a88b26f593116149193f9bd98050035f4c61ecd8d6a5936a85804545d7"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1287,6 +1285,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:21.249Z",
+  "extractedAt": "2026-08-28T04:49:22.334Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

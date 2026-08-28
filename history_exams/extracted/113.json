@@ -41,12 +41,20 @@
         24,
         25
       ],
-      "genre": "article_informational",
+      "genre": "infographic_chart_table",
       "title": null,
-      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "text": "Baker's Kitchen visual schedule/menu used to answer Q24-Q25.",
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "table",
+          "imagePath": "history_exams/assets/113/page-5.png",
+          "description": "Baker's Kitchen visual schedule",
+          "sha256": "988f3a35bd9a89eab079b70c6677a5efdde1d0677eefadee83d8a097f81a5b44"
+        }
+      ],
       "glossary": {
         "oven": "烤爐"
       },
@@ -64,12 +72,20 @@
         26,
         27
       ],
-      "genre": "article_informational",
+      "genre": "brochure_flyer",
       "title": null,
-      "text": "(A) Using the free festival bus service.\n(B) Visiting the festival on the weekend.\n(C) Entering Satyr’s Park from Fox Street.\n(D) Parking in Garden Square and walking to the festival.",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "text": "Green Festival visitor information and map, including entrances, parking, roads, and transport recommendations.",
+      "evidenceMode": "spatial",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 6,
+          "role": "map",
+          "imagePath": "history_exams/assets/113/page-6.png",
+          "description": "Green Festival map and visitor information",
+          "sha256": "b891f7bb8500b7031aec0303a04a75df1a9d13599fb3cea582a4b4256025dcf9"
+        }
+      ],
       "glossary": {
         "recommend": "推薦"
       },
@@ -187,9 +203,17 @@
       "genre": "cloze_passage",
       "title": null,
       "text": "A HISTORY LESSON ON THE PANDEMIC _____ 2020.10.29\nSince the Covid-19 pandemic started, people have begun “social distancing”—\nkeeping a safe space between you and anyone you don’t live with. Though it\nhas been a very popular topic this year, social distancing 40 . In fact, it was\nwidely used in the U.S. in the flu pandemic in 1918. But how well did it work? The\nAmericans’ experience can tell us whether it really saved lives.\nFrom the picture, we can see that 41 started social distancing earlier than\nthe other three cities. This helped the city keep the number of deaths down. Besides\ntaking early action, keeping the action long enough was also important in fighting\nthe pandemic. The picture shows that Portland and Denver did well in the first few\nweeks. However, both cities 42 , and the numbers of deaths climbed again.\nBut there was one thing Portland did right. The city used several ways of social\ndistancing at the same time to deal with the pandemic. 43 , sick people were kept\naway from healthy ones; schools were closed; public activities were not allowed. All\nthese were useful in keeping people safe.\nThe lessons of the 1918 pandemic bring us hope. While we are still learning to\nfight Covid-19, social distancing may be the best way to get us through the dark days,\nat least for now.",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 14,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/113/page-14.png",
+          "description": "1918 pandemic city comparison graphs",
+          "sha256": "2a00378a31c4b6558251e31bb95caa41bb2444831efc9df293021036399ee022"
+        }
+      ],
       "glossary": {
         "pandemic": "（疾病的） 大流行 per 每 ( 一 )"
       },
@@ -721,11 +745,21 @@
         "D": "7:00pm."
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "table",
+          "imagePath": "history_exams/assets/113/page-5.png",
+          "description": "Baker's Kitchen visual schedule",
+          "sha256": "988f3a35bd9a89eab079b70c6677a5efdde1d0677eefadee83d8a097f81a5b44"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -745,11 +779,21 @@
         "D": "Its members can save $100 when they shop on Fridays."
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 5,
+          "role": "table",
+          "imagePath": "history_exams/assets/113/page-5.png",
+          "description": "Baker's Kitchen visual schedule",
+          "sha256": "988f3a35bd9a89eab079b70c6677a5efdde1d0677eefadee83d8a097f81a5b44"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -761,19 +805,29 @@
         26,
         27
       ],
-      "stem": "(Comprehension question 26)",
+      "stem": "What is recommended to people who want to visit the festival?",
       "options": {
-        "A": "[Option A]",
-        "B": "[Option B]",
-        "C": "[Option C]",
-        "D": "[Option D]"
+        "A": "Using the free festival bus service.",
+        "B": "Visiting the festival on the weekend.",
+        "C": "Entering Satyr’s Park from Fox Street.",
+        "D": "Parking in Garden Square and walking to the festival."
       },
       "answer": "A",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "spatial",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 6,
+          "role": "map",
+          "imagePath": "history_exams/assets/113/page-6.png",
+          "description": "Green Festival map",
+          "sha256": "b891f7bb8500b7031aec0303a04a75df1a9d13599fb3cea582a4b4256025dcf9"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -798,15 +852,16 @@
       "requiredAssets": [
         {
           "page": 6,
-          "role": "diagram",
+          "role": "map",
           "imagePath": "history_exams/assets/113/page-6.png",
-          "description": "Visual evidence for question 27 on page 6",
+          "description": "Green Festival map",
           "sha256": "b891f7bb8500b7031aec0303a04a75df1a9d13599fb3cea582a4b4256025dcf9"
         }
       ],
-      "extractionConfidence": "partial_visual_pending",
+      "extractionConfidence": "needs_multimodal_review",
       "extractionWarnings": [
-        "Question 27 requires visual evidence from page 6"
+        "Question 27 requires visual evidence from page 6",
+        "Verified official-source visual evidence is required."
       ]
     },
     {
@@ -819,19 +874,29 @@
         28,
         29
       ],
-      "stem": "(Comprehension question 28)",
+      "stem": "What kind of people do Yan’s and Chang’s friends most likely think Yan and Chang are?",
       "options": {
-        "A": "[Option A]",
-        "B": "[Option B]",
-        "C": "[Option C]",
-        "D": "[Option D]"
+        "A": "They enjoy good food.",
+        "B": "They don’t like to share.",
+        "C": "They like to make friends.",
+        "D": "They don’t like new things."
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 7,
+          "role": "full_page",
+          "imagePath": "history_exams/assets/113/page-7.png",
+          "description": "Paired illustrated anecdotes for Q28",
+          "sha256": "989ea55bf7d3a12bf70b13b74d04a57dc96b58f658f0cb4fa3ae77e7beb60df5"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -1139,11 +1204,21 @@
         "D": "Pittsburgh"
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 15,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/113/page-15.png",
+          "description": "1918 pandemic city comparison graph",
+          "sha256": "ee7688543521b91b0e9f3e75f8b33b7287b227813ba7431bb98a2fb4e98121aa"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -1163,11 +1238,21 @@
         "D": "had the most days of social distancing"
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 15,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/113/page-15.png",
+          "description": "1918 pandemic city comparison graph",
+          "sha256": "ee7688543521b91b0e9f3e75f8b33b7287b227813ba7431bb98a2fb4e98121aa"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "113",
@@ -1194,6 +1279,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:23.795Z",
+  "extractedAt": "2026-08-28T04:49:24.683Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

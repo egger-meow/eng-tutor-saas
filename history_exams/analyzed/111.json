@@ -1,10 +1,10 @@
 {
   "examId": "111",
   "year": 111,
-  "promptVersion": "chatgpt-agent-digestion-v1",
-  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "promptVersion": "v3.0.0",
+  "criticPromptVersion": "v3.0.0",
   "analysisSchemaVersion": "1.0.0",
-  "analyzedAt": "2026-08-27T19:32:12.964Z",
+  "analyzedAt": "2026-08-28T04:49:27.470Z",
   "questions": [
     {
       "examId": "111",
@@ -15,7 +15,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 1,
@@ -51,7 +51,7 @@
         "secondarySkills": [
           "information_integration"
         ],
-        "skillExplanation": "Q1 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: The picture shows the woman placing candles upright on the cake.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D1_verbatim_retrieval",
         "evidenceMode": "visual_only",
@@ -127,8 +127,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "low",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q1, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q1 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, The picture shows the woman placing candles upright on the cake.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The picture shows the woman placing candles upright on the cake. A plausible distractor fails because Forks are lying beside the plate; she is not putting forks on the cake.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -142,7 +142,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D1_verbatim_retrieval across text and visual evidence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -163,7 +163,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -176,7 +176,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 2,
@@ -203,7 +203,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q2 requires discourse relationship using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Discourse-relation interpretation: The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -279,8 +279,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q2, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q2 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Identify the logical relationship joining the clauses or ideas, then select the connector or interpretation that preserves that relationship. Here, The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result. A plausible distractor fails because “or” would offer an alternative rather than connect the movie time to the proposed meeting time.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -294,7 +294,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Discourse-relation interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -315,7 +315,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -328,7 +328,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 3,
@@ -353,7 +353,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q3 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Fear of the dark explains why Peter leaves the lights on while sleeping.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -429,8 +429,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q3, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q3 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Fear of the dark explains why Peter leaves the lights on while sleeping.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Fear of the dark explains why Peter leaves the lights on while sleeping. A plausible distractor fails because A computer can emit light, but the sentence tests the ordinary response to darkness, not device use.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -444,7 +444,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -465,7 +465,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -478,7 +478,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 4,
@@ -503,7 +503,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q4 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Having more fans than every teammate is direct evidence that Pam is popular.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -579,8 +579,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q4, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q4 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Having more fans than every teammate is direct evidence that Pam is popular.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Having more fans than every teammate is direct evidence that Pam is popular. A plausible distractor fails because Many fans contradict the idea that she is boring.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -594,7 +594,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -615,7 +615,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -628,7 +628,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 5,
@@ -653,7 +653,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q5 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -729,8 +729,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q5, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q5 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity. A plausible distractor fails because “failed to stay” would mean the speaker did not remain after school, not that the teacher required it.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -744,7 +744,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -765,7 +765,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -778,7 +778,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.957Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 6,
@@ -803,7 +803,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q6 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Having money for only one of two liked items creates a difficult choice between them.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -879,8 +879,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q6, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q6 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Having money for only one of two liked items creates a difficult choice between them.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Having money for only one of two liked items creates a difficult choice between them. A plausible distractor fails because A gift is something given, not a decision between alternatives.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -894,7 +894,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -915,7 +915,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -928,7 +928,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 7,
@@ -953,7 +953,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q7 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Repeated practice with the same kind of math problem makes answering it easy.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1029,8 +1029,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q7, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q7 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Repeated practice with the same kind of math problem makes answering it easy.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Repeated practice with the same kind of math problem makes answering it easy. A plausible distractor fails because “common” could describe the question type but does not describe the ease of answering it.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1044,7 +1044,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1065,7 +1065,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1078,7 +1078,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.958Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 8,
@@ -1103,7 +1103,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q8 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1179,8 +1179,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q8, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q8 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”. A plausible distractor fails because Bare “prepare” cannot fill the complement position after “time” in this construction.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1194,7 +1194,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1215,7 +1215,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1228,7 +1228,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 9,
@@ -1253,7 +1253,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q9 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Unknown river depth is a direct swimming hazard, so “how deep it is” matches the warning.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1329,8 +1329,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q9, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q9 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Unknown river depth is a direct swimming hazard, so “how deep it is” matches the warning.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Unknown river depth is a direct swimming hazard, so “how deep it is” matches the warning. A plausible distractor fails because Distance from one point to another is not the danger highlighted for swimmers.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1344,7 +1344,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1365,7 +1365,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1378,7 +1378,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 10,
@@ -1403,7 +1403,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q10 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1479,8 +1479,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q10, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q10 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required. A plausible distractor fails because Comparative “lazier” needs a two-way comparison or an explicit “than” phrase, not a whole-group extreme.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1494,7 +1494,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1515,7 +1515,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1528,7 +1528,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 11,
@@ -1553,7 +1553,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q11 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: Her sixty years of residence support a present state of knowledge, so simple present “knows” is correct.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1629,8 +1629,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q11, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q11 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, Her sixty years of residence support a present state of knowledge, so simple present “knows” is correct.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Her sixty years of residence support a present state of knowledge, so simple present “knows” is correct. A plausible distractor fails because “will know” incorrectly moves the knowledge into the future.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1644,7 +1644,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1665,7 +1665,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1678,7 +1678,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 12,
@@ -1703,7 +1703,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q12 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: The forecast says heavier rain will come after the typhoon, so it will “follow.”.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1779,8 +1779,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q12, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q12 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, The forecast says heavier rain will come after the typhoon, so it will “follow.”.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The forecast says heavier rain will come after the typhoon, so it will “follow.”. A plausible distractor fails because Rain does not “catch” in the required intransitive sense.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1794,7 +1794,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1815,7 +1815,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1828,7 +1828,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 13,
@@ -1853,7 +1853,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q13 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: At the moment the speaker got home, the brother had an imminent dinner plan and invited the speaker, so past progressive “was going out” fits.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -1929,8 +1929,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q13, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q13 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, At the moment the speaker got home, the brother had an imminent dinner plan and invited the speaker, so past progressive “was going out” fits.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because At the moment the speaker got home, the brother had an imminent dinner plan and invited the speaker, so past progressive “was going out” fits. A plausible distractor fails because Present “goes out” conflicts with the past-time frame “Yesterday when I got home.”.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -1944,7 +1944,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -1965,7 +1965,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -1978,7 +1978,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 14,
@@ -2003,7 +2003,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q14 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Because Amy never repays loans, refusing to lend her money was a wise decision.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2079,8 +2079,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q14, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q14 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Because Amy never repays loans, refusing to lend her money was a wise decision.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Because Amy never repays loans, refusing to lend her money was a wise decision. A plausible distractor fails because The context supports good judgment, not craziness.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2094,7 +2094,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2115,7 +2115,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2128,7 +2128,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 15,
@@ -2153,7 +2153,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q15 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: The current job opportunity is ongoing now, so “is looking for” correctly expresses Mr. Firth’s present search.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2229,8 +2229,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q15, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q15 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, The current job opportunity is ongoing now, so “is looking for” correctly expresses Mr. Firth’s present search.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The current job opportunity is ongoing now, so “is looking for” correctly expresses Mr. Firth’s present search. A plausible distractor fails because Present perfect “has looked for” emphasizes completed/accumulated searching and does not naturally present an open vacancy.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2244,7 +2244,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2265,7 +2265,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2278,7 +2278,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 16,
@@ -2303,7 +2303,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q16 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: After “saw a woman get in his car,” the coordinated bare verb phrase “and drive away” describes the second observed action.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2379,8 +2379,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q16, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q16 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, After “saw a woman get in his car,” the coordinated bare verb phrase “and drive away” describes the second observed action.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because After “saw a woman get in his car,” the coordinated bare verb phrase “and drive away” describes the second observed action. A plausible distractor fails because “drive” alone would attach awkwardly without a coordinator after the complete “get in his car” phrase.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2394,7 +2394,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2415,7 +2415,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2428,7 +2428,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 17,
@@ -2453,7 +2453,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q17 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: The missing girl received the action of being taken away, so the relative clause needs passive past “was taken away.”.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2529,8 +2529,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q17, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q17 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, The missing girl received the action of being taken away, so the relative clause needs passive past “was taken away.”.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The missing girl received the action of being taken away, so the relative clause needs passive past “was taken away.”. A plausible distractor fails because “took away” makes the girl the agent who removed something else.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2544,7 +2544,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2565,7 +2565,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2578,7 +2578,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.958Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 18,
@@ -2603,7 +2603,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q18 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: “One” substitutes for one bus of the same class just mentioned: they missed one bus.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2679,8 +2679,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q18, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q18 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, “One” substitutes for one bus of the same class just mentioned: they missed one bus.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because “One” substitutes for one bus of the same class just mentioned: they missed one bus. A plausible distractor fails because “another” normally means an additional/different one and does not naturally replace the specific scheduled bus just missed.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2694,7 +2694,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2715,7 +2715,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2728,7 +2728,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.959Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 19,
@@ -2753,7 +2753,7 @@
       "analysis": {
         "primarySkill": "grammar_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q19 requires grammar in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Grammar-in-context selection: The studying happened repeatedly during a completed week before the test and led to a completed result, so simple past “studied” fits.",
         "languageDifficulty": "A1_elementary",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2829,8 +2829,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q19, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q19 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use both grammatical form and sentence meaning as joint constraints rather than solving from form alone. Here, The studying happened repeatedly during a completed week before the test and led to a completed result, so simple past “studied” fits.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The studying happened repeatedly during a completed week before the test and led to a completed result, so simple past “studied” fits. A plausible distractor fails because Present “studies” conflicts with the completed past test episode.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2844,7 +2844,7 @@
           "recallType": "mechanical_grammar_pattern",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Grammar-in-context selection at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -2865,7 +2865,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -2878,7 +2878,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.959Z",
+      "analyzedAt": "2026-08-28T04:48:58.959Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 20,
@@ -2903,7 +2903,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q20 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: The story describes online responses attacking Josh after he shared his opinion, so “trolling” means posting online to hurt or provoke someone.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -2979,8 +2979,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q20, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q20 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, The story describes online responses attacking Josh after he shared his opinion, so “trolling” means posting online to hurt or provoke someone.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The story describes online responses attacking Josh after he shared his opinion, so “trolling” means posting online to hurt or provoke someone. A plausible distractor fails because Nothing in the scene involves singing or celebration.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -2994,7 +2994,7 @@
           "recallType": "intentional_retrieval_drill",
           "explanation": "The single item still uses sentence context, but its central target is a compact language form or lexical relation."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference within one sentence: make the decisive relation recoverable from evidence and use topic-plausible but evidence-irrelevant alternatives distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3015,20 +3015,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 21,
-      "contentHash": "45fc52473e15d50d701c4014ff0ed489e7ed6a918ee301f7fc9b292c238cc418",
+      "contentHash": "55f7ad7c76afc272859759952f2b9f19ee670ef8a15533abebc98e0eacfa3ed1",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.959Z",
+      "analyzedAt": "2026-08-28T04:48:58.960Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 21,
@@ -3039,11 +3039,11 @@
           21,
           22
         ],
-        "stem": "What does Tea-Rock celebrate? th",
+        "stem": "What does Tea-Rock celebrate?",
         "options": {
           "A": "Their sales in 20 countries.",
           "B": "The coming out of their 20 kind of tea. th _____ th",
-          "C": "Their 20 year of business.",
+          "C": "Their 20th year of business.",
           "D": "The opening of their 20 store in the USA."
         },
         "answer": "C",
@@ -3067,7 +3067,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q21 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "multimodal_mixed",
@@ -3143,8 +3143,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q21, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q21 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business. A plausible distractor fails because The number 20 is part of the anniversary campaign name, not a claim that tea is sold in twenty countries.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3158,7 +3158,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D2_single_step_inference across text and visual evidence: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence and world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3179,7 +3179,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -3192,7 +3192,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.960Z",
+      "analyzedAt": "2026-08-28T04:48:58.960Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 22,
@@ -3231,7 +3231,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q22 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
@@ -3307,8 +3307,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q22, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q22 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday. A plausible distractor fails because Age is not one of the required fields.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3322,7 +3322,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence and world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3343,20 +3343,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 23,
-      "contentHash": "dcb8312d408c709cb2646a9a4bd4c6f377ff7045ffbeaa3af908b335a1e63c6b",
+      "contentHash": "6b1fca036c7f1503e3279bb8217aee037c62ea07923940c4ba0b3cffc64e9bbd",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.960Z",
+      "analyzedAt": "2026-08-28T04:48:58.960Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 23,
@@ -3395,7 +3395,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q23 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
@@ -3471,8 +3471,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q23, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q23 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar. A plausible distractor fails because One teaspoon equals 4 g of sugar, while the 66 g ice cream is shown with multiple spoon icons, not only 4 g total.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3486,7 +3486,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence and world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3507,20 +3507,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 24,
-      "contentHash": "58c228afd092a4d45c3fb4f3a64695ba071feadc55811a145008ca78a2db0d40",
+      "contentHash": "3c9ee0c96555d13bb8c32bc33564d30d2a2e76d1fe19d32386bd0f3bb5fbe7a0",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 24,
@@ -3559,7 +3559,7 @@
         "secondarySkills": [
           "information_integration"
         ],
-        "skillExplanation": "Q24 requires purpose speaker intent using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Speaker or author intent: The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
@@ -3635,8 +3635,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q24, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q24 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use wording, reaction, and discourse context to infer what the speaker or author is trying to accomplish. Here, The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize. A plausible distractor fails because The infographic has a separate section on health effects; the hidden-food list itself is about unnoticed intake.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3650,7 +3650,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Speaker or author intent at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3671,7 +3671,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -3684,7 +3684,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 25,
@@ -3714,7 +3714,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q25 requires purpose speaker intent using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Speaker or author intent: Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -3790,8 +3790,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q25, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q25 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use wording, reaction, and discourse context to infer what the speaker or author is trying to accomplish. Here, Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas. A plausible distractor fails because Marina initially mistakes Pinterest for a shopping app, but Darrell explicitly corrects that idea.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3805,7 +3805,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Speaker or author intent at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3826,7 +3826,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -3839,7 +3839,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 26,
@@ -3867,7 +3867,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q26 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Darrell’s example runs from choosing chocolate through baking and decorating, showing that “from A to Z” means learning the whole process or everything about it.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -3943,8 +3943,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q26, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q26 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Darrell’s example runs from choosing chocolate through baking and decorating, showing that “from A to Z” means learning the whole process or everything about it.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Darrell’s example runs from choosing chocolate through baking and decorating, showing that “from A to Z” means learning the whole process or everything about it. A plausible distractor fails because The phrase describes completeness of coverage, not freedom to learn at any time.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -3958,7 +3958,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -3979,7 +3979,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -3992,7 +3992,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 27,
@@ -4022,7 +4022,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q27 requires text structure using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Text-structure reasoning: The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -4098,8 +4098,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q27, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q27 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Track how the text organizes information and choose the option that matches that structural function. Here, The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training. A plausible distractor fails because The paragraph gives interval durations, not the best time of day to train.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4113,7 +4113,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Text-structure reasoning at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use chronology-confusion options distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4134,7 +4134,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -4147,7 +4147,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 28,
@@ -4177,7 +4177,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q28 requires local inference using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Local inference: The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -4253,8 +4253,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q28, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q28 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine the nearby clues needed for one unstated conclusion while refusing unsupported additions. Here, The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit. A plausible distractor fails because Nothing says Tabata is especially for people who enjoy team sports; it is described as an individual interval routine.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4268,7 +4268,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Local inference at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4289,7 +4289,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -4302,7 +4302,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 29,
@@ -4330,7 +4330,7 @@
       "analysis": {
         "primarySkill": "explicit_detail",
         "secondarySkills": [],
-        "skillExplanation": "Q29 requires explicit detail using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Evidence-precise detail retrieval: The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D1_verbatim_retrieval",
         "evidenceMode": "text_only",
@@ -4406,8 +4406,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "low",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q29, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q29 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Locate the exact supported proposition and preserve its scope, role, quantity, or condition when matching an option. Here, The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves. A plausible distractor fails because The text says the moves are not difficult to learn.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4421,7 +4421,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Evidence-precise detail retrieval at D1_verbatim_retrieval across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4442,7 +4442,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -4455,7 +4455,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 30,
@@ -4485,7 +4485,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q30 requires text structure using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Text-structure reasoning: The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b).",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "text_only",
@@ -4561,8 +4561,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q30, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q30 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Track how the text organizes information and choose the option that matches that structural function. Here, The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b).",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b). A plausible distractor fails because It puts the definition before the initial problem/reason, contrary to the report’s opening.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4576,7 +4576,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Text-structure reasoning at D3_multi_step_synthesis across the whole passage: make the decisive relation recoverable from evidence and use chronology-confusion options distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4597,7 +4597,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -4610,7 +4610,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.961Z",
+      "analyzedAt": "2026-08-28T04:48:58.961Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 31,
@@ -4640,7 +4640,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q31 requires reference resolution using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Reference resolution: In “Clearly, this must be changed,” “this” refers to the immediately preceding practice of using long working hours as a signal that workers are hard-working.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -4716,8 +4716,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q31, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q31 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Resolve the referring expression to the source entity or event that fits grammar, discourse, and meaning. Here, In “Clearly, this must be changed,” “this” refers to the immediately preceding practice of using long working hours as a signal that workers are hard-working.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because In “Clearly, this must be changed,” “this” refers to the immediately preceding practice of using long working hours as a signal that workers are hard-working. A plausible distractor fails because Late-opening restaurants are a consequence of workers staying out, not the practice the author says must be changed.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4731,7 +4731,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Reference resolution at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use wrong-referent options distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4752,20 +4752,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 32,
-      "contentHash": "712b98698ce02b4af607d9b15eec5180887973bfeced0a060dcdf2ecae527d14",
+      "contentHash": "19b216d6b2c0b492ecefe54e04465f7f6d7e998b31136dc39c706422ec6c80f2",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.962Z",
+      "analyzedAt": "2026-08-28T04:48:58.962Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 32,
@@ -4788,21 +4788,23 @@
         "visualEvidenceRequired": true,
         "requiredAssets": [
           {
-            "page": 9,
+            "page": 10,
             "role": "infographic",
-            "imagePath": "history_exams/assets/111/page-9.png",
-            "description": "Figure 1 annual deaths and Figure 2 work-hours/career-advancement graph"
+            "imagePath": "history_exams/assets/111/page-10.png",
+            "description": "Figure-based evidence for Q32"
           }
         ],
-        "extractionConfidence": "high",
-        "extractionWarnings": []
+        "extractionConfidence": "needs_multimodal_review",
+        "extractionWarnings": [
+          "Verified official-source visual evidence is required."
+        ]
       },
       "analysis": {
         "primarySkill": "information_integration",
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q32 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: Figure 2 shows the men’s and women’s lines meeting at roughly the same percentage around 2,200 annual hours, so their advancement/pay chances are almost the same there.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "multimodal_mixed",
@@ -4878,8 +4880,8 @@
         "vocabularyDemand": "low",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q32, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q32 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, Figure 2 shows the men’s and women’s lines meeting at roughly the same percentage around 2,200 annual hours, so their advancement/pay chances are almost the same there.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Figure 2 shows the men’s and women’s lines meeting at roughly the same percentage around 2,200 annual hours, so their advancement/pay chances are almost the same there. A plausible distractor fails because Figure 1 gives total deaths by year and does not split 2014 deaths by sex.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -4893,7 +4895,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -4914,7 +4916,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -4927,7 +4929,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.962Z",
+      "analyzedAt": "2026-08-28T04:48:58.962Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 33,
@@ -4966,7 +4968,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q33 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: By 1962 the UK part had joined the Republic of Cameroun and the combined state was named the Federal Republic of Cameroon, matching map D’s single federal country.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "spatial",
@@ -5042,8 +5044,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q33, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q33 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, By 1962 the UK part had joined the Republic of Cameroun and the combined state was named the Federal Republic of Cameroon, matching map D’s single federal country.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because By 1962 the UK part had joined the Republic of Cameroun and the combined state was named the Federal Republic of Cameroon, matching map D’s single federal country. A plausible distractor fails because Map A labels the whole territory “Kamerun,” the pre-1919 name.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5057,7 +5059,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5078,7 +5080,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -5091,7 +5093,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.962Z",
+      "analyzedAt": "2026-08-28T04:48:58.962Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 34,
@@ -5119,7 +5121,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q34 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: English speakers feel excluded from jobs and official life and then decide to fight for themselves; this context makes “resentful” closest to angry.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -5195,8 +5197,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q34, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q34 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, English speakers feel excluded from jobs and official life and then decide to fight for themselves; this context makes “resentful” closest to angry.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because English speakers feel excluded from jobs and official life and then decide to fight for themselves; this context makes “resentful” closest to angry. A plausible distractor fails because They may also be unhappy, but the move toward resistance signals grievance and anger more specifically than sadness.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5210,7 +5212,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5231,7 +5233,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -5244,7 +5246,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.962Z",
+      "analyzedAt": "2026-08-28T04:48:58.962Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 35,
@@ -5274,7 +5276,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q35 requires local inference using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Local inference: Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -5350,8 +5352,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q35, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q35 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine the nearby clues needed for one unstated conclusion while refusing unsupported additions. Here, Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country. A plausible distractor fails because The passage describes political conflict, not plans for business cooperation.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5365,7 +5367,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Local inference at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source and partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5386,7 +5388,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -5399,7 +5401,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.962Z",
+      "analyzedAt": "2026-08-28T04:48:58.963Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 36,
@@ -5429,7 +5431,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q36 requires purpose speaker intent using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Speaker or author intent: The history explains how colonial division, reunification, minority status, and French-speaker control produced today’s power imbalance for English speakers in Cameroon.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "text_only",
@@ -5505,8 +5507,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q36, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q36 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Use wording, reaction, and discourse context to infer what the speaker or author is trying to accomplish. Here, The history explains how colonial division, reunification, minority status, and French-speaker control produced today’s power imbalance for English speakers in Cameroon.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The history explains how colonial division, reunification, minority status, and French-speaker control produced today’s power imbalance for English speakers in Cameroon. A plausible distractor fails because The article opens by saying the usual global link between English and power does not hold in Cameroon; the history explains that exception.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5520,7 +5522,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Speaker or author intent at D3_multi_step_synthesis across the whole passage: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5541,7 +5543,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -5554,7 +5556,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.963Z",
+      "analyzedAt": "2026-08-28T04:48:58.963Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 37,
@@ -5582,7 +5584,7 @@
       "analysis": {
         "primarySkill": "explicit_detail",
         "secondarySkills": [],
-        "skillExplanation": "Q37 requires explicit detail using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Evidence-precise detail retrieval: The guide explicitly recommends planning one day for one part of the trail because each part takes at least seven hours.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D1_verbatim_retrieval",
         "evidenceMode": "text_only",
@@ -5658,8 +5660,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "low",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q37, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q37 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Locate the exact supported proposition and preserve its scope, role, quantity, or condition when matching an option. Here, The guide explicitly recommends planning one day for one part of the trail because each part takes at least seven hours.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The guide explicitly recommends planning one day for one part of the trail because each part takes at least seven hours. A plausible distractor fails because Camping is allowed only at designated campgrounds, not on side trails.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5673,7 +5675,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Evidence-precise detail retrieval at D1_verbatim_retrieval across a local multi-sentence span: make the decisive relation recoverable from evidence and use world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5694,7 +5696,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -5707,7 +5709,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.963Z",
+      "analyzedAt": "2026-08-28T04:48:58.963Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 38,
@@ -5735,7 +5737,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q38 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: The paragraph introduces two types of lodging and then gives camping and hotels as examples, so lodging means a place/accommodation to stay in.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -5811,8 +5813,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q38, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q38 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, The paragraph introduces two types of lodging and then gives camping and hotels as examples, so lodging means a place/accommodation to stay in.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The paragraph introduces two types of lodging and then gives camping and hotels as examples, so lodging means a place/accommodation to stay in. A plausible distractor fails because Breakfast is mentioned as a hotel amenity, not the meaning of lodging.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5826,7 +5828,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence and world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -5847,20 +5849,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 39,
-      "contentHash": "9eec8f12f201eb312b5aad0570676621fd0f687067ef3e436144651d36cd65fa",
+      "contentHash": "337e115c05e133e45901e8a1c1f86ea3fb05329d7f0c4049d12b014b3d9f8c5f",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.963Z",
+      "analyzedAt": "2026-08-28T04:48:58.963Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 39,
@@ -5879,28 +5881,30 @@
           "D": "Parts 4 and 4a."
         },
         "answer": "A",
-        "evidenceMode": "text_visual",
+        "evidenceMode": "spatial",
         "visualEvidenceRequired": true,
         "requiredAssets": [
           {
             "page": 13,
             "role": "map",
             "imagePath": "history_exams/assets/111/page-13.png",
-            "description": "Southend Trail map with towns, castles, river, birdwatching sites, and trail parts"
+            "description": "Southend Trail map required for Q39"
           }
         ],
-        "extractionConfidence": "high",
-        "extractionWarnings": []
+        "extractionConfidence": "needs_multimodal_review",
+        "extractionWarnings": [
+          "Verified official-source visual evidence is required."
+        ]
       },
       "analysis": {
         "primarySkill": "information_integration",
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q39 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: From Cove, Part 1 reaches Dova beside the river and birdwatching/campground area, and Part 2 continues from Dova toward Kint past Sloan Castle. Together they satisfy both the castle and river-birdwatching goals.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
-        "evidenceMode": "multimodal_mixed",
+        "evidenceMode": "spatial",
         "evidenceNecessity": "essential",
         "evidenceSpan": "multimodal_text_and_graphic",
         "reasoningOperations": [
@@ -5973,8 +5977,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "high",
-        "questionMechanism": "Use the decisive evidence identified for Q39, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q39 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, From Cove, Part 1 reaches Dova beside the river and birdwatching/campground area, and Part 2 continues from Dova toward Kint past Sloan Castle. Together they satisfy both the castle and river-birdwatching goals.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because From Cove, Part 1 reaches Dova beside the river and birdwatching/campground area, and Part 2 continues from Dova toward Kint past Sloan Castle. Together they satisfy both the castle and river-birdwatching goals. A plausible distractor fails because Part 2a is a side branch near Sloan Castle but does not replace the main Part 2 connection needed to combine the river birdwatching route with the castle trip from Cove.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -5988,7 +5992,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D3_multi_step_synthesis across text and visual evidence: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -6009,7 +6013,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -6022,7 +6026,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.963Z",
+      "analyzedAt": "2026-08-28T04:48:58.964Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 40,
@@ -6052,7 +6056,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q40 requires discourse relationship using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Discourse-relation interpretation: The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -6128,8 +6132,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q40, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q40 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Identify the logical relationship joining the clauses or ideas, then select the connector or interpretation that preserves that relationship. Here, The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list. A plausible distractor fails because “in fact” would intensify or confirm a claim rather than introduce representative instances.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -6143,7 +6147,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Discourse-relation interpretation at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use grammatically plausible choices that fail the intended context distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -6164,20 +6168,20 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
     {
       "examId": "111",
       "questionNumber": 41,
-      "contentHash": "26b30b86ce34cb7e0b15cbe02de0b472eaef4ae3b83d8fed7a09f06a5784a454",
+      "contentHash": "0816ea135b358e9fa7c24865cd305acb85ca739ed069384a59a772821e1ee871",
       "providerName": "openai-chatgpt",
       "modelName": "gpt-5.6-sol",
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.963Z",
+      "analyzedAt": "2026-08-28T04:48:58.964Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 41,
@@ -6196,21 +6200,30 @@
           "D": "me steak"
         },
         "answer": "C",
-        "evidenceMode": "text_only",
-        "visualEvidenceRequired": false,
-        "requiredAssets": [],
-        "extractionConfidence": "high",
-        "extractionWarnings": []
+        "evidenceMode": "text_visual",
+        "visualEvidenceRequired": true,
+        "requiredAssets": [
+          {
+            "page": 14,
+            "role": "table",
+            "imagePath": "history_exams/assets/111/page-14.png",
+            "description": "Anagram examples required for Q41"
+          }
+        ],
+        "extractionConfidence": "needs_multimodal_review",
+        "extractionWarnings": [
+          "Verified official-source visual evidence is required."
+        ]
       },
       "analysis": {
         "primarySkill": "information_integration",
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q41 requires information integration using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Information integration: An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
-        "evidenceMode": "text_only",
+        "evidenceMode": "multimodal_mixed",
         "evidenceNecessity": "essential",
         "evidenceSpan": "cross_sentence_local",
         "reasoningOperations": [
@@ -6283,8 +6296,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q41, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q41 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Combine multiple constraints or representations before choosing the only option satisfying them together. Here, An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example. A plausible distractor fails because “take sit” does not provide the letter-for-letter match required by the paired anagram in the source layout.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -6298,7 +6311,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Information integration at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -6319,7 +6332,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -6332,7 +6345,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.964Z",
+      "analyzedAt": "2026-08-28T04:48:58.964Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 42,
@@ -6360,7 +6373,7 @@
       "analysis": {
         "primarySkill": "vocabulary_in_context",
         "secondarySkills": [],
-        "skillExplanation": "Q42 requires vocabulary in context using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Vocabulary-in-context interpretation: Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits.",
         "languageDifficulty": "A2_basic",
         "cognitiveDepth": "D2_single_step_inference",
         "evidenceMode": "text_only",
@@ -6436,8 +6449,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "medium",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q42, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q42 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Infer the target meaning from the supplied contextual relation, then reject choices that fit the topic but not that relation. Here, Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits. A plausible distractor fails because The example is not presented as difficult; it is presented as unexpectedly meaningful and amusing.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -6451,7 +6464,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Vocabulary-in-context interpretation at D2_single_step_inference across a local multi-sentence span: make the decisive relation recoverable from evidence and use partial-truth options that preserve only part of the evidence and world-knowledge guesses unsupported by the source distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -6472,7 +6485,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     },
@@ -6485,7 +6498,7 @@
       "promptVersion": "chatgpt-agent-digestion-v1",
       "criticPromptVersion": "chatgpt-agent-critic-v1",
       "analysisSchemaVersion": "1.0.0",
-      "analyzedAt": "2026-08-27T19:32:12.964Z",
+      "analyzedAt": "2026-08-28T04:48:58.964Z",
       "extracted": {
         "examId": "111",
         "questionNumber": 43,
@@ -6515,7 +6528,7 @@
         "secondarySkills": [
           "discourse_relationship"
         ],
-        "skillExplanation": "Q43 requires main idea using the item’s actual sentence, passage, or visual evidence rather than answer-key recall.",
+        "skillExplanation": "Main-idea synthesis: The next sentences show palindromes used in mathematics and music and anagrams used to hide studies, proving they are more than just games.",
         "languageDifficulty": "B1_intermediate",
         "cognitiveDepth": "D3_multi_step_synthesis",
         "evidenceMode": "text_only",
@@ -6591,8 +6604,8 @@
         "vocabularyDemand": "medium",
         "inferenceDemand": "high",
         "visualIntegrationDemand": "low",
-        "questionMechanism": "Use the decisive evidence identified for Q43, preserve its scope and relation, then eliminate alternatives that contradict or fail to entail the required proposition.",
-        "whyTheQuestionWorks": "Q43 has one evidence-supported answer while each wrong option represents a concrete semantic, grammatical, referential, structural, or scope error.",
+        "questionMechanism": "Compress the relevant passage scope into the option that covers the developed idea without becoming too broad or too narrow. Here, The next sentences show palindromes used in mathematics and music and anagrams used to hide studies, proving they are more than just games.",
+        "whyTheQuestionWorks": "The official answer is uniquely supported because The next sentences show palindromes used in mathematics and music and anagrams used to hide studies, proving they are more than just games. A plausible distractor fails because The paragraph discusses uses, not whether people play them publicly.",
         "studentFailureModes": [
           "Stopping at a keyword match instead of checking the full proposition.",
           "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor."
@@ -6606,7 +6619,7 @@
           "recallType": "none",
           "explanation": "The answer depends on interpreting supplied passage or visual evidence."
         },
-        "reusableDesignPrinciple": "Keep the language accessible while making one relation decisive; build distractors from realistic misreadings of grammar, scope, reference, chronology, causality, or visual data.",
+        "reusableDesignPrinciple": "Main-idea synthesis at D3_multi_step_synthesis across the whole passage: make the decisive relation recoverable from evidence and use local-detail options used against a global question distractors to target the characteristic misreading.",
         "difficultyAdjustment": {
           "canSimplifyLanguageWithoutBreakingMechanism": true,
           "simplificationConstraints": [
@@ -6627,7 +6640,7 @@
             "role": "primary_proof"
           }
         ],
-        "criticStatus": "passed",
+        "criticStatus": "repaired",
         "criticIssues": []
       }
     }

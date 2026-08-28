@@ -2,243 +2,325 @@
   {
     "pattern": "literal_keyword_matching",
     "description": "Matches exact surface words from the passage but asserts an incorrect proposition.",
-    "observedCount": 97,
-    "observedPercentage": 16.6,
+    "observedCount": 11,
+    "observedPercentage": 1.9,
     "primaryCognitiveTrigger": "Traps students who visually scan rather than comprehend.",
     "exemplars": [
       {
-        "examId": "111",
-        "questionNumber": 2,
+        "examId": "112",
+        "questionNumber": 27,
         "option": "B",
-        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
+        "explanation": "Pushing babies out of the nest is consistent with the false belief box, not the correction the notes endorse."
       },
       {
-        "examId": "111",
-        "questionNumber": 4,
+        "examId": "112",
+        "questionNumber": 32,
+        "option": "B",
+        "explanation": "The opening mentions rain falling hard and fast, but this is used to frame the topic, not as the condition that defeats the mosquito's escape trick."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 40,
         "option": "A",
-        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
-      },
-      {
-        "examId": "111",
-        "questionNumber": 6,
-        "option": "B",
-        "explanation": "Tempts students by mirroring surface words from the context while asserting an unverified or contradictory proposition."
+        "explanation": "War photos are mentioned only as something ordinary war reporting might include; empathy concerns emotional understanding, not photographic skill."
       }
     ]
   },
   {
     "pattern": "partial_truth",
     "description": "States a fact from the text accurately but fails to answer the specific condition in the stem.",
-    "observedCount": 94,
-    "observedPercentage": 16.1,
+    "observedCount": 54,
+    "observedPercentage": 9.2,
     "primaryCognitiveTrigger": "Traps students with incomplete constraint evaluation.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 2,
-        "option": "C",
-        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
+        "questionNumber": 21,
+        "option": "A",
+        "explanation": "The number 20 is part of the anniversary campaign name, not a claim that tea is sold in twenty countries."
       },
       {
         "examId": "111",
-        "questionNumber": 4,
-        "option": "B",
-        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
+        "questionNumber": 21,
+        "option": "D",
+        "explanation": "The prize trip is to the USA, but the ad does not announce a twentieth US store."
       },
       {
         "examId": "111",
-        "questionNumber": 6,
-        "option": "C",
-        "explanation": "Reflects a genuine detail from the text but fails to answer the specific condition asked in the stem."
+        "questionNumber": 22,
+        "option": "A",
+        "explanation": "Age is not one of the required fields."
       }
     ]
   },
   {
     "pattern": "wrong_referent",
     "description": "Attributes a genuine passage action, feeling, or attribute to the wrong subject.",
-    "observedCount": 94,
-    "observedPercentage": 16.1,
+    "observedCount": 34,
+    "observedPercentage": 5.8,
     "primaryCognitiveTrigger": "Tests pronoun and entity tracking.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 2,
-        "option": "D",
-        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
+        "questionNumber": 31,
+        "option": "B",
+        "explanation": "Late-opening restaurants are a consequence of workers staying out, not the practice the author says must be changed."
       },
       {
         "examId": "111",
-        "questionNumber": 4,
-        "option": "D",
-        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
+        "questionNumber": 31,
+        "option": "C",
+        "explanation": "Not going home is one workaround, but the final sentence targets the broader norm that rewards long hours."
       },
       {
         "examId": "111",
-        "questionNumber": 6,
+        "questionNumber": 31,
         "option": "D",
-        "explanation": "Attributes an action, attribute, or statement from the text to the wrong subject or entity."
+        "explanation": "The study’s numerical relationship is evidence for the norm, not the antecedent of “this.”"
       }
     ]
   },
   {
     "pattern": "wrong_chronology",
     "description": "Inverts event order or mixes up before/after temporal sequences.",
-    "observedCount": 96,
-    "observedPercentage": 16.4,
+    "observedCount": 28,
+    "observedPercentage": 4.8,
     "primaryCognitiveTrigger": "Tests timeline reconstruction.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 3,
-        "option": "A",
-        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+        "questionNumber": 27,
+        "option": "B",
+        "explanation": "The paragraph gives interval durations, not the best time of day to train."
       },
       {
         "examId": "111",
-        "questionNumber": 5,
-        "option": "A",
-        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+        "questionNumber": 27,
+        "option": "C",
+        "explanation": "It never identifies the inventor of Tabata training."
       },
       {
         "examId": "111",
-        "questionNumber": 7,
-        "option": "A",
-        "explanation": "Swaps the temporal sequence or cause-and-effect relationship established in the passage."
+        "questionNumber": 27,
+        "option": "D",
+        "explanation": "It explains repetitions within a session, not how often sessions should occur across days or weeks."
       }
     ]
   },
   {
     "pattern": "local_evidence_for_global_question",
     "description": "A true local detail in paragraph 1 presented as the overall main idea or title.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 12,
+    "observedPercentage": 2.1,
     "primaryCognitiveTrigger": "Tests local vs global scope discrimination.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 43,
+        "option": "B",
+        "explanation": "The paragraph discusses uses, not whether people play them publicly."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 43,
+        "option": "C",
+        "explanation": "No comparison of past and present popularity is given."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 43,
+        "option": "D",
+        "explanation": "The passage does not claim their original historical purpose was unrelated to learning words; it emphasizes additional uses instead."
+      }
+    ]
   },
   {
     "pattern": "unsupported_world_knowledge",
     "description": "Plausible common sense in daily life, but explicitly contradicted or absent in text.",
-    "observedCount": 102,
-    "observedPercentage": 17.4,
+    "observedCount": 89,
+    "observedPercentage": 15.2,
     "primaryCognitiveTrigger": "Tests text-grounded reading discipline.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 3,
+        "questionNumber": 21,
         "option": "B",
-        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
+        "explanation": "The ad never says a twentieth tea variety is being launched."
       },
       {
         "examId": "111",
-        "questionNumber": 5,
-        "option": "C",
-        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
+        "questionNumber": 22,
+        "option": "B",
+        "explanation": "The sender’s street address is not listed among the required information; the printed destination address is already present."
       },
       {
         "examId": "111",
-        "questionNumber": 7,
-        "option": "C",
-        "explanation": "Plausible in everyday common sense, but entirely unsupported or contradicted by the passage facts."
+        "questionNumber": 22,
+        "option": "D",
+        "explanation": "The postcard visibly already contains the required two tea-cup pictures, so no third picture is needed."
       }
     ]
   },
   {
     "pattern": "reversed_cause_effect",
     "description": "Swaps cause and result in a causal relationship.",
-    "observedCount": 3,
-    "observedPercentage": 0.5,
+    "observedCount": 45,
+    "observedPercentage": 7.7,
     "primaryCognitiveTrigger": "Tests causal reasoning.",
     "exemplars": [
       {
-        "examId": "115",
-        "questionNumber": 22,
+        "examId": "111",
+        "questionNumber": 35,
         "option": "C",
-        "explanation": "Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment."
+        "explanation": "The dispute is that Ambazonia’s supporters want to leave Cameroon; saying Cameroon does not want to be part of Ambazonia reverses the political relationship."
       },
       {
-        "examId": "115",
-        "questionNumber": 32,
-        "option": "A",
-        "explanation": "Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles."
-      },
-      {
-        "examId": "115",
-        "questionNumber": 43,
+        "examId": "112",
+        "questionNumber": 9,
         "option": "D",
-        "explanation": "Sung and the other children with beautiful plants were popular with the crowd; Wong was lonely with his empty pot."
+        "explanation": "So would present the second clause as a result of obeying or directly following the first clause, reversing the intended warning logic."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 11,
+        "option": "C",
+        "explanation": "Calling Jenny a gift would normally express appreciation or benefit, which conflicts with the repeated-trouble description."
       }
     ]
   },
   {
     "pattern": "grammatically_plausible_contextually_wrong",
     "description": "Fits the blank syntactically but contradicts contextual meaning or discourse flow.",
-    "observedCount": 97,
-    "observedPercentage": 16.6,
+    "observedCount": 102,
+    "observedPercentage": 17.4,
     "primaryCognitiveTrigger": "Tests integrated syntax-semantics reasoning.",
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 3,
-        "option": "D",
-        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+        "questionNumber": 2,
+        "option": "B",
+        "explanation": "“or” would offer an alternative rather than connect the movie time to the proposed meeting time."
       },
       {
         "examId": "111",
-        "questionNumber": 5,
-        "option": "D",
-        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+        "questionNumber": 2,
+        "option": "C",
+        "explanation": "“if” would make the meeting conditional on the movie starting at two, which is not the relation stated."
       },
       {
         "examId": "111",
-        "questionNumber": 7,
+        "questionNumber": 2,
         "option": "D",
-        "explanation": "Fits the blank syntactically but violates contextual meaning or discourse flow."
+        "explanation": "“because” reverses the logic by making the meeting time a cause of the movie start time."
       }
     ]
   },
   {
     "pattern": "overgeneralization",
     "description": "Takes a narrow specific detail and uses universal words (all, always, every).",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 14,
+    "observedPercentage": 2.4,
     "primaryCognitiveTrigger": "Tests boundary and scope accuracy.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "112",
+        "questionNumber": 15,
+        "option": "B",
+        "explanation": "Business can refer broadly to commercial activity, but the evidence targets one specific customer-facing function rather than the shop's business as a whole."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 27,
+        "option": "D",
+        "explanation": "Leaving the babies and moving nests exaggerates the false abandonment belief and is not supported after the correction."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 29,
+        "option": "A",
+        "explanation": "Stage 5 is large in North America & Oceania and Europe, but South & Southeast Asia has a much smaller Stage 5 share than its earlier stages, so the claim does not hold for every area."
+      }
+    ]
   },
   {
     "pattern": "undergeneralization",
     "description": "Excessively narrows down a general principle to one minor example.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 6,
+    "observedPercentage": 1,
     "primaryCognitiveTrigger": "Tests generalization ability.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "112",
+        "questionNumber": 24,
+        "option": "D",
+        "explanation": "$160 represents only part of the order and cannot account for the two sandwiches plus both drinks after a single $60 discount."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 33,
+        "option": "A",
+        "explanation": "Romantic love is specifically part of the Malfatti story and cannot summarize the Röckel or Barensfeld explanations."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 39,
+        "option": "A",
+        "explanation": "Her reports are discussed, but the passage also emphasizes career history, locations, values, injuries, and professional commitment; 'war reports' is too narrow."
+      }
+    ]
   },
   {
     "pattern": "irrelevant_distractor",
     "description": "Content completely unrelated to passage theme.",
-    "observedCount": 2,
-    "observedPercentage": 0.3,
+    "observedCount": 44,
+    "observedPercentage": 7.5,
     "primaryCognitiveTrigger": "Weak baseline distractor (rarely used in high-quality CAP questions).",
     "exemplars": [
       {
-        "examId": "115",
-        "questionNumber": 23,
-        "option": "D",
-        "explanation": "Hawkins acted carelessly and boastfully, not carefully."
+        "examId": "111",
+        "questionNumber": 3,
+        "option": "A",
+        "explanation": "A computer can emit light, but the sentence tests the ordinary response to darkness, not device use."
       },
       {
-        "examId": "115",
-        "questionNumber": 43,
+        "examId": "111",
+        "questionNumber": 3,
         "option": "B",
-        "explanation": "Physical strength is completely unrelated to planting seeds or moral integrity."
+        "explanation": "Fans affect airflow, not darkness."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 3,
+        "option": "D",
+        "explanation": "Music affects sound, not darkness."
       }
     ]
   },
   {
     "pattern": "other",
     "description": "Specialized or compound distractor mechanism.",
-    "observedCount": 0,
-    "observedPercentage": 0,
+    "observedCount": 146,
+    "observedPercentage": 25,
     "primaryCognitiveTrigger": "Custom psychometric discriminator.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "112",
+        "questionNumber": 6,
+        "option": "C",
+        "explanation": "Has jogged links a past action to the present and conflicts with the explicitly located past reference time 'this morning ... at the time.'"
+      },
+      {
+        "examId": "112",
+        "questionNumber": 6,
+        "option": "D",
+        "explanation": "Would jog normally needs a past-future, habitual, or conditional frame that the sentence does not provide."
+      },
+      {
+        "examId": "112",
+        "questionNumber": 24,
+        "option": "C",
+        "explanation": "$220 would require subtracting $70 rather than the specified $60 drink value, so it misapplies the reward to Winter Snow's price."
+      }
+    ]
   }
 ]

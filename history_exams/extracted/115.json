@@ -23,7 +23,7 @@
       ],
       "genre": "infographic_chart_table",
       "title": "The Best Fruit Tea You Can Make at Home",
-      "text": "[Visual/Graphic Content in Source PDF: infographic_chart_table on page 4]",
+      "text": "The Best Fruit Tea You Can Make at Home\nThings to get ready: 3-4 teabags (green or black tea), half an apple, half a peach, half a pear, 20 mL lemon juice, 1,200 mL water, 30 g sugar.\nNote: Most fruits are good for making fruit tea, but not papayas or bananas.\nHow to make fruit tea: boil water; steep the teabags for 2-3 minutes and remove them; cut fruit into small pieces; put the fruit into the hot tea for 5-6 minutes; add sugar and lemon juice and stir for at least 10 seconds.\nNow enjoy the tea!",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -54,7 +54,7 @@
       ],
       "genre": "comic_strip",
       "title": "Hawkins Comic Strip",
-      "text": "th\nIn 6 grade, I tried to get the students\nI totally bombed it.\nto pick me as student leader. _____\nI’ll make class hours shorter.\nAnd we’ll have only three\ndays of school a week…\nWhat? That’s not\nwhat a student\nleader can decide.\nHe doesn’t\nknow anything. _____ I was the best choice,\nbut why didn’t people\nknow that?\nI became a salesperson when I was 23,\nI bombed it again.\nand I believed I could be Number 1. _____\nYou said you would\nHawkins, we don’t need\nsell 50 cars a month.\nyour service anymore.\nDon’t worry.\nBut you sold only 1\nGo pack your things…\nI’ll sell 149 cars\ncar in two months.\nnext month.\nWhy ?\nYou said that\na year ago.",
+      "text": "In 6 grade, I tried to get the students\nI totally bombed it.\nto pick me as student leader. _____\nI’ll make class hours shorter.\nAnd we’ll have only three\ndays of school a week…\nWhat? That’s not\nwhat a student\nleader can decide.\nHe doesn’t\nknow anything. _____ I was the best choice,\nbut why didn’t people\nknow that?\nI became a salesperson when I was 23,\nI bombed it again.\nand I believed I could be Number 1. _____\nYou said you would\nHawkins, we don’t need\nsell 50 cars a month.\nyour service anymore.\nDon’t worry.\nBut you sold only 1\nGo pack your things…\nI’ll sell 149 cars\ncar in two months.\nnext month.\nWhy ?\nYou said that\na year ago.",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -995,21 +995,11 @@
         "D": "They took a course on movies together."
       },
       "answer": "A",
-      "evidenceMode": "spatial",
-      "visualEvidenceRequired": true,
-      "requiredAssets": [
-        {
-          "page": 9,
-          "role": "diagram",
-          "imagePath": "history_exams/assets/115/page-9.png",
-          "description": "Visual evidence for question 30 on page 9",
-          "sha256": "8b59b6b4e105aa2339165f9bd300636653ae8328fb0156ca4491e48765a99fec"
-        }
-      ],
-      "extractionConfidence": "partial_visual_pending",
-      "extractionWarnings": [
-        "Question 30 requires visual evidence from page 9"
-      ]
+      "evidenceMode": "text_only",
+      "visualEvidenceRequired": false,
+      "requiredAssets": [],
+      "extractionConfidence": "high",
+      "extractionWarnings": []
     },
     {
       "examId": "115",
@@ -1419,6 +1409,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:27.024Z",
+  "extractedAt": "2026-08-28T04:49:27.435Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

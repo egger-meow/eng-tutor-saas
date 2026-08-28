@@ -1,0 +1,4297 @@
+{
+  "examId": "114",
+  "providerName": "openai-chatgpt",
+  "modelName": "gpt-5.6-sol",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "analysisSchemaVersion": "1.0.0",
+  "questions": [
+    {
+      "questionNumber": 1,
+      "primarySkill": "information_integration",
+      "secondarySkills": [
+        "explicit_detail"
+      ],
+      "languageDifficulty": "A1_elementary",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Read the four noun options.",
+        "Inspect which candidate is flying over the houses, not merely which candidates appear in the illustration."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "high",
+      "questionMechanism": "All four option referents are visible, so the spatial phrase 'over the houses' performs the discrimination.",
+      "whyTheQuestionWorks": "The bird, butterfly, kite, and plane all appear, preventing simple picture-word matching.",
+      "correctRationale": "The plane is the large aircraft above the rooftops, so D is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "partial_truth",
+          "rationale": "A bird is visible but is not the target above the houses.",
+          "misconceptionTarget": "Selecting any pictured referent."
+        },
+        "B": {
+          "strategy": "partial_truth",
+          "rationale": "The butterfly is near the flowers at street level.",
+          "misconceptionTarget": "Ignoring the spatial relation."
+        },
+        "C": {
+          "strategy": "partial_truth",
+          "rationale": "The kite is lower and connected to the person on the street.",
+          "misconceptionTarget": "Matching flying while dropping location."
+        }
+      },
+      "studentFailureModes": [
+        "Naming the first flying object noticed instead of checking position."
+      ],
+      "misconceptionsTargeted": [
+        "Any pictured option is sufficient evidence."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Show multiple candidate nouns and let one simple spatial relation select the answer.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep all four candidates and 'over the houses'."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Add a second spatial constraint."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 2 / Q1 illustration",
+          "quoteOrDescription": "The aircraft is above the rooftops while the other flying objects occupy different positions.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q1 combines the location phrase 'over the houses' with a picture containing several visible flying objects, so the learner must use spatial evidence to select the plane."
+    },
+    {
+      "questionNumber": 2,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q2 asks the learner to infer a past personality trait from the contrast between difficulty talking to people as a teenager and greater ease doing so now.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Notice the past-versus-present contrast introduced by 'But now'.",
+        "Infer which adjective best explains earlier difficulty talking to people."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The second clause supplies behavioral evidence that narrows the adjective to a social-interaction trait.",
+      "whyTheQuestionWorks": "All four options are familiar adjectives, but only 'shy' has a direct semantic relationship with difficulty speaking to people.",
+      "correctRationale": "If talking to people used to be difficult but is easier now, the natural description of the earlier state is 'shy', so D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q2 stem",
+          "quoteOrDescription": "'But now, it’s easier for me to talk to people.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "Being happy does not explain why talking to people was difficult.",
+          "misconceptionTarget": "Choosing a common positive adjective without matching the behavioral clue.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q2 stem",
+              "quoteOrDescription": "The contrast is specifically about social interaction.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "Being lazy concerns willingness to work or act, not discomfort talking to people.",
+          "misconceptionTarget": "Matching a negative adjective by tone rather than meaning.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q2 stem",
+              "quoteOrDescription": "The evidence is ease of talking to people, not effort.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "Being popular usually implies successful social contact and does not explain difficulty talking to people.",
+          "misconceptionTarget": "Associating any social adjective with a social clue.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q2 stem",
+              "quoteOrDescription": "Earlier social interaction was difficult.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Ignoring 'But now' and choosing from general adjective familiarity.",
+        "Treating all social adjectives as interchangeable."
+      ],
+      "misconceptionsTargeted": [
+        "Vocabulary can be solved by word valence without using sentence evidence.",
+        "Popularity and shyness describe the same social dimension."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The adjective must be inferred from a behavioral contrast."
+      },
+      "reusableDesignPrinciple": "Test personality vocabulary by pairing an earlier trait with a later behavioral change that uniquely diagnoses it.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the contrast between past difficulty and present ease talking to people."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit phrase 'talk to people' and imply social discomfort through a short situation."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q2 stem",
+          "quoteOrDescription": "Past teenage state contrasts with easier social interaction now.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 3,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q3 requires mapping fear of water to the one proposed activity that necessarily involves being on water.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Identify 'afraid of water' as the causal clue.",
+        "Compare which activity is intrinsically water-based."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The because-clause gives a cause that selects the semantically compatible gerund activity.",
+      "whyTheQuestionWorks": "The options are all natural after 'go', so syntax alone cannot solve the item; meaning must connect the activity with fear of water.",
+      "correctRationale": "Sailing takes place on water, so fear of water directly explains why Lena does not want to go sailing; C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q3 stem",
+          "quoteOrDescription": "'because she is afraid of water'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "Dancing does not normally require water, so the stated fear would not explain avoiding it.",
+          "misconceptionTarget": "Selecting any familiar 'go + V-ing' activity.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q3 stem",
+              "quoteOrDescription": "The reason must be explained by water exposure.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "Hiking is land-based and has no necessary connection to fear of water.",
+          "misconceptionTarget": "Ignoring causal coherence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q3 stem",
+              "quoteOrDescription": "Fear of water is the explicit cause.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "Shopping is not inherently water-related.",
+          "misconceptionTarget": "Choosing by collocation while discarding sentence meaning.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q3 stem",
+              "quoteOrDescription": "Only a water activity fits the reason.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Solving only from the pattern 'go + V-ing'.",
+        "Failing to use the because-clause as a semantic constraint."
+      ],
+      "misconceptionsTargeted": [
+        "All grammatically valid activity nouns are equally plausible.",
+        "A causal clause can be ignored in vocabulary selection."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must connect activity meaning with the causal clue."
+      },
+      "reusableDesignPrinciple": "Make collocation options grammatically parallel, then let a causal clause distinguish them semantically.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain an explicit fear-of-water reason."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the direct fear statement with behavior such as refusing to get on a boat."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q3 stem",
+          "quoteOrDescription": "Lena avoids the activity because she is afraid of water.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 4,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "Q4 tests the complement pattern after 'enjoy': the verb requires a gerund, and the embedded phrase is 'listen to her dad read stories.'",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Recognize that 'enjoy' selects a gerund complement.",
+        "Preserve the phrase 'listen to + object + base verb'."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The item combines two nested complement constraints: 'enjoy + V-ing' and 'listen to + object + bare infinitive'.",
+      "whyTheQuestionWorks": "Every option contains the same lexical verb, so the learner must distinguish inflectional form rather than vocabulary meaning.",
+      "correctRationale": "After 'enjoy', the activity must be expressed as a gerund: 'enjoys listening to her dad read stories'; therefore B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q4 stem",
+          "quoteOrDescription": "'enjoys _____ her dad read stories' requires a gerund complement.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'enjoy' does not normally take a to-infinitive complement in this meaning.",
+          "misconceptionTarget": "Generalizing 'to + verb' as the default complement after any verb.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q4 stem",
+              "quoteOrDescription": "The matrix verb is 'enjoys'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "A bare infinitive cannot directly serve as the complement of 'enjoys'.",
+          "misconceptionTarget": "Dropping inflection because another base verb appears later in the sentence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q4 stem",
+              "quoteOrDescription": "The blank immediately follows 'enjoys'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'listens to' is a finite verb form and would create two finite predicates without a linker.",
+          "misconceptionTarget": "Matching third-person -s mechanically to the subject Cindy.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q4 stem",
+              "quoteOrDescription": "'enjoys' is already the finite predicate.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing 'listens' because Cindy is third-person singular.",
+        "Remembering the meaning of 'enjoy' but not its gerund complement pattern."
+      ],
+      "misconceptionsTargeted": [
+        "Every verb referring to a singular subject needs -s.",
+        "Infinitives and gerunds are freely interchangeable after lexical verbs."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "none",
+        "explanation": "The main decision is a stored lexical complement rule for 'enjoy'."
+      },
+      "reusableDesignPrinciple": "Test complement selection by embedding a second verb phrase so agreement-based guessing competes with the true matrix-verb rule.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep 'enjoy' immediately before the blank."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Add another nearby third-person verb to increase attraction without changing the complement rule."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q4 stem",
+          "quoteOrDescription": "Matrix verb 'enjoys' selects 'listening'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 5,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q5 asks for the adjective that describes dinner's state after cooking is almost finished, using 'in ten minutes' as the completion clue.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Link busy cooking with near-future completion.",
+        "Choose the adjective meaning prepared and available to eat."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A short event sequence establishes a future result state for dinner.",
+      "whyTheQuestionWorks": "The distractors are common adjectives that fit after 'be' grammatically, but only 'ready' matches the cooking timeline.",
+      "correctRationale": "Because Dad is cooking and dinner will be completed in ten minutes, dinner will be 'ready'; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q5 stem",
+          "quoteOrDescription": "Dad is cooking now and dinner will be available in ten minutes.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Free' describes absence of cost or restriction, not food preparation.",
+          "misconceptionTarget": "Choosing a familiar adjective without checking noun compatibility.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q5 stem",
+              "quoteOrDescription": "The topic is cooking dinner.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "People can be full after eating, but dinner itself is not normally 'full' in this context.",
+          "misconceptionTarget": "Confusing a result for the eater with a state of the meal.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q5 stem",
+              "quoteOrDescription": "The subject of the adjective is 'Dinner'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Medium' can describe size or cooking degree in some noun phrases, but 'dinner will be medium' is not the intended completion state.",
+          "misconceptionTarget": "Overextending a food-related word to an incompatible construction.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q5 stem",
+              "quoteOrDescription": "The time expression predicts completion, not size or doneness grade.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing a food-associated adjective instead of the result-state adjective.",
+        "Ignoring the future time clue."
+      ],
+      "misconceptionsTargeted": [
+        "Any adjective related to food can describe a meal after 'be'.",
+        "Temporal context is irrelevant to lexical choice."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Meaning is resolved by the cooking timeline."
+      },
+      "reusableDesignPrinciple": "Use a process plus a near-future time expression to test vocabulary for the resulting state.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep cooking as the current process and a short completion time."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make readiness inferable from a family member being called to the table rather than stating a time."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q5 stem",
+          "quoteOrDescription": "Cooking now leads to dinner being ready soon.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 6,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "reference_resolution"
+      ],
+      "skillExplanation": "Q6 tests the common metonymic use of 'faces' to mean newly encountered people, reinforced by the need to remember who is who.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use 'who is who' to identify people as the referent.",
+        "Select the noun that can naturally stand for people in an office."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The second sentence disambiguates the plural noun by referring to personal identity rather than objects or policies.",
+      "whyTheQuestionWorks": "All options can plausibly be 'new' in an office, but only 'faces' connects naturally to identifying people.",
+      "correctRationale": "Remembering 'who is who' means the speaker is learning new people, and 'new faces' is a common expression for new people; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q6 stem",
+          "quoteOrDescription": "'remember who is who' signals newly encountered people.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "wrong_referent",
+          "rationale": "Ideas cannot be identified with 'who is who'.",
+          "misconceptionTarget": "Using only the office setting to choose a plausible noun.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q6 stem",
+              "quoteOrDescription": "The pronoun 'who' requires people.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "wrong_referent",
+          "rationale": "Rules are not people and cannot satisfy 'who is who'.",
+          "misconceptionTarget": "Ignoring pronoun semantics.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q6 stem",
+              "quoteOrDescription": "Identity language points to people.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "wrong_referent",
+          "rationale": "Tools may be new in an office, but they are identified by 'what', not 'who'.",
+          "misconceptionTarget": "Selecting a concrete office noun without integrating the following sentence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q6 stem",
+              "quoteOrDescription": "'who is who' excludes inanimate objects.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Stopping after the first sentence and choosing an office-related noun.",
+        "Missing the figurative expression 'new faces'."
+      ],
+      "misconceptionsTargeted": [
+        "Context can be reduced to topic words such as office.",
+        "Body-part nouns cannot refer metonymically to people."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The phrase is familiar, but the decisive evidence comes from referent tracking across two sentences."
+      },
+      "reusableDesignPrinciple": "Place several topic-compatible nouns in the options and use a later pronoun or identity clue to force precise referent resolution.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain a clue equivalent to 'who is who'."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace 'who is who' with a subtler reference to remembering everyone's names."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q6 stem",
+          "quoteOrDescription": "New faces are people whose identities the speaker must learn.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 7,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q7 asks the learner to infer a self-critical label from the embarrassing discovery that the keys being searched for were in the speaker's pocket all along.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize the situation as a silly personal mistake.",
+        "Choose the noun expressing self-judged foolishness."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The punchline supplies an evaluative situation from which the noun phrase 'feel like a ___' must be inferred.",
+      "whyTheQuestionWorks": "Every option denotes a person-like entity, but only 'fool' matches embarrassment over an obvious mistake.",
+      "correctRationale": "Searching for hours for keys that were in one's pocket is a foolish mistake, so 'I feel like a fool' is the natural self-evaluation; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q7 stem",
+          "quoteOrDescription": "The keys were in the speaker's pocket during the entire search.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "other",
+          "rationale": "A ghost does not express embarrassment or stupidity.",
+          "misconceptionTarget": "Choosing an imaginative noun without matching the speaker's evaluation.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q7 stem",
+              "quoteOrDescription": "The situation is about a silly mistake, not invisibility or death.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "A king suggests power or status, the opposite of the speaker's self-deprecating reaction.",
+          "misconceptionTarget": "Ignoring emotional tone.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q7 stem",
+              "quoteOrDescription": "The speaker is embarrassed by the mistake.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "A stranger is an unfamiliar person and does not describe making a foolish mistake.",
+          "misconceptionTarget": "Selecting by the frame 'a + person noun' instead of meaning.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q7 stem",
+              "quoteOrDescription": "The issue is self-judgment, not familiarity.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Treating 'feel like a' as enough to license any person noun.",
+        "Missing the humorous self-criticism in the second sentence."
+      ],
+      "misconceptionsTargeted": [
+        "Lexical frames can be solved without discourse tone.",
+        "The consequence sentence need not explain the chosen noun."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner infers the evaluative noun from the whole scenario."
+      },
+      "reusableDesignPrinciple": "Use a short embarrassing scenario to test evaluative nouns through pragmatic inference rather than dictionary definition alone.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the discovery that the searched-for item was already with the speaker."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'I feel like' and ask what the speaker most likely thinks about themself."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q7 stem",
+          "quoteOrDescription": "Hours of searching were unnecessary because the keys were in the pocket.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 8,
+      "primarySkill": "reference_resolution",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q8 tests how English refers to the remaining member of a known three-person set after two members have already been identified.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Establish a set of three daughters.",
+        "Subtract the two already assigned to high school.",
+        "Refer to the single remaining daughter with 'the other'."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Cardinality and discourse definiteness jointly determine the referring expression for one remaining member.",
+      "whyTheQuestionWorks": "The options are all determiner-like expressions, but only 'the other' conventionally identifies the remaining one in a closed set.",
+      "correctRationale": "There are three daughters total and two are already accounted for, leaving one known remaining daughter; 'the other' is the correct expression, so B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q8 stem",
+          "quoteOrDescription": "Three daughters total; two are in high school; one remains.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Each' distributes over multiple members and cannot naturally mean the one remaining daughter here.",
+          "misconceptionTarget": "Treating all set-related determiners as equivalent.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q8 stem",
+              "quoteOrDescription": "Only one daughter remains unassigned.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'The one' can identify a member when modified or contrasted, but by itself it does not encode the standard 'remaining member' relation supplied by 'the other'.",
+          "misconceptionTarget": "Using generic singular reference where a remainder relation is required.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q8 stem",
+              "quoteOrDescription": "The sentence contrasts two members with the remaining third.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'The next' indicates sequence or order, not the remaining member of a set.",
+          "misconceptionTarget": "Confusing remainder with sequence.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q8 stem",
+              "quoteOrDescription": "No ordering of daughters is being described.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Ignoring the total count of three daughters.",
+        "Confusing 'the other' with expressions of order such as 'the next'."
+      ],
+      "misconceptionsTargeted": [
+        "Reference expressions can be chosen without tracking set size.",
+        "'Other' and 'next' both simply mean a different person."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must track the set and compute the remaining member."
+      },
+      "reusableDesignPrinciple": "Test other/another reference by making set cardinality explicit and accounting for all but one member.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve a known set of three and identify two members before the blank."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Spread the set information across two conversational turns so the remaining-member calculation requires discourse memory."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q8 stem",
+          "quoteOrDescription": "Two of three daughters are identified, leaving the other one.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 9,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "sequence_cause_consequence",
+        "grammar_in_context"
+      ],
+      "skillExplanation": "Q9 asks which verb describes what trees have difficulty doing under harsh beach conditions caused by strong sea winds.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Interpret strong winds as an adverse environmental condition.",
+        "Choose the biological process trees need favorable conditions to do."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The causal phrase 'because of the strong winds' constrains the verb to a plausible effect on trees.",
+      "whyTheQuestionWorks": "All options are basic verbs, but only 'grow' forms a coherent tree-environment relation.",
+      "correctRationale": "Strong coastal winds can make it difficult for trees to develop normally, so 'grow' is the only semantically coherent choice; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q9 stem",
+          "quoteOrDescription": "Strong winds from the sea make the process hard for trees.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_referent",
+          "rationale": "Winds blow; trees do not normally 'blow' as the intended biological process.",
+          "misconceptionTarget": "Copying a nearby word's semantic field without respecting grammatical roles.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q9 stem",
+              "quoteOrDescription": "Wind is the cause, while trees are the affected entity.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "Trees do not 'build' in this intransitive environmental sense.",
+          "misconceptionTarget": "Ignoring verb selectional restrictions.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q9 stem",
+              "quoteOrDescription": "The subject is trees with no object after the blank.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Follow' requires a path, person, or target and does not describe tree development.",
+          "misconceptionTarget": "Choosing a grammatical verb without contextual fit.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q9 stem",
+              "quoteOrDescription": "The sentence describes survival/development conditions.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing 'blow' because the sentence contains winds.",
+        "Checking only grammar and not subject-verb semantics."
+      ],
+      "misconceptionsTargeted": [
+        "Lexical association with a nearby noun is enough for vocabulary questions.",
+        "Any intransitive verb can describe a plant under environmental stress."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer comes from a cause-effect relation between environment and plant development."
+      },
+      "reusableDesignPrinciple": "Use a salient nearby noun to tempt lexical association while the subject's semantic role identifies the correct verb.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep trees as subject and strong winds as the adverse cause."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the explicit cause phrase with signs of coastal exposure and require inference of the growth problem."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q9 stem",
+          "quoteOrDescription": "Strong sea winds inhibit tree growth.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 10,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q10 tests the present progressive use for an approaching scheduled/calendar event that motivates current planning.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize that Christmas is in the near future, not past or habitual.",
+        "Choose the form that presents the event as approaching now."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A current desire to make travel plans anchors Christmas as an approaching event, favoring present progressive 'is coming'.",
+      "whyTheQuestionWorks": "All options use the same verb but encode different temporal/aspectual meanings, so discourse time determines the answer.",
+      "correctRationale": "The speaker is making plans because Christmas is approaching, so 'Christmas is coming' is the natural present-progressive construction; C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q10 stem",
+          "quoteOrDescription": "The speaker wants to visit an aunt abroad and asks about plans yet.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'came' places Christmas in the completed past, which conflicts with current future planning.",
+          "misconceptionTarget": "Selecting a familiar simple tense without building a timeline.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q10 stem",
+              "quoteOrDescription": "The visit is still being planned.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "'comes' can describe a recurring fact, but the context highlights this upcoming Christmas as an approaching event.",
+          "misconceptionTarget": "Using simple present for every calendar event.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q10 stem",
+              "quoteOrDescription": "Current planning creates an imminent-event reading.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'was coming' requires a past reference point, which the sentence does not provide.",
+          "misconceptionTarget": "Recognizing progressive aspect but ignoring tense anchoring.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q10 stem",
+              "quoteOrDescription": "The planning conversation occurs now.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing simple present because Christmas is a recurring event.",
+        "Not linking the second sentence to the event's temporal status."
+      ],
+      "misconceptionsTargeted": [
+        "Calendar events always take simple present.",
+        "Progressive aspect cannot describe future arrangements or approaching events."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The tense-aspect choice is resolved from the present planning context."
+      },
+      "reusableDesignPrinciple": "Pair an approaching event with a current planning decision to distinguish progressive future meaning from habitual simple present.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep an upcoming holiday and an unresolved future plan."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove explicit planning language and use a contextual consequence such as buying tickets."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q10 stem",
+          "quoteOrDescription": "Current travel planning signals an approaching Christmas.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 11,
+      "primarySkill": "other_uncertain",
+      "secondarySkills": [
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q11 tests the base-form imperative in the fixed expression 'make sure', following a reason clause about arriving on time.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize the second clause as direct advice/command to the listener.",
+        "Use the base verb form in an imperative."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "After 'so', the speaker issues an imperative; English imperatives use the bare verb, yielding 'make sure'.",
+      "whyTheQuestionWorks": "The subject 'you' appears in the reason clause, tempting agreement-based forms, but the target clause has an understood imperative subject.",
+      "correctRationale": "The speaker is telling the listener what to do, so the imperative is 'make sure that you arrive on time'; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q11 stem",
+          "quoteOrDescription": "The clause after 'so' gives a direct instruction to the listener.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "other",
+          "rationale": "'makes' is third-person singular finite agreement, but the target clause is an imperative.",
+          "misconceptionTarget": "Choosing verb agreement without identifying clause type.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q11 stem",
+              "quoteOrDescription": "The understood imperative subject is 'you'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'to make sure' would need a governing expression and does not independently form the command after 'so'.",
+          "misconceptionTarget": "Using infinitive form whenever expressing purpose or advice.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q11 stem",
+              "quoteOrDescription": "The blank begins an independent directive.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'is making' requires a third-person subject and describes an ongoing event rather than an instruction.",
+          "misconceptionTarget": "Treating present progressive as a generic present-time form.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q11 stem",
+              "quoteOrDescription": "The sentence tells the listener to ensure punctuality.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Looking for agreement with the nearest explicit pronoun instead of recognizing an imperative.",
+        "Treating 'to make sure' as a generic advice pattern."
+      ],
+      "misconceptionsTargeted": [
+        "Every clause needs an overt subject and finite agreement.",
+        "Verb form can be chosen without identifying sentence function."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "none",
+        "explanation": "The item primarily applies the imperative base-form rule and the expression 'make sure'."
+      },
+      "reusableDesignPrinciple": "Hide an imperative after a result connector so learners must distinguish clause function from nearby subject agreement.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the target clause as a direct instruction beginning at the blank."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Place another finite verb immediately before the imperative to increase structural competition."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q11 stem",
+          "quoteOrDescription": "'so _____ sure' introduces a command: 'make sure'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 12,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q12 asks for the noun that explains a long drive when many cars and buses are present.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Use 'long drive' to identify a transportation problem.",
+        "Use 'a lot of cars and buses' to identify heavy traffic."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The explanatory second sentence effectively defines the target noun through observable road conditions.",
+      "whyTheQuestionWorks": "Only 'traffic' connects both the transportation delay and the density of vehicles; the other nouns are syntactically possible after 'terrible' but semantically irrelevant.",
+      "correctRationale": "Many cars and buses can make a drive take longer, which describes terrible traffic; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q12 stem",
+          "quoteOrDescription": "'There are usually a lot of cars and buses during this time.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "An experience can be terrible, but it does not specifically explain many vehicles or a long drive.",
+          "misconceptionTarget": "Choosing by adjective collocation alone.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q12 stem",
+              "quoteOrDescription": "The second sentence describes road congestion.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "A machine is a physical device, not a road condition caused by many cars and buses.",
+          "misconceptionTarget": "Using a transport-adjacent concrete noun without semantic fit.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q12 stem",
+              "quoteOrDescription": "The cause is the number of vehicles on the road.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "Service may affect travel quality, but the sentence explicitly points to vehicle volume instead.",
+          "misconceptionTarget": "Inferring a general transportation problem instead of using the defining clue.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q12 stem",
+              "quoteOrDescription": "Cars and buses are numerous, which defines heavy traffic.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Reading only the first sentence and choosing any negative noun.",
+        "Not treating the second sentence as a definition-like clue."
+      ],
+      "misconceptionsTargeted": [
+        "Vocabulary questions can be solved without integrating explanatory follow-up sentences.",
+        "All transportation-related nouns are interchangeable."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The noun is identified through a concrete contextual definition."
+      },
+      "reusableDesignPrinciple": "Follow a target blank with a plain-language description that functions as a semantic definition while distractors remain topic-compatible.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep both the long-drive consequence and many-vehicles clue."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the explicit many-cars sentence with a delay and stop-and-go movement that implies congestion."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q12 stem",
+          "quoteOrDescription": "Many cars and buses plus a long drive indicate traffic.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 13,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "reference_resolution"
+      ],
+      "skillExplanation": "Q13 tests an epistemic adverb that marks uncertainty about whether future basketball players will surpass Stephen Curry.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize that the statement concerns an uncertain future possibility.",
+        "Choose the adverb that expresses possibility rather than time or negation."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The contrast between possible future improvement and the speaker's current belief requires an epistemic hedge.",
+      "whyTheQuestionWorks": "The options are all adverbs, so grammatical position alone is insufficient; only 'perhaps' contributes the intended uncertainty.",
+      "correctRationale": "The speaker allows that greater players may exist in the future while still calling Curry the best now, so 'perhaps' correctly expresses possibility; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q13 stem",
+          "quoteOrDescription": "'In the future' is contrasted with 'but now we believe he is the best'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Again' implies a repeated event or state, but no earlier cycle of greater players is established.",
+          "misconceptionTarget": "Choosing an adverb that fits position without matching discourse meaning.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q13 stem",
+              "quoteOrDescription": "The sentence expresses possibility, not repetition.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "'Already' signals that something has happened earlier than expected, conflicting with the explicitly future possibility.",
+          "misconceptionTarget": "Ignoring the time frame 'In the future'.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q13 stem",
+              "quoteOrDescription": "The greater players are hypothetical future players.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Never' makes the prediction absolute and would clash with the sentence's open-ended future contrast.",
+          "misconceptionTarget": "Converting a hedged possibility into categorical negation.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q13 stem",
+              "quoteOrDescription": "The sentence leaves room for future players to be greater.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Selecting by adverb position instead of semantic contribution.",
+        "Letting current praise of Curry trigger the absolute answer 'never'."
+      ],
+      "misconceptionsTargeted": [
+        "Strong current belief implies certainty about all future outcomes.",
+        "Adverbs with the same syntactic position are semantically interchangeable."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting epistemic stance across future and present clauses."
+      },
+      "reusableDesignPrinciple": "Contrast a confident present evaluation with an uncertain future projection to test epistemic adverbs without rare vocabulary.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep an uncertain future claim and a confident present claim."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'In the future' and make the future time frame inferable from a later generation of players."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q13 stem",
+          "quoteOrDescription": "Future possibility is hedged while present belief remains strong.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 14,
+      "primarySkill": "reference_resolution",
+      "secondarySkills": [
+        "text_structure",
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q14 requires interpreting 'except the one in the kitchen' as leaving exactly one window open, so every other window is closed.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Interpret the exception phrase.",
+        "Infer that the closed set contains every window except one.",
+        "Choose the universal quantifier."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The exception construction determines the quantifier: one kitchen window is open, therefore all the others are closed.",
+      "whyTheQuestionWorks": "The distractors all quantify plural sets, but only 'all' is compatible with an explicit single exception.",
+      "correctRationale": "If every window is closed except the kitchen window, then 'All of the windows are closed except the one in the kitchen' is correct; A is the answer.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q14 stem",
+          "quoteOrDescription": "'except the one in the kitchen' leaves one exception to an otherwise complete set.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "other",
+          "rationale": "'Both' applies to exactly two members, but the sentence refers to a larger set of windows.",
+          "misconceptionTarget": "Using a familiar totalizing quantifier without checking set size.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q14 stem",
+              "quoteOrDescription": "The plural set is not limited to two windows.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "local_evidence_for_global_question",
+          "rationale": "'Most' would allow several windows to be open, which conflicts with the explicit statement that only the kitchen window is the exception.",
+          "misconceptionTarget": "Treating a single exception as compatible with an unspecified majority.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q14 stem",
+              "quoteOrDescription": "Exactly one window is excluded from the closed set.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "local_evidence_for_global_question",
+          "rationale": "'Some' is too weak because the sentence establishes closure for every non-kitchen window.",
+          "misconceptionTarget": "Choosing a true but insufficiently precise quantifier.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q14 stem",
+              "quoteOrDescription": "The exception construction implies universality outside the exception.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Ignoring the logical force of 'except'.",
+        "Choosing a quantifier that could be true without matching the exact set relation."
+      ],
+      "misconceptionsTargeted": [
+        "'Except one' does not constrain the rest of the set.",
+        "Quantifiers differ only in rough amount, not logical scope."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer follows from set reasoning triggered by the exception phrase."
+      },
+      "reusableDesignPrinciple": "Use an exception phrase to force precise quantifier scope rather than vocabulary recall.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep one explicit exception to an otherwise complete set."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "State the open window in a previous sentence and require readers to infer the universal set relation."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q14 stem",
+          "quoteOrDescription": "One kitchen window is the only exception.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 15,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q15 asks the learner to recognize a concession: fruit-picking machines existed for a long time, yet strawberry farms adopted them only recently.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Identify the expectation created by long-term machine use.",
+        "Notice the surprising delayed use on strawberry farms.",
+        "Choose the concessive conjunction."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The first clause should make strawberry use seem likely earlier, while the second clause contradicts that expectation, requiring 'Although'.",
+      "whyTheQuestionWorks": "All options can introduce subordinate clauses, but only the concessive relation matches the timeline contrast.",
+      "correctRationale": "Machines had been used for fruit picking for a long time, yet strawberry farms did not use them until recently, so 'Although' is correct; A is the answer.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q15 stem",
+          "quoteOrDescription": "Long-standing general use contrasts with recent strawberry-farm adoption.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "'Because' would incorrectly say long-term machine use caused their late strawberry adoption.",
+          "misconceptionTarget": "Treating any factual relationship as causal.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q15 stem",
+              "quoteOrDescription": "The clauses conflict rather than form a cause-effect pair.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Before' would create a sequence in which the first clause happened earlier than the second, but the intended meaning is concession across overlapping periods.",
+          "misconceptionTarget": "Using time words whenever the sentence contains 'for a long time' and 'until'.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q15 stem",
+              "quoteOrDescription": "The key relation is unexpected contrast, not simple sequence.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'If' would make long-term machine use hypothetical, although the sentence presents it as a fact.",
+          "misconceptionTarget": "Confusing factual background with condition.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q15 stem",
+              "quoteOrDescription": "Both clauses describe facts.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing by nearby time expressions instead of clause relation.",
+        "Overusing 'because' for any two connected facts."
+      ],
+      "misconceptionsTargeted": [
+        "Subordinators can be selected without discourse logic.",
+        "A delayed event after an earlier fact is automatically temporal rather than concessive."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The conjunction is determined by the expectation-versus-result relation."
+      },
+      "reusableDesignPrinciple": "Create a strong expectation from broad historical practice and then violate it with a delayed specific adoption.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve long-standing general use and much later specific use."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make the expected earlier adoption implicit rather than directly contrasting the timelines."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q15 stem",
+          "quoteOrDescription": "Existing technology did not reach strawberry farms until recently.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 16,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q16 tests the double-object pattern 'save someone something' meaning prevent the need for an expense, trip, or effort.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Infer that home exercise videos remove the need to travel to a gym.",
+        "Match that benefit to the verb 'save'."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The phrase 'a trip to the gym, and some money too' names costs avoided by using home exercise videos.",
+      "whyTheQuestionWorks": "The distractors are common transitive verbs, but only 'save' supports both the double-object syntax and avoidance-of-cost meaning.",
+      "correctRationale": "Doing the exercises at home means you do not need the gym trip and may spend less money, so the videos 'save you a trip ... and some money'; D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q16 stem",
+          "quoteOrDescription": "Home exercise avoids both a gym trip and some expense.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Cost you a trip' would mean the videos cause you to lose a trip, which reverses the intended benefit and does not fit the added money clue naturally.",
+          "misconceptionTarget": "Confusing cost and save because both relate to money.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q16 stem",
+              "quoteOrDescription": "The home videos provide a benefit by avoiding gym travel.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "The videos do not literally give the learner a trip to the gym; they eliminate the need for one.",
+          "misconceptionTarget": "Reading the double-object structure literally without context.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q16 stem",
+              "quoteOrDescription": "Exercises are done at home.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Keep you a trip' is not the idiomatic construction for avoiding travel or expense.",
+          "misconceptionTarget": "Treating all common verbs as interchangeable in a double-object frame.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q16 stem",
+              "quoteOrDescription": "The natural idiom is 'save someone a trip'.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing 'cost' because money appears later.",
+        "Not knowing the idiom 'save someone a trip'."
+      ],
+      "misconceptionsTargeted": [
+        "Money-related verbs have the same polarity.",
+        "Double-object syntax alone determines meaning."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "none",
+        "explanation": "The item relies partly on knowing the idiomatic construction 'save someone something'."
+      },
+      "reusableDesignPrinciple": "Test idiomatic double-object verbs with two parallel benefits, one non-monetary and one monetary, so polarity is clear.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep home exercise as a way to avoid a gym trip and expense."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit money clue and require inference from transport/time savings alone."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q16 stem",
+          "quoteOrDescription": "At-home videos remove the need for gym travel and spending.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 17,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [],
+      "skillExplanation": "Q17 requires recovering the omitted adjective phrase after 'mine' and choosing the plural copula because 'mine' refers to the speaker's parents.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Resolve 'mine' as 'my parents'.",
+        "Recover the ellipsis 'happy to see their grandchildren'.",
+        "Choose plural present copula 'are'."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Possessive-pronoun reference and omitted predicate content jointly determine the auxiliary: plural 'my parents' plus an adjective complement requires 'are'.",
+      "whyTheQuestionWorks": "The nearby singular possessive pronoun form 'mine' can distract learners from its plural referent, while 'do/does' tempts generic ellipsis strategies.",
+      "correctRationale": "'Mine' means 'my parents', a plural subject, and the omitted predicate is adjectival 'happy', so the correct copula is 'are'; B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "stem_clue",
+          "location": "114 Q17 stem",
+          "quoteOrDescription": "'Jane’s parents ... but mine' establishes 'mine' = 'my parents'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Is' is singular, but the referent of 'mine' is the plural noun 'parents'.",
+          "misconceptionTarget": "Agreeing with the surface form of a pronoun instead of its referent.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q17 stem",
+              "quoteOrDescription": "The contrasted noun phrase is 'Jane’s parents'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Do' can support verb-phrase ellipsis, but the recovered predicate is copular/adjectival 'are happy', not a lexical verb phrase.",
+          "misconceptionTarget": "Using do-support for every omitted predicate.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q17 stem",
+              "quoteOrDescription": "The antecedent predicate is 'are always happy'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'Does' is both the wrong auxiliary type and singular for the plural referent.",
+          "misconceptionTarget": "Choosing an auxiliary solely because part of the predicate is omitted.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q17 stem",
+              "quoteOrDescription": "Plural parents require a form of 'be' matching 'happy'.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Treating 'mine' as grammatically singular because it has no visible plural -s.",
+        "Using do-support automatically whenever words are omitted."
+      ],
+      "misconceptionsTargeted": [
+        "Pronoun form determines agreement independently of referent number.",
+        "All ellipsis uses do/does."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must resolve reference, reconstruct the predicate, and then apply agreement."
+      },
+      "reusableDesignPrinciple": "Combine possessive-pronoun reference with predicate ellipsis so agreement cannot be solved from the nearest surface word.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep a plural antecedent for 'mine' and an adjectival predicate requiring 'be'."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the antecedent noun phrase into a previous sentence to increase discourse-memory demand."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q17 stem",
+          "quoteOrDescription": "'mine' refers to plural parents and inherits the predicate 'happy'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 18,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "reference_resolution"
+      ],
+      "skillExplanation": "Q18 tests the rule that a future-time subordinate clause introduced by 'before' normally uses present simple rather than 'will'.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Recognize the main clause as advice about a future action.",
+        "Identify 'before' as a future-time subordinator.",
+        "Use present simple in the subordinate clause."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Although the asking event is future relative to now, English marks future time after 'before' with present simple.",
+      "whyTheQuestionWorks": "The future meaning tempts 'will ask', while past forms remain morphologically familiar; only present simple satisfies the time-clause rule.",
+      "correctRationale": "The advice is to tell Daphne now before she later asks about the cup, and future-time clauses after 'before' take present simple: 'before she asks'; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q18 stem",
+          "quoteOrDescription": "Future sequence is expressed with 'before + present simple'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "other",
+          "rationale": "'Asked' would place Daphne's question in the past, conflicting with advice to act before it happens.",
+          "misconceptionTarget": "Ignoring event order.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q18 stem",
+              "quoteOrDescription": "The telling should happen before the asking.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Was asking' also places the event in a past time frame and lacks a suitable past reference point.",
+          "misconceptionTarget": "Selecting progressive aspect because the action may unfold over time.",
+          "evidenceRefs": [
+            {
+              "type": "stem_clue",
+              "location": "114 Q18 stem",
+              "quoteOrDescription": "No past narrative frame is present.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'Will ask' matches the real-world future meaning but violates the standard tense pattern after 'before' in a future-time clause.",
+          "misconceptionTarget": "Mapping future meaning mechanically to 'will'.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q18 stem",
+              "quoteOrDescription": "The subordinate clause is introduced by 'before'.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing 'will ask' because the event has not happened yet.",
+        "Failing to distinguish grammatical tense from real-world time reference."
+      ],
+      "misconceptionsTargeted": [
+        "Every future event must contain 'will'.",
+        "Time subordinators do not affect tense selection."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "none",
+        "explanation": "The main target is the future-time-clause tense rule."
+      },
+      "reusableDesignPrinciple": "Create a clearly future event after a time subordinator so semantic future meaning competes with the grammatical present-simple rule.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep 'before' introducing an event that is future relative to the advice."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Use a longer sequence with two future events so learners must identify which clause is subordinate."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q18 stem",
+          "quoteOrDescription": "'before she asks' expresses future time with present simple.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 19,
+      "primarySkill": "other_uncertain",
+      "secondarySkills": [
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q19 requires coordinating two past events with the shirts as the shared subject: they were blown away and then fell into the pond.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Parse 'were blown away' as a completed passive event.",
+        "Recognize that the shirts themselves perform the second event 'fell'.",
+        "Coordinate the second finite past verb with 'and'."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The surface passive form before the blank tempts a participle, but event structure requires a new active past predicate coordinated with the first clause.",
+      "whyTheQuestionWorks": "All options contain 'fall' morphology, but only 'and fell' creates the intended sequential finite event without producing an ungrammatical participial chain.",
+      "correctRationale": "The wind blew the shirts away, and the shirts then fell into the pond. The second event needs the coordinated simple-past verb 'and fell', so B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q19 stem",
+          "quoteOrDescription": "The shirts undergo 'were blown away' and then perform the event 'fell in the pond'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "A bare finite 'fell' after 'were blown away' creates two predicates without a coordinator.",
+          "misconceptionTarget": "Tracking tense while ignoring clause linkage.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q19 stem",
+              "quoteOrDescription": "Two sequential predicates require coordination here.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Fallen' is a past participle and cannot function as the independent second event without an auxiliary.",
+          "misconceptionTarget": "Using participle form because the previous passive contains a participle.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q19 stem",
+              "quoteOrDescription": "The second event needs a finite past verb.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'And fallen' would coordinate two participles under 'were', yielding the unintended passive-like reading 'were ... fallen' rather than an active event of falling.",
+          "misconceptionTarget": "Assuming coordination requires identical surface participle forms even when voice changes.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q19 stem",
+              "quoteOrDescription": "The shirts fall by themselves in the second event.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Matching 'fallen' to the preceding passive participle pattern.",
+        "Choosing 'fell' but forgetting that two finite predicates need coordination."
+      ],
+      "misconceptionsTargeted": [
+        "Parallel events must use the same voice/form.",
+        "A finite verb can be inserted after another finite predicate without a linker."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must parse voice, event roles, and coordination rather than recall one isolated rule."
+      },
+      "reusableDesignPrinciple": "Create a sequence where the same noun changes from passive patient to active subject, forcing learners to reason about voice and coordination together.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve a passive first event followed by an active second event with the same subject."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Add an intervening phrase that increases distance between the first finite verb and the coordinated second event."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q19 stem",
+          "quoteOrDescription": "The correct sequence is 'were blown away and fell'.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 20,
+      "primarySkill": "explicit_detail",
+      "secondarySkills": [
+        "vocabulary_in_context",
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q20 asks the learner to map the explicit event 'Rex was hit by a car' and hospitalization onto the paraphrase 'He got hurt.'",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Locate what happened to Rex on Sunday night.",
+        "Paraphrase being hit by a car and hospitalized as getting hurt."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A direct passage detail is tested through a simpler paraphrase rather than exact lexical repetition.",
+      "whyTheQuestionWorks": "The wrong options are plausible dog-related problems, but none is supported by the passage's explicit accident sequence.",
+      "correctRationale": "The passage says Rex was hit by a car and was in the hospital, which means he got hurt; B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 20-21",
+          "quoteOrDescription": "'Rex is in the hospital. He was hit by a car last night.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "Rex is absent from school because he is hospitalized, not because he got lost.",
+          "misconceptionTarget": "Inferring a common reason for absence instead of using explicit evidence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "The classmate explicitly explains Rex's absence with the car accident.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The passage describes Rex as cute and friendly and never says he bit anyone.",
+          "misconceptionTarget": "Importing stereotypical dog behavior not in the text.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "Rex is described as friendly.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "Nothing connects Rex's hospital stay with overeating.",
+          "misconceptionTarget": "Choosing a health-related distractor because a hospital is mentioned.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "The stated cause is being hit by a car.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Remembering only that Rex was absent and inventing a cause.",
+        "Failing to recognize 'got hurt' as a paraphrase of the accident."
+      ],
+      "misconceptionsTargeted": [
+        "Reading comprehension answers may rely on plausible world knowledge rather than passage evidence.",
+        "Paraphrases must repeat the exact wording of the text."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires locating and paraphrasing an explicit passage detail."
+      },
+      "reusableDesignPrinciple": "Test basic detail comprehension by replacing the passage's concrete event with a broader paraphrase in the correct option.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the accident and hospital detail explicit."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the hospital sentence and require inference of injury from later recovery details."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 20-21",
+          "quoteOrDescription": "Rex was hit by a car and hospitalized.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 21,
+      "primarySkill": "sequence_cause_consequence",
+      "secondarySkills": [
+        "other_uncertain",
+        "vocabulary_in_context"
+      ],
+      "skillExplanation": "Q21 asks which action the narrator and classmates took that directly helped Rex recover, requiring connection of daily walks with improved health and strength.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Locate the group's action after Rex improved enough to leave hospital care.",
+        "Connect the daily walks with the stated result 'Because of the exercise'.",
+        "Paraphrase that action as making him exercise."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The passage explicitly marks causal linkage between the group's walking routine and Rex becoming healthier and stronger.",
+      "whyTheQuestionWorks": "Several distractors are plausible forms of helping an injured dog, but only exercise is performed by the narrator and directly tied to recovery in the passage.",
+      "correctRationale": "The group took Rex for a walk every evening, and the passage says 'Because of the exercise, Rex became healthier and stronger'; therefore they helped by making him exercise, so B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 20-21",
+          "quoteOrDescription": "They took Rex for a walk every evening, and 'Because of the exercise, Rex became healthier and stronger.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The passage never says the narrator called the police.",
+          "misconceptionTarget": "Inventing a reasonable response to a car accident instead of tracking the stated action.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "The narrator's described intervention is daily walking.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "wrong_referent",
+          "rationale": "Rex was already in the hospital when the narrator visited; the text does not say the narrator took him to a doctor.",
+          "misconceptionTarget": "Assigning an action to the narrator merely because the action occurred somewhere in the story.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "The group went to see Rex in the hospital after he had already been admitted.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "No one looks for a new home; Rex continues to belong at the bakery near the school.",
+          "misconceptionTarget": "Assuming injury leads to rehoming without textual support.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 20-21",
+              "quoteOrDescription": "The story focuses on rehabilitation, not relocation.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing the hospital-related option because it sounds more medically helpful.",
+        "Missing the explicit causal phrase 'Because of the exercise'."
+      ],
+      "misconceptionsTargeted": [
+        "The most dramatic helping action is necessarily the correct one.",
+        "Cause-effect markers in a passage are optional details."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer requires linking an action in one sentence to its stated result in the next."
+      },
+      "reusableDesignPrinciple": "Use an explicit causal transition after a character action so the correct answer tests action-result integration rather than isolated detail recall.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep daily walks and an explicit improvement caused by exercise."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'Because of the exercise' and let readers infer the causal link from the recovery sequence."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 20-21",
+          "quoteOrDescription": "Daily walking is directly linked to Rex becoming healthier and stronger.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 22,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "purpose_speaker_intent",
+        "cross_sentence_inference"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Track speaker turns in the group chat.",
+        "Use Linda’s repeated objections and final reaction to infer her attitude."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "medium",
+      "questionMechanism": "The answer is inferred from turn-taking and reaction cues rather than stated as an emotion label.",
+      "whyTheQuestionWorks": "Mark repeatedly redirects attention to himself and Linda explicitly objects.",
+      "correctRationale": "Linda tells Mark not to start again, explains his behavior, and reacts “MARK!!”, so A is supported.",
+      "distractors": {
+        "B": {
+          "strategy": "wrong_chronology",
+          "rationale": "Mark already got the job he wanted; he is not still looking.",
+          "misconceptionTarget": "Losing event completion."
+        },
+        "C": {
+          "strategy": "wrong_referent",
+          "rationale": "The cake story says Mark introduced his own cake; nobody says he disliked Linda’s.",
+          "misconceptionTarget": "Attaching a detail to the wrong attitude."
+        },
+        "D": {
+          "strategy": "wrong_referent",
+          "rationale": "Jenny, not Mark, announces a marriage.",
+          "misconceptionTarget": "Confusing speakers."
+        }
+      },
+      "studentFailureModes": [
+        "Losing speaker identity in the chat layout."
+      ],
+      "misconceptionsTargeted": [
+        "All dialogue details can be assigned to the same speaker."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Use multi-speaker reactions to support a character inference.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve speaker labels and Linda’s corrective turns."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the final exclamation and rely on subtler turn cues."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 5 / group chat",
+          "quoteOrDescription": "Linda objects to Mark redirecting attention and ends with “MARK!!”.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "passage_text",
+          "location": "114 p22-23 dialogue",
+          "quoteOrDescription": "Mark says he already got the job; Jenny announces her marriage.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q22 requires tracking speakers across the group chat and inferring Linda's attitude toward Mark from her repeated objections and final reaction."
+    },
+    {
+      "questionNumber": 23,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "information_integration",
+        "local_inference"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Infer the idiom from Linda’s explanation and examples.",
+        "Transfer the social mechanism to four new scenarios."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "medium",
+      "questionMechanism": "The dialogue teaches an idiom in use, then the item tests transfer rather than definition recall.",
+      "whyTheQuestionWorks": "Only Jeff interrupts another person’s important personal news with his own announcement.",
+      "correctRationale": "C reproduces the same attention-stealing structure as Mark’s behavior.",
+      "distractors": {
+        "A": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Changing one’s mind after advice is influence, not stealing attention.",
+          "misconceptionTarget": "Equating interpersonal influence with attention stealing."
+        },
+        "B": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Giving inconsistent answers is contradiction, not attention redirection.",
+          "misconceptionTarget": "Confusing inconsistency with the idiom."
+        },
+        "D": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Rejecting a lunch choice after claiming indifference is inconsistency, not stealing another person’s moment.",
+          "misconceptionTarget": "Matching general awkwardness instead of mechanism."
+        }
+      },
+      "studentFailureModes": [
+        "Treating the idiom as merely “doing something rude”."
+      ],
+      "misconceptionsTargeted": [
+        "Any socially negative act is pragmatically equivalent."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Teach a pragmatic expression in context and test transfer by preserving its social mechanism.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep Linda’s explanation plus one concrete example."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Include two interruption scenarios but only one involving important news."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 5 / dialogue",
+          "quoteOrDescription": "Linda explains that Mark redirects attention while Jenny shares important news.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "stem_clue",
+          "location": "Q23 option C",
+          "quoteOrDescription": "Jeff announces his move while Ivy is still telling people about her baby.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q23 requires inferring the social meaning of 'steal someone's thunder' from the dialogue and transferring that attention-stealing mechanism to a new scenario."
+    },
+    {
+      "questionNumber": 24,
+      "primarySkill": "explicit_detail",
+      "secondarySkills": [
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "single_sentence",
+      "reasoningOperations": [
+        "Locate the benefits shared by any City Card.",
+        "Match unlimited metro travel to the option paraphrase."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Each distractor alters one exact scope, recipient, or boundary while keeping brochure vocabulary.",
+      "whyTheQuestionWorks": "Only D preserves the unlimited metro benefit without changing the discount or zone rules.",
+      "correctRationale": "The card allows metro, bus, or train use as many times as desired within covered zones, so D is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "wrong_referent",
+          "rationale": "The 20% discount is for public museum tickets, not children’s train tickets.",
+          "misconceptionTarget": "Moving a benefit to the wrong service."
+        },
+        "B": {
+          "strategy": "overgeneralization",
+          "rationale": "Museums are discounted 20%, not free.",
+          "misconceptionTarget": "Turning a discount into free admission."
+        },
+        "C": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "The card is limited to trips inside the three zones.",
+          "misconceptionTarget": "Reversing a boundary condition."
+        }
+      },
+      "studentFailureModes": [
+        "Scanning only for repeated numbers."
+      ],
+      "misconceptionsTargeted": [
+        "A repeated number guarantees the same benefit."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Change one precise constraint in each detail distractor.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the benefit bullets and zone limitation."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Require combining two benefits and an exception."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p24-25 benefits",
+          "quoteOrDescription": "Any card permits unlimited metro, bus, or train travel within covered zones and gives a museum discount.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q24 checks precise brochure-detail integration by separating unlimited transport, museum discounts, and zone restrictions that are easy to recombine incorrectly."
+    },
+    {
+      "questionNumber": 25,
+      "primarySkill": "information_integration",
+      "secondarySkills": [
+        "explicit_detail",
+        "sequence_cause_consequence"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Map Friday’s museum to Zone 1 and Saturday’s lake to Zone 2.",
+        "Apply weekday versus weekend validity.",
+        "Compare the costs of valid combinations."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "high",
+      "questionMechanism": "The answer requires spatial mapping, temporal eligibility, table lookup, and minimization.",
+      "whyTheQuestionWorks": "A plan can be geographically valid yet temporally invalid or unnecessarily expensive.",
+      "correctRationale": "Friday needs a $20 1-day Zone 1 card; Saturday needs a $50 Weekend Zones 1-2 card. $70 makes C the cheapest valid plan.",
+      "distractors": {
+        "A": {
+          "strategy": "partial_truth",
+          "rationale": "Zone 1 covers Friday but not White Lake in Zone 2 and does not solve the weekend requirement.",
+          "misconceptionTarget": "Checking duration without all constraints."
+        },
+        "B": {
+          "strategy": "partial_truth",
+          "rationale": "Weekend Zones 1-3 has broad coverage but does not cover Friday.",
+          "misconceptionTarget": "Buying broad coverage without day eligibility."
+        },
+        "D": {
+          "strategy": "partial_truth",
+          "rationale": "It is valid but wastes $20 on unnecessary Friday Zone 2 coverage, so it is not cheapest.",
+          "misconceptionTarget": "Stopping at the first valid plan."
+        }
+      },
+      "studentFailureModes": [
+        "Forgetting weekday/weekend validity.",
+        "Stopping before comparing cost."
+      ],
+      "misconceptionsTargeted": [
+        "More zones is always the best choice."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Satisfy spatial and temporal constraints before minimizing cost.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the Friday/Saturday split, map, and price table."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Add a third destination while keeping arithmetic simple."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 6 / map and table",
+          "quoteOrDescription": "The history museum is in Zone 1, White Lake in Zone 2, with prices by coverage.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "passage_text",
+          "location": "114 p24-25 rules",
+          "quoteOrDescription": "1/3/5-day cards are weekdays; Weekend Card is for weekends and holidays.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q25 integrates the city-zone map, weekday versus weekend validity, and the price table to identify the cheapest combination that satisfies both planned trips."
+    },
+    {
+      "questionNumber": 26,
+      "primarySkill": "main_idea",
+      "secondarySkills": [
+        "explicit_detail",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Combine the farm features with the stated family-vacation function.",
+        "Choose the category covering both."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The exact category is not given as a label; it is abstracted from several concrete attributes.",
+      "whyTheQuestionWorks": "“Zoo” and “campground” each overfocus one plausible feature while “vacation farm” integrates the evidence.",
+      "correctRationale": "Rolling Acres has crops and animals and is a popular place for families to vacation, so C is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "undergeneralization",
+          "rationale": "Animals are present, but the place is a working farm with crops and vacation activities.",
+          "misconceptionTarget": "Classifying from one feature."
+        },
+        "B": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "Families vacation there, but camping is never stated.",
+          "misconceptionTarget": "Adding an unstated lodging type."
+        },
+        "D": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "No restaurant service is described.",
+          "misconceptionTarget": "Assuming a family visitor business is a restaurant."
+        }
+      },
+      "studentFailureModes": [
+        "Classifying from the word “animals” alone."
+      ],
+      "misconceptionsTargeted": [
+        "One salient feature determines the whole place category."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Ask learners to infer a category from multiple defining attributes.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep one farm feature and the vacation function."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the historical word “farm” and rely on activities."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p26-28 first paragraph",
+          "quoteOrDescription": "Rolling Acres began as a sheep farm, now has crops and animals, and welcomes vacationing families.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q26 requires abstracting the category 'vacation farm' from Rolling Acres' combined farm features, animals, crops, and family-vacation function."
+    },
+    {
+      "questionNumber": 27,
+      "primarySkill": "main_idea",
+      "secondarySkills": [
+        "text_structure",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Restrict evidence to the first paragraph.",
+        "Identify which topic is developed across its many sentences."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Distractors mention nearby topics, but only one summarizes the paragraph’s developed focus.",
+      "whyTheQuestionWorks": "The first paragraph repeatedly describes Libby’s chores and visitor-facing work rather than motives, visitor opinions, or plans.",
+      "correctRationale": "A best summarizes what the first paragraph teaches about what Libby does at Rolling Acres.",
+      "distractors": {
+        "B": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "Visitor activities are listed, but visitor opinions are not.",
+          "misconceptionTarget": "Confusing activities with attitudes."
+        },
+        "C": {
+          "strategy": "literal_keyword_matching",
+          "rationale": "The grandparents are named as founders, but their reason is not given.",
+          "misconceptionTarget": "Treating mention as explanation."
+        },
+        "D": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "No future family plan appears.",
+          "misconceptionTarget": "Inventing a forward-looking topic."
+        }
+      },
+      "studentFailureModes": [
+        "Ignoring the stem’s “first paragraph” scope."
+      ],
+      "misconceptionsTargeted": [
+        "Any mentioned topic can be the paragraph’s main point."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Use scope-specific main-idea questions with nearby but undeveloped distractor topics.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the first-paragraph scope and several Libby-work details."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make another option accurately summarize paragraph two."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p26-28 first paragraph",
+          "quoteOrDescription": "Libby’s 5 a.m. chores, visitor preparation, and teaching children to feed baby sheep dominate the paragraph.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q27 is a scope-sensitive main-idea task: the learner must summarize what the first paragraph develops about Libby's work rather than select nearby undeveloped topics."
+    },
+    {
+      "questionNumber": 28,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "local_inference"
+      ],
+      "skillExplanation": "Q28 requires inferring the meaning of 'making sacrifices' from Libby's examples of giving up sleeping late, summer camp, and trips because she must work at the family farm.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Locate the examples immediately following the phrase.",
+        "Identify what Libby wants but cannot do because of farm work.",
+        "Generalize the examples into the meaning of sacrifice."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Concrete examples define an unfamiliar phrase indirectly, so readers must abstract a common meaning from several lost opportunities.",
+      "whyTheQuestionWorks": "The passage does not give a dictionary definition; the correct option is the only one that captures the trade-off shown by Libby's summer choices.",
+      "correctRationale": "Libby gives up sleeping late, summer camp, and trips so she can work at Rolling Acres. That means 'making sacrifices' is giving up something important to do something else, so D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 26-28",
+          "quoteOrDescription": "Libby says she would love to sleep until noon or go to summer camp, and friends stopped inviting her on trips because she is always busy.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "partial_truth",
+          "rationale": "Libby earns money, but the examples of sacrifice concern activities and freedom she gives up, not learning financial management.",
+          "misconceptionTarget": "Choosing a nearby topic rather than defining the target phrase.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 26-28",
+              "quoteOrDescription": "The sacrifice examples are lost leisure opportunities.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "local_evidence_for_global_question",
+          "rationale": "Feeling closer to family is a benefit Libby mentions after discussing sacrifices, not the meaning of the phrase itself.",
+          "misconceptionTarget": "Confusing consequence or benefit with definition.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 26-28",
+              "quoteOrDescription": "Family closeness is presented as the positive side of working together.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "Libby is actually doing difficult work; she is not making excuses to avoid it.",
+          "misconceptionTarget": "Associating 'sacrifice' with difficulty without tracking the direction of action.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 26-28",
+              "quoteOrDescription": "She continues working despite losing leisure opportunities.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Selecting a nearby detail instead of using the examples as a definition.",
+        "Confusing the benefit of family closeness with the cost described by 'sacrifices'."
+      ],
+      "misconceptionsTargeted": [
+        "Unknown phrases should be guessed from topic words rather than surrounding examples.",
+        "A result of an action is the same as the action's meaning."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The phrase is derived from contextual examples rather than recalled in isolation."
+      },
+      "reusableDesignPrinciple": "Teach abstract vocabulary by following it with multiple concrete examples that share one semantic core.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep at least two desired activities Libby must give up because of work."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Move the examples earlier and require the learner to connect them back to the phrase across a larger span."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 26-28",
+          "quoteOrDescription": "Lost sleep, camp, and trips instantiate giving something up for work.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 29,
+      "primarySkill": "main_idea",
+      "secondarySkills": [
+        "sequence_cause_consequence",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Trace the comic from abundant trees through depletion, scarcity, conflict, and collapse.",
+        "Connect the final Earth warning to the whole causal sequence."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "high",
+      "questionMechanism": "The environmental lesson emerges from a multi-panel causal narrative.",
+      "whyTheQuestionWorks": "The final warning generalizes Easter Island’s collapse to Earth, ruling out narrower morals.",
+      "correctRationale": "The comic warns people to protect the planet before destructive resource use becomes irreversible, so C is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "local_evidence_for_global_question",
+          "rationale": "Early leisure scenes are local details, not the final lesson.",
+          "misconceptionTarget": "Overweighting the story opening."
+        },
+        "B": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "The old tree-cutting behavior causes the disaster and is not endorsed.",
+          "misconceptionTarget": "Treating described behavior as advice."
+        },
+        "D": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Conflict is a consequence of scarcity, but reciprocal treatment is not the central theme.",
+          "misconceptionTarget": "Generalizing conflict to an unrelated moral."
+        }
+      },
+      "studentFailureModes": [
+        "Reading panels independently instead of as a causal chain."
+      ],
+      "misconceptionsTargeted": [
+        "The first positive scene defines the story’s theme."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Use a comic sequence where accumulating decisions create a consequence and a general warning.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep abundance, depletion, scarcity, collapse, and the Earth warning."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit final warning and infer the theme from sequence alone."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 pages 8-9 / Easter Island comics",
+          "quoteOrDescription": "Panels move from abundant trees to dry land, hunger, conflict, last-tree cutting, and collapse.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "passage_text",
+          "location": "114 p29-31 conclusion",
+          "quoteOrDescription": "The comic warns not to make Earth another Easter Island.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q29 requires synthesizing a multi-panel causal sequence from resource abundance through depletion, scarcity, conflict, and collapse into the comic's environmental warning."
+    },
+    {
+      "questionNumber": 30,
+      "primarySkill": "explicit_detail",
+      "secondarySkills": [
+        "sequence_cause_consequence",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Locate the conflict stage.",
+        "Match the stated purpose of moving statues to fighting grounds."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "medium",
+      "questionMechanism": "Distractors recombine real comic objects into false relations, so proposition tracking matters more than keyword spotting.",
+      "whyTheQuestionWorks": "Only D preserves the explicit relationship between statues and showing power.",
+      "correctRationale": "The comic says the statues were moved to fighting grounds to show their power, so D is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "wrong_chronology",
+          "rationale": "Fire belongs to early tree use; it is not stated as preparation for fighting.",
+          "misconceptionTarget": "Combining true details into a false sequence."
+        },
+        "B": {
+          "strategy": "overgeneralization",
+          "rationale": "People begin fighting after scarcity and fight for water and food, not land and plants all the time.",
+          "misconceptionTarget": "Inflating a late event into a constant behavior."
+        },
+        "C": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "No prayer beside statues and fire is stated.",
+          "misconceptionTarget": "Importing cultural assumptions."
+        }
+      },
+      "studentFailureModes": [
+        "Combining co-occurring keywords into a proposition the comic never makes."
+      ],
+      "misconceptionsTargeted": [
+        "Real entities from the passage can be recombined freely."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Create detail distractors by recombining real entities into wrong relations or chronology.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the explicit “show their power” statement."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Separate the action and purpose across panels."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p29-31",
+          "quoteOrDescription": "The statues were moved to fighting grounds to show their power.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "visual_page_asset",
+          "location": "114 pages 8-9 / comics",
+          "quoteOrDescription": "The later panels visually place statues in the conflict stage.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q30 tests proposition-level detail tracking in the comic, especially the stated purpose for moving statues to fighting grounds rather than keyword recombination."
+    },
+    {
+      "questionNumber": 31,
+      "primarySkill": "reference_resolution",
+      "secondarySkills": [
+        "local_inference",
+        "sequence_cause_consequence"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Read the clause immediately before “but still, they did it.”",
+        "Resolve the event reference to the action performed by “those who cut down the last trees”."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "“Did it” compresses an event antecedent rather than naming a noun referent.",
+      "whyTheQuestionWorks": "The concessive structure contrasts understanding tree importance with performing the destructive action anyway.",
+      "correctRationale": "“They” are those who cut down the last trees, so “did it” means cut down the last trees; B is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "wrong_referent",
+          "rationale": "Falling is a later consequence, not the intentional action of “they”.",
+          "misconceptionTarget": "Resolving to a nearby consequence."
+        },
+        "C": {
+          "strategy": "wrong_chronology",
+          "rationale": "Moving statues occurs earlier and is not the action contrasted with understanding.",
+          "misconceptionTarget": "Choosing a salient prior event."
+        },
+        "D": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "Understanding is the concessive premise; “did it” refers to the contrary action.",
+          "misconceptionTarget": "Treating premise as referenced action."
+        }
+      },
+      "studentFailureModes": [
+        "Using nearest-event matching without reading the concession."
+      ],
+      "misconceptionsTargeted": [
+        "Reference resolution always selects the closest event."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Test event reference with a compressed “do it” expression after a concession.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the agent phrase and “but still” contrast."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Increase the gap between antecedent and reference by one panel."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p29-31 Picture 7",
+          "quoteOrDescription": "Those who cut down the last trees understood their importance, but still they did it.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 9 / Picture 7",
+          "quoteOrDescription": "Picture numbering anchors the reference to the final tree-cutting stage.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q31 resolves the event anaphor 'did it' across a concessive sentence, linking it to cutting down the last trees rather than to a nearby consequence or earlier action."
+    },
+    {
+      "questionNumber": 32,
+      "primarySkill": "purpose_speaker_intent",
+      "secondarySkills": [
+        "other_uncertain",
+        "reference_resolution"
+      ],
+      "skillExplanation": "Q32 asks why Ariely conducted the origami study; the passage explicitly says he wanted to know whether anyone shared the strong attachment he felt after building his IKEA cabinet.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Locate the transition from the cabinet story to the study.",
+        "Identify the question Ariely wanted the study to answer.",
+        "Match that purpose to the option paraphrase."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The study's purpose is stated directly in a transition sentence, and the correct answer paraphrases that statement.",
+      "whyTheQuestionWorks": "Distractors mention IKEA or origami, but only one preserves the research question that motivates the experiment.",
+      "correctRationale": "The passage says Ariely wanted to know if anyone shared his feelings after his IKEA experience, so D is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34",
+          "quoteOrDescription": "Ariely wanted to know if anyone shared his feelings, so he did an origami study.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_chronology",
+          "rationale": "The IKEA effect is named only after the study's results; the study was not designed to stop it.",
+          "misconceptionTarget": "Projecting a later conclusion backward as the original research purpose.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "The effect is introduced after the experiment is explained.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "literal_keyword_matching",
+          "rationale": "Origami is the experimental task, not the phenomenon Ariely is trying to explain.",
+          "misconceptionTarget": "Confusing study method with study purpose.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "Origami provides a way to compare makers' and buyers' valuations.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "literal_keyword_matching",
+          "rationale": "IKEA furniture triggered Ariely's personal observation, but the study does not investigate IKEA's fame.",
+          "misconceptionTarget": "Selecting an option because it repeats a prominent proper noun.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "The question concerns emotional valuation after making something oneself.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Confusing the experiment's task with its purpose.",
+        "Choosing an option that repeats 'IKEA' without checking the author's stated question."
+      ],
+      "misconceptionsTargeted": [
+        "Research purpose equals experimental activity.",
+        "A later label in a passage must have been the original study goal."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must locate and paraphrase the research-purpose sentence."
+      },
+      "reusableDesignPrinciple": "Separate a study's motivating question, experimental task, and later conclusion so questions can test whether readers distinguish their roles.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Preserve the explicit transition from Ariely's personal experience to the study question."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit 'wanted to know' sentence and require inference from the comparison he designed."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34",
+          "quoteOrDescription": "The study asks whether others share Ariely's IKEA-related feelings.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 33,
+      "primarySkill": "information_integration",
+      "secondarySkills": [],
+      "skillExplanation": "Q33 requires comparing the values assigned by builders and buyers: builders would pay 25 cents for their own origami while buyers would pay only five cents.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Identify what each group was asked to value.",
+        "Extract five cents for buyers and 25 cents for builders.",
+        "Compare the two amounts."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A simple quantitative contrast supports one true comparison while distractors distort who made the origami, what each group knew, or how knowledge affected price.",
+      "whyTheQuestionWorks": "The correct option requires preserving both group roles and the direction of the numerical difference.",
+      "correctRationale": "Buyers offered five cents while builders valued their own origami at 25 cents, so buyers would spend less than builders; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34",
+          "quoteOrDescription": "Buyers would pay five cents; builders would spend 25 cents.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "wrong_referent",
+          "rationale": "Only builders made the origami; buyers only evaluated works shown to them.",
+          "misconceptionTarget": "Collapsing the two experimental groups into the same task.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "Builders were told to make origami; buyers were shown it afterward.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "The passage says builders believed others would also think their work was worth that much, not that they knew others would value it less.",
+          "misconceptionTarget": "Reversing the builders' mistaken belief.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "Builders believed others would think their works were good enough to cost that much.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The study does not report buyers increasing their price after learning how the origami was made.",
+          "misconceptionTarget": "Inventing an untested before-and-after effect.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "Only one buyer valuation is reported.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Mixing up builders and buyers.",
+        "Remembering the two prices but reversing which group offered which amount."
+      ],
+      "misconceptionsTargeted": [
+        "Experimental groups can be interpreted without tracking their assigned roles.",
+        "A quantitative comparison is enough without preserving direction."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires extracting and comparing values across two group descriptions."
+      },
+      "reusableDesignPrinciple": "Use two clearly defined groups and contrasting numerical results to test role tracking plus comparison rather than arithmetic difficulty.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep distinct builder/buyer roles and two different valuations."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Present the group results in separate paragraphs so learners must integrate across a wider span."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34",
+          "quoteOrDescription": "Five cents from buyers versus 25 cents from builders.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 34,
+      "primarySkill": "information_integration",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q34 requires transferring the passage's IKEA effect to a new parenting scenario: Mia should participate in making the vegetables so she may value and accept the result more.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D4_evaluative_pragmatic",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Abstract the IKEA effect as increased attachment to things one helps make.",
+        "Map 'making' from furniture/origami to preparing food.",
+        "Choose the action that gives Mia authorship or participation."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The question withholds any direct textual answer and instead tests whether the learner can generalize a behavioral principle to a novel domain.",
+      "whyTheQuestionWorks": "All options are plausible parenting strategies, but only helping cook reproduces the causal ingredient of the IKEA effect: making something oneself.",
+      "correctRationale": "The IKEA effect says people value things more when they make them themselves. Asking Mia to help cook the vegetables gives her a role in making the meal, so B best applies the effect.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34 conclusion",
+          "quoteOrDescription": "People may love things more when they make them themselves.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "wrong_referent",
+          "rationale": "If Jerry cooks the vegetables for Mia, Mia remains a buyer-like recipient rather than a builder-like maker.",
+          "misconceptionTarget": "Thinking personalization by another person is equivalent to self-production.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "The effect depends on the person's own effort in making the item.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Candy is an external reward, not an application of increased valuation through self-creation.",
+          "misconceptionTarget": "Choosing any strategy that might change behavior rather than applying the named mechanism.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "No reward mechanism is part of Ariely's IKEA effect.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "Choosing preferred vegetables may help acceptance, but Mia still does not make the food herself, so the IKEA effect is not directly engaged.",
+          "misconceptionTarget": "Equating preference choice with production effort.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 passage 32-34",
+              "quoteOrDescription": "The defining variable is making, not merely selecting.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing the most generally sensible parenting strategy instead of applying the specific passage concept.",
+        "Remembering the IKEA effect as 'liking customized things' rather than 'liking things you make yourself'."
+      ],
+      "misconceptionsTargeted": [
+        "Concept-application questions can be answered by plausibility alone.",
+        "Participation, selection, and reward are interchangeable behavioral mechanisms."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner must abstract and transfer a principle to a new scenario."
+      },
+      "reusableDesignPrinciple": "After explaining a phenomenon through one domain, test genuine understanding by asking learners to preserve its causal mechanism in a different everyday domain.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep a new scenario where one option lets the target person help make the final product."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Offer two participation options but make only one involve meaningful production effort, forcing closer mechanism matching."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 passage 32-34 conclusion",
+          "quoteOrDescription": "Self-production increases subjective value.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 35,
+      "primarySkill": "main_idea",
+      "secondarySkills": [
+        "text_structure",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Track the opening picture frame and the historical events that follow.",
+        "Choose the option covering both the narrative and its relationship to the picture."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "medium",
+      "questionMechanism": "The passage functions as historical context for a source image, not as a biography or generic electricity history.",
+      "whyTheQuestionWorks": "The opening and closing both return to the picture while the middle explains the labor disputes behind it.",
+      "correctRationale": "C captures the organizing purpose: the history behind the picture of a UK electricity worker.",
+      "distractors": {
+        "A": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "The passage uses a picture but does not teach picture-storytelling techniques.",
+          "misconceptionTarget": "Confusing use of a source with instructional purpose."
+        },
+        "B": {
+          "strategy": "overgeneralization",
+          "rationale": "Electricity shortages affect life, but the passage is not a general history of electricity’s impact.",
+          "misconceptionTarget": "Generalizing a consequence into the topic."
+        },
+        "D": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The pictured worker is not identified as famous; the history concerns a collective dispute.",
+          "misconceptionTarget": "Turning an illustrative individual into a biography."
+        }
+      },
+      "studentFailureModes": [
+        "Choosing the broad repeated topic “electricity” instead of the framing purpose."
+      ],
+      "misconceptionsTargeted": [
+        "A pictured person must be the main biographical subject."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Frame an informational passage around a historical image and test whether readers identify the source-context relationship.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep opening and closing picture references plus the labor history."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit opening frame and rely on the closing interpretation."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p35-37",
+          "quoteOrDescription": "The reading opens with a UK electricity-worker picture, narrates the disputes, and closes by explaining what it represented.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 12 / historical image",
+          "quoteOrDescription": "The image is the historical artifact whose background the passage explains.",
+          "role": "contextual_clue"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q35 asks for the passage's organizing purpose by linking a historical electricity-worker image to the labor-dispute history supplied as its explanatory context."
+    },
+    {
+      "questionNumber": 36,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "cross_sentence_inference",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D4_evaluative_pragmatic",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multimodal_text_and_graphic",
+      "reasoningOperations": [
+        "Combine the picture’s editorial attitude with the account of repeated pay demands.",
+        "Weigh the widespread public costs before inferring the represented judgment."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "high",
+      "questionMechanism": "The stem asks for an evidence-bounded public attitude inferred from a historical image plus contextual narrative.",
+      "whyTheQuestionWorks": "The second pay demand follows the first victory while months of restrictions impose broad costs on ordinary people.",
+      "correctRationale": "The represented criticism is that workers were asking too much and did not know when to stop, so C is best.",
+      "distractors": {
+        "A": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The dispute is not framed as a lack of bravery.",
+          "misconceptionTarget": "Inventing a character judgment."
+        },
+        "B": {
+          "strategy": "irrelevant_distractor",
+          "rationale": "Nothing supports the robot metaphor.",
+          "misconceptionTarget": "Choosing a vivid but ungrounded characterization."
+        },
+        "D": {
+          "strategy": "partial_truth",
+          "rationale": "Hospitals suffer, but the represented complaint is broader than a specific claim of indifference to health.",
+          "misconceptionTarget": "Overfitting one consequence into a narrower accusation."
+        }
+      },
+      "studentFailureModes": [
+        "Using one hardship detail instead of the overall evaluative pattern."
+      ],
+      "misconceptionsTargeted": [
+        "“Most likely think” permits unconstrained speculation."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Pair a historical image with context to test evidence-bounded inference about public attitude.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep repeated demands, broad public costs, and the statement that the picture reflects opinion."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Use two mildly critical distractors that require distinguishing excessiveness from indifference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "visual_page_asset",
+          "location": "114 page 12 / electricity-worker image",
+          "quoteOrDescription": "The passage says the picture represented what many people thought of the workers.",
+          "role": "primary_proof"
+        },
+        {
+          "type": "passage_text",
+          "location": "114 p35-37",
+          "quoteOrDescription": "A second pay demand is followed by months of heating limits, candle-lit hospitals, factory stoppages, and job losses.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q36 integrates the historical image with repeated pay demands and widespread public hardship to infer the critical attitude represented by the picture."
+    },
+    {
+      "questionNumber": 37,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "vocabulary_in_context",
+        "information_integration"
+      ],
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Identify literal darkness caused by electricity restrictions.",
+        "Connect “dark” to the difficult social period.",
+        "Interpret quotation marks as signaling layered meaning."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The punctuation marks a word carrying both literal and figurative meanings in context.",
+      "whyTheQuestionWorks": "C is the only option explaining both electricity-related darkness and the broader hardship.",
+      "correctRationale": "The period was literally dark because lights were restricted and figuratively dark because people endured cold homes, factory stoppages, and lost jobs, so C is correct.",
+      "distractors": {
+        "A": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "The quotation marks do not deny literal darkness; they add a figurative layer.",
+          "misconceptionTarget": "Treating quotation marks as simple negation."
+        },
+        "B": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The word is never attributed to the government.",
+          "misconceptionTarget": "Assuming quotation marks always report speech."
+        },
+        "D": {
+          "strategy": "partial_truth",
+          "rationale": "The conflict outcome does not explain the word’s double meaning.",
+          "misconceptionTarget": "Explaining punctuation from plot outcome rather than semantics."
+        }
+      },
+      "studentFailureModes": [
+        "Assuming quotation marks have only a reporting function."
+      ],
+      "misconceptionsTargeted": [
+        "Punctuation has one fixed meaning regardless of context."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer depends on interpreting the supplied item evidence rather than isolated recall."
+      },
+      "reusableDesignPrinciple": "Ask why punctuation marks a common word when context supports simultaneous literal and figurative senses.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep one literal-light detail and several hardship details."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the candle detail and infer literal darkness from the restrictions."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 p35-37 final paragraph",
+          "quoteOrDescription": "Hospitals used candles, homes lacked heat, factories stopped, jobs were lost, and the period is called the “dark” time.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": [],
+      "skillExplanation": "Q37 interprets quotation marks around 'dark' by integrating literal electricity-related darkness with the figurative social hardship of the period."
+    },
+    {
+      "questionNumber": 38,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q38 asks for the tense of the event that began Cameron's birthday-gift habit, anchored by 'in his first year of junior high school' and followed by a past narrative.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D1_verbatim_retrieval",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Identify the specific completed past time anchor.",
+        "Use simple past for the beginning event."
+      ],
+      "reasoningComplexity": "simple_single_step",
+      "readingDemand": "low",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "A definite past period requires simple past 'started', despite the habit continuing into the present.",
+      "whyTheQuestionWorks": "Present and present-perfect distractors are tempting because the tradition continues, but the sentence targets the original starting event at a finished past time.",
+      "correctRationale": "The habit began during a specific past school year, so 'He started doing this in his first year of junior high school' is correct; B is the answer.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q38 context",
+          "quoteOrDescription": "'in his first year of junior high school' gives a completed past time frame.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "'Starts' places the beginning in the present, contradicting the past school-year anchor.",
+          "misconceptionTarget": "Matching tense to a current habit instead of the described origin event.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q38 context",
+              "quoteOrDescription": "The following sentence begins 'That year'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "Present perfect is normally incompatible with a finished, specific past time such as that school year.",
+          "misconceptionTarget": "Using present perfect merely because an action has present relevance.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q38 context",
+              "quoteOrDescription": "A definite finished past time is supplied.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "The passage narrates how the tradition began in the past, not a future plan to begin it.",
+          "misconceptionTarget": "Ignoring narrative chronology.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q38 context",
+              "quoteOrDescription": "Cameron's later yearly tradition is traced back to an earlier event.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing present perfect because the habit still continues.",
+        "Failing to separate the beginning event from the continuing tradition."
+      ],
+      "misconceptionsTargeted": [
+        "Current relevance always requires present perfect.",
+        "A continuing habit makes every event in its history present tense."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": true,
+        "recallType": "none",
+        "explanation": "The main decision is the simple-past rule with a definite finished time."
+      },
+      "reusableDesignPrinciple": "Contrast a continuing present habit with a clearly dated origin event to test whether learners anchor tense to the target event rather than the broader situation.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep an explicit completed past period for the start of a still-continuing habit."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit school-year phrase but retain surrounding past narrative cues that establish the origin event."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q38 context",
+          "quoteOrDescription": "The tradition began in a named past school year.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 39,
+      "primarySkill": "discourse_relationship",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q39 requires choosing the sentence that prepares the two exclamatory thoughts that immediately follow: women are brave to have babies, and Cameron is thankful he will never have to do that.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Notice that two distinct thoughts follow the blank.",
+        "Identify them as ideas that stayed in Cameron's mind after the video.",
+        "Choose the option that naturally introduces exactly two recurring thoughts."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank is constrained forward by two following thought sentences; discourse cohesion requires an introduction that predicts two persistent thoughts.",
+      "whyTheQuestionWorks": "Every option mentions 'two things', but only 'couldn’t stop thinking about' correctly frames the following internal reflections without adding unsupported fear, confusion, or life-changing actions.",
+      "correctRationale": "After the birth video, Cameron keeps thinking about two ideas, which are then stated directly. Therefore 'he couldn’t stop thinking about two things' gives the coherent setup, so C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q39 context",
+          "quoteOrDescription": "Two reflective exclamations immediately follow the blank and supply the content of the 'two things'.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "The following thoughts express admiration and relief, not two explicit fears.",
+          "misconceptionTarget": "Treating the birth video as automatically frightening rather than reading the actual thoughts.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q39 context",
+              "quoteOrDescription": "Cameron calls women brave and thanks God he need not give birth.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "The following sentences show clear conclusions, not two things he still cannot understand.",
+          "misconceptionTarget": "Confusing reflection with lack of comprehension.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q39 context",
+              "quoteOrDescription": "The two ideas are articulated confidently.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "The next sentences are thoughts, not actions Cameron performs.",
+          "misconceptionTarget": "Matching the number 'two' while ignoring semantic category.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q39 context",
+              "quoteOrDescription": "The following material is internal commentary.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Matching only the phrase 'two things'.",
+        "Reading the video situation emotionally instead of using the two following sentences as structural evidence."
+      ],
+      "misconceptionsTargeted": [
+        "Cloze coherence can be solved from local word overlap alone.",
+        "A sentence before quoted thoughts does not need to match their discourse function."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner integrates forward discourse structure and semantic type."
+      },
+      "reusableDesignPrinciple": "Place an abstract setup sentence before two concrete thoughts so readers must use forward reference to identify the correct discourse frame.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep exactly two following internal thoughts that instantiate the selected setup."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Make one of the two thoughts indirect, requiring readers to infer that both belong to the same mental set."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q39 context",
+          "quoteOrDescription": "The blank must introduce two thoughts that the next two sentences express.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 40,
+      "primarySkill": "main_idea",
+      "secondarySkills": [
+        "other_uncertain",
+        "sequence_cause_consequence"
+      ],
+      "skillExplanation": "Q40 requires expressing Cameron's realization that his birthday should focus on his mother's effort in carrying and giving birth to him rather than on rewarding him.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D3_multi_step_synthesis",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Identify Cameron's reasoning about nine months inside his mother.",
+        "Contrast his lack of effort with his mother's hard work.",
+        "Select the sentence that captures the resulting shift in who deserves the birthday gift."
+      ],
+      "reasoningComplexity": "complex_multi_step_deduction",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank states a conclusion that is then justified by several rhetorical questions and comparisons in the following sentences.",
+      "whyTheQuestionWorks": "The correct option summarizes the paragraph's central perspective reversal; distractors capture partial themes such as helping, new beginnings, or nine months but not the gift logic.",
+      "correctRationale": "Cameron reasons that his mother did the hard work while he merely ate and slept, so his birthday should be about thanking her rather than receiving gifts himself. Thus C is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q40 context",
+          "quoteOrDescription": "Cameron contrasts his nine months of eating and sleeping with his mother's hard work and asks why he should get a gift for doing nothing.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "The paragraph's conclusion is about who the birthday should honor, not that the whole day must be spent helping his mom.",
+          "misconceptionTarget": "Turning gratitude into an unsupported all-day activity requirement.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q40 context",
+              "quoteOrDescription": "The next reasoning focuses specifically on who should receive a gift.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "other",
+          "rationale": "A new start is not the reason Cameron gives for changing his birthday tradition.",
+          "misconceptionTarget": "Selecting a broadly positive birthday theme without evidence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q40 context",
+              "quoteOrDescription": "The paragraph focuses on his mother's labor during pregnancy.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "overgeneralization",
+          "rationale": "Nine months explains his mother's effort, but Cameron does not argue for nine months of birthday celebration.",
+          "misconceptionTarget": "Copying a salient number into an unsupported conclusion.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q40 context",
+              "quoteOrDescription": "Nine months is evidence for gratitude, not a proposed celebration duration.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing an option because it repeats 'nine months'.",
+        "Missing that the paragraph is organized around a shift from self to mother."
+      ],
+      "misconceptionsTargeted": [
+        "A detail repeated in the passage is automatically the main conclusion.",
+        "Paragraph completion does not require tracking the author's reasoning direction."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer synthesizes a paragraph-level argument."
+      },
+      "reusableDesignPrinciple": "Use a blank for a paragraph conclusion and place the supporting reasoning immediately after it, forcing readers to infer the umbrella claim rather than match words.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the contrast between Cameron's passivity and his mother's effort plus the question of who deserves a gift."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the rhetorical questions with subtler examples and require readers to infer the perspective shift."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q40 context",
+          "quoteOrDescription": "The paragraph argues that his mother, not Cameron, deserves the birthday gift.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 41,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "other_uncertain",
+        "reference_resolution"
+      ],
+      "skillExplanation": "Q41 asks which ordinal-like adjective identifies the bag of cookies as the beginning of Cameron's annual birthday-gift tradition.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Recognize that the story has just described Cameron's decision to begin the tradition.",
+        "Read the later statement that he now gives a gift every year.",
+        "Identify the cookies as the first gift in that sequence."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Narrative chronology identifies the cookies as the origin item in a recurring series.",
+      "whyTheQuestionWorks": "All options can modify 'birthday gift' grammatically, but only 'first' matches the newly established yearly sequence.",
+      "correctRationale": "The cookies are the gift Cameron prepared when he first adopted the new birthday practice, before later yearly gifts, so 'first' is correct; A is the answer.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q41 context",
+          "quoteOrDescription": "After deciding to give his mother a birthday gift, Cameron prepares cookies; the passage later says he now makes a gift every year.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "reversed_cause_effect",
+          "rationale": "The tradition continues annually, so the cookie gift is not the last one.",
+          "misconceptionTarget": "Ignoring later continuation of the practice.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q41 context",
+              "quoteOrDescription": "'Now, on his birthday every year, Cameron makes a gift'.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "The cookies are not the only birthday gift because Cameron makes later gifts, including the dress this year.",
+          "misconceptionTarget": "Confusing the only gift described so far with the only gift in the tradition.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q41 context",
+              "quoteOrDescription": "The tradition repeats every year.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'Other' would require contrast with a previously established gift in the same set, whereas this is the origin gift.",
+          "misconceptionTarget": "Using a generic alternative marker where chronological order matters.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q41 context",
+              "quoteOrDescription": "No earlier birthday gift to his mother has been introduced.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Reading only the cookie sentence and not connecting it to the yearly tradition.",
+        "Choosing 'only' because one gift is described in that paragraph."
+      ],
+      "misconceptionsTargeted": [
+        "Sequence words can be chosen without tracking events beyond the current sentence.",
+        "A locally unique item is globally the only item."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Chronological discourse establishes the ordinal relation."
+      },
+      "reusableDesignPrinciple": "Introduce the first member of a recurring tradition and confirm repetition later so sequence vocabulary requires cross-sentence tracking.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the cookie gift as the origin of a practice later stated to repeat every year."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Delay confirmation of annual repetition until a later paragraph."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q41 context",
+          "quoteOrDescription": "Cookies begin a recurring annual gift sequence.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 42,
+      "primarySkill": "pragmatic_meaning",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q42 tests the figurative expression 'made his heart sing', using Cameron's reaction that giving a gift felt much better than getting one.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Interpret his mother's praise as a positive emotional event.",
+        "Use the next sentence saying it felt much better than receiving a gift.",
+        "Choose the idiom expressing happiness."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank names an emotional effect, and the following sentence establishes strongly positive valence.",
+      "whyTheQuestionWorks": "The idiomatic correct option cannot be selected from literal meaning alone; discourse emotion distinguishes it from pain, reversal, or quitting.",
+      "correctRationale": "His mother's loving response makes Cameron very happy, and the next sentence says giving felt better than receiving. 'Made his heart sing' expresses that joy, so B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q42 context",
+          "quoteOrDescription": "His mother calls the bad-tasting cookies the best thing she ever got, and Cameron feels giving is much better than getting a gift.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "other",
+          "rationale": "A hurting head expresses discomfort, opposite to the joy established by the next sentence.",
+          "misconceptionTarget": "Reading figurative body-part language literally or ignoring emotional valence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q42 context",
+              "quoteOrDescription": "Cameron's reaction is explicitly positive.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "The praise strengthens Cameron's new practice; it does not make him reverse his decision.",
+          "misconceptionTarget": "Assuming strong emotion necessarily causes a change of plan.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q42 context",
+              "quoteOrDescription": "He continues making a gift every year afterward.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "unsupported_world_knowledge",
+          "rationale": "Although the cookies tasted bad, the mother's response encourages the gift tradition rather than causing Cameron to quit baking specifically.",
+          "misconceptionTarget": "Overweighting the negative cookie-quality detail.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q42 context",
+              "quoteOrDescription": "The emotional payoff is positive and motivates continued giving.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Focusing on the cookies tasting bad and choosing a negative consequence.",
+        "Interpreting 'heart sing' literally instead of as positive figurative language."
+      ],
+      "misconceptionsTargeted": [
+        "Immediate negative details outweigh later explicit emotional evaluation.",
+        "Idioms should be interpreted word by word."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Even without memorizing the idiom, surrounding emotional evidence determines its meaning."
+      },
+      "reusableDesignPrinciple": "Place a figurative emotional expression between a triggering event and an explicit consequence sentence that fixes its valence.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep a clearly positive response after the mother's praise."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit 'better than getting a gift' sentence and require emotion inference from Cameron's later repeated behavior."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q42 context",
+          "quoteOrDescription": "Mother's praise creates strong joy and reinforces giving.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 43,
+      "primarySkill": "grammar_in_context",
+      "secondarySkills": [
+        "other_uncertain"
+      ],
+      "skillExplanation": "Q43 asks for the form expressing Cameron's already-decided future gift: the dress is finished and hidden, ready to be given to his mother this year.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "multi_paragraph_global",
+      "reasoningOperations": [
+        "Use 'This year' and the later finished-dress details to establish a future giving event.",
+        "Recognize the plan is already decided and prepared.",
+        "Choose 'is going to give'."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "high",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "Concrete present evidence of preparation supports an already-planned future action, making 'be going to' the natural choice.",
+      "whyTheQuestionWorks": "The simple present distractor can suggest a habit and past forms can match earlier narrative sections, but the local paragraph clearly concerns this year's not-yet-delivered gift.",
+      "correctRationale": "Cameron has already made the dress and intends to give it to his mother, so 'This year, Cameron is going to give his mom a nice dress' correctly expresses the planned future; A is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "114 Q43 context",
+          "quoteOrDescription": "The dress is finished and hanging behind Cameron's bedroom door, showing the future gift is already prepared.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "other",
+          "rationale": "'Gives' would describe a regular present habit, but the paragraph singles out this year's specific planned gift.",
+          "misconceptionTarget": "Letting the annual tradition override the local one-time future event.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q43 context",
+              "quoteOrDescription": "'This year' introduces a specific upcoming gift.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "other",
+          "rationale": "'Has given' would mean the giving has already happened, yet the dress is still hidden in Cameron's room awaiting presentation.",
+          "misconceptionTarget": "Confusing preparation completion with completion of the giving event.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q43 context",
+              "quoteOrDescription": "The dress is finished but not yet given.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "other",
+          "rationale": "'Gave' also places the gift transfer in the past, contradicting the description of the dress waiting behind the bedroom door.",
+          "misconceptionTarget": "Following the passage's earlier past narrative instead of resetting to the current 'This year' time frame.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "114 Q43 context",
+              "quoteOrDescription": "The gift is ready for a future presentation.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing simple present because Cameron gives a gift every year.",
+        "Treating 'the dress is finished' as proof that the giving event is finished too."
+      ],
+      "misconceptionsTargeted": [
+        "Habitual context determines tense for every specific event within the habit.",
+        "Completing preparation and completing the intended action are the same event."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The future form is supported by local event-state reasoning and evidence of an existing plan."
+      },
+      "reusableDesignPrinciple": "Contrast a recurring habit with a specific prepared-but-not-yet-completed instance to test future intention and event boundaries.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep a prepared object that has not yet been handed over and a clear current-year frame."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove 'This year' and make the future timing inferable solely from the hidden finished gift."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "114 Q43 context",
+          "quoteOrDescription": "The finished hidden dress is present evidence for a planned future gift.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    }
+  ]
+}
