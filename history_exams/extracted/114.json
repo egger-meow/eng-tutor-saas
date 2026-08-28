@@ -41,9 +41,9 @@
         22,
         23
       ],
-      "genre": "article_informational",
+      "genre": "dialogue",
       "title": null,
-      "text": "[Visual/Graphic Content in Source PDF: article_informational on page 5]",
+      "text": "Friends Forever Group (3): Jenny, Linda, Mark\nJenny: Hey guys, guess what? I’m getting married next year!\nLinda: Wow, I’m so happy for you.\nMark: I have good news too! I just got the job I’ve wanted so much.\nLinda: Come on, Mark. Don’t start again.\nLinda: You’re stealing Jenny’s thunder. Jenny was telling us about her big news. It’s very important to her. And you want us to hear about your new job now?\nMark: I didn’t mean that. I just...\nJenny: I agree. Last time when we were talking about how delicious Linda’s cake was, you started telling us about the chocolate cake you made at home.\nMark: All right, all right, my problem. Sorry, Jenny. I’ll never do that again. So do you want to know what job I got?\nLinda: MARK!!",
       "evidenceMode": "text_only",
       "visualEvidenceRequired": false,
       "requiredAssets": [],
@@ -111,12 +111,20 @@
         29,
         31
       ],
-      "genre": "article_informational",
+      "genre": "comic_strip",
       "title": null,
       "text": "Around the year 400, people came to Easter Island.\nSo many trees here!\nIn their free time, they loved\nThey used trees to make fire and _____ making statues with big rocks. With\nbuild houses. Because of the trees, _____ the trees they cut down, they could\npeople had a great life on the island. _____ move the statues around easily.\nTrees were needed and used in every part of their life.\nYears passed, and there were fewer and fewer trees on Easter Island.\nWithout enough trees to keep\nAnd I’m hungry.\nwater under the ground, the land\nI’m thirsty.\nbecame dry, and plants didn’t grow.\nPeople began to fight for water and food. The statues were moved to fighting\ngrounds to show their power. The last trees were probably cut down at this time.\nLet’s not make Earth, our only home,\nThose who cut down\nanother Easter Island.\nthe last trees surely\nunderstood how\nimportant trees were\nto them—but still,\nthey did it . When the\nlast trees fell to the\nground, people on the\nisland fell, too.",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 8,
+          "role": "comic",
+          "imagePath": "history_exams/assets/114/page-8.png",
+          "description": "Multi-panel environmental-history comic",
+          "sha256": "1885224256f07a82de68e76f7fe12d6326c0cacc6b97fcdfcd5d5aec8d9f0505"
+        }
+      ],
       "pageStart": 8,
       "pageEnd": 9,
       "questionNumbers": [
@@ -160,9 +168,17 @@
       "genre": "article_informational",
       "title": null,
       "text": "In the picture is a UK electricity worker in the 1970s. Pictures like this appeared in\nmany newspapers at the time. In 1972, electricity workers in the UK asked to be paid more,\nand they decided to stop working until their wish was answered. The government worried\nthat there wouldn’t be enough electricity for the country if these workers didn’t go to work,\nso it agreed to give them the pay rise. However, the story didn’t end there.\nA year later, the electricity workers asked for another pay rise. To get what they\nwanted, they worked shorter hours and acted like they would walk away from their job\nanytime. But this time, the government decided to fight. To save electricity, it made new\nrules for people to follow. For example, each family could turn on the heat in only one\nroom; TV stations had to stop their shows at 10:30 p.m.; businesses could open only three\ndays a week.\nPeople’s lives were greatly changed. Without enough heat to keep the house warm,\npeople covered themselves in blankets all the time. Hospitals had to use candles because\nthey couldn’t keep all the lights on. Factories couldn’t keep their machines working. Many\npeople lost their jobs. For months, people were paying the price while the electricity\nworkers were fighting for their wish. In the end, the government agreed to the second pay\nrise. This picture shows what many people thought of the electricity workers during the\n“dark” time.",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 12,
+          "role": "full_page",
+          "imagePath": "history_exams/assets/114/page-12.png",
+          "description": "Historical electricity-worker image and article context",
+          "sha256": "f9d7123bdcc4bfdcf7c86a4155b6908ad3eb48af22d2b2f091b5e73206c5dcdb"
+        }
+      ],
       "glossary": {
         "electricity": "電力",
         "government": "政府",
@@ -674,7 +690,7 @@
         "A": "He made Linda unhappy.",
         "B": "He is looking for a new job.",
         "C": "He did not like Linda’s cake.",
-        "D": "He is getting married to Jenny. (A) Dennis never changes his mind except when his wife tells him to. (B) Melisa tells Tom she’ll go to the party but tells her mom she’ll stay home. (C) Jeff tells everyone he’ll move abroad when Ivy is still telling them about her baby. (D) Alisa says she doesn’t care what we have for lunch but also doesn’t like the restaurant we chose."
+        "D": "He is getting married to Jenny."
       },
       "answer": "A",
       "evidenceMode": "text_only",
@@ -693,12 +709,12 @@
         22,
         23
       ],
-      "stem": "(Comprehension question 23)",
+      "stem": "Which is most likely an example of stealing someone’s thunder?",
       "options": {
-        "A": "[Option A]",
-        "B": "[Option B]",
-        "C": "[Option C]",
-        "D": "[Option D]"
+        "A": "Dennis never changes his mind except when his wife tells him to.",
+        "B": "Melisa tells Tom she’ll go to the party but tells her mom she’ll stay home.",
+        "C": "Jeff tells everyone he'll move abroad when Ivy is still telling them about her baby.",
+        "D": "Alisa says she doesn’t care what we have for lunch but also doesn’t like the restaurant we chose."
       },
       "answer": "C",
       "evidenceMode": "text_only",
@@ -770,7 +786,7 @@
         "A": "A zoo.",
         "B": "A campground.",
         "C": "A vacation farm.",
-        "D": "A family restaurant. (A) What Libby does at Rolling Acres. (B) What visitors think of Rolling Acres. (C) Why Libby’s grandparents started Rolling Acres. (D) What the Larson family’s plans are for Rolling Acres."
+        "D": "A family restaurant."
       },
       "answer": "C",
       "evidenceMode": "text_only",
@@ -789,12 +805,12 @@
         26,
         28
       ],
-      "stem": "(Comprehension question 27)",
+      "stem": "What do we learn from the first paragraph?",
       "options": {
-        "A": "[Option A]",
-        "B": "[Option B]",
-        "C": "[Option C]",
-        "D": "[Option D]"
+        "A": "What Libby does at Rolling Acres.",
+        "B": "What visitors think of Rolling Acres.",
+        "C": "Why Libby’s grandparents started Rolling Acres.",
+        "D": "What the Larson family’s plans are for Rolling Acres."
       },
       "answer": "A",
       "evidenceMode": "text_only",
@@ -845,11 +861,21 @@
         "D": "Treat others the way we want to be treated."
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 9,
+          "role": "comic",
+          "imagePath": "history_exams/assets/114/page-9.png",
+          "description": "Multi-panel environmental-history comic",
+          "sha256": "307cfe9ed1a3908ec35d38f7dfd8452106c2bd6cb84ae3cc0771d7dbdf4a2bf2"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "114",
@@ -869,11 +895,21 @@
         "D": "They used statues to show how strong they were."
       },
       "answer": "D",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 9,
+          "role": "comic",
+          "imagePath": "history_exams/assets/114/page-9.png",
+          "description": "Multi-panel environmental-history comic",
+          "sha256": "307cfe9ed1a3908ec35d38f7dfd8452106c2bd6cb84ae3cc0771d7dbdf4a2bf2"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "114",
@@ -893,11 +929,21 @@
         "D": "Understand how important trees were."
       },
       "answer": "B",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 9,
+          "role": "comic",
+          "imagePath": "history_exams/assets/114/page-9.png",
+          "description": "Multi-panel environmental-history comic",
+          "sha256": "307cfe9ed1a3908ec35d38f7dfd8452106c2bd6cb84ae3cc0771d7dbdf4a2bf2"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "114",
@@ -1013,11 +1059,21 @@
         "D": "They did not care whether their job might hurt people’s health."
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 13,
+          "role": "full_page",
+          "imagePath": "history_exams/assets/114/page-13.png",
+          "description": "Historical electricity-worker image required for Q36",
+          "sha256": "53c0394df9d03cbad390af89eb3f63a84b4cad2a60fe7218df81d5d46db08a2c"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "114",
@@ -1188,6 +1244,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:25.503Z",
+  "extractedAt": "2026-08-28T04:49:25.938Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

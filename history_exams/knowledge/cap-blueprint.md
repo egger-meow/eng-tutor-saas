@@ -13,10 +13,10 @@ This blueprint captures the core psychometric and pedagogical architecture rever
 - **Total Questions per Exam**: Exactly 43 items (19–23 Single Questions, 20–24 Passage Questions).
 - **Passage Sets per Exam**: Exactly 8 reading sets per year spanning multi-modal authentic genres.
 - **Cognitive Depth Distribution**:
-  - Direct Retrieval (`D1`): ~22.6% (mostly Section 1)
-  - Single-Step Inference (`D2`): ~60%
-  - Multi-Step Synthesis (`D3`): ~17.4%
-  - Evaluative / Pragmatic (`D4`): ~10%
+  - Direct Retrieval (`D1`): ~6.7% (mostly Section 1)
+  - Single-Step Inference (`D2`): ~68.7%
+  - Multi-Step Synthesis (`D3`): ~22.6%
+  - Evaluative / Pragmatic (`D4`): ~2.1%
 - **Evidence Necessity**: 100% of Section 2 reading items have **essential** evidence necessity.
 
 ---
@@ -60,34 +60,34 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_CLOZE_DISCOURSE_AND_TENSE_FLOW: Cloze Discourse Architecture & Tense Flow Tracker
 - **Primary Skill**: `grammar_in_context`
 - **Supported Genres**: `cloze_passage`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`, `D1_verbatim_retrieval`, `D4_evaluative_pragmatic`
 - **Evidence Span**: `cross_sentence_local`
 - **Evidence Support**: 19 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis, Follow narrative setup: King gives boiled seeds to all children to grow plants, Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants, Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty
+- **Reasoning Operations**: The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example., Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits., The next sentences show palindromes used in mathematics and music and anagrams used to hide studies, proving they are more than just games., Use the next sentence explaining that Katz's quiz asked what words people use for something.
 - **Stem Templates**:
   * *"(Cloze blank 40)"*
   * *"(Cloze blank 41)"*
   * *"(Cloze blank 42)"*
   * *"(Cloze blank 43)"*
-- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `irrelevant_distractor`, `reversed_cause_effect`
+- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `partial_truth`, `unsupported_world_knowledge`, `local_evidence_for_global_question`, `literal_keyword_matching`, `overgeneralization`, `wrong_referent`, `other`, `reversed_cause_effect`, `wrong_chronology`
 - **Quality Checks**:
   * Correct tense/connective must be determined by earlier or subsequent sentences
   * All 4 options must be grammatically valid in isolation
 
 
 ### RECIPE_INFOGRAPHIC_CROSS_MODAL_RECONCILER: Infographic, Chart & Diagram Cross-Modal Reconciler
-- **Primary Skill**: `explicit_detail`
+- **Primary Skill**: `information_integration`
 - **Supported Genres**: `infographic_chart_table`
-- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`, `D1_verbatim_retrieval`, `D4_evaluative_pragmatic`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Evidence Support**: 20 items across 3 years (Years: 111, 113, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis, Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries, Read the recipe callout Note: "Most fruits are good for making fruit tea, but not papayas or bananas", Apply negative constraint to eliminate candidate options containing bananas or papayas
+- **Evidence Support**: 30 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday., The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar., The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize., Figure 2 shows the men’s and women’s lines meeting at roughly the same percentage around 2,200 annual hours, so their advancement/pay chances are almost the same there.
 - **Stem Templates**:
-  * *"What does Tea-Rock celebrate? th"*
+  * *"What does Tea-Rock celebrate?"*
   * *"Here is the postcard {Character} is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?"*
   * *"What can we learn about sugar from the infographic?"*
   * *"What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?"*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `reversed_cause_effect`, `irrelevant_distractor`
+- **Distractor Mechanisms**: `partial_truth`, `unsupported_world_knowledge`, `other`, `undergeneralization`, `literal_keyword_matching`, `overgeneralization`, `wrong_referent`, `reversed_cause_effect`, `local_evidence_for_global_question`, `irrelevant_distractor`, `wrong_chronology`
 - **Quality Checks**:
   * If the graphic is removed, the question must become unanswerable
   * Distractors must reflect genuine visual coordinates with altered labels
@@ -96,16 +96,16 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_INFORMATIONAL_EXPLICIT_DETAIL_PARAPHRASE: Informational Article Detail & Proposition Verification
 - **Primary Skill**: `explicit_detail`
 - **Supported Genres**: `article_informational`, `narrative`
-- **Cognitive Depth**: `D2_single_step_inference`
+- **Cognitive Depth**: `D2_single_step_inference`, `D1_verbatim_retrieval`, `D3_multi_step_synthesis`, `D4_evaluative_pragmatic`
 - **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 43 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Evidence Support**: 40 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves., The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b)., In “Clearly, this must be changed,” “this” refers to the immediately preceding practice of using long working hours as a signal that workers are hard-working., English speakers feel excluded from jobs and official life and then decide to fight for themselves; this context makes “resentful” closest to angry.
 - **Stem Templates**:
   * *"Which idea is talked about in the first paragraph of the reading?"*
-  * *"Who might find that Tabata training is right for them?"*
   * *"Which is true about Tabata training?"*
-  * *"What does Cameroon’s government most likely think of Ambazonia?"*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+  * *"There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?"*
+  * *"What does this mean in the report?"*
+- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `partial_truth`, `wrong_referent`, `reversed_cause_effect`, `undergeneralization`, `irrelevant_distractor`, `local_evidence_for_global_question`, `overgeneralization`, `literal_keyword_matching`, `other`, `grammatically_plausible_contextually_wrong`
 - **Quality Checks**:
   * Correct answer must be an authentic paraphrase of the stated passage evidence
   * Distractors must use true entities with altered predicates or inverted scopes
@@ -114,31 +114,34 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_INFORMATIONAL_LOCAL_AND_GLOBAL_INFERENCE: Informational Article Deductive Inference & Clue Synthesis
 - **Primary Skill**: `local_inference`
 - **Supported Genres**: `article_informational`, `narrative`
-- **Cognitive Depth**: `D3_multi_step_synthesis`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`
 - **Evidence Span**: `cross_sentence_local`
-- **Evidence Support**: 21 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Evidence Support**: 6 items across 3 years (Years: 111, 112, 113)
+- **Reasoning Operations**: The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country., Use the successful case: after dropping about 6 cm, the mosquito can roll off and fly away., Integrate the failure case: if it is flying too low when hit, there is not enough time to escape before hitting the ground., Read the father's quoted protest as evidence of his grievance.
 - **Stem Templates**:
-  * *"Why did Darrell tell Marina to go to Pinterest ?"*
-  * *"There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?"*
-  * *"What does this mean in the report?"*
-  * *"What can we learn from Figure 1 and Figure 2?"*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+  * *"Who might find that Tabata training is right for them?"*
+  * *"What does Cameroon’s government most likely think of Ambazonia?"*
+  * *"When would it be dangerous for a mosquito in the rain?"*
+  * *"Why was Philip’s father angry?"*
+- **Distractor Mechanisms**: `unsupported_world_knowledge`, `partial_truth`, `reversed_cause_effect`, `literal_keyword_matching`, `other`, `irrelevant_distractor`
 - **Quality Checks**:
   * Must require bridging at least two stated facts in the text
   * Distractors must target common unwarranted deductive leaps
 
 
 ### RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE: Informational Article Main Idea & Rhetorical Purpose Synthesis
-- **Primary Skill**: `main_idea`
+- **Primary Skill**: `purpose_speaker_intent`
 - **Supported Genres**: `article_informational`, `narrative`
-- **Cognitive Depth**: `D3_multi_step_synthesis`
+- **Cognitive Depth**: `D2_single_step_inference`, `D3_multi_step_synthesis`, `D1_verbatim_retrieval`
 - **Evidence Span**: `multi_paragraph_global`
-- **Evidence Support**: 1 items across 1 years (Years: 114)
-- **Reasoning Operations**: cross_sentence_coreference, hypothesis_elimination, evidence_synthesis
+- **Evidence Support**: 9 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., Integrate the second paragraph's claim that toy preferences are learned through observing same-gender peers rather than being inborn., Combine it with the third paragraph's argument that limiting children to gender-coded toys can restrict learning, interests, and future opportunities., Survey what each paragraph contributes: biographical framing, career path and assignments, reporting philosophy, and final assignment/death., Choose the option whose scope includes all those stages rather than one subset such as particular reports, schooldays, or Homs.
 - **Stem Templates**:
-  * *"What is the reading mainly about?"*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
+  * *"Why did Darrell tell Marina to go to Pinterest ?"*
+  * *"What idea does Jesse Cohen talk about in the reading?"*
+  * *"What is the reading mostly about?"*
+  * *"According to the reading, why did Rohla and Kreytenberg open Habibi & Hawara?"*
+- **Distractor Mechanisms**: `unsupported_world_knowledge`, `overgeneralization`, `reversed_cause_effect`, `undergeneralization`, `local_evidence_for_global_question`, `other`, `irrelevant_distractor`, `wrong_chronology`, `literal_keyword_matching`, `partial_truth`
 - **Quality Checks**:
   * Every distractor should reflect a true local detail from one paragraph of the passage
   * The correct option must encompass the global theme of the passage
@@ -147,16 +150,16 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_SINGLE_LEXICAL_COMMUNICATIVE_COLLOCATION: Standalone Communicative Lexical Gap Drill
 - **Primary Skill**: `vocabulary_in_context`
 - **Supported Genres**: `single_standalone`
-- **Cognitive Depth**: `D1_verbatim_retrieval`
+- **Cognitive Depth**: `D2_single_step_inference`, `D1_verbatim_retrieval`, `D3_multi_step_synthesis`
 - **Evidence Span**: `single_sentence`
-- **Evidence Support**: 44 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: syntactic_parsing, lexical_semantic_matching
+- **Evidence Support**: 52 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., Fear of the dark explains why Peter leaves the lights on while sleeping., Having more fans than every teammate is direct evidence that Pam is popular., Having money for only one of two liked items creates a difficult choice between them., Repeated practice with the same kind of math problem makes answering it easy.
 - **Stem Templates**:
+  * *"The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five."*
   * *"{Character} is afraid of the dark. He even leaves the _____ on when sleeping."*
   * *"Pam is a _____ baseball player; she has more fans than any other player on her team."*
-  * *"It was _____ for us to answer the math question because we’ve done the same kind of questions many times."*
-  * *"Don’t let the children swim in the river. We don’t know how _____ it is. It could be dangerous."*
-- **Distractor Mechanisms**: `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`, `literal_keyword_matching`, `partial_truth`, `wrong_referent`
+  * *"Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both."*
+- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `irrelevant_distractor`, `partial_truth`, `wrong_referent`, `unsupported_world_knowledge`, `reversed_cause_effect`, `overgeneralization`, `wrong_chronology`, `other`, `local_evidence_for_global_question`
 - **Quality Checks**:
   * All 4 options must belong to the exact same grammatical word class
   * Scenario must clearly disambiguate the correct word without world knowledge assumptions
@@ -165,16 +168,16 @@ High Cognitive Depth (D3/D4) + Elementary/Basic Language (A1/A2)
 ### RECIPE_SINGLE_SYNTACTIC_AGREEMENT_LICENSING: Standalone Syntactic Agreement & Clause Licensing Drill
 - **Primary Skill**: `grammar_in_context`
 - **Supported Genres**: `single_standalone`
-- **Cognitive Depth**: `D2_single_step_inference`
+- **Cognitive Depth**: `D2_single_step_inference`, `D1_verbatim_retrieval`, `D3_multi_step_synthesis`
 - **Evidence Span**: `single_sentence`
-- **Evidence Support**: 47 items across 5 years (Years: 111, 112, 113, 114, 115)
-- **Reasoning Operations**: syntactic_parsing, lexical_semantic_matching
+- **Evidence Support**: 39 items across 5 years (Years: 111, 112, 113, 114, 115)
+- **Reasoning Operations**: The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity., Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting., The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”, Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required., Her sixty years of residence support a present state of knowledge, so simple present “knows” is correct., At the moment the speaker got home, the brother had an imminent dinner plan and invited the speaker, so past progressive “was going out” fits.
 - **Stem Templates**:
-  * *"The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five."*
   * *"I did not do my homework, so my teacher said I _____ stay after school to finish it."*
-  * *"Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both."*
   * *"Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it."*
-- **Distractor Mechanisms**: `literal_keyword_matching`, `partial_truth`, `wrong_referent`, `wrong_chronology`, `unsupported_world_knowledge`, `grammatically_plausible_contextually_wrong`
+  * *"Bob is _____ of the boys in the family. He never does any housework. His brothers at least take out the garbage sometimes."*
+  * *"Aunt Gina has lived in this town for more than sixty years, so she _____ it very well."*
+- **Distractor Mechanisms**: `grammatically_plausible_contextually_wrong`, `other`, `wrong_chronology`, `reversed_cause_effect`, `undergeneralization`
 - **Quality Checks**:
   * Ensure sentence provides an explicit syntactic trigger
   * Distractors must represent common student developmental grammar errors

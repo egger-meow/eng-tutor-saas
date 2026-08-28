@@ -77,6 +77,8 @@ export {
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
+export { auditCapPrecedentFloor, auditCapPrecedentPackage, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'
+export type { CapAssessmentIntent, CapAssessmentPlan, CapDesignAnchor, CapPrecedentAuditResult, CapPrecedentRuntimeBundle } from './cap-precedent-audit.js'
 export {
   countWords,
   extractBlockTexts,

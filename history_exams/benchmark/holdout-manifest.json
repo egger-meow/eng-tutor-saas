@@ -118,7 +118,7 @@
       "questionNumber": 25,
       "section": "passage_comprehension",
       "genre": "brochure_flyer",
-      "evidenceMode": "text_only",
+      "evidenceMode": "text_visual",
       "primarySkillTarget": "information_integration",
       "cognitiveDepthTarget": "D3_multi_step_synthesis",
       "rationale": "Spatial map routing and directional constraint reasoning"

@@ -5,6 +5,7 @@ import type { CurriculumPackage } from './curriculum-package-schema.js'
 import { extractBlockTexts, resolveQuestionAnswerLetter } from './normalize-curriculum-package.js'
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
 import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
+import { auditCapPrecedentPackage } from './cap-precedent-audit.js'
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -215,6 +216,11 @@ export function auditCurriculumPackage(
   const passageWords = blockTexts.reduce((total, text) => total + words(text), 0)
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
+
+  if (pkg.metadata.promptVersion.includes('2.9.0')) {
+    const capAudit = auditCapPrecedentPackage(pkg)
+    for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)
+  }
 
   if ('grounding' in pkg) {
     const densityExceptionGenres = new Set(['notice', 'schedule', 'instructions'])

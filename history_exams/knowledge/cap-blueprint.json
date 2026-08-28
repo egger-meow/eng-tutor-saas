@@ -10,16 +10,16 @@
     ],
     "sourceQuestionCount": 195,
     "excludedHoldoutCount": 20,
-    "providerName": "offline-mock",
-    "modelName": "rule-based-mock",
-    "analysisPromptVersion": "v3.0.0",
+    "providerName": "openai-chatgpt",
+    "modelName": "gpt-5.6-sol",
+    "analysisPromptVersion": "chatgpt-agent-digestion-v1",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T18:17:27.277Z",
-    "sourceCorpusHash": "2ed146595a15b14cf1d6b7afe3694d2241ef2d9aba997265994fd184c267a4fe",
-    "authorityStatus": "provisional"
+    "generatedAt": "2026-08-28T07:27:52.251Z",
+    "sourceCorpusHash": "c0035a5178b8aae6653e383eb0efd98ef1250fd2e6329209817afc0ff29c9811",
+    "authorityStatus": "authoritative"
   },
   "version": "1.0.0",
-  "generatedAt": "2026-08-27T18:17:27.289Z",
+  "generatedAt": "2026-08-28T07:27:52.269Z",
   "totalQuestionsAnalyzed": 195,
   "totalExams": 5,
   "sectionComposition": {
@@ -64,51 +64,51 @@
   },
   "distributions": {
     "skills": {
-      "vocabulary_in_context": 24.6,
-      "grammar_in_context": 33.3,
-      "explicit_detail": 24.6,
-      "reference_resolution": 0,
-      "local_inference": 12.3,
-      "cross_sentence_inference": 0,
-      "main_idea": 1,
-      "purpose_speaker_intent": 0.5,
-      "discourse_relationship": 0,
-      "sequence_cause_consequence": 0,
-      "text_structure": 0,
-      "information_integration": 3.6,
-      "pragmatic_meaning": 0,
-      "other_uncertain": 0
+      "vocabulary_in_context": 26.2,
+      "grammar_in_context": 21,
+      "explicit_detail": 8.2,
+      "reference_resolution": 4.6,
+      "local_inference": 4.1,
+      "cross_sentence_inference": 1,
+      "main_idea": 4.6,
+      "purpose_speaker_intent": 2.6,
+      "discourse_relationship": 4.1,
+      "sequence_cause_consequence": 3.1,
+      "text_structure": 1.5,
+      "information_integration": 12.3,
+      "pragmatic_meaning": 3.6,
+      "other_uncertain": 3.1
     },
     "cognitiveDepth": {
-      "D1_verbatim_retrieval": 22.6,
-      "D2_single_step_inference": 60,
-      "D3_multi_step_synthesis": 17.4,
-      "D4_evaluative_pragmatic": 0
+      "D1_verbatim_retrieval": 6.7,
+      "D2_single_step_inference": 68.7,
+      "D3_multi_step_synthesis": 22.6,
+      "D4_evaluative_pragmatic": 2.1
     },
     "languageDifficulty": {
-      "A1_elementary": 10.3,
-      "A2_basic": 48.7,
-      "B1_intermediate": 41
+      "A1_elementary": 17.9,
+      "A2_basic": 68.7,
+      "B1_intermediate": 13.3
     },
     "evidenceNecessity": {
-      "essential": 53.3,
+      "essential": 82.1,
       "helpful": 0,
       "decorative": 0,
-      "none": 46.7
+      "none": 17.9
     },
     "evidenceSpan": {
       "single_word": 0,
       "single_clause": 0,
-      "single_sentence": 46.7,
-      "cross_sentence_local": 47.7,
-      "multi_paragraph_global": 2.1,
-      "multimodal_text_and_graphic": 3.6
+      "single_sentence": 40.5,
+      "cross_sentence_local": 30.8,
+      "multi_paragraph_global": 12.8,
+      "multimodal_text_and_graphic": 15.9
     },
     "contextNecessity": {
-      "essential": 53.3,
+      "essential": 82.1,
       "helpful": 0,
       "decorative": 0,
-      "none": 46.7
+      "none": 17.9
     }
   },
   "keyDesignPrinciples": [

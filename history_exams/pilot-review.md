@@ -29,44 +29,49 @@
   - **(D)**: pants
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `vocabulary_in_context`
-- **Secondary Skills**: `information_integration`
-- **Cognitive Depth Target**: `D1_verbatim_retrieval`
+- **Primary Skill**: `information_integration`
+- **Secondary Skills**: `vocabulary_in_context`, `grammar_in_context`
+- **Cognitive Depth Target**: `D2_single_step_inference`
 - **Language Difficulty**: `A1_elementary`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `Parse the restrictive relative clause syntactic constraint: "who are exercising"`, `Distinguish active exercising students (left badminton girl, middle badminton boy, middle-right jump rope girl) from inactive bench spectators (right two students)`, `Inspect physical attire features across all active students to verify invariant attribute (glasses) and reject subset/inactive attributes (caps, jackets, pants)`
+- **Reasoning Operations**: `Use 'who are exercising' to exclude the students who are sitting and resting from the comparison set.`, `Inspect the three exercising students and identify the one visible attribute shared by all three.`, `Reject attributes that are worn by only one exercising student or that belong mainly to the non-exercising students.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Syntactic constraint filtering ("who are exercising") combined with coordinate visual entity attribute verification.
-- **Why The Question Works**: Penalizes superficial image scanning by requiring grammatical filtering of candidate entities before attribute matching.
+- **Mechanism**: The item combines grammatical subset filtering with visual attribute intersection: the learner must first decide who counts as 'students who are exercising' and then test each noun against every person in that subset.
+- **Why The Question Works**: Several answer choices are visibly present somewhere in the scene, so superficial picture scanning is insufficient. Only glasses remain true for all of the students who satisfy the stem's activity condition.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `partial_truth` | Only the girl on the far left wears a cap among exercising students; the two students sitting on the bench wear caps but they are not exercising. | Scanning for any character wearing caps without filtering by the relative clause predicate. | page-2.png: bench spectators |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | All three students actively engaged in exercise (playing badminton and jumping rope) are clearly depicted wearing glasses on their faces. | *None* | page-2.png: 3 exercising figures |
-| **(C)** | ❌ No | `unsupported_world_knowledge` | All exercising students are wearing short-sleeve athletic t-shirts, not jackets. | Assuming general outdoor sportswear includes jackets without verifying the illustration. | page-2.png: athletic attire |
-| **(D)** | ❌ No | `partial_truth` | The girl playing badminton on the left wears a pleated skirt, not pants. | Overgeneralizing pants to all exercising students when one wears a skirt. | page-2.png: lower attire |
+| **(A)** | ❌ No | `partial_truth` | Caps appear in the scene, including on students who are sitting, but a cap is not shared by all three exercising students. | Scanning the whole picture for a visible object without first applying the relative-clause filter. | 115 page 2, Q1 illustration: exercising and resting students |
+| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | The three students actively exercising in the picture are the badminton players and the student jumping rope, and all three are wearing glasses. Therefore B is the only option that satisfies the word 'all' after the exercising subset is correctly identified. | *None* | 115 page 2, Q1 illustration: three exercising students |
+| **(C)** | ❌ No | `unsupported_world_knowledge` | The exercising students are not all wearing jackets; treating jackets as ordinary sportswear imports a plausible idea instead of checking the drawing. | Replacing direct visual verification with an expectation about what people might wear while exercising. | 115 page 2, Q1 illustration: upper-body clothing |
+| **(D)** | ❌ No | `partial_truth` | Pants are not common to the entire exercising subset because the exercising badminton girl is shown in a skirt rather than pants. | Checking only some target figures and failing to enforce the universal quantifier 'all'. | 115 page 2, Q1 illustration: lower-body clothing |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
-- **Can Simplify Language Without Breaking Mechanism**: ❌ No
+- **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Relative clause is required to establish entity subset constraint.*
+  - *Retain a grammatical condition equivalent to 'who are exercising'.*
+  - *Retain a universal quantifier such as 'all' so every target figure must be checked.*
+  - *Keep multiple visible answer attributes in the scene to prevent direct object naming.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add multiple overlapping activities with conflicting attire configurations.*
+  - *Add another non-exercising figure who also wears glasses so subset filtering becomes even more important.*
+  - *Ask which option is true of exactly the exercising students but not the resting students, creating a two-set comparison without harder vocabulary.*
 - **Student Failure Modes**:
-  - *Selecting caps (A) by confusing bench spectators with exercising students.*
-  - *Selecting pants (D) by overlooking the skirt worn by the badminton player.*
+  - *Including the students sitting on the bench when interpreting 'students who are exercising'.*
+  - *Choosing an attribute after seeing it on one or two students instead of checking every exercising student.*
+  - *Ignoring the quantifier 'all' and treating a partial match as sufficient.*
 - **Targeted Misconceptions**:
-  - *Assuming all characters in the image are subjects of the sentence.*
+  - *Every person visible in a picture is automatically part of the grammatical subject set.*
+  - *A visually salient attribute can answer an 'all' question even when one target person lacks it.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `3906ee180301d8b8ff5cf06f0786f6ff12da7fbdc0af081b62ac2448ffa2a922`
+- **Content Hash**: `1fc1a875fd4db3f122a2742db21b6bf80b7154acd9d03a0a3fc64dc3b08b6a2a`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -81,7 +86,11 @@
   - Path: `history_exams/assets/115/page-4.png` | Role: `infographic` | Hash: `70d561b198b36c43083c5a5e2b32f6c93f7ed6a805dc5269da341bb7c7aa6321`
 - **Passage Set**: `115-p20-21` (Genre: `infographic_chart_table` | Evidence Mode: `text_visual`)
 > **Passage Context Excerpt**:
-> [Visual/Graphic Content in Source PDF: infographic_chart_table on page 4]
+> The Best Fruit Tea You Can Make at Home
+> Things to get ready: 3-4 teabags (green or black tea), half an apple, half a peach, half a pear, 20 mL lemon juice, 1,200 mL water, 30 g sugar.
+> Note: Most fruits are good for making fruit tea, but not papayas or bananas.
+> How to make fruit tea: boil water; steep the teabags for 2-3 minutes and remove them; cut fruit into small pieces; put the fruit into the hot tea for 5-6 minutes; add sugar and lemon juice and stir for at least 10 seconds.
+> Now enjoy the tea!
 
 - **Question Stem**: Amanda wants to make fruit tea by following The Best Fruit Tea You Can Make at Home . She has several kinds of fruit in the kitchen: apples, bananas, oranges, papayas, pears, and strawberries. Which are some of the fruits she can use to make the fruit tea?
 - **Options**:
@@ -97,37 +106,38 @@
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries`, `Read the recipe callout Note: "Most fruits are good for making fruit tea, but not papayas or bananas"`, `Apply negative constraint to eliminate candidate options containing bananas or papayas`, `Verify that option C contains only permitted fruits (apples, oranges, strawberries)`
+- **Reasoning Operations**: `Read the note excluding papayas and bananas.`, `Check every fruit in each option.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Practical procedural reading with highlighted negative constraint callout filter.
-- **Why The Question Works**: Mirrors real-world task-based reading where following practical instructions requires checking exception boxes.
+- **Mechanism**: Only one option contains neither explicitly forbidden fruit.
+- **Why The Question Works**: Each distractor violates the visual rule with at least one listed fruit.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `literal_keyword_matching` | Contains papayas, which the recipe Note explicitly excludes ("not papayas or bananas"). | Ignoring negative constraint callouts and picking recognizable pantry fruits. | page-4.png: Note callout box |
-| **(B)** | ❌ No | `literal_keyword_matching` | Contains bananas, which the recipe Note explicitly forbids. | Failing to check each item in the triple against exclusion rules. | page-4.png: Note callout box |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Apples are explicitly listed under "Things to get ready", while oranges and strawberries are permitted fruits under "Most fruits are good" and neither is excluded by the Note. | *None* | page-4.png: Things to get ready & Note |
-| **(D)** | ❌ No | `literal_keyword_matching` | Contains both bananas and papayas, violating both explicit exclusions. | Total omission of the Note restriction. | page-4.png: Note callout box |
+| **(A)** | ❌ No | `other` | Papaya is explicitly excluded. | Checking only part of a set. | page 4 infographic |
+| **(B)** | ❌ No | `other` | Banana is explicitly excluded. | Treating one acceptable member as sufficient. | page 4 infographic |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Apples, oranges, and strawberries are allowed because the note excludes only papayas and bananas; C is correct. | *None* | history_exams/assets/115/page-4.png |
+| **(D)** | ❌ No | `other` | Both banana and papaya are excluded. | Missing a negative rule. | page 4 infographic |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Preserve explicit negative constraint in callout note.*
+  - *Keep the exclusion rule and multi-item options.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add conditional rules based on fruit ripeness or quantities.*
+  - *Add a second independent ingredient constraint.*
 - **Student Failure Modes**:
-  - *Scanning only the ingredient list at the top and missing the Note box below.*
+  - *Checking only one fruit in each option.*
+  - *Missing the word 'not'.*
 - **Targeted Misconceptions**:
-  - *Assuming all edible fruits are automatically suitable for the recipe.*
+  - *A set answer must satisfy every constraint.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `2deea7c6c95ba8039e1c353d9ed07a84f66b8c9d25efd788e4dd2d27cce2af9c`
+- **Content Hash**: `16c8292be34e3e9aa999227613b02f608fb0e4b6d075d6bc90b3e747658db904`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -142,7 +152,6 @@
   - Path: `history_exams/assets/115/page-5.png` | Role: `comic` | Hash: `46ed46e6eeb5849045cd57408af85ce12f923872ea427ff67b07f4816e446ae0`
 - **Passage Set**: `115-p22-23` (Genre: `comic_strip` | Evidence Mode: `text_visual`)
 > **Passage Context Excerpt**:
-> th
 > In 6 grade, I tried to get the students
 > I totally bombed it.
 > to pick me as student leader. _____
@@ -181,43 +190,44 @@
   - **(D)**: He talks about things he can’t do.
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `purpose_speaker_intent`
-- **Secondary Skills**: `cross_sentence_inference`, `pragmatic_meaning`
+- **Primary Skill**: `local_inference`
+- **Secondary Skills**: `information_integration`
 - **Cognitive Depth Target**: `D3_multi_step_synthesis`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `multi_paragraph_global`
-- **Reasoning Operations**: `Analyze Panel 1-2 episode: Hawkins runs for 6th grade leader promising 3 school days/week (unrealistic/beyond authority), gets 2 votes, bombs election`, `Analyze Panel 3-4 episode: Hawkins works as car salesman promising to sell 50 then 149 cars/month, sells only 1, gets fired`, `Synthesize the invariant psychological trait across both episodes: boasting and making impossible promises he cannot fulfill ("talks about things he can't do")`
+- **Evidence Span**: `multimodal_text_and_graphic`
+- **Reasoning Operations**: `Compare Hawkins's school and work promises.`, `Abstract the repeated gap between claims and ability.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Cross-panel thematic induction of a personality trait through recurring behavioral failure patterns.
-- **Why The Question Works**: Requires high-level characterization across distinct chronological settings rather than literal sentence extraction.
+- **Mechanism**: Both episodes show unrealistic promises followed by failure.
+- **Why The Question Works**: The answer must generalize across panels, not repeat one event.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `unsupported_world_knowledge` | Hawkins exhibits self-absorption ("I was the best choice, but why didn't people know that?"), not benevolence toward others. | Projecting positive character tropes without textual basis. | page-5.png: Panel 2 speech |
-| **(B)** | ❌ No | `unsupported_world_knowledge` | Punctuality is never mentioned; his failure is extreme underperformance and empty boasting. | Associating being fired with tardiness rather than performance. | page-5.png: Panel 3-4 |
-| **(C)** | ❌ No | `reversed_cause_effect` | Hawkins does not conform or follow others; he makes wild unilateral promises that contradict everyone else's judgment. | Confusing being influenced by others with being rejected by others. | page-5.png: Panel 1 |
-| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | In 6th grade he promised 3 days of school/week (which a student leader cannot decide); as a car salesman he promised 50 and then 149 cars/month but only sold 1. Both instances synthesize the trait of making impossible promises. | *None* | page-5.png: Panels 1 & 3 |
+| **(A)** | ❌ No | `unsupported_world_knowledge` | The comic is about Hawkins's own inflated claims, not seeing good in others. | Choosing a generic positive trait. | page 5 comic |
+| **(B)** | ❌ No | `unsupported_world_knowledge` | No panel concerns lateness. | Inventing a workplace detail. | page 5 comic |
+| **(C)** | ❌ No | `reversed_cause_effect` | He insists on his own plans rather than blindly following others. | Confusing overconfidence with conformity. | page 5 comic |
+| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Hawkins repeatedly talks about outcomes he cannot deliver, so D is correct. | *None* | history_exams/assets/115/page-5.png |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Maintain the contrast between grandiose promise and meager outcome in both scenes.*
+  - *Keep two parallel failures.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add subtle facial expressions or third-party reactions that require pragmatic inference.*
+  - *Make the second episode less explicit.*
 - **Student Failure Modes**:
-  - *Fixating on the dismissal in Panel 4 and picking generic workplace faults like tardiness (B).*
+  - *Using one panel only.*
+  - *Mistaking confidence for competence.*
 - **Targeted Misconceptions**:
-  - *Assuming multiple choice options must match a specific quoted line rather than an abstract synthesis.*
+  - *Character traits can require cross-episode abstraction.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `88f72120d001d71f7bec953f867f9beab872cdfd2a3ec84583c7929d6457bdc8`
+- **Content Hash**: `06adab5850321ec896c1d0191b590082602248ede458a32caf5db47d22f802fb`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -232,7 +242,6 @@
   - Path: `history_exams/assets/115/page-5.png` | Role: `comic` | Hash: `46ed46e6eeb5849045cd57408af85ce12f923872ea427ff67b07f4816e446ae0`
 - **Passage Set**: `115-p22-23` (Genre: `comic_strip` | Evidence Mode: `text_visual`)
 > **Passage Context Excerpt**:
-> th
 > In 6 grade, I tried to get the students
 > I totally bombed it.
 > to pick me as student leader. _____
@@ -272,48 +281,48 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `vocabulary_in_context`
-- **Secondary Skills**: `local_inference`
+- **Secondary Skills**: `information_integration`, `local_inference`
 - **Cognitive Depth Target**: `D2_single_step_inference`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `cross_sentence_local`
-- **Reasoning Operations**: `Locate target phrase "bombed it" in Panel 2 header ("I totally bombed it") and Panel 4 header ("I bombed it again")`, `Analyze context in Panel 2: Hawkins receives only 2 votes out of 40 on the scoreboard (crushing defeat)`, `Analyze context in Panel 4: Hawkins sells only 1 car in two months and is fired by his boss`, `Synthesize the common meaning of "bombed": failed completely / suffered total failure`
+- **Evidence Span**: `multimodal_text_and_graphic`
+- **Reasoning Operations**: `Use election and firing outcomes as context.`, `Map the repeated phrase to the shared result.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Multimodal contextual grounding of informal idiom through clear narrative outcomes.
-- **Why The Question Works**: Demonstrates how authentic narrative context allows students to deduce unfamiliar colloquial vocabulary without prior rote memorization.
+- **Mechanism**: The phrase appears after two unmistakable failures.
+- **Why The Question Works**: Repeated visual context disambiguates an unfamiliar idiom.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `grammatically_plausible_contextually_wrong` | Hawkins did not give up or resign voluntarily; he actively campaigned and was rejected by voters, and wanted to stay at his job but was fired. | Confusing failing at an effort with voluntarily quitting. | page-5.png: Panel 2 & 4 |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | In both situations (getting 2 votes in an election, selling 1 car and getting fired), Hawkins suffered complete, disastrous failure. Therefore "bombed" means "failed at it". | *None* | page-5.png: Panel 2 scoreboard & Panel 4 dismissal |
-| **(C)** | ❌ No | `unsupported_world_knowledge` | Hawkins exhibits bewildered distress and confusion ("why didn't people know that?", "Why?"), demonstrating he was not fine with the outcomes. | Misinterpreting emotional valence of the character. | page-5.png: Panel 2 & 4 speech bubbles |
-| **(D)** | ❌ No | `irrelevant_distractor` | Hawkins acted carelessly and boastfully, not carefully. | Selecting an arbitrary antonym of reckless behavior. | page-5.png: Panels 1 & 3 |
+| **(A)** | ❌ No | `partial_truth` | He does not voluntarily give up either attempt. | Confusing failure with quitting. | page 5 comic |
+| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | Hawkins failed badly in both cases, so 'bombed' means failed at it; B is correct. | *None* | history_exams/assets/115/page-5.png |
+| **(C)** | ❌ No | `reversed_cause_effect` | The scenes show negative consequences, not being fine with them. | Ignoring outcome polarity. | page 5 comic |
+| **(D)** | ❌ No | `unsupported_world_knowledge` | Carefulness is not the shared meaning. | Substituting a behavior for contextual meaning. | page 5 comic |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Preserve the target idiomatic expression in caption.*
+  - *Keep both failures.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce subtle partial successes to force nuance between failure and underperformance.*
+  - *Remove one explicit failure label.*
 - **Student Failure Modes**:
-  - *Assuming "bombed" refers literally to explosives.*
-  - *Confusing failing (B) with voluntarily giving up (A).*
+  - *Using the literal noun meaning of bomb.*
+  - *Reading only one occurrence.*
 - **Targeted Misconceptions**:
-  - *Believing vocabulary questions require pre-memorized dictionary definitions rather than context clues.*
+  - *Idioms can be decoded from repeated outcome frames.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `97a2ecd307713ae939a7d8e67e31a4fa49f47e251361f66d600eb8738988e891`
+- **Content Hash**: `d93ebacc99ee9c7aed3d9400d8957903c889e3a9f1846878ff3bf16fe82b8be9`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
 
-## Question 26 [Official Answer: `B`]
+## Question 26 [Official Answer: `C`]
 
 ### 1. Corpus Extraction Foundation
 - **Section**: `passage_comprehension`
@@ -349,43 +358,43 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `information_integration`
-- **Secondary Skills**: `discourse_relationship`
+- **Secondary Skills**: `local_inference`, `information_integration`, `sequence_cause_consequence`
 - **Cognitive Depth Target**: `D3_multi_step_synthesis`
-- **Language Difficulty**: `B1_intermediate`
+- **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multimodal_text_and_graphic`
-- **Reasoning Operations**: `Locate starting position on map: Main House (5) gift shop exit facing North towards Family Library (4)`, `Establish character egocentric orientation: Facing North (upward on map)`, `Locate destination: Rose Garden (9) in the southeast area of the grounds`, `Trace candidate route B: Turn left (west/around path), walk past Sir Archie's House (7), turn right and walk past the Main House towards the Rose Garden pathway`, `Verify that option B correctly describes the valid connecting pathway to the Rose Garden without blocked walls or reversed vectors`
+- **Reasoning Operations**: `Establish facing direction from Family Library being in front.`, `Trace each route step-by-step.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Allocentric map navigation conditioned by an egocentric orientation anchor.
-- **Why The Question Works**: Tests high-order spatial reasoning by requiring mental rotation and pathway topology tracing.
+- **Mechanism**: Correctness depends on orientation, road continuity, landmarks, and turn order.
+- **Why The Question Works**: All routes mention real places and sound plausible until traced.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `wrong_chronology` | Turning left from facing north leads west past Main Gate and away from the eastern Rose Garden. | Confusing east/west directions from the character viewpoint. | page-6.png: West road layout |
-| **(B)** | ✅ **YES** | *N/A (Correct Answer)* | From the gift shop facing Family Library (North), taking the pathway loop past Sir Archie's House (7) and navigating past the Main House leads directly into the Rose Garden (9). | *None* | page-6.png: Map pathways |
-| **(C)** | ❌ No | `partial_truth` | Turning right towards Farmyard (8) leads to the northeast perimeter where pathways dead-end without direct access to Rose Garden. | Assuming all perimeter roads form an unbroken circular loop. | page-6.png: Northeast layout |
-| **(D)** | ❌ No | `wrong_referent` | Butterfly Garden (2) is in the southwest quadrant, behind and to the left of someone facing north, not reached by turning right. | Reversing left and right coordinates. | page-6.png: Quadrant positions |
+| **(A)** | ❌ No | `other` | The left-first sequence does not reach the Rose Garden from the oriented start. | Not tracing turns. | page 6 map |
+| **(B)** | ❌ No | `other` | Passing Sir Archie's House then Main House does not match the needed progression. | Choosing familiar landmarks without route continuity. | page 6 map |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | From the Main House with the Family Library ahead, the route that matches the map goes right toward the Farmyard, then right and straight, then left to the Rose Garden; C is correct. | *None* | history_exams/assets/115/page-6.png |
+| **(D)** | ❌ No | `other` | The Butterfly Garden and Rabbit's Temple chain runs away from the Rose Garden route. | Following a scenic chain rather than geometry. | page 6 map |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Preserve directional verbs (turn left/right, walk past, at the corner).*
+  - *Keep orientation and map geometry.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add one-way signs, closed gates, or time-window access constraints on pathways.*
+  - *Remove one landmark cue.*
 - **Student Failure Modes**:
-  - *Confusing the reader static perspective (bottom of page) with the character orientation (facing North).*
-  - *Failing to trace actual drawn pathways and assuming line-of-sight walking.*
+  - *Ignoring the facing-direction sentence.*
+  - *Checking landmarks but not turns.*
 - **Targeted Misconceptions**:
-  - *Treating left/right in map questions as absolute page-left/page-right rather than character-heading relative.*
+  - *Map questions require orientation plus continuity.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `fded717407b3f21b57b1116ac0652b0a38cd63f04c32c575940f93278f74e589`
+- **Content Hash**: `bf38930d1d8c5dc02588c34195b3b7a774132f78441c78aa0c33ade81a38b496`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -436,43 +445,43 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `main_idea`
-- **Secondary Skills**: `text_structure`, `sequence_cause_consequence`
+- **Secondary Skills**: `information_integration`, `other_uncertain`
 - **Cognitive Depth Target**: `D3_multi_step_synthesis`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
-- **Evidence Span**: `multi_paragraph_global`
-- **Reasoning Operations**: `Identify the title metaphor: "Glass Bottles' Second Life"`, `Scan the 6-step lifecycle diagram: Step 1 (thrown as garbage) -> Steps 2-4 (broken, smoothed, frosted into sea glass) -> Step 5 (beached) -> Step 6 (collected by artists for artworks)`, `Synthesize why it is called a "second life": discarded garbage bottles are reborn as sea glass used in art pieces`
+- **Evidence Span**: `multimodal_text_and_graphic`
+- **Reasoning Operations**: `Trace bottles through sea-glass formation.`, `Connect the endpoint to artistic reuse.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Metaphorical title comprehension grounded in multi-stage process infographic synthesis.
-- **Why The Question Works**: Evaluates macro-level text structure comprehension, ensuring students connect the opening title to the concluding stage of the diagram.
+- **Mechanism**: The title compresses transformation plus reuse into a metaphor.
+- **Why The Question Works**: The correct answer must include both the new material and its new function.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `reversed_cause_effect` | Sea glass is collected by artists for artwork, not re-melted into commercial glass bottles. | Equating "second life" literally with factory bottle recycling. | page-10.png: Step 6 |
-| **(B)** | ❌ No | `unsupported_world_knowledge` | Making wishes at the beach is never mentioned in the text or process steps. | Injecting romanticized folklore without textual grounding. | page-10.png: entire diagram |
-| **(C)** | ❌ No | `unsupported_world_knowledge` | Sea animals living in bottles is unsupported by the text, which focuses on geological wave erosion and artistic collection. | Confusing environmental marine biology themes with physical sea glass formation. | page-10.png: Steps 1-6 |
-| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Glass bottles thrown into the sea break and erode into smooth sea glass over centuries, which artists then collect and repurpose in art pieces, giving them a meaningful "second life". | *None* | page-10.png: Intro & Step 6 |
+| **(A)** | ❌ No | `reversed_cause_effect` | Sea glass is not remade into bottles. | Assuming reuse means restoration to the original product. | page 10 diagram |
+| **(B)** | ❌ No | `unsupported_world_knowledge` | No wish-making is mentioned. | Importing beach folklore. | page 10 diagram |
+| **(C)** | ❌ No | `unsupported_world_knowledge` | No sea-animal homes appear in the process. | Choosing a plausible environmental story. | page 10 diagram |
+| **(D)** | ✅ **YES** | *N/A (Correct Answer)* | Discarded bottles become sea glass and are then used in art pieces, giving them a 'second life'; D is correct. | *None* | history_exams/assets/115/page-10.png |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Maintain the 6 chronological process stages.*
+  - *Keep transformation and reuse endpoint.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Introduce competing ecological perspectives in an accompanying sidebar.*
+  - *Make the title less explicit.*
 - **Student Failure Modes**:
-  - *Assuming a literal recycling definition (A) rather than reading Step 6.*
-  - *Selecting marine animal habitats (C) based on general ocean associations.*
+  - *Taking the title literally.*
+  - *Stopping before the art endpoint.*
 - **Targeted Misconceptions**:
-  - *Interpreting titles through isolated prior knowledge rather than holistic diagram synthesis.*
+  - *Titles can summarize a multi-stage conceptual arc.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `f5b59870266ee201a224720d81b36703336eaf5bcdf48cd61804b5ffc3d83705`
+- **Content Hash**: `1e8e894229eccd2f94b5393bdb23dcbd3e0447a1689c3b09da08ba1c60c1f18d`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -534,43 +543,44 @@
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
 - **Primary Skill**: `cross_sentence_inference`
-- **Secondary Skills**: `purpose_speaker_intent`, `discourse_relationship`
+- **Secondary Skills**: `information_integration`, `purpose_speaker_intent`, `main_idea`
 - **Cognitive Depth Target**: `D3_multi_step_synthesis`
-- **Language Difficulty**: `B1_intermediate`
+- **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multi_paragraph_global`
-- **Reasoning Operations**: `Analyze Document 1 (Anna Adams): Documents widespread fear that Icelandic is dying due to English prevalence; ends with ominous question "Will Iceland one day give up Icelandic for English? It may happen soon" -> Adams is worried`, `Analyze Document 2 (Gunnar Eggertsson): Acknowledges public worry ("I understand their worries, but does the future... really look that bad?"), then rebuts with data (314k speakers > 35k safety threshold, 51.3M crowns spent teaching Icelandic to AI/tech, schools continue teaching) and concludes "Clearly, we are not giving up our first language" -> Eggertsson is not worried`, `Synthesize comparative stance: Adams is worried, but Eggertsson is not (Option C)`
+- **Reasoning Operations**: `Infer Adams's concern from her conclusion.`, `Infer Eggertsson's comparatively optimistic stance from his rebuttal and evidence.`, `Map the two stances to the combined option.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Paired-text authorial stance comparison with rhetorical concession differentiation.
-- **Why The Question Works**: Requires discerning an author genuine stance from quoted voices and rhetorical concessions across distinct viewpoints.
+- **Mechanism**: Cross-document stance comparison selects the asymmetric answer: Adams is worried, Eggertsson is not.
+- **Why The Question Works**: Both writers discuss the same risk and acknowledge work remains, so learners must distinguish concern about extinction from support for improvement.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `partial_truth` | Ignores Adams' explicit warnings that Icelanders are losing Icelandic to English products and foreigners. | Overgeneralizing Eggertsson's optimism to both authors. | page-12.png: Article 1 |
-| **(B)** | ❌ No | `partial_truth` | Conflates Eggertsson's rhetorical opening ("I understand their worries") with his actual stance, ignoring his empirical rebuttal. | Mistaking a rhetorical concession for the author's primary thesis. | page-12.png: Article 2 |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Adams presents the alarming perspective that English is displacing Icelandic and threatens its survival, while Eggertsson counters that 314,000 speakers, heavy machine-learning investment, and school curricula ensure Icelandic is safe and not being abandoned. | *None* | page-12.png: Articles 1 & 2 |
-| **(D)** | ❌ No | `reversed_cause_effect` | Directly inverts the two authors' positions. | Transposing author attribution between paired articles. | page-12.png: Author bylines & conclusions |
+| **(A)** | ❌ No | `overgeneralization` | It ignores Adams's explicit worry that Icelandic may soon be given up for English. | Collapsing two authors into a shared neutral stance because they discuss the same topic. | The Future of Icelandic ending |
+| **(B)** | ❌ No | `overgeneralization` | Eggertsson acknowledges improvement is needed but argues Icelandic is not currently in such danger, so he is not worried in the same way Adams is. | Treating any call for improvement as equivalent to fear of language death. | Our Future with Icelandic |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Adams warns Iceland may give up Icelandic soon, while Eggertsson argues the situation is not that bad and provides evidence of safety, so C is correct. | *None* | both Icelandic articles |
+| **(D)** | ❌ No | `reversed_cause_effect` | This reverses the authors' positions: Adams is the pessimistic writer, Eggertsson the reassuring one. | Remembering the stance contrast but assigning it to the wrong author. | both article conclusions |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Preserve the contrasting thesis and counter-argument structure.*
+  - *Keep one clearly pessimistic conclusion and one evidence-based reassuring conclusion.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add a third brief perspective to create a 3-way matrix synthesis.*
+  - *Make both authors acknowledge counterarguments and require separating final stance from concessions.*
 - **Student Failure Modes**:
-  - *Selecting (B) because Eggertsson writes "I understand their worries" in line 2 of his piece.*
-  - *Transposing the two authors (D).*
+  - *Equating 'more should be done' with 'worried the language will disappear'.*
+  - *Remembering a contrast but swapping authors.*
 - **Targeted Misconceptions**:
-  - *Assuming that mentioning an opposing viewpoint means endorsing it.*
+  - *Writers who cover the same problem necessarily share the same stance.*
+  - *A nuanced optimistic writer cannot still advocate additional action.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `08a47a2dc3edbebb72e7287a1b0bdca19a9369ab753573a0873a53ab190441ee`
+- **Content Hash**: `22c0475e9084ba622fd3dec64decf868fd69c1488b172b51f7b339d71d256fcc`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---
@@ -616,44 +626,45 @@
   - **(D)**: popular
 
 ### 2. Pedagogical Reverse-Engineering & Cognitive Architecture
-- **Primary Skill**: `vocabulary_in_context`
-- **Secondary Skills**: `discourse_relationship`, `sequence_cause_consequence`
-- **Cognitive Depth Target**: `D3_multi_step_synthesis`
+- **Primary Skill**: `local_inference`
+- **Secondary Skills**: `sequence_cause_consequence`, `pragmatic_meaning`
+- **Cognitive Depth Target**: `D4_evaluative_pragmatic`
 - **Language Difficulty**: `A2_basic`
 - **Evidence Necessity**: `essential`
 - **Evidence Span**: `multi_paragraph_global`
-- **Reasoning Operations**: `Follow narrative setup: King gives boiled seeds to all children to grow plants`, `Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants`, `Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty`, `Resolve cloze blank 43: "There is only one child who is _____ enough to be king" -> Wong was the only "honest" child`
+- **Reasoning Operations**: `Infer the consequence of boiled seeds: genuine growth was impossible.`, `Compare Wong's empty pot with other children's plants.`, `Infer the moral trait being tested.`
 
 #### Question Mechanism & Pedagogical Function
-- **Mechanism**: Narrative climax cloze resolution driven by plot twist and character moral evaluation.
-- **Why The Question Works**: Transforms cloze from mechanical local syntax into deep reading comprehension of moral fable resolution.
+- **Mechanism**: The story's reveal turns an apparently failed growing task into a hidden character test; the empty pot demonstrates honesty.
+- **Why The Question Works**: Readers must reinterpret the entire story after the reveal, a classic reversal that supports high cognitive depth with simple vocabulary.
 
 ### 3. Option-by-Option Micro-Analysis
 
 | Option | Correct? | Strategy / Mechanism | Pedagogical Rationale | Misconception Targeted | Evidence Reference |
 | :---: | :---: | :---: | :--- | :--- | :--- |
-| **(A)** | ❌ No | `unsupported_world_knowledge` | Wong did not demonstrate intellectual shrewdness; his trial tested truthfulness versus deceit. | Selecting generic royal virtues ("wise king") without resolving the seed honesty test. | page-14.png: Paragraph 4 |
-| **(B)** | ❌ No | `irrelevant_distractor` | Physical strength is completely unrelated to planting seeds or moral integrity. | Arbitrary adjective association. | page-14.png |
-| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Because the king had boiled the seeds, no plants could legitimately grow. All other children lied by substituting fake plants, while Wong truthfully presented his empty pot, proving he was the only "honest" child. | *None* | page-14.png: Paragraph 4 |
-| **(D)** | ❌ No | `reversed_cause_effect` | Sung and the other children with beautiful plants were popular with the crowd; Wong was lonely with his empty pot. | Confusing crowd popularity with the king's moral standard. | page-14.png: Paragraph 3 |
+| **(A)** | ❌ No | `partial_truth` | Wong may appear wise in hindsight, but the test directly reveals truthfulness, not superior knowledge; he did not know the seeds were boiled. | Equating a good outcome with wisdom regardless of what the character knew. | 115-p40-43 |
+| **(B)** | ❌ No | `unsupported_world_knowledge` | Physical strength plays no role in planting, reporting, or the king's reveal. | Choosing a stereotypical leadership trait not tested by the story. | 115-p40-43 |
+| **(C)** | ✅ **YES** | *N/A (Correct Answer)* | Because boiled seeds could not grow, Wong is the only child whose empty pot truthfully reflects what happened. The king therefore values him as honest; C is correct. | *None* | 115-p40-43 climax |
+| **(D)** | ❌ No | `grammatically_plausible_contextually_wrong` | Popularity is associated with Sung's crowd approval, but the king rejects the children with impressive plants and accepts Wong's unpopular empty pot. | Treating social approval as evidence of moral suitability. | 115-p40-43 |
 
 ### 4. Difficulty Adjustment & Diagnostic Dimensions
 - **Can Simplify Language Without Breaking Mechanism**: ✅ Yes
 - **Simplification Constraints**:
-  - *Preserve the key narrative turning point (boiled seed revelation).*
+  - *Preserve impossible-to-grow seeds, false successful plants, and one truthful empty pot.*
 - **Can Increase Cognitive Depth Without Increasing Vocabulary**: ✅ Yes
 - **Depth Adjustment Strategies**:
-  - *Add a subplot where another child hesitated before cheating.*
+  - *Remove the king's explicit statement that no plants could grow and require inference from the boiling fact alone.*
 - **Student Failure Modes**:
-  - *Choosing (A) wise due to the traditional fairy tale archetype of the "wise king".*
-  - *Failing to connect the boiled seed clue to the honesty test.*
+  - *Reading the king's seed challenge literally as a gardening contest even after the reveal.*
+  - *Choosing a generic positive leadership trait instead of the specific trait evidenced by the plot.*
 - **Targeted Misconceptions**:
-  - *Relying on generic fairy tale tropes rather than the specific cause-and-effect mechanism of the plot.*
+  - *A narrative reveal does not require reinterpretation of earlier events.*
+  - *Any positive trait is equally supported if a character becomes king.*
 
 ### 5. Quality Control & Critic Audit
 - **Critic Status**: `passed`
 - **Analysis Confidence**: `high`
-- **Content Hash**: `c056502b157a5553af684be3c15f04acf550569afb6c1b2931b67b26c46e740d`
+- **Content Hash**: `404af889d44d53f921846396652ad513b4a3d3a7eb4d3d9bbe1d4482445dc50e`
 - **Critic Audit Notes**: Passed 100% of factual grounding and evidence cross-check audits without repair.
 
 ---

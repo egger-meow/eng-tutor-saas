@@ -14,22 +14,24 @@
       "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "B1_intermediate",
-      "A2_basic"
+      "A2_basic",
+      "B1_intermediate"
     ],
     "typicalCognitiveDepthRange": [
       "D2_single_step_inference",
-      "D3_multi_step_synthesis"
+      "D3_multi_step_synthesis",
+      "D1_verbatim_retrieval",
+      "D4_evaluative_pragmatic"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
     "requiredEvidenceStructure": "Cohesive paragraph passage with narrative timeline or argumentative flow",
     "reasoningOperations": [
-      "cross_sentence_coreference",
-      "hypothesis_elimination",
-      "evidence_synthesis",
-      "Follow narrative setup: King gives boiled seeds to all children to grow plants",
-      "Track plot twist: Boiled seeds cannot grow; other children cheated and replaced seeds with flowering plants",
-      "Analyze Wong's behavior: Wong watered his pot diligently but brought an empty pot with honesty"
+      "The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example.",
+      "Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits.",
+      "The next sentences show palindromes used in mathematics and music and anagrams used to hide studies, proving they are more than just games.",
+      "Use the next sentence explaining that Katz's quiz asked what words people use for something."
     ],
     "stemTemplates": [
       "(Cloze blank 40)",
@@ -38,28 +40,31 @@
       "(Cloze blank 43)"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend grammar_in_context against surface word matchers.",
-      "Transforms cloze from mechanical local syntax into deep reading comprehension of moral fable resolution."
+      "The official answer is uniquely supported because The words and sentences that follow are examples of palindromes, so “for example” correctly introduces the list. A plausible distractor fails because “in fact” would intensify or confirm a claim rather than introduce representative instances.",
+      "The official answer is uniquely supported because An anagram must reuse exactly the same letters in a different order; “it makes” can be rearranged to “me steak,” so option C forms the valid pair required by the missing table/example. A plausible distractor fails because “take sit” does not provide the letter-for-letter match required by the paired anagram in the source layout.",
+      "The official answer is uniquely supported because Turning the ordinary word “restaurant” into the odd sentence “Eat rats, run!” is funny because the resulting meaning is strange, so “strange” fits. A plausible distractor fails because The example is not presented as difficult; it is presented as unexpectedly meaningful and amusing."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem",
-      "Choosing (A) wise due to the traditional fairy tale archetype of the \"wise king\"."
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Choosing sports because the most concrete example involves sports shoes."
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Remove the explicit quiz-method sentence and let learners infer the naming topic from several object-label pairs."
     ],
     "validDistractorMechanisms": [
-      "literal_keyword_matching",
-      "partial_truth",
-      "wrong_referent",
-      "wrong_chronology",
-      "unsupported_world_knowledge",
       "grammatically_plausible_contextually_wrong",
-      "irrelevant_distractor",
-      "reversed_cause_effect"
+      "partial_truth",
+      "unsupported_world_knowledge",
+      "local_evidence_for_global_question",
+      "literal_keyword_matching",
+      "overgeneralization",
+      "wrong_referent",
+      "other",
+      "reversed_cause_effect",
+      "wrong_chronology"
     ],
     "commonWeakImplementations": [
       "Isolated sentence grammar where surrounding passage has zero impact on choice",
@@ -138,7 +143,7 @@
   {
     "recipeId": "RECIPE_INFOGRAPHIC_CROSS_MODAL_RECONCILER",
     "name": "Infographic, Chart & Diagram Cross-Modal Reconciler",
-    "primarySkill": "explicit_detail",
+    "primarySkill": "information_integration",
     "secondarySkills": [
       "explicit_detail",
       "local_inference"
@@ -156,48 +161,53 @@
     ],
     "typicalCognitiveDepthRange": [
       "D2_single_step_inference",
-      "D3_multi_step_synthesis"
+      "D3_multi_step_synthesis",
+      "D1_verbatim_retrieval",
+      "D4_evaluative_pragmatic"
     ],
     "requiredEvidenceSpan": "multimodal_text_and_graphic",
     "requiredEvidenceStructure": "Co-dependent prose text paired with a diagram, chart, or comparative table",
     "reasoningOperations": [
-      "cross_sentence_coreference",
-      "hypothesis_elimination",
-      "evidence_synthesis",
-      "Identify Amanda kitchen fruit inventory: apples, bananas, oranges, papayas, pears, strawberries",
-      "Read the recipe callout Note: \"Most fruits are good for making fruit tea, but not papayas or bananas\"",
-      "Apply negative constraint to eliminate candidate options containing bananas or papayas"
+      "The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday.",
+      "The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar.",
+      "The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize.",
+      "Figure 2 shows the men’s and women’s lines meeting at roughly the same percentage around 2,200 annual hours, so their advancement/pay chances are almost the same there."
     ],
     "stemTemplates": [
-      "What does Tea-Rock celebrate? th",
+      "What does Tea-Rock celebrate?",
       "Here is the postcard {Character} is going to send to Tea-Rock 20. What else does he need to put on the postcard before he sends it?",
       "What can we learn about sugar from the infographic?",
       "What can be a reason why the list of “Sugar that is hidden in foods and drinks” is put in the infographic?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend explicit_detail against surface word matchers.",
-      "Discriminates students who comprehend local_inference against surface word matchers.",
-      "Discriminates students who comprehend information_integration against surface word matchers."
+      "The official answer is uniquely supported because The ad thanks customers for “Twenty Summers & Winters,” which marks Tea-Rock’s twentieth year in business. A plausible distractor fails because The number 20 is part of the anniversary campaign name, not a claim that tea is sold in twenty countries.",
+      "The official answer is uniquely supported because The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday. A plausible distractor fails because Age is not one of the required fields.",
+      "The official answer is uniquely supported because The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar. A plausible distractor fails because One teaspoon equals 4 g of sugar, while the 66 g ice cream is shown with multiple spoon icons, not only 4 g total."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem",
-      "Scanning only the ingredient list at the top and missing the Note box below."
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Reading the prices but overlooking the star-plan box."
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Add two eligible reward choices with different prices and require selecting the rule-compliant one before calculating."
     ],
     "validDistractorMechanisms": [
-      "wrong_chronology",
-      "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong",
-      "literal_keyword_matching",
       "partial_truth",
+      "unsupported_world_knowledge",
+      "other",
+      "undergeneralization",
+      "literal_keyword_matching",
+      "overgeneralization",
       "wrong_referent",
       "reversed_cause_effect",
-      "irrelevant_distractor"
+      "local_evidence_for_global_question",
+      "irrelevant_distractor",
+      "wrong_chronology"
     ],
     "commonWeakImplementations": [
       "Graphic is purely cosmetic and question can be solved purely from text",
@@ -211,7 +221,7 @@
       {
         "examId": "111",
         "questionNumber": 21,
-        "brief": "What does Tea-Rock celebrate? th"
+        "brief": "What does Tea-Rock celebrate?"
       },
       {
         "examId": "111",
@@ -230,14 +240,16 @@
       },
       {
         "examId": "111",
-        "questionNumber": 33,
-        "brief": "Which map is most likely the map of Cameroon in 1962?"
+        "questionNumber": 32,
+        "brief": "What can we learn from Figure 1 and Figure 2?"
       }
     ],
-    "supportCount": 20,
+    "supportCount": 30,
     "supportYears": [
       111,
+      112,
       113,
+      114,
       115
     ],
     "confidence": "high",
@@ -247,7 +259,7 @@
       {
         "examId": "111",
         "questionNumber": 21,
-        "brief": "What does Tea-Rock celebrate? th"
+        "brief": "What does Tea-Rock celebrate?"
       },
       {
         "examId": "111",
@@ -266,8 +278,8 @@
       },
       {
         "examId": "111",
-        "questionNumber": 33,
-        "brief": "Which map is most likely the map of Cameroon in 1962?"
+        "questionNumber": 32,
+        "brief": "What can we learn from Figure 1 and Figure 2?"
       }
     ]
   },
@@ -286,45 +298,59 @@
       "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "B1_intermediate",
-      "A2_basic"
+      "A2_basic",
+      "B1_intermediate"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference"
+      "D2_single_step_inference",
+      "D1_verbatim_retrieval",
+      "D3_multi_step_synthesis",
+      "D4_evaluative_pragmatic"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
     "requiredEvidenceStructure": "Informational paragraph containing specific factual assertions, qualifications, and constraints",
     "reasoningOperations": [
-      "cross_sentence_coreference",
-      "hypothesis_elimination",
-      "evidence_synthesis"
+      "The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves.",
+      "The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b).",
+      "In “Clearly, this must be changed,” “this” refers to the immediately preceding practice of using long working hours as a signal that workers are hard-working.",
+      "English speakers feel excluded from jobs and official life and then decide to fight for themselves; this context makes “resentful” closest to angry."
     ],
     "stemTemplates": [
       "Which idea is talked about in the first paragraph of the reading?",
-      "Who might find that Tabata training is right for them?",
       "Which is true about Tabata training?",
-      "What does Cameroon’s government most likely think of Ambazonia?"
+      "There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?",
+      "What does this mean in the report?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend explicit_detail against surface word matchers.",
-      "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      "The official answer is uniquely supported because The first paragraph explains the Tabata cycle: exercise 20 seconds, rest 10 seconds, repeat at least eight times, plus examples of moves. That is how to do the training. A plausible distractor fails because The paragraph gives interval durations, not the best time of day to train.",
+      "The official answer is uniquely supported because The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves. A plausible distractor fails because The text says the moves are not difficult to learn.",
+      "The official answer is uniquely supported because The report first establishes the long-hours problem and why companies created No Overtime Day (c), then defines the policy (a), describes workers’ workarounds (d), and finally explains the incentive that makes the policy fail (b). A plausible distractor fails because It puts the definition before the initial problem/reason, contrary to the report’s opening."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Matching one phrase such as 'falls together' without checking the second half of the option."
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Remove the direct phrase 'this trick' and ask learners to infer which sequence counts as the successful survival mechanism."
     ],
     "validDistractorMechanisms": [
       "wrong_chronology",
       "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong",
-      "literal_keyword_matching",
       "partial_truth",
-      "wrong_referent"
+      "wrong_referent",
+      "reversed_cause_effect",
+      "undergeneralization",
+      "irrelevant_distractor",
+      "local_evidence_for_global_question",
+      "overgeneralization",
+      "literal_keyword_matching",
+      "other",
+      "grammatically_plausible_contextually_wrong"
     ],
     "commonWeakImplementations": [
       "Copying exact verbatim wording without paraphrased vocabulary",
@@ -342,26 +368,26 @@
       },
       {
         "examId": "111",
-        "questionNumber": 28,
-        "brief": "Who might find that Tabata training is right for them?"
-      },
-      {
-        "examId": "111",
         "questionNumber": 29,
         "brief": "Which is true about Tabata training?"
       },
       {
         "examId": "111",
-        "questionNumber": 35,
-        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+        "questionNumber": 30,
+        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
       },
       {
         "examId": "111",
-        "questionNumber": 37,
-        "brief": "What is recommended to people who are visiting the Southend Trail?"
+        "questionNumber": 31,
+        "brief": "What does this mean in the report?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 34,
+        "brief": "What does resentful mean in the reading?"
       }
     ],
-    "supportCount": 43,
+    "supportCount": 40,
     "supportYears": [
       111,
       112,
@@ -380,23 +406,23 @@
       },
       {
         "examId": "111",
-        "questionNumber": 28,
-        "brief": "Who might find that Tabata training is right for them?"
-      },
-      {
-        "examId": "111",
         "questionNumber": 29,
         "brief": "Which is true about Tabata training?"
       },
       {
         "examId": "111",
-        "questionNumber": 35,
-        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+        "questionNumber": 30,
+        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
       },
       {
         "examId": "111",
-        "questionNumber": 37,
-        "brief": "What is recommended to people who are visiting the Southend Trail?"
+        "questionNumber": 31,
+        "brief": "What does this mean in the report?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 34,
+        "brief": "What does resentful mean in the reading?"
       }
     ]
   },
@@ -416,44 +442,51 @@
       "text_only"
     ],
     "typicalLanguageDifficultyRange": [
-      "A2_basic",
-      "B1_intermediate"
+      "B1_intermediate",
+      "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
+      "D2_single_step_inference",
       "D3_multi_step_synthesis"
     ],
     "requiredEvidenceSpan": "cross_sentence_local",
     "requiredEvidenceStructure": "Informational article with implicit causal connections, comparative criteria, or chronological sequences",
     "reasoningOperations": [
-      "cross_sentence_coreference",
-      "hypothesis_elimination",
-      "evidence_synthesis"
+      "The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country.",
+      "Use the successful case: after dropping about 6 cm, the mosquito can roll off and fly away.",
+      "Integrate the failure case: if it is flying too low when hit, there is not enough time to escape before hitting the ground.",
+      "Read the father's quoted protest as evidence of his grievance."
     ],
     "stemTemplates": [
-      "Why did Darrell tell Marina to go to Pinterest ?",
-      "There are four important points in the report: a. What “No Overtime Day” is b. Why “No Overtime Day” fails c. Why there is “No Overtime Day” in the country d. How workers deal with “No Overtime Day” How are they ordered in the report?",
-      "What does this mean in the report?",
-      "What can we learn from Figure 1 and Figure 2?"
+      "Who might find that Tabata training is right for them?",
+      "What does Cameroon’s government most likely think of Ambazonia?",
+      "When would it be dangerous for a mosquito in the rain?",
+      "Why was Philip’s father angry?"
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend local_inference against surface word matchers."
+      "The official answer is uniquely supported because The passage warns that Tabata may not suit people who seldom exercise, while recommending it for busy people who enjoy exercising, so an existing exercise habit is the best fit. A plausible distractor fails because Nothing says Tabata is especially for people who enjoy team sports; it is described as an individual interval routine.",
+      "The official answer is uniquely supported because Police tried to stop the independence meeting and people were killed, strongly implying the Cameroon government rejects the English speakers’ claim that Ambazonia is a separate country. A plausible distractor fails because The passage describes political conflict, not plans for business cooperation.",
+      "Hard rain and repeated impacts are dramatic but not identified as the decisive danger. More than 6 cm actually gives escape distance. Only proximity to the ground removes the time needed to roll off and fly away."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Choosing the most dramatic-sounding rain condition rather than the explicitly described failure case."
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Omit the explicit phrase 'too low' and require learners to infer danger from the needed 6 cm escape distance plus a shorter flight-height scenario."
     ],
     "validDistractorMechanisms": [
-      "wrong_chronology",
       "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong",
-      "literal_keyword_matching",
       "partial_truth",
-      "wrong_referent"
+      "reversed_cause_effect",
+      "literal_keyword_matching",
+      "other",
+      "irrelevant_distractor"
     ],
     "commonWeakImplementations": [
       "Inference requires unverifiable external domain knowledge",
@@ -466,31 +499,170 @@
     "sourceEvidence": [
       {
         "examId": "111",
+        "questionNumber": 28,
+        "brief": "Who might find that Tabata training is right for them?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 35,
+        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+      },
+      {
+        "examId": "112",
+        "questionNumber": 32,
+        "brief": "When would it be dangerous for a mosquito in the rain?"
+      },
+      {
+        "examId": "113",
+        "questionNumber": 23,
+        "brief": "Why was Philip’s father angry?"
+      },
+      {
+        "examId": "113",
+        "questionNumber": 31,
+        "brief": "Why is Chen Bing-Hong’s job important in the example he gave?"
+      }
+    ],
+    "supportCount": 6,
+    "supportYears": [
+      111,
+      112,
+      113
+    ],
+    "confidence": "high",
+    "rarePattern": false,
+    "targetGenre": "article_informational",
+    "realExamExemplars": [
+      {
+        "examId": "111",
+        "questionNumber": 28,
+        "brief": "Who might find that Tabata training is right for them?"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 35,
+        "brief": "What does Cameroon’s government most likely think of Ambazonia?"
+      },
+      {
+        "examId": "112",
+        "questionNumber": 32,
+        "brief": "When would it be dangerous for a mosquito in the rain?"
+      },
+      {
+        "examId": "113",
+        "questionNumber": 23,
+        "brief": "Why was Philip’s father angry?"
+      },
+      {
+        "examId": "113",
+        "questionNumber": 31,
+        "brief": "Why is Chen Bing-Hong’s job important in the example he gave?"
+      }
+    ]
+  },
+  {
+    "recipeId": "RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE",
+    "name": "Informational Article Main Idea & Rhetorical Purpose Synthesis",
+    "primarySkill": "purpose_speaker_intent",
+    "secondarySkills": [
+      "cross_sentence_inference",
+      "discourse_relationship"
+    ],
+    "supportedGenres": [
+      "article_informational",
+      "narrative"
+    ],
+    "evidenceModes": [
+      "text_only"
+    ],
+    "typicalLanguageDifficultyRange": [
+      "A2_basic",
+      "B1_intermediate"
+    ],
+    "typicalCognitiveDepthRange": [
+      "D2_single_step_inference",
+      "D3_multi_step_synthesis",
+      "D1_verbatim_retrieval"
+    ],
+    "requiredEvidenceSpan": "multi_paragraph_global",
+    "requiredEvidenceStructure": "Complete multiparagraph discourse structure with distinct introduction, body development, and conclusion",
+    "reasoningOperations": [
+      "Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "Integrate the second paragraph's claim that toy preferences are learned through observing same-gender peers rather than being inborn.",
+      "Combine it with the third paragraph's argument that limiting children to gender-coded toys can restrict learning, interests, and future opportunities.",
+      "Survey what each paragraph contributes: biographical framing, career path and assignments, reporting philosophy, and final assignment/death.",
+      "Choose the option whose scope includes all those stages rather than one subset such as particular reports, schooldays, or Homs."
+    ],
+    "stemTemplates": [
+      "Why did Darrell tell Marina to go to Pinterest ?",
+      "What idea does Jesse Cohen talk about in the reading?",
+      "What is the reading mostly about?",
+      "According to the reading, why did Rohla and Kreytenberg open Habibi & Hawara?"
+    ],
+    "correctAnswerConstructionPrinciples": [
+      "The official answer is uniquely supported because Marina lacks ideas for a future-house art assignment, and Darrell recommends Pinterest because people share their work and methods there, giving her examples and ideas. A plausible distractor fails because Marina initially mistakes Pinterest for a shopping app, but Darrell explicitly corrects that idea.",
+      "The distractors each borrow a real topic from the passage, such as learning, age, or gender, but distort the author's stance. Option D is the only one broad enough to unify the explanation and recommendation across paragraphs.",
+      "War reports are important but the text also discusses career development and values; Yale and Homs each occupy only limited sections. B captures the widest relevant scope without becoming vague."
+    ],
+    "distractorConstructionPrinciples": [
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Choosing a statement that is locally related to one paragraph but does not represent the whole passage."
+    ],
+    "difficultyAdjustmentRules": [
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Ask which policy or parent action best follows from the whole passage without directly restating the author's conclusion."
+    ],
+    "validDistractorMechanisms": [
+      "unsupported_world_knowledge",
+      "overgeneralization",
+      "reversed_cause_effect",
+      "undergeneralization",
+      "local_evidence_for_global_question",
+      "other",
+      "irrelevant_distractor",
+      "wrong_chronology",
+      "literal_keyword_matching",
+      "partial_truth"
+    ],
+    "commonWeakImplementations": [
+      "Making the main idea identical to a single introductory sentence",
+      "Distractors that are factually false even on a local level"
+    ],
+    "qualityChecks": [
+      "Every distractor should reflect a true local detail from one paragraph of the passage",
+      "The correct option must encompass the global theme of the passage"
+    ],
+    "sourceEvidence": [
+      {
+        "examId": "111",
         "questionNumber": 25,
         "brief": "Why did Darrell tell Marina to go to Pinterest ?"
       },
       {
-        "examId": "111",
-        "questionNumber": 30,
-        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
+        "examId": "112",
+        "questionNumber": 36,
+        "brief": "What idea does Jesse Cohen talk about in the reading?"
       },
       {
-        "examId": "111",
-        "questionNumber": 31,
-        "brief": "What does this mean in the report?"
+        "examId": "112",
+        "questionNumber": 39,
+        "brief": "What is the reading mostly about?"
       },
       {
-        "examId": "111",
-        "questionNumber": 32,
-        "brief": "What can we learn from Figure 1 and Figure 2?"
+        "examId": "113",
+        "questionNumber": 33,
+        "brief": "According to the reading, why did Rohla and Kreytenberg open Habibi & Hawara?"
       },
       {
-        "examId": "111",
-        "questionNumber": 34,
-        "brief": "What does resentful mean in the reading?"
+        "examId": "114",
+        "questionNumber": 26,
+        "brief": "What is Rolling Acres?"
       }
     ],
-    "supportCount": 21,
+    "supportCount": 9,
     "supportYears": [
       111,
       112,
@@ -508,102 +680,24 @@
         "brief": "Why did Darrell tell Marina to go to Pinterest ?"
       },
       {
-        "examId": "111",
-        "questionNumber": 30,
-        "brief": "There are four important points in the report: a. What “No Overtime Day” is b. W"
+        "examId": "112",
+        "questionNumber": 36,
+        "brief": "What idea does Jesse Cohen talk about in the reading?"
       },
       {
-        "examId": "111",
-        "questionNumber": 31,
-        "brief": "What does this mean in the report?"
+        "examId": "112",
+        "questionNumber": 39,
+        "brief": "What is the reading mostly about?"
       },
       {
-        "examId": "111",
-        "questionNumber": 32,
-        "brief": "What can we learn from Figure 1 and Figure 2?"
+        "examId": "113",
+        "questionNumber": 33,
+        "brief": "According to the reading, why did Rohla and Kreytenberg open Habibi & Hawara?"
       },
-      {
-        "examId": "111",
-        "questionNumber": 34,
-        "brief": "What does resentful mean in the reading?"
-      }
-    ]
-  },
-  {
-    "recipeId": "RECIPE_INFORMATIONAL_MAIN_IDEA_AND_PURPOSE",
-    "name": "Informational Article Main Idea & Rhetorical Purpose Synthesis",
-    "primarySkill": "main_idea",
-    "secondarySkills": [
-      "cross_sentence_inference",
-      "discourse_relationship"
-    ],
-    "supportedGenres": [
-      "article_informational",
-      "narrative"
-    ],
-    "evidenceModes": [
-      "text_only"
-    ],
-    "typicalLanguageDifficultyRange": [
-      "B1_intermediate"
-    ],
-    "typicalCognitiveDepthRange": [
-      "D3_multi_step_synthesis"
-    ],
-    "requiredEvidenceSpan": "multi_paragraph_global",
-    "requiredEvidenceStructure": "Complete multiparagraph discourse structure with distinct introduction, body development, and conclusion",
-    "reasoningOperations": [
-      "cross_sentence_coreference",
-      "hypothesis_elimination",
-      "evidence_synthesis"
-    ],
-    "stemTemplates": [
-      "What is the reading mainly about?"
-    ],
-    "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend main_idea against surface word matchers."
-    ],
-    "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
-    ],
-    "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
-    ],
-    "validDistractorMechanisms": [
-      "wrong_chronology",
-      "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong"
-    ],
-    "commonWeakImplementations": [
-      "Making the main idea identical to a single introductory sentence",
-      "Distractors that are factually false even on a local level"
-    ],
-    "qualityChecks": [
-      "Every distractor should reflect a true local detail from one paragraph of the passage",
-      "The correct option must encompass the global theme of the passage"
-    ],
-    "sourceEvidence": [
       {
         "examId": "114",
-        "questionNumber": 35,
-        "brief": "What is the reading mainly about?"
-      }
-    ],
-    "supportCount": 1,
-    "supportYears": [
-      114
-    ],
-    "confidence": "low",
-    "rarePattern": true,
-    "targetGenre": "article_informational",
-    "realExamExemplars": [
-      {
-        "examId": "114",
-        "questionNumber": 35,
-        "brief": "What is the reading mainly about?"
+        "questionNumber": 26,
+        "brief": "What is Rolling Acres?"
       }
     ]
   },
@@ -623,39 +717,52 @@
       "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
-      "D1_verbatim_retrieval"
+      "D2_single_step_inference",
+      "D1_verbatim_retrieval",
+      "D3_multi_step_synthesis"
     ],
     "requiredEvidenceSpan": "single_sentence",
     "requiredEvidenceStructure": "Single communicative sentence establishing pragmatic situation or collocational trigger",
     "reasoningOperations": [
-      "syntactic_parsing",
-      "lexical_semantic_matching"
+      "The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "Fear of the dark explains why Peter leaves the lights on while sleeping.",
+      "Having more fans than every teammate is direct evidence that Pam is popular.",
+      "Having money for only one of two liked items creates a difficult choice between them.",
+      "Repeated practice with the same kind of math problem makes answering it easy."
     ],
     "stemTemplates": [
+      "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five.",
       "{Character} is afraid of the dark. He even leaves the _____ on when sleeping.",
       "Pam is a _____ baseball player; she has more fans than any other player on her team.",
-      "It was _____ for us to answer the math question because we’ve done the same kind of questions many times.",
-      "Don’t let the children swim in the river. We don’t know how _____ it is. It could be dangerous."
+      "Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both."
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+      "The official answer is uniquely supported because The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result. A plausible distractor fails because “or” would offer an alternative rather than connect the movie time to the proposed meeting time.",
+      "The official answer is uniquely supported because Fear of the dark explains why Peter leaves the lights on while sleeping. A plausible distractor fails because A computer can emit light, but the sentence tests the ordinary response to darkness, not device use.",
+      "The official answer is uniquely supported because Having more fans than every teammate is direct evidence that Pam is popular. A plausible distractor fails because Many fans contradict the idea that she is boring."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Stopping after finding an option that sounds natural after 'enjoys.'"
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Make the identifying ability implicit across two short clues instead of naming 'voice' directly."
     ],
     "validDistractorMechanisms": [
-      "wrong_chronology",
-      "unsupported_world_knowledge",
       "grammatically_plausible_contextually_wrong",
-      "literal_keyword_matching",
+      "irrelevant_distractor",
       "partial_truth",
-      "wrong_referent"
+      "wrong_referent",
+      "unsupported_world_knowledge",
+      "reversed_cause_effect",
+      "overgeneralization",
+      "wrong_chronology",
+      "other",
+      "local_evidence_for_global_question"
     ],
     "commonWeakImplementations": [
       "Awkward non-native sentence structure",
@@ -668,6 +775,11 @@
     "sourceEvidence": [
       {
         "examId": "111",
+        "questionNumber": 2,
+        "brief": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-fi"
+      },
+      {
+        "examId": "111",
         "questionNumber": 3,
         "brief": "Peter is afraid of the dark. He even leaves the _____ on when sleeping."
       },
@@ -678,21 +790,16 @@
       },
       {
         "examId": "111",
+        "questionNumber": 6,
+        "brief": "Kevin has only enough money for the bag or the shoes. That is a hard _____ to ma"
+      },
+      {
+        "examId": "111",
         "questionNumber": 7,
         "brief": "It was _____ for us to answer the math question because we’ve done the same kind"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 9,
-        "brief": "Don’t let the children swim in the river. We don’t know how _____ it is. It coul"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 10,
-        "brief": "Bob is _____ of the boys in the family. He never does any housework. His brother"
       }
     ],
-    "supportCount": 44,
+    "supportCount": 52,
     "supportYears": [
       111,
       112,
@@ -706,6 +813,11 @@
     "realExamExemplars": [
       {
         "examId": "111",
+        "questionNumber": 2,
+        "brief": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-fi"
+      },
+      {
+        "examId": "111",
         "questionNumber": 3,
         "brief": "Peter is afraid of the dark. He even leaves the _____ on when sleeping."
       },
@@ -716,18 +828,13 @@
       },
       {
         "examId": "111",
+        "questionNumber": 6,
+        "brief": "Kevin has only enough money for the bag or the shoes. That is a hard _____ to ma"
+      },
+      {
+        "examId": "111",
         "questionNumber": 7,
         "brief": "It was _____ for us to answer the math question because we’ve done the same kind"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 9,
-        "brief": "Don’t let the children swim in the river. We don’t know how _____ it is. It coul"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 10,
-        "brief": "Bob is _____ of the boys in the family. He never does any housework. His brother"
       }
     ]
   },
@@ -747,39 +854,47 @@
       "A2_basic"
     ],
     "typicalCognitiveDepthRange": [
-      "D2_single_step_inference"
+      "D2_single_step_inference",
+      "D1_verbatim_retrieval",
+      "D3_multi_step_synthesis"
     ],
     "requiredEvidenceSpan": "single_sentence",
     "requiredEvidenceStructure": "Single sentence containing explicit syntactic trigger (time adverbial, modal, relative clause, passive cue)",
     "reasoningOperations": [
-      "syntactic_parsing",
-      "lexical_semantic_matching"
+      "The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity.",
+      "Test each alternative against the same grammatical, semantic, discourse, and source constraints before selecting.",
+      "The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”",
+      "Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required.",
+      "Her sixty years of residence support a present state of knowledge, so simple present “knows” is correct.",
+      "At the moment the speaker got home, the brother had an imminent dinner plan and invited the speaker, so past progressive “was going out” fits."
     ],
     "stemTemplates": [
-      "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-five.",
       "I did not do my homework, so my teacher said I _____ stay after school to finish it.",
-      "Kevin has only enough money for the bag or the shoes. That is a hard _____ to make because he likes them both.",
-      "Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it."
+      "Although it took me lots of time _____ a big meal for ten people, I was happy that everyone enjoyed it.",
+      "Bob is _____ of the boys in the family. He never does any housework. His brothers at least take out the garbage sometimes.",
+      "Aunt Gina has lived in this town for more than sixty years, so she _____ it very well."
     ],
     "correctAnswerConstructionPrinciples": [
-      "Discriminates students who comprehend grammar_in_context against surface word matchers."
+      "The official answer is uniquely supported because The teacher imposed an obligation after the unfinished homework, so “had to stay” correctly expresses past necessity. A plausible distractor fails because “failed to stay” would mean the speaker did not remain after school, not that the teacher required it.",
+      "The official answer is uniquely supported because The construction is “it took me lots of time to prepare,” requiring the to-infinitive after “took me … time.”. A plausible distractor fails because Bare “prepare” cannot fill the complement position after “time” in this construction.",
+      "The official answer is uniquely supported because Bob is compared with all the boys in the family and is the extreme case, so the definite superlative “the laziest” is required. A plausible distractor fails because Comparative “lazier” needs a two-way comparison or an explicit “than” phrase, not a whole-group extreme."
     ],
     "distractorConstructionPrinciples": [
-      "Scanning for identical keywords in the passage without constraint resolution",
-      "Ignoring negative polarity or qualifying constraints in the stem"
+      "Stopping at a keyword match instead of checking the full proposition.",
+      "Ignoring a qualifier, grammatical relation, discourse function, or visual constraint that separates the correct option from a distractor.",
+      "Matching the past tense of watched with danced by surface agreement."
     ],
     "difficultyAdjustmentRules": [
-      "Introduce multi-sentence constraint dependencies",
-      "Require cross-paragraph inference rather than proximate sentence lookup",
-      "Must preserve core syntactic connective or prompt structure"
+      "Distribute the decisive evidence across two clauses, sentences, or visual elements while keeping vocabulary comparable.",
+      "Preserve the clue or evidence relation that uniquely distinguishes the official answer.",
+      "Contrast bare infinitive versus -ing in a context where event completeness determines which interpretation is more natural."
     ],
     "validDistractorMechanisms": [
-      "literal_keyword_matching",
-      "partial_truth",
-      "wrong_referent",
+      "grammatically_plausible_contextually_wrong",
+      "other",
       "wrong_chronology",
-      "unsupported_world_knowledge",
-      "grammatically_plausible_contextually_wrong"
+      "reversed_cause_effect",
+      "undergeneralization"
     ],
     "commonWeakImplementations": [
       "Ambiguous time frame where two tenses are equally acceptable",
@@ -792,18 +907,8 @@
     "sourceEvidence": [
       {
         "examId": "111",
-        "questionNumber": 2,
-        "brief": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-fi"
-      },
-      {
-        "examId": "111",
         "questionNumber": 5,
         "brief": "I did not do my homework, so my teacher said I _____ stay after school to finish"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 6,
-        "brief": "Kevin has only enough money for the bag or the shoes. That is a hard _____ to ma"
       },
       {
         "examId": "111",
@@ -812,11 +917,21 @@
       },
       {
         "examId": "111",
+        "questionNumber": 10,
+        "brief": "Bob is _____ of the boys in the family. He never does any housework. His brother"
+      },
+      {
+        "examId": "111",
         "questionNumber": 11,
         "brief": "Aunt Gina has lived in this town for more than sixty years, so she _____ it very"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 13,
+        "brief": "Yesterday when I got home from work, my brother _____ for dinner, so he invited "
       }
     ],
-    "supportCount": 47,
+    "supportCount": 39,
     "supportYears": [
       111,
       112,
@@ -830,18 +945,8 @@
     "realExamExemplars": [
       {
         "examId": "111",
-        "questionNumber": 2,
-        "brief": "The movie starts at two o’clock, _____ let’s meet at the theater at one forty-fi"
-      },
-      {
-        "examId": "111",
         "questionNumber": 5,
         "brief": "I did not do my homework, so my teacher said I _____ stay after school to finish"
-      },
-      {
-        "examId": "111",
-        "questionNumber": 6,
-        "brief": "Kevin has only enough money for the bag or the shoes. That is a hard _____ to ma"
       },
       {
         "examId": "111",
@@ -850,8 +955,18 @@
       },
       {
         "examId": "111",
+        "questionNumber": 10,
+        "brief": "Bob is _____ of the boys in the family. He never does any housework. His brother"
+      },
+      {
+        "examId": "111",
         "questionNumber": 11,
         "brief": "Aunt Gina has lived in this town for more than sixty years, so she _____ it very"
+      },
+      {
+        "examId": "111",
+        "questionNumber": 13,
+        "brief": "Yesterday when I got home from work, my brother _____ for dinner, so he invited "
       }
     ]
   }

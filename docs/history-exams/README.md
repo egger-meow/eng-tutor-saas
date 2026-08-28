@@ -65,6 +65,7 @@ The pipeline is fully dynamic and idempotent. When a new year passes (e.g. addin
    - Analyze the new exam while reusing cached analyses for unchanged existing exams via stable SHA-256 content hashes.
    - Re-synthesize all cross-year knowledge artifacts and benchmarks across the active corpus.
    - Validate 100% of data structures against Zod contracts.
+   - Seal the rolling source hashes only after the rebuilt corpus is authoritative, so a crashed update cannot reuse stale analyses on the next run.
 
 ---
 
@@ -98,7 +99,7 @@ pnpm history-exams build
 
 ## 4. Extraction Assumptions & Strict Real Data Contract
 
-1. **No Hallucinated Answers**: The official student test booklets in `history_exams/raw/` contain questions and passages, but do not contain printed answer keys. In strict accordance with repository fidelity rules, `answer` is recorded as `null` rather than fabricated.
+1. **Verified Official Answers**: Student booklets do not contain answer keys. Each active year therefore requires a separately verified official RCPET 43-item answer key before extraction/build may proceed; the pipeline fails closed instead of guessing answers.
 2. **Text & Geometry Preservation**: Uses `pdfjs-dist` to extract raw text items, sorting lines strictly by coordinate geometry `(X, Y)` to preserve the physical layout without OCR distortion.
 3. **Passage Linking & Cloze Discrimination**:
    - Section 1 (單題): Standalone items (Questions 1 to 19–23).

@@ -6,6 +6,9 @@ import { runBenchmarkPipeline } from './benchmark/index.ts';
 import { validateFullCorpus } from './validator/index.ts';
 import { generateSpotCheckReport } from './spot-check/spot-check-builder.ts';
 import { generatePilotReviewReport } from './spot-check/pilot-builder.ts';
+import { commitRollingWindowManifest, reconcileRollingWindow } from './corpus/rolling-window.ts';
+import { writePrecedentCards } from './precedents/build-precedent-cards.ts';
+import { rotateHoldoutManifest } from './benchmark/rotate-holdouts.ts';
 
 const rootDir = process.cwd();
 const rawDir = path.resolve(rootDir, 'history_exams/raw');
@@ -16,6 +19,7 @@ const knowledgeDir = path.resolve(rootDir, 'history_exams/knowledge');
 const benchmarkDir = path.resolve(rootDir, 'history_exams/benchmark');
 const spotCheckPath = path.resolve(rootDir, 'history_exams/spot-check-report.md');
 const pilotReviewPath = path.resolve(rootDir, 'history_exams/pilot-review.md');
+const agentAnalysisDir = path.resolve(rootDir, 'history_exams/agent_analysis');
 
 function parseArgs(args: string[]) {
   const command = args[0] || 'help';
@@ -226,16 +230,19 @@ async function main() {
 
     case 'build': {
       console.log(`[history-exams] Running Complete Hardened Pipeline...`);
-      await runExtractionPipeline({ rawDir, outputDir: extractedDir, assetsDir, renderImages: true });
+      const rolling = reconcileRollingWindow({ rawDir, extractedDir, analyzedDir, assetsDir, agentAnalysisDir });
+      console.log(`[history-exams] Rolling window ${rolling.examIds.join(', ')}; reusing authoritative analysis for ${rolling.unchangedExamIds.join(', ') || 'none'}.`);
+      await runExtractionPipeline({ rawDir, outputDir: extractedDir, assetsDir, renderImages: true, examIdsToProcess: rolling.changedExamIds });
       await runAnalysisPipeline({
         extractedDir,
         analyzedDir,
         providerName,
         modelName,
         concurrency,
-        force,
+        force: false,
         allowOfflineMock: allowProvisionalMock,
       });
+      rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);
       let aiProvider;
       try {
         aiProvider = createAiProvider({ allowOfflineMock: allowProvisionalMock });
@@ -245,11 +252,30 @@ async function main() {
       generateSpotCheckReport({ extractedDir, analyzedDir, outputPath: spotCheckPath });
       generatePilotReviewReport({ extractedDir, analyzedDir, outputPath: pilotReviewPath });
       const report = validateFullCorpus({ extractedDir, analyzedDir, knowledgeDir, benchmarkDir });
-      if (!report.valid) {
+      if (!report.valid || !report.authorityEligible || report.authorityStatus !== 'authoritative') {
         console.error('[history-exams] Build validation failed:', report.errors);
         process.exit(1);
       }
+      writePrecedentCards(
+        analyzedDir,
+        benchmarkDir,
+        path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'),
+        path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'),
+      );
+      commitRollingWindowManifest(rawDir, rolling);
       console.log(`[history-exams] Complete digestion pipeline successfully built, validated, and spot-check/pilot reports generated!`);
+      break;
+    }
+
+    case 'reconcile': {
+      const rolling = reconcileRollingWindow({ rawDir, extractedDir, analyzedDir, assetsDir, agentAnalysisDir });
+      console.log(JSON.stringify(rolling, null, 2));
+      break;
+    }
+
+    case 'precedents': {
+      const cards = writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'), path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'));
+      console.log(`[history-exams] Wrote ${cards.length} authoritative non-holdout precedent cards.`);
       break;
     }
 
@@ -266,6 +292,8 @@ Commands:
   spot-check   Generate human spot-check report (history_exams/spot-check-report.md)
   validate     Validate integrity, schema, and provenance across all artifacts
   build        Run extract -> analyze -> synthesize -> benchmark -> spot-check -> pilot -> validate in sequence
+  reconcile    Reconcile derived artifacts to the authoritative rolling five-year raw/ window
+  precedents   Build compact production precedent cards with strict holdout isolation
 
 Options:
   --exam <id>               Filter by exam ID (e.g. --exam 115)
@@ -286,4 +314,3 @@ main().catch((err) => {
   console.error('[history-exams] Fatal error:', err);
   process.exit(1);
 });
-

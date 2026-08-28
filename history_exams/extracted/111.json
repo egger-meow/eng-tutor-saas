@@ -54,7 +54,7 @@
       ],
       "genre": "infographic_chart_table",
       "title": "Infographic Guide",
-      "text": "Below is an infographic.",
+      "text": "Visual infographic comparing drinks and their sugar content, including rice milk.",
       "evidenceMode": "text_visual",
       "visualEvidenceRequired": true,
       "requiredAssets": [
@@ -662,11 +662,11 @@
         21,
         22
       ],
-      "stem": "What does Tea-Rock celebrate? th",
+      "stem": "What does Tea-Rock celebrate?",
       "options": {
         "A": "Their sales in 20 countries.",
         "B": "The coming out of their 20 kind of tea. th _____ th",
-        "C": "Their 20 year of business.",
+        "C": "Their 20th year of business.",
         "D": "The opening of their 20 store in the USA."
       },
       "answer": "C",
@@ -974,11 +974,21 @@
         "D": "Men and women have almost the same chance to get paid more and rise higher when they work 2,200 hours."
       },
       "answer": "D",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 10,
+          "role": "infographic",
+          "imagePath": "history_exams/assets/111/page-10.png",
+          "description": "Figure-based evidence for Q32",
+          "sha256": "aeb992dcd9a6553c07628142411d57bf314fd18c7955c643b4bb3a8a93f86f84"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1152,11 +1162,21 @@
         "D": "Parts 4 and 4a."
       },
       "answer": "A",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "spatial",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 13,
+          "role": "map",
+          "imagePath": "history_exams/assets/111/page-13.png",
+          "description": "Southend Trail map required for Q39",
+          "sha256": "1d4a820b24b53658c741b39b9083380c22dbfaff4935119389c41a226a6bb70e"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1200,11 +1220,21 @@
         "D": "me steak"
       },
       "answer": "C",
-      "evidenceMode": "text_only",
-      "visualEvidenceRequired": false,
-      "requiredAssets": [],
-      "extractionConfidence": "high",
-      "extractionWarnings": []
+      "evidenceMode": "text_visual",
+      "visualEvidenceRequired": true,
+      "requiredAssets": [
+        {
+          "page": 14,
+          "role": "table",
+          "imagePath": "history_exams/assets/111/page-14.png",
+          "description": "Anagram examples required for Q41",
+          "sha256": "7a9078a88b26f593116149193f9bd98050035f4c61ecd8d6a5936a85804545d7"
+        }
+      ],
+      "extractionConfidence": "needs_multimodal_review",
+      "extractionWarnings": [
+        "Verified official-source visual evidence is required."
+      ]
     },
     {
       "examId": "111",
@@ -1255,6 +1285,6 @@
       "extractionWarnings": []
     }
   ],
-  "extractedAt": "2026-08-27T18:17:21.249Z",
+  "extractedAt": "2026-08-28T04:49:22.334Z",
   "extractorVersion": "2.0.0-multimodal-hardened"
 }

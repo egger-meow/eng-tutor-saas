@@ -186,6 +186,9 @@ export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
     schemaVersion: z.literal('2.3.0'),
   }),
   grounding: GroundingSchema,
+  qualityEvidence: CurriculumPackageV22Schema.shape.qualityEvidence.extend({
+    precedentRefs: z.array(z.string().regex(/^cap-[a-f0-9]{12}$/)).max(20).default([]),
+  }),
 })
 
 /** The one canonical schema used for all newly authored production packages. */

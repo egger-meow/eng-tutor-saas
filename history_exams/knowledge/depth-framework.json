@@ -12,21 +12,21 @@
     "exemplars": [
       {
         "examId": "111",
-        "questionNumber": 3,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
-      },
-      {
-        "examId": "111",
-        "questionNumber": 4,
-        "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
-      },
-      {
-        "examId": "111",
-        "questionNumber": 7,
+        "questionNumber": 29,
         "languageDifficulty": "A2_basic",
-        "whyThisDepth": "Discriminates students who comprehend vocabulary_in_context against surface word matchers."
+        "whyThisDepth": "The official answer is uniquely supported because The passage explicitly says, “You can decide yourself what moves to do,” so users are free to choose their own moves. A plausible distractor fails because The text says the moves are not difficult to learn."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 37,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "The official answer is uniquely supported because The guide explicitly recommends planning one day for one part of the trail because each part takes at least seven hours. A plausible distractor fails because Camping is allowed only at designated campgrounds, not on side trails."
+      },
+      {
+        "examId": "113",
+        "questionNumber": 13,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "At and in are high-frequency location prepositions and below creates a grammatical measurement phrase, but a mountain temple at 3,000 m is conventionally described as above sea level."
       }
     ]
   },
@@ -45,19 +45,19 @@
         "examId": "111",
         "questionNumber": 2,
         "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
+        "whyThisDepth": "The official answer is uniquely supported because The 2:00 start time creates a consequence: meeting at 1:45 is therefore sensible, so “so” expresses the intended result. A plausible distractor fails because “or” would offer an alternative rather than connect the movie time to the proposed meeting time."
       },
       {
         "examId": "111",
-        "questionNumber": 5,
+        "questionNumber": 3,
         "languageDifficulty": "A1_elementary",
-        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
+        "whyThisDepth": "The official answer is uniquely supported because Fear of the dark explains why Peter leaves the lights on while sleeping. A plausible distractor fails because A computer can emit light, but the sentence tests the ordinary response to darkness, not device use."
       },
       {
         "examId": "111",
-        "questionNumber": 6,
-        "languageDifficulty": "A2_basic",
-        "whyThisDepth": "Discriminates students who comprehend grammar_in_context against surface word matchers."
+        "questionNumber": 4,
+        "languageDifficulty": "A1_elementary",
+        "whyThisDepth": "The official answer is uniquely supported because Having more fans than every teammate is direct evidence that Pam is popular. A plausible distractor fails because Many fans contradict the idea that she is boring."
       }
     ]
   },
@@ -74,21 +74,21 @@
     "exemplars": [
       {
         "examId": "111",
+        "questionNumber": 22,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "The official answer is uniquely supported because The instructions require name, birthday, telephone number, e-mail address, favorite tea, and two tea-cup pictures. Jason’s postcard already has everything except his birthday. A plausible distractor fails because Age is not one of the required fields."
+      },
+      {
+        "examId": "111",
+        "questionNumber": 23,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "The official answer is uniquely supported because The infographic shows fewer sugar-spoon icons for 400 ml rice milk than for 400 ml grape juice, so rice milk contains less sugar. A plausible distractor fails because One teaspoon equals 4 g of sugar, while the 66 g ice cream is shown with multiple spoon icons, not only 4 g total."
+      },
+      {
+        "examId": "111",
         "questionNumber": 24,
         "languageDifficulty": "A2_basic",
-        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
-      },
-      {
-        "examId": "111",
-        "questionNumber": 25,
-        "languageDifficulty": "A2_basic",
-        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
-      },
-      {
-        "examId": "111",
-        "questionNumber": 30,
-        "languageDifficulty": "B1_intermediate",
-        "whyThisDepth": "Discriminates students who comprehend local_inference against surface word matchers."
+        "whyThisDepth": "The official answer is uniquely supported because The “hidden sugar” list reveals substantial sugar in ordinary foods and drinks, supporting the warning that people may consume more sugar than they realize. A plausible distractor fails because The infographic has a separate section on health effects; the hidden-food list itself is about unnoticed intake."
       }
     ]
   },
@@ -102,6 +102,25 @@
       "Evaluating speaker motivation and subtext"
     ],
     "languageDecouplingRule": "Relies on social-linguistic reasoning rather than vocabulary obscurity. Questions remain fully solvable within standard vocabulary.",
-    "exemplars": []
+    "exemplars": [
+      {
+        "examId": "114",
+        "questionNumber": 34,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "All options are plausible parenting strategies, but only helping cook reproduces the causal ingredient of the IKEA effect: making something oneself."
+      },
+      {
+        "examId": "114",
+        "questionNumber": 36,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "The second pay demand follows the first victory while months of restrictions impose broad costs on ordinary people."
+      },
+      {
+        "examId": "115",
+        "questionNumber": 39,
+        "languageDifficulty": "A2_basic",
+        "whyThisDepth": "The same numerical fact supports opposite rhetorical purposes, making the item test conceptual integration instead of keyword duplication alone."
+      }
+    ]
   }
 ]

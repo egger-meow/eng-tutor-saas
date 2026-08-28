@@ -1,6 +1,7 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { runExtractionPipeline } from '../../scripts/history-exams/src/extractor';
 import { runAnalysisPipeline } from '../../scripts/history-exams/src/analyzer';
 import { runSynthesisPipeline } from '../../scripts/history-exams/src/synthesizer';
@@ -10,18 +11,32 @@ import { generateSpotCheckReport } from '../../scripts/history-exams/src/spot-ch
 import { generatePilotReviewReport } from '../../scripts/history-exams/src/spot-check/pilot-builder';
 
 describe('Historical CAP English Exam Pipeline Smoke Test', () => {
-  const rawDir = path.resolve(__dirname, '../../history_exams/raw');
-  const assetsDir = path.resolve(__dirname, '../../history_exams/assets');
-  const extractedDir = path.resolve(__dirname, '../../history_exams/extracted');
-  const analyzedDir = path.resolve(__dirname, '../../history_exams/analyzed');
-  const knowledgeDir = path.resolve(__dirname, '../../history_exams/knowledge');
-  const benchmarkDir = path.resolve(__dirname, '../../history_exams/benchmark');
-  const spotCheckPath = path.resolve(__dirname, '../../history_exams/spot-check-report.md');
-  const pilotReviewPath = path.resolve(__dirname, '../../history_exams/pilot-review.md');
+  const roots: string[] = [];
+
+  afterEach(() => {
+    for (const root of roots.splice(0)) fs.rmSync(root, { recursive: true, force: true });
+  });
 
   it(
     'runs complete lifecycle end-to-end and validates resulting artifacts',
     async () => {
+      const testRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cap-cli-'));
+      roots.push(testRoot);
+      const rawDir = path.join(testRoot, 'raw');
+      const assetsDir = path.join(testRoot, 'assets');
+      const extractedDir = path.join(testRoot, 'extracted');
+      const analyzedDir = path.join(testRoot, 'analyzed');
+      const knowledgeDir = path.join(testRoot, 'knowledge');
+      const benchmarkDir = path.join(testRoot, 'benchmark');
+      const spotCheckPath = path.join(testRoot, 'spot-check-report.md');
+      const pilotReviewPath = path.join(testRoot, 'pilot-review.md');
+      fs.cpSync(path.resolve(__dirname, '../../history_exams/raw'), rawDir, { recursive: true });
+      fs.mkdirSync(benchmarkDir, { recursive: true });
+      fs.copyFileSync(
+        path.resolve(__dirname, '../../history_exams/benchmark/holdout-manifest.json'),
+        path.join(benchmarkDir, 'holdout-manifest.json')
+      );
+
       // 1. Extract & Render
       const extractResults = await runExtractionPipeline({
         rawDir,
@@ -79,4 +94,3 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
     45000
   );
 });
-

@@ -10,16 +10,16 @@
     ],
     "sourceQuestionCount": 215,
     "excludedHoldoutCount": 20,
-    "providerName": "offline-mock",
-    "modelName": "rule-based-mock",
-    "analysisPromptVersion": "v3.0.0",
+    "providerName": "openai-chatgpt",
+    "modelName": "gpt-5.6-sol",
+    "analysisPromptVersion": "chatgpt-agent-digestion-v1",
     "synthesisPromptVersion": "v1.0.0",
-    "generatedAt": "2026-08-27T18:17:27.308Z",
-    "sourceCorpusHash": "2ed146595a15b14cf1d6b7afe3694d2241ef2d9aba997265994fd184c267a4fe",
-    "authorityStatus": "provisional"
+    "generatedAt": "2026-08-28T07:27:52.788Z",
+    "sourceCorpusHash": "c0035a5178b8aae6653e383eb0efd98ef1250fd2e6329209817afc0ff29c9811",
+    "authorityStatus": "authoritative"
   },
   "benchmarkVersion": "1.0.0",
-  "generatedAt": "2026-08-27T18:17:27.308Z",
+  "generatedAt": "2026-08-28T07:27:52.788Z",
   "referenceCorpus": {
     "examIds": [
       "111",
@@ -33,71 +33,71 @@
   },
   "distributions": {
     "skillDistribution": {
-      "vocabulary_in_context": 25.1,
-      "grammar_in_context": 33,
-      "explicit_detail": 24.2,
-      "reference_resolution": 0,
-      "local_inference": 12.1,
-      "cross_sentence_inference": 0.5,
-      "main_idea": 0.9,
-      "purpose_speaker_intent": 0.5,
-      "discourse_relationship": 0,
-      "sequence_cause_consequence": 0,
-      "text_structure": 0,
-      "information_integration": 3.7,
-      "pragmatic_meaning": 0,
-      "other_uncertain": 0
+      "vocabulary_in_context": 27.4,
+      "grammar_in_context": 20,
+      "explicit_detail": 7.9,
+      "reference_resolution": 4.2,
+      "local_inference": 3.7,
+      "cross_sentence_inference": 1.4,
+      "main_idea": 4.7,
+      "purpose_speaker_intent": 2.8,
+      "discourse_relationship": 4.2,
+      "sequence_cause_consequence": 2.8,
+      "text_structure": 1.9,
+      "information_integration": 12.6,
+      "pragmatic_meaning": 3.3,
+      "other_uncertain": 3.3
     },
     "cognitiveDepthDistribution": {
-      "D1_verbatim_retrieval": 23.3,
-      "D2_single_step_inference": 59.1,
-      "D3_multi_step_synthesis": 17.7,
-      "D4_evaluative_pragmatic": 0
+      "D1_verbatim_retrieval": 8.4,
+      "D2_single_step_inference": 67.4,
+      "D3_multi_step_synthesis": 22.3,
+      "D4_evaluative_pragmatic": 1.9
     },
     "languageDifficultyDistribution": {
-      "A1_elementary": 11.6,
-      "A2_basic": 47.4,
-      "B1_intermediate": 40.9
+      "A1_elementary": 19.1,
+      "A2_basic": 67.9,
+      "B1_intermediate": 13
     },
     "evidenceNecessityDistribution": {
-      "essential": 54.9,
+      "essential": 82.8,
       "helpful": 0,
       "decorative": 0,
-      "none": 45.1
+      "none": 17.2
     },
     "evidenceSpanDistribution": {
       "single_word": 0,
       "single_clause": 0,
-      "single_sentence": 45.1,
-      "cross_sentence_local": 46.5,
-      "multi_paragraph_global": 2.3,
-      "multimodal_text_and_graphic": 6
+      "single_sentence": 39.1,
+      "cross_sentence_local": 30.7,
+      "multi_paragraph_global": 12.6,
+      "multimodal_text_and_graphic": 17.7
     },
     "distractorPatternDistribution": {
-      "literal_keyword_matching": 16,
-      "partial_truth": 16.3,
-      "wrong_referent": 15.7,
-      "wrong_chronology": 16.7,
-      "local_evidence_for_global_question": 0,
-      "unsupported_world_knowledge": 17.7,
-      "reversed_cause_effect": 0.6,
-      "grammatically_plausible_contextually_wrong": 16.7,
-      "overgeneralization": 0,
-      "undergeneralization": 0,
-      "irrelevant_distractor": 0.3,
-      "other": 0
+      "literal_keyword_matching": 1.9,
+      "partial_truth": 9.9,
+      "wrong_referent": 5.6,
+      "wrong_chronology": 4.8,
+      "local_evidence_for_global_question": 1.9,
+      "unsupported_world_knowledge": 14.7,
+      "reversed_cause_effect": 7.8,
+      "grammatically_plausible_contextually_wrong": 16.4,
+      "overgeneralization": 2.6,
+      "undergeneralization": 0.9,
+      "irrelevant_distractor": 8.4,
+      "other": 25.1
     },
     "contextNecessityDistribution": {
-      "essential": 54.9,
+      "essential": 82.8,
       "helpful": 0,
       "decorative": 0,
-      "none": 45.1
+      "none": 17.2
     }
   },
   "rates": {
-    "shallowRecallRateOverall": 20.9,
-    "shallowRecallRateSingleSection": 44.1,
-    "shallowRecallRatePassageSection": 0,
+    "shallowRecallRateOverall": 13,
+    "shallowRecallRateSingleSection": 26.5,
+    "shallowRecallRatePassageSection": 0.9,
     "essentialEvidenceRatePassageSection": 100,
     "essentialContextRatePassageSection": 100
   },
@@ -121,38 +121,38 @@
       "section": "single",
       "evidenceMode": "text_only",
       "primarySkill": "vocabulary_in_context",
-      "cognitiveDepth": "D1_verbatim_retrieval",
-      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "languageDifficulty": "A1_elementary",
       "evidenceNecessity": "none",
       "evidenceSpan": "single_sentence",
       "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D1_verbatim_retrieval depth with none evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D2_single_step_inference depth with none evidence necessity."
     },
     {
       "examId": "111",
       "questionNumber": 26,
       "section": "passage_comprehension",
       "evidenceMode": "text_only",
-      "primarySkill": "local_inference",
-      "cognitiveDepth": "D3_multi_step_synthesis",
-      "languageDifficulty": "B1_intermediate",
+      "primarySkill": "vocabulary_in_context",
+      "cognitiveDepth": "D2_single_step_inference",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "cross_sentence_local",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on local_inference at D3_multi_step_synthesis depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "111",
       "questionNumber": 36,
       "section": "passage_comprehension",
       "evidenceMode": "text_only",
-      "primarySkill": "explicit_detail",
-      "cognitiveDepth": "D2_single_step_inference",
+      "primarySkill": "purpose_speaker_intent",
+      "cognitiveDepth": "D3_multi_step_synthesis",
       "languageDifficulty": "B1_intermediate",
       "evidenceNecessity": "essential",
-      "evidenceSpan": "cross_sentence_local",
+      "evidenceSpan": "multi_paragraph_global",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on explicit_detail at D2_single_step_inference depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on purpose_speaker_intent at D3_multi_step_synthesis depth with essential evidence necessity."
     },
     {
       "examId": "112",
@@ -175,10 +175,10 @@
       "primarySkill": "grammar_in_context",
       "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A2_basic",
-      "evidenceNecessity": "none",
+      "evidenceNecessity": "essential",
       "evidenceSpan": "single_sentence",
-      "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with none evidence necessity."
+      "contextNecessity": "essential",
+      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "112",
@@ -188,23 +188,23 @@
       "primarySkill": "grammar_in_context",
       "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A2_basic",
-      "evidenceNecessity": "none",
-      "evidenceSpan": "single_sentence",
-      "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with none evidence necessity."
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "contextNecessity": "essential",
+      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "112",
       "questionNumber": 38,
       "section": "passage_comprehension",
       "evidenceMode": "text_only",
-      "primarySkill": "explicit_detail",
-      "cognitiveDepth": "D2_single_step_inference",
+      "primarySkill": "text_structure",
+      "cognitiveDepth": "D3_multi_step_synthesis",
       "languageDifficulty": "B1_intermediate",
       "evidenceNecessity": "essential",
       "evidenceSpan": "cross_sentence_local",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on explicit_detail at D2_single_step_inference depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on text_structure at D3_multi_step_synthesis depth with essential evidence necessity."
     },
     {
       "examId": "113",
@@ -224,24 +224,24 @@
       "questionNumber": 14,
       "section": "single",
       "evidenceMode": "text_only",
-      "primarySkill": "grammar_in_context",
+      "primarySkill": "discourse_relationship",
       "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A2_basic",
-      "evidenceNecessity": "none",
+      "evidenceNecessity": "essential",
       "evidenceSpan": "single_sentence",
-      "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with none evidence necessity."
+      "contextNecessity": "essential",
+      "benchmarkEvaluationFocus": "Evaluate generated materials on discourse_relationship at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "113",
       "questionNumber": 25,
       "section": "passage_comprehension",
-      "evidenceMode": "text_only",
+      "evidenceMode": "text_visual",
       "primarySkill": "explicit_detail",
       "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
-      "evidenceSpan": "cross_sentence_local",
+      "evidenceSpan": "multimodal_text_and_graphic",
       "contextNecessity": "essential",
       "benchmarkEvaluationFocus": "Evaluate generated materials on explicit_detail at D2_single_step_inference depth with essential evidence necessity."
     },
@@ -250,91 +250,91 @@
       "questionNumber": 35,
       "section": "passage_comprehension",
       "evidenceMode": "text_only",
-      "primarySkill": "local_inference",
-      "cognitiveDepth": "D3_multi_step_synthesis",
-      "languageDifficulty": "B1_intermediate",
+      "primarySkill": "vocabulary_in_context",
+      "cognitiveDepth": "D2_single_step_inference",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "cross_sentence_local",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on local_inference at D3_multi_step_synthesis depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "114",
       "questionNumber": 1,
       "section": "single",
       "evidenceMode": "visual_only",
-      "primarySkill": "vocabulary_in_context",
+      "primarySkill": "information_integration",
       "cognitiveDepth": "D1_verbatim_retrieval",
       "languageDifficulty": "A1_elementary",
       "evidenceNecessity": "essential",
       "evidenceSpan": "multimodal_text_and_graphic",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D1_verbatim_retrieval depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on information_integration at D1_verbatim_retrieval depth with essential evidence necessity."
     },
     {
       "examId": "114",
       "questionNumber": 11,
       "section": "single",
       "evidenceMode": "text_only",
-      "primarySkill": "grammar_in_context",
-      "cognitiveDepth": "D2_single_step_inference",
+      "primarySkill": "other_uncertain",
+      "cognitiveDepth": "D1_verbatim_retrieval",
       "languageDifficulty": "A2_basic",
-      "evidenceNecessity": "none",
+      "evidenceNecessity": "essential",
       "evidenceSpan": "single_sentence",
-      "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with none evidence necessity."
+      "contextNecessity": "essential",
+      "benchmarkEvaluationFocus": "Evaluate generated materials on other_uncertain at D1_verbatim_retrieval depth with essential evidence necessity."
     },
     {
       "examId": "114",
       "questionNumber": 27,
       "section": "passage_comprehension",
       "evidenceMode": "text_only",
-      "primarySkill": "explicit_detail",
+      "primarySkill": "main_idea",
       "cognitiveDepth": "D2_single_step_inference",
-      "languageDifficulty": "B1_intermediate",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "cross_sentence_local",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on explicit_detail at D2_single_step_inference depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on main_idea at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "114",
       "questionNumber": 41,
       "section": "cloze",
       "evidenceMode": "text_only",
-      "primarySkill": "grammar_in_context",
+      "primarySkill": "vocabulary_in_context",
       "cognitiveDepth": "D2_single_step_inference",
-      "languageDifficulty": "B1_intermediate",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "cross_sentence_local",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "115",
       "questionNumber": 1,
       "section": "single",
       "evidenceMode": "visual_only",
-      "primarySkill": "vocabulary_in_context",
-      "cognitiveDepth": "D1_verbatim_retrieval",
+      "primarySkill": "information_integration",
+      "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A1_elementary",
       "evidenceNecessity": "essential",
       "evidenceSpan": "multimodal_text_and_graphic",
       "contextNecessity": "essential",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D1_verbatim_retrieval depth with essential evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on information_integration at D2_single_step_inference depth with essential evidence necessity."
     },
     {
       "examId": "115",
       "questionNumber": 15,
       "section": "single",
       "evidenceMode": "text_only",
-      "primarySkill": "grammar_in_context",
+      "primarySkill": "vocabulary_in_context",
       "cognitiveDepth": "D2_single_step_inference",
       "languageDifficulty": "A2_basic",
       "evidenceNecessity": "none",
       "evidenceSpan": "single_sentence",
       "contextNecessity": "none",
-      "benchmarkEvaluationFocus": "Evaluate generated materials on grammar_in_context at D2_single_step_inference depth with none evidence necessity."
+      "benchmarkEvaluationFocus": "Evaluate generated materials on vocabulary_in_context at D2_single_step_inference depth with none evidence necessity."
     },
     {
       "examId": "115",
@@ -343,7 +343,7 @@
       "evidenceMode": "spatial",
       "primarySkill": "information_integration",
       "cognitiveDepth": "D3_multi_step_synthesis",
-      "languageDifficulty": "B1_intermediate",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "multimodal_text_and_graphic",
       "contextNecessity": "essential",
@@ -356,7 +356,7 @@
       "evidenceMode": "multi_document",
       "primarySkill": "cross_sentence_inference",
       "cognitiveDepth": "D3_multi_step_synthesis",
-      "languageDifficulty": "B1_intermediate",
+      "languageDifficulty": "A2_basic",
       "evidenceNecessity": "essential",
       "evidenceSpan": "multi_paragraph_global",
       "contextNecessity": "essential",
