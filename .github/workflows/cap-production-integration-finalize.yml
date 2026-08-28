@@ -9,6 +9,7 @@ on:
       - scripts/cap-production-integration-patch.py
       - scripts/cap-production-routing-patch.py
       - scripts/cap-production-contract-compact.py
+      - tests/history-exams/rolling-window.test.ts
 
 permissions:
   contents: write
