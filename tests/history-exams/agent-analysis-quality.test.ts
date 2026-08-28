@@ -31,8 +31,8 @@ function frequencyStats(values: string[]) {
 describe('CAP agent-authored deep digestion quality floor', () => {
   it('allows principled reuse while rejecting a template-dominated corpus', () => {
     const legitimateReuse = [
-      ...Array.from({ length: 160 }, (_, index) => `principle-${index}`),
-      ...Array.from({ length: 55 }, (_, index) => `principle-${index % 8}`),
+      ...Array.from({ length: 180 }, (_, index) => `principle-${index}`),
+      ...Array.from({ length: 35 }, (_, index) => `principle-${index % 8}`),
     ];
     const templated = [
       ...Array.from({ length: 150 }, () => 'same boilerplate'),
@@ -74,7 +74,14 @@ describe('CAP agent-authored deep digestion quality floor', () => {
 
     // Reusable principles may legitimately recur across items with the same assessment mechanic.
     // Block concentration and corpus-wide boilerplate instead of forcing cosmetic paraphrases.
-    expect(principles).toMatchObject({ accepted: true, hasBlank: false, totalCount: 215 });
+    expect(principles).toMatchObject({
+      accepted: true,
+      hasBlank: false,
+      totalCount: 215,
+      singletonCount: 178,
+      maxFrequency: 10,
+    });
+    expect(principles.singletonRatio).toBeGreaterThanOrEqual(0.75);
 
     const bannedBoilerplate = [
       'exact wording and evidence configuration',
