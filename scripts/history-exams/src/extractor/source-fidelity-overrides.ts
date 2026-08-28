@@ -146,7 +146,7 @@ function apply113(exam: ExtractedExam) {
 
 function apply114(exam: ExtractedExam) {
   const chat = passage(exam, '114-p22-23');
-  chat.genre = 'dialogue_chat';
+  chat.genre = 'dialogue';
   chat.text = [
     'Friends Forever Group (3): Jenny, Linda, Mark',
     'Jenny: Hey guys, guess what? I’m getting married next year!',
