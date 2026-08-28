@@ -105,6 +105,8 @@ export const SOURCE_FILES = [
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
   'docs/curriculum-quality-rubric.md',
   'docs/product-rules.md',
+  'packages/generator/curriculum/cap-precedent-contract.md',
+  'packages/generator/curriculum/cap-precedent-cards.json',
 ] as const
 
 function compactQualityProfileForBundle(profile: string): string {
@@ -229,6 +231,8 @@ export async function compileProductionBundle(
   const geminiProfile = compactQualityProfileForBundle(await readFile(resolve(repoRoot, 'packages/generator/quality-profiles/gemini-3.7-flash.md'), 'utf8'))
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
+  const precedentContract = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-contract.md'), 'utf8')
+  const precedentCards = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-cards.json'), 'utf8')
 
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
@@ -283,6 +287,14 @@ export async function compileProductionBundle(
     '',
     '## 2. Curriculum Quality Rubric',
     rubric.trim().replace(/\r\n/g, '\n'),
+    '',
+    '## 2A. CAP Precedent-First Contract',
+    precedentContract.trim().replace(/\r\n/g, '\n'),
+    '',
+    '## 2B. Searchable CAP Precedent Cards',
+    '```json',
+    precedentCards.trim(),
+    '```',
     '',
     profileResolutionContract,
     '',

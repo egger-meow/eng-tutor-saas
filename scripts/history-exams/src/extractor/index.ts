@@ -22,6 +22,7 @@ export interface ExtractAllOptions {
   assetsDir?: string;
   examIdFilter?: string;
   renderImages?: boolean;
+  examIdsToProcess?: string[];
 }
 
 export interface ExtractSummary {
@@ -38,7 +39,7 @@ export interface ExtractSummary {
  * Runs the deterministic extraction and multimodal rendering pipeline across all historical exam PDFs
  */
 export async function runExtractionPipeline(options: ExtractAllOptions): Promise<ExtractSummary[]> {
-  const { rawDir, outputDir, examIdFilter, renderImages = true } = options;
+  const { rawDir, outputDir, examIdFilter, renderImages = true, examIdsToProcess } = options;
   const assetsDir = options.assetsDir || path.resolve(outputDir, '../assets');
 
   if (!fs.existsSync(outputDir)) {
@@ -57,6 +58,7 @@ export async function runExtractionPipeline(options: ExtractAllOptions): Promise
     if (!match) continue;
 
     const examId = match[1];
+    if (examIdsToProcess && !examIdsToProcess.includes(examId)) continue;
     if (examIdFilter && examId !== examIdFilter) {
       continue;
     }

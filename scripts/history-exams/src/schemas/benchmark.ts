@@ -74,7 +74,11 @@ export const HoldoutManifestSchema = z
     for (const h of data.holdoutQuestions) {
       yearCounts[h.examId] = (yearCounts[h.examId] || 0) + 1;
     }
-    for (const yr of ['111', '112', '113', '114', '115']) {
+    const years = [...new Set(data.holdoutQuestions.map((h) => h.examId))].sort();
+    if (years.length !== 5) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Holdout manifest must cover exactly 5 years, found ${years.length}`, path: ['holdoutQuestions'] });
+    }
+    for (const yr of years) {
       if (yearCounts[yr] !== 4) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -114,4 +118,3 @@ export const CapBenchmarkSchema = z.object({
   holdoutReferenceSet: z.array(BenchmarkHoldoutItemSchema),
 });
 export type CapBenchmark = z.infer<typeof CapBenchmarkSchema>;
-

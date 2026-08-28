@@ -24,7 +24,7 @@ describe('bundle-compiler', () => {
     expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
     expect(freshBundle.metadata.promptVersion).toBe('2.8.0')
     expect(freshBundle.metadata.bundleVersion).toBe('2.8.0-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(25)
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(27)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
     expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -38,6 +38,9 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).toContain('Never transmit child names, child/job IDs')
     expect(freshBundle.content).toContain('Only the independent critic may add or mark')
     expect(freshBundle.content).not.toContain('Before output, add passed `qualityEvidence.criticalChecks`')
+    expect(freshBundle.content).toContain('CAP Precedent-First Assessment Contract')
+    expect(freshBundle.content).toContain('qualityEvidence.precedentRefs')
+    expect(freshBundle.content).toContain('Language difficulty and cognitive depth are independent controls')
   })
 
   it('keeps public web research in the scheduled production input contract', async () => {
