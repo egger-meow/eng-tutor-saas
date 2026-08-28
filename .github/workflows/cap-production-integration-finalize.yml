@@ -1,0 +1,1066 @@
+name: CAP Production Integration Finalizer
+
+on:
+  push:
+    branches: [feat/cap-chatgpt-deep-digestion]
+    paths:
+      - .github/workflows/cap-production-integration-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/cap-chatgpt-deep-digestion
+          fetch-depth: 0
+
+      - name: Apply final CAP production integration patch
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          def write(path: str, content: str):
+              p = Path(path)
+              p.parent.mkdir(parents=True, exist_ok=True)
+              p.write_text(content.rstrip() + '\n', encoding='utf-8')
+
+          def replace_once(path: str, old: str, new: str):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'expected text not found in {path}: {old[:120]!r}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          write('scripts/history-exams/src/corpus/rolling-window.ts', r'''
+          import { createHash } from 'node:crypto'
+          import fs from 'node:fs'
+          import path from 'node:path'
+
+          import { OFFICIAL_CAP_ANSWERS } from '../extractor/official-answers.ts'
+
+          export interface RollingWindowOptions {
+            rawDir: string
+            extractedDir: string
+            analyzedDir: string
+            assetsDir: string
+            agentAnalysisDir?: string
+          }
+
+          export interface RollingWindowResult {
+            examIds: string[]
+            unchangedExamIds: string[]
+            changedExamIds: string[]
+            removedExamIds: string[]
+            sourceHashes: Record<string, string>
+          }
+
+          interface RollingWindowManifest {
+            version: '1.1.0'
+            authorityStatus: 'authoritative'
+            examIds: string[]
+            sourceHashes: Record<string, string>
+            sealedAt: string
+          }
+
+          const sha256 = (file: string) => createHash('sha256').update(fs.readFileSync(file)).digest('hex')
+
+          function artifactIds(directory: string): string[] {
+            if (!fs.existsSync(directory)) return []
+            return fs.readdirSync(directory).flatMap((name) => {
+              const match = name.match(/^(\d{3})(?:\.json)?$/)
+              return match ? [match[1]!] : []
+            })
+          }
+
+          function manifestPath(rawDir: string): string {
+            return path.resolve(rawDir, '../rolling-window-manifest.json')
+          }
+
+          function readTrustedManifest(rawDir: string): RollingWindowManifest | null {
+            const file = manifestPath(rawDir)
+            if (!fs.existsSync(file)) return null
+            try {
+              const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Partial<RollingWindowManifest>
+              if (parsed.version !== '1.1.0' || parsed.authorityStatus !== 'authoritative' || !parsed.sourceHashes) return null
+              return parsed as RollingWindowManifest
+            } catch {
+              return null
+            }
+          }
+
+          /**
+           * Reconciles derived artifacts to raw/. This never seals the new source hashes.
+           * A failed build therefore cannot cause a later run to reuse stale analyzed data.
+           */
+          export function reconcileRollingWindow(options: RollingWindowOptions): RollingWindowResult {
+            const rawFiles = fs.readdirSync(options.rawDir).filter((name) => /^\d{3}P_English\.pdf$/i.test(name)).sort()
+            const examIds = rawFiles.map((name) => name.slice(0, 3))
+            if (examIds.length !== 5 || examIds.some((id, index) => index > 0 && Number(id) !== Number(examIds[index - 1]) + 1)) {
+              throw new Error(`[RollingWindowError] raw/ must contain exactly five consecutive CAP years; found ${examIds.join(', ')}`)
+            }
+            for (const examId of examIds) {
+              const answers = OFFICIAL_CAP_ANSWERS[examId]
+              if (!answers || Object.keys(answers).length !== 43) {
+                throw new Error(`[OfficialAnswerKeyError] ${examId} has no verified official 43-item answer key`)
+              }
+            }
+
+            const sourceHashes = Object.fromEntries(rawFiles.map((name) => [name.slice(0, 3), sha256(path.join(options.rawDir, name))]))
+            const previous = readTrustedManifest(options.rawDir)
+            const unchangedExamIds = examIds.filter((id) =>
+              previous?.sourceHashes[id] === sourceHashes[id]
+              && previous.examIds.includes(id)
+              && fs.existsSync(path.join(options.extractedDir, `${id}.json`))
+              && fs.existsSync(path.join(options.analyzedDir, `${id}.json`)),
+            )
+            const changedExamIds = examIds.filter((id) => !unchangedExamIds.includes(id))
+            const active = new Set(examIds)
+            const derivedDirs = [options.extractedDir, options.analyzedDir, options.assetsDir, ...(options.agentAnalysisDir ? [options.agentAnalysisDir] : [])]
+            const removedExamIds = [...new Set(derivedDirs.flatMap(artifactIds))].filter((id) => !active.has(id)).sort()
+
+            for (const directory of derivedDirs) {
+              for (const id of removedExamIds) {
+                const file = path.join(directory, `${id}.json`)
+                const folder = path.join(directory, id)
+                if (fs.existsSync(file)) fs.rmSync(file)
+                if (fs.existsSync(folder)) fs.rmSync(folder, { recursive: true })
+              }
+            }
+
+            return { examIds, unchangedExamIds, changedExamIds, removedExamIds, sourceHashes }
+          }
+
+          /** Seal only after the complete corpus has passed the authoritative validator. */
+          export function commitRollingWindowManifest(rawDir: string, result: RollingWindowResult): string {
+            const file = manifestPath(rawDir)
+            const manifest: RollingWindowManifest = {
+              version: '1.1.0',
+              authorityStatus: 'authoritative',
+              examIds: result.examIds,
+              sourceHashes: result.sourceHashes,
+              sealedAt: new Date().toISOString(),
+            }
+            fs.writeFileSync(file, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+            return file
+          }
+          ''')
+
+          write('scripts/history-exams/src/precedents/build-precedent-cards.ts', r'''
+          import { createHash } from 'node:crypto'
+          import fs from 'node:fs'
+          import path from 'node:path'
+          import { AnalyzedExamSchema } from '../schemas/analyzed.ts'
+          import { HoldoutManifestSchema } from '../schemas/benchmark.ts'
+          import { ExtractedExamSchema } from '../schemas/extracted.ts'
+
+          const RUNTIME_VERSION = '1.1.0'
+          const PLANNER_VERSION = 'cap-planner-1.0.0'
+          const QUALITY_FLOOR_VERSION = 'cap-floor-1.0.0'
+
+          export interface PrecedentCard {
+            ref: string
+            genre: string
+            primarySkill: string
+            secondarySkills: string[]
+            cognitiveDepth: string
+            languageDifficulty: string
+            evidenceMode: string
+            evidenceNecessity: string
+            evidenceSpan: string
+            reasoningOperations: string[]
+            questionMechanism: string
+            whyTheQuestionWorks: string
+            correctAnswerConstructionPrinciple: string
+            distractorStrategies: string[]
+            reusableDesignPrinciple: string
+            studentFailureModes: string[]
+            misconceptionsTargeted: string[]
+            difficultyAdjustment: {
+              simplificationConstraints: string[]
+              depthAdjustmentStrategies: string[]
+            }
+            copyGuardHashes: string[]
+          }
+
+          export interface PrecedentRuntimeBundle {
+            version: string
+            authorityStatus: 'authoritative'
+            capKnowledgeVersion: string
+            capCorpusHash: string
+            capBundleVersion: string
+            plannerVersion: string
+            qualityFloorVersion: string
+            cards: PrecedentCard[]
+          }
+
+          const compact = (value: string | undefined, max = 180) => {
+            const text = (value ?? '').replace(/\s+/g, ' ').trim()
+            return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`
+          }
+
+          const hashText = (value: string) => createHash('sha256').update(value).digest('hex')
+
+          function fiveGramHashes(text: string): string[] {
+            const tokens = text.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/g) ?? []
+            const hashes = new Set<string>()
+            for (let index = 0; index <= tokens.length - 5; index += 1) {
+              const gram = tokens.slice(index, index + 5).join(' ')
+              hashes.add(hashText(gram).slice(0, 16))
+              if (hashes.size >= 20) break
+            }
+            return [...hashes]
+          }
+
+          function requireAuthoritativeRun(analyzedDir: string) {
+            const manifestPath = path.join(analyzedDir, 'run-manifest.json')
+            if (!fs.existsSync(manifestPath)) throw new Error('[CAPAuthorityError] missing analyzed/run-manifest.json')
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as Record<string, unknown>
+            const passed = Number(manifest.criticPassedCount ?? 0)
+            const repaired = Number(manifest.criticRepairedCount ?? 0)
+            if (
+              Number(manifest.totalQuestions) !== 215
+              || Number(manifest.liveOrAgentQuestionCount) !== 215
+              || Number(manifest.mockQuestionCount) !== 0
+              || Number(manifest.unresolvedCount) !== 0
+              || Number(manifest.criticFailedCount) !== 0
+              || Number(manifest.criticNotReviewedCount) !== 0
+              || passed + repaired !== 215
+            ) {
+              throw new Error('[CAPAuthorityError] precedent compilation requires 215 authoritative live/agent analyses with zero mock/unresolved/failed records')
+            }
+            const corpusHash = String(manifest.corpusHash ?? '')
+            if (!/^[a-f0-9]{64}$/.test(corpusHash)) throw new Error('[CAPAuthorityError] missing canonical 64-char corpus hash')
+            return { corpusHash }
+          }
+
+          function passageGenresForExam(analyzedDir: string, examId: string): Map<string, string> {
+            const extractedPath = path.resolve(analyzedDir, '../extracted', `${examId}.json`)
+            if (!fs.existsSync(extractedPath)) return new Map()
+            const exam = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(extractedPath, 'utf8')))
+            return new Map(exam.passages.map((passage) => [passage.id, passage.genre]))
+          }
+
+          export function buildPrecedentCards(analyzedDir: string, benchmarkDir: string): PrecedentCard[] {
+            requireAuthoritativeRun(analyzedDir)
+            const manifest = HoldoutManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(benchmarkDir, 'holdout-manifest.json'), 'utf8')))
+            const holdouts = new Set(manifest.holdoutQuestions.map((item) => `${item.examId}-Q${item.questionNumber}`))
+            const cards: PrecedentCard[] = []
+
+            for (const file of fs.readdirSync(analyzedDir).filter((name) => /^\d{3}\.json$/.test(name)).sort()) {
+              const exam = AnalyzedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(analyzedDir, file), 'utf8')))
+              const passageGenres = passageGenresForExam(analyzedDir, exam.examId)
+              for (const question of exam.questions) {
+                const key = `${question.examId}-Q${question.questionNumber}`
+                if (holdouts.has(key)) continue
+                const a = question.analysis
+                const correct = a.optionAnalyses.find((option) => option.isCorrect)
+                const sourceText = `${question.extracted.stem} ${Object.values(question.extracted.options).join(' ')}`
+                const ref = `cap-${hashText(`${key}:${question.contentHash}`).slice(0, 12)}`
+                cards.push({
+                  ref,
+                  genre: question.extracted.passageId ? (passageGenres.get(question.extracted.passageId) ?? question.extracted.section) : question.extracted.section,
+                  primarySkill: a.primarySkill,
+                  secondarySkills: a.secondarySkills.slice(0, 3),
+                  cognitiveDepth: a.cognitiveDepth,
+                  languageDifficulty: a.languageDifficulty,
+                  evidenceMode: a.evidenceMode,
+                  evidenceNecessity: a.evidenceNecessity,
+                  evidenceSpan: a.evidenceSpan,
+                  reasoningOperations: a.reasoningOperations.slice(0, 3).map((item) => compact(item, 110)),
+                  questionMechanism: compact(a.questionMechanism, 190),
+                  whyTheQuestionWorks: compact(a.whyTheQuestionWorks, 170),
+                  correctAnswerConstructionPrinciple: compact(
+                    `Construct one option uniquely supported by ${a.evidenceSpan} evidence after ${a.reasoningOperations.slice(0, 2).join(' + ')}; avoid unsupported world knowledge.${correct?.correctRationale ? ' The historical item confirms this evidence path.' : ''}`,
+                    190,
+                  ),
+                  distractorStrategies: [...new Set(a.optionAnalyses.flatMap((option) => option.distractorStrategy ? [option.distractorStrategy] : []))],
+                  reusableDesignPrinciple: compact(a.reusableDesignPrinciple, 170),
+                  studentFailureModes: a.studentFailureModes.slice(0, 2).map((item) => compact(item, 110)),
+                  misconceptionsTargeted: a.misconceptionsTargeted.slice(0, 2).map((item) => compact(item, 110)),
+                  difficultyAdjustment: {
+                    simplificationConstraints: a.difficultyAdjustment.simplificationConstraints.slice(0, 2).map((item) => compact(item, 100)),
+                    depthAdjustmentStrategies: a.difficultyAdjustment.depthAdjustmentStrategies.slice(0, 2).map((item) => compact(item, 100)),
+                  },
+                  copyGuardHashes: fiveGramHashes(sourceText),
+                })
+              }
+            }
+            if (cards.length !== 195) throw new Error(`[CAPAuthorityError] expected 195 non-holdout precedent cards, found ${cards.length}`)
+            if (new Set(cards.map((card) => card.ref)).size !== cards.length) throw new Error('[CAPAuthorityError] precedent refs must be unique')
+            return cards
+          }
+
+          export function buildPrecedentRuntimeBundle(analyzedDir: string, benchmarkDir: string): PrecedentRuntimeBundle {
+            const { corpusHash } = requireAuthoritativeRun(analyzedDir)
+            const cards = buildPrecedentCards(analyzedDir, benchmarkDir)
+            return {
+              version: RUNTIME_VERSION,
+              authorityStatus: 'authoritative',
+              capKnowledgeVersion: `cap-knowledge-${corpusHash.slice(0, 16)}`,
+              capCorpusHash: corpusHash,
+              capBundleVersion: `cap-runtime-${RUNTIME_VERSION}`,
+              plannerVersion: PLANNER_VERSION,
+              qualityFloorVersion: QUALITY_FLOOR_VERSION,
+              cards,
+            }
+          }
+
+          export function writePrecedentCards(
+            analyzedDir: string,
+            benchmarkDir: string,
+            outputPath: string,
+            indexPath?: string,
+          ): PrecedentCard[] {
+            const runtime = buildPrecedentRuntimeBundle(analyzedDir, benchmarkDir)
+            fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+            fs.writeFileSync(outputPath, `${JSON.stringify(runtime)}\n`)
+
+            if (indexPath) {
+              const manifest = HoldoutManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(benchmarkDir, 'holdout-manifest.json'), 'utf8')))
+              const holdouts = new Set(manifest.holdoutQuestions.map((item) => `${item.examId}-Q${item.questionNumber}`))
+              const rows: Array<{ ref: string; examId: string; questionNumber: number; contentHash: string }> = []
+              for (const file of fs.readdirSync(analyzedDir).filter((name) => /^\d{3}\.json$/.test(name)).sort()) {
+                const exam = AnalyzedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(analyzedDir, file), 'utf8')))
+                for (const question of exam.questions) {
+                  const key = `${question.examId}-Q${question.questionNumber}`
+                  if (holdouts.has(key)) continue
+                  rows.push({
+                    ref: `cap-${hashText(`${key}:${question.contentHash}`).slice(0, 12)}`,
+                    examId: question.examId,
+                    questionNumber: question.questionNumber,
+                    contentHash: question.contentHash,
+                  })
+                }
+              }
+              fs.mkdirSync(path.dirname(indexPath), { recursive: true })
+              fs.writeFileSync(indexPath, `${JSON.stringify({ version: RUNTIME_VERSION, capCorpusHash: runtime.capCorpusHash, rows }, null, 2)}\n`)
+            }
+            return runtime.cards
+          }
+          ''')
+
+          write('packages/generator/src/cap-precedent-audit.ts', r'''
+          import { createHash } from 'node:crypto'
+          import runtimeJson from '../curriculum/cap-precedent-cards.json' with { type: 'json' }
+
+          export interface CapPrecedentAuditInput {
+            capTransferQuestionCount: number
+            precedentRefs: string[]
+            availableRefs: ReadonlySet<string>
+          }
+
+          export interface CapPrecedentAuditResult { passed: boolean; findings: string[] }
+
+          export interface CapDesignAnchor {
+            ref: string
+            genre: string
+            primarySkill: string
+            secondarySkills: string[]
+            cognitiveDepth: string
+            languageDifficulty: string
+            evidenceMode: string
+            evidenceNecessity: string
+            evidenceSpan: string
+            reasoningOperations: string[]
+            questionMechanism: string
+            whyTheQuestionWorks: string
+            correctAnswerConstructionPrinciple: string
+            distractorStrategies: string[]
+            reusableDesignPrinciple: string
+            studentFailureModes: string[]
+            misconceptionsTargeted: string[]
+            difficultyAdjustment: {
+              simplificationConstraints: string[]
+              depthAdjustmentStrategies: string[]
+            }
+            copyGuardHashes: string[]
+          }
+
+          export interface CapPrecedentRuntimeBundle {
+            version: string
+            authorityStatus: 'authoritative'
+            capKnowledgeVersion: string
+            capCorpusHash: string
+            capBundleVersion: string
+            plannerVersion: string
+            qualityFloorVersion: string
+            cards: CapDesignAnchor[]
+          }
+
+          export interface CapAssessmentIntent {
+            learningObjective: string
+            primarySkill: string
+            secondarySkills?: string[]
+            targetLanguageDifficulty: string
+            targetCognitiveDepth: string
+            evidenceMode: string
+            evidenceSpan: string
+            reasoningOperations: string[]
+            distractorStrategies?: string[]
+          }
+
+          export interface CapAssessmentPlan extends CapAssessmentIntent {
+            precedentRefs: string[]
+            preservedMechanics: string[]
+            adaptationStrategy: string[]
+            distractorStrategies: string[]
+            intentionalRecall?: boolean
+            noPrecedentReason?: string
+          }
+
+          interface QuestionLike {
+            id: string
+            itemType: string
+            prompt: string
+            options?: string[]
+          }
+
+          interface PackageLike {
+            studentLesson: {
+              practice: Array<{ stage: string; questions: QuestionLike[] }>
+              homework: { questions: QuestionLike[] }
+            }
+            qualityEvidence: {
+              precedentRefs?: string[]
+              criticalChecks: Array<{ id: string; passed: boolean; evidence: string }>
+            }
+          }
+
+          const runtime = runtimeJson as unknown as CapPrecedentRuntimeBundle
+          const CAP_REF = /^cap-[a-f0-9]{12}$/
+          const DEPTH_RANK: Record<string, number> = {
+            D1_verbatim_retrieval: 1,
+            D2_single_step_inference: 2,
+            D3_multi_step_synthesis: 3,
+            D4_evaluative_pragmatic: 4,
+          }
+          const COMPREHENSION_TYPES = new Set(['main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze'])
+          const RECALL_TYPES = new Set(['vocabulary', 'grammar'])
+
+          function hash(value: string): string {
+            return createHash('sha256').update(value).digest('hex')
+          }
+
+          function fiveGramHashes(text: string): Set<string> {
+            const tokens = text.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/g) ?? []
+            const hashes = new Set<string>()
+            for (let index = 0; index <= tokens.length - 5; index += 1) {
+              hashes.add(hash(tokens.slice(index, index + 5).join(' ')).slice(0, 16))
+            }
+            return hashes
+          }
+
+          function parseJsonCheck<T>(pkg: PackageLike, id: string): T | null {
+            const check = pkg.qualityEvidence.criticalChecks.find((item) => item.id === id && item.passed)
+            if (!check) return null
+            try { return JSON.parse(check.evidence) as T } catch { return null }
+          }
+
+          function scoreAnchor(intent: CapAssessmentIntent, card: CapDesignAnchor): number {
+            let score = 0
+            if (card.primarySkill === intent.primarySkill) score += 5
+            if (card.cognitiveDepth === intent.targetCognitiveDepth) score += 3
+            if (card.evidenceSpan === intent.evidenceSpan) score += 2
+            if (card.evidenceMode === intent.evidenceMode) score += 1
+            if (card.languageDifficulty === intent.targetLanguageDifficulty) score += 1
+            const secondary = new Set(intent.secondarySkills ?? [])
+            score += card.secondarySkills.filter((skill) => secondary.has(skill)).length
+            const distractors = new Set(intent.distractorStrategies ?? [])
+            score += card.distractorStrategies.filter((strategy) => distractors.has(strategy)).length * 0.5
+            return score
+          }
+
+          export function retrieveCapPrecedents(
+            intent: CapAssessmentIntent,
+            bundle: CapPrecedentRuntimeBundle = runtime,
+            limit = 5,
+          ): CapDesignAnchor[] {
+            if (bundle.authorityStatus !== 'authoritative') return []
+            return bundle.cards
+              .map((card) => ({ card, score: scoreAnchor(intent, card) }))
+              .filter((entry) => entry.score >= 5)
+              .sort((a, b) => b.score - a.score || a.card.ref.localeCompare(b.card.ref))
+              .slice(0, Math.max(1, Math.min(5, limit)))
+              .map((entry) => entry.card)
+          }
+
+          function assessmentItems(pkg: PackageLike): Array<{ stage: string; question: QuestionLike }> {
+            const items = pkg.studentLesson.practice.flatMap((section) =>
+              section.questions
+                .filter((question) => section.stage === 'cap-transfer' || (section.stage === 'independent' && question.options?.length === 4))
+                .map((question) => ({ stage: section.stage, question })),
+            )
+            for (const question of pkg.studentLesson.homework.questions) {
+              if (question.options?.length === 4 && !['translation', 'sentence-production', 'short-response'].includes(question.itemType)) {
+                items.push({ stage: 'homework', question })
+              }
+            }
+            return items
+          }
+
+          export function auditCapPrecedentPackage(
+            pkg: PackageLike,
+            bundle: CapPrecedentRuntimeBundle = runtime,
+          ): CapPrecedentAuditResult {
+            const findings: string[] = []
+            if (bundle.authorityStatus !== 'authoritative' || bundle.cards.length !== 195) {
+              findings.push('CAP_AUTHORITY_UNAVAILABLE: production CAP runtime is not an authoritative 195-card non-holdout library')
+              return { passed: false, findings }
+            }
+
+            const available = new Map(bundle.cards.map((card) => [card.ref, card]))
+            const provenance = parseJsonCheck<Record<string, string>>(pkg, 'cap-provenance')
+            const expectedProvenance: Record<string, string> = {
+              capKnowledgeVersion: bundle.capKnowledgeVersion,
+              capCorpusHash: bundle.capCorpusHash,
+              capBundleVersion: bundle.capBundleVersion,
+              plannerVersion: bundle.plannerVersion,
+              qualityFloorVersion: bundle.qualityFloorVersion,
+            }
+            if (!provenance || Object.entries(expectedProvenance).some(([key, value]) => provenance[key] !== value)) {
+              findings.push('CAP_PROVENANCE_MISMATCH: cap-provenance must exactly match the authoritative runtime bundle versions and corpus hash')
+            }
+
+            const planRefs = new Set<string>()
+            const requiredItems = assessmentItems(pkg)
+            for (const { stage, question } of requiredItems) {
+              const plan = parseJsonCheck<CapAssessmentPlan>(pkg, `cap-plan:${question.id}`)
+              if (!plan) {
+                findings.push(`CAP_ITEM_PLAN_MISSING:${question.id}: every normal assessment/application item requires an internal CAP assessment plan`)
+                continue
+              }
+              if (!plan.learningObjective?.trim() || !plan.primarySkill?.trim() || !plan.targetLanguageDifficulty?.trim() || !plan.targetCognitiveDepth?.trim()) {
+                findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: learning objective, skill, language difficulty, and cognitive depth are required`)
+              }
+              if (!Array.isArray(plan.reasoningOperations) || plan.reasoningOperations.length === 0 || !Array.isArray(plan.preservedMechanics) || plan.preservedMechanics.length === 0 || !Array.isArray(plan.adaptationStrategy) || plan.adaptationStrategy.length === 0) {
+                findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: reasoning, preserved mechanics, and adaptation strategy are required`)
+              }
+
+              const intentionalRecall = plan.intentionalRecall === true
+              if (intentionalRecall) {
+                if (stage === 'cap-transfer' || !RECALL_TYPES.has(question.itemType)) {
+                  findings.push(`CAP_RECALL_EXEMPTION_INVALID:${question.id}: intentional recall is only valid for explicit vocabulary/grammar retrieval outside cap-transfer`)
+                }
+                continue
+              }
+
+              const relevant = retrieveCapPrecedents(plan, bundle, 5)
+              if ((!plan.precedentRefs || plan.precedentRefs.length === 0) && relevant.length > 0) {
+                findings.push(`CAP_PRECEDENT_MISSING:${question.id}: relevant authentic CAP precedents exist, so blank-page assessment authoring is forbidden`)
+                continue
+              }
+              if ((!plan.precedentRefs || plan.precedentRefs.length === 0) && relevant.length === 0 && (!plan.noPrecedentReason || plan.noPrecedentReason.trim().length < 20)) {
+                findings.push(`CAP_FALLBACK_REASON_MISSING:${question.id}: no-precedent fallback requires a specific reason`)
+                continue
+              }
+
+              const referenced: CapDesignAnchor[] = []
+              for (const ref of plan.precedentRefs ?? []) {
+                planRefs.add(ref)
+                const card = available.get(ref)
+                if (!CAP_REF.test(ref) || !card) {
+                  findings.push(`CAP_PRECEDENT_UNKNOWN:${question.id}:${ref}`)
+                  continue
+                }
+                referenced.push(card)
+              }
+              if (referenced.length > 0 && !referenced.some((card) => card.primarySkill === plan.primarySkill)) {
+                findings.push(`CAP_PRECEDENT_SKILL_MISMATCH:${question.id}: at least one anchor must match the planned primary skill`)
+              }
+              for (const card of referenced) {
+                const target = DEPTH_RANK[plan.targetCognitiveDepth]
+                const source = DEPTH_RANK[card.cognitiveDepth]
+                if (target && source && Math.abs(target - source) > 1) {
+                  findings.push(`CAP_PRECEDENT_DEPTH_MISMATCH:${question.id}:${card.ref}: anchor depth is too far from the planned depth`)
+                } else if (target && source && target !== source && !plan.adaptationStrategy.some((item) => /depth|reason|推理|深度/i.test(item))) {
+                  findings.push(`CAP_DEPTH_ADAPTATION_UNEXPLAINED:${question.id}:${card.ref}: adjacent-depth adaptation must explicitly preserve or change reasoning depth`)
+                }
+              }
+
+              if (question.options?.length === 4 && (!plan.distractorStrategies || plan.distractorStrategies.length === 0)) {
+                findings.push(`CAP_DISTRACTOR_PLAN_MISSING:${question.id}: four-option assessment needs explicit distractor mechanisms`)
+              }
+              const depth = DEPTH_RANK[plan.targetCognitiveDepth] ?? 0
+              if (depth >= 3 && ['single_word', 'single_clause'].includes(plan.evidenceSpan)) {
+                findings.push(`CAP_DEPTH_COLLAPSE:${question.id}: D3/D4 reasoning cannot claim only word/clause evidence after simplification`)
+              }
+              if (COMPREHENSION_TYPES.has(question.itemType) && plan.evidenceSpan === 'single_word') {
+                findings.push(`CAP_DECORATIVE_CONTEXT:${question.id}: comprehension/application cannot reduce evidence to a single isolated word`)
+              }
+              if (/^\s*what\s+is\s+the\s+meaning\s+of\b/i.test(question.prompt) || /^\s*what\s+does\s+.+\s+mean\??\s*$/i.test(question.prompt)) {
+                findings.push(`CAP_SHALLOW_ASSESSMENT:${question.id}: naked dictionary-definition prompt is not valid normal comprehension/application assessment`)
+              }
+
+              if (referenced.length > 0) {
+                const authoredHashes = fiveGramHashes(`${question.prompt} ${(question.options ?? []).join(' ')}`)
+                const sourceHashes = new Set(referenced.flatMap((card) => card.copyGuardHashes))
+                const overlap = [...authoredHashes].filter((item) => sourceHashes.has(item))
+                if (overlap.length >= 2) {
+                  findings.push(`CAP_COPY_OVERLAP:${question.id}: multiple five-word phrase fingerprints overlap the historical anchor; adapt mechanics, not wording`)
+                }
+              }
+            }
+
+            const packageRefs = new Set(pkg.qualityEvidence.precedentRefs ?? [])
+            const unknownPackageRefs = [...packageRefs].filter((ref) => !CAP_REF.test(ref) || !available.has(ref))
+            if (unknownPackageRefs.length > 0) findings.push(`CAP_PRECEDENT_UNKNOWN: ${unknownPackageRefs.join(', ')}`)
+            const missingAggregateRefs = [...planRefs].filter((ref) => !packageRefs.has(ref))
+            const extraAggregateRefs = [...packageRefs].filter((ref) => !planRefs.has(ref))
+            if (missingAggregateRefs.length > 0 || extraAggregateRefs.length > 0) {
+              findings.push('CAP_PROVENANCE_INCONSISTENT: qualityEvidence.precedentRefs must equal the union of per-item cap-plan precedentRefs')
+            }
+
+            if (requiredItems.length >= 4 && planRefs.size === 1) {
+              findings.push('CAP_PRECEDENT_MONOCULTURE: four or more assessment items cannot all reuse a single design anchor')
+            }
+
+            return { passed: findings.length === 0, findings }
+          }
+
+          /** Backwards-compatible low-level primitive retained for direct callers/tests. */
+          export function auditCapPrecedentFloor(input: CapPrecedentAuditInput): CapPrecedentAuditResult {
+            const findings: string[] = []
+            if (input.capTransferQuestionCount > 0 && input.precedentRefs.length === 0) {
+              findings.push('CAP_PRECEDENT_MISSING: cap-transfer assessment started without an internal precedent reference')
+            }
+            const invalid = input.precedentRefs.filter((ref) => !CAP_REF.test(ref) || !input.availableRefs.has(ref))
+            if (invalid.length > 0) findings.push(`CAP_PRECEDENT_UNKNOWN: ${[...new Set(invalid)].join(', ')}`)
+            return { passed: findings.length === 0, findings }
+          }
+
+          export function capRuntimeMetadata(bundle: CapPrecedentRuntimeBundle = runtime) {
+            return {
+              capKnowledgeVersion: bundle.capKnowledgeVersion,
+              capCorpusHash: bundle.capCorpusHash,
+              capBundleVersion: bundle.capBundleVersion,
+              plannerVersion: bundle.plannerVersion,
+              qualityFloorVersion: bundle.qualityFloorVersion,
+            }
+          }
+          ''')
+
+          write('packages/generator/curriculum/cap-precedent-contract.md', r'''
+          # CAP Precedent-First Assessment Contract
+
+          This contract governs normal assessment, application, contextual grammar, and reading-comprehension design. Instruction, explanations, scaffolding, production tasks, and explicit vocabulary/grammar retrieval remain pedagogically free to use simpler forms.
+
+          ## Permanent invariant
+
+          **No normal assessment item starts from a blank page when a relevant authoritative CAP precedent exists.**
+
+          The bundled cards are authoritative non-holdout design anchors. They expose abstract assessment mechanics only. Never reconstruct or copy historical wording, answers, entities, topics, visuals, or numbers. Holdouts are absent from the runtime library.
+
+          ## Assessment intent planning
+
+          Before authoring each four-option question in `independent`, every question in `cap-transfer`, and every assessment-style four-option homework question:
+
+          1. plan the learning objective, primary/secondary skill, language difficulty, cognitive depth, evidence mode/span, and reasoning operations;
+          2. retrieve 1–5 best-matching cards by those dimensions plus distractor mechanics;
+          3. preserve evidence topology, reasoning operation, cognitive demand, and distractor logic;
+          4. adapt topic, entities, wording, facts, numbers, passage/visual content, and answer wording for this learner;
+          5. simplify English independently from thinking depth.
+
+          For each governed question `<questionId>`, add a passed `qualityEvidence.criticalChecks` record with id `cap-plan:<questionId>`. Its `evidence` MUST be compact valid JSON with this shape:
+
+          ```json
+          {
+            "learningObjective": "...",
+            "primarySkill": "...",
+            "secondarySkills": [],
+            "targetLanguageDifficulty": "A1_elementary | A2_basic | B1_intermediate",
+            "targetCognitiveDepth": "D1_verbatim_retrieval | D2_single_step_inference | D3_multi_step_synthesis | D4_evaluative_pragmatic",
+            "evidenceMode": "...",
+            "evidenceSpan": "...",
+            "reasoningOperations": ["..."],
+            "precedentRefs": ["cap-..."],
+            "preservedMechanics": ["..."],
+            "adaptationStrategy": ["..."],
+            "distractorStrategies": ["..."],
+            "intentionalRecall": false,
+            "noPrecedentReason": null
+          }
+          ```
+
+          `qualityEvidence.precedentRefs` is the de-duplicated union of every per-item `precedentRefs` array.
+
+          ## Intentional retrieval exemption
+
+          Vocabulary or grammar recall may set `intentionalRecall: true` when it is explicitly a retrieval drill outside `cap-transfer`. This is not a loophole for comprehension/application items. A normal comprehension item such as `What is the meaning of "brave"?` is rejected; an explicitly labeled vocabulary retrieval task may remain simple.
+
+          ## No-precedent fallback
+
+          Retrieval is mandatory when a relevant card exists. If deterministic retrieval finds none, the plan may use authoritative CAP recipes/blueprint only when `noPrecedentReason` specifically explains why no direct anchor applies. Never silently skip retrieval.
+
+          ## Independent language and cognition controls
+
+          A weaker learner may receive A1/A2 language with D2/D3 thinking. Simplify vocabulary, syntax, entity count, or instructions without deleting evidence dependency, constraint integration, inference, spatial reasoning, discourse reasoning, or plausible distractors. Difficulty must not be created merely through obscure words.
+
+          ## CAP quality floor critic
+
+          Before submission, independently check every governed item for evidence necessity, planned cognitive depth, exactly one evidence-supported answer, plausible misconception-based distractors, precedent-mechanism fidelity, and worksheet regressions. Reject decorative context, context-free comprehension, absurd distractors, accidental shallow recall, answer giveaways, and D3/D4 claims whose reasoning collapsed during simplification.
+
+          The deterministic Finisher re-runs this floor. Prompt-level self-attestation is insufficient.
+
+          ## Anti-copy
+
+          The runtime cards contain only abstracted design fields plus one-way five-word phrase fingerprints. The Finisher rejects multiple historical phrase-fingerprint overlaps for an anchored question. Transfer mechanics, never source wording.
+
+          ## Targeted repair only
+
+          CAP-floor failure repairs only the failing question/local cluster plus dependent answer/explanation and its `cap-plan` evidence. Preserve valid reading, grounding, IDs, targets, unrelated questions, and history. Re-retrieve a better anchor or restore missing reasoning/distractor structure. Existing bounded retry/failure lifecycle remains authoritative.
+
+          ## Runtime authority and provenance
+
+          Add a passed critical check `cap-provenance` whose `evidence` is valid JSON containing exactly the values published at the top of the authoritative runtime card bundle:
+
+          - `capKnowledgeVersion`
+          - `capCorpusHash`
+          - `capBundleVersion`
+          - `plannerVersion`
+          - `qualityFloorVersion`
+
+          Production must fail closed if the CAP runtime bundle is not authoritative. Never consume mock/provisional CAP knowledge and never claim CAP grounding when the authority gate is unavailable.
+          ''')
+
+          write('packages/generator/src/cap-precedent-audit.test.ts', r'''
+          import { describe, expect, it } from 'vitest'
+          import {
+            auditCapPrecedentFloor,
+            auditCapPrecedentPackage,
+            retrieveCapPrecedents,
+            type CapPrecedentRuntimeBundle,
+          } from './cap-precedent-audit.js'
+
+          const card = {
+            ref: 'cap-0123456789ab', genre: 'article_informational', primarySkill: 'local_inference', secondarySkills: [],
+            cognitiveDepth: 'D2_single_step_inference', languageDifficulty: 'A1_elementary', evidenceMode: 'text_only',
+            evidenceNecessity: 'essential', evidenceSpan: 'cross_sentence_local', reasoningOperations: ['connect evidence'],
+            questionMechanism: 'infer a result from two clues', whyTheQuestionWorks: 'context is required',
+            correctAnswerConstructionPrinciple: 'one option follows both clues', distractorStrategies: ['partial_truth'],
+            reusableDesignPrinciple: 'make two clues jointly decisive', studentFailureModes: ['uses one clue'], misconceptionsTargeted: ['partial reading'],
+            difficultyAdjustment: { simplificationConstraints: ['keep two clues'], depthAdjustmentStrategies: ['add a competing clue'] },
+            copyGuardHashes: [],
+          }
+          const runtime: CapPrecedentRuntimeBundle = {
+            version: 'test', authorityStatus: 'authoritative', capKnowledgeVersion: 'k', capCorpusHash: 'a'.repeat(64),
+            capBundleVersion: 'b', plannerVersion: 'p', qualityFloorVersion: 'q', cards: [card],
+          }
+          const provenance = JSON.stringify({ capKnowledgeVersion: 'k', capCorpusHash: 'a'.repeat(64), capBundleVersion: 'b', plannerVersion: 'p', qualityFloorVersion: 'q' })
+          const plan = (overrides = {}) => JSON.stringify({
+            learningObjective: 'infer from evidence', primarySkill: 'local_inference', secondarySkills: [],
+            targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D2_single_step_inference', evidenceMode: 'text_only',
+            evidenceSpan: 'cross_sentence_local', reasoningOperations: ['connect evidence'], precedentRefs: ['cap-0123456789ab'],
+            preservedMechanics: ['two clues jointly decide'], adaptationStrategy: ['change topic and wording'], distractorStrategies: ['partial_truth'],
+            intentionalRecall: false, noPrecedentReason: null, ...overrides,
+          })
+          const pkg = (planEvidence: string | null, question = { id: 'q1', itemType: 'inference', prompt: 'What can we infer from both clues?', options: ['A', 'B', 'C', 'D'] }) => ({
+            studentLesson: { practice: [{ stage: 'independent', questions: [question] }], homework: { questions: [] } },
+            qualityEvidence: {
+              precedentRefs: ['cap-0123456789ab'],
+              criticalChecks: [
+                { id: 'cap-provenance', passed: true, evidence: provenance },
+                ...(planEvidence ? [{ id: 'cap-plan:q1', passed: true, evidence: planEvidence }] : []),
+              ],
+            },
+          })
+
+          describe('CAP precedent deterministic quality floor', () => {
+            it('keeps the low-level unknown/missing ref primitive', () => {
+              const available = new Set(['cap-0123456789ab'])
+              expect(auditCapPrecedentFloor({ capTransferQuestionCount: 1, precedentRefs: [], availableRefs: available }).passed).toBe(false)
+              expect(auditCapPrecedentFloor({ capTransferQuestionCount: 1, precedentRefs: ['cap-0123456789ab'], availableRefs: available }).passed).toBe(true)
+            })
+
+            it('retrieves relevant anchors deterministically', () => {
+              expect(retrieveCapPrecedents(JSON.parse(plan()), runtime).map((item) => item.ref)).toEqual(['cap-0123456789ab'])
+            })
+
+            it('blocks blank-page assessment authoring when a relevant precedent exists', () => {
+              const result = auditCapPrecedentPackage(pkg(plan({ precedentRefs: [] })), runtime)
+              expect(result.findings.join('\n')).toContain('CAP_PRECEDENT_MISSING:q1')
+            })
+
+            it('requires a per-item plan and exact runtime provenance', () => {
+              expect(auditCapPrecedentPackage(pkg(null), runtime).findings.join('\n')).toContain('CAP_ITEM_PLAN_MISSING:q1')
+              const bad = pkg(plan())
+              bad.qualityEvidence.criticalChecks[0]!.evidence = JSON.stringify({ capKnowledgeVersion: 'wrong' })
+              expect(auditCapPrecedentPackage(bad, runtime).findings.join('\n')).toContain('CAP_PROVENANCE_MISMATCH')
+            })
+
+            it('allows explicit vocabulary recall without forcing CAP imitation', () => {
+              const recall = pkg(plan({ intentionalRecall: true, precedentRefs: [] }), { id: 'q1', itemType: 'vocabulary', prompt: 'brave = ?', options: ['勇敢的', '安靜的', '古老的', '昂貴的'] })
+              recall.qualityEvidence.precedentRefs = []
+              expect(auditCapPrecedentPackage(recall, runtime).passed).toBe(true)
+            })
+
+            it('rejects naked dictionary-definition prompts in normal assessment', () => {
+              const weak = pkg(plan(), { id: 'q1', itemType: 'context-clue', prompt: 'What is the meaning of brave?', options: ['A', 'B', 'C', 'D'] })
+              expect(auditCapPrecedentPackage(weak, runtime).findings.join('\n')).toContain('CAP_SHALLOW_ASSESSMENT:q1')
+            })
+
+            it('does not couple easy language to shallow cognition', () => {
+              const deepCard = { ...card, cognitiveDepth: 'D3_multi_step_synthesis', evidenceSpan: 'multi_paragraph_global' }
+              const deepRuntime = { ...runtime, cards: [deepCard] }
+              const deepPlan = plan({ targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D3_multi_step_synthesis', evidenceSpan: 'multi_paragraph_global' })
+              expect(auditCapPrecedentPackage(pkg(deepPlan), deepRuntime).passed).toBe(true)
+            })
+          })
+          ''')
+
+          write('packages/generator/src/cap-precedent-evaluation.test.ts', r'''
+          import { describe, expect, it } from 'vitest'
+          import { auditCapPrecedentFloor } from './cap-precedent-audit.js'
+
+          describe('CAP quality-floor evaluation harness', () => {
+            it('makes precedent coverage a measurable floor instead of an inspirational hint', () => {
+              const available = new Set(['cap-0123456789ab'])
+              const baseline = auditCapPrecedentFloor({ capTransferQuestionCount: 3, precedentRefs: [], availableRefs: available })
+              const grounded = auditCapPrecedentFloor({ capTransferQuestionCount: 3, precedentRefs: ['cap-0123456789ab'], availableRefs: available })
+              expect(baseline.passed).toBe(false)
+              expect(grounded.passed).toBe(true)
+              expect(baseline.findings[0]).toContain('CAP_PRECEDENT_MISSING')
+            })
+          })
+          ''')
+
+          write('tests/history-exams/precedent-cards.test.ts', r'''
+          import path from 'node:path'
+          import { describe, expect, it } from 'vitest'
+          import { buildPrecedentCards, buildPrecedentRuntimeBundle } from '../../scripts/history-exams/src/precedents/build-precedent-cards.ts'
+
+          describe('production CAP precedent cards', () => {
+            it('exposes 195 authoritative non-holdout design anchors without historical wording or source identities', () => {
+              const root = process.cwd()
+              const analyzed = path.join(root, 'history_exams/analyzed')
+              const benchmark = path.join(root, 'history_exams/benchmark')
+              const cards = buildPrecedentCards(analyzed, benchmark)
+              expect(cards).toHaveLength(195)
+              expect(new Set(cards.map((card) => card.ref)).size).toBe(195)
+              expect(cards.every((card) => /^cap-[a-f0-9]{12}$/.test(card.ref))).toBe(true)
+              expect(JSON.stringify(cards)).not.toMatch(/111-Q\d|112-Q\d|113-Q\d|114-Q\d|115-Q\d/)
+              expect(cards.every((card) => card.questionMechanism && card.reasoningOperations.length > 0 && card.reusableDesignPrinciple)).toBe(true)
+              expect(cards.every((card) => card.evidenceNecessity && card.difficultyAdjustment && Array.isArray(card.copyGuardHashes))).toBe(true)
+              const runtime = buildPrecedentRuntimeBundle(analyzed, benchmark)
+              expect(runtime.authorityStatus).toBe('authoritative')
+              expect(runtime.capCorpusHash).toMatch(/^[a-f0-9]{64}$/)
+            })
+          })
+          ''')
+
+          write('tests/history-exams/rolling-window.test.ts', r'''
+          import fs from 'node:fs'
+          import os from 'node:os'
+          import path from 'node:path'
+          import { afterEach, describe, expect, it } from 'vitest'
+          import { commitRollingWindowManifest, reconcileRollingWindow } from '../../scripts/history-exams/src/corpus/rolling-window.ts'
+
+          const roots: string[] = []
+          function fixture() {
+            const root = fs.mkdtempSync(path.join(os.tmpdir(), 'cap-window-')); roots.push(root)
+            const dirs = Object.fromEntries(['raw', 'extracted', 'analyzed', 'assets', 'agent'].map((name) => {
+              const dir = path.join(root, name); fs.mkdirSync(dir); return [name, dir]
+            })) as Record<string, string>
+            for (const id of ['111', '112', '113', '114', '115']) {
+              fs.writeFileSync(path.join(dirs.raw!, `${id}P_English.pdf`), `pdf-${id}`)
+              fs.writeFileSync(path.join(dirs.extracted!, `${id}.json`), '{}')
+              fs.writeFileSync(path.join(dirs.analyzed!, `${id}.json`), '{}')
+            }
+            return dirs
+          }
+          afterEach(() => roots.splice(0).forEach((root) => fs.rmSync(root, { recursive: true, force: true })))
+
+          describe('rolling five-year CAP corpus', () => {
+            it('reuses only a successfully sealed authoritative window and purges stale artifacts', () => {
+              const d = fixture()
+              fs.writeFileSync(path.join(d.extracted!, '110.json'), '{}'); fs.mkdirSync(path.join(d.assets!, '110'))
+              let result = reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets!, agentAnalysisDir: d.agent! })
+              expect(result.removedExamIds).toEqual(['110'])
+              expect(result.unchangedExamIds).toEqual([])
+              commitRollingWindowManifest(d.raw!, result)
+              result = reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets!, agentAnalysisDir: d.agent! })
+              expect(result.unchangedExamIds).toEqual(['111', '112', '113', '114', '115'])
+            })
+
+            it('does not seal changed PDF hashes before a successful build', () => {
+              const d = fixture()
+              const initial = reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets! })
+              commitRollingWindowManifest(d.raw!, initial)
+              fs.appendFileSync(path.join(d.raw!, '115P_English.pdf'), '-changed')
+              const first = reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets! })
+              const second = reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets! })
+              expect(first.changedExamIds).toEqual(['115'])
+              expect(second.changedExamIds).toEqual(['115'])
+            })
+
+            it('fails before derivation when a new year lacks a verified 43-item key', () => {
+              const d = fixture(); fs.rmSync(path.join(d.raw!, '111P_English.pdf')); fs.writeFileSync(path.join(d.raw!, '116P_English.pdf'), 'new')
+              expect(() => reconcileRollingWindow({ rawDir: d.raw!, extractedDir: d.extracted!, analyzedDir: d.analyzed!, assetsDir: d.assets! })).toThrow('no verified official 43-item answer key')
+            })
+          })
+          ''')
+
+          # New prompt suite inherits 2.8.0 recency/grounding behavior; CAP contract is compiled as an additional source.
+          src = Path('packages/generator/prompts/2.8.0')
+          dst = Path('packages/generator/prompts/2.9.0')
+          dst.mkdir(parents=True, exist_ok=True)
+          for name in ['01-plan.md', '02-author.md', '03-critic.md', '04-repair.md', 'README.md']:
+              text = (src / name).read_text(encoding='utf-8').replace('2.8.0', '2.9.0')
+              (dst / name).write_text(text, encoding='utf-8')
+
+          replace_once('packages/generator/src/engine-version.ts', "export const CURRENT_PROMPT_VERSION = '2.8.0'", "export const CURRENT_PROMPT_VERSION = '2.9.0'")
+
+          bundle = Path('packages/generator/src/bundle-compiler.ts')
+          bundle_text = bundle.read_text(encoding='utf-8').replace('packages/generator/prompts/2.8.0/', 'packages/generator/prompts/2.9.0/')
+          bundle.write_text(bundle_text, encoding='utf-8')
+
+          audit = Path('packages/generator/src/audit-curriculum.ts')
+          audit_text = audit.read_text(encoding='utf-8')
+          import_anchor = "import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'"
+          if "auditCapPrecedentPackage" not in audit_text:
+              audit_text = audit_text.replace(import_anchor, import_anchor + "\nimport { auditCapPrecedentPackage } from './cap-precedent-audit.js'", 1)
+          add_anchor = "  const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })\n\n"
+          cap_gate = """  if (pkg.metadata.promptVersion.includes('2.9.0')) {\n    const capAudit = auditCapPrecedentPackage(pkg)\n    for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)\n  }\n\n"""
+          if cap_gate not in audit_text:
+              if add_anchor not in audit_text: raise SystemExit('audit add anchor missing')
+              audit_text = audit_text.replace(add_anchor, add_anchor + cap_gate, 1)
+          audit.write_text(audit_text, encoding='utf-8')
+
+          index = Path('packages/generator/src/index.ts')
+          index_text = index.read_text(encoding='utf-8')
+          export_anchor = "export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'\n"
+          cap_exports = "export { auditCapPrecedentFloor, auditCapPrecedentPackage, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'\nexport type { CapAssessmentIntent, CapAssessmentPlan, CapDesignAnchor, CapPrecedentAuditResult, CapPrecedentRuntimeBundle } from './cap-precedent-audit.js'\n"
+          if cap_exports not in index_text:
+              if export_anchor not in index_text: raise SystemExit('index export anchor missing')
+              index_text = index_text.replace(export_anchor, export_anchor + cap_exports, 1)
+          index.write_text(index_text, encoding='utf-8')
+
+          cli = Path('scripts/history-exams/src/cli.ts')
+          cli_text = cli.read_text(encoding='utf-8')
+          cli_text = cli_text.replace("import { reconcileRollingWindow } from './corpus/rolling-window.ts';", "import { commitRollingWindowManifest, reconcileRollingWindow } from './corpus/rolling-window.ts';")
+          cli_text = cli_text.replace("      rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);\n", "", 1)
+          start = cli_text.index("    case 'build': {")
+          end = cli_text.index("    case 'reconcile': {", start)
+          block = cli_text[start:end]
+          analysis_anchor = """      await runAnalysisPipeline({
+        extractedDir,
+        analyzedDir,
+        providerName,
+        modelName,
+        concurrency,
+        force: false,
+        allowOfflineMock: allowProvisionalMock,
+      });
+"""
+          if "rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);" not in block:
+              if analysis_anchor not in block: raise SystemExit('build analysis anchor missing')
+              block = block.replace(analysis_anchor, analysis_anchor + "      rotateHoldoutManifest(analyzedDir, benchmarkDir, rolling.examIds);\n", 1)
+          block = block.replace("      writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'));\n", "")
+          block = block.replace("      if (!report.valid) {", "      if (!report.valid || !report.authorityEligible || report.authorityStatus !== 'authoritative') {")
+          success_anchor = "      console.log(`[history-exams] Complete digestion pipeline successfully built, validated, and spot-check/pilot reports generated!`);"
+          final_steps = """      writePrecedentCards(
+        analyzedDir,
+        benchmarkDir,
+        path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'),
+        path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'),
+      );
+      commitRollingWindowManifest(rawDir, rolling);
+"""
+          if final_steps not in block:
+              if success_anchor not in block: raise SystemExit('build success anchor missing')
+              block = block.replace(success_anchor, final_steps + success_anchor, 1)
+          cli_text = cli_text[:start] + block + cli_text[end:]
+          old_precedents = "const cards = writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'));"
+          new_precedents = "const cards = writePrecedentCards(analyzedDir, benchmarkDir, path.resolve(rootDir, 'packages/generator/curriculum/cap-precedent-cards.json'), path.resolve(rootDir, 'history_exams/knowledge/cap-precedent-index.json'));"
+          cli_text = cli_text.replace(old_precedents, new_precedents)
+          cli.write_text(cli_text, encoding='utf-8')
+
+          schedule = Path('docs/chatgpt-work-daily-schedule.md')
+          schedule_text = schedule.read_text(encoding='utf-8').replace('Engine 1.4.0 / Prompt 2.8.0', 'Engine 1.4.0 / Prompt 2.9.0')
+          schedule.write_text(schedule_text, encoding='utf-8')
+
+          spec = Path('docs/SPEC.md')
+          spec_text = spec.read_text(encoding='utf-8')
+          old_cap_source = "Historical CAP English exam design knowledge (taxonomy, question recipes, distractor patterns, cognitive depth framework, and benchmark foundation) lives independently under `history_exams/` and `docs/history-exams/` as an assessment-design reference."
+          new_cap_source = old_cap_source + "\n\nProduction assessment authoring consumes only the deterministically compiled **authoritative non-holdout CAP runtime bundle**. Raw historical PDFs and heavy visual assets never enter normal weekly generation. For normal assessment/application/comprehension items, a relevant authentic CAP precedent is a required design anchor rather than optional inspiration; intentional vocabulary/grammar retrieval remains exempt when explicitly planned as retrieval."
+          if old_cap_source in spec_text and new_cap_source not in spec_text:
+              spec_text = spec_text.replace(old_cap_source, new_cap_source, 1)
+          validation_anchor = "* required grounding accuracy and copyright critical checks pass."
+          cap_validation = """* required grounding accuracy and copyright critical checks pass.
+* Prompt 2.9+ normal assessment/application/comprehension items have per-item CAP assessment plans; relevant authoritative precedent retrieval cannot be silently skipped.
+* package-level CAP precedent refs equal the union of per-item refs and resolve only to the authoritative non-holdout runtime bundle.
+* CAP language difficulty and cognitive depth are validated independently; simplifying English must not silently erase planned reasoning.
+* deterministic CAP copy-fingerprint and shallow-assessment checks pass before rendering."""
+          if validation_anchor in spec_text and 'per-item CAP assessment plans' not in spec_text:
+              spec_text = spec_text.replace(validation_anchor, cap_validation, 1)
+          section_206 = "\n# 206. Core Architectural Summary"
+          cap_agent_rules = """
+24. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP design anchors before writing the item, and preserve mechanics rather than wording.
+25. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
+26. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
+27. The deterministic Finisher must fail closed on missing/unknown CAP refs, authority/provenance mismatch, blank-page authoring when a relevant precedent exists, copy overlap, or accidental shallow assessment; repair only the failing item/local cluster.
+"""
+          if section_206 in spec_text and 'normal assessment/application/comprehension authoring is precedent-first' not in spec_text:
+              spec_text = spec_text.replace(section_206, cap_agent_rules + section_206, 1)
+          spec.write_text(spec_text, encoding='utf-8')
+          PY
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Verify existing CAP authority before runtime compilation
+        run: pnpm history-exams validate
+
+      - name: Build authoritative rich precedent runtime and debug index
+        run: pnpm history-exams precedents
+
+      - name: Compile production authoring bundle
+        run: pnpm compile:bundle
+
+      - name: Focused CAP regression suite
+        run: pnpm exec vitest run tests/history-exams/rolling-window.test.ts tests/history-exams/precedent-cards.test.ts packages/generator/src/cap-precedent-audit.test.ts packages/generator/src/cap-precedent-evaluation.test.ts packages/generator/src/bundle-compiler.test.ts
+
+      - name: Validate CAP corpus after runtime compilation
+        run: pnpm history-exams validate
+
+      - name: Install Traditional Chinese PDF fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          sudo fc-cache -f
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @paper-english/pdf pdf:install
+
+      - name: Full verification
+        run: |
+          pnpm lint
+          pnpm test
+          pnpm typecheck
+          pnpm build
+          pnpm compile:bundle
+          pnpm generate:synthetic
+          git diff --check
+
+      - name: Seal rolling window only after authoritative/full verification
+        run: |
+          pnpm exec tsx -e "import path from 'node:path'; import { reconcileRollingWindow, commitRollingWindowManifest } from './scripts/history-exams/src/corpus/rolling-window.ts'; const root=process.cwd(); const result=reconcileRollingWindow({rawDir:path.resolve(root,'history_exams/raw'), extractedDir:path.resolve(root,'history_exams/extracted'), analyzedDir:path.resolve(root,'history_exams/analyzed'), assetsDir:path.resolve(root,'history_exams/assets'), agentAnalysisDir:path.resolve(root,'history_exams/agent_analysis')}); commitRollingWindowManifest(path.resolve(root,'history_exams/raw'), result);"
+          pnpm exec tsx -e "import path from 'node:path'; import { reconcileRollingWindow } from './scripts/history-exams/src/corpus/rolling-window.ts'; const root=process.cwd(); const result=reconcileRollingWindow({rawDir:path.resolve(root,'history_exams/raw'), extractedDir:path.resolve(root,'history_exams/extracted'), analyzedDir:path.resolve(root,'history_exams/analyzed'), assetsDir:path.resolve(root,'history_exams/assets'), agentAnalysisDir:path.resolve(root,'history_exams/agent_analysis')}); if(result.unchangedExamIds.join(',') !== '111,112,113,114,115' || result.changedExamIds.length) throw new Error('rolling window did not reuse all five sealed years'); console.log(JSON.stringify(result));"
+
+      - name: Commit verified production integration
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/SPEC.md docs/chatgpt-work-daily-schedule.md history_exams/rolling-window-manifest.json history_exams/knowledge/cap-precedent-index.json packages/generator scripts/history-exams tests/history-exams
+          git commit -m "feat(generator): enforce CAP precedent-first production quality floor"
+          git push origin HEAD:feat/cap-chatgpt-deep-digestion
