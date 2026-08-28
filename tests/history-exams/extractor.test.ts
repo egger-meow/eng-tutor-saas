@@ -14,12 +14,7 @@ let outputDir: string;
 beforeAll(async () => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cap-extractor-test-'));
   outputDir = path.join(tmpDir, 'extracted');
-  await runExtractionPipeline({
-    rawDir: RAW_DIR,
-    outputDir,
-    assetsDir: ASSETS_DIR,
-    renderImages: false,
-  });
+  await runExtractionPipeline({ rawDir: RAW_DIR, outputDir, assetsDir: ASSETS_DIR, renderImages: false });
 }, 60_000);
 
 afterAll(() => {
@@ -79,7 +74,6 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
   it('parses dual-document Icelandic opinion articles with sub-documents and split glossary', () => {
     const content = JSON.parse(fs.readFileSync(path.join(outputDir, '115.json'), 'utf-8'));
     const pIce = content.passages.find((p: any) => p.id === '115-p35-39');
-
     expect(pIce.genre).toBe('multi_document_comparison');
     expect(pIce.evidenceMode).toBe('multi_document');
     expect(pIce.subDocuments?.length).toBe(2);
@@ -95,9 +89,11 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     const y113 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '113.json'), 'utf-8')));
     const y114 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '114.json'), 'utf-8')));
     const y115 = ExtractedExamSchema.parse(JSON.parse(fs.readFileSync(path.join(outputDir, '115.json'), 'utf-8')));
-
     const q = (exam: any, n: number) => exam.questions.find((item: any) => item.questionNumber === n);
     const passage = (exam: any, id: string) => exam.passages.find((item: any) => item.id === id);
+
+    const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
+    console.log('FRESH_VISUAL_REQUIRED', allQuestions.filter((item: any) => item.visualEvidenceRequired).map((item: any) => `${item.examId}-Q${item.questionNumber}`).join(','));
 
     expect(q(y111, 21).stem).toBe('What does Tea-Rock celebrate?');
     expect(q(y111, 21).options.C).toBe('Their 20th year of business.');
@@ -106,9 +102,7 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     expect(q(y111, 41).visualEvidenceRequired).toBe(true);
     expect(passage(y111, '111-p23-24').text).toContain('rice milk');
 
-    for (const n of [24, 25, 26, 27, 28, 29]) {
-      expect(q(y112, n).visualEvidenceRequired).toBe(true);
-    }
+    for (const n of [24, 25, 26, 27, 28, 29]) expect(q(y112, n).visualEvidenceRequired).toBe(true);
     expect(passage(y112, '112-p24-25').text).toContain("Four Seasons' Kitchen");
     expect(passage(y112, '112-p26-27').text).toContain("Birds don't care");
     expect(passage(y112, '112-p28-29').text).toContain('4.6');
@@ -120,9 +114,7 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
 
     expect(q(y114, 23).options.C).toContain("Ivy is still telling them about her baby");
     expect(q(y114, 27).stem).toBe('What do we learn from the first paragraph?');
-    for (const n of [29, 30, 31]) {
-      expect(q(y114, n).visualEvidenceRequired).toBe(true);
-    }
+    for (const n of [29, 30, 31]) expect(q(y114, n).visualEvidenceRequired).toBe(true);
     expect(q(y114, 36).visualEvidenceRequired).toBe(true);
 
     expect(q(y115, 26).answer).toBe('C');
@@ -130,14 +122,10 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     expect(q(y115, 30).evidenceMode).toBe('text_only');
     expect(q(y115, 30).visualEvidenceRequired).toBe(false);
 
-    const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
-    console.log('FRESH_VISUAL_REQUIRED', allQuestions.filter((item: any) => item.visualEvidenceRequired).map((item: any) => `${item.examId}-Q${item.questionNumber}`).join(','));
     expect(allQuestions.filter((item: any) => item.visualEvidenceRequired)).toHaveLength(40);
     for (const item of allQuestions) {
       expect(item.stem).not.toMatch(/\[Option [A-D]\]|\(Comprehension question \d+\)/);
-      for (const option of Object.values(item.options)) {
-        expect(String(option)).not.toMatch(/^\[Option [A-D]\]$/);
-      }
+      for (const option of Object.values(item.options)) expect(String(option)).not.toMatch(/^\[Option [A-D]\]$/);
     }
   });
 });
