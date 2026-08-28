@@ -31,6 +31,11 @@ describe('Historical CAP English Exam Pipeline Smoke Test', () => {
       const spotCheckPath = path.join(testRoot, 'spot-check-report.md');
       const pilotReviewPath = path.join(testRoot, 'pilot-review.md');
       fs.cpSync(path.resolve(__dirname, '../../history_exams/raw'), rawDir, { recursive: true });
+      fs.mkdirSync(benchmarkDir, { recursive: true });
+      fs.copyFileSync(
+        path.resolve(__dirname, '../../history_exams/benchmark/holdout-manifest.json'),
+        path.join(benchmarkDir, 'holdout-manifest.json')
+      );
 
       // 1. Extract & Render
       const extractResults = await runExtractionPipeline({
