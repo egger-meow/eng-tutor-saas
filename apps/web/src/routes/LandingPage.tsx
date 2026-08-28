@@ -5,6 +5,7 @@ import { PublicFooter } from '../components/layout/PublicFooter'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { FounderSummary } from '../components/public/FounderSummary'
 import { PricingSection } from '../components/public/PricingSection'
+import { CoreBrainsSection } from '../components/public/CoreBrainsSection'
 import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
@@ -154,6 +155,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <span>Week 1</span><b>→</b><span>回饋與學習記憶</span><b>→</b><span>Week 2 更貼合</span><b>→</b><span>系統持續升級</span>
           </FadeInUp>
         </section>
+
+        <CoreBrainsSection />
 
         <section className="public-section deliverables-section" id="samples">
           <FadeInUp reveal="pop" className="section-heading">
