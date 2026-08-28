@@ -7,8 +7,8 @@ import { HoldoutManifestSchema } from '../schemas/benchmark.ts'
 import { ExtractedExamSchema } from '../schemas/extracted.ts'
 
 const RUNTIME_VERSION = '1.1.0'
-const PLANNER_VERSION = 'cap-planner-1.0.0'
-const QUALITY_FLOOR_VERSION = 'cap-floor-1.0.0'
+const PLANNER_VERSION = 'cap-planner-1.1.0'
+const QUALITY_FLOOR_VERSION = 'cap-floor-1.1.0'
 
 export interface PrecedentCard {
   ref: string

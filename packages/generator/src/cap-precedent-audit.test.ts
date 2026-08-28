@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import {
   auditCapPrecedentFloor,
@@ -25,7 +26,7 @@ const plan = (overrides = {}) => JSON.stringify({
   learningObjective: 'infer from evidence', primarySkill: 'local_inference', secondarySkills: [],
   targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D2_single_step_inference', evidenceMode: 'text_only',
   evidenceSpan: 'cross_sentence_local', reasoningOperations: ['connect evidence'], precedentRefs: ['cap-0123456789ab'],
-  preservedMechanics: ['two clues jointly decide'], adaptationStrategy: ['change topic and wording'], distractorStrategies: ['partial_truth'],
+  precedentMode: 'anchor', borrowedDesignPrinciples: ['two clues jointly decide'], distractorStrategies: ['partial_truth'],
   intentionalRecall: false, noPrecedentReason: null, ...overrides,
 })
 const pkg = (planEvidence: string | null, question = { id: 'q1', itemType: 'inference', prompt: 'What can we infer from both clues?', options: ['A', 'B', 'C', 'D'] }) => ({
@@ -50,6 +51,68 @@ describe('CAP precedent deterministic quality floor', () => {
     expect(retrieveCapPrecedents(JSON.parse(plan()), runtime).map((item) => item.ref)).toEqual(['cap-0123456789ab'])
   })
 
+  it('surfaces structurally useful precedents without exact primary-skill equality', () => {
+    const structuralCard = {
+      ...card,
+      ref: 'cap-111111111111',
+      primarySkill: 'information_integration',
+      genre: 'multi_document_comparison',
+      cognitiveDepth: 'D3_multi_step_synthesis',
+      evidenceMode: 'multi_document',
+      evidenceSpan: 'multi_paragraph_global',
+      reasoningOperations: ['compare claims across two sources'],
+      distractorStrategies: ['partial_truth', 'unsupported_world_knowledge'],
+    }
+    const structuralRuntime = { ...runtime, cards: [structuralCard] }
+    const intent = {
+      ...JSON.parse(plan()),
+      primarySkill: 'author_purpose',
+      genre: 'multi_document_comparison',
+      targetCognitiveDepth: 'D3_multi_step_synthesis',
+      evidenceMode: 'multi_document',
+      evidenceSpan: 'cross_sentence_local',
+      reasoningOperations: ['compare claims across two sources'],
+      distractorStrategies: ['unsupported_world_knowledge'],
+    }
+    expect(retrieveCapPrecedents(intent, structuralRuntime).map((item) => item.ref)).toEqual(['cap-111111111111'])
+  })
+
+  it('varies equally strong candidates deterministically and softly down-ranks recent refs', () => {
+    const tiedRuntime = {
+      ...runtime,
+      cards: [
+        card,
+        { ...card, ref: 'cap-111111111111' },
+        { ...card, ref: 'cap-222222222222' },
+      ],
+    }
+    const intent = JSON.parse(plan())
+    const first = retrieveCapPrecedents(intent, tiedRuntime, 1, { selectionKey: 'packet-a' })[0]!.ref
+    const second = retrieveCapPrecedents(intent, tiedRuntime, 1, { selectionKey: 'packet-b' })[0]!.ref
+    expect(first).not.toBe(second)
+    expect(retrieveCapPrecedents(intent, tiedRuntime, 1, {
+      selectionKey: 'packet-a',
+      recentPrecedentRefs: [first],
+    })[0]!.ref).not.toBe(first)
+  })
+
+  it.each([
+    ['anchor', { borrowedDesignPrinciples: ['make two independent clues jointly decisive'] }],
+    ['blend', { synthesizedDesignPrinciples: ['combine cross-source comparison with causal elimination'] }],
+    ['calibration', { benchmarkQualities: ['requires evidence integration and plausible partial-truth distractors'], noveltyRationale: 'Uses a new evidence arrangement while preserving the same or higher reasoning demand.' }],
+  ])('accepts %s mode without requiring structural imitation', (precedentMode, modeEvidence) => {
+    const modePlan = plan({
+      precedentMode,
+      ...modeEvidence,
+      preservedMechanics: undefined,
+      adaptationStrategy: undefined,
+      primarySkill: precedentMode === 'calibration' ? 'author_purpose' : 'local_inference',
+      evidenceMode: precedentMode === 'calibration' ? 'multi_document' : 'text_only',
+      evidenceSpan: precedentMode === 'calibration' ? 'multi_paragraph_global' : 'cross_sentence_local',
+    })
+    expect(auditCapPrecedentPackage(pkg(modePlan), runtime).passed).toBe(true)
+  })
+
   it('blocks blank-page assessment authoring when a relevant precedent exists', () => {
     expect(auditCapPrecedentPackage(pkg(plan({ precedentRefs: [] })), runtime).findings.join('\n')).toContain('CAP_PRECEDENT_MISSING:q1')
   })
@@ -67,6 +130,23 @@ describe('CAP precedent deterministic quality floor', () => {
     expect(auditCapPrecedentPackage(recall, runtime).passed).toBe(true)
   })
 
+  it('keeps unknown refs and historical wording overlap fail-closed', () => {
+    const unknown = pkg(plan({ precedentMode: 'anchor', borrowedDesignPrinciples: ['use two clues'], precedentRefs: ['cap-ffffffffffff'] }))
+    unknown.qualityEvidence.precedentRefs = ['cap-ffffffffffff']
+    expect(auditCapPrecedentPackage(unknown, runtime).findings.join('\n')).toContain('CAP_PRECEDENT_UNKNOWN:q1:cap-ffffffffffff')
+
+    const copiedText = 'wet streets made people close their bright umbrellas quickly'
+    const tokens = copiedText.split(' ')
+    const copyGuardHashes = Array.from({ length: tokens.length - 4 }, (_, index) =>
+      createHash('sha256').update(tokens.slice(index, index + 5).join(' ')).digest('hex').slice(0, 16),
+    )
+    const copiedRuntime = { ...runtime, cards: [{ ...card, copyGuardHashes }] }
+    const copied = pkg(plan({ precedentMode: 'anchor', borrowedDesignPrinciples: ['two clues jointly decide'] }), {
+      id: 'q1', itemType: 'inference', prompt: copiedText, options: ['A', 'B', 'C', 'D'],
+    })
+    expect(auditCapPrecedentPackage(copied, copiedRuntime).findings.join('\n')).toContain('CAP_COPY_OVERLAP:q1')
+  })
+
   it('rejects naked dictionary-definition prompts in normal assessment', () => {
     const weak = pkg(plan(), { id: 'q1', itemType: 'context-clue', prompt: 'What is the meaning of brave?', options: ['A', 'B', 'C', 'D'] })
     expect(auditCapPrecedentPackage(weak, runtime).findings.join('\n')).toContain('CAP_SHALLOW_ASSESSMENT:q1')
@@ -77,5 +157,42 @@ describe('CAP precedent deterministic quality floor', () => {
     const deepRuntime = { ...runtime, cards: [deepCard] }
     const deepPlan = plan({ targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D3_multi_step_synthesis', evidenceSpan: 'multi_paragraph_global' })
     expect(auditCapPrecedentPackage(pkg(deepPlan), deepRuntime).passed).toBe(true)
+  })
+
+  it('rejects D3/D4 collapse even in calibration mode', () => {
+    const collapsed = plan({
+      precedentMode: 'calibration',
+      benchmarkQualities: ['multi-step synthesis'],
+      noveltyRationale: 'A new structure intended to maintain multi-step reasoning.',
+      targetCognitiveDepth: 'D3_multi_step_synthesis',
+      evidenceSpan: 'single_clause',
+    })
+    expect(auditCapPrecedentPackage(pkg(collapsed), runtime).findings.join('\n')).toContain('CAP_DEPTH_COLLAPSE:q1')
+  })
+
+  it('allows one precedent across materially different items without a ref-count failure', () => {
+    const questions = ['q1', 'q2', 'q3', 'q4'].map((id, index) => ({
+      id,
+      itemType: index % 2 === 0 ? 'inference' : 'author-purpose',
+      prompt: `Question ${index + 1} uses a materially different evidence arrangement.`,
+      options: ['A', 'B', 'C', 'D'],
+    }))
+    const repeated = pkg(null)
+    repeated.studentLesson.practice = [{ stage: 'independent', questions }]
+    repeated.qualityEvidence.criticalChecks.push(...questions.map((question, index) => ({
+      id: `cap-plan:${question.id}`,
+      passed: true,
+      evidence: plan({
+        precedentMode: index === 0 ? 'anchor' : index === 1 ? 'blend' : 'calibration',
+        borrowedDesignPrinciples: index === 0 ? ['joint evidence'] : undefined,
+        synthesizedDesignPrinciples: index === 1 ? ['causal elimination plus evidence integration'] : undefined,
+        benchmarkQualities: index >= 2 ? ['plausible distractors and evidence-based reasoning'] : undefined,
+        noveltyRationale: index >= 2 ? `Novel arrangement ${index} preserves the quality floor.` : undefined,
+        preservedMechanics: undefined,
+        adaptationStrategy: undefined,
+      }),
+    })))
+    expect(auditCapPrecedentPackage(repeated, runtime).findings).not.toContain('CAP_PRECEDENT_MONOCULTURE: four or more assessment items cannot all reuse one design anchor')
+    expect(auditCapPrecedentPackage(repeated, runtime).passed).toBe(true)
   })
 })

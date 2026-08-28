@@ -313,7 +313,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     }))
   })
 
-  it('excludes immediately previous production release (Engine 1.3.0 / Schema 2.3.0 / Prompt 2.7.0) from drift against current 1.4.0 / 2.9.0 release', async () => {
+  it('excludes immediately previous production release (Engine 1.3.0 / Schema 2.3.0 / Prompt 2.7.0) from drift against current 1.4.0 / 2.9.1 release', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-prev', display_name: 'Previous Release Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
@@ -420,7 +420,7 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(overview.engineInspector.alignmentStatus).toBe('aligned')
   })
 
-  it('proves a freshly completed Engine 1.4.0 / Prompt 2.9.0 material produces a fully ALIGNED inspector', async () => {
+  it('proves a freshly completed Engine 1.4.0 / Prompt 2.9.1 material produces a fully ALIGNED inspector', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-fresh', display_name: 'Fresh Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
@@ -1362,7 +1362,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       // 4. Central Engine Versioning & Dynamic Label Formatting
       expect(CURRENT_ENGINE_VERSION).toBe('1.4.0')
       expect(CURRENT_SCHEMA_VERSION).toBe('2.3.0')
-      expect(CURRENT_PROMPT_VERSION).toBe('2.9.0')
+      expect(CURRENT_PROMPT_VERSION).toBe('2.9.1')
       expect(CURRENT_ERA_TAG).toBe('engine_v1')
       expect(formatEngineVersion()).toBe('Engine v1.4.0')
       expect(formatEngineVersion('1.0.0')).toBe('Engine v1.0.0')
@@ -1557,7 +1557,7 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(currentExport.provenance.currentEraName).toBe('Engine v1.4.0')
       expect(currentExport.provenance.currentEngineVersion).toBe('1.4.0')
       expect(currentExport.provenance.currentSchemaVersion).toBe('2.3.0')
-      expect(currentExport.provenance.currentPromptVersion).toBe('2.9.0')
+      expect(currentExport.provenance.currentPromptVersion).toBe('2.9.1')
     })
   })
 
@@ -2266,4 +2266,3 @@ describe('AdminService Authoritative Truth Layer', () => {
     })
   })
 })
-

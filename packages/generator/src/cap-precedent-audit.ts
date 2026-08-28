@@ -51,6 +51,7 @@ export interface CapAssessmentIntent {
   learningObjective: string
   primarySkill: string
   secondarySkills?: string[]
+  genre?: string
   targetLanguageDifficulty: string
   targetCognitiveDepth: string
   evidenceMode: string
@@ -61,11 +62,24 @@ export interface CapAssessmentIntent {
 
 export interface CapAssessmentPlan extends CapAssessmentIntent {
   precedentRefs: string[]
-  preservedMechanics: string[]
-  adaptationStrategy: string[]
+  precedentMode: 'anchor' | 'blend' | 'calibration'
+  borrowedDesignPrinciples?: string[]
+  synthesizedDesignPrinciples?: string[]
+  benchmarkQualities?: string[]
+  noveltyRationale?: string
+  /** Prompt 2.9.0 compatibility only; structural imitation is not required in 2.9.1. */
+  preservedMechanics?: string[]
+  /** Prompt 2.9.0 compatibility only; mode-specific evidence supersedes it. */
+  adaptationStrategy?: string[]
   distractorStrategies: string[]
   intentionalRecall?: boolean
   noPrecedentReason?: string | null
+}
+
+export interface CapRetrievalPreferences {
+  selectionKey?: string
+  recentPrecedentRefs?: readonly string[]
+  recentMechanisms?: readonly string[]
 }
 
 interface QuestionLike {
@@ -130,12 +144,34 @@ function scoreAnchor(intent: CapAssessmentIntent, card: CapDesignAnchor): number
   if (card.evidenceSpan === intent.evidenceSpan) score += 2
   if (card.evidenceMode === intent.evidenceMode) score += 1
   if (card.languageDifficulty === intent.targetLanguageDifficulty) score += 1
+  if (intent.genre && card.genre === intent.genre) score += 2
 
   const secondary = new Set(intent.secondarySkills ?? [])
   score += card.secondarySkills.filter((skill) => secondary.has(skill)).length
   const distractors = new Set(intent.distractorStrategies ?? [])
   score += card.distractorStrategies.filter((strategy) => distractors.has(strategy)).length * 0.5
+  const operations = new Set(intent.reasoningOperations.map((operation) => operation.trim().toLowerCase()))
+  score += card.reasoningOperations.filter((operation) => operations.has(operation.trim().toLowerCase())).length * 3
   return score
+}
+
+function stableRotation(key: string, length: number): number {
+  if (length <= 1) return 0
+  return Number.parseInt(hash(key).slice(0, 8), 16) % length
+}
+
+function rotateEqualScoreGroups<T extends { score: number }>(entries: T[], selectionKey?: string): T[] {
+  if (!selectionKey) return entries
+  const result: T[] = []
+  for (let start = 0; start < entries.length;) {
+    let end = start + 1
+    while (end < entries.length && entries[end]!.score === entries[start]!.score) end += 1
+    const group = entries.slice(start, end)
+    const offset = stableRotation(`${selectionKey}:${entries[start]!.score}`, group.length)
+    result.push(...group.slice(offset), ...group.slice(0, offset))
+    start = end
+  }
+  return result
 }
 
 /** Deterministic compact-index retrieval. Returns at most five design anchors. */
@@ -143,14 +179,48 @@ export function retrieveCapPrecedents(
   intent: CapAssessmentIntent,
   bundle: CapPrecedentRuntimeBundle = runtime,
   limit = 5,
+  preferences: CapRetrievalPreferences = {},
 ): CapDesignAnchor[] {
   if (bundle.authorityStatus !== 'authoritative') return []
-  return bundle.cards
-    .map((card) => ({ card, score: scoreAnchor(intent, card) }))
+  const recentRefs = new Set(preferences.recentPrecedentRefs ?? [])
+  const recentMechanisms = new Set((preferences.recentMechanisms ?? []).map((item) => item.trim().toLowerCase()))
+  const ranked = bundle.cards
+    .map((card) => ({
+      card,
+      score: scoreAnchor(intent, card)
+        - (recentRefs.has(card.ref) ? 0.75 : 0)
+        - (recentMechanisms.has(card.questionMechanism.trim().toLowerCase()) ? 0.5 : 0),
+    }))
     .filter((entry) => entry.score >= 6)
     .sort((a, b) => b.score - a.score || a.card.ref.localeCompare(b.card.ref))
+  return rotateEqualScoreGroups(ranked, preferences.selectionKey)
     .slice(0, Math.max(1, Math.min(5, limit)))
     .map((entry) => entry.card)
+}
+
+function isRelevantPrecedent(intent: CapAssessmentIntent, card: CapDesignAnchor): boolean {
+  const skills = new Set([intent.primarySkill, ...(intent.secondarySkills ?? [])])
+  const operations = new Set(intent.reasoningOperations.map((item) => item.trim().toLowerCase()))
+  const distractors = new Set(intent.distractorStrategies ?? [])
+  const signals = [
+    skills.has(card.primarySkill) || card.secondarySkills.some((skill) => skills.has(skill)),
+    card.reasoningOperations.some((operation) => operations.has(operation.trim().toLowerCase())),
+    card.evidenceMode === intent.evidenceMode,
+    card.evidenceSpan === intent.evidenceSpan,
+    Boolean(intent.genre && card.genre === intent.genre),
+    card.distractorStrategies.some((strategy) => distractors.has(strategy)),
+    Math.abs((DEPTH_RANK[card.cognitiveDepth] ?? 0) - (DEPTH_RANK[intent.targetCognitiveDepth] ?? 0)) <= 1,
+  ].filter(Boolean).length
+  return signals >= 2
+}
+
+function hasModeEvidence(plan: CapAssessmentPlan): boolean {
+  if (plan.precedentMode === 'anchor') return Boolean(plan.borrowedDesignPrinciples?.some((item) => item.trim()))
+  if (plan.precedentMode === 'blend') return Boolean(plan.synthesizedDesignPrinciples?.some((item) => item.trim()))
+  if (plan.precedentMode === 'calibration') {
+    return Boolean(plan.benchmarkQualities?.some((item) => item.trim()) && plan.noveltyRationale?.trim())
+  }
+  return false
 }
 
 function governedAssessmentItems(pkg: PackageLike): Array<{ stage: string; question: QuestionLike }> {
@@ -219,8 +289,11 @@ export function auditCapPrecedentPackage(
     if (!plan.learningObjective?.trim() || !plan.primarySkill?.trim() || !plan.targetLanguageDifficulty?.trim() || !plan.targetCognitiveDepth?.trim()) {
       findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: learning objective, skill, language difficulty, and cognitive depth are required`)
     }
-    if (!Array.isArray(plan.reasoningOperations) || plan.reasoningOperations.length === 0 || !Array.isArray(plan.preservedMechanics) || plan.preservedMechanics.length === 0 || !Array.isArray(plan.adaptationStrategy) || plan.adaptationStrategy.length === 0) {
-      findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: reasoning, preserved mechanics, and adaptation strategy are required`)
+    if (!Array.isArray(plan.reasoningOperations) || plan.reasoningOperations.length === 0) {
+      findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: reasoning operations are required`)
+    }
+    if (!hasModeEvidence(plan)) {
+      findings.push(`CAP_PRECEDENT_MODE_INVALID:${question.id}: anchor, blend, or calibration mode requires its specific CAP-use evidence`)
     }
 
     if (plan.intentionalRecall === true) {
@@ -251,17 +324,8 @@ export function auditCapPrecedentPackage(
       referenced.push(card)
     }
 
-    if (referenced.length > 0 && !referenced.some((card) => card.primarySkill === plan.primarySkill)) {
-      findings.push(`CAP_PRECEDENT_SKILL_MISMATCH:${question.id}: at least one anchor must match the planned primary skill`)
-    }
-    for (const card of referenced) {
-      const target = DEPTH_RANK[plan.targetCognitiveDepth]
-      const source = DEPTH_RANK[card.cognitiveDepth]
-      if (target && source && Math.abs(target - source) > 1) {
-        findings.push(`CAP_PRECEDENT_DEPTH_MISMATCH:${question.id}:${card.ref}: anchor depth is too far from the planned depth`)
-      } else if (target && source && target !== source && !plan.adaptationStrategy.some((item) => /depth|reason|推理|深度/i.test(item))) {
-        findings.push(`CAP_DEPTH_ADAPTATION_UNEXPLAINED:${question.id}:${card.ref}: adjacent-depth adaptation must explicitly explain reasoning-depth preservation/change`)
-      }
+    if (referenced.length > 0 && !referenced.some((card) => isRelevantPrecedent(plan, card))) {
+      findings.push(`CAP_PRECEDENT_IRRELEVANT:${question.id}: consultation must be relevant by skill or reasoning/evidence/distractor structure`)
     }
 
     if (question.options?.length === 4 && (!plan.distractorStrategies || plan.distractorStrategies.length === 0)) {
@@ -297,10 +361,6 @@ export function auditCapPrecedentPackage(
   const extraAggregateRefs = [...packageRefs].filter((ref) => !planRefs.has(ref))
   if (missingAggregateRefs.length > 0 || extraAggregateRefs.length > 0) {
     findings.push('CAP_PROVENANCE_INCONSISTENT: qualityEvidence.precedentRefs must equal the union of per-item cap-plan precedentRefs')
-  }
-
-  if (requiredItems.length >= 4 && planRefs.size === 1) {
-    findings.push('CAP_PRECEDENT_MONOCULTURE: four or more assessment items cannot all reuse one design anchor')
   }
 
   return { passed: findings.length === 0, findings }

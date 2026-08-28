@@ -216,7 +216,7 @@ export async function compileProductionBundle(
   const readPromptStage = async (fileName: string) => {
     const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
       .replaceAll('2.2.0', '2.3.0')
-      .replaceAll('2.4.0', '2.9.0')
+      .replaceAll('2.4.0', '2.9.1')
     const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
     const workloadOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.6.0/${fileName}`), 'utf8')
     const mcqOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.7.0/${fileName}`), 'utf8')
@@ -238,9 +238,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.9.0-prod',
+    bundleVersion: '2.9.1-prod',
     schemaVersion: '2.3.0',
-    promptVersion: '2.9.0',
+    promptVersion: '2.9.1',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,

@@ -217,7 +217,7 @@ export function auditCurriculumPackage(
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
-  if (pkg.metadata.promptVersion.includes('2.9.0')) {
+  if (pkg.metadata.promptVersion.startsWith('2.9')) {
     const capAudit = auditCapPrecedentPackage(pkg)
     for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)
   }
