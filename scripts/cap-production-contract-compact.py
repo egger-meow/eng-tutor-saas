@@ -1,6 +1,7 @@
 from pathlib import Path
 
-Path('packages/generator/curriculum/cap-precedent-contract.md').write_text('''# CAP Precedent-First Assessment Contract
+path = Path('packages/generator/curriculum/cap-precedent-contract.md')
+text = '''# CAP Precedent-First Assessment Contract
 
 ## Invariant
 
@@ -33,4 +34,10 @@ Repair only the failing item/local cluster and dependent answer/explanation/plan
 ## Authority and provenance
 
 A passed `cap-provenance` check encodes exact `capKnowledgeVersion`, `capCorpusHash`, `capBundleVersion`, `plannerVersion`, and `qualityFloorVersion`. Production fails closed without authoritative CAP runtime; provisional/mock knowledge is forbidden.
-''', encoding='utf-8')
+'''
+
+# One-shot integration helper: keep the production prompt compact instead of relaxing the bundle budget.
+if len(text.split()) >= 350:
+    raise RuntimeError(f'CAP production contract unexpectedly expanded to {len(text.split())} words')
+
+path.write_text(text, encoding='utf-8')
