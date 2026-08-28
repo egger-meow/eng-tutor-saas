@@ -1,18 +1,328 @@
+import { createHash } from 'node:crypto'
+
+import runtimeJson from '../curriculum/cap-precedent-cards.json' with { type: 'json' }
+
 export interface CapPrecedentAuditInput {
   capTransferQuestionCount: number
   precedentRefs: string[]
   availableRefs: ReadonlySet<string>
 }
 
-export interface CapPrecedentAuditResult { passed: boolean; findings: string[] }
+export interface CapPrecedentAuditResult {
+  passed: boolean
+  findings: string[]
+}
 
-/** Deterministic production quality floor; prompt-level relevance/depth critique remains independent. */
+export interface CapDesignAnchor {
+  ref: string
+  genre: string
+  primarySkill: string
+  secondarySkills: string[]
+  cognitiveDepth: string
+  languageDifficulty: string
+  evidenceMode: string
+  evidenceNecessity: string
+  evidenceSpan: string
+  reasoningOperations: string[]
+  questionMechanism: string
+  whyTheQuestionWorks: string
+  correctAnswerConstructionPrinciple: string
+  distractorStrategies: string[]
+  reusableDesignPrinciple: string
+  difficultyAdjustment: {
+    simplificationConstraints: string[]
+    depthAdjustmentStrategies: string[]
+  }
+  copyGuardHashes: string[]
+}
+
+export interface CapPrecedentRuntimeBundle {
+  version: string
+  authorityStatus: 'authoritative'
+  capKnowledgeVersion: string
+  capCorpusHash: string
+  capBundleVersion: string
+  plannerVersion: string
+  qualityFloorVersion: string
+  cards: CapDesignAnchor[]
+}
+
+export interface CapAssessmentIntent {
+  learningObjective: string
+  primarySkill: string
+  secondarySkills?: string[]
+  targetLanguageDifficulty: string
+  targetCognitiveDepth: string
+  evidenceMode: string
+  evidenceSpan: string
+  reasoningOperations: string[]
+  distractorStrategies?: string[]
+}
+
+export interface CapAssessmentPlan extends CapAssessmentIntent {
+  precedentRefs: string[]
+  preservedMechanics: string[]
+  adaptationStrategy: string[]
+  distractorStrategies: string[]
+  intentionalRecall?: boolean
+  noPrecedentReason?: string | null
+}
+
+interface QuestionLike {
+  id: string
+  itemType: string
+  prompt: string
+  options?: string[]
+}
+
+interface PackageLike {
+  studentLesson: {
+    reading?: {
+      blocks?: Array<Record<string, unknown>>
+    }
+    practice: Array<{ stage: string; questions: QuestionLike[] }>
+    homework: { questions: QuestionLike[] }
+  }
+  qualityEvidence: {
+    precedentRefs?: string[]
+    criticalChecks: Array<{ id: string; passed: boolean; evidence: string }>
+  }
+}
+
+const runtime = runtimeJson as unknown as CapPrecedentRuntimeBundle
+const CAP_REF = /^cap-[a-f0-9]{12}$/
+const DEPTH_RANK: Record<string, number> = {
+  D1_verbatim_retrieval: 1,
+  D2_single_step_inference: 2,
+  D3_multi_step_synthesis: 3,
+  D4_evaluative_pragmatic: 4,
+}
+const COMPREHENSION_TYPES = new Set(['main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze'])
+const RECALL_TYPES = new Set(['vocabulary', 'grammar'])
+
+function hash(value: string): string {
+  return createHash('sha256').update(value).digest('hex')
+}
+
+function fiveGramHashes(text: string): Set<string> {
+  const tokens = text.toLowerCase().match(/[a-z0-9]+(?:'[a-z]+)?/g) ?? []
+  const hashes = new Set<string>()
+  for (let index = 0; index <= tokens.length - 5; index += 1) {
+    hashes.add(hash(tokens.slice(index, index + 5).join(' ')).slice(0, 16))
+  }
+  return hashes
+}
+
+function parseJsonCheck<T>(pkg: PackageLike, id: string): T | null {
+  const check = pkg.qualityEvidence.criticalChecks.find((item) => item.id === id && item.passed)
+  if (!check) return null
+  try {
+    return JSON.parse(check.evidence) as T
+  } catch {
+    return null
+  }
+}
+
+function scoreAnchor(intent: CapAssessmentIntent, card: CapDesignAnchor): number {
+  let score = 0
+  if (card.primarySkill === intent.primarySkill) score += 6
+  if (card.cognitiveDepth === intent.targetCognitiveDepth) score += 3
+  if (card.evidenceSpan === intent.evidenceSpan) score += 2
+  if (card.evidenceMode === intent.evidenceMode) score += 1
+  if (card.languageDifficulty === intent.targetLanguageDifficulty) score += 1
+
+  const secondary = new Set(intent.secondarySkills ?? [])
+  score += card.secondarySkills.filter((skill) => secondary.has(skill)).length
+  const distractors = new Set(intent.distractorStrategies ?? [])
+  score += card.distractorStrategies.filter((strategy) => distractors.has(strategy)).length * 0.5
+  return score
+}
+
+/** Deterministic compact-index retrieval. Returns at most five design anchors. */
+export function retrieveCapPrecedents(
+  intent: CapAssessmentIntent,
+  bundle: CapPrecedentRuntimeBundle = runtime,
+  limit = 5,
+): CapDesignAnchor[] {
+  if (bundle.authorityStatus !== 'authoritative') return []
+  return bundle.cards
+    .map((card) => ({ card, score: scoreAnchor(intent, card) }))
+    .filter((entry) => entry.score >= 6)
+    .sort((a, b) => b.score - a.score || a.card.ref.localeCompare(b.card.ref))
+    .slice(0, Math.max(1, Math.min(5, limit)))
+    .map((entry) => entry.card)
+}
+
+function governedAssessmentItems(pkg: PackageLike): Array<{ stage: string; question: QuestionLike }> {
+  const items = pkg.studentLesson.practice.flatMap((section) =>
+    section.questions
+      .filter((question) => section.stage === 'cap-transfer' || (section.stage === 'independent' && question.options?.length === 4))
+      .map((question) => ({ stage: section.stage, question })),
+  )
+
+  for (const question of pkg.studentLesson.homework.questions) {
+    if (question.options?.length === 4 && !['translation', 'sentence-production', 'short-response'].includes(question.itemType)) {
+      items.push({ stage: 'homework', question })
+    }
+  }
+  return items
+}
+
+function studentAssessmentText(pkg: PackageLike, question: QuestionLike): string {
+  const reading = (pkg.studentLesson.reading?.blocks ?? [])
+    .flatMap((block) => Object.values(block).filter((value): value is string => typeof value === 'string'))
+    .join(' ')
+  return `${reading} ${question.prompt} ${(question.options ?? []).join(' ')}`
+}
+
+/**
+ * Deterministic production CAP quality floor.
+ *
+ * Prompt-level critic still judges semantic quality; this gate makes provenance,
+ * mandatory retrieval, anti-copy, intentional-recall boundaries, and several
+ * common worksheet regressions non-optional before rendering.
+ */
+export function auditCapPrecedentPackage(
+  pkg: PackageLike,
+  bundle: CapPrecedentRuntimeBundle = runtime,
+): CapPrecedentAuditResult {
+  const findings: string[] = []
+  if (bundle.authorityStatus !== 'authoritative' || !/^[a-f0-9]{64}$/.test(bundle.capCorpusHash) || bundle.cards.length === 0) {
+    return {
+      passed: false,
+      findings: ['CAP_AUTHORITY_UNAVAILABLE: production CAP runtime is not authoritative'],
+    }
+  }
+
+  const available = new Map(bundle.cards.map((card) => [card.ref, card]))
+  const provenance = parseJsonCheck<Record<string, string>>(pkg, 'cap-provenance')
+  const expectedProvenance: Record<string, string> = {
+    capKnowledgeVersion: bundle.capKnowledgeVersion,
+    capCorpusHash: bundle.capCorpusHash,
+    capBundleVersion: bundle.capBundleVersion,
+    plannerVersion: bundle.plannerVersion,
+    qualityFloorVersion: bundle.qualityFloorVersion,
+  }
+  if (!provenance || Object.entries(expectedProvenance).some(([key, value]) => provenance[key] !== value)) {
+    findings.push('CAP_PROVENANCE_MISMATCH: cap-provenance must exactly match the authoritative runtime versions and corpus hash')
+  }
+
+  const planRefs = new Set<string>()
+  const requiredItems = governedAssessmentItems(pkg)
+  for (const { stage, question } of requiredItems) {
+    const plan = parseJsonCheck<CapAssessmentPlan>(pkg, `cap-plan:${question.id}`)
+    if (!plan) {
+      findings.push(`CAP_ITEM_PLAN_MISSING:${question.id}: every normal assessment/application item requires an internal CAP assessment plan`)
+      continue
+    }
+
+    if (!plan.learningObjective?.trim() || !plan.primarySkill?.trim() || !plan.targetLanguageDifficulty?.trim() || !plan.targetCognitiveDepth?.trim()) {
+      findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: learning objective, skill, language difficulty, and cognitive depth are required`)
+    }
+    if (!Array.isArray(plan.reasoningOperations) || plan.reasoningOperations.length === 0 || !Array.isArray(plan.preservedMechanics) || plan.preservedMechanics.length === 0 || !Array.isArray(plan.adaptationStrategy) || plan.adaptationStrategy.length === 0) {
+      findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: reasoning, preserved mechanics, and adaptation strategy are required`)
+    }
+
+    if (plan.intentionalRecall === true) {
+      if (stage === 'cap-transfer' || !RECALL_TYPES.has(question.itemType)) {
+        findings.push(`CAP_RECALL_EXEMPTION_INVALID:${question.id}: intentional recall is only valid for explicit vocabulary/grammar retrieval outside cap-transfer`)
+      }
+      continue
+    }
+
+    const relevant = retrieveCapPrecedents(plan, bundle, 5)
+    if ((!plan.precedentRefs || plan.precedentRefs.length === 0) && relevant.length > 0) {
+      findings.push(`CAP_PRECEDENT_MISSING:${question.id}: relevant authentic CAP precedents exist, so blank-page assessment authoring is forbidden`)
+      continue
+    }
+    if ((!plan.precedentRefs || plan.precedentRefs.length === 0) && relevant.length === 0 && (!plan.noPrecedentReason || plan.noPrecedentReason.trim().length < 20)) {
+      findings.push(`CAP_FALLBACK_REASON_MISSING:${question.id}: no-precedent fallback requires a specific reason`)
+      continue
+    }
+
+    const referenced: CapDesignAnchor[] = []
+    for (const ref of plan.precedentRefs ?? []) {
+      planRefs.add(ref)
+      const card = available.get(ref)
+      if (!CAP_REF.test(ref) || !card) {
+        findings.push(`CAP_PRECEDENT_UNKNOWN:${question.id}:${ref}`)
+        continue
+      }
+      referenced.push(card)
+    }
+
+    if (referenced.length > 0 && !referenced.some((card) => card.primarySkill === plan.primarySkill)) {
+      findings.push(`CAP_PRECEDENT_SKILL_MISMATCH:${question.id}: at least one anchor must match the planned primary skill`)
+    }
+    for (const card of referenced) {
+      const target = DEPTH_RANK[plan.targetCognitiveDepth]
+      const source = DEPTH_RANK[card.cognitiveDepth]
+      if (target && source && Math.abs(target - source) > 1) {
+        findings.push(`CAP_PRECEDENT_DEPTH_MISMATCH:${question.id}:${card.ref}: anchor depth is too far from the planned depth`)
+      } else if (target && source && target !== source && !plan.adaptationStrategy.some((item) => /depth|reason|推理|深度/i.test(item))) {
+        findings.push(`CAP_DEPTH_ADAPTATION_UNEXPLAINED:${question.id}:${card.ref}: adjacent-depth adaptation must explicitly explain reasoning-depth preservation/change`)
+      }
+    }
+
+    if (question.options?.length === 4 && (!plan.distractorStrategies || plan.distractorStrategies.length === 0)) {
+      findings.push(`CAP_DISTRACTOR_PLAN_MISSING:${question.id}: four-option assessment needs explicit distractor mechanisms`)
+    }
+
+    const depth = DEPTH_RANK[plan.targetCognitiveDepth] ?? 0
+    if (depth >= 3 && ['single_word', 'single_clause'].includes(plan.evidenceSpan)) {
+      findings.push(`CAP_DEPTH_COLLAPSE:${question.id}: D3/D4 reasoning cannot claim only word/clause evidence after simplification`)
+    }
+    if (COMPREHENSION_TYPES.has(question.itemType) && plan.evidenceSpan === 'single_word') {
+      findings.push(`CAP_DECORATIVE_CONTEXT:${question.id}: comprehension/application cannot reduce evidence to an isolated word`)
+    }
+    if (/^\s*what\s+is\s+the\s+meaning\s+of\b/i.test(question.prompt) || /^\s*what\s+does\s+.+\s+mean\??\s*$/i.test(question.prompt)) {
+      findings.push(`CAP_SHALLOW_ASSESSMENT:${question.id}: naked dictionary-definition prompt is not valid normal comprehension/application assessment`)
+    }
+
+    if (referenced.length > 0) {
+      const authoredHashes = fiveGramHashes(studentAssessmentText(pkg, question))
+      const sourceHashes = new Set(referenced.flatMap((card) => card.copyGuardHashes))
+      const overlap = [...authoredHashes].filter((item) => sourceHashes.has(item))
+      if (overlap.length >= 2) {
+        findings.push(`CAP_COPY_OVERLAP:${question.id}: multiple five-word phrase fingerprints overlap historical anchor material; adapt mechanics, not wording`)
+      }
+    }
+  }
+
+  const packageRefs = new Set(pkg.qualityEvidence.precedentRefs ?? [])
+  const unknownPackageRefs = [...packageRefs].filter((ref) => !CAP_REF.test(ref) || !available.has(ref))
+  if (unknownPackageRefs.length > 0) findings.push(`CAP_PRECEDENT_UNKNOWN: ${unknownPackageRefs.join(', ')}`)
+
+  const missingAggregateRefs = [...planRefs].filter((ref) => !packageRefs.has(ref))
+  const extraAggregateRefs = [...packageRefs].filter((ref) => !planRefs.has(ref))
+  if (missingAggregateRefs.length > 0 || extraAggregateRefs.length > 0) {
+    findings.push('CAP_PROVENANCE_INCONSISTENT: qualityEvidence.precedentRefs must equal the union of per-item cap-plan precedentRefs')
+  }
+
+  if (requiredItems.length >= 4 && planRefs.size === 1) {
+    findings.push('CAP_PRECEDENT_MONOCULTURE: four or more assessment items cannot all reuse one design anchor')
+  }
+
+  return { passed: findings.length === 0, findings }
+}
+
+/** Backwards-compatible low-level primitive retained for direct callers/tests. */
 export function auditCapPrecedentFloor(input: CapPrecedentAuditInput): CapPrecedentAuditResult {
   const findings: string[] = []
   if (input.capTransferQuestionCount > 0 && input.precedentRefs.length === 0) {
     findings.push('CAP_PRECEDENT_MISSING: cap-transfer assessment started without an internal precedent reference')
   }
-  const invalid = input.precedentRefs.filter((ref) => !/^cap-[a-f0-9]{12}$/.test(ref) || !input.availableRefs.has(ref))
+  const invalid = input.precedentRefs.filter((ref) => !CAP_REF.test(ref) || !input.availableRefs.has(ref))
   if (invalid.length > 0) findings.push(`CAP_PRECEDENT_UNKNOWN: ${[...new Set(invalid)].join(', ')}`)
   return { passed: findings.length === 0, findings }
+}
+
+export function capRuntimeMetadata(bundle: CapPrecedentRuntimeBundle = runtime) {
+  return {
+    capKnowledgeVersion: bundle.capKnowledgeVersion,
+    capCorpusHash: bundle.capCorpusHash,
+    capBundleVersion: bundle.capBundleVersion,
+    plannerVersion: bundle.plannerVersion,
+    qualityFloorVersion: bundle.qualityFloorVersion,
+  }
 }
