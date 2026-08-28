@@ -20,6 +20,14 @@ export interface RollingWindowResult {
   sourceHashes: Record<string, string>
 }
 
+interface RollingWindowManifest {
+  version: '1.1.0'
+  authorityStatus: 'authoritative'
+  examIds: string[]
+  sourceHashes: Record<string, string>
+  sealedAt: string
+}
+
 const sha256 = (file: string) => createHash('sha256').update(fs.readFileSync(file)).digest('hex')
 
 function artifactIds(directory: string): string[] {
@@ -30,13 +38,39 @@ function artifactIds(directory: string): string[] {
   })
 }
 
-/** Reconciles derived artifacts to the five consecutive PDFs in raw/. It never mutates raw/. */
+function manifestPath(rawDir: string): string {
+  return path.resolve(rawDir, '../rolling-window-manifest.json')
+}
+
+function readTrustedManifest(rawDir: string): RollingWindowManifest | null {
+  const file = manifestPath(rawDir)
+  if (!fs.existsSync(file)) return null
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Partial<RollingWindowManifest>
+    if (parsed.version !== '1.1.0' || parsed.authorityStatus !== 'authoritative' || !parsed.sourceHashes || !Array.isArray(parsed.examIds)) {
+      return null
+    }
+    return parsed as RollingWindowManifest
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Reconciles derived artifacts to the five consecutive PDFs in raw/.
+ *
+ * This function deliberately does NOT persist the new PDF hashes. The caller may
+ * seal them with commitRollingWindowManifest() only after extraction, analysis,
+ * synthesis, benchmark construction, and authoritative validation all succeed.
+ * A crashed build therefore cannot make a later run reuse stale analyzed data.
+ */
 export function reconcileRollingWindow(options: RollingWindowOptions): RollingWindowResult {
   const rawFiles = fs.readdirSync(options.rawDir).filter((name) => /^\d{3}P_English\.pdf$/i.test(name)).sort()
   const examIds = rawFiles.map((name) => name.slice(0, 3))
   if (examIds.length !== 5 || examIds.some((id, index) => index > 0 && Number(id) !== Number(examIds[index - 1]) + 1)) {
     throw new Error(`[RollingWindowError] raw/ must contain exactly five consecutive CAP years; found ${examIds.join(', ')}`)
   }
+
   for (const examId of examIds) {
     const answers = OFFICIAL_CAP_ANSWERS[examId]
     if (!answers || Object.keys(answers).length !== 43) {
@@ -45,10 +79,15 @@ export function reconcileRollingWindow(options: RollingWindowOptions): RollingWi
   }
 
   const sourceHashes = Object.fromEntries(rawFiles.map((name) => [name.slice(0, 3), sha256(path.join(options.rawDir, name))]))
-  const manifestPath = path.resolve(options.rawDir, '../rolling-window-manifest.json')
-  const previous = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as { sourceHashes?: Record<string, string> } : {}
-  const unchangedExamIds = examIds.filter((id) => previous.sourceHashes?.[id] === sourceHashes[id] && fs.existsSync(path.join(options.analyzedDir, `${id}.json`)))
+  const previous = readTrustedManifest(options.rawDir)
+  const unchangedExamIds = examIds.filter((id) =>
+    previous?.sourceHashes[id] === sourceHashes[id]
+    && previous.examIds.includes(id)
+    && fs.existsSync(path.join(options.extractedDir, `${id}.json`))
+    && fs.existsSync(path.join(options.analyzedDir, `${id}.json`)),
+  )
   const changedExamIds = examIds.filter((id) => !unchangedExamIds.includes(id))
+
   const active = new Set(examIds)
   const derivedDirs = [options.extractedDir, options.analyzedDir, options.assetsDir, ...(options.agentAnalysisDir ? [options.agentAnalysisDir] : [])]
   const removedExamIds = [...new Set(derivedDirs.flatMap(artifactIds))].filter((id) => !active.has(id)).sort()
@@ -60,7 +99,20 @@ export function reconcileRollingWindow(options: RollingWindowOptions): RollingWi
       if (fs.existsSync(folder)) fs.rmSync(folder, { recursive: true })
     }
   }
-  fs.mkdirSync(options.analyzedDir, { recursive: true })
-  fs.writeFileSync(manifestPath, JSON.stringify({ version: '1.0.0', examIds, sourceHashes }, null, 2))
+
   return { examIds, unchangedExamIds, changedExamIds, removedExamIds, sourceHashes }
+}
+
+/** Seal a rolling window only after the full corpus is certified authoritative. */
+export function commitRollingWindowManifest(rawDir: string, result: RollingWindowResult): string {
+  const file = manifestPath(rawDir)
+  const manifest: RollingWindowManifest = {
+    version: '1.1.0',
+    authorityStatus: 'authoritative',
+    examIds: result.examIds,
+    sourceHashes: result.sourceHashes,
+    sealedAt: new Date().toISOString(),
+  }
+  fs.writeFileSync(file, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+  return file
 }
