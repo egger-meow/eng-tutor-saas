@@ -8,6 +8,7 @@ on:
       - .github/workflows/cap-production-integration-finalize.yml
       - scripts/cap-production-integration-patch.py
       - scripts/cap-production-routing-patch.py
+      - scripts/cap-production-contract-compact.py
 
 permissions:
   contents: write
@@ -25,6 +26,7 @@ jobs:
         run: |
           python3 scripts/cap-production-integration-patch.py
           python3 scripts/cap-production-routing-patch.py
+          python3 scripts/cap-production-contract-compact.py
 
       - uses: pnpm/action-setup@v4
         with:
@@ -77,7 +79,7 @@ jobs:
           pnpm exec tsx -e "import path from 'node:path'; import { reconcileRollingWindow } from './scripts/history-exams/src/corpus/rolling-window.ts'; const root=process.cwd(); const result=reconcileRollingWindow({rawDir:path.resolve(root,'history_exams/raw'),extractedDir:path.resolve(root,'history_exams/extracted'),analyzedDir:path.resolve(root,'history_exams/analyzed'),assetsDir:path.resolve(root,'history_exams/assets'),agentAnalysisDir:path.resolve(root,'history_exams/agent_analysis')}); if(result.unchangedExamIds.join(',')!=='111,112,113,114,115'||result.changedExamIds.length) throw new Error(JSON.stringify(result)); console.log(JSON.stringify(result));"
 
       - name: Remove one-shot helpers
-        run: git rm .github/workflows/cap-production-integration-finalize.yml scripts/cap-production-integration-patch.py scripts/cap-production-routing-patch.py
+        run: git rm .github/workflows/cap-production-integration-finalize.yml scripts/cap-production-integration-patch.py scripts/cap-production-routing-patch.py scripts/cap-production-contract-compact.py
 
       - name: Commit verified integration
         run: |
