@@ -281,12 +281,12 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </StaggerContainer>
           <FadeInUp reveal="right" delay={0.08} className="why-not-gpt" id="chatgpt-difference">
             <p className="overline">那直接用 ChatGPT 不就好了？</p>
-            <h3>ChatGPT 解決一次提問；紙屬英文維持一段學習。</h3>
+            <h3>ChatGPT 本身很強；差別不是它會不會，而是誰把這些能力變成一套持續運作的教材系統。</h3>
             <div className="comparison-compact">
-              <p><strong>一般聊天工具</strong><span>需要家長反覆說明程度、寫提示、控制難度、整理成可印教材。</span></p>
-              <p><strong>紙屬英文</strong><span>持續記住課程進度、學過的字、錯誤、主題與回饋，並負責每週交付完整教材。</span></p>
+              <p><strong>直接使用 ChatGPT</strong><span>可以搜尋網路、解釋英文、產生文章與題目；但通常仍要自己交代孩子程度、進度、錯誤、來源與難度，並在每次使用時維持這些教育規則。</span></p>
+              <p><strong>紙屬英文</strong><span>把孩子的長期學習記憶、全網知識搜尋與可靠資訊篩選、會考命題大腦和每週品質檢查接成固定流程，持續交付完整教材。</span></p>
             </div>
-            <p className="comparison-conclusion">差別不只是一個 Prompt，而是學習記憶、課程邊界與每週持續調整。</p>
+            <p className="comparison-conclusion">差別不是我們用了另一個 AI，而是把 AI 變成一套專門替孩子持續做教材的系統。</p>
           </FadeInUp>
         </section>
 
