@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { reconcileRollingWindow } from '../../scripts/history-exams/src/corpus/rolling-window.ts'
+import { commitRollingWindowManifest, reconcileRollingWindow } from '../../scripts/history-exams/src/corpus/rolling-window.ts'
 
 const roots: string[] = []
 function fixture() {
@@ -16,16 +16,26 @@ function fixture() {
 afterEach(() => roots.splice(0).forEach((root) => fs.rmSync(root, { recursive: true, force: true })))
 
 describe('rolling five-year CAP corpus', () => {
-  it('purges stale derived artifacts and reuses unchanged analyzed years by PDF hash', () => {
+  it('purges stale derived artifacts and reuses unchanged analyzed years only after an authoritative hash seal', () => {
     const d = fixture()
     fs.writeFileSync(path.join(d.extracted, '110.json'), '{}'); fs.mkdirSync(path.join(d.assets, '110'))
     let result = reconcileRollingWindow({ rawDir: d.raw, extractedDir: d.extracted, analyzedDir: d.analyzed, assetsDir: d.assets, agentAnalysisDir: d.agent })
     expect(result.removedExamIds).toEqual(['110'])
-    for (const id of result.examIds) fs.writeFileSync(path.join(d.analyzed, `${id}.json`), '{}')
+    expect(result.changedExamIds).toEqual(['111', '112', '113', '114', '115'])
+
+    for (const id of result.examIds) {
+      fs.writeFileSync(path.join(d.extracted, `${id}.json`), '{}')
+      fs.writeFileSync(path.join(d.analyzed, `${id}.json`), '{}')
+    }
+    commitRollingWindowManifest(d.raw, result)
+
     result = reconcileRollingWindow({ rawDir: d.raw, extractedDir: d.extracted, analyzedDir: d.analyzed, assetsDir: d.assets, agentAnalysisDir: d.agent })
     expect(result.unchangedExamIds).toEqual(['111', '112', '113', '114', '115'])
+    expect(result.changedExamIds).toEqual([])
+
     fs.appendFileSync(path.join(d.raw, '115P_English.pdf'), '-changed')
     result = reconcileRollingWindow({ rawDir: d.raw, extractedDir: d.extracted, analyzedDir: d.analyzed, assetsDir: d.assets, agentAnalysisDir: d.agent })
+    expect(result.unchangedExamIds).toEqual(['111', '112', '113', '114'])
     expect(result.changedExamIds).toEqual(['115'])
   })
 
