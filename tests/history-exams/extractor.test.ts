@@ -121,9 +121,16 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
 
     const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
     expect(allQuestions.filter((item: any) => item.visualEvidenceRequired)).toHaveLength(40);
-    for (const item of allQuestions) {
-      expect(item.stem).not.toMatch(/\[Option [A-D]\]|\(Comprehension question \d+\)/);
-      for (const option of Object.values(item.options)) expect(String(option)).not.toMatch(/^\[Option [A-D]\]$/);
-    }
+
+    const unresolvedStems = allQuestions
+      .filter((item: any) => /\[Option [A-D]\]|\(Comprehension question \d+\)/.test(item.stem))
+      .map((item: any) => `${item.examId}-Q${item.questionNumber}: ${item.stem}`);
+    const unresolvedOptions = allQuestions.flatMap((item: any) =>
+      Object.entries(item.options)
+        .filter(([, option]) => /^\[Option [A-D]\]$/.test(String(option)))
+        .map(([key, option]) => `${item.examId}-Q${item.questionNumber}.${key}: ${option}`),
+    );
+    expect(unresolvedStems, `unresolved stems: ${unresolvedStems.join(' | ')}`).toEqual([]);
+    expect(unresolvedOptions, `unresolved options: ${unresolvedOptions.join(' | ')}`).toEqual([]);
   });
 });
