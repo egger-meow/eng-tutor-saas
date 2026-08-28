@@ -49,12 +49,13 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     expect(passage.text).not.toContain('[Visual/Graphic Content');
   });
 
-  it('correctly classifies Hawkins comic strip for 115 Q22-23 and cleans control chars', () => {
+  it('correctly classifies Hawkins comic strip for 115 Q22-23 and cleans hidden controls', () => {
     const content = JSON.parse(fs.readFileSync(path.join(outputDir, '115.json'), 'utf-8'));
     const passage = content.passages.find((p: any) => p.id === '115-p22-23');
     expect(passage.genre).toBe('comic_strip');
     expect(passage.visualEvidenceRequired).toBe(true);
-    expect(passage.text).not.toMatch(/[\u0000-\u001F\u007F-\u009F]/);
+    expect(passage.text).not.toMatch(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/);
+    expect(passage.text).not.toMatch(/^\s*th\s*$/im);
   });
 
   it('tags Marigolds Home Q26 as spatial evidence mode', () => {
@@ -92,9 +93,6 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     const q = (exam: any, n: number) => exam.questions.find((item: any) => item.questionNumber === n);
     const passage = (exam: any, id: string) => exam.passages.find((item: any) => item.id === id);
 
-    const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
-    console.log('FRESH_VISUAL_REQUIRED', allQuestions.filter((item: any) => item.visualEvidenceRequired).map((item: any) => `${item.examId}-Q${item.questionNumber}`).join(','));
-
     expect(q(y111, 21).stem).toBe('What does Tea-Rock celebrate?');
     expect(q(y111, 21).options.C).toBe('Their 20th year of business.');
     expect(q(y111, 32).visualEvidenceRequired).toBe(true);
@@ -109,8 +107,7 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
 
     expect(q(y113, 26).stem).toBe('What is recommended to people who want to visit the festival?');
     expect(q(y113, 28).options.B).toBe("They don’t like to share.");
-    expect(q(y113, 41).visualEvidenceRequired).toBe(true);
-    expect(q(y113, 42).visualEvidenceRequired).toBe(true);
+    for (const n of [24, 25, 26, 27, 28, 41, 42]) expect(q(y113, n).visualEvidenceRequired).toBe(true);
 
     expect(q(y114, 23).options.C).toContain("Ivy is still telling them about her baby");
     expect(q(y114, 27).stem).toBe('What do we learn from the first paragraph?');
@@ -122,6 +119,7 @@ describe('Historical CAP English Exam Extractor (Multimodal Hardened)', () => {
     expect(q(y115, 30).evidenceMode).toBe('text_only');
     expect(q(y115, 30).visualEvidenceRequired).toBe(false);
 
+    const allQuestions = [y111, y112, y113, y114, y115].flatMap((exam: any) => exam.questions);
     expect(allQuestions.filter((item: any) => item.visualEvidenceRequired)).toHaveLength(40);
     for (const item of allQuestions) {
       expect(item.stem).not.toMatch(/\[Option [A-D]\]|\(Comprehension question \d+\)/);
