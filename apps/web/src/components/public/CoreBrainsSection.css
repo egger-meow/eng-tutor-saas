@@ -1,0 +1,237 @@
+.core-brains-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.core-brains-section::before {
+  content: '';
+  position: absolute;
+  inset: 10% auto auto 50%;
+  z-index: -1;
+  width: min(52rem, 88vw);
+  height: 30rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(154 89 56 / 10%), transparent 70%);
+  pointer-events: none;
+}
+
+.core-brains-heading {
+  max-width: 64rem;
+}
+
+.core-brains-heading h2 {
+  max-width: 15ch;
+  margin-bottom: var(--space-5);
+  font-size: clamp(2.35rem, 5vw, 4.6rem);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.core-brains-heading > p:last-child {
+  max-width: 50rem;
+  color: var(--color-muted);
+  font-size: clamp(1rem, 1.8vw, 1.12rem);
+  line-height: 1.8;
+}
+
+.core-brains-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 2rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.core-brain-card {
+  position: relative;
+  min-height: 100%;
+  padding: clamp(1.6rem, 3.5vw, 3rem);
+  border: 1px solid var(--color-rule-strong);
+  background: rgb(255 253 248 / 90%);
+  box-shadow: 0 1.4rem 3.6rem rgb(24 38 31 / 6%);
+}
+
+.core-brain-card::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 4rem;
+  height: 4rem;
+  border-right: 2px solid var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+  opacity: .32;
+}
+
+.core-brain-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.core-brain-mark {
+  color: var(--color-accent);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.core-brain-icon {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+
+.core-brain-eyebrow {
+  margin: clamp(1.7rem, 3vw, 2.4rem) 0 .55rem;
+  color: var(--color-action);
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.core-brain-card h3 {
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  line-height: 1.2;
+}
+
+.core-brain-body {
+  margin: var(--space-6) 0 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.82;
+}
+
+.core-brain-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: var(--space-6);
+}
+
+.core-brain-tags span {
+  padding: .35rem .68rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  background: rgb(246 242 233 / 66%);
+  color: var(--color-ink);
+  font-size: .74rem;
+  font-weight: 750;
+}
+
+.core-brain-principle {
+  margin: clamp(1.7rem, 3vw, 2.35rem) 0 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+  line-height: 1.6;
+}
+
+.core-brains-equation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.15fr);
+  gap: clamp(.65rem, 1.5vw, 1rem);
+  align-items: stretch;
+  margin-top: clamp(2rem, 5vw, 3.8rem);
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  border-block: 1px solid var(--color-rule-strong);
+}
+
+.core-brains-equation > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .25rem;
+  min-width: 0;
+  padding: .8rem .6rem;
+}
+
+.core-brains-equation span {
+  color: var(--color-ink);
+  font-size: .9rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.core-brains-equation small {
+  color: var(--color-muted);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.core-brains-equation b {
+  align-self: center;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.core-brains-result {
+  border-left: 3px solid var(--color-accent);
+  background: rgb(246 242 233 / 58%);
+}
+
+.core-brains-result span {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+@media (max-width: 920px) {
+  .core-brains-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .core-brains-equation {
+    grid-template-columns: 1fr;
+    gap: .3rem;
+  }
+
+  .core-brains-equation > div {
+    padding: .75rem 1rem;
+  }
+
+  .core-brains-equation > b {
+    justify-self: center;
+    transform: rotate(90deg);
+    font-size: 1rem;
+  }
+
+  .core-brains-equation > .core-brains-arrow {
+    font-size: 1.15rem;
+  }
+
+  .core-brains-result {
+    border-top: 1px solid var(--color-rule);
+    border-left: 3px solid var(--color-accent);
+  }
+}
+
+@media (max-width: 620px) {
+  .core-brains-heading h2 {
+    font-size: clamp(2.1rem, 11vw, 3.2rem);
+  }
+
+  .core-brain-card {
+    padding: 1.45rem;
+  }
+
+  .core-brain-body {
+    font-size: .96rem;
+  }
+
+  .core-brains-equation {
+    padding-inline: .4rem;
+  }
+}
