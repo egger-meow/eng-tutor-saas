@@ -1,0 +1,779 @@
+{
+  "examId": "113",
+  "providerName": "openai-chatgpt",
+  "modelName": "gpt-5.6-sol",
+  "promptVersion": "chatgpt-agent-digestion-v2",
+  "criticPromptVersion": "chatgpt-agent-critic-v1",
+  "analysisSchemaVersion": "1.0.0",
+  "questions": [
+    {
+      "questionNumber": 36,
+      "primarySkill": "vocabulary_in_context",
+      "secondarySkills": [
+        "definition_inference",
+        "stance"
+      ],
+      "skillExplanation": "Q36 asks learners to infer 'advocate' from Smith's explicitly supportive position on bringing extinct animals back.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Locate the author's characterization of Smith as an advocate.",
+        "Use the immediately following explanation of Smith's beliefs to infer the word's meaning."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "An unfamiliar stance noun is glossed indirectly by nearby sentences that show strong support and a belief that the action should be taken.",
+      "whyTheQuestionWorks": "The passage supplies enough behavioral and attitudinal evidence to infer the term without outside dictionary knowledge.",
+      "correctRationale": "Smith thinks humans should do everything possible to bring extinct animals back, so an advocate is someone who believes an idea is good and should be pursued; B is correct.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q36 passage",
+          "quoteOrDescription": "Smith is called an advocate and is then described as thinking 'we must do everything we can to bring them back.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "unsupported_characterization",
+          "rationale": "The passage describes Smith's beliefs and proposals but does not define advocacy as talking without action.",
+          "misconceptionTarget": "Importing a negative stereotype rather than using contextual definition evidence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q36 context",
+              "quoteOrDescription": "Smith's position is support for the project, not a judgment about how much he personally does.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "stance_reversal",
+          "rationale": "Having bad experiences does not define a supporter; Smith is presented as favoring the work.",
+          "misconceptionTarget": "Confusing motivation or experience with stance.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q36 context",
+              "quoteOrDescription": "The explanatory sentence says Smith thinks the work should be done.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "status_for_stance",
+          "rationale": "Being an early participant is unrelated to the word's meaning here.",
+          "misconceptionTarget": "Treating a social role as a historical sequence label.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q36 context",
+              "quoteOrDescription": "No claim is made that Smith was among the first to attempt de-extinction.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Guessing from the unfamiliar word's form instead of reading its explanatory context.",
+        "Confusing a person's stance with their experience or historical role."
+      ],
+      "misconceptionsTargeted": [
+        "Unknown vocabulary must be recalled from memory rather than inferred from context.",
+        "A stance label can mean any fact about the person holding the stance."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The passage locally defines the stance through Smith's stated beliefs."
+      },
+      "reusableDesignPrinciple": "Place an inferable academic word immediately before concrete statements that operationalize its meaning.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep explicit evidence that Smith supports the action and thinks it should be done."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Distribute the stance evidence across two paragraphs instead of placing it immediately after the target term."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q36 passage",
+          "quoteOrDescription": "Smith is called an advocate and is then described as thinking 'we must do everything we can to bring them back.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 37,
+      "primarySkill": "explicit_information_integration",
+      "secondarySkills": [
+        "cause_effect",
+        "scientific_application"
+      ],
+      "skillExplanation": "Q37 asks what is special about the extinct frog in Smith's argument; its unusual reproductive process might help researchers address a human pregnancy problem.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D3_multi_constraint_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Identify the frog's unusual biological feature.",
+        "Follow Smith's proposed link from studying that feature to helping women keep pregnancies successfully.",
+        "Map the proposal to a potential health benefit."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The answer requires combining an unusual animal trait with its proposed human application rather than retrieving either detail alone.",
+      "whyTheQuestionWorks": "Distractors reuse themes of extinction, habitat, and reproduction but do not preserve the passage's proposed medical application.",
+      "correctRationale": "Smith believes studying how the frog grew tadpoles in its stomach might lead to ways to help women whose babies die before birth, so the frog might help address a health problem; B.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q37 passage",
+          "quoteOrDescription": "Smith links the frog's stomach-grown tadpoles to possible new ways to help women successfully keep their babies.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "theme_association_without_support",
+          "rationale": "Dirty habitats are discussed as a cause of extinction generally, not as a special ability of this frog.",
+          "misconceptionTarget": "Attaching a general passage detail to the focal animal.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q37 context",
+              "quoteOrDescription": "The frog's special feature is reproductive, not habitat tolerance.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "biological_detail_distortion",
+          "rationale": "The passage says tadpoles grew in its stomach, not that it ate babies because of food shortage.",
+          "misconceptionTarget": "Converting an unusual reproductive fact into a familiar feeding behavior.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q37 context",
+              "quoteOrDescription": "The tadpoles are described as growing inside the frog's stomach.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "unsupported_superlative",
+          "rationale": "Nothing says this was the first extinct animal studied.",
+          "misconceptionTarget": "Adding a historical distinction absent from the text.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q37 context",
+              "quoteOrDescription": "The passage discusses potential usefulness, not research chronology.",
+              "role": "counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Stopping at the frog's unusual biology without following the proposed application.",
+        "Choosing a passage-wide extinction detail instead of the frog-specific point."
+      ],
+      "misconceptionsTargeted": [
+        "Any distinctive animal fact answers a question about why the animal matters in an argument.",
+        "General background information can substitute for the local causal chain."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The item requires linking two propositions: biological mechanism and proposed medical benefit."
+      },
+      "reusableDesignPrinciple": "Ask why a scientific example matters by requiring readers to connect a mechanism to its proposed application.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain both the frog's unusual reproduction and the proposed benefit to women."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "State the medical problem earlier and require readers to bridge back to the biological example."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q37 passage",
+          "quoteOrDescription": "Smith links the frog's stomach-grown tadpoles to possible new ways to help women successfully keep their babies.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 38,
+      "primarySkill": "rhetorical_function",
+      "secondarySkills": [
+        "quotation_function",
+        "argument_support"
+      ],
+      "skillExplanation": "Q38 asks why Zimmer quotes Dr. Solomon Wang; the quote gives a compact external formulation of the same criticism she has been developing about spending heavily without results.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D3_multi_constraint_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_paragraph",
+      "reasoningOperations": [
+        "Summarize Zimmer's preceding criticism of cost and failed outcomes.",
+        "Interpret Wang's phrase 'throwing good money after bad.'",
+        "Compare the quotation's stance with Zimmer's own argument."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The learner must identify a quotation's discourse function by aligning its proposition with the surrounding author's stance.",
+      "whyTheQuestionWorks": "The quote appears late enough that readers must see it as support/clarification rather than a new topic or call to action.",
+      "correctRationale": "Zimmer has already argued that years and millions of dollars produced only dead frog eggs. Wang's 'throwing good money after bad' condenses that same criticism, making her point clearer; C.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q38 passage",
+          "quoteOrDescription": "Zimmer describes ten years and millions spent with little result, then agrees with Wang's 'throwing good money after bad.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "discourse_function_mismatch",
+          "rationale": "The quotation continues the existing cost-effectiveness critique rather than introducing a new subject.",
+          "misconceptionTarget": "Treating every new speaker as a topic shift.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q38 context",
+              "quoteOrDescription": "Wang's statement directly echoes the prior paragraph's money/result discussion.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "stance_reversal",
+          "rationale": "The quotation calls the research wasteful; it does not share or celebrate a big dream.",
+          "misconceptionTarget": "Ignoring negative evaluative language.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q38 context",
+              "quoteOrDescription": "Zimmer says 'And he's right' after a negative assessment.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "rhetorical_overreach",
+          "rationale": "The passage ends with a skeptical question, not a specific invitation for readers to take action.",
+          "misconceptionTarget": "Equating strong opinion with a call to action.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q38 context",
+              "quoteOrDescription": "The quotation supplies evaluative support, not an instruction."
+              ,"role":"counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Classifying quotations by speaker change instead of argumentative function.",
+        "Failing to compare the quote with the author's immediately preceding claim."
+      ],
+      "misconceptionsTargeted": [
+        "A quoted expert always introduces new information.",
+        "Agreement with a quotation necessarily means urging action."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Answering requires discourse-level comparison between the quotation and Zimmer's argument."
+      },
+      "reusableDesignPrinciple": "Test quotation function by making the quote paraphrase or sharpen an argument already established in the surrounding text.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the cost-without-results argument before the quotation and Zimmer's agreement after it."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit 'And he's right' and make stance alignment inferential."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q38 passage",
+          "quoteOrDescription": "Zimmer describes ten years and millions spent with little result, then agrees with Wang's 'throwing good money after bad.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 39,
+      "primarySkill": "author_stance_inference",
+      "secondarySkills": [
+        "evidence_synthesis",
+        "argument_evaluation"
+      ],
+      "skillExplanation": "Q39 requires synthesizing Zimmer's repeated skepticism about feasibility into her overall stance toward bringing extinct animals back.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D3_multi_constraint_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_paragraph",
+      "reasoningOperations": [
+        "Collect Zimmer's uncertainty about whether extinct animals could actually return.",
+        "Integrate the failed frog research example.",
+        "Use her agreement that further spending is wasteful to infer her overall feasibility judgment."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "high",
+      "grammarDemand": "low",
+      "vocabularyDemand": "medium",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The stance is not given as a one-line answer; readers must synthesize several skeptical claims while distinguishing feasibility from danger.",
+      "whyTheQuestionWorks": "The possible/dangerous dimensions create a clean contrast: Zimmer questions whether it can work, not whether revived animals would be physically dangerous.",
+      "correctRationale": "Zimmer doubts extinct animals could actually come back, notes that a decade of costly frog research produced no real frog, and endorses the view that continuing is wasteful. Her likely view is that bringing them back is not possible; C.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q39 passage",
+          "quoteOrDescription": "Zimmer says no one knows if they could actually come back, emphasizes failed results, and agrees the work is 'throwing good money after bad.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "stance_reversal",
+          "rationale": "This matches Smith's optimism more than Zimmer's skepticism.",
+          "misconceptionTarget": "Confusing the reviewed author's stance with the reviewer/narrator's stance.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q39 context",
+              "quoteOrDescription": "Zimmer repeatedly challenges Smith's confidence.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "wrong_evaluation_dimension",
+          "rationale": "Zimmer's objections focus on feasibility, cost, and results, not physical danger from revived animals.",
+          "misconceptionTarget": "Treating any negative stance as a safety concern.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q39 context",
+              "quoteOrDescription": "No claim says revived animals would be dangerous."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "irrelevant_dimension",
+          "rationale": "Whether the process is dangerous is not Zimmer's central judgment and does not capture her skepticism about possibility.",
+          "misconceptionTarget": "Selecting a neutral-sounding statement on an unasked dimension.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q39 context",
+              "quoteOrDescription": "Her evidence addresses whether the work succeeds, not whether it is safe."
+              ,"role":"counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Mixing Smith's claims with Zimmer's response.",
+        "Reducing all criticism to 'danger' instead of identifying the evaluated dimension."
+      ],
+      "misconceptionsTargeted": [
+        "All speakers in an argumentative passage share one stance.",
+        "A negative opinion about a scientific project must mean it is dangerous."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer emerges from multiple skeptical statements across the passage."
+      },
+      "reusableDesignPrinciple": "For stance questions, contrast answer options along different evaluative dimensions so learners must identify exactly what the writer disputes.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain at least two feasibility/cost-result criticisms attributable specifically to Zimmer."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit final agreement with Wang and require stance synthesis from earlier evidence alone."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q39 passage",
+          "quoteOrDescription": "Zimmer says no one knows if they could actually come back, emphasizes failed results, and agrees the work is 'throwing good money after bad.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 40,
+      "primarySkill": "cloze_coherence",
+      "secondarySkills": [
+        "historical_evidence",
+        "contrast"
+      ],
+      "skillExplanation": "Q40 requires using the next sentence about widespread U.S. use in 1918 to complete the claim that social distancing is not a new idea.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Read the concession that social distancing became a popular topic in 2020.",
+        "Use 'In fact' plus the 1918 example as elaborating historical evidence.",
+        "Choose the proposition that the historical example directly proves."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "medium",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank must create a claim that is licensed and then supported by the immediately following historical example.",
+      "whyTheQuestionWorks": "All options are plausible general statements about social distancing, but only one makes the 1918 evidence rhetorically relevant.",
+      "correctRationale": "The next sentence says social distancing was widely used in the U.S. during the 1918 flu pandemic, directly proving it is not new; A.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q40 passage",
+          "quoteOrDescription": "'In fact, it was widely used in the U.S. in the flu pandemic in 1918.'",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "B": {
+          "strategy": "unsupported_evaluation",
+          "rationale": "The paragraph then asks how well it worked; usefulness has not yet been established as poor.",
+          "misconceptionTarget": "Jumping ahead to an evaluation before the passage supplies evidence.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q40 context",
+              "quoteOrDescription": "The following historical sentence addresses age, not effectiveness.",
+              "role": "counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "unsupported_problem_claim",
+          "rationale": "The 1918-use example does not establish that social distancing creates problems.",
+          "misconceptionTarget": "Selecting a generally plausible pandemic statement without discourse support.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q40 context",
+              "quoteOrDescription": "No problem is introduced after the blank."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "unsupported_social_stance",
+          "rationale": "No evidence here discusses whether everyone welcomes social distancing.",
+          "misconceptionTarget": "Inferring public opinion from popularity as a topic.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q40 context",
+              "quoteOrDescription": "The paragraph moves to historical use, not acceptance."
+              ,"role":"counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Filling the blank from general pandemic knowledge rather than local discourse evidence.",
+        "Ignoring the rhetorical signal 'In fact.'"
+      ],
+      "misconceptionsTargeted": [
+        "Any true-sounding sentence can complete a cloze paragraph.",
+        "Examples need not directly support the preceding claim."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "Selection depends on discourse coherence with historical evidence."
+      },
+      "reusableDesignPrinciple": "Follow a cloze blank with a concrete example that entails exactly one candidate proposition.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain the contrast between seeming current popularity and documented 1918 use."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the explicit year with an indirect historical reference requiring temporal inference."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q40 passage",
+          "quoteOrDescription": "'In fact, it was widely used in the U.S. in the flu pandemic in 1918.'",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 42,
+      "primarySkill": "cloze_causal_inference",
+      "secondarySkills": [
+        "duration",
+        "cause_effect"
+      ],
+      "skillExplanation": "Q42 asks what Portland and Denver did that explains why deaths climbed again; the paragraph has just established that distancing must be kept long enough.",
+      "languageDifficulty": "B1_intermediate",
+      "cognitiveDepth": "D3_multi_constraint_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Use the topic sentence that duration matters.",
+        "Interpret 'did well in the first few weeks' as initial successful distancing.",
+        "Infer from the contrast marker 'However' and renewed deaths that the action ended prematurely."
+      ],
+      "reasoningComplexity": "multi_constraint",
+      "readingDemand": "medium",
+      "grammarDemand": "low",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "high",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank is solved from a causal argument in the prose: sufficient duration lowers deaths, while premature stopping explains the reversal.",
+      "whyTheQuestionWorks": "The item can be answered from the textual causal scaffold without relying on the chart, making it separable from the visual-dependent Q41.",
+      "correctRationale": "The passage says keeping distancing long enough was important, then contrasts Portland and Denver's good first weeks with deaths climbing again. The coherent cause is that both stopped social distancing too soon; B.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q42 passage",
+          "quoteOrDescription": "'keeping the action long enough was also important' followed by Portland/Denver doing well first, then deaths climbing again.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "effect_for_cause",
+          "rationale": "Higher deaths are the outcome described after the blank, not the behavior explaining that outcome.",
+          "misconceptionTarget": "Confusing consequence with cause.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q42 context",
+              "quoteOrDescription": "The sentence already states that death numbers climbed again."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "unsupported_sequence",
+          "rationale": "Nothing in the prose says they restarted social distancing at this point.",
+          "misconceptionTarget": "Inventing an intervention rather than explaining the stated rebound.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q42 context",
+              "quoteOrDescription": "The contrast is between early success and later rebound."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "D": {
+          "strategy": "logic_reversal",
+          "rationale": "Having the most days would support sustained success, not explain why deaths rose again.",
+          "misconceptionTarget": "Ignoring the passage's explicit duration principle.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q42 context",
+              "quoteOrDescription": "The author says longer-enough action is important in fighting the pandemic."
+              ,"role":"counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing an option that restates the effect instead of explaining it.",
+        "Failing to connect the paragraph's general duration principle to the city examples."
+      ],
+      "misconceptionsTargeted": [
+        "Cloze answers can duplicate the following consequence.",
+        "Topic sentences need not constrain later examples."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The answer follows from a stated causal principle plus a temporal contrast."
+      },
+      "reusableDesignPrinciple": "State a general causal principle, then test whether readers can use it to explain a concrete reversal in outcomes.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Keep the explicit importance of sufficient duration and the later rebound in deaths."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Remove the explicit duration principle and let readers infer it from two contrasted city trajectories."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q42 passage",
+          "quoteOrDescription": "'keeping the action long enough was also important' followed by Portland/Denver doing well first, then deaths climbing again.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    },
+    {
+      "questionNumber": 43,
+      "primarySkill": "discourse_marker",
+      "secondarySkills": [
+        "exemplification",
+        "cloze_coherence"
+      ],
+      "skillExplanation": "Q43 tests the discourse relation between a general claim that Portland used several distancing methods and the following list of specific methods.",
+      "languageDifficulty": "A2_basic",
+      "cognitiveDepth": "D2_single_step_inference",
+      "evidenceNecessity": "essential",
+      "evidenceSpan": "cross_sentence_local",
+      "reasoningOperations": [
+        "Identify the preceding general claim about using several methods.",
+        "Classify the following semicolon-separated actions as examples of those methods.",
+        "Select an exemplification marker."
+      ],
+      "reasoningComplexity": "compound_dual_step",
+      "readingDemand": "medium",
+      "grammarDemand": "medium",
+      "vocabularyDemand": "low",
+      "inferenceDemand": "low",
+      "visualIntegrationDemand": "low",
+      "questionMechanism": "The blank signals a general-to-specific discourse move from 'several ways' to a concrete list.",
+      "whyTheQuestionWorks": "All options are common sentence connectors, but punctuation and rhetorical structure strongly identify exemplification.",
+      "correctRationale": "The text first says Portland used several ways of distancing, then lists isolating sick people, closing schools, and banning public activities. 'For example' introduces that list; D.",
+      "correctEvidenceRefs": [
+        {
+          "type": "passage_text",
+          "location": "113 Q43 passage",
+          "quoteOrDescription": "A general claim about 'several ways' is followed by three concrete distancing measures.",
+          "role": "primary_proof"
+        }
+      ],
+      "distractors": {
+        "A": {
+          "strategy": "addition_for_example",
+          "rationale": "'Also' merely adds another point; it does not explicitly signal that the following list instantiates 'several ways.'",
+          "misconceptionTarget": "Treating addition and exemplification as equivalent discourse relations.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q43 context",
+              "quoteOrDescription": "The following actions are examples of the preceding category."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "B": {
+          "strategy": "temporal_marker_mismatch",
+          "rationale": "The list is not the first stage of a chronology.",
+          "misconceptionTarget": "Selecting a familiar transition without identifying temporal structure.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q43 context",
+              "quoteOrDescription": "The sentence organizes examples, not time."
+              ,"role":"counter_evidence"
+            }
+          ]
+        },
+        "C": {
+          "strategy": "contrast_marker_mismatch",
+          "rationale": "The examples support the general claim rather than contradicting it.",
+          "misconceptionTarget": "Using 'however' as a generic sentence opener.",
+          "evidenceRefs": [
+            {
+              "type": "passage_text",
+              "location": "113 Q43 context",
+              "quoteOrDescription": "The list illustrates, rather than opposes, 'several ways.'"
+              ,"role":"counter_evidence"
+            }
+          ]
+        }
+      },
+      "studentFailureModes": [
+        "Choosing connectors from tone rather than rhetorical relation.",
+        "Failing to see the category-to-examples structure."
+      ],
+      "misconceptionsTargeted": [
+        "All additive transitions perform the same function.",
+        "Lists do not need a discourse relation to the preceding sentence."
+      ],
+      "shallowRecall": {
+        "isShallowRecall": false,
+        "recallType": "none",
+        "explanation": "The learner identifies a general-to-specific discourse relation."
+      },
+      "reusableDesignPrinciple": "Make discourse-marker items rely on unmistakable rhetorical structure, such as a category statement followed by a multi-item list.",
+      "canSimplifyLanguageWithoutBreakingMechanism": true,
+      "simplificationConstraints": [
+        "Retain 'several ways' before a concrete list of methods."
+      ],
+      "canIncreaseDepthWithoutIncreasingVocabulary": true,
+      "depthAdjustmentStrategies": [
+        "Replace the explicit category phrase with a more implicit summary that readers must infer the examples instantiate."
+      ],
+      "analysisConfidence": "high",
+      "uncertainties": [],
+      "evidenceReferences": [
+        {
+          "type": "passage_text",
+          "location": "113 Q43 passage",
+          "quoteOrDescription": "A general claim about 'several ways' is followed by three concrete distancing measures.",
+          "role": "primary_proof"
+        }
+      ],
+      "criticStatus": "passed",
+      "criticIssues": []
+    }
+  ]
+}
