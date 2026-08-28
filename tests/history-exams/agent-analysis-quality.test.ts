@@ -51,20 +51,21 @@ describe('CAP agent-authored deep digestion quality floor', () => {
     const principles = frequencyStats(questions.map((q) => q.reusableDesignPrinciple));
     const skillExplanations = frequencyStats(questions.map((q) => q.skillExplanation));
 
-    // Item-specific explanatory fields should remain nearly one-per-item.
     expect(mechanisms.uniqueCount).toBeGreaterThanOrEqual(200);
     expect(whyWorks.uniqueCount).toBeGreaterThanOrEqual(200);
     expect(skillExplanations.uniqueCount).toBeGreaterThanOrEqual(200);
 
-    // A reusable design principle is intentionally allowed to recur across items sharing a
-    // genuine assessment mechanic. Guard against boilerplate collapse instead of forcing
-    // cosmetic paraphrases that would destroy the meaning of "reusable".
+    // Reusable principles may legitimately recur across items with the same assessment mechanic.
+    // Block corpus-wide boilerplate instead of forcing cosmetic one-off paraphrases.
     expect(principles.uniqueCount).toBeGreaterThanOrEqual(150);
     expect(principles.maxFrequency).toBeLessThanOrEqual(10);
 
     const bannedBoilerplate = [
       'exact wording and evidence configuration',
       'Preserve the evidence pattern while changing surface content',
+      'Use the decisive evidence identified for Q',
+      'has one evidence-supported answer while each wrong option represents',
+      'using the item’s actual sentence, passage, or visual evidence rather than answer-key recall',
     ];
     for (const question of questions) {
       const serialized = JSON.stringify(question);
