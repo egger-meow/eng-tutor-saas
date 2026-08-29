@@ -1189,7 +1189,6 @@ button, input, select, textarea {
 
 .chart-floating-tooltip {
   position: absolute;
-  transform: translate(-50%, -100%);
   background: rgba(15, 23, 42, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);

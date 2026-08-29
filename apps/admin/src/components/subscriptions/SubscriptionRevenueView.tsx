@@ -438,25 +438,40 @@ function InteractiveMetricChart({
         </svg>
 
         {/* Hover Floating Tooltip Overlay */}
-        {activeCoord && activeHoverPoint && (
-          <div
-            className="chart-floating-tooltip"
-            style={{
-              left: `${Math.min(Math.max(activeCoord.x, 90), svgWidth - 90)}px`,
-              top: `${Math.max(padTop + 6, activeCoord.y - 42)}px`,
-            }}
-          >
-            <span className="tooltip-date">{activeHoverPoint.fullDateLabel}</span>
-            <div className="tooltip-val">
-              <span className="tooltip-dot" style={{ backgroundColor: color }} />
-              <strong>{title}:</strong>
-              <span style={{ color: color, fontWeight: 700 }}>
-                {Number(activeHoverPoint[field]).toLocaleString('zh-TW')}
-                {unit}
-              </span>
+        {activeCoord && activeHoverPoint && (() => {
+          const xPct = (activeCoord.x / svgWidth) * 100
+          const yPct = (activeCoord.y / svgHeight) * 100
+          const isNearTop = yPct < 30
+          const isNearLeft = xPct < 20
+          const isNearRight = xPct > 80
+
+          let transformX = '-50%'
+          if (isNearLeft) transformX = '0%'
+          else if (isNearRight) transformX = '-100%'
+
+          const transformY = isNearTop ? '12px' : 'calc(-100% - 10px)'
+
+          return (
+            <div
+              className="chart-floating-tooltip"
+              style={{
+                left: `${xPct}%`,
+                top: `${yPct}%`,
+                transform: `translate(${transformX}, ${transformY})`,
+              }}
+            >
+              <span className="tooltip-date">{activeHoverPoint.fullDateLabel}</span>
+              <div className="tooltip-val">
+                <span className="tooltip-dot" style={{ backgroundColor: color }} />
+                <strong>{title}:</strong>
+                <span style={{ color: color, fontWeight: 700 }}>
+                  {Number(activeHoverPoint[field]).toLocaleString('zh-TW')}
+                  {unit}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
       </div>
     </article>
   )
