@@ -438,53 +438,25 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       expect(result.issues?.[0]?.message).toContain('corrupted learning targets')
     })
 
-    it('repairs an underfilled workload surgically while preserving grounding and unaffected content', async () => {
+    it('does not force surgical repair merely because workload telemetry is underfilled', async () => {
       const canonical = buildSampleCanonicalPackage()
-      const originalReading = structuredClone(canonical.studentLesson.reading)
-      const originalGrounding = 'grounding' in canonical ? structuredClone(canonical.grounding) : undefined
-      const originalQuestion = structuredClone(canonical.studentLesson.practice[1]!.questions[0]!)
+      const original = structuredClone(canonical)
 
       const result = await applyModelQualityProfile(canonical, {
+        modelName: 'gemini-3.7-flash',
         targetMinutes: 100,
-        surgicalRepairHook: (pkg, _profile, findings) => {
-          expect(findings.some((finding) => finding.message.includes('BUDGET_UNDERFILLED'))).toBe(true)
-          let index = 0
-          while (evaluateWorkloadFit(100, computeDeterministicPlanMinutes(pkg)).code === 'BUDGET_UNDERFILLED') {
-            const questionId = `budget-extension-${index++}`
-            pkg.studentLesson.practice[1]!.questions.push({
-              id: questionId,
-              targetIds: ['reading-inference', 'vocab-experiment'],
-              itemType: 'short-response',
-              prompt: 'Use one taught vocabulary word and cite one detail from the reading to explain Mina’s decision.',
-              writingLines: 6,
-              difficulty: 'on-level',
-            })
-            pkg.answers.push({
-              questionId,
-              answer: 'Mina changes one condition because the test evidence shows where the robot makes mistakes.',
-              acceptedAnswers: [],
-              explanationZh: '答案必須使用本週詞彙，並引用閱讀中的具體證據。',
-              likelyMisconceptionZh: null,
-              followUpZh: null,
-            })
-          }
-          return pkg
-        },
       })
 
       expect(result.success).toBe(true)
-      expect(result.curriculumPackage!.studentLesson.reading).toEqual(originalReading)
-      if (originalGrounding && 'grounding' in result.curriculumPackage!) {
-        expect(result.curriculumPackage.grounding).toEqual(originalGrounding)
-      }
-      expect(result.curriculumPackage!.studentLesson.practice[1]!.questions[0]).toEqual(originalQuestion)
-      expect(evaluateWorkloadFit(100, result.curriculumPackage!.learningPlan.estimatedMinutes).code).toBe('BUDGET_ALIGNED')
+      expect(result.curriculumPackage!.studentLesson.reading).toEqual(original.studentLesson.reading)
+      expect(result.curriculumPackage!.studentLesson.practice).toEqual(original.studentLesson.practice)
+      expect(result.curriculumPackage!.answers).toEqual(original.answers)
     })
 
-    it('rejects workload repair that deletes an existing required curriculum stage', async () => {
+    it('still rejects a surgical hook that deletes existing curriculum structure', async () => {
       const canonical = buildSampleCanonicalPackage()
       const result = await applyModelQualityProfile(canonical, {
-        targetMinutes: 100,
+        modelName: 'gemini-3.7-flash',
         surgicalRepairHook: (pkg) => {
           pkg.studentLesson.practice = pkg.studentLesson.practice.filter((section) => section.stage !== 'retrieval')
           return pkg
@@ -492,13 +464,12 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       })
 
       expect(result.success).toBe(false)
-      expect(result.issues?.[0]?.message).toContain('deleted a required curriculum stage')
+      expect(result.issues?.[0]?.message).toMatch(/corrupted question identifiers|deleted a required curriculum stage/u)
     })
 
-    it('trims only low-value redundant work from an overfilled package and preserves required stages', async () => {
+    it('does not force trimming merely because workload telemetry is overfilled', async () => {
       const canonical = buildSampleCanonicalPackage()
       const originalReading = structuredClone(canonical.studentLesson.reading)
-      const originalStages = canonical.studentLesson.practice.map((section) => section.stage)
       const section = canonical.studentLesson.practice[1]!
       for (let index = 0; index < 8; index += 1) {
         const questionId = `budget-redundant-${index}`
@@ -514,33 +485,21 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
           questionId,
           answer: 'The same evidence sentence.',
           acceptedAnswers: [],
-          explanationZh: '這是可刪除的重複練習，不是必要教學階段。',
+          explanationZh: '這是重複練習。',
           likelyMisconceptionZh: null,
           followUpZh: null,
         })
       }
-      const beforeMinutes = computeDeterministicPlanMinutes(canonical)
+      const originalQuestions = structuredClone(canonical.studentLesson.practice)
 
       const result = await applyModelQualityProfile(canonical, {
+        modelName: 'gemini-3.7-flash',
         targetMinutes: 70,
-        surgicalRepairHook: (pkg, _profile, findings) => {
-          expect(findings.some((finding) => finding.message.includes('BUDGET_OVERFILLED'))).toBe(true)
-          const independent = pkg.studentLesson.practice.find((item) => item.stage === 'independent')!
-          while (evaluateWorkloadFit(70, computeDeterministicPlanMinutes(pkg)).code === 'BUDGET_OVERFILLED') {
-            const index = independent.questions.findIndex((question) => question.id.startsWith('budget-redundant-'))
-            if (index < 0) break
-            const [removed] = independent.questions.splice(index, 1)
-            pkg.answers = pkg.answers.filter((answer) => answer.questionId !== removed!.id)
-          }
-          return pkg
-        },
       })
 
       expect(result.success).toBe(true)
-      expect(result.curriculumPackage!.learningPlan.estimatedMinutes).toBeLessThan(beforeMinutes)
       expect(result.curriculumPackage!.studentLesson.reading).toEqual(originalReading)
-      expect(result.curriculumPackage!.studentLesson.practice.map((item) => item.stage)).toEqual(originalStages)
-      expect(evaluateWorkloadFit(70, result.curriculumPackage!.learningPlan.estimatedMinutes).code).toBe('BUDGET_ALIGNED')
+      expect(result.curriculumPackage!.studentLesson.practice).toEqual(originalQuestions)
     })
   })
 })

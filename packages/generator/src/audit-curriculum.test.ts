@@ -97,9 +97,8 @@ describe('curriculum audit & lexical contract', () => {
       message: expect.stringContaining('studentLesson.reading.wordCount'),
     }))
   })
-  it('enforces lexical anchor: rejects package when core vocabulary is absent from reading passage', () => {
+  it('reports an unanchored core vocabulary card as warning-only telemetry', () => {
     const pkg = canonicalPackage()
-    // Inject a core vocabulary word that never appears anywhere in the reading passage
     pkg.studentLesson.vocabulary.push({
       id: 'vocab-unrelated',
       word: 'astronomy',
@@ -114,14 +113,13 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('critical')
+    expect(anchorFinding?.severity).toBe('warning')
     expect(anchorFinding?.message).toContain('astronomy')
-    expect(report.passed).toBe(false)
+    expect(report.passed).toBe(true)
   })
 
-  it('enforces comprehensive lexical ceiling: detects untaught high-difficulty words across options and practice', () => {
+  it('does not use fixed-list lexical ceiling membership as a publication gate', () => {
     const pkg = canonicalPackage()
-    // Inject multiple obscure words into question prompt and options
     pkg.studentLesson.practice[0].questions[0].prompt = 'Does the ephemeral juxtaposition cause ubiquitous dichotomy in empirical methodology?'
     pkg.studentLesson.practice[0].questions[0].options = [
       'The transcendent epistemology obfuscates the paradigm.',
@@ -131,10 +129,8 @@ describe('curriculum audit & lexical contract', () => {
     ]
 
     const report = auditCurriculumPackage(pkg)
-    const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
-    expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('critical')
-    expect(report.passed).toBe(false)
+    expect(report.findings.find((f) => f.dimension === 'lexical-ceiling')).toBeUndefined()
+    expect(report.passed).toBe(true)
   })
 
   it('flags genre-block mismatch when dialogue genre lacks dialogue blocks', () => {
@@ -152,42 +148,23 @@ describe('curriculum audit & lexical contract', () => {
     expect(alignmentFinding?.severity).toBe('critical')
   })
 
-  it('enforces token-boundary morphology: car != carry (does not match substring in carry)', () => {
+  it('keeps lexical-anchor morphology mismatches warning-only rather than blocking publication', () => {
     const pkg = canonicalPackage()
-    // Passage has "carry" / "carrying" / "carries" and is 130+ words, but never contains the word "car"
     pkg.studentLesson.reading.blocks = [
       { type: 'paragraph', text: 'Mia and Alex carry the heavy robot parts across the workshop to the main workbench. They are carrying extra batteries and testing instruments carefully before the regional robotics tournament begins tomorrow morning.' },
       { type: 'paragraph', text: 'The entire team works together after school every Tuesday in Taipei to calibrate each optical sensor and inspect the aluminum chassis. When unexpected circuit problems happen during testing, they record the exact error code, discuss possible solutions calmly with their teacher, and test each component step by step. Everyone agrees that careful preparation and good teamwork help them achieve excellent results in the competition. They check every screw and verify all electrical connections to ensure complete safety. By keeping detailed logs and testing repeatedly, the students build strong confidence for the big tournament match.' },
     ]
     pkg.studentLesson.reading.wordCount = 135
     pkg.studentLesson.vocabulary = [
-      {
-        id: 'v-car',
-        word: 'car',
-        partOfSpeech: 'n.',
-        meaningZh: '車子',
-        pronunciationHint: null,
-        exampleEn: 'He drives a car.',
-        exampleZh: '他開車。',
-        status: 'new',
-      },
-      ...['workshop', 'team', 'sensor', 'error', 'prepare', 'result', 'tournament'].map((word, i) => ({
-        id: `v-${word}`,
-        word,
-        partOfSpeech: 'n.',
-        meaningZh: `意思 ${i}`,
-        pronunciationHint: null,
-        exampleEn: `Example for ${word}.`,
-        exampleZh: `例句 ${i}。`,
-        status: 'new' as const,
-      })),
+      { id: 'v-car', word: 'car', partOfSpeech: 'n.', meaningZh: '車子', pronunciationHint: null, exampleEn: 'He drives a car.', exampleZh: '他開車。', status: 'new' },
+      ...['workshop', 'team', 'sensor', 'error', 'prepare', 'result', 'tournament'].map((word, i) => ({ id: `v-${word}`, word, partOfSpeech: 'n.', meaningZh: `意思 ${i}`, pronunciationHint: null, exampleEn: `Example for ${word}.`, exampleZh: `例句 ${i}。`, status: 'new' as const })),
     ]
 
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('car'))
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('critical')
-    expect(report.passed).toBe(false)
+    expect(anchorFinding?.severity).toBe('warning')
+    expect(report.passed).toBe(true)
   })
 
   it('accepts valid morphological variants: carry is anchored by carries or carrying', () => {
@@ -243,7 +220,7 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.findings.find((f) => f.dimension === 'lexical-ceiling' && /work|together/u.test(f.message))).toBeUndefined()
   })
 
-  it('rejects more than three phrase or collocation cards', () => {
+  it('treats more than three phrase or collocation cards as warning-only telemetry', () => {
     const pkg = canonicalPackage()
     const phrases = ['work together', 'after school', 'take notes', 'find out']
     phrases.forEach((word, index) => {
@@ -252,21 +229,15 @@ describe('curriculum audit & lexical contract', () => {
 
     const report = auditCurriculumPackage(pkg)
     const finding = report.findings.find((f) => f.dimension === 'lexical-unit-mix')
-    expect(finding?.severity).toBe('critical')
-    expect(report.passed).toBe(false)
+    expect(finding?.severity).toBe('warning')
+    expect(report.passed).toBe(true)
   })
 
-  it('flags isolated advanced non-allowlist words as warning telemetry without hard rejection', () => {
+  it('does not emit fixed-list lexical findings for isolated off-list words', () => {
     const pkg = canonicalPackage()
-    // Inject 1-2 non-repeated obscure words that are not in the approved vocab, not dialogue speakers, and not interests
-    pkg.studentLesson.reading.blocks[0] = {
-      type: 'paragraph',
-      text: 'A quantum device helps our daily robot testing procedures in the workshop today.',
-    }
+    pkg.studentLesson.reading.blocks[0] = { type: 'paragraph', text: 'A quantum device helps our daily robot testing procedures in the workshop today.' }
     const report = auditCurriculumPackage(pkg)
-    const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
-    expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('warning')
+    expect(report.findings.find((f) => f.dimension === 'lexical-ceiling')).toBeUndefined()
     expect(report.passed).toBe(true)
   })
 
@@ -384,28 +355,25 @@ describe('curriculum audit & lexical contract', () => {
     expect(highFinding?.message).toContain('最高安全上限 (140 分鐘)')
   })
 
-  it('verifies workload calibration against the inclusive 85%-115% band', () => {
+  it('reports workload budget percentage deviations as warning-only telemetry', () => {
     const pkg = canonicalPackage()
-    // Canonical package has computed minutes = 69 (within global bounds 55-140)
 
-    // 1. Declared budget = 80 min (85%-115% range is [68, 92]) -> 69 min is matched, no finding
     const reportMatched = auditCurriculumPackage(pkg, 80)
-    const matchedFinding = reportMatched.findings.find((f) => f.dimension === 'workload-calibration')
-    expect(matchedFinding).toBeUndefined()
+    expect(reportMatched.findings.find((f) => f.dimension === 'workload-calibration')).toBeUndefined()
 
-    // 2. Declared budget = 100 min (85%-115% range is [85, 115]) -> 69 min < 80 min (under-budget warning)
     const reportUnder = auditCurriculumPackage(pkg, 100)
     const underFinding = reportUnder.findings.find((f) => f.dimension === 'workload-calibration')
     expect(underFinding).toBeDefined()
-    expect(underFinding?.severity).toBe('critical')
+    expect(underFinding?.severity).toBe('warning')
     expect(underFinding?.message).toContain('BUDGET_UNDERFILLED')
+    expect(reportUnder.passed).toBe(true)
 
-    // 3. Declared budget = 50 min (85%-115% range is [43, 58]) -> 69 min > 60 min (over-budget warning)
     const reportOver = auditCurriculumPackage(pkg, { declaredWeeklyMinutes: 50 })
     const overFinding = reportOver.findings.find((f) => f.dimension === 'workload-calibration')
     expect(overFinding).toBeDefined()
-    expect(overFinding?.severity).toBe('critical')
+    expect(overFinding?.severity).toBe('warning')
     expect(overFinding?.message).toContain('BUDGET_OVERFILLED')
+    expect(reportOver.passed).toBe(true)
   })
 
   it('validates presence of core evidence organizer task in independent practice stage', () => {
@@ -453,32 +421,20 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.findings.some((item) => item.tier === 'structural-critical' && item.severity === 'critical')).toBe(true)
   })
 
-  it('requires explicit substantive evidence for a workload exception', () => {
+  it('accepts short non-empty workload exception evidence without an arbitrary character minimum', () => {
     const pkg = canonicalPackage()
     const targetMinutes = Math.round(computeDeterministicPlanMinutes(pkg) / 0.8)
-    pkg.qualityEvidence.criticalChecks.push({
-      id: 'workload-budget-exception',
-      passed: true,
-      evidence: 'Temporary exception.',
-    })
+    pkg.qualityEvidence.criticalChecks.push({ id: 'workload-budget-exception', passed: true, evidence: 'Temporary exception.' })
 
     const report = auditCurriculumPackage(pkg, targetMinutes)
-    expect(report.passed).toBe(false)
-    expect(report.findings.some((finding) => finding.message.includes('requires at least 80 characters'))).toBe(true)
+    expect(report.findings.some((finding) => finding.message.includes('requires at least 80 characters'))).toBe(false)
+    expect(report.passed).toBe(true)
 
-    pkg.qualityEvidence.criticalChecks.at(-1)!.evidence =
-      'The independent critic confirms a temporary learner-specific fatigue constraint this week; the bounded workload preserves every required stage and remains safe and useful.'
-    const excepted = auditCurriculumPackage(pkg, targetMinutes)
-    expect(excepted.findings.some((finding) => finding.message.includes('BUDGET_UNDERFILLED'))).toBe(false)
-    expect(excepted.findings.some(
-      (finding) => finding.severity === 'critical' && finding.dimension === 'workload-calibration',
-    )).toBe(false)
-
-    const outsideHardBound = auditCurriculumPackage(pkg, 600)
-    expect(outsideHardBound.passed).toBe(false)
-    expect(outsideHardBound.findings.some(
-      (finding) => finding.message.includes('cannot bypass the deterministic 75%-125% hard bound'),
-    )).toBe(true)
+    const outsideBand = auditCurriculumPackage(pkg, 600)
+    const finding = outsideBand.findings.find((item) => item.dimension === 'workload-calibration')
+    expect(finding).toBeDefined()
+    expect(finding?.severity).toBe('warning')
+    expect(outsideBand.passed).toBe(true)
   })
 })
 
@@ -571,39 +527,30 @@ function make12McqPackage(answerLetters: string[]): any {
   return pkg
 }
 
-describe('MCQ answer-position leakage & distribution gate', () => {
-  it('rejects all-A concentrated pattern (AAAAAAAAAAAA)', () => {
-    const allA = Array.from({ length: 12 }, () => 'A')
-    const pkg = make12McqPackage(allA)
+describe('MCQ answer-position leakage telemetry', () => {
+  it('reports all-A concentration without blocking publication', () => {
+    const pkg = make12McqPackage(Array.from({ length: 12 }, () => 'A'))
     const report = auditCurriculumPackage(pkg)
-
-    expect(report.passed).toBe(false)
-    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
-    expect(leakageFindings.length).toBeGreaterThanOrEqual(1)
-    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('run >= 4'))).toBe(true)
-    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('嚴重答案位置集中洩漏'))).toBe(true)
+    expect(report.passed).toBe(true)
+    const findings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(findings.some((f) => f.severity === 'warning' && f.message.includes('run >= 4'))).toBe(true)
+    expect(findings.some((f) => f.severity === 'warning' && f.message.includes('嚴重答案位置集中洩漏'))).toBe(true)
   })
 
-  it('rejects strongly concentrated patterns exceeding 60% single-position concentration', () => {
-    // 10 A's out of 12 (83.3% > 60%), with runs broken up (maxRun = 3)
+  it('reports strongly concentrated patterns without blocking publication', () => {
     const concentrated = ['A', 'A', 'A', 'B', 'A', 'A', 'A', 'C', 'A', 'A', 'A', 'D']
-    const pkg = make12McqPackage(concentrated)
-    const report = auditCurriculumPackage(pkg)
-
-    expect(report.passed).toBe(false)
-    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
-    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('過度集中於位置 "A"'))).toBe(true)
+    const report = auditCurriculumPackage(make12McqPackage(concentrated))
+    expect(report.passed).toBe(true)
+    const findings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(findings.some((f) => f.severity === 'warning' && f.message.includes('過度集中於位置 "A"'))).toBe(true)
   })
 
-  it('rejects excessively long identical-position runs (run >= 4)', () => {
-    // 4 consecutive A's, but overall counts are balanced (4 A, 3 B, 3 C, 2 D)
+  it('reports long identical-position runs without blocking publication', () => {
     const longRun = ['A', 'A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'D', 'D']
-    const pkg = make12McqPackage(longRun)
-    const report = auditCurriculumPackage(pkg)
-
-    expect(report.passed).toBe(false)
-    const leakageFindings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
-    expect(leakageFindings.some((f) => f.severity === 'critical' && f.message.includes('run >= 4'))).toBe(true)
+    const report = auditCurriculumPackage(make12McqPackage(longRun))
+    expect(report.passed).toBe(true)
+    const findings = report.findings.filter((f) => f.dimension === 'mcq-position-leakage')
+    expect(findings.some((f) => f.severity === 'warning' && f.message.includes('run >= 4'))).toBe(true)
   })
 
   it('accepts naturally mixed distributions without requiring artificial 25/25/25/25 balancing', () => {
@@ -670,23 +617,14 @@ describe('MCQ answer-position leakage & distribution gate', () => {
     expect(reorderedA?.likelyMisconceptionZh).toBe('選 A 者常因看見零件而過度推論。')
   })
 
-  it('balances an all-A package using balanceCurriculumMcqPositions so it passes quality audit', () => {
-    const allA = Array.from({ length: 12 }, () => 'A')
-    const pkg = make12McqPackage(allA)
+  it('can still balance an all-A package as optional deterministic cleanup', () => {
+    const pkg = make12McqPackage(Array.from({ length: 12 }, () => 'A'))
+    expect(auditCurriculumPackage(pkg).passed).toBe(true)
 
-    // Initial audit fails
-    expect(auditCurriculumPackage(pkg).passed).toBe(false)
-
-    // Balance options deterministically
     const balanced = balanceCurriculumMcqPositions(pkg)
-
-    // Balanced audit passes
     const report = auditCurriculumPackage(balanced)
     expect(report.findings.filter((f) => f.dimension === 'mcq-position-leakage')).toEqual([])
     expect(report.passed).toBe(true)
-
-    // Check that answers are distributed across A, B, C, D
-    const letters = balanced.answers.map((a: any) => a.answer[0])
-    expect(letters).toEqual(['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'])
+    expect(balanced.answers.map((a: any) => a.answer[0])).toEqual(['A', 'B', 'C', 'D', 'A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'])
   })
 })

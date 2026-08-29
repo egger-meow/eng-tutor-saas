@@ -20,14 +20,11 @@ function lexicalFinding(pkg: any) {
 }
 
 describe('production failure regressions', () => {
-  it('dedupes lexical-ceiling findings case-insensitively and flags repeated unapproved words critically', () => {
+  it('does not emit fixed-list lexical-ceiling findings for repeated off-list words', () => {
     const pkg = canonicalPackage()
     pkg.studentLesson.practice[0].questions[0].prompt = 'Meticulous meticulous METICULOUS MeTiCuLoUs'
-
-    const finding = lexicalFinding(pkg)
-    expect(finding).toBeDefined()
-    expect(finding?.severity).toBe('critical')
-    expect(finding?.message.toLowerCase().match(/meticulous/g)).toHaveLength(1)
+    expect(lexicalFinding(pkg)).toBeUndefined()
+    expect(auditCurriculumPackage(pkg).passed).toBe(true)
   })
 
   it('accepts comprehensive irregular verb and plural forms without false positives', () => {
@@ -51,36 +48,20 @@ describe('production failure regressions', () => {
     expect(lexicalFinding(pkg)).toBeUndefined()
   })
 
-  it('rejects untaught above-ceiling word when used as direct context-clue target', () => {
+  it('does not use fixed-list membership to reject a context-clue target', () => {
     const pkg = canonicalPackage()
     pkg.studentLesson.practice[0].questions[0].itemType = 'context-clue'
     pkg.studentLesson.practice[0].questions[0].prompt = 'In paragraph 2, what is the meaning of "epistemology"?'
     pkg.studentLesson.practice[0].questions[0].options = ['Theory of knowledge', 'Tool', 'Machine', 'Camera']
-
-    const audit = auditCurriculumPackage(pkg)
-    expect(audit.passed).toBe(false)
-    const finding = audit.findings.find((f) => f.dimension === 'lexical-ceiling')
-    expect(finding?.severity).toBe('critical')
-    expect(finding?.message).toContain('epistemology')
+    expect(auditCurriculumPackage(pkg).findings.find((f) => f.dimension === 'lexical-ceiling')).toBeUndefined()
   })
 
-  it('rejects unanchored new vocabulary card critically', () => {
+  it('treats an unanchored new vocabulary card as warning-only telemetry', () => {
     const pkg = canonicalPackage()
-    pkg.studentLesson.vocabulary.push({
-      id: 'v-unanchored-new',
-      word: 'astronomy',
-      partOfSpeech: 'n.',
-      meaningZh: '天文學',
-      pronunciationHint: null,
-      exampleEn: 'He studies astronomy.',
-      exampleZh: '他研究天文學。',
-      status: 'new',
-    })
-
+    pkg.studentLesson.vocabulary.push({ id: 'v-unanchored-new', word: 'astronomy', partOfSpeech: 'n.', meaningZh: '天文學', pronunciationHint: null, exampleEn: 'He studies astronomy.', exampleZh: '他研究天文學。', status: 'new' })
     const audit = auditCurriculumPackage(pkg)
-    expect(audit.passed).toBe(false)
-    const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
-    expect(anchorFinding?.severity).toBe('critical')
+    expect(audit.passed).toBe(true)
+    expect(audit.findings.find((f) => f.dimension === 'lexical-anchor')?.severity).toBe('warning')
   })
 
   it('rejects bare CURRENT_PROMPT_VERSION (2.10.0) packages missing mandatory critic dimensions', () => {

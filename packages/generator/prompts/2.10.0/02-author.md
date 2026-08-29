@@ -9,7 +9,7 @@ All reading comprehension and reading-based CAP assessment items must draw evide
   - Every CAP-governed assessment item must specify valid `evidenceAnchors` in its internal `cap-plan:<questionId>` check.
   - Every non-CAP reading-dependent assessment item (e.g. guided/independent reading comprehension, detail, inference) must specify a compact internal `evidence-plan:<questionId>` check in `qualityEvidence.criticalChecks` declaring `evidenceScope: "primary_reading"` and valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where `anchorText` occurs verbatim.
   - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
-- **Quote Verifiability**: Any quoted sentence or phrase appearing inside a question prompt must be verbatim present in the declared reading passage blocks.
+- **Quote Verifiability**: A quote explicitly attributed to the reading/passage/author must be verbatim present in the declared reading blocks. Constructed assessment stimuli (for example, `A student says, "..."`) are allowed and are judged by their evidence anchors rather than passage-string identity.
 
 ## 2. Modality Preservation & Textual Entailment
 
@@ -21,5 +21,5 @@ Preserve strict factual truth and epistemic modality across all question prompts
 
 Ensure strict alignment between vocabulary cards and authored text:
 - **Mandatory Reading Anchoring**: Every core vocabulary item with `status: 'new'` or `'extension'` must appear directly in the primary reading passage text.
-- **Ceiling & Target Integrity**: Never target an untaught, out-of-ceiling word with a context-clue or definition question unless adequate context clues are explicitly built into the primary reading text.
+- **Ceiling & Target Integrity**: Use learner-level judgment, context, and instructional value when deciding whether an unfamiliar word is acceptable or should be taught. The official 2000-word foundation is a planning reference, not a deterministic allowlist; ordinary inflections, derivations, compounds, transparent topic words, and natural domain language must not be treated as automatic defects merely because a fixed list or morphology heuristic misses them.
 - **Linguistic Richness**: Maintain level-appropriate sentence variety, cohesive conjunctions, and expressive phrasing suited to the learner's calibrated band.
