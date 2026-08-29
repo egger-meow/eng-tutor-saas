@@ -1810,10 +1810,11 @@ export class AdminService {
       return this.buildEmptyTimeline(targetWeek || new Date().toISOString().slice(0, 10), 'none', availableChildren, dataSources)
     }
 
-    const [childData, subData, jobsData, learningData, testModeStatus] = await Promise.all([
+    const [childData, subData, jobsData, materialsData, learningData, testModeStatus] = await Promise.all([
       this.safeQuery<any>('child_single', () => client.from('children').select('*').eq('id', effectiveChildId).maybeSingle(), dataSources),
       this.safeQuery<any>('subscription_single', () => client.from('subscriptions').select('*').eq('child_id', effectiveChildId).maybeSingle(), dataSources),
-      this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', effectiveChildId).order('created_at', { ascending: false }).limit(10), dataSources),
+      this.safeQuery<any[]>('child_jobs', () => client.from('generation_jobs').select('*').eq('child_id', effectiveChildId).order('material_week', { ascending: false }).order('created_at', { ascending: false }).limit(20), dataSources),
+      this.safeQuery<any[]>('child_materials', () => client.from('materials').select('*').eq('child_id', effectiveChildId).order('material_week', { ascending: false }).limit(20), dataSources),
       this.safeQuery<any>('learning_state', () => client.from('child_learning_state').select('*').eq('child_id', effectiveChildId).maybeSingle(), dataSources),
       this.getTestModeStatus(effectiveChildId).catch(() => null),
     ])
@@ -1824,28 +1825,83 @@ export class AdminService {
     }
 
     const jobs = (jobsData as any[]) || []
-    const selectedJob = (targetWeek ? jobs.find((j: any) => j.material_week === targetWeek) : jobs[0]) || jobs[0]
-    const actualWeek = selectedJob?.material_week || targetWeek || new Date().toISOString().slice(0, 10)
+    const materials = (materialsData as any[]) || []
+
+    // Build availableWeeks covering both jobs and recorded materials
+    const weekMap = new Map<string, { week: string; jobId?: string; status: string; attemptCount: number; hasMaterial: boolean; materialId?: string; releaseAt?: string | null }>()
+
+    for (const mat of materials) {
+      if (mat.material_week) {
+        weekMap.set(mat.material_week, {
+          week: mat.material_week,
+          jobId: undefined,
+          status: 'completed',
+          attemptCount: 0,
+          hasMaterial: true,
+          materialId: mat.id,
+          releaseAt: null,
+        })
+      }
+    }
+
+    for (const j of jobs) {
+      if (j.material_week) {
+        const existing = weekMap.get(j.material_week)
+        weekMap.set(j.material_week, {
+          week: j.material_week,
+          jobId: j.id,
+          status: j.status,
+          attemptCount: Number(j.attempt_count) || 0,
+          hasMaterial: existing?.hasMaterial || Boolean(j.material_id),
+          materialId: j.material_id || existing?.materialId,
+          releaseAt: j.release_at || existing?.releaseAt || null,
+        })
+      }
+    }
+
+    const availableWeeks = Array.from(weekMap.values()).sort((a, b) => b.week.localeCompare(a.week))
+
+    // Select job & target week
+    let selectedJob: any = null
+    let actualWeek: string = ''
+
+    if (targetWeek) {
+      selectedJob = jobs.find((j: any) => j.material_week === targetWeek) || null
+      actualWeek = targetWeek
+    } else {
+      // Smart default when no week is queried:
+      // Prefer latest job that has completed or has material, or active job with attempts > 0
+      const completedJob = jobs.find((j: any) => j.status === 'completed' || Boolean(j.material_id))
+      const inFlightJob = jobs.find((j: any) => (Number(j.attempt_count) || 0) > 0)
+      selectedJob = completedJob || inFlightJob || jobs[0] || null
+      actualWeek = selectedJob?.material_week || availableWeeks[0]?.week || new Date().toISOString().slice(0, 10)
+    }
 
     let submissions: any[] = []
     let material: any = null
     let feedback: any = null
 
+    if (!selectedJob && actualWeek) {
+      selectedJob = jobs.find((j: any) => j.material_week === actualWeek) || null
+    }
+
     if (selectedJob) {
-      const [submissionsRes, matData, fbData] = await Promise.all([
+      const [submissionsRes, matData] = await Promise.all([
         this.queryCurriculumSubmissions(selectedJob.id, 20, dataSources),
         selectedJob.material_id
           ? this.safeQuery<any>('material_single', () => client.from('materials').select('*').eq('id', selectedJob.material_id).maybeSingle(), dataSources)
           : this.safeQuery<any>('material_by_week', () => client.from('materials').select('*').eq('child_id', effectiveChildId).eq('material_week', actualWeek).maybeSingle(), dataSources),
-        selectedJob.material_id
-          ? this.safeQuery<any>('feedback_single', () => client.from('feedback').select('*').eq('child_id', effectiveChildId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
-          : Promise.resolve(null),
       ])
       submissions = submissionsRes || []
-      material = matData
-      feedback = fbData
+      material = matData || materials.find((m) => m.material_week === actualWeek) || null
     } else {
-      material = await this.safeQuery<any>('material_by_week', () => client.from('materials').select('*').eq('child_id', effectiveChildId).eq('material_week', actualWeek).maybeSingle(), dataSources)
+      material = materials.find((m) => m.material_week === actualWeek) || await this.safeQuery<any>('material_by_week', () => client.from('materials').select('*').eq('child_id', effectiveChildId).eq('material_week', actualWeek).maybeSingle(), dataSources)
+    }
+
+    if (material?.id) {
+      feedback = await this.safeQuery<any>('feedback_by_material', () => client.from('feedback').select('*').eq('child_id', effectiveChildId).eq('material_id', material.id).maybeSingle(), dataSources)
+    } else if (selectedJob?.material_id) {
+      feedback = await this.safeQuery<any>('feedback_by_job', () => client.from('feedback').select('*').eq('child_id', effectiveChildId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
     }
 
     return this.buildLifecycleTimeline({
@@ -1858,6 +1914,7 @@ export class AdminService {
       learningState: learningData,
       targetWeek: actualWeek,
       availableChildren,
+      availableWeeks,
       testModeStatus,
       dataSources,
     })
@@ -2611,7 +2668,7 @@ export class AdminService {
     }
   }
 
-  private buildEmptyTimeline(targetWeek: string, childId = 'none', availableChildren: ChildWeekTimeline['availableChildren'] = [], dataSources: DataSourceStatus[] = []): ChildWeekTimeline {
+  private buildEmptyTimeline(targetWeek: string, childId = 'none', availableChildren: ChildWeekTimeline['availableChildren'] = [], dataSources: DataSourceStatus[] = [], availableWeeks: ChildWeekTimeline['availableWeeks'] = []): ChildWeekTimeline {
     return {
       dataSources,
       childId,
@@ -2629,6 +2686,7 @@ export class AdminService {
       },
       events: [],
       availableChildren,
+      availableWeeks: availableWeeks || [],
       testModeStatus: null,
       rawMetadata: {
         job: null,
@@ -2636,6 +2694,7 @@ export class AdminService {
         material: null,
         feedback: null,
         testModeStatus: null,
+        availableWeeks: availableWeeks || [],
       },
     }
   }
@@ -2650,10 +2709,11 @@ export class AdminService {
     learningState: any
     targetWeek: string
     availableChildren: ChildWeekTimeline['availableChildren']
+    availableWeeks?: ChildWeekTimeline['availableWeeks']
     testModeStatus?: GenerationTestModeStatus | null
     dataSources: DataSourceStatus[]
   }): ChildWeekTimeline {
-    const { child, subscription, job, submissions, material, feedback, learningState, targetWeek, availableChildren, testModeStatus, dataSources } = data
+    const { child, subscription, job, submissions, material, feedback, learningState, targetWeek, availableChildren, availableWeeks = [], testModeStatus, dataSources } = data
 
     const now = new Date().toISOString()
     const releaseAt = job?.release_at || null
@@ -2859,6 +2919,7 @@ export class AdminService {
       jobSummary,
       events,
       availableChildren,
+      availableWeeks,
       testModeStatus: testModeStatus || null,
       rawMetadata: {
         job: job || null,

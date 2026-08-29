@@ -139,8 +139,10 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
               <select
                 value={inputChildId || data.childId}
                 onChange={(e) => {
-                  setInputChildId(e.target.value)
-                  onSearch(e.target.value, inputWeek.trim())
+                  const newChildId = e.target.value
+                  setInputChildId(newChildId)
+                  setInputWeek('')
+                  onSearch(newChildId, '')
                 }}
                 style={{ width: '100%', background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '13px' }}
               >
@@ -190,6 +192,86 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
           </div>
         </form>
       </div>
+
+      {/* 週次切換快捷列 (Available Weeks Selector) */}
+      {data.availableWeeks && data.availableWeeks.length > 0 && (
+        <div
+          className="cockpit-card"
+          style={{
+            marginBottom: '20px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            flexWrap: 'wrap',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-strong)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+            <span>🗓️ 歷次教材週次：</span>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {data.availableWeeks.map((w) => {
+              const isSelected = w.week === targetWeek
+              const isDone = w.status === 'completed' || w.hasMaterial
+              return (
+                <button
+                  key={w.week}
+                  type="button"
+                  onClick={() => {
+                    setInputWeek(w.week)
+                    onSearch(childId, w.week)
+                  }}
+                  style={{
+                    background: isSelected ? '#2563eb' : 'var(--bg-main)',
+                    color: isSelected ? '#ffffff' : '#94a3b8',
+                    border: isSelected ? '1px solid #60a5fa' : '1px solid var(--border-subtle)',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontWeight: isSelected ? 700 : 500,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span>{w.week}</span>
+                  {isDone ? (
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        background: isSelected ? '#1e40af' : 'rgba(16, 185, 129, 0.15)',
+                        color: isSelected ? '#93c5fd' : '#34d399',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ✓ 已產出 {w.attemptCount > 0 ? `(${w.attemptCount}次)` : ''}
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        background: isSelected ? '#1e40af' : 'rgba(234, 179, 8, 0.15)',
+                        color: isSelected ? '#93c5fd' : '#fcd34d',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ⏳ {w.status === 'waiting_for_feedback' ? '等待回饋' : w.status === 'pending' ? '等待生成' : w.status}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Human Review Required & Grant 1 Retry Banner */}
       {job && isHumanReviewRequired && (

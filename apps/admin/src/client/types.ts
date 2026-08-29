@@ -516,6 +516,15 @@ export interface ChildWeekTimeline {
     grade: number
     subscriptionStatus: string
   }>
+  availableWeeks?: Array<{
+    week: string
+    jobId?: string
+    status: string
+    attemptCount: number
+    hasMaterial: boolean
+    materialId?: string
+    releaseAt?: string | null
+  }>
   testModeStatus?: GenerationTestModeStatus | null
   rawMetadata: {
     job: Record<string, unknown> | null
@@ -523,7 +532,26 @@ export interface ChildWeekTimeline {
     material: Record<string, unknown> | null
     feedback: Record<string, unknown> | null
     testModeStatus?: GenerationTestModeStatus | null
+    availableWeeks?: Array<{
+      week: string
+      jobId?: string
+      status: string
+      attemptCount: number
+      hasMaterial: boolean
+      materialId?: string
+      releaseAt?: string | null
+    }>
   }
+}
+
+export interface AvailableWeekOption {
+  week: string
+  jobId?: string
+  status: string
+  attemptCount: number
+  hasMaterial: boolean
+  materialId?: string
+  releaseAt?: string | null
 }
 
 export interface AiExportDataset {
