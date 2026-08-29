@@ -30,7 +30,19 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
 
 export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
 
-export const QuestionSchema = z.strictObject({
+export const QuestionLegacySchema = z.strictObject({
+  id: StableId,
+  targetIds: z.array(StableId).min(1).max(4),
+  itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
+  prompt: Text,
+  options: z.array(Text).length(4).optional(),
+  writingLines: z.number().int().min(0).max(10),
+  difficulty: z.enum(['supported', 'on-level', 'stretch']),
+})
+
+export type QuestionLegacy = z.infer<typeof QuestionLegacySchema>
+
+export const QuestionV24Schema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
   itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
@@ -41,7 +53,9 @@ export const QuestionSchema = z.strictObject({
   responseLayout: ResponseLayoutSchema.optional(),
 })
 
-const Question = QuestionSchema
+export type QuestionV24 = z.infer<typeof QuestionV24Schema>
+export const QuestionSchema = QuestionV24Schema
+export type Question = QuestionV24
 
 export const ReadingBlockSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('paragraph'), text: Text }),
@@ -181,9 +195,9 @@ export const CurriculumPackageV22Schema = z.strictObject({
     }),
     adaptiveExtension: AdaptiveExtensionSchema.nullable().optional(),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -209,7 +223,7 @@ export const CurriculumPackageV22Schema = z.strictObject({
   }),
 })
 
-// Canonical 2.3.0 Production Schema
+// Legacy 2.3.0 Production Schema
 export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
   metadata: CurriculumPackageV22Schema.shape.metadata.extend({
     schemaVersion: z.literal('2.3.0'),
@@ -220,8 +234,40 @@ export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
   }),
 })
 
+// Canonical 2.4.0 Production Schema
+export const CurriculumPackageV24Schema = CurriculumPackageV23Schema.extend({
+  metadata: CurriculumPackageV23Schema.shape.metadata.extend({
+    schemaVersion: z.literal('2.4.0'),
+  }),
+  studentLesson: CurriculumPackageV23Schema.shape.studentLesson.extend({
+    vocabulary: z.array(z.strictObject({
+      id: StableId,
+      word: Text,
+      partOfSpeech: Text,
+      meaningZh: Text,
+      pronunciationHint: Text.nullable(),
+      exampleEn: Text,
+      exampleZh: Text,
+      status: z.enum(['new', 'review', 'repeated-miss', 'extension']),
+    })).min(1).max(30),
+    practice: z.array(z.strictObject({
+      id: StableId,
+      stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']),
+      titleZh: Text,
+      instructionsZh: Text,
+      hintZh: Text.nullable(),
+      questions: z.array(QuestionV24Schema).min(1).max(20),
+    })).min(4).max(10),
+    homework: z.strictObject({
+      purposeZh: Text,
+      estimatedMinutes: z.number().int().min(5).max(90),
+      questions: z.array(QuestionV24Schema).min(3).max(20),
+    }),
+  }),
+})
+
 /** The one canonical schema used for all newly authored production packages. */
-export const CurriculumPackageSchema = CurriculumPackageV23Schema
+export const CurriculumPackageSchema = CurriculumPackageV24Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -276,9 +322,9 @@ export const CurriculumPackageV21Schema = z.strictObject({
       sourceNote: Text.nullable().optional().default(null),
     }),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -348,9 +394,9 @@ export const CurriculumPackageV20Schema = z.strictObject({
     vocabulary: z.array(z.strictObject({ id: StableId, word: Text, partOfSpeech: Text, meaningZh: Text, pronunciationHint: Text.nullable(), exampleEn: Text, exampleZh: Text, status: z.enum(['new', 'review', 'repeated-miss', 'extension']) })).min(7).max(15),
     reading: z.strictObject({ title: Text, contextZh: Text, paragraphs: z.array(Text).min(3).max(12), wordCount: z.number().int().min(120).max(900), readingTipsZh: z.array(Text).min(1).max(6), sourceNote: Text.nullable().optional().default(null) }),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -375,9 +421,33 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
+export type CurriculumPackageV24 = z.infer<typeof CurriculumPackageV24Schema>
 export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
 export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
-export type CurriculumPackage = CurriculumPackageV23 | CurriculumPackageV22
+export type CurriculumPackage = CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
-export type CurriculumQuestion = z.infer<typeof Question>
+export type CurriculumQuestionV24 = z.infer<typeof QuestionV24Schema>
+export type CurriculumQuestionLegacy = z.infer<typeof QuestionLegacySchema>
+export type CurriculumQuestion = CurriculumQuestionV24 | (CurriculumQuestionLegacy & { responseLayout?: undefined })
+
+export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24 {
+  return {
+    ...pkg,
+    metadata: {
+      ...pkg.metadata,
+      schemaVersion: '2.4.0',
+    },
+    studentLesson: {
+      ...pkg.studentLesson,
+      practice: pkg.studentLesson.practice.map((sec) => ({
+        ...sec,
+        questions: sec.questions.map((q) => ({ ...q })),
+      })),
+      homework: {
+        ...pkg.studentLesson.homework,
+        questions: pkg.studentLesson.homework.questions.map((q) => ({ ...q })),
+      },
+    },
+  }
+}

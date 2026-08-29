@@ -259,7 +259,7 @@ describe('production failure regressions', () => {
     expect(profile.isFallback).toBe(true)
   })
 
-  it('rejects materials where decisive control conditions are dropped in answer entailment', () => {
+  it('rejects materials where decisive control conditions are dropped in answer entailment (Finisher / Audit acceptance of critic verdict)', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks.push(
@@ -281,7 +281,7 @@ describe('production failure regressions', () => {
     expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
   })
 
-  it('passes materials that preserve decisive control conditions or use valid stylistic paraphrasing', () => {
+  it('passes materials that preserve decisive control conditions or use valid stylistic paraphrasing (Finisher / Audit acceptance of critic verdict)', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks.push(
@@ -297,7 +297,7 @@ describe('production failure regressions', () => {
     expect(entailmentFindings).toEqual([])
   })
 
-  it('rejects materials where model answers violate explicit prompt constraints such as sentence count', () => {
+  it('rejects materials where model answers violate explicit prompt constraints such as sentence count (Finisher / Audit acceptance of critic verdict)', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks.push(
@@ -317,5 +317,41 @@ describe('production failure regressions', () => {
     const audit = auditCurriculumPackage(pkg)
     expect(audit.passed).toBe(false)
     expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
+  })
+
+  describe('Prompt 2.10.1 Behavioral Contracts', () => {
+    it('authoring and critic overlays mandate preserving decisive control conditions for bounded causal claims', async () => {
+      const bundle = await compileProductionBundle()
+      expect(bundle.metadata.promptVersion).toBe('2.10.1')
+      expect(bundle.metadata.schemaVersion).toBe('2.4.0')
+
+      // Authoring contract must explicitly require qualifier scope preservation
+      expect(bundle.content).toContain('Condition & Qualifier Scope Preservation')
+      expect(bundle.content).toContain('strictly preserve decisive qualifiers and control conditions')
+      expect(bundle.content).toContain('never drop "at the same length and tension"')
+
+      // Critic contract must evaluate qualifier preservation under answer-entailment
+      expect(bundle.content).toContain('preserve decisive control conditions / qualifiers (e.g. holding length and tension equal when comparing thickness)')
+    })
+
+    it('authoring and critic overlays mandate exact prompt constraint compliance in model answers', async () => {
+      const bundle = await compileProductionBundle()
+
+      // Authoring contract must mandate constraint compliance (e.g. sentence count)
+      expect(bundle.content).toContain('Task Instruction & Constraint Compliance')
+      expect(bundle.content).toContain('If a question requests "in two complete sentences", the model answer must contain exactly two sentences')
+
+      // Critic contract must mandate checking task constraint compliance
+      expect(bundle.content).toContain('obey all explicit constraints stated in the question prompt (e.g. requested sentence counts)')
+    })
+
+    it('authoring and critic overlays distinguish valid stylistic paraphrasing from dropped control conditions', async () => {
+      const bundle = await compileProductionBundle()
+
+      // Repair contract preserves valid unaffected content while repairing dropped qualifiers
+      expect(bundle.content).toContain('Answer Entailment & Condition Scope Repairs')
+      expect(bundle.content).toContain('Ensure model answers preserve decisive qualifiers')
+      expect(bundle.content).toContain('Preserve Unaffected Content')
+    })
   })
 })

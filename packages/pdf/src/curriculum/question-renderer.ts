@@ -1,4 +1,4 @@
-import type { CurriculumQuestion } from '@paper-english/generator'
+import type { CurriculumQuestion, ResponseLayout } from '@paper-english/generator'
 import { escapeHtml as h } from '../escape-html.js'
 
 const OPTION_PREFIX_REGEX = /^(?:\([A-Da-d]\)|\[[A-Da-d]\]|[A-Da-d][).:])\s*/u
@@ -34,12 +34,12 @@ function renderWritingLines(count: number): string {
 </div>`
 }
 
-function renderOrganizerTable(layout: NonNullable<CurriculumQuestion['responseLayout']>): string {
+function renderOrganizerTable(layout: ResponseLayout): string {
   if (layout.type === 'lines') {
     return renderWritingLines(layout.lineCount ?? 0)
   }
 
-  const headerCells = layout.headers.map((hText) => `<th>${h(hText)}</th>`).join('')
+  const headerCells = layout.headers.map((hText: string) => `<th>${h(hText)}</th>`).join('')
   const rowsHtml = layout.rows.map((row) => {
     const labelCell = row.label ? `<td class="organizer-row-label">${h(row.label)}</td>` : ''
     const valueCellsCount = row.label ? Math.max(1, layout.headers.length - 1) : layout.headers.length

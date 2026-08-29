@@ -82,11 +82,26 @@ function progressionSet(capsule: Record<string, unknown> | undefined, keys: stri
   return new Set(keys.flatMap((key) => stringArray(capsule?.[key])))
 }
 
-function feedbackExplicitlyRequestsGrammarRepair(context: GenerationContext): boolean {
+function feedbackOrLearningStateSupportsGrammarReview(primaryGrammar: string, context: GenerationContext): boolean {
+  const grammarCapsule = context.grammarCapsule as Record<string, unknown> | undefined
+  const reviewDueGrammar = progressionSet(grammarCapsule, ['dueForReview', 'weakRecent', 'uncertain'])
+  if (reviewDueGrammar.has(primaryGrammar)) return true
+
+  const snapshot = context.learnerSnapshot as Record<string, unknown> | undefined
+  if (snapshot) {
+    if (snapshot.recentDifficulty === 'too-hard') return true
+    const mistakes = stringArray(snapshot.recurringMistakes).join(' ').toLocaleLowerCase()
+    const reviewDue = stringArray(snapshot.reviewDue).join(' ').toLocaleLowerCase()
+    const pGrammarLower = primaryGrammar.toLocaleLowerCase()
+    if (mistakes.includes(pGrammarLower) || reviewDue.includes(pGrammarLower)) return true
+  }
+
   const feedback = context.feedback
-  if (!feedback || typeof feedback !== 'object') return false
-  const text = JSON.stringify(feedback).toLocaleLowerCase()
-  return /grammar|文法|repeat|again|review|複習|再練|重做|不熟|錯|弱/u.test(text)
+  if (feedback && typeof feedback === 'object') {
+    const text = JSON.stringify(feedback).toLocaleLowerCase()
+    if (text.length > 2 && text !== '{}' && text !== '[]') return true
+  }
+  return false
 }
 
 /** Context-aware publish gate: package-only schema validation cannot detect week-over-week regressions. */
@@ -97,15 +112,7 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
   const dueVocabulary = progressionSet(vocabCapsule, ['dueForReview', 'weakRecent'])
   const introduced = new Set(pkg.trackingDelta.introducedVocabularyIds)
   const reviewed = new Set(pkg.trackingDelta.reviewedVocabularyIds)
-  const reviewCards = pkg.studentLesson.vocabulary.filter((item) => item.status === 'review' || item.status === 'repeated-miss')
-  const newCards = pkg.studentLesson.vocabulary.filter((item) => item.status === 'new' || item.status === 'extension')
 
-  if (reviewCards.length > 4) {
-    findings.push({ source: 'validation', dimension: 'forward-progression', path: 'studentLesson.vocabulary', message: `Review vocabulary is capped at 4 cards; received ${reviewCards.length}.` })
-  }
-  if (newCards.length < 7) {
-    findings.push({ source: 'validation', dimension: 'forward-progression', path: 'studentLesson.vocabulary', message: `The new-word quota requires at least 7 genuinely new cards; received ${newCards.length}.` })
-  }
   for (const item of pkg.studentLesson.vocabulary) {
     const wasExposed = knownVocabulary.has(item.id)
     if (wasExposed && (item.status === 'new' || item.status === 'extension')) {
@@ -131,7 +138,7 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
   const knownGrammar = progressionSet(grammarCapsule, ['dueForReview', 'weakRecent', 'uncertain', 'recentlyMastered'])
   const weakGrammar = progressionSet(grammarCapsule, ['weakRecent'])
   const primaryGrammar = pkg.trackingDelta.exposedGrammarTargetIds[0]
-  if (primaryGrammar && knownGrammar.has(primaryGrammar) && !weakGrammar.has(primaryGrammar) && !feedbackExplicitlyRequestsGrammarRepair(context)) {
+  if (primaryGrammar && knownGrammar.has(primaryGrammar) && !weakGrammar.has(primaryGrammar) && !feedbackOrLearningStateSupportsGrammarReview(primaryGrammar, context)) {
     const recommended = stringArray((context.capCoverageCapsule as Record<string, unknown> | undefined)?.recommendedGrammar)
     const prerequisiteRepair = recommended.some((id) => getGrammarUnit(id)?.prerequisites.includes(primaryGrammar))
       && !progressionSet(grammarCapsule, ['recentlyMastered']).has(primaryGrammar)

@@ -1,9 +1,10 @@
 import { ZodError } from 'zod'
 import {
   CurriculumPackageSchema,
-  CurriculumPackageV20Schema,
-  CurriculumPackageV21Schema,
+  CurriculumPackageV23Schema,
   CurriculumPackageV22Schema,
+  CurriculumPackageV21Schema,
+  CurriculumPackageV20Schema,
   type CurriculumPackage,
 } from './curriculum-package-schema.js'
 import {
@@ -209,7 +210,7 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
 const GROUNDED_READING_LOCATION = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail)$/u
 
 function groundingRelationshipIssues(
-  value: Extract<CurriculumPackage, { metadata: { schemaVersion: '2.3.0' } }>,
+  value: Extract<CurriculumPackage, { metadata: { schemaVersion: '2.3.0' | '2.4.0' } }>,
 ): LessonValidationIssue[] {
   const issues: LessonValidationIssue[] = []
   const sourceIds = new Set<string>()
@@ -405,7 +406,9 @@ export function validateCurriculumPackage(input: unknown): CurriculumValidationR
     : undefined
   const parsed = normalizedVersion === '2.2.0'
     ? CurriculumPackageV22Schema.safeParse(normalized)
-    : CurriculumPackageSchema.safeParse(normalized)
+    : normalizedVersion === '2.3.0'
+      ? CurriculumPackageV23Schema.safeParse(normalized)
+      : CurriculumPackageSchema.safeParse(normalized)
   if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
   const issues = relationshipIssues(parsed.data)
   return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage: parsed.data }

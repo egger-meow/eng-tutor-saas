@@ -1,6 +1,6 @@
-# Prompt 01 Overlay: Calibrated Planning, Lexical Hierarchy & Task Topology (v2.10.0)
+# Prompt 01 Overlay: Calibrated Planning, Lexical Hierarchy & Task Topology (v2.10.1)
 
-Apply the complete inherited planning contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+Apply the complete inherited planning contract, with Curriculum Schema 2.4.0 and Prompt Version 2.10.1.
 
 ## 1. Learner-Level Calibration & Linguistic Depth
 
@@ -26,3 +26,9 @@ Plan varied assessment mechanisms across practice sections:
 Explicitly assign and constrain the evidence scope for every planned assessment item:
 - Items assessing reading comprehension or reading-based CAP transfer must be designated with `evidenceScope: "primary_reading"`.
 - Never plan reading comprehension questions that rely on instruction headers, vocabulary definitions, or external background knowledge as reading evidence.
+
+## 5. Structured Response Layout Planning
+
+When an open-response question asks the student to complete a comparison table, organizer, or multi-field mapping:
+- Plan a concrete `responseLayout` (type: `table` or `organizer`) with clear `headers` and `rows`.
+- Never ask a student to "fill in the table below" without providing the structured `responseLayout` object in the question.

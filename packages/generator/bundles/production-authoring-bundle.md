@@ -1,7 +1,7 @@
 ---
-bundleVersion: "2.10.0-prod"
-schemaVersion: "2.3.0"
-promptVersion: "2.10.0"
+bundleVersion: "2.10.1-prod"
+schemaVersion: "2.4.0"
+promptVersion: "2.10.1"
 engineVersion: "1.5.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
@@ -25,11 +25,11 @@ sourceHashes:
   "packages/generator/prompts/2.8.0/02-author.md": "b2c72237b77a437747107818483ac3fa5e5ec08748d4a91aae1ef69118a229f1"
   "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
   "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
-  "packages/generator/prompts/2.10.0/01-plan.md": "00e31eb3b577625f48f6af954159b0e532d9f928dbf3ce35d1f03ed714f368ae"
-  "packages/generator/prompts/2.10.0/02-author.md": "2234939fdd48d4b75c6eb966917186fdc4c3fbf3a4042d5bf680f63a7917aade"
-  "packages/generator/prompts/2.10.0/03-critic.md": "6b893fbe7701d12d785594caf5f8ecb15abac8889e872a06937e2a10015d3d4b"
-  "packages/generator/prompts/2.10.0/04-repair.md": "71bc67542e14481eaf69bb074fdf5a55565f7c9f36fdaa542045d343f96046f3"
-  "packages/generator/src/curriculum-package-schema.ts": "95a1a643ace940c410cf5225a4672eea9b0ed0e7b116c780245ea5cf949c702d"
+  "packages/generator/prompts/2.10.1/01-plan.md": "6059eacfbda5ddd37fd398220538e6f86111d9366f1679b935a40e67dae63e68"
+  "packages/generator/prompts/2.10.1/02-author.md": "2b8b74e0f9ba840e7037089083aad6f07bff50c9c52c4dc05ef0a91ba7629d4a"
+  "packages/generator/prompts/2.10.1/03-critic.md": "2027d1291f7caa3df9c5b0062f42c573a2eab5a131320e13ecaa0d420810d7fd"
+  "packages/generator/prompts/2.10.1/04-repair.md": "38e3b5080c44d76531f9948ecf71d6fc4d606a580e3490672c8b1ef6d7ee4941"
+  "packages/generator/src/curriculum-package-schema.ts": "b2c7098646f49268f4688027738f88f0e123efc8952fca3d6369c8241dfb7600"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "fc9c9bdabc6cb1c7f9640310f9b4b4da974d4c27a3bacf7059783f2d9c5dfc69"
@@ -324,7 +324,19 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
 
 export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
 
-export const QuestionSchema = z.strictObject({
+export const QuestionLegacySchema = z.strictObject({
+  id: StableId,
+  targetIds: z.array(StableId).min(1).max(4),
+  itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
+  prompt: Text,
+  options: z.array(Text).length(4).optional(),
+  writingLines: z.number().int().min(0).max(10),
+  difficulty: z.enum(['supported', 'on-level', 'stretch']),
+})
+
+export type QuestionLegacy = z.infer<typeof QuestionLegacySchema>
+
+export const QuestionV24Schema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
   itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
@@ -335,7 +347,9 @@ export const QuestionSchema = z.strictObject({
   responseLayout: ResponseLayoutSchema.optional(),
 })
 
-const Question = QuestionSchema
+export type QuestionV24 = z.infer<typeof QuestionV24Schema>
+export const QuestionSchema = QuestionV24Schema
+export type Question = QuestionV24
 
 export const ReadingBlockSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('paragraph'), text: Text }),
@@ -475,9 +489,9 @@ export const CurriculumPackageV22Schema = z.strictObject({
     }),
     adaptiveExtension: AdaptiveExtensionSchema.nullable().optional(),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -503,7 +517,7 @@ export const CurriculumPackageV22Schema = z.strictObject({
   }),
 })
 
-// Canonical 2.3.0 Production Schema
+// Legacy 2.3.0 Production Schema
 export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
   metadata: CurriculumPackageV22Schema.shape.metadata.extend({
     schemaVersion: z.literal('2.3.0'),
@@ -514,8 +528,40 @@ export const CurriculumPackageV23Schema = CurriculumPackageV22Schema.extend({
   }),
 })
 
+// Canonical 2.4.0 Production Schema
+export const CurriculumPackageV24Schema = CurriculumPackageV23Schema.extend({
+  metadata: CurriculumPackageV23Schema.shape.metadata.extend({
+    schemaVersion: z.literal('2.4.0'),
+  }),
+  studentLesson: CurriculumPackageV23Schema.shape.studentLesson.extend({
+    vocabulary: z.array(z.strictObject({
+      id: StableId,
+      word: Text,
+      partOfSpeech: Text,
+      meaningZh: Text,
+      pronunciationHint: Text.nullable(),
+      exampleEn: Text,
+      exampleZh: Text,
+      status: z.enum(['new', 'review', 'repeated-miss', 'extension']),
+    })).min(1).max(30),
+    practice: z.array(z.strictObject({
+      id: StableId,
+      stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']),
+      titleZh: Text,
+      instructionsZh: Text,
+      hintZh: Text.nullable(),
+      questions: z.array(QuestionV24Schema).min(1).max(20),
+    })).min(4).max(10),
+    homework: z.strictObject({
+      purposeZh: Text,
+      estimatedMinutes: z.number().int().min(5).max(90),
+      questions: z.array(QuestionV24Schema).min(3).max(20),
+    }),
+  }),
+})
+
 /** The one canonical schema used for all newly authored production packages. */
-export const CurriculumPackageSchema = CurriculumPackageV23Schema
+export const CurriculumPackageSchema = CurriculumPackageV24Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -570,9 +616,9 @@ export const CurriculumPackageV21Schema = z.strictObject({
       sourceNote: Text.nullable().optional().default(null),
     }),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -642,9 +688,9 @@ export const CurriculumPackageV20Schema = z.strictObject({
     vocabulary: z.array(z.strictObject({ id: StableId, word: Text, partOfSpeech: Text, meaningZh: Text, pronunciationHint: Text.nullable(), exampleEn: Text, exampleZh: Text, status: z.enum(['new', 'review', 'repeated-miss', 'extension']) })).min(7).max(15),
     reading: z.strictObject({ title: Text, contextZh: Text, paragraphs: z.array(Text).min(3).max(12), wordCount: z.number().int().min(120).max(900), readingTipsZh: z.array(Text).min(1).max(6), sourceNote: Text.nullable().optional().default(null) }),
     instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, explanationZh: Text, patterns: z.array(Text).min(1).max(8), workedExamples: z.array(z.strictObject({ example: Text, walkthroughZh: Text })).min(2).max(8), commonMistakes: z.array(z.strictObject({ wrong: Text, corrected: Text, whyZh: Text })).min(1).max(6) })).min(1).max(4),
-    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(Question).min(1).max(20) })).min(4).max(10),
+    practice: z.array(z.strictObject({ id: StableId, stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']), titleZh: Text, instructionsZh: Text, hintZh: Text.nullable(), questions: z.array(QuestionLegacySchema).min(1).max(20) })).min(4).max(10),
     selfCheckZh: z.array(Text).min(2).max(8),
-    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(Question).min(3).max(20) }),
+    homework: z.strictObject({ purposeZh: Text, estimatedMinutes: z.number().int().min(5).max(90), questions: z.array(QuestionLegacySchema).min(3).max(20) }),
   }),
   answers: z.array(z.strictObject({ questionId: StableId, answer: Text, acceptedAnswers: z.array(Text), explanationZh: Text, likelyMisconceptionZh: Text.nullable(), followUpZh: Text.nullable() })).min(1),
   parentSummary: z.strictObject({
@@ -669,18 +715,40 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
+export type CurriculumPackageV24 = z.infer<typeof CurriculumPackageV24Schema>
 export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
 export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
-export type CurriculumPackage = CurriculumPackageV23 | CurriculumPackageV22
+export type CurriculumPackage = CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
-export type CurriculumQuestion = z.infer<typeof Question>
+export type CurriculumQuestion = z.infer<typeof QuestionV24Schema> | z.infer<typeof QuestionLegacySchema>
+
+export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24 {
+  return {
+    ...pkg,
+    metadata: {
+      ...pkg.metadata,
+      schemaVersion: '2.4.0',
+    },
+    studentLesson: {
+      ...pkg.studentLesson,
+      practice: pkg.studentLesson.practice.map((sec) => ({
+        ...sec,
+        questions: sec.questions.map((q) => ({ ...q })),
+      })),
+      homework: {
+        ...pkg.studentLesson.homework,
+        questions: pkg.studentLesson.homework.questions.map((q) => ({ ...q })),
+      },
+    },
+  }
+}
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.10.0)
+# Prompt 01: Planning (v2.10.1)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.4.0, Prompt Version 2.10.1).
 
 ---
 
@@ -793,7 +861,7 @@ Include 2–4 previous-week vocabulary items and prior grammar patterns in `revi
 
 ---
 
-## 6. Learning Plan Output Format (Schema 2.3.0)
+## 6. Learning Plan Output Format (Schema 2.4.0)
 
 Output a JSON object matching `learningPlan`:
 ```json
@@ -925,9 +993,9 @@ Freshness is topic-aware, not one universal day cutoff. Very fast-moving claims 
 
 ---
 
-# Prompt 01 Overlay: Calibrated Planning, Lexical Hierarchy & Task Topology (v2.10.0)
+# Prompt 01 Overlay: Calibrated Planning, Lexical Hierarchy & Task Topology (v2.10.1)
 
-Apply the complete inherited planning contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+Apply the complete inherited planning contract, with Curriculum Schema 2.4.0 and Prompt Version 2.10.1.
 
 ## 1. Learner-Level Calibration & Linguistic Depth
 
@@ -956,17 +1024,18 @@ Explicitly assign and constrain the evidence scope for every planned assessment 
 
 ## 5. Structured Response Layout Planning
 
-When planning comparison tasks, multi-variable organizers, or multi-dimensional synthesis questions:
-- Explicitly plan a structured table/organizer layout (`responseLayout: { type: "table" | "organizer", headers: [...], rows: [...] }`) instead of generic writing lines whenever the task asks the learner to organize findings into categories, rows, or tables.
+When an open-response question asks the student to complete a comparison table, organizer, or multi-field mapping:
+- Plan a concrete `responseLayout` (type: `table` or `organizer`) with clear `headers` and `rows`.
+- Never ask a student to "fill in the table below" without providing the structured `responseLayout` object in the question.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.10.0)
+# Prompt 02: Material Authoring (v2.10.1)
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.4.0, Prompt Version 2.10.1).
 
 ---
 
-## 1. Schema 2.3.0 Multi-Genre Reading Blocks
+## 1. Schema 2.4.0 Multi-Genre Reading Blocks
 
 The `studentLesson.reading` object MUST use `genre` and `blocks`. Do NOT emit a `paragraphs` array.
 
@@ -1158,7 +1227,7 @@ Max 0–1 per week. When learner state or lesson context warrants genuine depth,
 
 ---
 
-## 7. trackingDelta: Exposure Only (Schema 2.3.0)
+## 7. trackingDelta: Exposure Only (Schema 2.4.0)
 
 `trackingDelta` records **EXPOSURE ONLY**. Exposure is not evidence of mastery.
 The first `exposedGrammarTargetIds` entry is primary: normally new and grade-appropriate. Prior grammar belongs in retrieval/application unless feedback, failure evidence, or prerequisite repair justifies repetition.
@@ -1206,7 +1275,7 @@ The server automatically derives `wordCount`, `learningPlan.estimatedMinutes`, `
 
 ## 10. Output Contract (Strict JSON Only)
 
-Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.3.0).
+Output one single, valid JSON object starting with `{` and ending with `}`, conforming strictly to `CurriculumPackageSchema` (2.4.0).
 
 ---
 
@@ -1270,53 +1339,35 @@ Current selection grants no quality exemption. Preserve meaningful factual densi
 
 ---
 
-# Prompt 02 Overlay: Evidence Boundaries, Modality Truth & Lexical Integrity (v2.10.0)
+# Prompt 02 Overlay: Authentic Discourse, Strict Evidence Bounds & Rich Transfer (v2.10.1)
 
-Apply the complete inherited authoring contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+Author high-integrity weekly curriculum packages for Schema 2.4.0 under Prompt 2.10.1.
 
-## 1. Strict Primary Reading Evidence Boundary
+## 1. Reading Passage Integrity & Lexical Anchoring
 
-All reading comprehension and reading-based CAP assessment items must draw evidence exclusively from `studentLesson.reading.blocks`:
-- **Explicit Location Anchoring**:
-  - Every CAP-governed assessment item must specify valid `evidenceAnchors` in its internal `cap-plan:<questionId>` check.
-  - Every non-CAP reading-dependent assessment item (e.g. guided/independent reading comprehension, detail, inference) must specify a compact internal `evidence-plan:<questionId>` check in `qualityEvidence.criticalChecks` declaring `evidenceScope: "primary_reading"` and valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where `anchorText` occurs verbatim.
-  - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
-- **Quote Verifiability**: A quote explicitly attributed to the reading/passage/author must be verbatim present in the declared reading blocks. Constructed assessment stimuli (for example, `A student says, "..."`) are allowed and are judged by their evidence anchors rather than passage-string identity.
+- **Linguistic Authenticity**: Write rich, natural, age-appropriate passages that model authentic English discourse. Use paragraphs with meaningful logical connectors and varied sentence architecture.
+- **Lexical Anchoring**: Integrate every new and extension vocabulary word directly into the primary reading passage in a supportive, decipherable context.
+- **Evidence Containment**: Ensure all factual assertions in reading comprehension questions are exclusively answerable from the reading text itself. Never leak facts from the instruction section or external real-world knowledge into reading questions.
+- **Condition & Qualifier Scope Preservation**: When discussing physical, scientific, or causal relationships (e.g., how string thickness, tension, or length affects guitar pitch), strictly preserve decisive qualifiers and control conditions across Reading → Instruction → Question → Model Answer. For example, if pitch depends on string thickness *when length and tension are kept equal*, never drop "at the same length and tension" in explanations or model answers.
 
-## 2. Modality Preservation, Scope Consistency & Task Constraint Adherence
+## 2. Instruction Depth & Non-Trivial Examples
 
-Preserve strict factual truth, decisive qualifiers, and epistemic modality across all question prompts, parent answers, and explanations:
-- **Condition & Scope Preservation**: Bounded claims in Reading (e.g. comparative outcomes depending on controlled factors like length, tension, thickness, temperature, baseline state) must preserve all materially necessary qualifiers across Reading, Instruction, Question prompts, and Answer explanations.
-  - Instruction cannot silently strengthen or weaken a Reading claim.
-  - Questions cannot drop decisive conditions from the evidence they depend on (e.g. asking what reading predicts for thicker vs thinner strings without specifying that length and tension are held equal).
-  - Answer explanations cannot expand a bounded claim into an unqualified universal claim.
-  - Modality and scope must remain consistent across: `Reading → Instruction → Question → Answer`.
-- **Hypothetical vs. Observed Distinction**: If the passage describes a condition or hypothetical scenario ("If eaten portions are high...", "It could happen that..."), never convert it into an asserted historical record or observed fact ("the record shows that eaten portions remained high for days").
-- **No Invented Evidence**: Never synthesize ungrounded backstory, fabricated data logs, or phantom experiments in parent answer rubrics or multiple-choice distractors.
-- **Task Constraint Adherence in Model Answers**: Model answers in `answers` must strictly obey all explicit structural constraints given in question prompts, such as:
-  - Exact requested sentence count (e.g. if the prompt specifies "Write two sentences.", provide exactly two sentences, not four or one).
-  - Requested number of examples or comparison dimensions.
-  - Requested connectors or grammatical structures.
+- **Syntax & Grammar Explanations**: Provide clear Traditional Chinese explanations that clarify the grammatical function, communicative purpose, and common pitfall patterns of the target structure.
+- **Worked Examples**: Provide rich, contextualized worked examples that demonstrate varied communicative registers rather than minor lexical variations of a single sentence skeleton.
+- **Common Mistakes**: Provide authentic student errors with clear diagnostic explanations in Traditional Chinese (`whyZh`).
 
-## 3. Lexical Integrity & Anchored Core Vocabulary
+## 3. High-Fidelity Assessment Items & Open Transfer
 
-Ensure strict alignment between vocabulary cards and authored text:
-- **Mandatory Reading Anchoring**: Every core vocabulary item with `status: 'new'` or `'extension'` must appear directly in the primary reading passage text.
-- **Ceiling & Target Integrity**: Use learner-level judgment, context, and instructional value when deciding whether an unfamiliar word is acceptable or should be taught. The official 2000-word foundation is a planning reference, not a deterministic allowlist; ordinary inflections, derivations, compounds, transparent topic words, and natural domain language must not be treated as automatic defects merely because a fixed list or morphology heuristic misses them.
-- **Linguistic Richness**: Maintain level-appropriate sentence variety, cohesive conjunctions, and expressive phrasing suited to the learner's calibrated band.
-
-## 4. Structured Response Layout Authoring
-
-When a question prompt or instruction directs the learner to fill out or create a table or multi-column organizer (such as comparing changed features, controlled features, and outcomes):
-- Provide structured response metadata in `responseLayout`:
-  - `type`: `"table"` or `"organizer"`
-  - `headers`: column header titles (e.g. `["Feature", "What changes?", "What stays the same?", "Pitch result"]`)
-  - `rows`: list of row objects with optional `label` (e.g. `label: "Thickness"`, `label: "Tension"`, `label: "Vibrating length"`) and optional initial values.
+- **Task Topology Alignment**: Maintain cognitive variety across the practice sections (direct retrieval, condition-result mapping, inferential explanation, context-clue deduction, and open transfer).
+- **Epistemic Modality & True/False Distinction**: For detail and inference items, verify that the correct option is strictly entailed by the reading passage. Distinguish between statements that are definitely true, definitely false, and merely plausible/unsupported.
+- **Task Instruction & Constraint Compliance**: Model answers (`answer` and `acceptedAnswers`) must strictly obey all explicit constraints stated in the question prompt. If a question requests "in two complete sentences", the model answer must contain exactly two sentences; if it asks for two reasons, provide two reasons.
+- **Structured Response Layouts**: When asking students to fill in tables or graphic organizers, provide the `responseLayout` object (`type: "table"` or `"organizer"`, with `headers` and `rows`) in the question schema so the student PDF renders a structured grid.
+- **Deep Explanations in Parent Answer Key**: The parent answer key must contain thorough, pedagogical Traditional Chinese explanations (`explanationZh`) and actionable parent follow-up prompts (`followUpZh`).
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.10.0)
+# Prompt 03: Critic (v2.10.1)
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.4.0, Prompt Version 2.10.1).
 
 ---
 
@@ -1453,40 +1504,22 @@ Reject news-shaped prose that follows a source's headline, lead, framing, orderi
 
 ---
 
-# Prompt 03 Overlay: Mandatory 5-Dimension Adversarial Critic (v2.10.0)
+# Prompt 03 Overlay: Adversarial Semantic Critic Engine (v2.10.1)
 
-Apply the complete inherited independent critic contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+Perform rigorous, independent adversarial critique across the 5 canonical dimensions for Schema 2.4.0 under Prompt 2.10.1:
 
-In addition to structural, CAP, grounding, and workload audits, the critic MUST independently evaluate and record specific, non-empty verification evidence across the following 5 critical quality dimensions. Do not pad evidence to satisfy a character count.
+1. `primary-reading-evidence-containment`: Verify all reading comprehension items are exclusively answerable from the reading passage.
+2. `lexical-anchor-depth`: Verify all new/extension vocabulary items are authentically embedded in the reading passage with supportive context.
+3. `epistemic-modality-truth`: Verify option correctness against the passage with precise modal distinction (certain vs possible vs contradicted).
+4. `task-topology-diversity`: Verify cognitive variety across practice sections without repetitive template collapse.
+5. `answer-entailment`: Verify parent answer keys strictly follow the passage evidence, preserve decisive control conditions / qualifiers (e.g. holding length and tension equal when comparing thickness), and obey all explicit constraints stated in the question prompt (e.g. requested sentence counts).
 
-## 1. `evidence-boundary`
-Verify that all reading comprehension and reading-based CAP questions draw evidence strictly and exclusively from `studentLesson.reading.blocks`. Reject any item where the targeted sentence or example was located in an instruction box, tip note, or practice prompt.
-
-## 2. `answer-entailment`
-Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality, condition scope, and task instructions:
-- **Condition & Scope Preservation**: Reject any question, answer rubric, or explanation that silently drops decisive control conditions or qualifiers from the reading (e.g. omitting that length and tension must be held equal when comparing string thickness), converting a bounded relation into an invalid claim.
-- **Hypothetical vs. Asserted Facts**: Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
-- **Task Instruction Compliance**: Verify that model answers in `answers` strictly obey explicit prompt constraints (e.g. exact requested sentence count, requested number of items/reasons, specified connectors). Reject any model answer that violates the prompt's own explicit constraints.
-
-## 3. `lexical-integrity`
-Verify lexical appropriateness holistically for this learner: core vocabulary should be useful, genuinely difficult words should receive enough support, and context-clue targets should have usable textual clues. Do not reject merely because a token is outside the official 2000-word list or because a deterministic inflection/derivation heuristic would fail to recognize it.
-
-## 4. `task-topology`
-Verify cognitive mechanism diversity across practice questions. Reject question template collapse where multiple items reuse the same shallow reasoning mechanic or repetitive matching schema.
-
-## 5. `level-calibration`
-Verify that language complexity, reading passage depth, and cognitive demand match the learner's diagnosed band. Reject artificial linguistic flattening or low-level D1/D2 confinement for advanced learners.
-
-## Critic Acceptance & Recording Contract
-- **Passing Verification**: All five mandatory dimensions require a specific, non-empty passing critical check (`passed: true`) in `qualityEvidence.criticalChecks` for final deterministic approval. No arbitrary character minimum applies.
-- **Defect Tracking**: When defects or quality failures are discovered during review, record them in `qualityEvidence.criticFindings` with appropriate severity (`'critical'` or `'warning'`).
-- **Post-Repair Re-Verification**: After a critical finding is repaired by the repair engine, the corresponding dimension must be re-verified with a passing critical check (`passed: true`), and the finding must document its `resolution`.
-- **Unresolved Findings Blocking**: Any unresolved critical finding (`severity: 'critical'` with missing/empty `resolution`) strictly blocks publication.
+Record findings with appropriate severity (`info`, `warning`, `critical`). Critical findings must be resolved during repair.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.10.0)
+# Prompt 04: Repair (v2.10.1)
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.4.0, Prompt Version 2.10.1).
 
 ---
 
@@ -1494,7 +1527,7 @@ You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curricul
 
 When fixing validation or critic findings in a curriculum package:
 1. **Preserve Valid Educational Content**: Only modify the specific fields flagged in validation `issues` or critic `findings`.
-2. **Schema 2.3.0 Invariants**: Maintain `schemaVersion: "2.3.0"`, typed `reading.blocks: ReadingBlock[]`, and optional typed `studentLesson.adaptiveExtension` (if present).
+2. **Schema 2.4.0 Invariants**: Maintain `schemaVersion: "2.4.0"`, typed `reading.blocks: ReadingBlock[]`, and optional typed `studentLesson.adaptiveExtension` (if present).
 3. **Pedagogical Repair**:
    - For silly distractors, supply plausible student misconceptions (`partial evidence`, `reversed relationship`).
    - For circular explanations, add textual evidence and `likelyMisconceptionZh`.
@@ -1510,7 +1543,7 @@ When fixing validation or critic findings in a curriculum package:
 
 ## 2. Output Contract
 
-Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.3.0).
+Output the complete, valid, corrected `CurriculumPackage` JSON object adhering strictly to `CurriculumPackageSchema` (2.4.0).
 
 ---
 
@@ -1550,29 +1583,14 @@ Preserve valid research, valid unrelated lesson sections, immutable previous att
 
 ---
 
-# Prompt 04 Overlay: Targeted Quality Repair & Dependency Closure (v2.10.0)
+# Prompt 04 Overlay: Targeted Surgical Repair (v2.10.1)
 
-Apply the complete inherited targeted-repair contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+Resolve all critic findings with minimal, surgical modifications for Schema 2.4.0 under Prompt 2.10.1:
 
-When the semantic critic or curriculum audit reports a failure in evidence boundaries, answer entailment, lexical integrity, task topology, or level calibration, perform targeted repair with complete dependency closure:
-
-## 1. Evidence Boundary Repair
-- If a question referenced an instruction box rather than primary reading prose, relocate or re-author the required text into `studentLesson.reading.blocks` or rewrite the question prompt and `evidenceAnchors` to target an authentic reading block.
-- Update all associated `CapAssessmentPlan` anchors to point strictly to valid reading block paths.
-
-## 2. Answer Entailment, Scope & Task Constraint Repair
-- If a question or answer dropped a decisive control condition or expanded a bounded claim, restore the required qualifier in the question prompt/options/explanation or calibrate the reading claim to match.
-- If an answer rubric converted a hypothetical condition into an asserted fact, rewrite the answer explanation and criteria to strictly reflect the conditional or modal framing of the source passage.
-- If a model answer violated prompt structural constraints (e.g. sentence count mismatch), rewrite the answer to strictly obey the instruction count and structure.
-
-## 3. Lexical Integrity Repair
-- If a new vocabulary item is unanchored, weave it naturally into the reading text or replace it with a genuine passage-derived word.
-- If hard words were left untaught while core slots were spent on basic words, reallocate the vocabulary card slots to teach the high-leverage passage terms.
-
-## 4. Topology & Calibration Repair
-- If questions exhibit mechanical collapse or level mismatch, re-author the offending items to introduce diverse cognitive operations and appropriate linguistic depth.
-
-## 5. Structured Response Layout Repair
-- If a question asks for a multi-row or multi-column table/organizer but lacks `responseLayout`, attach a clean `responseLayout` object with proper `headers` and `rows`.
-
-Always preserve unaffected sections, maintain valid provenance chains, and update all corresponding critic and audit records atomically.
+- **Evidence Containment Violations**: Move necessary factual context into the reading passage or revise questions to rely only on stated facts.
+- **Lexical Anchor Failures**: Weave untaught/unanchored words naturally into the reading passage text.
+- **Modality / Option Truth Issues**: Correct distractor plausibility and eliminate ambiguity in correct options.
+- **Task Topology Collapse**: Diversify question mechanics across practice sections to restore cognitive breadth.
+- **Answer Entailment & Condition Scope Repairs**: Ensure model answers preserve decisive qualifiers (e.g. "at the same length and tension") and strictly satisfy all task instructions (e.g. matching requested sentence count).
+- **Structured Response Layout Repairs**: If an organizer or table question lacks structured layout metadata, add a valid `responseLayout` object with complete `headers` and `rows`.
+- **Preserve Unaffected Content**: Never rewrite sections that passed critic review without findings.

@@ -4,12 +4,13 @@ import { resolve } from 'node:path'
 import { REPO_ROOT } from './bundle-compiler.js'
 import {
   CurriculumPackageSchema,
+  CurriculumPackageV23Schema,
   CurriculumPackageV22Schema,
   CurriculumPackageV21Schema,
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.10.0 active invariant contract with frozen 2.4.0 through 2.8.0 inheritance', () => {
+describe('Prompt 2.10.1 active invariant contract with frozen 2.4.0 through 2.8.0 and 2.10.0 inheritance', () => {
   it('enforces active Prompt 2.4.0 Wave 2 pedagogy invariants (Trigger-Pattern-Trap-Try, distractor reasoning, non-tautological explanations)', async () => {
     const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
     const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
@@ -93,17 +94,21 @@ describe('Prompt 2.10.0 active invariant contract with frozen 2.4.0 through 2.8.
     expect(critic240).toContain('Passage-First Lexical Contract & Lexical Ceiling')
   })
 
-  it('uses CurriculumPackageSchema 2.3.0 while preserving V22, V21, and V20 legacy schemas', async () => {
+  it('uses CurriculumPackageSchema 2.4.0 while preserving V23, V22, V21, and V20 legacy schemas', async () => {
     const bundle = await readFile(resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
 
-    // Assert schema target domain enum still includes communication in 2.3.0.
+    // Assert schema target domain enum still includes communication in 2.4.0.
     const targetDomainEnum = CurriculumPackageSchema.shape.learningPlan.shape.targets.element.shape.domain.options
     expect(targetDomainEnum).toEqual(['vocabulary', 'grammar', 'reading', 'writing', 'communication', 'review'])
 
-    // Assert canonical schemaVersion is 2.3.0 and historical versions stay explicit.
-    expect(CurriculumPackageSchema.shape.metadata.shape.schemaVersion.safeParse('2.3.0').success).toBe(true)
+    // Assert canonical schemaVersion is 2.4.0 and historical versions stay explicit.
+    expect(CurriculumPackageSchema.shape.metadata.shape.schemaVersion.safeParse('2.4.0').success).toBe(true)
+    expect(CurriculumPackageSchema.shape.metadata.shape.schemaVersion.safeParse('2.3.0').success).toBe(false)
     expect(CurriculumPackageSchema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
     expect(CurriculumPackageSchema.shape.metadata.shape.schemaVersion.safeParse('2.1.0').success).toBe(false)
+
+    expect(CurriculumPackageV23Schema.shape.metadata.shape.schemaVersion.safeParse('2.3.0').success).toBe(true)
+    expect(CurriculumPackageV23Schema.shape.metadata.shape.schemaVersion.safeParse('2.4.0').success).toBe(false)
 
     expect(CurriculumPackageV22Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(true)
     expect(CurriculumPackageV22Schema.shape.metadata.shape.schemaVersion.safeParse('2.3.0').success).toBe(false)
@@ -115,11 +120,11 @@ describe('Prompt 2.10.0 active invariant contract with frozen 2.4.0 through 2.8.
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.10.0-prod"')
-    expect(bundle).toContain('schemaVersion: "2.3.0"')
+    expect(bundle).toContain('bundleVersion: "2.10.1-prod"')
+    expect(bundle).toContain('schemaVersion: "2.4.0"')
     expect(bundle).toContain('engineVersion: "1.5.0"')
 
-    // Assert adaptiveExtension is optional in Schema 2.2 studentLesson
+    // Assert adaptiveExtension is optional in Schema 2.4 studentLesson
     const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape
     expect(studentLessonShape.adaptiveExtension).toBeDefined()
   })

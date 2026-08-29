@@ -41,6 +41,7 @@ export type { LessonValidationIssue, LessonValidationResult } from './validate-l
 export { syntheticWeekOne } from './fixtures/synthetic-week-1.js'
 export {
   CurriculumPackageSchema,
+  CurriculumPackageV24Schema,
   CurriculumPackageV23Schema,
   CurriculumPackageV22Schema,
   GroundingSchema,
@@ -52,16 +53,22 @@ export {
   AdaptiveExtensionPurposeSchema,
   AdaptiveExtensionPlacementSchema,
   QuestionSchema,
+  QuestionV24Schema,
+  QuestionLegacySchema,
   ResponseLayoutSchema,
   ResponseLayoutRowSchema,
+  upgradeV23ToV24,
 } from './curriculum-package-schema.js'
 export type {
   CurriculumPackage,
+  CurriculumPackageV24,
   CurriculumPackageV23,
   CurriculumPackageV22,
   CurriculumPackageV21,
   CurriculumPackageV20,
   CurriculumQuestion,
+  QuestionV24,
+  QuestionLegacy,
   ResponseLayout,
   ResponseLayoutRow,
   ReadingBlock,

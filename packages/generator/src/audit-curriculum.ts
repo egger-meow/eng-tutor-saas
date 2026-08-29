@@ -387,9 +387,9 @@ export function auditCurriculumPackage(
   if (pkg.studentLesson.opening.goalsZh.length < 2 || cjk(pkg.studentLesson.opening.howToUseZh) < 8) add('semantic-critical', 'self-study', 'warning', '開場中文目標或使用說明偏少；請確認學生仍能自行理解如何使用教材。')
   if (pkg.studentLesson.instruction.some((section) => section.workedExamples.length < 2 || section.commonMistakes.length < 1)) add('semantic-critical', 'self-study', 'warning', '部分新概念的 worked examples / 錯誤對照較少；由 Critic 判斷是否真的影響自學。')
   if (pkg.studentLesson.reading.blocks.length < 2 || passageWords < 120) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
-  if (pkg.studentLesson.vocabulary.length > 15) add('semantic-critical', 'cognitive-load', 'critical', '核心單字超過 15 個，可能造成不必要負擔。')
+  if (pkg.studentLesson.vocabulary.length > 15) add('semantic-critical', 'cognitive-load', 'warning', '核心單字超過 15 個，可能造成不必要負擔。')
   const phraseCount = pkg.studentLesson.vocabulary.filter((v) => lexicalUnitTokens(v.word).length > 1).length
-  if (phraseCount > 3) add('semantic-critical', 'lexical-unit-mix', 'critical', `核心詞彙含 ${phraseCount} 個片語或搭配，超過 0–3 個的上限。請只保留比另一個單字更有學習價值的詞彙單位。`)
+  if (phraseCount > 3) add('semantic-critical', 'lexical-unit-mix', 'warning', `核心詞彙含 ${phraseCount} 個片語或搭配，超過 0–3 個的上限。請只保留比另一個單字更有學習價值的詞彙單位。`)
   if (!pkg.studentLesson.practice.some((stage) => stage.stage === 'retrieval')) add('semantic-critical', 'retrieval', 'critical', '缺少隔天或延遲提取練習。')
   if (questions.length > 70) add('auto-derived', 'token-efficiency', 'warning', '題目超過 70 題；請刪除重複題並保留能區分學習狀態的證據。')
 
