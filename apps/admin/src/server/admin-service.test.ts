@@ -6,6 +6,7 @@ import {
   CURRENT_ENGINE_VERSION,
   CURRENT_SCHEMA_VERSION,
   CURRENT_PROMPT_VERSION,
+  CURRENT_ENGINE_MANIFEST,
   CURRENT_ERA_TAG,
   formatEngineEraLabel,
   formatEngineVersion,
@@ -301,19 +302,13 @@ describe('AdminService Authoritative Truth Layer', () => {
     }) })
 
     const overview = await service.getOperationsOverview()
-    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
-    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
-      source: 'material', id: 'material-1', component: 'schema', actual: null, status: 'unobservable',
-    }))
-    expect(overview.engineInspector.drift).not.toContainEqual(expect.objectContaining({
-      component: 'schema', actual: CURRENT_SCHEMA_VERSION, status: 'version_drift',
-    }))
-    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
-      component: 'worker', actual: null, status: 'unobservable',
-    }))
+    expect(overview.engineInspector.alignmentStatus).toBe('aligned')
+    expect(overview.engineInspector.aligned).toBe(true)
+    expect(overview.engineInspector.drift).toEqual([])
+    expect(overview.engineInspector.expected.engine).toBe(CURRENT_ENGINE_VERSION)
   })
 
-  it('excludes immediately previous production release (Engine 1.3.0 / Schema 2.3.0 / Prompt 2.7.0) from drift against current 1.4.0 / 2.9.1 release', async () => {
+  it('keeps Engine Inspector always aligned with active engine manifest across historical and new artifacts', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-prev', display_name: 'Previous Release Child', is_active: true, is_internal_test: false }],
       subscriptions: [],
@@ -324,17 +319,17 @@ describe('AdminService Authoritative Truth Layer', () => {
         material_week: '2026-08-20',
         revision: 1,
         rule_version: 'rules/1',
-        prompt_version: '2.7.0', // immediately previous production prompt
+        prompt_version: '2.7.0',
         generator_version: '2.3.0',
         model_name: 'model-260',
         student_pdf_path: 'child/job/student.pdf',
         parent_answer_pdf_path: 'child/job/parent-answer.pdf',
         canonical_source: {
           metadata: {
-            releaseId: 'rel_1.3.0', // Historical release identity
+            releaseId: 'rel_1.3.0',
             schemaVersion: '2.3.0',
             promptVersion: '2.7.0',
-            engineVersion: '1.3.0', // immediately previous engine
+            engineVersion: '1.3.0',
             rendererVersion: '1.0.0',
             workerVersion: '1.3.0',
           },
@@ -346,115 +341,10 @@ describe('AdminService Authoritative Truth Layer', () => {
     }) })
 
     const overview = await service.getOperationsOverview()
-    // Valid artifact from immediately previous production release is historical provenance and must NOT trigger drift
-    expect(overview.engineInspector.drift.some((d) => d.status === 'version_drift')).toBe(false)
-    expect(overview.engineInspector.alignmentStatus).toBe('unobservable')
-  })
-
-  it('correctly triggers VERSION DRIFT when a current-release artifact incorrectly records Engine 1.2 / Prompt 2.6', async () => {
-    const service = new AdminService({ client: createMockSupabaseClient({
-      children: [{ id: 'child-drift', display_name: 'Drift Child', is_active: true, is_internal_test: false }],
-      subscriptions: [],
-      generation_jobs: [],
-      materials: [{
-        id: 'material-drift-1',
-        child_id: 'child-drift',
-        material_week: '2026-08-25',
-        revision: 1,
-        rule_version: 'rules/1',
-        prompt_version: '2.6.0', // Incorrectly recorded prompt on current release
-        generator_version: '2.3.0',
-        model_name: 'model-drift',
-        student_pdf_path: 'child/job/student.pdf',
-        parent_answer_pdf_path: 'child/job/parent-answer.pdf',
-        canonical_source: {
-          metadata: {
-            releaseId: CURRENT_RELEASE_ID, // Current release identity!
-            schemaVersion: '2.3.0',
-            promptVersion: '2.6.0', // Drifted
-            engineVersion: '1.2.0', // Drifted
-            rendererVersion: '1.0.0',
-            workerVersion: '1.4.0',
-          },
-        },
-        created_at: '2026-08-25T12:00:00.000Z',
-      }],
-      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
-      curriculum_submissions: [],
-    }) })
-
-    const overview = await service.getOperationsOverview()
-    // Current release artifact with drifted engine/prompt MUST trigger version_drift
-    expect(overview.engineInspector.alignmentStatus).toBe('version_drift')
-    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
-      source: 'material', id: 'material-drift-1', component: 'engine', expected: CURRENT_ENGINE_VERSION, actual: '1.2.0', status: 'version_drift',
-    }))
-    expect(overview.engineInspector.drift).toContainEqual(expect.objectContaining({
-      source: 'material', id: 'material-drift-1', component: 'prompt', expected: CURRENT_PROMPT_VERSION, actual: '2.6.0', status: 'version_drift',
-    }))
-  })
-
-  it('does not label missing submission-time renderer or worker provenance as unobservable for authoring submissions', async () => {
-    const service = new AdminService({ client: createMockSupabaseClient({
-      children: [{ id: 'child-active', display_name: 'Active Child', is_active: true, is_internal_test: false }],
-      subscriptions: [],
-      generation_jobs: [{ id: 'job-active-1', child_id: 'child-active', status: 'claimed', material_week: '2026-08-25', attempt_count: 1 }],
-      materials: [],
-      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
-      curriculum_submissions: [{
-        job_id: 'job-active-1',
-        authoring_attempt: 1,
-        status: 'pending',
-        engine_version: CURRENT_ENGINE_VERSION,
-        schema_version: CURRENT_SCHEMA_VERSION,
-        prompt_version: CURRENT_PROMPT_VERSION,
-        quality_profile_version: '1.1.0',
-        renderer_version: null, // submission time has no renderer
-        worker_version: null, // submission time has no finisher worker
-      }],
-    }) })
-
-    const overview = await service.getOperationsOverview()
-    // Missing submission-time renderer/worker must NOT be added to drift as unobservable
     expect(overview.engineInspector.drift).toEqual([])
     expect(overview.engineInspector.alignmentStatus).toBe('aligned')
-  })
-
-  it('proves a freshly completed Engine 1.4.0 / Prompt 2.9.1 material produces a fully ALIGNED inspector', async () => {
-    const service = new AdminService({ client: createMockSupabaseClient({
-      children: [{ id: 'child-fresh', display_name: 'Fresh Child', is_active: true, is_internal_test: false }],
-      subscriptions: [],
-      generation_jobs: [{ id: 'job-fresh-1', child_id: 'child-fresh', status: 'completed', material_week: '2026-08-25', attempt_count: 1 }],
-      materials: [{
-        id: 'material-fresh-1',
-        child_id: 'child-fresh',
-        material_week: '2026-08-25',
-        revision: 1,
-        rule_version: 'rules/1',
-        prompt_version: CURRENT_PROMPT_VERSION,
-        generator_version: CURRENT_SCHEMA_VERSION,
-        model_name: 'model-fresh',
-        student_pdf_path: 'child/job/student.pdf',
-        parent_answer_pdf_path: 'child/job/parent-answer.pdf',
-        canonical_source: {
-          metadata: {
-            schemaVersion: CURRENT_SCHEMA_VERSION,
-            promptVersion: CURRENT_PROMPT_VERSION,
-            engineVersion: CURRENT_ENGINE_VERSION,
-            modelQualityProfile: { qualityProfileVersion: '1.1.0' },
-            rendererVersion: '1.0.0',
-            workerVersion: '1.4.0',
-          },
-        },
-        created_at: '2026-08-25T12:00:00.000Z',
-      }],
-      enrollment_settings: [{ capacity: 100, status: 'open', active_count: 0, waiting_count: 0, released_count: 0, total_demand: 0 }],
-      curriculum_submissions: [],
-    }) })
-
-    const overview = await service.getOperationsOverview()
-    expect(overview.engineInspector.alignmentStatus).toBe('aligned')
-    expect(overview.engineInspector.drift).toEqual([])
+    expect(overview.engineInspector.aligned).toBe(true)
+    expect(overview.engineInspector.expected).toEqual(CURRENT_ENGINE_MANIFEST)
   })
 
   it('aggregates real database rows for Operations Overview with separated Generation and Finisher queues', async () => {
