@@ -251,11 +251,10 @@ export async function compileProductionBundle(
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
   const readPromptStage = async (fileName: string) => {
-  const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
-  return `${stage.trim()}
-`
-}
-const plan = await readPromptStage('01-plan.md')
+    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+    return `${stage.trim()}\n`
+  }
+  const plan = await readPromptStage('01-plan.md')
   const author = await readPromptStage('02-author.md')
   const critic = await readPromptStage('03-critic.md')
   const repair = await readPromptStage('04-repair.md')
