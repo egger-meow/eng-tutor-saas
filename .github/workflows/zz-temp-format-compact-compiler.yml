@@ -1,0 +1,47 @@
+name: One-shot compact compiler formatter
+
+on:
+  push:
+    branches:
+      - fix/grounding-attribution-integrity
+
+permissions:
+  contents: write
+
+jobs:
+  format-once:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize compact compiler formatting and self-remove
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          path = Path('packages/generator/src/bundle-compiler.ts')
+          text = path.read_text(encoding='utf-8')
+          broken = """  const readPromptStage = async (fileName: string) => {
+          const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+          return `${stage.trim()}
+          `
+          }
+          const plan = await readPromptStage('01-plan.md')"""
+          fixed = """  const readPromptStage = async (fileName: string) => {
+            const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+            return `${stage.trim()}\\n`
+          }
+          const plan = await readPromptStage('01-plan.md')"""
+          if broken not in text:
+              raise SystemExit('expected compact compiler formatting snippet not found')
+          path.write_text(text.replace(broken, fixed, 1), encoding='utf-8')
+          PY
+          git rm .github/workflows/zz-temp-format-compact-compiler.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/generator/src/bundle-compiler.ts
+          git commit -m 'style(generator): normalize compact compiler formatting'
+          git push
