@@ -6,6 +6,7 @@ on:
       - fix/relax-brittle-finisher-gates
     paths:
       - scripts/_tmp_relax_brittle_finisher_gates.mjs
+      - scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
       - .github/workflows/_tmp-relax-brittle-finisher-gates.yml
 
 permissions:
@@ -28,7 +29,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Apply patch
-        run: node scripts/_tmp_relax_brittle_finisher_gates.mjs
+        run: |
+          node scripts/_tmp_relax_brittle_finisher_gates.mjs
+          node scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
       - name: Compile production bundle
         run: pnpm compile:bundle
       - name: Diff check
