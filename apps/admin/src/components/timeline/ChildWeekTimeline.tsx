@@ -48,10 +48,96 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
   }
 
   if (!data) {
+    const cachedChildren = adminApi.getCachedAvailableChildren()
     return (
-      <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <div style={{ fontSize: '24px', marginBottom: '12px' }}>⏳</div>
-        <div>載入孩子生命週期軌跡中...</div>
+      <div>
+        {/* Search Header */}
+        <div className="cockpit-card" style={{ marginBottom: '20px' }}>
+          <form onSubmit={handleSubmit} className="timeline-search-form">
+            {cachedChildren.length > 0 && (
+              <div className="timeline-search-field-grow">
+                <label className="form-label">
+                  選擇在學孩子 (Quick Select)
+                </label>
+                <select
+                  value={inputChildId}
+                  onChange={(e) => {
+                    const newChildId = e.target.value
+                    setInputChildId(newChildId)
+                    setInputWeek('')
+                    onSearch(newChildId, '')
+                  }}
+                  className="form-select"
+                >
+                  {cachedChildren.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.displayPseudonym}（年級 {c.grade}／{c.subscriptionStatus}）
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="timeline-search-field-grow">
+              <label className="form-label">
+                手動輸入孩子 ID
+              </label>
+              <input
+                type="text"
+                placeholder="輸入孩子 UUID…"
+                value={inputChildId}
+                onChange={(e) => setInputChildId(e.target.value)}
+                className="form-input"
+              />
+            </div>
+
+            <div className="timeline-search-field-sm">
+              <label className="form-label">
+                教材週次
+              </label>
+              <input
+                type="text"
+                placeholder="YYYY-MM-DD"
+                value={inputWeek}
+                onChange={(e) => setInputWeek(e.target.value)}
+                className="form-input"
+              />
+            </div>
+
+            <div className="timeline-search-action">
+              <button
+                type="submit"
+                className="create-btn"
+                style={{ padding: '8px 18px' }}
+              >
+                🔍 檢索
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Skeleton Student Info Card */}
+        <div className="cockpit-card" style={{ marginBottom: '20px', padding: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+            <div className="skeleton-box" style={{ width: '220px', height: '26px' }} />
+            <div className="skeleton-box" style={{ width: '110px', height: '24px' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+            <div className="skeleton-box" style={{ height: '48px' }} />
+            <div className="skeleton-box" style={{ height: '48px' }} />
+            <div className="skeleton-box" style={{ height: '48px' }} />
+          </div>
+        </div>
+
+        {/* Skeleton Timeline Steps */}
+        <div className="cockpit-card" style={{ padding: '16px' }}>
+          <div className="skeleton-box" style={{ width: '160px', height: '20px', marginBottom: '14px' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="skeleton-box" style={{ height: '54px' }} />
+            <div className="skeleton-box" style={{ height: '54px' }} />
+            <div className="skeleton-box" style={{ height: '54px' }} />
+          </div>
+        </div>
       </div>
     )
   }

@@ -163,18 +163,35 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       })
   }, [])
 
+  // Proactive background prefetch for timeline on startup
+  useEffect(() => {
+    if (activeTab !== 'timeline' && !timeline) {
+      adminApi.getTimeline().then((res) => {
+        setTimeline((prev) => prev ?? res)
+      }).catch(() => {})
+    }
+  }, [])
+
   // Trigger tab refresh on tab or era change
   useEffect(() => {
+    // If switching to timeline tab and no state exists yet, immediately check cache
+    if (activeTab === 'timeline' && !timeline) {
+      const cached = adminApi.getCachedTimeline(timelineChildId || undefined, timelineWeek || undefined)
+      if (cached) {
+        setTimeline(cached)
+      }
+    }
+
     const hasData = Boolean(
       (activeTab === 'overview' && overview) ||
-      (activeTab === 'subscriptions' && subscriptions) ||
       (activeTab === 'subscriptions' && subscriptions) ||
       (activeTab === 'failures' && failures) ||
       (activeTab === 'feedback' && feedback) ||
       (activeTab === 'product' && productFeedback) ||
-      (activeTab === 'timeline' && timeline) ||
+      (activeTab === 'timeline' && (timeline || adminApi.getCachedTimeline(timelineChildId || undefined, timelineWeek || undefined))) ||
       (activeTab === 'waitlist' && waitlist) ||
-      (activeTab === 'export' && aiExport)
+      (activeTab === 'export' && aiExport) ||
+      (activeTab === 'announcements' && announcements)
     )
     if (!hasData) {
       setLoading(true)

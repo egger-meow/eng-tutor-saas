@@ -63,6 +63,17 @@ async function postJson<T>(url: string, body: Record<string, unknown>): Promise<
 const timelineCache = new Map<string, { data: ChildWeekTimeline; timestamp: number }>()
 const testModeCache = new Map<string, { data: GenerationTestModeStatus; timestamp: number }>()
 const inFlightRequests = new Map<string, Promise<any>>()
+let cachedAvailableChildrenList: Array<{ id: string; displayPseudonym: string; grade: number; subscriptionStatus: string }> = []
+
+// Try to hydrate available children from sessionStorage on startup
+try {
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    const raw = sessionStorage.getItem('admin_available_children')
+    if (raw) {
+      cachedAvailableChildrenList = JSON.parse(raw)
+    }
+  }
+} catch {}
 
 function dedupeRequest<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const existing = inFlightRequests.get(key)
@@ -91,13 +102,52 @@ export const adminApi = {
     const key = `${childId || ''}:${week || ''}`
     const entry = timelineCache.get(key)
     if (entry) return entry.data
+
     // Also check wildcard key if week is omitted
     if (!week && childId) {
       for (const [k, v] of timelineCache.entries()) {
         if (k.startsWith(`${childId}:`)) return v.data
       }
     }
+
+    // If no childId is specified, check latest cached entry in memory
+    if (!childId && !week && timelineCache.size > 0) {
+      const latest = timelineCache.get('latest')
+      if (latest) return latest.data
+      const first = timelineCache.values().next().value
+      if (first) return first.data
+    }
+
+    // Fallback: check sessionStorage for instant zero-latency restoration
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const storageKey = childId ? `admin_timeline_${childId}` : 'admin_timeline_latest'
+        const raw = sessionStorage.getItem(storageKey)
+        if (raw) {
+          const parsed = JSON.parse(raw) as ChildWeekTimeline
+          if (parsed && parsed.childId) {
+            timelineCache.set(key, { data: parsed, timestamp: Date.now() })
+            return parsed
+          }
+        }
+      }
+    } catch {}
+
     return null
+  },
+
+  getCachedAvailableChildren: (): Array<{ id: string; displayPseudonym: string; grade: number; subscriptionStatus: string }> => {
+    if (cachedAvailableChildrenList.length > 0) return cachedAvailableChildrenList
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const raw = sessionStorage.getItem('admin_available_children')
+        if (raw) {
+          cachedAvailableChildrenList = JSON.parse(raw)
+          return cachedAvailableChildrenList
+        }
+      }
+    } catch {}
+    return []
   },
 
   getCachedTestModeStatus: (childId: string): GenerationTestModeStatus | null => {
@@ -111,6 +161,25 @@ export const adminApi = {
     const defaultKey = `${data.childId}:`
     timelineCache.set(key, { data, timestamp: Date.now() })
     timelineCache.set(defaultKey, { data, timestamp: Date.now() })
+    timelineCache.set('latest', { data, timestamp: Date.now() })
+
+    if (data.availableChildren && data.availableChildren.length > 0) {
+      cachedAvailableChildrenList = data.availableChildren
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem('admin_available_children', JSON.stringify(data.availableChildren))
+        }
+      } catch {}
+    }
+
+    // Persist to sessionStorage for instant cold-tab switching
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('admin_timeline_latest', JSON.stringify(data))
+        sessionStorage.setItem(`admin_timeline_${data.childId}`, JSON.stringify(data))
+      }
+    } catch {}
+
     if (data.testModeStatus) {
       testModeCache.set(data.childId, { data: data.testModeStatus, timestamp: Date.now() })
     }
