@@ -261,9 +261,25 @@ function InteractiveMetricChart({
 
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!svgRef.current || count === 0) return
-    const rect = svgRef.current.getBoundingClientRect()
-    const clientX = e.clientX - rect.left
-    const svgX = (clientX / rect.width) * svgWidth
+    const svg = svgRef.current
+    let svgX = 0
+
+    if (svg.getScreenCTM) {
+      const ctm = svg.getScreenCTM()
+      if (ctm) {
+        const pt = svg.createSVGPoint()
+        pt.x = e.clientX
+        pt.y = e.clientY
+        const transformed = pt.matrixTransform(ctm.inverse())
+        svgX = transformed.x
+      }
+    }
+
+    if (svgX === 0) {
+      const rect = svg.getBoundingClientRect()
+      const clientX = e.clientX - rect.left
+      svgX = (clientX / rect.width) * svgWidth
+    }
 
     const relativeX = Math.max(0, Math.min(plotW, svgX - padLeft))
     const index = Math.round((relativeX / plotW) * (count - 1))
@@ -315,6 +331,9 @@ function InteractiveMetricChart({
             </linearGradient>
             <filter id={`glow-${gradientId}`} x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={color} floodOpacity="0.4" />
+            </filter>
+            <filter id={`shadow-${gradientId}`} x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.6" />
             </filter>
           </defs>
 
@@ -413,65 +432,84 @@ function InteractiveMetricChart({
               />
             ))}
 
-          {/* Hover Crosshair & Indicator */}
-          {activeCoord && activeHoverPoint && (
-            <g className="chart-hover-layer">
-              <line
-                x1={activeCoord.x}
-                x2={activeCoord.x}
-                y1={padTop}
-                y2={padTop + plotH}
-                stroke="rgba(255, 255, 255, 0.45)"
-                strokeDasharray="3,3"
-              />
-              <circle cx={activeCoord.x} cy={activeCoord.y} r="8" fill={color} opacity="0.25" />
-              <circle
-                cx={activeCoord.x}
-                cy={activeCoord.y}
-                r="4.5"
-                fill="#ffffff"
-                stroke={color}
-                strokeWidth="2.5"
-              />
-            </g>
-          )}
+          {/* Hover Crosshair, Point & Native SVG Tooltip */}
+          {activeCoord && activeHoverPoint && (() => {
+            const tooltipWidth = 148
+            const tooltipHeight = 44
+            const isNearLeft = activeCoord.x - tooltipWidth / 2 < padLeft
+            const isNearRight = activeCoord.x + tooltipWidth / 2 > padLeft + plotW
+            const isNearTop = activeCoord.y - tooltipHeight - 10 < padTop
+
+            let boxX = activeCoord.x - tooltipWidth / 2
+            if (isNearLeft) boxX = padLeft
+            else if (isNearRight) boxX = padLeft + plotW - tooltipWidth
+
+            const boxY = isNearTop ? activeCoord.y + 12 : activeCoord.y - tooltipHeight - 10
+
+            return (
+              <g className="chart-hover-layer" pointerEvents="none">
+                {/* Vertical Guideline */}
+                <line
+                  x1={activeCoord.x}
+                  x2={activeCoord.x}
+                  y1={padTop}
+                  y2={padTop + plotH}
+                  stroke="rgba(255, 255, 255, 0.45)"
+                  strokeDasharray="3,3"
+                />
+                {/* Outer Glow Halo */}
+                <circle cx={activeCoord.x} cy={activeCoord.y} r="8" fill={color} opacity="0.25" />
+                {/* Target Dot */}
+                <circle
+                  cx={activeCoord.x}
+                  cy={activeCoord.y}
+                  r="4.5"
+                  fill="#ffffff"
+                  stroke={color}
+                  strokeWidth="2.5"
+                />
+
+                {/* Native SVG Floating Tooltip Card */}
+                <g transform={`translate(${boxX}, ${boxY})`} filter={`url(#shadow-${gradientId})`}>
+                  <rect
+                    width={tooltipWidth}
+                    height={tooltipHeight}
+                    rx="6"
+                    ry="6"
+                    fill="#0f172a"
+                    stroke="rgba(255, 255, 255, 0.18)"
+                    strokeWidth="1"
+                    opacity="0.96"
+                  />
+                  <text
+                    x="10"
+                    y="17"
+                    fill="#94a3b8"
+                    fontSize="10"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                  >
+                    {activeHoverPoint.fullDateLabel}
+                  </text>
+                  <circle cx="15" cy="31" r="3.2" fill={color} />
+                  <text
+                    x="24"
+                    y="34"
+                    fill="#f8fafc"
+                    fontSize="11"
+                    fontWeight="600"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                  >
+                    {title}:{' '}
+                    <tspan fill={color} fontWeight="700">
+                      {Number(activeHoverPoint[field]).toLocaleString('zh-TW')}
+                      {unit}
+                    </tspan>
+                  </text>
+                </g>
+              </g>
+            )
+          })()}
         </svg>
-
-        {/* Hover Floating Tooltip Overlay */}
-        {activeCoord && activeHoverPoint && (() => {
-          const xPct = (activeCoord.x / svgWidth) * 100
-          const yPct = (activeCoord.y / svgHeight) * 100
-          const isNearTop = yPct < 30
-          const isNearLeft = xPct < 20
-          const isNearRight = xPct > 80
-
-          let transformX = '-50%'
-          if (isNearLeft) transformX = '0%'
-          else if (isNearRight) transformX = '-100%'
-
-          const transformY = isNearTop ? '12px' : 'calc(-100% - 10px)'
-
-          return (
-            <div
-              className="chart-floating-tooltip"
-              style={{
-                left: `${xPct}%`,
-                top: `${yPct}%`,
-                transform: `translate(${transformX}, ${transformY})`,
-              }}
-            >
-              <span className="tooltip-date">{activeHoverPoint.fullDateLabel}</span>
-              <div className="tooltip-val">
-                <span className="tooltip-dot" style={{ backgroundColor: color }} />
-                <strong>{title}:</strong>
-                <span style={{ color: color, fontWeight: 700 }}>
-                  {Number(activeHoverPoint[field]).toLocaleString('zh-TW')}
-                  {unit}
-                </span>
-              </div>
-            </div>
-          )
-        })()}
       </div>
     </article>
   )
