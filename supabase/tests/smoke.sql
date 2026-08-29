@@ -455,8 +455,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.5.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.5.1: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -551,7 +551,7 @@ begin
       bridge_job_id,
       'bridge-smoke',
       jsonb_build_object('metadata', jsonb_build_object(
-        'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
+        'schemaVersion', '2.4.0', 'jobId', bridge_job_id::text,
         'childId', bridge_child_id::text, 'inputFingerprint', 'sha256:' || repeat('0', 64)
       ))
     );
@@ -563,7 +563,7 @@ begin
   end if;
 
   first_package := jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
+      'schemaVersion', '2.4.0', 'jobId', bridge_job_id::text,
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ));
   select attempt_count into bridge_attempt_before
@@ -682,8 +682,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.5.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.5.1: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -695,7 +695,7 @@ begin
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
   second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
+    'schemaVersion', '2.4.0', 'jobId', bridge_job_id::text,
     'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repairMarker', 'targeted-attempt-2'
   ));
@@ -764,7 +764,7 @@ begin
   perform private_generation.chatgpt_submit_curriculum_package(
     '00000000-0000-0000-0000-000000000071', 'max-attempt-smoke',
     jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.3.0', 'jobId', '00000000-0000-0000-0000-000000000071',
+      'schemaVersion', '2.4.0', 'jobId', '00000000-0000-0000-0000-000000000071',
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ))
   );
@@ -834,7 +834,7 @@ begin
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
 
   first_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.3.0', 'jobId', recovery_job_id::text,
+    'schemaVersion', '2.4.0', 'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint
   ));
   perform private_generation.chatgpt_submit_curriculum_package(
@@ -956,7 +956,7 @@ begin
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
   second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.3.0', 'jobId', recovery_job_id::text,
+    'schemaVersion', '2.4.0', 'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repaired', true
   ));
@@ -1030,13 +1030,13 @@ begin
     select item into mismatch_context
     from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
     where item #>> '{job,id}' = mismatch_job_id::text;
-    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
       raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
     end if;
 
     -- 2. Submit package for Attempt 1
     mismatch_package := jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.3.0', 'jobId', mismatch_job_id::text,
+      'schemaVersion', '2.4.0', 'jobId', mismatch_job_id::text,
       'childId', mismatch_child_id::text, 'inputFingerprint', mismatch_context ->> 'inputFingerprint',
       'releaseId', 'rel_1.4.0'
     ));
@@ -1046,7 +1046,7 @@ begin
     perform public.worker_claim_curriculum_submissions('mismatch-finisher', 5);
     if not public.worker_finish_curriculum_submission(
       mismatch_job_id, 1, 'mismatch-finisher', 'technical_failed', 'RELEASE_MISMATCH',
-      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.5.0'
+      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.5.1'
     ) then
       raise exception 'failed to record RELEASE_MISMATCH technical failure';
     end if;
@@ -1078,8 +1078,8 @@ begin
       raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
     end if;
 
-    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.5.0 and NO retryContext (fresh authoring, not quality repair)
-    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.0'
+    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.5.1 and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.1'
       or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
       or mismatch_context ? 'retryContext' then
       raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;
@@ -1744,7 +1744,7 @@ begin
     if sqlerrm = 'legacy curriculum schema was accepted for new production submission' then
       raise;
     end if;
-    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.3.0 object%' then
+    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.4.0 object%' then
       raise exception 'unexpected legacy schema rejection: %', sqlerrm;
     end if;
   end;
@@ -1754,7 +1754,7 @@ begin
     'chatgpt-test-worker',
     jsonb_build_object(
       'metadata', jsonb_build_object(
-        'schemaVersion', '2.3.0',
+        'schemaVersion', '2.4.0',
         'jobId', test_job_id::text,
         'childId', '00000000-0000-0000-0000-000000000099',
         'inputFingerprint', bridge_fingerprint

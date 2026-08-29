@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { syntheticWeekOne, CURRENT_PDF_RENDERER_VERSION, CURRENT_WORKER_VERSION, CURRENT_RELEASE_ID, type CurriculumPackage } from '@paper-english/generator'
 import type { CurriculumPdfPairInspection } from '@paper-english/pdf'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
-import { completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
+import { completeCurriculumJob, completeJob, failClaimedJob, forwardProgressionIssues, loadGenerationContext, type GenerationContext, type WorkerClient } from './pipeline.js'
 
 function setup() {
   const uploads: string[] = []
@@ -553,3 +553,109 @@ describe('loadGenerationContext', () => {
     expect(cap.recommendedCommunicationFunctions.length).toBeGreaterThan(0)
   })
 })
+
+describe('forwardProgressionIssues grammar progression', () => {
+  const basePkg: CurriculumPackage = {
+    ...curriculumSample,
+    trackingDelta: {
+      ...curriculumSample.trackingDelta,
+      exposedGrammarTargetIds: ['g7-be-verbs-pronouns'],
+    },
+  }
+
+  it('rejects repeating previously exposed grammar when feedback is unrelated (e.g. topic preference or reading length)', () => {
+    const context: GenerationContext = {
+      job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: ['g7-be-verbs-pronouns'],
+        historicalCount: 1,
+      },
+      feedback: {
+        overallDifficulty: 'appropriate',
+        parentObservation: '孩子很喜歡恐龍主題，希望下週多出恐龍相關的文章。閱讀長度剛好。',
+        requestTopic: 'dinosaurs',
+      },
+    }
+
+    const issues = forwardProgressionIssues(basePkg, context)
+    expect(issues.some((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toBe(true)
+  })
+
+  it('accepts repeating previously exposed grammar when grammarCapsule marks it dueForReview or weakRecent', () => {
+    const context: GenerationContext = {
+      job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: ['g7-be-verbs-pronouns'],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: [],
+        historicalCount: 1,
+      },
+    }
+
+    const issues = forwardProgressionIssues(basePkg, context)
+    expect(issues.filter((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
+  })
+
+  it('accepts repeating previously exposed grammar when structured feedback explicitly targets grammar', () => {
+    const context: GenerationContext = {
+      job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: ['g7-be-verbs-pronouns'],
+        historicalCount: 1,
+      },
+      feedback: {
+        focusArea: 'grammar',
+        grammarDifficulty: 'too-hard',
+      },
+    }
+
+    const issues = forwardProgressionIssues(basePkg, context)
+    expect(issues.filter((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
+  })
+
+  it('accepts repeating previously exposed grammar when parent feedback notes mention grammar specifically', () => {
+    const context: GenerationContext = {
+      job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: ['g7-be-verbs-pronouns'],
+        historicalCount: 1,
+      },
+      feedback: {
+        parentObservation: '文法部分 be 動詞與主詞單複數常常混淆，希望能再練習一次。',
+      },
+    }
+
+    const issues = forwardProgressionIssues(basePkg, context)
+    expect(issues.filter((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
+  })
+
+  it('accepts repeating previously exposed grammar when learnerSnapshot records recurring mistakes matching the unit', () => {
+    const context: GenerationContext = {
+      job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: ['g7-be-verbs-pronouns'],
+        historicalCount: 1,
+      },
+      learnerSnapshot: {
+        recurringMistakes: ['be-verbs-present subject agreement errors'],
+      },
+    }
+
+    const issues = forwardProgressionIssues(basePkg, context)
+    expect(issues.filter((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
+  })
+})
+

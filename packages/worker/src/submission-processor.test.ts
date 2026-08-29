@@ -62,7 +62,7 @@ describe('processCurriculumSubmissions', () => {
   it('records a release mismatch as technical_failed with errorCode RELEASE_MISMATCH', async () => {
     const state = setup([submission])
     const complete = vi.fn(async () => {
-      throw new ReleaseMismatchError('rel_1.4.0', 'rel_1.5.0')
+      throw new ReleaseMismatchError('rel_1.4.0', 'rel_1.5.1')
     })
     await expect(processCurriculumSubmissions(state.client, 'github-actions-finisher', 5, complete)).resolves.toEqual([{
       jobId: submission.job_id,

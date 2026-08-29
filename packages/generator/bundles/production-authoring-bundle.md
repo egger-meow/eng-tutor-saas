@@ -29,7 +29,7 @@ sourceHashes:
   "packages/generator/prompts/2.10.1/02-author.md": "2b8b74e0f9ba840e7037089083aad6f07bff50c9c52c4dc05ef0a91ba7629d4a"
   "packages/generator/prompts/2.10.1/03-critic.md": "2027d1291f7caa3df9c5b0062f42c573a2eab5a131320e13ecaa0d420810d7fd"
   "packages/generator/prompts/2.10.1/04-repair.md": "38e3b5080c44d76531f9948ecf71d6fc4d606a580e3490672c8b1ef6d7ee4941"
-  "packages/generator/src/curriculum-package-schema.ts": "b2c7098646f49268f4688027738f88f0e123efc8952fca3d6369c8241dfb7600"
+  "packages/generator/src/curriculum-package-schema.ts": "f55d16962a96b426788f1d3ef3c358fbaac2f273d525e2015be2d715291ab8d7"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "fc9c9bdabc6cb1c7f9640310f9b4b4da974d4c27a3bacf7059783f2d9c5dfc69"
@@ -721,7 +721,9 @@ export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
 export type CurriculumPackage = CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
-export type CurriculumQuestion = z.infer<typeof QuestionV24Schema> | z.infer<typeof QuestionLegacySchema>
+export type CurriculumQuestionV24 = z.infer<typeof QuestionV24Schema>
+export type CurriculumQuestionLegacy = z.infer<typeof QuestionLegacySchema>
+export type CurriculumQuestion = CurriculumQuestionV24 | (CurriculumQuestionLegacy & { responseLayout?: undefined })
 
 export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24 {
   return {

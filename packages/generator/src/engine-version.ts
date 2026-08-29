@@ -8,7 +8,7 @@
  * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.2.0')
  */
 
-export const CURRENT_RELEASE_ID = 'rel_1.5.0'
+export const CURRENT_RELEASE_ID = 'rel_1.5.1'
 export const CURRENT_ENGINE_VERSION = '1.5.0'
 export const CURRENT_SCHEMA_VERSION = '2.4.0'
 export const CURRENT_PROMPT_VERSION = '2.10.1'
