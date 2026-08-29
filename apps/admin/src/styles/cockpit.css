@@ -1643,6 +1643,46 @@ button, input, select, textarea {
   font-size: 12px;
 }
 
+.quality-findings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quality-finding-item {
+  background: rgba(0, 0, 0, 0.28);
+  border-left: 3px solid var(--status-rose);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quality-finding-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quality-finding-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  word-break: break-word;
+}
+
+.quality-finding-text code {
+  font-family: ui-monospace, monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #fca5a5;
+  font-size: 12px;
+}
+
 .quality-rule-card {
   color: var(--text-main);
   text-align: left;

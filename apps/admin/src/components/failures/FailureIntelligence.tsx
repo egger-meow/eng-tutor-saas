@@ -27,6 +27,28 @@ function formatTimestamp(isoString?: string): string {
   }
 }
 
+interface QualityFindingItem {
+  id: string
+  rule: string
+  category: string
+  message: string
+  description?: string
+  evidence?: Record<string, unknown>
+}
+
+interface GroupedQualityJobFailure {
+  id: string
+  jobId: string
+  childId?: string
+  childPseudonym: string
+  materialWeek: string
+  attempt: number
+  timestamp: string
+  distinctRules: string[]
+  findings: QualityFindingItem[]
+  evidence: Record<string, unknown>
+}
+
 export const FailureIntelligenceView: React.FC<Props> = ({
   data,
   currentEra,
@@ -38,65 +60,91 @@ export const FailureIntelligenceView: React.FC<Props> = ({
   const [selectedErrorCodeModal, setSelectedErrorCodeModal] = useState<FailureIntelligence['errorCodeClusters'][number] | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Flatten all quality failure occurrences across rules into a single chronological list
-  const allQualityFailures = useMemo(() => {
+  // Merge multiple findings for the same job attempt into a single chronological event card
+  const groupedQualityFailures = useMemo(() => {
     if (!data?.qualityRuleViolations) return []
-    const list: Array<{
-      id: string
-      jobId: string
-      childId?: string
-      childPseudonym: string
-      materialWeek: string
-      attempt: number
-      timestamp: string
-      rule: string
-      category: string
-      message: string
-      evidence: Record<string, unknown>
-    }> = []
+
+    const jobMap = new Map<string, GroupedQualityJobFailure>()
 
     data.qualityRuleViolations.forEach((rule, ruleIdx) => {
       rule.recentExamples.forEach((ex, exIdx) => {
-        list.push({
-          id: `${ex.jobId}_${ex.attempt}_${rule.rule}_${ruleIdx}_${exIdx}`,
-          jobId: ex.jobId,
-          childId: ex.childId,
-          childPseudonym: ex.childPseudonym,
-          materialWeek: ex.materialWeek,
-          attempt: ex.attempt,
-          timestamp: ex.timestamp || '',
-          rule: rule.rule,
-          category: rule.category,
-          message: ex.message,
-          evidence: ex.evidence,
-        })
+        const groupKey = `${ex.jobId}_${ex.attempt || 1}`
+        let group = jobMap.get(groupKey)
+
+        if (!group) {
+          group = {
+            id: groupKey,
+            jobId: ex.jobId,
+            childId: ex.childId,
+            childPseudonym: ex.childPseudonym,
+            materialWeek: ex.materialWeek,
+            attempt: ex.attempt || 1,
+            timestamp: ex.timestamp || '',
+            distinctRules: [],
+            findings: [],
+            evidence: ex.evidence || {},
+          }
+          jobMap.set(groupKey, group)
+        }
+
+        if (ex.timestamp && ex.timestamp > group.timestamp) {
+          group.timestamp = ex.timestamp
+        }
+
+        if (!group.evidence || Object.keys(group.evidence).length === 0) {
+          group.evidence = ex.evidence || {}
+        }
+
+        if (!group.distinctRules.includes(rule.rule)) {
+          group.distinctRules.push(rule.rule)
+        }
+
+        const isDuplicate = group.findings.some(
+          (f) => f.rule === rule.rule && f.message === ex.message
+        )
+        if (!isDuplicate) {
+          group.findings.push({
+            id: `${groupKey}_${rule.rule}_${ruleIdx}_${exIdx}`,
+            rule: rule.rule,
+            category: rule.category,
+            message: ex.message,
+            description: rule.description,
+            evidence: ex.evidence,
+          })
+        }
       })
     })
 
     // Sort strictly by happening time descending (newest first)
-    return list.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+    return Array.from(jobMap.values()).sort((a, b) =>
+      (b.timestamp || '').localeCompare(a.timestamp || '')
+    )
   }, [data?.qualityRuleViolations])
 
   // Filtered by selected rule filter and search query
   const filteredQualityFailures = useMemo(() => {
-    let result = allQualityFailures
+    let result = groupedQualityFailures
     if (selectedRuleFilter !== 'all') {
-      result = result.filter((item) => item.rule === selectedRuleFilter)
+      result = result.filter((item) => item.distinctRules.includes(selectedRuleFilter))
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim()
       result = result.filter(
         (item) =>
-          item.rule.toLowerCase().includes(q) ||
           item.childPseudonym.toLowerCase().includes(q) ||
           item.materialWeek.toLowerCase().includes(q) ||
-          item.message.toLowerCase().includes(q) ||
+          item.jobId.toLowerCase().includes(q) ||
           (item.childId && item.childId.toLowerCase().includes(q)) ||
-          item.jobId.toLowerCase().includes(q)
+          item.distinctRules.some((r) => r.toLowerCase().includes(q)) ||
+          item.findings.some((f) => f.message.toLowerCase().includes(q))
       )
     }
     return result
-  }, [allQualityFailures, selectedRuleFilter, searchQuery])
+  }, [groupedQualityFailures, selectedRuleFilter, searchQuery])
+
+  const totalFindingsCount = useMemo(() => {
+    return groupedQualityFailures.reduce((sum, g) => sum + g.findings.length, 0)
+  }, [groupedQualityFailures])
 
   const activeModalOccurrences = useMemo(() => {
     if (selectedQualityRuleModal) {
@@ -201,11 +249,11 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         <div>
           <span>Finisher 品質審核未通過即時紀錄 (Recent Quality Audit Failures)</span>
           <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 'normal', marginLeft: '12px' }}>
-            依發生時間降冪排序（最新在前），即時掌握退回原因以快速修正 Prompt 或結構
+            依發生時間降冪排序（最新在前），同次生成的違規項目已合併為單一紀錄清單
           </span>
         </div>
         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          共 {allQualityFailures.length} 筆品質違規
+          共 {groupedQualityFailures.length} 次退回審核（{totalFindingsCount} 項違規發現）
         </span>
       </div>
 
@@ -217,7 +265,7 @@ export const FailureIntelligenceView: React.FC<Props> = ({
             onClick={() => setSelectedRuleFilter('all')}
           >
             全部規則
-            <span className="quality-filter-chip-count">{allQualityFailures.length}</span>
+            <span className="quality-filter-chip-count">{totalFindingsCount}</span>
           </button>
           {data.qualityRuleViolations.map((r) => (
             <button
@@ -256,22 +304,26 @@ export const FailureIntelligenceView: React.FC<Props> = ({
 
       {/* Chronological Quality Failures Feed */}
       <div className="quality-failure-feed">
-        {filteredQualityFailures.map((item) => (
-          <div className="quality-failure-card" key={item.id}>
+        {filteredQualityFailures.map((group) => (
+          <div className="quality-failure-card" key={group.id}>
             <div className="quality-failure-header">
               <div className="quality-failure-identity">
-                <span className="quality-rule-tag">🛡️ {item.rule}</span>
-                <span className="occurrence-tag">👤 {item.childPseudonym}</span>
-                <span className="occurrence-tag">📅 {item.materialWeek}</span>
-                <span className="occurrence-tag">🔄 第 {item.attempt || 1} 次嘗試</span>
+                {group.distinctRules.map((ruleName) => (
+                  <span className="quality-rule-tag" key={ruleName}>
+                    🛡️ {ruleName}
+                  </span>
+                ))}
+                <span className="occurrence-tag">👤 {group.childPseudonym}</span>
+                <span className="occurrence-tag">📅 {group.materialWeek}</span>
+                <span className="occurrence-tag">🔄 第 {group.attempt || 1} 次嘗試</span>
                 <span className="occurrence-tag">⚙️ finisher_audit</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className="occurrence-time">⏰ {formatTimestamp(item.timestamp)}</span>
-                {item.childId && (
+                <span className="occurrence-time">⏰ {formatTimestamp(group.timestamp)}</span>
+                {group.childId && (
                   <button
                     className="timeline-jump-btn"
-                    onClick={() => onDrillDownTimeline(item.childId!, item.materialWeek)}
+                    onClick={() => onDrillDownTimeline(group.childId!, group.materialWeek)}
                     title="前往此學員生成時間軸"
                   >
                     查看時間軸 →
@@ -280,17 +332,34 @@ export const FailureIntelligenceView: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="quality-failure-message">
-              <strong style={{ color: '#fda4af', display: 'block', marginBottom: '4px', fontSize: '12px' }}>
-                未通過原因 / 診斷訊息：
-              </strong>
-              <div>{item.message}</div>
+            {/* Merged Findings / Evidence List */}
+            <div className="quality-findings-list">
+              <div style={{ fontSize: '12px', color: '#fda4af', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0 2px 0' }}>
+                <span>未通過原因與診斷清單</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: 'normal' }}>
+                  ({group.findings.length} 項發現 / Findings)
+                </span>
+              </div>
+
+              {group.findings.map((f, idx) => (
+                <div className="quality-finding-item" key={f.id || idx}>
+                  <div className="quality-finding-header">
+                    <span className="quality-rule-tag" style={{ fontSize: '11px', padding: '1px 6px' }}>
+                      {f.rule}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                      #{idx + 1}
+                    </span>
+                  </div>
+                  <div className="quality-finding-text">{f.message}</div>
+                </div>
+              ))}
             </div>
 
-            {item.evidence && Object.keys(item.evidence).length > 0 && (
-              <details className="details-evidence">
-                <summary>檢視詳細診斷證據 (Evidence JSON)</summary>
-                <pre className="code-inspector">{JSON.stringify(item.evidence, null, 2)}</pre>
+            {group.evidence && Object.keys(group.evidence).length > 0 && (
+              <details className="details-evidence" style={{ marginTop: '4px' }}>
+                <summary>檢視完整診斷證據 (Evidence JSON)</summary>
+                <pre className="code-inspector">{JSON.stringify(group.evidence, null, 2)}</pre>
               </details>
             )}
           </div>
