@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CurriculumQualityError, isSoftQualityOverrideEligible } from './pipeline.js'
+import { CurriculumQualityError, ReleaseMismatchError, isSoftQualityOverrideEligible } from './pipeline.js'
 import { processCurriculumSubmissions, type CurriculumSubmission } from './submission-processor.js'
 import type { WorkerClient } from './pipeline.js'
 
@@ -56,6 +56,22 @@ describe('processCurriculumSubmissions', () => {
       outcome: 'quality_rejected',
       error_code: 'QUALITY_REJECTED',
       failure_evidence: expect.objectContaining({ failureType: 'QUALITY_REJECTED' }),
+    }))
+  })
+
+  it('records a release mismatch as technical_failed with errorCode RELEASE_MISMATCH', async () => {
+    const state = setup([submission])
+    const complete = vi.fn(async () => {
+      throw new ReleaseMismatchError('rel_1.4.0', 'rel_1.5.0')
+    })
+    await expect(processCurriculumSubmissions(state.client, 'github-actions-finisher', 5, complete)).resolves.toEqual([{
+      jobId: submission.job_id,
+      status: 'technical_failed',
+      errorCode: 'RELEASE_MISMATCH',
+    }])
+    expect(state.rpc).toHaveBeenCalledWith('worker_finish_curriculum_submission', expect.objectContaining({
+      outcome: 'technical_failed',
+      error_code: 'RELEASE_MISMATCH',
     }))
   })
 

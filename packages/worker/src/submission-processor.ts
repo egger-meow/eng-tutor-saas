@@ -1,4 +1,12 @@
-import { CurriculumQualityError, completeCurriculumJob, isSoftQualityOverrideEligible, loadGenerationContext, type CurriculumFailureEvidence, type WorkerClient } from './pipeline.js'
+import {
+  CurriculumQualityError,
+  ReleaseMismatchError,
+  completeCurriculumJob,
+  isSoftQualityOverrideEligible,
+  loadGenerationContext,
+  type CurriculumFailureEvidence,
+  type WorkerClient,
+} from './pipeline.js'
 
 export type CurriculumSubmission = {
   job_id: string
@@ -24,9 +32,13 @@ function unwrap<T>(result: { data: T | null; error: { message: string } | null }
 
 function classifyFailure(error: unknown): Pick<CurriculumSubmissionResult, 'status' | 'errorCode'> & { evidence?: CurriculumFailureEvidence } {
   const message = error instanceof Error ? error.message : String(error)
-  return error instanceof CurriculumQualityError
-    ? { status: 'quality_rejected', errorCode: 'QUALITY_REJECTED', evidence: error.evidence }
-    : { status: 'technical_failed', errorCode: 'CURRICULUM_PIPELINE_FAILED' }
+  if (error instanceof CurriculumQualityError) {
+    return { status: 'quality_rejected', errorCode: 'QUALITY_REJECTED', evidence: error.evidence }
+  }
+  if (error instanceof ReleaseMismatchError || /Release mismatch/iu.test(message)) {
+    return { status: 'technical_failed', errorCode: 'RELEASE_MISMATCH' }
+  }
+  return { status: 'technical_failed', errorCode: 'CURRICULUM_PIPELINE_FAILED' }
 }
 
 export async function processCurriculumSubmissions(

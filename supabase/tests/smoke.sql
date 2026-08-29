@@ -455,8 +455,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.4.0' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.4.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.5.0: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -682,8 +682,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.4.0' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.4.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.5.0: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -1003,6 +1003,91 @@ begin
   -- Clean up recovery fixture
   delete from public.subscriptions where child_id = recovery_child_id;
   delete from public.children where id = recovery_child_id;
+
+  -- =========================================================================
+  -- RELEASE MISMATCH FORMAL RECOVERY PATH VERIFICATION
+  -- =========================================================================
+  declare
+    mismatch_child_id uuid := '00000000-0000-0000-0000-000000000099';
+    mismatch_job_id uuid := '00000000-0000-0000-0000-000000000991';
+    mismatch_claim_result jsonb;
+    mismatch_context jsonb;
+    mismatch_package jsonb;
+  begin
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+    values (mismatch_child_id, '00000000-0000-0000-0000-000000000001', 'Release Mismatch Test Child', 7, 'grade_7', true);
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, generation_due_at, feedback_cutoff_at, max_attempts
+    ) values (
+      mismatch_job_id, mismatch_child_id, '2026-W36', '1.0.0', 'idemp:rel-mismatch-1', 'pending',
+      now() - interval '1 hour', now() - interval '30 minutes', now() - interval '2 hours', 5
+    );
+
+    -- 1. Claim job for Attempt 1
+    select private_generation.chatgpt_claim_generation_batch('mismatch-worker') into mismatch_claim_result;
+    select item into mismatch_context
+    from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
+    where item #>> '{job,id}' = mismatch_job_id::text;
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.0' then
+      raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
+    end if;
+
+    -- 2. Submit package for Attempt 1
+    mismatch_package := jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.3.0', 'jobId', mismatch_job_id::text,
+      'childId', mismatch_child_id::text, 'inputFingerprint', mismatch_context ->> 'inputFingerprint',
+      'releaseId', 'rel_1.4.0'
+    ));
+    perform private_generation.chatgpt_submit_curriculum_package(mismatch_job_id, 'mismatch-worker', mismatch_package);
+
+    -- 3. Finisher encounters release mismatch -> technical_failed with RELEASE_MISMATCH
+    perform public.worker_claim_curriculum_submissions('mismatch-finisher', 5);
+    if not public.worker_finish_curriculum_submission(
+      mismatch_job_id, 1, 'mismatch-finisher', 'technical_failed', 'RELEASE_MISMATCH',
+      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.5.0'
+    ) then
+      raise exception 'failed to record RELEASE_MISMATCH technical failure';
+    end if;
+
+    -- 4. Verify old submission preserved as technical_failed/RELEASE_MISMATCH (not deleted or modified)
+    if not exists (
+      select 1 from private_generation.curriculum_submissions
+      where job_id = mismatch_job_id and authoring_attempt = 1
+        and status = 'technical_failed' and error_code = 'RELEASE_MISMATCH'
+    ) then
+      raise exception 'old submission was not preserved with status=technical_failed and error_code=RELEASE_MISMATCH';
+    end if;
+
+    -- 5. Verify generation job is back in pending with lease cleared
+    if not exists (
+      select 1 from public.generation_jobs
+      where id = mismatch_job_id and status = 'pending' and claimed_by is null and lease_expires_at is null
+        and attempt_count = 1 and error_code = 'RELEASE_MISMATCH'
+    ) then
+      raise exception 'generation job was not reset to pending with cleared lease on RELEASE_MISMATCH';
+    end if;
+
+    -- 6. Verify claim_due_generation_jobs allows claiming Attempt 2
+    select private_generation.chatgpt_claim_generation_batch('mismatch-worker-2') into mismatch_claim_result;
+    select item into mismatch_context
+    from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
+    where item #>> '{job,id}' = mismatch_job_id::text;
+    if mismatch_context is null then
+      raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
+    end if;
+
+    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.5.0 and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.0'
+      or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
+      or mismatch_context ? 'retryContext' then
+      raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;
+    end if;
+
+    -- Clean up test child
+    delete from public.children where id = mismatch_child_id;
+  end;
 
 
 

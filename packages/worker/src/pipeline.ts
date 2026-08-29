@@ -528,6 +528,14 @@ function assertMatchingPdfPair(
   }
 }
 
+export class ReleaseMismatchError extends Error {
+  readonly code = 'RELEASE_MISMATCH'
+  constructor(public readonly targetReleaseId: string, public readonly currentReleaseId: string) {
+    super(`Release mismatch: submission target release '${targetReleaseId}' does not match Finisher CURRENT_RELEASE_ID '${currentReleaseId}'`)
+    this.name = 'ReleaseMismatchError'
+  }
+}
+
 export async function completeCurriculumJob(input: CompleteCurriculumInput): Promise<string> {
   const paths = {
     student: `${input.context.job.childId}/${input.context.job.id}/student.pdf`,
@@ -546,7 +554,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     // Finisher must verify the submission targetReleaseId equals its CURRENT_RELEASE_ID before processing.
     // If they differ, fail explicitly as a release/worker mismatch; never overwrite the artifact into another release identity.
     if (targetReleaseId !== CURRENT_RELEASE_ID) {
-      throw new Error(`Release mismatch: submission target release '${targetReleaseId}' does not match Finisher CURRENT_RELEASE_ID '${CURRENT_RELEASE_ID}'`)
+      throw new ReleaseMismatchError(targetReleaseId, CURRENT_RELEASE_ID)
     }
 
     const preparedPackage = {
