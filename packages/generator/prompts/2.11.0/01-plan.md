@@ -42,7 +42,7 @@ For factual claims involving a named product, organization, model, version, mode
 
 `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`
 
-A source being broadly about the same company or product is not enough. Never combine individually true fragments from different modes/features into a false relationship. If sources distinguish modes, preserve that distinction or simplify the claim.
+A source being broadly about the same product or organization is not enough. Never combine individually true fragments from different modes/features into a false relationship. If sources distinguish modes, preserve that distinction or simplify the claim.
 
 ## 4. Assessment planning
 
