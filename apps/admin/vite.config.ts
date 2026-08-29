@@ -11,5 +11,6 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5174,
     strictPort: false,
+    allowedHosts: ['jjmow.tail7fa36c.ts.net'],
   },
 })
