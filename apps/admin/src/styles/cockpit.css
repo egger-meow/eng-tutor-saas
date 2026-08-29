@@ -1518,6 +1518,131 @@ button, input, select, textarea {
   margin: 14px 0;
 }
 
+.quality-filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 12px 0 16px 0;
+}
+
+.quality-filter-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.quality-filter-chip:hover {
+  border-color: #3b82f6;
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.quality-filter-chip.active {
+  background: #1e3a8a;
+  border-color: #3b82f6;
+  color: #bfdbfe;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+}
+
+.quality-filter-chip-count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+}
+
+.quality-filter-chip.active .quality-filter-chip-count {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
+}
+
+.quality-failure-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.quality-failure-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--status-rose);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quality-failure-card:hover {
+  border-color: #3b82f6;
+  border-left-color: var(--status-rose);
+  background: var(--bg-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.quality-failure-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quality-failure-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quality-rule-tag {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(244, 63, 94, 0.15);
+  color: #fda4af;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quality-failure-message {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  word-break: break-word;
+}
+
+.quality-failure-message code {
+  font-family: ui-monospace, monospace;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #fca5a5;
+  font-size: 12px;
+}
+
 .quality-rule-card {
   color: var(--text-main);
   text-align: left;

@@ -33,13 +33,74 @@ export const FailureIntelligenceView: React.FC<Props> = ({
   onSelectEra,
   onDrillDownTimeline,
 }) => {
-  const [selectedQualityRule, setSelectedQualityRule] = useState<FailureIntelligence['qualityRuleViolations'][number] | null>(null)
-  const [selectedErrorCode, setSelectedErrorCode] = useState<FailureIntelligence['errorCodeClusters'][number] | null>(null)
+  const [selectedRuleFilter, setSelectedRuleFilter] = useState<string>('all')
+  const [selectedQualityRuleModal, setSelectedQualityRuleModal] = useState<FailureIntelligence['qualityRuleViolations'][number] | null>(null)
+  const [selectedErrorCodeModal, setSelectedErrorCodeModal] = useState<FailureIntelligence['errorCodeClusters'][number] | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const activeOccurrences = useMemo(() => {
-    if (selectedQualityRule) {
-      return selectedQualityRule.recentExamples.map((ex) => ({
+  // Flatten all quality failure occurrences across rules into a single chronological list
+  const allQualityFailures = useMemo(() => {
+    if (!data?.qualityRuleViolations) return []
+    const list: Array<{
+      id: string
+      jobId: string
+      childId?: string
+      childPseudonym: string
+      materialWeek: string
+      attempt: number
+      timestamp: string
+      rule: string
+      category: string
+      message: string
+      evidence: Record<string, unknown>
+    }> = []
+
+    data.qualityRuleViolations.forEach((rule, ruleIdx) => {
+      rule.recentExamples.forEach((ex, exIdx) => {
+        list.push({
+          id: `${ex.jobId}_${ex.attempt}_${rule.rule}_${ruleIdx}_${exIdx}`,
+          jobId: ex.jobId,
+          childId: ex.childId,
+          childPseudonym: ex.childPseudonym,
+          materialWeek: ex.materialWeek,
+          attempt: ex.attempt,
+          timestamp: ex.timestamp || '',
+          rule: rule.rule,
+          category: rule.category,
+          message: ex.message,
+          evidence: ex.evidence,
+        })
+      })
+    })
+
+    // Sort strictly by happening time descending (newest first)
+    return list.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))
+  }, [data?.qualityRuleViolations])
+
+  // Filtered by selected rule filter and search query
+  const filteredQualityFailures = useMemo(() => {
+    let result = allQualityFailures
+    if (selectedRuleFilter !== 'all') {
+      result = result.filter((item) => item.rule === selectedRuleFilter)
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim()
+      result = result.filter(
+        (item) =>
+          item.rule.toLowerCase().includes(q) ||
+          item.childPseudonym.toLowerCase().includes(q) ||
+          item.materialWeek.toLowerCase().includes(q) ||
+          item.message.toLowerCase().includes(q) ||
+          (item.childId && item.childId.toLowerCase().includes(q)) ||
+          item.jobId.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [allQualityFailures, selectedRuleFilter, searchQuery])
+
+  const activeModalOccurrences = useMemo(() => {
+    if (selectedQualityRuleModal) {
+      return selectedQualityRuleModal.recentExamples.map((ex) => ({
         id: `${ex.jobId}_${ex.attempt}`,
         jobId: ex.jobId,
         childId: ex.childId,
@@ -52,8 +113,8 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         evidence: ex.evidence,
       }))
     }
-    if (selectedErrorCode) {
-      return (selectedErrorCode.occurrences || []).map((occ) => ({
+    if (selectedErrorCodeModal) {
+      return (selectedErrorCodeModal.occurrences || []).map((occ) => ({
         id: occ.id,
         jobId: occ.jobId,
         childId: occ.childId,
@@ -67,18 +128,7 @@ export const FailureIntelligenceView: React.FC<Props> = ({
       }))
     }
     return []
-  }, [selectedQualityRule, selectedErrorCode])
-
-  const filteredOccurrences = useMemo(() => {
-    if (!searchQuery.trim()) return activeOccurrences
-    const q = searchQuery.toLowerCase().trim()
-    return activeOccurrences.filter((item) =>
-      item.childPseudonym.toLowerCase().includes(q) ||
-      item.materialWeek.toLowerCase().includes(q) ||
-      item.message.toLowerCase().includes(q) ||
-      (item.childId && item.childId.toLowerCase().includes(q))
-    )
-  }, [activeOccurrences, searchQuery])
+  }, [selectedQualityRuleModal, selectedErrorCodeModal])
 
   if (!data) return <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>載入失敗情報中…</div>
 
@@ -146,48 +196,118 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Finisher Quality Rule Violations */}
+      {/* Main Section: Chronological Finisher Quality Failures List */}
       <div className="section-title" style={{ marginTop: '24px' }}>
-        <span>Finisher 品質審核未通過原因（點擊可查看個別學員每週發生紀錄）</span>
+        <div>
+          <span>Finisher 品質審核未通過即時紀錄 (Recent Quality Audit Failures)</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 'normal', marginLeft: '12px' }}>
+            依發生時間降冪排序（最新在前），即時掌握退回原因以快速修正 Prompt 或結構
+          </span>
+        </div>
+        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+          共 {allQualityFailures.length} 筆品質違規
+        </span>
       </div>
 
-      <div className="quality-rule-grid">
-        {data.qualityRuleViolations.map((rule) => (
+      {/* Filter Chips Bar */}
+      {data.qualityRuleViolations.length > 0 && (
+        <div className="quality-filter-bar">
           <button
-            className="cockpit-card quality-rule-card"
-            key={rule.rule}
-            onClick={() => {
-              setSelectedErrorCode(null)
-              setSelectedQualityRule(rule)
-              setSearchQuery('')
-            }}
+            className={`quality-filter-chip ${selectedRuleFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setSelectedRuleFilter('all')}
           >
-            <div className="pipeline-title" style={{ padding: '0 0 10px 0', borderBottom: 'none' }}>
-              <strong><code>{rule.rule}</code></strong>
-              <b style={{ color: 'var(--status-rose)', fontSize: '20px' }}>{rule.count}</b>
-            </div>
-            <p style={{ fontSize: '13px', margin: '6px 0 10px 0', lineHeight: 1.4 }}>{rule.description}</p>
-            <div className="pipeline-job-meta">
-              <span>影響 {rule.affectedChildrenCount} 位學員</span>
-              <span>嘗試次數：{rule.attempts.join('、') || '1'}</span>
-            </div>
-            <div className="quality-card-action">
-              <span>查看個別發生明細 ({rule.recentExamples.length} 筆)</span>
-              <span>→</span>
-            </div>
+            全部規則
+            <span className="quality-filter-chip-count">{allQualityFailures.length}</span>
           </button>
-        ))}
-      </div>
-
-      {!data.qualityRuleViolations.length && (
-        <div className="cockpit-card" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-          此範圍沒有品質未通過紀錄。
+          {data.qualityRuleViolations.map((r) => (
+            <button
+              key={r.rule}
+              className={`quality-filter-chip ${selectedRuleFilter === r.rule ? 'active' : ''}`}
+              onClick={() => setSelectedRuleFilter(selectedRuleFilter === r.rule ? 'all' : r.rule)}
+            >
+              <code>{r.rule}</code>
+              <span className="quality-filter-chip-count">{r.count}</span>
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Technical Failures */}
-      <div style={{ marginTop: '24px' }}>
-        <details className="cockpit-card technical-failures" open>
+      {/* Search & Action Bar */}
+      <div className="dialog-search-bar" style={{ margin: '10px 0 14px 0' }}>
+        <input
+          type="text"
+          className="dialog-search-input"
+          placeholder="搜尋學員名稱、週次 (如 2026-W35)、規則或錯誤關鍵字..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {(searchQuery || selectedRuleFilter !== 'all') && (
+          <button
+            className="refresh-btn"
+            onClick={() => {
+              setSearchQuery('')
+              setSelectedRuleFilter('all')
+            }}
+          >
+            重設篩選
+          </button>
+        )}
+      </div>
+
+      {/* Chronological Quality Failures Feed */}
+      <div className="quality-failure-feed">
+        {filteredQualityFailures.map((item) => (
+          <div className="quality-failure-card" key={item.id}>
+            <div className="quality-failure-header">
+              <div className="quality-failure-identity">
+                <span className="quality-rule-tag">🛡️ {item.rule}</span>
+                <span className="occurrence-tag">👤 {item.childPseudonym}</span>
+                <span className="occurrence-tag">📅 {item.materialWeek}</span>
+                <span className="occurrence-tag">🔄 第 {item.attempt || 1} 次嘗試</span>
+                <span className="occurrence-tag">⚙️ finisher_audit</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="occurrence-time">⏰ {formatTimestamp(item.timestamp)}</span>
+                {item.childId && (
+                  <button
+                    className="timeline-jump-btn"
+                    onClick={() => onDrillDownTimeline(item.childId!, item.materialWeek)}
+                    title="前往此學員生成時間軸"
+                  >
+                    查看時間軸 →
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="quality-failure-message">
+              <strong style={{ color: '#fda4af', display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+                未通過原因 / 診斷訊息：
+              </strong>
+              <div>{item.message}</div>
+            </div>
+
+            {item.evidence && Object.keys(item.evidence).length > 0 && (
+              <details className="details-evidence">
+                <summary>檢視詳細診斷證據 (Evidence JSON)</summary>
+                <pre className="code-inspector">{JSON.stringify(item.evidence, null, 2)}</pre>
+              </details>
+            )}
+          </div>
+        ))}
+
+        {!filteredQualityFailures.length && (
+          <div className="cockpit-card" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+            {searchQuery || selectedRuleFilter !== 'all'
+              ? '無符合篩選條件的品質審核紀錄。'
+              : '✨ 此範圍暫無品質未通過紀錄，所有生成皆符合品質規範。'}
+          </div>
+        )}
+      </div>
+
+      {/* Technical Failures Collapsible Section */}
+      <div style={{ marginTop: '28px' }}>
+        <details className="cockpit-card technical-failures">
           <summary style={{ paddingBottom: '10px' }}>
             工程技術失敗（次要） · {data.errorCodeClusters.length} 個錯誤群組
           </summary>
@@ -196,8 +316,8 @@ export const FailureIntelligenceView: React.FC<Props> = ({
               className="technical-row clickable"
               key={item.errorCode}
               onClick={() => {
-                setSelectedQualityRule(null)
-                setSelectedErrorCode(item)
+                setSelectedQualityRuleModal(null)
+                setSelectedErrorCodeModal(item)
                 setSearchQuery('')
               }}
               title="點擊查看此錯誤的個別發生紀錄"
@@ -222,70 +342,13 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         </details>
       </div>
 
-      {/* Chronological Recent Failures Stream */}
-      {data.recentFailures && data.recentFailures.length > 0 && (
-        <div style={{ marginTop: '28px' }}>
-          <div className="section-title">
-            <span>近期失敗事件紀錄流 (Recent Failure Events Stream)</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>顯示最新 {data.recentFailures.length} 筆事件</span>
-          </div>
-          <div className="data-table-wrapper">
-            <table className="cockpit-table">
-              <thead>
-                <tr>
-                  <th>發生時間</th>
-                  <th>學員</th>
-                  <th>週次</th>
-                  <th>階段</th>
-                  <th>錯誤代碼 / 摘要</th>
-                  <th>嘗試次數</th>
-                  <th style={{ textAlign: 'right' }}>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.recentFailures.map((rf) => (
-                  <tr key={rf.id}>
-                    <td style={{ fontFamily: 'ui-monospace, monospace', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                      {formatTimestamp(rf.timestamp)}
-                    </td>
-                    <td><strong>{rf.childPseudonym}</strong></td>
-                    <td><span className="occurrence-tag">{rf.materialWeek}</span></td>
-                    <td><span className="occurrence-tag">{rf.stage}</span></td>
-                    <td style={{ maxWidth: '380px' }}>
-                      <div><code>{rf.errorCode}</code></div>
-                      <small style={{ color: 'var(--text-muted)', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '380px' }}>
-                        {rf.errorMessage}
-                      </small>
-                    </td>
-                    <td>第 {rf.authoringAttempt || 1} 次</td>
-                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      {rf.childPseudonym && !rf.childPseudonym.startsWith('Job #') && (
-                        <button
-                          className="timeline-jump-btn"
-                          onClick={() => {
-                            // Find child ID or open timeline
-                            onDrillDownTimeline(rf.jobId, rf.materialWeek)
-                          }}
-                        >
-                          查看時間軸
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Occurrences Detail Modal */}
-      {(selectedQualityRule || selectedErrorCode) && (
+      {/* Occurrences Detail Modal (For Technical Error Drilldown or Deep Dives) */}
+      {(selectedQualityRuleModal || selectedErrorCodeModal) && (
         <div
           className="evidence-modal"
           onClick={() => {
-            setSelectedQualityRule(null)
-            setSelectedErrorCode(null)
+            setSelectedQualityRuleModal(null)
+            setSelectedErrorCodeModal(null)
           }}
         >
           <section
@@ -296,22 +359,22 @@ export const FailureIntelligenceView: React.FC<Props> = ({
             <div className="section-title" style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
               <div>
                 <span className="quality-card-badge">
-                  {selectedQualityRule ? 'Finisher 品質審核規則' : '工程技術錯誤群組'}
+                  {selectedQualityRuleModal ? 'Finisher 品質審核規則' : '工程技術錯誤群組'}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                   <code style={{ fontSize: '15px' }}>
-                    {selectedQualityRule ? selectedQualityRule.rule : selectedErrorCode?.errorCode}
+                    {selectedQualityRuleModal ? selectedQualityRuleModal.rule : selectedErrorCodeModal?.errorCode}
                   </code>
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                    共 {activeOccurrences.length} 筆紀錄 · 影響 {selectedQualityRule?.affectedChildrenCount ?? selectedErrorCode?.affectedChildrenCount ?? 0} 位學員
+                    共 {activeModalOccurrences.length} 筆紀錄 · 影響 {selectedQualityRuleModal?.affectedChildrenCount ?? selectedErrorCodeModal?.affectedChildrenCount ?? 0} 位學員
                   </span>
                 </div>
               </div>
               <button
                 className="refresh-btn"
                 onClick={() => {
-                  setSelectedQualityRule(null)
-                  setSelectedErrorCode(null)
+                  setSelectedQualityRuleModal(null)
+                  setSelectedErrorCodeModal(null)
                 }}
               >
                 關閉
@@ -320,28 +383,12 @@ export const FailureIntelligenceView: React.FC<Props> = ({
 
             {/* Description / Summary Box */}
             <div style={{ margin: '14px 0', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              {selectedQualityRule ? selectedQualityRule.description : selectedErrorCode?.sampleMessage}
-            </div>
-
-            {/* Filter Search Bar */}
-            <div className="dialog-search-bar">
-              <input
-                type="text"
-                className="dialog-search-input"
-                placeholder="搜尋學員名稱、週次 (如 2026-W35) 或錯誤關鍵字..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button className="refresh-btn" onClick={() => setSearchQuery('')}>
-                  清除
-                </button>
-              )}
+              {selectedQualityRuleModal ? selectedQualityRuleModal.description : selectedErrorCodeModal?.sampleMessage}
             </div>
 
             {/* Occurrences List */}
             <div style={{ marginTop: '10px' }}>
-              {filteredOccurrences.map((item) => (
+              {activeModalOccurrences.map((item) => (
                 <div className="occurrence-card" key={item.id}>
                   <div className="occurrence-header">
                     <div className="occurrence-identity">
@@ -356,8 +403,8 @@ export const FailureIntelligenceView: React.FC<Props> = ({
                         <button
                           className="timeline-jump-btn"
                           onClick={() => {
-                            setSelectedQualityRule(null)
-                            setSelectedErrorCode(null)
+                            setSelectedQualityRuleModal(null)
+                            setSelectedErrorCodeModal(null)
                             onDrillDownTimeline(item.childId!, item.materialWeek)
                           }}
                         >
@@ -381,9 +428,9 @@ export const FailureIntelligenceView: React.FC<Props> = ({
                 </div>
               ))}
 
-              {!filteredOccurrences.length && (
+              {!activeModalOccurrences.length && (
                 <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-muted)' }}>
-                  {searchQuery ? '無符合搜尋條件的紀錄。' : '此項目暫無明細紀錄。'}
+                  此項目暫無明細紀錄。
                 </div>
               )}
             </div>
