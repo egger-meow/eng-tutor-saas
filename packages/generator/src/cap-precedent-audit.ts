@@ -224,6 +224,24 @@ function studentAssessmentText(pkg: PackageLike, question: QuestionLike): string
   return `${reading} ${question.prompt} ${(question.options ?? []).join(' ')}`
 }
 
+const PASSAGE_QUOTE_ATTRIBUTION = /(?:\b(?:according to|from)\s+(?:the\s+)?(?:reading|passage|article|text)\b|\bin\s+(?:the\s+)?(?:reading|passage|article|text|sentence|paragraph(?:\s+\d+)?)\b|\b(?:the\s+)?(?:reading|passage|article|text|writer|author)\s+(?:says?|states?|writes?|notes?|explains?|mentions?|includes?|uses?)\b)/iu
+const CONSTRUCTED_QUOTE_SPEAKER = /\b(?:(?:a|one|another|your)\s+)?(?:student|classmate|learner|reader|friend|person|someone|somebody)\s+(?:says?|claims?|argues?|thinks?|suggests?|writes?)\s*,?\s*$/iu
+
+/**
+ * Quote-verbatim checking is defense-in-depth for text attributed to the passage.
+ * A clearly constructed speaker quote takes precedence over nearby instructions such
+ * as "According to the reading"; canonical evidence anchors still govern the answer.
+ */
+function quoteClaimsPassageSource(prompt: string, rawQuoted: string): boolean {
+  const quoteIndex = prompt.indexOf(rawQuoted)
+  if (quoteIndex < 0) return false
+  const prefix = prompt.slice(Math.max(0, quoteIndex - 160), quoteIndex)
+  if (CONSTRUCTED_QUOTE_SPEAKER.test(prefix)) return false
+  const start = Math.max(0, quoteIndex - 180)
+  const end = Math.min(prompt.length, quoteIndex + rawQuoted.length + 180)
+  return PASSAGE_QUOTE_ATTRIBUTION.test(prompt.slice(start, end))
+}
+
 /**
  * Deterministic production CAP quality floor.
  *
@@ -399,7 +417,7 @@ export function auditCapPrecedentPackage(
           const cleanQuote = rawQuoted.replace(/^["“'‘]|["”'’]$/gu, '').trim()
           if (cleanQuote.length >= 4 && !/^(?:A|B|C|D|\d+)$/i.test(cleanQuote)) {
             const normQuote = cleanQuote.toLowerCase().replace(/\s+/gu, ' ')
-            if (!readingFullText.includes(normQuote)) {
+            if (!readingFullText.includes(normQuote) && quoteClaimsPassageSource(question.prompt, rawQuoted)) {
               findings.push(
                 `CAP_QUOTE_EVIDENCE_MISMATCH:${question.id}: quoted prompt text "${cleanQuote}" does not exist in declared reading evidence`,
               )
@@ -523,7 +541,11 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
           `EVIDENCE_PLAN_MISSING:${question.id}: reading-dependent question requires an internal evidence-plan:<id> or cap-plan:<id> check`,
         )
       } else if (plan) {
-        if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading') {
+        if (isGoverned && (!plan.evidenceScope || plan.evidenceScope.trim().length === 0)) {
+          findings.push(
+            `EVIDENCE_SCOPE_MISSING:${question.id}: governed reading-dependent question must explicitly declare evidenceScope as primary_reading`,
+          )
+        } else if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading') {
           findings.push(
             `EVIDENCE_BOUNDARY_VIOLATION:${question.id}: reading-dependent question cannot claim evidence from "${plan.evidenceScope}"; evidenceScope must be primary_reading`,
           )
@@ -583,7 +605,7 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
             findings.push(
               `EVIDENCE_BOUNDARY_LEAKAGE:${question.id}: quoted prompt text "${cleanQuote}" exists only in instruction/box content, not in primary reading prose`,
             )
-          } else if (isReadingDependent && !isExplicitRecall) {
+          } else if (isReadingDependent && !isExplicitRecall && quoteClaimsPassageSource(question.prompt, rawQuoted)) {
             findings.push(
               `EVIDENCE_QUOTE_MISMATCH:${question.id}: quoted prompt text "${cleanQuote}" does not exist in primary reading prose`,
             )
