@@ -180,3 +180,4 @@ await replaceRequired(regressionPath, [
 ])
 
 console.log('Applied Finisher calibration patch.')
+// trigger one-shot patch workflow
