@@ -423,11 +423,12 @@ export async function handleApiRequest(
         return true
       }
 
+      case '/api/materials/pdf-url':
       case '/api/test-mode/pdf-url': {
         const childId = typeof parsedUrl.query.childId === 'string' ? parsedUrl.query.childId : ''
         const materialId = typeof parsedUrl.query.materialId === 'string' ? parsedUrl.query.materialId : ''
         const pdfType = parsedUrl.query.type === 'parent' ? 'parent' : 'student'
-        const data = await service.getTestPdfSignedUrl(childId, materialId, pdfType)
+        const data = await service.getPdfSignedUrl(childId, materialId, pdfType)
         res.statusCode = data.success ? 200 : 400
         res.end(JSON.stringify(data))
         return true

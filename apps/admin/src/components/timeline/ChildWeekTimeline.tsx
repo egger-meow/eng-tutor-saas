@@ -72,6 +72,31 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
   } = data
 
   const job = (rawMetadata?.job as any) || jobSummary
+  const material = (rawMetadata?.material as any) || null
+  const materialId = material?.id || job?.material_id
+  const hasMaterial = Boolean(materialId) && (Boolean(material?.student_pdf_path) || Boolean(material?.parent_answer_pdf_path) || Boolean(material))
+  const [downloadLoading, setDownloadLoading] = useState<'student' | 'parent' | null>(null)
+
+  const handleDownloadPdf = async (type: 'student' | 'parent') => {
+    if (!materialId || !childId) {
+      alert('無此教材 ID，無法下載 PDF')
+      return
+    }
+    setDownloadLoading(type)
+    try {
+      const res = await adminApi.getPdfSignedUrl(childId, materialId, type)
+      if (res.success && res.signedUrl) {
+        window.open(res.signedUrl, '_blank', 'noopener,noreferrer')
+      } else {
+        alert(res.message || res.error || '無法取得 PDF 下載連結')
+      }
+    } catch (err) {
+      alert(`取得 PDF 失敗: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setDownloadLoading(null)
+    }
+  }
+
   const isCompleted = job?.status === 'completed'
   const attemptCount = Number(job?.attempt_count) || 0
   const maxAttempts = Number(job?.max_attempts) || 3
@@ -277,6 +302,80 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
         onRefreshTimeline={() => onSearch(childId, targetWeek)}
       />
 
+      {/* Current Week Material PDF Download Section for Any Enrolled / Test Child */}
+      {hasMaterial && (
+        <div
+          className="cockpit-card"
+          style={{
+            marginBottom: '20px',
+            border: '1px solid #10b981',
+            background: 'rgba(16, 185, 129, 0.05)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '20px' }}>📚</span>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                  本週教材 PDF ({targetWeek || material?.material_week})
+                </span>
+                <span className="status-pill active" style={{ fontSize: '11px', background: '#059669' }}>
+                  已產出 (Ready)
+                </span>
+                {material?.rule_version && (
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    規則: {material.rule_version}
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                任何一般在學或測試學員產出之教材，管理員皆可直接預覽或下載雙版本 PDF。
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              className="refresh-btn"
+              style={{
+                background: '#1e293b',
+                color: '#60a5fa',
+                borderColor: '#3b82f6',
+                fontSize: '13px',
+                padding: '8px 16px',
+                fontWeight: 600,
+              }}
+              onClick={() => handleDownloadPdf('student')}
+              disabled={downloadLoading !== null}
+            >
+              {downloadLoading === 'student' ? '產生連結中...' : '📄 預覽學生 PDF (Student)'}
+            </button>
+            <button
+              type="button"
+              className="refresh-btn"
+              style={{
+                background: '#1e293b',
+                color: '#34d399',
+                borderColor: '#10b981',
+                fontSize: '13px',
+                padding: '8px 16px',
+                fontWeight: 600,
+              }}
+              onClick={() => handleDownloadPdf('parent')}
+              disabled={downloadLoading !== null}
+            >
+              {downloadLoading === 'parent' ? '產生連結中...' : '📄 預覽家長解答 PDF (Parent)'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Child Summary Capsule */}
       <div className="kpi-grid">
         <div className="cockpit-card featured">
@@ -427,6 +526,29 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                         </div>
                       )
                     })}
+                  </div>
+                )}
+
+                {event.step === 'MATERIAL_STORED' && event.status === 'completed' && (
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="refresh-btn"
+                      style={{ background: '#1e293b', color: '#60a5fa', borderColor: '#3b82f6', fontSize: '12px', padding: '5px 12px', fontWeight: 600 }}
+                      onClick={() => handleDownloadPdf('student')}
+                      disabled={downloadLoading !== null}
+                    >
+                      {downloadLoading === 'student' ? '產生連結中...' : '📄 預覽學生 PDF'}
+                    </button>
+                    <button
+                      type="button"
+                      className="refresh-btn"
+                      style={{ background: '#1e293b', color: '#34d399', borderColor: '#10b981', fontSize: '12px', padding: '5px 12px', fontWeight: 600 }}
+                      onClick={() => handleDownloadPdf('parent')}
+                      disabled={downloadLoading !== null}
+                    >
+                      {downloadLoading === 'parent' ? '產生連結中...' : '📄 預覽家長解答 PDF'}
+                    </button>
                   </div>
                 )}
 

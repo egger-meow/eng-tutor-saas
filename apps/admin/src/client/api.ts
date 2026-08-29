@@ -201,9 +201,14 @@ export const adminApi = {
     return res
   },
 
+  getPdfSignedUrl: (childId: string, materialId: string, type: 'student' | 'parent') =>
+    fetchJson<TestPdfSignedUrlResult>(
+      `/api/materials/pdf-url?childId=${encodeURIComponent(childId)}&materialId=${encodeURIComponent(materialId)}&type=${type}`
+    ),
+
   getTestPdfSignedUrl: (childId: string, materialId: string, type: 'student' | 'parent') =>
     fetchJson<TestPdfSignedUrlResult>(
-      `/api/test-mode/pdf-url?childId=${encodeURIComponent(childId)}&materialId=${encodeURIComponent(materialId)}&type=${type}`
+      `/api/materials/pdf-url?childId=${encodeURIComponent(childId)}&materialId=${encodeURIComponent(materialId)}&type=${type}`
     ),
 
   // Waitlist & Scaling Gate API

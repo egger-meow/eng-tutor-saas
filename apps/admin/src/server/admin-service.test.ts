@@ -1180,6 +1180,7 @@ describe('AdminService Authoritative Truth Layer', () => {
 
       const service = new AdminService({ client: mockClient })
 
+      // Works for test mode child
       const studentPdfRes = await service.getTestPdfSignedUrl(testChildId, 'mat-1', 'student')
       expect(studentPdfRes.success).toBe(true)
       expect(studentPdfRes.signedUrl).toContain(`${testChildId}/2026-08-17_student.pdf`)
@@ -1187,6 +1188,40 @@ describe('AdminService Authoritative Truth Layer', () => {
       const parentPdfRes = await service.getTestPdfSignedUrl(testChildId, 'mat-1', 'parent')
       expect(parentPdfRes.success).toBe(true)
       expect(parentPdfRes.signedUrl).toContain(`${testChildId}/2026-08-17_parent.pdf`)
+
+      // Also works for normal child without test mode session
+      const normalChildId = 'c-normal-1'
+      const normalClient = createMockSupabaseClient(
+        {
+          children: [{ id: normalChildId, display_name: '一般學員 B', is_active: true, grade: 8 }],
+          generation_test_mode_sessions: [], // Not in test mode
+          materials: [
+            {
+              id: 'mat-normal-1',
+              child_id: normalChildId,
+              material_week: '2026-08-24',
+              student_pdf_path: `${normalChildId}/2026-08-24_student.pdf`,
+              parent_answer_pdf_path: `${normalChildId}/2026-08-24_parent.pdf`,
+            },
+          ],
+        },
+        {},
+        {},
+        {
+          createSignedUrl: (bucket: string, path: string, _expiry: number) => ({
+            data: { signedUrl: `https://mock.supabase.co/storage/v1/object/sign/${bucket}/${path}?token=signed_token_456` },
+            error: null,
+          }),
+        }
+      )
+      const normalService = new AdminService({ client: normalClient })
+      const normalStudentPdf = await normalService.getPdfSignedUrl(normalChildId, 'mat-normal-1', 'student')
+      expect(normalStudentPdf.success).toBe(true)
+      expect(normalStudentPdf.signedUrl).toContain(`${normalChildId}/2026-08-24_student.pdf`)
+
+      const normalParentPdf = await normalService.getPdfSignedUrl(normalChildId, 'mat-normal-1', 'parent')
+      expect(normalParentPdf.success).toBe(true)
+      expect(normalParentPdf.signedUrl).toContain(`${normalChildId}/2026-08-24_parent.pdf`)
     })
   })
 

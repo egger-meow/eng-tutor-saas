@@ -1022,7 +1022,7 @@ export class AdminService {
     }
   }
 
-  public async getTestPdfSignedUrl(
+  public async getPdfSignedUrl(
     childId: string,
     materialId: string,
     pdfType: 'student' | 'parent'
@@ -1033,25 +1033,10 @@ export class AdminService {
 
     const client = this.ensureClient()
 
-    // 1. Validate child is in test mode
-    const { data: session, error: sessErr } = await client
-      .from('generation_test_mode_sessions')
-      .select('is_enabled')
-      .eq('child_id', childId)
-      .maybeSingle()
-
-    if (sessErr || !session || !session.is_enabled) {
-      return {
-        success: false,
-        error: 'TEST_MODE_NOT_ENABLED',
-        message: 'PDF preview bypass is only available for active Test Mode children',
-      }
-    }
-
-    // 2. Validate material belongs to child
+    // 1. Validate material belongs to child
     const { data: material, error: matErr } = await client
       .from('materials')
-      .select('student_pdf_path, parent_answer_pdf_path')
+      .select('id, student_pdf_path, parent_answer_pdf_path, material_week')
       .eq('id', materialId)
       .eq('child_id', childId)
       .maybeSingle()
@@ -1060,7 +1045,7 @@ export class AdminService {
       return {
         success: false,
         error: 'MATERIAL_NOT_FOUND',
-        message: 'Material not found for this test child',
+        message: 'Material not found for this child',
       }
     }
 
@@ -1073,7 +1058,7 @@ export class AdminService {
       }
     }
 
-    // 3. Create signed URL via service-role Storage API (valid for 5 minutes)
+    // 2. Create signed URL via service-role Storage API (valid for 5 minutes)
     try {
       const { data, error: signErr } = await client.storage.from('weekly-materials').createSignedUrl(path, 300)
       if (signErr || !data?.signedUrl) {
@@ -1090,15 +1075,23 @@ export class AdminService {
         materialId,
         pdfType,
         signedUrl: data.signedUrl,
-        path,
+        expiresAt: new Date(Date.now() + 300 * 1000).toISOString(),
       }
     } catch (err) {
       return {
         success: false,
-        error: 'STORAGE_SIGN_EXCEPTION',
+        error: 'STORAGE_EXCEPTION',
         message: err instanceof Error ? err.message : String(err),
       }
     }
+  }
+
+  public async getTestPdfSignedUrl(
+    childId: string,
+    materialId: string,
+    pdfType: 'student' | 'parent'
+  ): Promise<TestPdfSignedUrlResult> {
+    return this.getPdfSignedUrl(childId, materialId, pdfType)
   }
 
   private ensureClient(): SupabaseClient {
@@ -1841,14 +1834,18 @@ export class AdminService {
     if (selectedJob) {
       const [submissionsRes, matData, fbData] = await Promise.all([
         this.queryCurriculumSubmissions(selectedJob.id, 20, dataSources),
-        selectedJob.material_id ? this.safeQuery<any>('material_single', () => client.from('materials').select('*').eq('id', selectedJob.material_id).maybeSingle(), dataSources) : Promise.resolve(null),
         selectedJob.material_id
-          ? this.safeQuery<any>('feedback_single', () => client.from('feedback').select('*').eq('child_id', childId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
+          ? this.safeQuery<any>('material_single', () => client.from('materials').select('*').eq('id', selectedJob.material_id).maybeSingle(), dataSources)
+          : this.safeQuery<any>('material_by_week', () => client.from('materials').select('*').eq('child_id', effectiveChildId).eq('material_week', actualWeek).maybeSingle(), dataSources),
+        selectedJob.material_id
+          ? this.safeQuery<any>('feedback_single', () => client.from('feedback').select('*').eq('child_id', effectiveChildId).eq('material_id', selectedJob.material_id).maybeSingle(), dataSources)
           : Promise.resolve(null),
       ])
       submissions = submissionsRes || []
       material = matData
       feedback = fbData
+    } else {
+      material = await this.safeQuery<any>('material_by_week', () => client.from('materials').select('*').eq('child_id', effectiveChildId).eq('material_week', actualWeek).maybeSingle(), dataSources)
     }
 
     return this.buildLifecycleTimeline({

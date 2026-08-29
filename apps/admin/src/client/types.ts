@@ -733,9 +733,12 @@ export interface TestPdfSignedUrlResult {
   pdfType?: 'student' | 'parent'
   signedUrl?: string
   path?: string
+  expiresAt?: string
   error?: string
   message?: string
 }
+
+export type PdfSignedUrlResult = TestPdfSignedUrlResult
 
 export type WaitlistStatus = 'waiting' | 'released' | 'converted' | 'canceled'
 export type NotificationStatus = 'none' | 'pending' | 'sent' | 'failed' | 'manual'
