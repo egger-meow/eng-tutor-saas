@@ -8,6 +8,7 @@ on:
       - scripts/_tmp_relax_brittle_finisher_gates.mjs
       - scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
       - scripts/_tmp_relax_brittle_finisher_gates_policy2.mjs
+      - scripts/_tmp_relax_brittle_finisher_gates_policy3.mjs
       - .github/workflows/_tmp-relax-brittle-finisher-gates.yml
 
 permissions:
@@ -29,6 +30,27 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Cache Traditional Chinese PDF fonts
+        id: cache-fonts
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fonts-noto-cjk
+          key: fonts-noto-cjk-v1-${{ runner.os }}
+      - name: Install or restore Traditional Chinese PDF fonts
+        run: |
+          if [ "${{ steps.cache-fonts.outputs.cache-hit }}" = "true" ]; then
+            sudo mkdir -p /usr/share/fonts/opentype/noto
+            sudo cp -r ~/.cache/fonts-noto-cjk/* /usr/share/fonts/opentype/noto/
+            sudo fc-cache -f
+          else
+            sudo apt-get update
+            sudo apt-get install -y fonts-noto-cjk
+            mkdir -p ~/.cache/fonts-noto-cjk
+            cp -r /usr/share/fonts/opentype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
+            if [ -d /usr/share/fonts/truetype/noto ]; then
+              cp -r /usr/share/fonts/truetype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
+            fi
+          fi
       - name: Cache Playwright Chromium
         id: cache-playwright
         uses: actions/cache@v4
@@ -43,12 +65,13 @@ jobs:
           node scripts/_tmp_relax_brittle_finisher_gates.mjs
           node scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
           node scripts/_tmp_relax_brittle_finisher_gates_policy2.mjs
+          node scripts/_tmp_relax_brittle_finisher_gates_policy3.mjs
       - name: Compile production bundle
         run: pnpm compile:bundle
       - name: Diff check
         run: git diff --check
       - name: Focused regression
-        run: pnpm vitest run packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/curriculum-package.test.ts packages/generator/src/bundle-compiler.test.ts
+        run: pnpm vitest run packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/curriculum-package.test.ts packages/generator/src/model-quality-profile.test.ts packages/worker/src/pipeline.test.ts packages/generator/src/bundle-compiler.test.ts
       - name: Full verification
         run: |
           pnpm lint
@@ -59,6 +82,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/SPEC.md packages/generator/src/audit-curriculum.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/curriculum-package.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/prompts/2.10.0/02-author.md packages/generator/prompts/2.10.0/03-critic.md packages/generator/bundles/production-authoring-bundle.md
+          git add docs/SPEC.md packages/generator/src/audit-curriculum.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/curriculum-package.test.ts packages/generator/src/model-quality-profile.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/finisher-relaxation-regression.test.ts packages/worker/src/pipeline.test.ts packages/generator/prompts/2.10.0/02-author.md packages/generator/prompts/2.10.0/03-critic.md packages/generator/bundles/production-authoring-bundle.md
           git commit -m "fix(generator): make brittle quality heuristics non-blocking"
           git push origin HEAD:fix/relax-brittle-finisher-gates
