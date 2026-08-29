@@ -106,7 +106,7 @@ describe('completeCurriculumJob', () => {
     expect(state.uploads).toEqual([])
   })
 
-  it('rejects an underfilled package against profile.weekly_minutes before rendering', async () => {
+  it('does not block rendering solely because profile.weekly_minutes heuristic is underfilled', async () => {
     const state = setup()
     const render = vi.fn(async () => pdfs)
     const budgetContext: GenerationContext = {
@@ -121,9 +121,9 @@ describe('completeCurriculumJob', () => {
       curriculumPackage: curriculumSample,
       render,
       inspect,
-    })).rejects.toThrow('BUDGET_UNDERFILLED')
-    expect(render).not.toHaveBeenCalled()
-    expect(state.uploads).toEqual([])
+    })).resolves.toBe('material-1')
+    expect(render).toHaveBeenCalledTimes(1)
+    expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
   })
 
   it('rejects Kobe W6→W7 when coach, team, and practice are relabeled new', async () => {

@@ -26,8 +26,8 @@ sourceHashes:
   "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
   "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
   "packages/generator/prompts/2.10.0/01-plan.md": "9290b2d412dabd3a1fc4a96afa6d34a247219ccb9e083d1bb6596ef7c374fede"
-  "packages/generator/prompts/2.10.0/02-author.md": "6e0c8c4b85d261ef40187639f61ed1d14e139eb8362260b1317e559e94798bff"
-  "packages/generator/prompts/2.10.0/03-critic.md": "246a2bf5d41b1e3c116d5824b6b011a1541e213d9e8095aefe72494e550b0e32"
+  "packages/generator/prompts/2.10.0/02-author.md": "a57038ca6f6807fa78a5657c95439ce9b65a08caf1fd3fb710e27b735b2157d9"
+  "packages/generator/prompts/2.10.0/03-critic.md": "eeaa28caaebafb87a16e6e074963493488b0d261c91bfbdad8eceb52350056f1"
   "packages/generator/prompts/2.10.0/04-repair.md": "1f08a6b147926b374a4ca546ff919848b0b29c19881cd1b45d28aec8f055b5b3"
   "packages/generator/src/curriculum-package-schema.ts": "6ce3751c552fda9002b1ed34d019d6c0b6f07f5da1450c123c9b21c2baf91343"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
@@ -1247,7 +1247,7 @@ All reading comprehension and reading-based CAP assessment items must draw evide
   - Every CAP-governed assessment item must specify valid `evidenceAnchors` in its internal `cap-plan:<questionId>` check.
   - Every non-CAP reading-dependent assessment item (e.g. guided/independent reading comprehension, detail, inference) must specify a compact internal `evidence-plan:<questionId>` check in `qualityEvidence.criticalChecks` declaring `evidenceScope: "primary_reading"` and valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where `anchorText` occurs verbatim.
   - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
-- **Quote Verifiability**: Any quoted sentence or phrase appearing inside a question prompt must be verbatim present in the declared reading passage blocks.
+- **Quote Verifiability**: A quote explicitly attributed to the reading/passage/author must be verbatim present in the declared reading blocks. Constructed assessment stimuli (for example, `A student says, "..."`) are allowed and are judged by their evidence anchors rather than passage-string identity.
 
 ## 2. Modality Preservation & Textual Entailment
 
@@ -1259,7 +1259,7 @@ Preserve strict factual truth and epistemic modality across all question prompts
 
 Ensure strict alignment between vocabulary cards and authored text:
 - **Mandatory Reading Anchoring**: Every core vocabulary item with `status: 'new'` or `'extension'` must appear directly in the primary reading passage text.
-- **Ceiling & Target Integrity**: Never target an untaught, out-of-ceiling word with a context-clue or definition question unless adequate context clues are explicitly built into the primary reading text.
+- **Ceiling & Target Integrity**: Use learner-level judgment, context, and instructional value when deciding whether an unfamiliar word is acceptable or should be taught. The official 2000-word foundation is a planning reference, not a deterministic allowlist; ordinary inflections, derivations, compounds, transparent topic words, and natural domain language must not be treated as automatic defects merely because a fixed list or morphology heuristic misses them.
 - **Linguistic Richness**: Maintain level-appropriate sentence variety, cohesive conjunctions, and expressive phrasing suited to the learner's calibrated band.
 
 ## 7. Prompt 03: Critic Engine
@@ -1406,7 +1406,7 @@ Reject news-shaped prose that follows a source's headline, lead, framing, orderi
 
 Apply the complete inherited independent critic contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
 
-In addition to structural, CAP, grounding, and workload audits, the critic MUST independently evaluate and record substantive, non-empty verification evidence (minimum 30 characters each) across the following 5 critical quality dimensions:
+In addition to structural, CAP, grounding, and workload audits, the critic MUST independently evaluate and record specific, non-empty verification evidence across the following 5 critical quality dimensions. Do not pad evidence to satisfy a character count.
 
 ## 1. `evidence-boundary`
 Verify that all reading comprehension and reading-based CAP questions draw evidence strictly and exclusively from `studentLesson.reading.blocks`. Reject any item where the targeted sentence or example was located in an instruction box, tip note, or practice prompt.
@@ -1415,7 +1415,7 @@ Verify that all reading comprehension and reading-based CAP questions draw evide
 Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality. Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
 
 ## 3. `lexical-integrity`
-Verify that all new/extension core vocabulary items are anchored in the primary reading passage, that core vocabulary capacity was not wasted on trivial words while leaving hard words untaught, and that untaught above-ceiling words are not targeted in context-clue questions without textual clues.
+Verify lexical appropriateness holistically for this learner: core vocabulary should be useful, genuinely difficult words should receive enough support, and context-clue targets should have usable textual clues. Do not reject merely because a token is outside the official 2000-word list or because a deterministic inflection/derivation heuristic would fail to recognize it.
 
 ## 4. `task-topology`
 Verify cognitive mechanism diversity across practice questions. Reject question template collapse where multiple items reuse the same shallow reasoning mechanic or repetitive matching schema.
@@ -1424,7 +1424,7 @@ Verify cognitive mechanism diversity across practice questions. Reject question 
 Verify that language complexity, reading passage depth, and cognitive demand match the learner's diagnosed band. Reject artificial linguistic flattening or low-level D1/D2 confinement for advanced learners.
 
 ## Critic Acceptance & Recording Contract
-- **Passing Verification**: All five mandatory dimensions require a substantive (>= 30 characters) passing critical check (`passed: true`) in `qualityEvidence.criticalChecks` for final deterministic approval.
+- **Passing Verification**: All five mandatory dimensions require a specific, non-empty passing critical check (`passed: true`) in `qualityEvidence.criticalChecks` for final deterministic approval. No arbitrary character minimum applies.
 - **Defect Tracking**: When defects or quality failures are discovered during review, record them in `qualityEvidence.criticFindings` with appropriate severity (`'critical'` or `'warning'`).
 - **Post-Repair Re-Verification**: After a critical finding is repaired by the repair engine, the corresponding dimension must be re-verified with a passing critical check (`passed: true`), and the finding must document its `resolution`.
 - **Unresolved Findings Blocking**: Any unresolved critical finding (`severity: 'critical'` with missing/empty `resolution`) strictly blocks publication.

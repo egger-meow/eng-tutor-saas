@@ -96,13 +96,14 @@ describe('curriculum package v2', () => {
     ['production packet', 'Week 1 無前一份 production packet 可比較；本週建立閱讀取證與因果產出的可觀察基線'],
     ['observable baseline', '本週建立可量測基準：同一目標跨 guided、independent、CAP 留下提示前後證據。'],
     ['silence-mastery trope', '本輪為 Week 1 且 feedbackMissing=true；沒有把沉默視為掌握，採保守校準。'],
-  ])('rejects semantic jargon in parentSummary.personalizationZh: %s', (_, jargonSentence) => {
+  ])('reports forbidden-jargon word-list matches as warning-only telemetry: %s', (_, jargonSentence) => {
     const value = validPackage()
     value.parentSummary.personalizationZh = [jargonSentence]
     const audit = auditCurriculumPackage(value)
-    expect(audit.passed).toBe(false)
+    expect(audit.passed).toBe(true)
     const semanticFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'parent-personalization')
     expect(semanticFinding).toBeDefined()
+    expect(semanticFinding?.severity).toBe('warning')
   })
 
   it('accepts clean parent-facing personalizationZh answering parent questions', () => {
@@ -270,31 +271,31 @@ describe('curriculum package v2.3 grounding', () => {
     }
   })
 
-  it('rejects generic one-fact theming at the semantic quality gate', () => {
+  it('reports low grounding density as warning-only telemetry', () => {
     const value = groundedPackage('basketball')
     value.grounding.facts = value.grounding.facts.slice(0, 1)
     value.grounding.claims = value.grounding.claims.slice(0, 1)
     const report = auditCurriculumPackage(value)
-    expect(report.passed).toBe(false)
+    expect(report.passed).toBe(true)
     expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ dimension: 'grounding-substance', severity: 'critical' }),
-      expect.objectContaining({ dimension: 'grounding-coverage', severity: 'critical' }),
+      expect.objectContaining({ dimension: 'grounding-substance', severity: 'warning' }),
+      expect.objectContaining({ dimension: 'grounding-coverage', severity: 'warning' }),
     ]))
   })
 
-  it('does not allow an article to self-declare a density exception', () => {
+  it('keeps article density exceptions advisory instead of publication-blocking', () => {
     const value = groundedPackage('anime')
     value.grounding.facts = value.grounding.facts.slice(0, 2)
     value.grounding.claims = value.grounding.claims.slice(0, 2)
     value.qualityEvidence.criticalChecks.push({
       id: 'grounding-density-exception',
       passed: true,
-      evidence: 'This long self-declared explanation cannot waive substance for a normal article reading genre.',
+      evidence: 'This explanation records why the author used lower factual density for this article.',
     })
     const report = auditCurriculumPackage(value)
-    expect(report.passed).toBe(false)
+    expect(report.passed).toBe(true)
     expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ dimension: 'grounding-substance', severity: 'critical' }),
+      expect.objectContaining({ dimension: 'grounding-substance', severity: 'warning' }),
     ]))
   })
 

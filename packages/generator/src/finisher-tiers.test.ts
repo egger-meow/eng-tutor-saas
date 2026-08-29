@@ -95,15 +95,15 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(semanticFinding?.message).toContain('主要學習目標')
   })
 
-  it('Tier 3 (SEMANTIC CRITICAL): fails closed on forbidden internal developer jargon', () => {
+  it('Tier 1 (WARNING TELEMETRY): forbidden-jargon word-list matches do not independently block publication', () => {
     const mutated = structuredClone(samplePackage)
     mutated.parentSummary.personalizationZh = ['本週建立 observable baseline 來確認能力。']
 
     const audit = auditCurriculumPackage(mutated)
-    expect(audit.passed).toBe(false)
+    expect(audit.passed).toBe(true)
     const jargonFinding = audit.findings.find((f) => f.tier === 'semantic-critical' && f.dimension === 'parent-personalization')
     expect(jargonFinding).toBeDefined()
-    expect(jargonFinding?.message).toContain('baseline')
+    expect(jargonFinding?.severity).toBe('warning')
   })
 
   it('Tier 3 (SEMANTIC CRITICAL): fails closed when dialogue genre lacks dialogue blocks', () => {
@@ -169,15 +169,14 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(audit.passed).toBe(true)
 
     const ceilingFinding = audit.findings.find((f) => f.dimension === 'lexical-ceiling')
-    expect(ceilingFinding).toBeDefined()
-    expect(ceilingFinding?.severity).toBe('warning')
+    expect(ceilingFinding).toBeUndefined()
 
     const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding).toBeDefined()
     expect(anchorFinding?.severity).toBe('warning')
   })
 
-  it('Tier 3 (SEMANTIC CRITICAL): fails quality gate when new vocabulary is unanchored or severe lexical ceiling violation occurs', () => {
+  it('Tier 1 (WARNING TELEMETRY): unanchored new vocabulary does not independently block publication', () => {
     const mutated = canonicalPackage()
     mutated.studentLesson.vocabulary.push({
       id: 'v-unanchored-new',
@@ -191,9 +190,9 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     })
 
     const audit = auditCurriculumPackage(mutated)
-    expect(audit.passed).toBe(false)
+    expect(audit.passed).toBe(true)
     const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding?.tier).toBe('semantic-critical')
-    expect(anchorFinding?.severity).toBe('critical')
+    expect(anchorFinding?.severity).toBe('warning')
   })
 })

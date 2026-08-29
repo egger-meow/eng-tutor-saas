@@ -1503,6 +1503,8 @@ Do not blindly force all weekly words to come from a fixed list when a useful to
 
 A small number of useful extension words may be allowed when clearly identified.
 
+The official 1200 + 800 foundation is a planning and calibration reference, not a deterministic publication allowlist. A production packet must never fail solely because a natural token is absent from that list or because a finite morphology heuristic does not recognize an inflection, derivation, compound, or transparent topic word.
+
 ---
 
 # 63. Vocabulary Selection Principle
@@ -1542,10 +1544,9 @@ Except for necessary proper nouns:
 
 must not quietly introduce substantially harder unknown words that are not taught.
 
-If a difficult word is necessary:
+If a genuinely difficult word is necessary, the author should normally teach it, support it from context, or rewrite using simpler language.
 
-1. make it a core word;
-2. or rewrite using simpler language.
+This is a semantic curriculum objective, not a fixed-list Finisher gate. Deterministic validation must not reject material solely on 2000-word-list membership, token frequency thresholds, morphology guesses, or fixed counts of off-list words. The independent author/critic pair owns the judgment of whether hidden vocabulary actually makes the packet too difficult for the learner.
 
 ---
 
@@ -1568,6 +1569,8 @@ For any possibly unfamiliar non-core word:
 This requirement prevents the common AI worksheet failure:
 
 > supposedly teaching 10 words while secretly requiring 25 more.
+
+Validation should therefore prioritize semantic author/critic judgment over brittle token allowlists. Deterministic lexical heuristics may be used for diagnostics, regression investigation, or non-blocking telemetry, but they must not become publication gates unless they prove an objective integrity error rather than approximate language difficulty.
 
 ---
 
@@ -3708,7 +3711,7 @@ Automated or semi-automated validation should eventually check:
 * answer key covers all answerable questions;
 * declared core vocabulary count reasonable;
 * vocabulary appears in expected places;
-* no obvious hidden hard vocabulary;
+* semantic review finds no material hidden-vocabulary burden for the learner; deterministic 2000-word membership is not a publish gate;
 * grammar focus matches selected topic;
 * PDF renders successfully;
 * Homework exists;
@@ -3949,7 +3952,7 @@ For an eligible child:
 11. metadata records generation version.
 12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance.
 13. fast-moving interests actively inspect recent developments and prefer a strong current angle when it improves the target, while preserving a defensible evergreen fallback.
-14. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, or lexical/workload gates.
+14. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, semantic lexical review, or workload gates.
 15. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
 
 ---
@@ -4173,7 +4176,7 @@ For weekly-material work specifically:
 5. Read recent feedback.
 6. Avoid theme repetition.
 7. Choose meaningful vocabulary.
-8. Keep hidden vocabulary difficulty controlled.
+8. Keep hidden vocabulary difficulty controlled through learner-aware author/critic judgment; do not use fixed word-list membership or finite morphology rules as publication gates.
 9. Use natural language.
 10. Include CAP-style reading thinking.
 11. Explain grammar for self-study.
@@ -4188,13 +4191,14 @@ For weekly-material work specifically:
 20. Scheduled Work plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
 21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
 22. Prefer a strong, reliable, age-appropriate, lexically feasible current angle only when it serves the learning target equally well or better. Do not force current; preserve an explainable evergreen fallback when recent candidates are weak, unsafe, too complex, factually thin, copyright-dependent, or pedagogically inferior.
-23. Current selection never relaxes source quality, factual density, original synthesis, lexical ceiling, grammar, CAP relevance, answer entailment, workload, copyright, or personalization gates.
+23. Current selection never relaxes source quality, factual density, original synthesis, semantic lexical appropriateness, grammar, CAP relevance, answer entailment, workload, copyright, or personalization review.
 24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and Claim/Submit/Finisher boundaries.
 25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 26. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP references before writing the item, then anchor, blend, or calibrate a novel design that meets or exceeds the CAP quality floor without requiring structural imitation.
 27. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
 28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
 29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, or cognitive-depth/shallow-assessment failures. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition and targeted repair.
+30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation.
 
 ---
 
