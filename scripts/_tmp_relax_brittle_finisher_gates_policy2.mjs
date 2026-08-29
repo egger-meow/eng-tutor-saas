@@ -16,11 +16,10 @@ function replaceItBlock(content, title, newBlock) {
   const startMarker = `  it('${title}', () => {`
   const start = content.indexOf(startMarker)
   if (start < 0) throw new Error(`Missing test block: ${title}`)
-  const nextIt = content.indexOf('\n  it(', start + startMarker.length)
-  const nextEach = content.indexOf('\n  it.each(', start + startMarker.length)
-  const candidates = [nextIt, nextEach].filter((v) => v >= 0)
-  const end = candidates.length > 0 ? Math.min(...candidates) : content.indexOf('\n})', start + startMarker.length)
-  if (end < 0) throw new Error(`Cannot find end of test block: ${title}`)
+  const closeMarker = '\n  })'
+  const close = content.indexOf(closeMarker, start + startMarker.length)
+  if (close < 0) throw new Error(`Cannot find close of test block: ${title}`)
+  const end = close + closeMarker.length
   return content.slice(0, start) + newBlock + content.slice(end)
 }
 
