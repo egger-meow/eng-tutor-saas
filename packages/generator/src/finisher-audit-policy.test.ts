@@ -9,8 +9,33 @@ function report(findings: CurriculumAuditReport['findings']): CurriculumAuditRep
   }
 }
 
+const explicitLexicalRecallPackage = {
+  studentLesson: {
+    practice: [
+      {
+        stage: 'independent',
+        questions: [{ id: 'I3', itemType: 'context-clue' }],
+      },
+    ],
+  },
+  qualityEvidence: {
+    criticalChecks: [
+      {
+        id: 'cap-plan:I3',
+        passed: true,
+        evidence: JSON.stringify({
+          learningObjective: 'Infer the contextual meaning of isolate from the reading.',
+          primarySkill: 'vocabulary_in_context',
+          targetCognitiveDepth: 'D1_verbatim_retrieval',
+          intentionalRecall: true,
+        }),
+      },
+    ],
+  },
+}
+
 describe('Finisher audit authority boundary', () => {
-  it('keeps Critic bookkeeping and semantic recall classification advisory', () => {
+  it('keeps Critic bookkeeping and proven lexical recall classification advisory', () => {
     const result = applyFinisherAuditPolicy(report([
       {
         tier: 'semantic-critical',
@@ -30,10 +55,27 @@ describe('Finisher audit authority boundary', () => {
         severity: 'critical',
         message: 'CAP_RECALL_EXEMPTION_INVALID:I3: lexical retrieval classification mismatch',
       },
-    ]))
+    ]), explicitLexicalRecallPackage)
 
     expect(result.passed).toBe(true)
     expect(result.findings.every((finding) => finding.severity === 'warning')).toBe(true)
+  })
+
+  it('still hard-fails a recall exemption without package evidence proving lexical or grammar retrieval', () => {
+    const result = applyFinisherAuditPolicy(report([
+      {
+        tier: 'semantic-critical',
+        dimension: 'cap-precedent-floor',
+        severity: 'critical',
+        message: 'CAP_RECALL_EXEMPTION_INVALID:I3: unsupported exemption',
+      },
+    ]), {
+      studentLesson: { practice: [{ stage: 'independent', questions: [{ id: 'I3', itemType: 'inference' }] }] },
+      qualityEvidence: { criticalChecks: [] },
+    })
+
+    expect(result.passed).toBe(false)
+    expect(result.findings[0]?.severity).toBe('critical')
   })
 
   it('still hard-fails objective CAP provenance and evidence integrity', () => {
