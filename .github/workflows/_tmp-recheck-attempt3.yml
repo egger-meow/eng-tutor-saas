@@ -1,0 +1,73 @@
+name: One-shot recheck attempt 3
+
+on:
+  push:
+    branches:
+      - fix/relax-brittle-finisher-gates
+    paths:
+      - .github/workflows/_tmp-recheck-attempt3.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curriculum-submission-finisher
+  cancel-in-progress: false
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Cache Traditional Chinese PDF fonts
+        id: cache-fonts
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fonts-noto-cjk
+          key: fonts-noto-cjk-v1-${{ runner.os }}
+      - name: Install or restore Traditional Chinese PDF fonts
+        run: |
+          if [ "${{ steps.cache-fonts.outputs.cache-hit }}" = "true" ]; then
+            sudo mkdir -p /usr/share/fonts/opentype/noto
+            sudo cp -r ~/.cache/fonts-noto-cjk/* /usr/share/fonts/opentype/noto/
+            sudo fc-cache -f
+          else
+            sudo apt-get update
+            sudo apt-get install -y fonts-noto-cjk
+            mkdir -p ~/.cache/fonts-noto-cjk
+            cp -r /usr/share/fonts/opentype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
+            if [ -d /usr/share/fonts/truetype/noto ]; then
+              cp -r /usr/share/fonts/truetype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
+            fi
+          fi
+      - name: Cache Playwright Chromium
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright Chromium
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: pnpm --filter @paper-english/pdf pdf:install
+      - name: Validate required worker secrets
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$SUPABASE_URL" || { echo 'SUPABASE_URL is missing'; exit 1; }
+          test -n "$SUPABASE_SECRET_KEY" || { echo 'SUPABASE_SECRET_KEY is missing'; exit 1; }
+      - name: Recheck existing curriculum submission only
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: pnpm worker process-submissions --processor github-actions-finisher --limit 15
