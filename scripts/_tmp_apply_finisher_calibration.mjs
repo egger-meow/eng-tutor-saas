@@ -34,7 +34,7 @@ const PASSAGE_QUOTE_ATTRIBUTION = /(?:\\b(?:according to|from)\\s+(?:the\\s+)?(?
 
 /**
  * Quote-verbatim checking is defense-in-depth for text attributed to the passage.
- * Constructed claims (for example, `A student says, "..."`) are assessment stimuli,
+ * Constructed claims such as A student says, "..." are assessment stimuli,
  * not passage quotations; their correctness is governed by canonical evidence anchors.
  */
 function quoteClaimsPassageSource(prompt: string, rawQuoted: string): boolean {
