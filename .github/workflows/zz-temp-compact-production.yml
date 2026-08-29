@@ -1,0 +1,286 @@
+name: Temporary Prompt 2.11 Materializer
+
+on:
+  push:
+    branches:
+      - fix/grounding-attribution-integrity
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ !contains(github.event.head_commit.message, '[compact-materialized]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Patch consolidated runtime contract
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          # ---- bundle compiler ----
+          path = 'packages/generator/src/bundle-compiler.ts'
+          text = read(path)
+
+          frozen_2100 = """export const FROZEN_2100_FILES = [
+            'packages/generator/prompts/2.10.0/01-plan.md',
+            'packages/generator/prompts/2.10.0/02-author.md',
+            'packages/generator/prompts/2.10.0/03-critic.md',
+            'packages/generator/prompts/2.10.0/04-repair.md',
+          ] as const
+          """
+          frozen_2101 = """
+          export const FROZEN_2101_FILES = [
+            'packages/generator/prompts/2.10.1/01-plan.md',
+            'packages/generator/prompts/2.10.1/02-author.md',
+            'packages/generator/prompts/2.10.1/03-critic.md',
+            'packages/generator/prompts/2.10.1/04-repair.md',
+          ] as const
+          """
+          if 'FROZEN_2101_FILES' not in text:
+              assert frozen_2100 in text
+              text = text.replace(frozen_2100, frozen_2100 + frozen_2101)
+
+          new_sources = """export const SOURCE_FILES = [
+            'packages/generator/prompts/2.11.0/01-plan.md',
+            'packages/generator/prompts/2.11.0/02-author.md',
+            'packages/generator/prompts/2.11.0/03-critic.md',
+            'packages/generator/prompts/2.11.0/04-repair.md',
+            'packages/generator/src/curriculum-package-schema.ts',
+            'packages/generator/quality-profiles/default.md',
+            'packages/generator/quality-profiles/gemini-3.7-flash.md',
+            'docs/curriculum-quality-rubric.md',
+            'docs/product-rules.md',
+            'packages/generator/curriculum/cap-precedent-contract.md',
+            'packages/generator/src/cap-assessment-plan-contract.ts',
+            'packages/generator/curriculum/cap-precedent-cards.json',
+            'packages/generator/curriculum/cap-precedent-routing-index.json',
+          ] as const"""
+          text, n = re.subn(r"export const SOURCE_FILES = \[[\s\S]*?\n\] as const", new_sources, text, count=1)
+          assert n == 1
+
+          direct_stage = """  const readPromptStage = async (fileName: string) => {
+            const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+            return `${stage.trim()}\\n`
+          }
+          const plan ="""
+          text, n = re.subn(
+              r"  const readPromptStage = async \(fileName: string\) => \{[\s\S]*?\n  \}\n  const plan =",
+              direct_stage,
+              text,
+              count=1,
+          )
+          assert n == 1
+
+          marker = "export async function computeFrozen230Hashes"
+          if 'computeFrozen2101Hashes' not in text:
+              assert marker in text
+              fn = """export async function computeFrozen2101Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+            const hashes: Record<string, string> = {}
+            for (const relativePath of FROZEN_2101_FILES) {
+              const fullPath = resolve(repoRoot, relativePath)
+              const content = await readFile(fullPath, 'utf8')
+              hashes[relativePath] = createHash('sha256').update(content.replace(/\\r\\n/g, '\\n')).digest('hex')
+            }
+            return hashes
+          }
+
+          """
+              text = text.replace(marker, fn + marker)
+
+          text = text.replace("bundleVersion: '2.10.1-prod'", "bundleVersion: '2.11.0-prod'")
+          text = text.replace("promptVersion: '2.10.1'", "promptVersion: '2.11.0'")
+          assert "bundleVersion: '2.11.0-prod'" in text
+          assert "promptVersion: '2.11.0'" in text
+          assert 'groundingOverlay' not in text
+          write(path, text)
+
+          # ---- bundle compiler regression ----
+          path = 'packages/generator/src/bundle-compiler.test.ts'
+          text = read(path)
+          text = text.replace('  computeFrozen2100Hashes,\n', '  computeFrozen2100Hashes,\n  computeFrozen2101Hashes,\n')
+          start = text.index("  it('generates a deterministic production bundle with matching source hashes and no drift'")
+          end = text.index("\n\n  it('embeds the exact machine-readable CAP assessment-plan contract'", start)
+          new_test = """  it('generates a compact deterministic 2.11.0 production bundle with no historical overlay sediment', async () => {
+            const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
+            const existingBundle = await readFile(bundlePath, 'utf8')
+            const freshBundle = await compileProductionBundle(REPO_ROOT)
+
+            expect(freshBundle.content.replace(/\\r\\n/g, '\\n')).toBe(existingBundle.replace(/\\r\\n/g, '\\n'))
+            expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
+            expect(freshBundle.metadata.promptVersion).toBe('2.11.0')
+            expect(freshBundle.metadata.bundleVersion).toBe('2.11.0-prod')
+            expect(freshBundle.metadata.engineVersion).toBe('1.6.0')
+            expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
+            expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/01-plan.md')
+            expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/03-critic.md')
+            expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.4.0/01-plan.md')
+            expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.10.1/03-critic.md')
+            expect(freshBundle.content).toContain('Source -> Fact -> Claim')
+            expect(freshBundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
+            expect(freshBundle.content).toContain('A source being broadly about the same product or organization is not enough')
+            expect(freshBundle.content).toContain('CAP is the quality floor, not a mold')
+            expect(freshBundle.content).toContain('responseLayout')
+            expect(freshBundle.content).toContain('### Canonical CAP Assessment Plan Contract')
+            expect(freshBundle.content).not.toContain('Prompt 01 Overlay:')
+            expect(freshBundle.content).not.toContain('Prompt 03 Overlay:')
+            expect(freshBundle.content).not.toContain('Require ≥7 genuinely new lexical units')
+            expect(freshBundle.content).not.toContain('Curriculum Version 2.2.0, Prompt Version 2.4.0')
+            expect(freshBundle.content).not.toContain('copyGuardHashes')
+          })"""
+          text = text[:start] + new_test + text[end:]
+
+          frozen_test = """
+
+          it('verifies that prompts/2.10.1 final overlay remains byte-for-byte frozen after consolidation', async () => {
+            expect(await computeFrozen2101Hashes(REPO_ROOT)).toEqual({
+              'packages/generator/prompts/2.10.1/01-plan.md': '6059eacfbda5ddd37fd398220538e6f86111d9366f1679b935a40e67dae63e68',
+              'packages/generator/prompts/2.10.1/02-author.md': '2b8b74e0f9ba840e7037089083aad6f07bff50c9c52c4dc05ef0a91ba7629d4a',
+              'packages/generator/prompts/2.10.1/03-critic.md': '2027d1291f7caa3df9c5b0062f42c573a2eab5a131320e13ecaa0d420810d7fd',
+              'packages/generator/prompts/2.10.1/04-repair.md': '38e3b5080c44d76531f9948ecf71d6fc4d606a580e3490672c8b1ef6d7ee4941',
+            })
+          })
+          """
+          if 'final overlay remains byte-for-byte frozen after consolidation' not in text:
+              pos = text.rfind('\n})')
+              assert pos > 0
+              text = text[:pos] + frozen_test + text[pos:]
+          write(path, text)
+
+          # ---- pedagogy active contract ----
+          path = 'packages/generator/src/pedagogy-contract.test.ts'
+          text = read(path)
+          text = text.replace(
+              "describe('Prompt 2.10.1 active invariant contract with frozen 2.4.0 through 2.8.0 and 2.10.0 inheritance', () => {",
+              "describe('Prompt 2.11.0 consolidated active invariant contract with frozen historical provenance', () => {",
+          )
+          text = text.replace('bundleVersion: "2.10.1-prod"', 'bundleVersion: "2.11.0-prod"')
+          text = text.replace('engineVersion: "1.5.0"', 'engineVersion: "1.6.0"')
+
+          active_test = """
+            it('keeps the active production prompt compact while covering the generalized exact-attribution hole', async () => {
+              const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/01-plan.md'), 'utf8')
+              const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/02-author.md'), 'utf8')
+              const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/03-critic.md'), 'utf8')
+              const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/04-repair.md'), 'utf8')
+
+              for (const stage of [plan, author, critic, repair]) {
+                expect(stage).toContain('2.11.0')
+                expect(stage).not.toContain('Apply the complete inherited')
+              }
+              expect(plan).toContain('explicit learner/profile/parent feedback')
+              expect(plan).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
+              expect(author).toContain('Do not fuse mode A')
+              expect(critic).toContain('Broad topical relevance is insufficient')
+              expect(critic).toContain('one mode’s limit to another mode’s workflow')
+              expect(repair).toContain('source/fact -> claim -> exact reading prose -> dependent instruction/question -> dependent answer/rationale')
+              expect(critic).not.toContain('Require ≥7 genuinely new lexical units')
+            })
+          """
+          if 'generalized exact-attribution hole' not in text:
+              needle = "describe('Prompt 2.11.0 consolidated active invariant contract with frozen historical provenance', () => {\n"
+              assert needle in text
+              text = text.replace(needle, needle + active_test, 1)
+          write(path, text)
+
+          # ---- canonical SPEC updates ----
+          path = 'docs/SPEC.md'
+          text = read(path)
+
+          sec61_insert = """
+          Named-entity factual accuracy is relationship-specific. For claims about a named product, organization, model, version, mode, feature, API, policy, mechanism, or similarly scoped entity, semantic Author/Critic review must verify `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`. Broad topical relevance does not establish that binding, and separately true fragments from different modes/features must never be fused into a false relationship. This is a semantic grounding responsibility, not a deterministic product-keyword validator.
+          """
+          if 'Named-entity factual accuracy is relationship-specific.' not in text:
+              marker = '\n# 62. Vocabulary Source'
+              assert marker in text
+              text = text.replace(marker, sec61_insert + marker, 1)
+
+          text, n = re.subn(
+              r"New production authoring uses Engine 1\.5\.0, schema 2\.4\.0, and prompt 2\.10\.1\.[^\n]*",
+              "New production authoring uses Engine 1.6.0, Schema 2.4.0, and Prompt 2.11.0. Prompt 2.11.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.",
+              text,
+              count=1,
+          )
+          assert n == 1
+
+          audit_bullet = "* required grounding accuracy and copyright critical checks pass."
+          exact_bullet = "\n* semantic grounding accuracy verifies exact named-entity/version/mode capability and control-flow bindings, rejecting feature/mode fusion and unsupported composite attribution even when the sources are broadly topical."
+          if 'semantic grounding accuracy verifies exact named-entity/version/mode capability' not in text:
+              assert audit_bullet in text
+              text = text.replace(audit_bullet, audit_bullet + exact_bullet, 1)
+
+          item30 = "30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation."
+          additions = """
+          31. Grounding review for named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, and similar scoped entities must verify the exact relationship `entity/version/mode -> capability/behavior -> control flow/condition/limit/qualifier`. Reject semantic feature fusion or compositional attribution; do not implement product-specific deterministic keyword rules as a substitute for Critic judgment.
+          32. Prompt 2.11.0 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
+          """
+          if '32. Prompt 2.11.0 is a consolidated production baseline.' not in text:
+              assert item30 in text
+              text = text.replace(item30, item30 + additions, 1)
+          write(path, text)
+
+          # ---- current release smoke truth ----
+          path = 'supabase/tests/smoke.sql'
+          text = read(path)
+          assert 'rel_1.5.1' in text
+          text = text.replace('rel_1.5.1', 'rel_1.6.0')
+          write(path, text)
+          PY
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compile production bundle
+        run: pnpm compile:bundle
+
+      - name: Targeted regressions
+        run: pnpm exec vitest run packages/generator/src/bundle-compiler.test.ts packages/generator/src/pedagogy-contract.test.ts
+
+      - name: Confirm compact bundle shape
+        shell: bash
+        run: |
+          grep -q 'bundleVersion: "2.11.0-prod"' packages/generator/bundles/production-authoring-bundle.md
+          grep -q 'promptVersion: "2.11.0"' packages/generator/bundles/production-authoring-bundle.md
+          grep -q 'engineVersion: "1.6.0"' packages/generator/bundles/production-authoring-bundle.md
+          grep -q 'exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier' packages/generator/bundles/production-authoring-bundle.md
+          ! grep -q 'Prompt 01 Overlay:' packages/generator/bundles/production-authoring-bundle.md
+          ! grep -q 'Prompt 03 Overlay:' packages/generator/bundles/production-authoring-bundle.md
+
+      - name: Commit materialized artifacts
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No materialized changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/generator/src/bundle-compiler.ts \
+                  packages/generator/src/bundle-compiler.test.ts \
+                  packages/generator/src/pedagogy-contract.test.ts \
+                  packages/generator/bundles/production-authoring-bundle.md \
+                  docs/SPEC.md \
+                  supabase/tests/smoke.sql
+          git commit -m 'feat(generator): materialize consolidated prompt 2.11.0 [compact-materialized]'
+          git push
