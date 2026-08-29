@@ -6,6 +6,7 @@ on:
       - fix/relax-brittle-finisher-gates
     paths:
       - scripts/_tmp_relax_brittle_finisher_gates.mjs
+      - .github/workflows/_tmp-relax-brittle-finisher-gates.yml
 
 permissions:
   contents: write
