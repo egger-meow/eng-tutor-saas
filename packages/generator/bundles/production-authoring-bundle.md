@@ -30,7 +30,7 @@ sourceHashes:
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "4dc0dbaa56f410ddbf283facab201b07b9843e6205c0710234636d474bb4170f"
   "docs/product-rules.md": "7d91b8ba65200d6af4f8c4be16e4d819d26008a2e8f13d9c4f8c70c0c036338b"
-  "packages/generator/curriculum/cap-precedent-contract.md": "8a36f81329e4cda58d2fc08a81a7984902cd65d8cdd19f7c87c3420fdcc5de02"
+  "packages/generator/curriculum/cap-precedent-contract.md": "036ad256be8d16ab98776a1d5e30770154265247535c6b1b3e5315da6bf27e6b"
   "packages/generator/src/cap-assessment-plan-contract.ts": "4b0e2fb13e9311d21a90088acae0a6d3955e3f22dc8bfafc14121988ccbc1d83"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
   "packages/generator/curriculum/cap-precedent-routing-index.json": "eca426ee315000a72d977d297384e29855c087f7950f9537f6af5e4dbd5a3773"
@@ -145,11 +145,11 @@ Consult authoritative non-holdout knowledge first. **CAP is the floor, not the m
 
 ## Retrieval and plan
 
-Route 195 cards by skill **or** structural relevance: reasoning, depth, evidence, genre, or distractors. Read only 1–2 same-SHA shards; never raw history, PDFs, holdouts, or full runtime. Vary strong ties deterministically and softly down-rank recent refs/mechanics when supplied. Quality outranks diversity; no quotas.
+Route by skill or structural relevance. Read only selected same-SHA shards; never raw sources or holdouts. Quality outranks diversity.
 
 Every governed `cap-plan:<questionId>` matches the machine contract below. Aliases are invalid.
 
-Modes may change structure. Package refs equal item refs. Relevant CAP requires refs or `noPrecedentReason`. Recall is only vocabulary/grammar outside CAP transfer. A1/A2 may retain D2/D3 reasoning.
+Modes may change structure. Package refs equal item refs. Relevant CAP requires `precedentRefs`. Only when no relevant authoritative precedent exists may refs be empty, and then a specific `noPrecedentReason` is required. Recall is only vocabulary/grammar outside CAP transfer. A1/A2 may retain D2/D3 reasoning.
 
 ## Quality, critic, and provenance
 

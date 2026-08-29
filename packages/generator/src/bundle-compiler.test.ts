@@ -45,6 +45,7 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).toContain('mechanically repetitive')
     expect(freshBundle.content).toContain('pedagogically justified')
     expect(freshBundle.content).toContain('A1/A2 may retain D2/D3 reasoning')
+    expect(freshBundle.content).toContain('Relevant CAP requires `precedentRefs`. Only when no relevant authoritative precedent exists may refs be empty')
     expect(freshBundle.content).toContain('cap-precedent-shards')
     expect(freshBundle.content).not.toContain('copyGuardHashes')
   })
