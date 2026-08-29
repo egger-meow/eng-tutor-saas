@@ -738,6 +738,53 @@ export const curriculumStyles = `
     height: 8.5mm;
   }
 
+  /* Response Organizer Table */
+  .response-organizer-container {
+    margin-top: 3mm;
+    margin-bottom: 2mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .response-organizer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    background: #ffffff;
+    border: 1.5px solid #8c8275;
+  }
+
+  .response-organizer-table th {
+    background: #f2eee8;
+    color: #173e37;
+    font-weight: 700;
+    text-align: center;
+    padding: 2mm 2.5mm;
+    border: 1px solid #b8aea1;
+  }
+
+  .response-organizer-table td {
+    border: 1px solid #b8aea1;
+    padding: 2mm 2.5mm;
+    min-height: 9mm;
+    height: 9mm;
+    vertical-align: middle;
+  }
+
+  .response-organizer-table td.organizer-row-label {
+    background: #faf8f5;
+    font-weight: 600;
+    color: #282420;
+    width: 25%;
+    text-align: left;
+  }
+
+  .response-organizer-table td.organizer-cell {
+    background: #ffffff;
+    min-height: 10mm;
+    height: 10mm;
+  }
+
   /* Self-Check Checklist */
   .selfcheck-section {
     margin: 6mm 0 5mm;
@@ -821,13 +868,29 @@ export const curriculumStyles = `
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 1mm;
+    margin-bottom: 1.5mm;
+    gap: 2mm;
+  }
+
+  .answer-qid-row {
+    display: flex;
+    align-items: baseline;
+    gap: 2mm;
+    flex-wrap: wrap;
   }
 
   .answer-qid {
     font-weight: 800;
     color: #765d42;
-    font-size: 9pt;
+    font-size: 9.5pt;
+    flex-shrink: 0;
+  }
+
+  .answer-question-context {
+    font-size: 8.5pt;
+    color: #5c564e;
+    font-weight: 500;
+    line-height: 1.35;
   }
 
   .answer-key {

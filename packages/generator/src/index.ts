@@ -51,6 +51,9 @@ export {
   AdaptiveExtensionSchema,
   AdaptiveExtensionPurposeSchema,
   AdaptiveExtensionPlacementSchema,
+  QuestionSchema,
+  ResponseLayoutSchema,
+  ResponseLayoutRowSchema,
 } from './curriculum-package-schema.js'
 export type {
   CurriculumPackage,
@@ -59,6 +62,8 @@ export type {
   CurriculumPackageV21,
   CurriculumPackageV20,
   CurriculumQuestion,
+  ResponseLayout,
+  ResponseLayoutRow,
   ReadingBlock,
   ReadingGenre,
   AdaptiveExtension,

@@ -34,11 +34,47 @@ function renderWritingLines(count: number): string {
 </div>`
 }
 
+function renderOrganizerTable(layout: NonNullable<CurriculumQuestion['responseLayout']>): string {
+  if (layout.type === 'lines') {
+    return renderWritingLines(layout.lineCount ?? 0)
+  }
+
+  const headerCells = layout.headers.map((hText) => `<th>${h(hText)}</th>`).join('')
+  const rowsHtml = layout.rows.map((row) => {
+    const labelCell = row.label ? `<td class="organizer-row-label">${h(row.label)}</td>` : ''
+    const valueCellsCount = row.label ? Math.max(1, layout.headers.length - 1) : layout.headers.length
+    const cells = Array.from({ length: valueCellsCount }, (_, idx) => {
+      const val = row.values && row.values[idx] ? h(row.values[idx]!) : ''
+      return `<td class="organizer-cell">${val}</td>`
+    }).join('')
+    return `<tr>${labelCell}${cells}</tr>`
+  }).join('\n')
+
+  return `<div class="response-organizer-container">
+  <table class="response-organizer-table">
+    <thead>
+      <tr>${headerCells}</tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+</div>`
+}
+
 export function renderQuestionCard(question: CurriculumQuestion): string {
   const optionsHtml = question.options && question.options.length > 0
     ? renderOptions(question.options)
     : ''
-  const linesHtml = renderWritingLines(question.writingLines)
+
+  let responseHtml = ''
+  if (question.responseLayout && (question.responseLayout.type === 'table' || question.responseLayout.type === 'organizer')) {
+    responseHtml = renderOrganizerTable(question.responseLayout)
+  } else if (question.responseLayout && question.responseLayout.type === 'lines') {
+    responseHtml = renderWritingLines(question.responseLayout.lineCount ?? question.writingLines)
+  } else {
+    responseHtml = renderWritingLines(question.writingLines)
+  }
 
   return `<article class="question-card">
   <div class="question-header">
@@ -46,6 +82,6 @@ export function renderQuestionCard(question: CurriculumQuestion): string {
   </div>
   <p class="question-prompt">${h(question.prompt)}</p>
   ${optionsHtml}
-  ${linesHtml}
+  ${responseHtml}
 </article>`
 }

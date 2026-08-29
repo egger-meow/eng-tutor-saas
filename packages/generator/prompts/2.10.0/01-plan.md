@@ -26,3 +26,9 @@ Plan varied assessment mechanisms across practice sections:
 Explicitly assign and constrain the evidence scope for every planned assessment item:
 - Items assessing reading comprehension or reading-based CAP transfer must be designated with `evidenceScope: "primary_reading"`.
 - Never plan reading comprehension questions that rely on instruction headers, vocabulary definitions, or external background knowledge as reading evidence.
+
+## 5. Structured Response Layout Planning
+
+When planning comparison tasks, multi-variable organizers, or multi-dimensional synthesis questions:
+- Explicitly plan a structured table/organizer layout (`responseLayout: { type: "table" | "organizer", headers: [...], rows: [...] }`) instead of generic writing lines whenever the task asks the learner to organize findings into categories, rows, or tables.
+

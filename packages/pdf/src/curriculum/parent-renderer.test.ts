@@ -34,9 +34,49 @@ describe('parent-renderer', () => {
       vocabulary: [],
       reading: { title: 'One Change at a Time', contextZh: '情境', paragraphs: ['Text'], wordCount: 4, readingTipsZh: ['提示'], sourceNote: null },
       instruction: [],
-      practice: [],
+      practice: [
+        {
+          id: 'practice-1',
+          titleZh: '閱讀理解',
+          instructionEn: 'Read and answer.',
+          questions: [
+            {
+              id: 'Q1',
+              targetIds: ['target-1'],
+              itemType: 'detail',
+              prompt: 'What did Mina build for the school library?',
+              writingLines: 2,
+              difficulty: 'on-level',
+            },
+          ],
+        },
+      ],
       selfCheckZh: ['檢查'],
       homework: { purposeZh: '作業', estimatedMinutes: 10, questions: [] },
+    },
+    grounding: {
+      sources: [
+        {
+          id: 'src-1',
+          title: 'Musical Instruments Guide',
+          publisher: 'Yamaha Musical Instrument Guide',
+          url: 'https://example.com/guitar-strings',
+          retrievedAt: '2026-08-20T00:00:00Z',
+          reliabilityTier: 'primary_authority',
+          summary: 'How strings vibrate',
+        },
+        {
+          id: 'src-2',
+          title: 'University Physics',
+          publisher: 'OpenStax',
+          url: 'https://example.com/physics',
+          retrievedAt: '2026-08-20T00:00:00Z',
+          reliabilityTier: 'primary_authority',
+          summary: 'Sound wave physics',
+        },
+      ],
+      facts: [],
+      claims: [],
     },
     parentSummary: {
       focusZh: '推論證據與 do / does',
@@ -65,11 +105,22 @@ describe('parent-renderer', () => {
     expect(html).toContain('是否能自己指出證據')
     expect(html).toContain('確認每一題都有作答即可')
     expect(html).toContain('class="answer-card"')
-    expect(html).toContain('class="answer-qid">Q1</div>')
+    expect(html).toContain('class="answer-qid">Q1</span>')
+    expect(html).toContain('class="answer-question-context">— What did Mina build for the school library?</span>')
     expect(html).toContain('<strong>答案：</strong>A robot.</div>')
     expect(html).toContain('<strong>也可接受：</strong>The robot；A book sorting robot</div>')
     expect(html).toContain('<strong>簡短理由：</strong>文章第一段明確提到')
     expect(html).toContain('<strong>常見誤區：</strong>容易誤選 Jay')
+  })
+
+  it('renders clean parent-facing source attribution without leaking internal provenance or URLs', () => {
+    const html = renderCurriculumParentAnswerHtml(samplePkg)
+    expect(html).toContain('本週內容參考：')
+    expect(html).toContain('Yamaha Musical Instrument Guide、OpenStax')
+    expect(html).not.toContain('src-1')
+    expect(html).not.toContain('src-2')
+    expect(html).not.toContain('https://example.com')
+    expect(html).not.toContain('primary_authority')
   })
 
   it('never assigns heavy teacher burden or displays internal student tracking hypotheses', () => {

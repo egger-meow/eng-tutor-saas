@@ -25,11 +25,11 @@ sourceHashes:
   "packages/generator/prompts/2.8.0/02-author.md": "b2c72237b77a437747107818483ac3fa5e5ec08748d4a91aae1ef69118a229f1"
   "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
   "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
-  "packages/generator/prompts/2.10.0/01-plan.md": "9290b2d412dabd3a1fc4a96afa6d34a247219ccb9e083d1bb6596ef7c374fede"
-  "packages/generator/prompts/2.10.0/02-author.md": "a57038ca6f6807fa78a5657c95439ce9b65a08caf1fd3fb710e27b735b2157d9"
-  "packages/generator/prompts/2.10.0/03-critic.md": "eeaa28caaebafb87a16e6e074963493488b0d261c91bfbdad8eceb52350056f1"
-  "packages/generator/prompts/2.10.0/04-repair.md": "1f08a6b147926b374a4ca546ff919848b0b29c19881cd1b45d28aec8f055b5b3"
-  "packages/generator/src/curriculum-package-schema.ts": "6ce3751c552fda9002b1ed34d019d6c0b6f07f5da1450c123c9b21c2baf91343"
+  "packages/generator/prompts/2.10.0/01-plan.md": "00e31eb3b577625f48f6af954159b0e532d9f928dbf3ce35d1f03ed714f368ae"
+  "packages/generator/prompts/2.10.0/02-author.md": "2234939fdd48d4b75c6eb966917186fdc4c3fbf3a4042d5bf680f63a7917aade"
+  "packages/generator/prompts/2.10.0/03-critic.md": "6b893fbe7701d12d785594caf5f8ecb15abac8889e872a06937e2a10015d3d4b"
+  "packages/generator/prompts/2.10.0/04-repair.md": "71bc67542e14481eaf69bb074fdf5a55565f7c9f36fdaa542045d343f96046f3"
+  "packages/generator/src/curriculum-package-schema.ts": "95a1a643ace940c410cf5225a4672eea9b0ed0e7b116c780245ea5cf949c702d"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "fc9c9bdabc6cb1c7f9640310f9b4b4da974d4c27a3bacf7059783f2d9c5dfc69"
@@ -298,7 +298,33 @@ const Text = z.string().trim().min(1)
 const StableId = Text.regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/, 'Must be a stable identifier')
 const Evidence = z.strictObject({ source: z.enum(['profile', 'school', 'learning-state', 'vocabulary', 'grammar', 'weekly-history', 'feedback', 'curriculum']), detail: Text })
 
-const Question = z.strictObject({
+export const ResponseLayoutRowSchema = z.strictObject({
+  label: Text.optional(),
+  values: z.array(Text).optional(),
+})
+
+export type ResponseLayoutRow = z.infer<typeof ResponseLayoutRowSchema>
+
+export const ResponseLayoutSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('lines'),
+    lineCount: z.number().int().min(1).max(10).optional(),
+  }),
+  z.strictObject({
+    type: z.literal('table'),
+    headers: z.array(Text).min(2).max(6),
+    rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
+  }),
+  z.strictObject({
+    type: z.literal('organizer'),
+    headers: z.array(Text).min(2).max(6),
+    rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
+  }),
+])
+
+export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
+
+export const QuestionSchema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
   itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
@@ -306,7 +332,10 @@ const Question = z.strictObject({
   options: z.array(Text).length(4).optional(),
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
+  responseLayout: ResponseLayoutSchema.optional(),
 })
+
+const Question = QuestionSchema
 
 export const ReadingBlockSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('paragraph'), text: Text }),
@@ -925,6 +954,11 @@ Explicitly assign and constrain the evidence scope for every planned assessment 
 - Items assessing reading comprehension or reading-based CAP transfer must be designated with `evidenceScope: "primary_reading"`.
 - Never plan reading comprehension questions that rely on instruction headers, vocabulary definitions, or external background knowledge as reading evidence.
 
+## 5. Structured Response Layout Planning
+
+When planning comparison tasks, multi-variable organizers, or multi-dimensional synthesis questions:
+- Explicitly plan a structured table/organizer layout (`responseLayout: { type: "table" | "organizer", headers: [...], rows: [...] }`) instead of generic writing lines whenever the task asks the learner to organize findings into categories, rows, or tables.
+
 ## 6. Prompt 02: Authoring Engine
 # Prompt 02: Material Authoring (v2.10.0)
 
@@ -1249,11 +1283,20 @@ All reading comprehension and reading-based CAP assessment items must draw evide
   - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
 - **Quote Verifiability**: A quote explicitly attributed to the reading/passage/author must be verbatim present in the declared reading blocks. Constructed assessment stimuli (for example, `A student says, "..."`) are allowed and are judged by their evidence anchors rather than passage-string identity.
 
-## 2. Modality Preservation & Textual Entailment
+## 2. Modality Preservation, Scope Consistency & Task Constraint Adherence
 
-Preserve strict factual truth and epistemic modality across all question prompts, parent answers, and explanations:
+Preserve strict factual truth, decisive qualifiers, and epistemic modality across all question prompts, parent answers, and explanations:
+- **Condition & Scope Preservation**: Bounded claims in Reading (e.g. comparative outcomes depending on controlled factors like length, tension, thickness, temperature, baseline state) must preserve all materially necessary qualifiers across Reading, Instruction, Question prompts, and Answer explanations.
+  - Instruction cannot silently strengthen or weaken a Reading claim.
+  - Questions cannot drop decisive conditions from the evidence they depend on (e.g. asking what reading predicts for thicker vs thinner strings without specifying that length and tension are held equal).
+  - Answer explanations cannot expand a bounded claim into an unqualified universal claim.
+  - Modality and scope must remain consistent across: `Reading → Instruction → Question → Answer`.
 - **Hypothetical vs. Observed Distinction**: If the passage describes a condition or hypothetical scenario ("If eaten portions are high...", "It could happen that..."), never convert it into an asserted historical record or observed fact ("the record shows that eaten portions remained high for days").
 - **No Invented Evidence**: Never synthesize ungrounded backstory, fabricated data logs, or phantom experiments in parent answer rubrics or multiple-choice distractors.
+- **Task Constraint Adherence in Model Answers**: Model answers in `answers` must strictly obey all explicit structural constraints given in question prompts, such as:
+  - Exact requested sentence count (e.g. if the prompt specifies "Write two sentences.", provide exactly two sentences, not four or one).
+  - Requested number of examples or comparison dimensions.
+  - Requested connectors or grammatical structures.
 
 ## 3. Lexical Integrity & Anchored Core Vocabulary
 
@@ -1261,6 +1304,14 @@ Ensure strict alignment between vocabulary cards and authored text:
 - **Mandatory Reading Anchoring**: Every core vocabulary item with `status: 'new'` or `'extension'` must appear directly in the primary reading passage text.
 - **Ceiling & Target Integrity**: Use learner-level judgment, context, and instructional value when deciding whether an unfamiliar word is acceptable or should be taught. The official 2000-word foundation is a planning reference, not a deterministic allowlist; ordinary inflections, derivations, compounds, transparent topic words, and natural domain language must not be treated as automatic defects merely because a fixed list or morphology heuristic misses them.
 - **Linguistic Richness**: Maintain level-appropriate sentence variety, cohesive conjunctions, and expressive phrasing suited to the learner's calibrated band.
+
+## 4. Structured Response Layout Authoring
+
+When a question prompt or instruction directs the learner to fill out or create a table or multi-column organizer (such as comparing changed features, controlled features, and outcomes):
+- Provide structured response metadata in `responseLayout`:
+  - `type`: `"table"` or `"organizer"`
+  - `headers`: column header titles (e.g. `["Feature", "What changes?", "What stays the same?", "Pitch result"]`)
+  - `rows`: list of row objects with optional `label` (e.g. `label: "Thickness"`, `label: "Tension"`, `label: "Vibrating length"`) and optional initial values.
 
 ## 7. Prompt 03: Critic Engine
 # Prompt 03: Critic (v2.10.0)
@@ -1412,7 +1463,10 @@ In addition to structural, CAP, grounding, and workload audits, the critic MUST 
 Verify that all reading comprehension and reading-based CAP questions draw evidence strictly and exclusively from `studentLesson.reading.blocks`. Reject any item where the targeted sentence or example was located in an instruction box, tip note, or practice prompt.
 
 ## 2. `answer-entailment`
-Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality. Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
+Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality, condition scope, and task instructions:
+- **Condition & Scope Preservation**: Reject any question, answer rubric, or explanation that silently drops decisive control conditions or qualifiers from the reading (e.g. omitting that length and tension must be held equal when comparing string thickness), converting a bounded relation into an invalid claim.
+- **Hypothetical vs. Asserted Facts**: Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
+- **Task Instruction Compliance**: Verify that model answers in `answers` strictly obey explicit prompt constraints (e.g. exact requested sentence count, requested number of items/reasons, specified connectors). Reject any model answer that violates the prompt's own explicit constraints.
 
 ## 3. `lexical-integrity`
 Verify lexical appropriateness holistically for this learner: core vocabulary should be useful, genuinely difficult words should receive enough support, and context-clue targets should have usable textual clues. Do not reject merely because a token is outside the official 2000-word list or because a deterministic inflection/derivation heuristic would fail to recognize it.
@@ -1506,8 +1560,10 @@ When the semantic critic or curriculum audit reports a failure in evidence bound
 - If a question referenced an instruction box rather than primary reading prose, relocate or re-author the required text into `studentLesson.reading.blocks` or rewrite the question prompt and `evidenceAnchors` to target an authentic reading block.
 - Update all associated `CapAssessmentPlan` anchors to point strictly to valid reading block paths.
 
-## 2. Answer Entailment & Modality Repair
+## 2. Answer Entailment, Scope & Task Constraint Repair
+- If a question or answer dropped a decisive control condition or expanded a bounded claim, restore the required qualifier in the question prompt/options/explanation or calibrate the reading claim to match.
 - If an answer rubric converted a hypothetical condition into an asserted fact, rewrite the answer explanation and criteria to strictly reflect the conditional or modal framing of the source passage.
+- If a model answer violated prompt structural constraints (e.g. sentence count mismatch), rewrite the answer to strictly obey the instruction count and structure.
 
 ## 3. Lexical Integrity Repair
 - If a new vocabulary item is unanchored, weave it naturally into the reading text or replace it with a genuine passage-derived word.
@@ -1515,5 +1571,8 @@ When the semantic critic or curriculum audit reports a failure in evidence bound
 
 ## 4. Topology & Calibration Repair
 - If questions exhibit mechanical collapse or level mismatch, re-author the offending items to introduce diverse cognitive operations and appropriate linguistic depth.
+
+## 5. Structured Response Layout Repair
+- If a question asks for a multi-row or multi-column table/organizer but lacks `responseLayout`, attach a clean `responseLayout` object with proper `headers` and `rows`.
 
 Always preserve unaffected sections, maintain valid provenance chains, and update all corresponding critic and audit records atomically.

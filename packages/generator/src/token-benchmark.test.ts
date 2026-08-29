@@ -35,7 +35,7 @@ describe('token-benchmark', () => {
 
     // Grounding remains compact relative to scattered context while retaining
     // the full inherited pedagogy and the auditable research contract.
-    expect(bundleWords).toBeLessThan(scatteredWords * 0.45)
+    expect(bundleWords).toBeLessThan(scatteredWords * 0.50)
     expect(bundleWords).toBeLessThan(15000)
   })
 

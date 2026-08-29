@@ -49,6 +49,37 @@ describe('question-renderer', () => {
     const lineMatches = html.match(/class="writing-line"/g)
     expect(lineMatches).toHaveLength(3)
   })
+
+  it('renders structured organizer table when responseLayout is provided', () => {
+    const q = {
+      id: 'P2',
+      targetIds: ['variable-control'],
+      itemType: 'short-response' as const,
+      prompt: 'Complete the table below to compare the three guitar string variables.',
+      writingLines: 0,
+      difficulty: 'on-level' as const,
+      responseLayout: {
+        type: 'organizer' as const,
+        headers: ['Feature', 'What changes?', 'What stays the same?', 'Pitch result'],
+        rows: [
+          { label: 'String Thickness', values: [] },
+          { label: 'String Tension', values: [] },
+          { label: 'Vibrating Length', values: [] },
+        ],
+      },
+    }
+
+    const html = renderQuestionCard(q)
+    expect(html).toContain('class="response-organizer-table"')
+    expect(html).toContain('<th>Feature</th>')
+    expect(html).toContain('<th>What changes?</th>')
+    expect(html).toContain('<th>What stays the same?</th>')
+    expect(html).toContain('<th>Pitch result</th>')
+    expect(html).toContain('class="organizer-row-label">String Thickness</td>')
+    expect(html).toContain('class="organizer-row-label">String Tension</td>')
+    expect(html).toContain('class="organizer-row-label">Vibrating Length</td>')
+    expect(html).toContain('class="organizer-cell"')
+  })
 })
 
 describe('practice-renderer', () => {

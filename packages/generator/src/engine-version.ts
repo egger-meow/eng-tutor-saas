@@ -15,7 +15,7 @@ export const CURRENT_PROMPT_VERSION = '2.10.0'
 export const CURRENT_ERA_TAG = 'engine_v1' as const
 export const CURRENT_QUALITY_PROFILE_VERSION = '1.2.0'
 export const CURRENT_WORKER_VERSION = '1.5.0'
-export const CURRENT_PDF_RENDERER_VERSION = '1.0.0'
+export const CURRENT_PDF_RENDERER_VERSION = '1.5.0'
 
 export const CURRENT_ENGINE_MANIFEST = {
   releaseId: CURRENT_RELEASE_ID,

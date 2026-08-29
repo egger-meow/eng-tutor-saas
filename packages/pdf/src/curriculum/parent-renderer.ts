@@ -1,11 +1,36 @@
-import type { CurriculumPackage } from '@paper-english/generator'
+import type { CurriculumPackage, CurriculumQuestion } from '@paper-english/generator'
 import { escapeHtml as h } from '../escape-html.js'
 import { renderCurriculumHeader } from './header.js'
 import { renderCurriculumShell } from './shell.js'
 
 type AnswerItem = CurriculumPackage['answers'][number]
 
-function renderAnswerCard(answer: AnswerItem): string {
+function extractQuestionMap(pkg: CurriculumPackage): Map<string, CurriculumQuestion> {
+  const map = new Map<string, CurriculumQuestion>()
+  if (Array.isArray(pkg.studentLesson?.practice)) {
+    for (const section of pkg.studentLesson.practice) {
+      if (Array.isArray(section?.questions)) {
+        for (const q of section.questions) {
+          if (q?.id) map.set(q.id, q)
+        }
+      }
+    }
+  }
+  if (Array.isArray(pkg.studentLesson?.homework?.questions)) {
+    for (const q of pkg.studentLesson.homework.questions) {
+      if (q?.id) map.set(q.id, q)
+    }
+  }
+  return map
+}
+
+function formatQuestionContextPrompt(prompt: string): string {
+  const clean = prompt.trim()
+  if (clean.length <= 90) return clean
+  return `${clean.slice(0, 87).trim()}...`
+}
+
+function renderAnswerCard(answer: AnswerItem, question?: CurriculumQuestion): string {
   const alternativesHtml = answer.acceptedAnswers && answer.acceptedAnswers.length > 0
     ? `<div class="answer-alternatives"><strong>也可接受：</strong>${h(answer.acceptedAnswers.join('；'))}</div>`
     : ''
@@ -18,9 +43,16 @@ function renderAnswerCard(answer: AnswerItem): string {
     ? `<div class="small muted" style="margin-top: 1.5mm;"><strong>可引導提問：</strong>${h(answer.followUpZh)}</div>`
     : ''
 
+  const promptContextHtml = question?.prompt
+    ? `<span class="answer-question-context">— ${h(formatQuestionContextPrompt(question.prompt))}</span>`
+    : ''
+
   return `<article class="answer-card">
   <div class="answer-header">
-    <div class="answer-qid">${h(answer.questionId)}</div>
+    <div class="answer-qid-row">
+      <span class="answer-qid">${h(answer.questionId)}</span>
+      ${promptContextHtml}
+    </div>
   </div>
   <div class="answer-key"><strong>答案：</strong>${h(answer.answer)}</div>
   ${alternativesHtml}
@@ -32,6 +64,7 @@ function renderAnswerCard(answer: AnswerItem): string {
 
 export function renderCurriculumParentAnswerHtml(pkg: CurriculumPackage): string {
   const summary = pkg.parentSummary
+  const questionMap = extractQuestionMap(pkg)
 
   const observeItemsHtml = summary.observeZh && summary.observeZh.length > 0
     ? `<ul>${summary.observeZh.map((item) => `<li>${h(item)}</li>`).join('')}</ul>`
@@ -43,7 +76,17 @@ export function renderCurriculumParentAnswerHtml(pkg: CurriculumPackage): string
       </div>`
     : ''
 
-  const answersHtml = pkg.answers.map(renderAnswerCard).join('\n')
+  const groundingSources = 'grounding' in pkg && pkg.grounding && Array.isArray(pkg.grounding.sources)
+    ? pkg.grounding.sources
+    : []
+  const cleanPublishers = [...new Set(groundingSources.map((s) => s.publisher || s.title).filter(Boolean))]
+  const sourceAttributionHtml = cleanPublishers.length > 0
+    ? `<p class="small muted" style="margin-top: 2mm; border-top: 1px dashed #e7ceb7; padding-top: 1.5mm;">
+        <strong>本週內容參考：</strong>${h(cleanPublishers.join('、'))}
+      </p>`
+    : ''
+
+  const answersHtml = pkg.answers.map((ans) => renderAnswerCard(ans, questionMap.get(ans.questionId))).join('\n')
 
   const body = `
 ${renderCurriculumHeader(pkg, 'parent-answer')}
@@ -56,6 +99,7 @@ ${renderCurriculumHeader(pkg, 'parent-answer')}
   <p class="small"><strong>完成度確認：</strong>${h(summary.completionCheckZh)}</p>
   <p class="small"><strong>預計總時間：</strong>${pkg.learningPlan.estimatedMinutes} 分鐘</p>
   ${personalizationHtml}
+  ${sourceAttributionHtml}
 </section>
 
 <section class="answers-section">

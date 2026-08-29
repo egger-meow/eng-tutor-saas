@@ -4,7 +4,33 @@ const Text = z.string().trim().min(1)
 const StableId = Text.regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/, 'Must be a stable identifier')
 const Evidence = z.strictObject({ source: z.enum(['profile', 'school', 'learning-state', 'vocabulary', 'grammar', 'weekly-history', 'feedback', 'curriculum']), detail: Text })
 
-const Question = z.strictObject({
+export const ResponseLayoutRowSchema = z.strictObject({
+  label: Text.optional(),
+  values: z.array(Text).optional(),
+})
+
+export type ResponseLayoutRow = z.infer<typeof ResponseLayoutRowSchema>
+
+export const ResponseLayoutSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('lines'),
+    lineCount: z.number().int().min(1).max(10).optional(),
+  }),
+  z.strictObject({
+    type: z.literal('table'),
+    headers: z.array(Text).min(2).max(6),
+    rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
+  }),
+  z.strictObject({
+    type: z.literal('organizer'),
+    headers: z.array(Text).min(2).max(6),
+    rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
+  }),
+])
+
+export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
+
+export const QuestionSchema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
   itemType: z.enum(['vocabulary', 'grammar', 'main-idea', 'detail', 'sequence', 'inference', 'context-clue', 'author-purpose', 'cloze', 'translation', 'sentence-production', 'short-response']),
@@ -12,7 +38,10 @@ const Question = z.strictObject({
   options: z.array(Text).length(4).optional(),
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
+  responseLayout: ResponseLayoutSchema.optional(),
 })
+
+const Question = QuestionSchema
 
 export const ReadingBlockSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('paragraph'), text: Text }),

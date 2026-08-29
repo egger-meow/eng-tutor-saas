@@ -8,7 +8,10 @@ In addition to structural, CAP, grounding, and workload audits, the critic MUST 
 Verify that all reading comprehension and reading-based CAP questions draw evidence strictly and exclusively from `studentLesson.reading.blocks`. Reject any item where the targeted sentence or example was located in an instruction box, tip note, or practice prompt.
 
 ## 2. `answer-entailment`
-Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality. Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
+Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality, condition scope, and task instructions:
+- **Condition & Scope Preservation**: Reject any question, answer rubric, or explanation that silently drops decisive control conditions or qualifiers from the reading (e.g. omitting that length and tension must be held equal when comparing string thickness), converting a bounded relation into an invalid claim.
+- **Hypothetical vs. Asserted Facts**: Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
+- **Task Instruction Compliance**: Verify that model answers in `answers` strictly obey explicit prompt constraints (e.g. exact requested sentence count, requested number of items/reasons, specified connectors). Reject any model answer that violates the prompt's own explicit constraints.
 
 ## 3. `lexical-integrity`
 Verify lexical appropriateness holistically for this learner: core vocabulary should be useful, genuinely difficult words should receive enough support, and context-clue targets should have usable textual clues. Do not reject merely because a token is outside the official 2000-word list or because a deterministic inflection/derivation heuristic would fail to recognize it.

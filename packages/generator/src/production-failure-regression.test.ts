@@ -258,4 +258,64 @@ describe('production failure regressions', () => {
     expect(profile.name).toBe('default')
     expect(profile.isFallback).toBe(true)
   })
+
+  it('rejects materials where decisive control conditions are dropped in answer entailment', () => {
+    const pkg = canonicalPackage()
+    pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
+    pkg.qualityEvidence.criticalChecks.push(
+      { id: 'evidence-boundary', passed: true, evidence: 'Primary reading contains all evidence anchors.' },
+      { id: 'answer-entailment', passed: false, evidence: 'Question C3 and explanation drop the control condition that string length and tension must be held equal, asserting unconditionally that thicker strings always produce lower pitch.' },
+      { id: 'lexical-integrity', passed: true, evidence: 'All new vocabulary items are anchored in the reading passage.' },
+      { id: 'task-topology', passed: true, evidence: 'Reasoning mechanisms vary across guided, independent, and transfer items.' },
+      { id: 'level-calibration', passed: true, evidence: 'Linguistic depth and cognitive load match the grade 7 intermediate band.' },
+    )
+    pkg.qualityEvidence.criticFindings.push({
+      dimension: 'answer-entailment',
+      severity: 'critical',
+      finding: 'Dropped decisive control condition (equal length & tension) in question C3 answer explanation.',
+      resolution: null,
+    })
+
+    const audit = auditCurriculumPackage(pkg)
+    expect(audit.passed).toBe(false)
+    expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
+  })
+
+  it('passes materials that preserve decisive control conditions or use valid stylistic paraphrasing', () => {
+    const pkg = canonicalPackage()
+    pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
+    pkg.qualityEvidence.criticalChecks.push(
+      { id: 'evidence-boundary', passed: true, evidence: 'Primary reading contains all evidence anchors.' },
+      { id: 'answer-entailment', passed: true, evidence: 'All comparative claims in C1-C3 preserve required control variables (same length and tension) and stylistic variations accurately match reading scope.' },
+      { id: 'lexical-integrity', passed: true, evidence: 'All new vocabulary items are anchored in the reading passage.' },
+      { id: 'task-topology', passed: true, evidence: 'Reasoning mechanisms vary across guided, independent, and transfer items.' },
+      { id: 'level-calibration', passed: true, evidence: 'Linguistic depth and cognitive load match the grade 7 intermediate band.' },
+    )
+
+    const audit = auditCurriculumPackage(pkg)
+    const entailmentFindings = audit.findings.filter((f) => f.dimension === 'answer-entailment' || f.dimension === 'critic-acceptance')
+    expect(entailmentFindings).toEqual([])
+  })
+
+  it('rejects materials where model answers violate explicit prompt constraints such as sentence count', () => {
+    const pkg = canonicalPackage()
+    pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
+    pkg.qualityEvidence.criticalChecks.push(
+      { id: 'evidence-boundary', passed: true, evidence: 'Primary reading contains all evidence anchors.' },
+      { id: 'answer-entailment', passed: false, evidence: 'Question H3 asks for exactly two sentences ("Write two sentences comparing..."), but the model answer contains four sentences.' },
+      { id: 'lexical-integrity', passed: true, evidence: 'All new vocabulary items are anchored in the reading passage.' },
+      { id: 'task-topology', passed: true, evidence: 'Reasoning mechanisms vary across guided, independent, and transfer items.' },
+      { id: 'level-calibration', passed: true, evidence: 'Linguistic depth and cognitive load match the grade 7 intermediate band.' },
+    )
+    pkg.qualityEvidence.criticFindings.push({
+      dimension: 'answer-entailment',
+      severity: 'critical',
+      finding: 'Task instruction constraint mismatch in H3: requested 2 sentences, provided 4 sentences.',
+      resolution: null,
+    })
+
+    const audit = auditCurriculumPackage(pkg)
+    expect(audit.passed).toBe(false)
+    expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
+  })
 })
