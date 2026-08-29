@@ -7,6 +7,7 @@ on:
     paths:
       - scripts/_tmp_relax_brittle_finisher_gates.mjs
       - scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
+      - scripts/_tmp_relax_brittle_finisher_gates_policy2.mjs
       - .github/workflows/_tmp-relax-brittle-finisher-gates.yml
 
 permissions:
@@ -28,16 +29,26 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Cache Playwright Chromium
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright Chromium
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: pnpm --filter @paper-english/pdf pdf:install
       - name: Apply patch
         run: |
           node scripts/_tmp_relax_brittle_finisher_gates.mjs
           node scripts/_tmp_relax_brittle_finisher_gates_fix.mjs
+          node scripts/_tmp_relax_brittle_finisher_gates_policy2.mjs
       - name: Compile production bundle
         run: pnpm compile:bundle
       - name: Diff check
         run: git diff --check
       - name: Focused regression
-        run: pnpm vitest run packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/bundle-compiler.test.ts
+        run: pnpm vitest run packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/bundle-compiler.test.ts
       - name: Full verification
         run: |
           pnpm lint
@@ -48,6 +59,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/SPEC.md packages/generator/src/audit-curriculum.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/prompts/2.10.0/02-author.md packages/generator/prompts/2.10.0/03-critic.md packages/generator/bundles/production-authoring-bundle.md
+          git add docs/SPEC.md packages/generator/src/audit-curriculum.ts packages/generator/src/audit-curriculum.test.ts packages/generator/src/production-failure-regression.test.ts packages/generator/src/finisher-tiers.test.ts packages/generator/src/finisher-relaxation-regression.test.ts packages/generator/prompts/2.10.0/02-author.md packages/generator/prompts/2.10.0/03-critic.md packages/generator/bundles/production-authoring-bundle.md
           git commit -m "fix(generator): make brittle quality heuristics non-blocking"
           git push origin HEAD:fix/relax-brittle-finisher-gates
