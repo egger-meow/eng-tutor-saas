@@ -1505,7 +1505,7 @@ export class AdminService {
 
   public async getSubscriptionRevenueData(rangeDays = 90): Promise<SubscriptionRevenueData> {
     const client = this.ensureClient()
-    const days = [30, 90, 180, 365].includes(rangeDays) ? rangeDays : 90
+    const days = [7, 14, 30, 90, 180, 365].includes(rangeDays) ? rangeDays : (rangeDays > 0 ? rangeDays : 90)
     const dataSources: DataSourceStatus[] = []
     const [childrenData, subscriptionsData, eventsData] = await Promise.all([
       this.safeQuery<any[]>('subscription_children', () => client.from('children').select('id, display_name, is_internal_test'), dataSources),
