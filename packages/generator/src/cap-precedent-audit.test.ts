@@ -274,7 +274,137 @@ describe('CAP precedent deterministic quality floor', () => {
   })
 
   describe('auditReadingEvidenceBoundary', () => {
-    it('detects cross-section leakage when non-reading item quotes instruction boxes', () => {
+    it('reads and validates canonical cap-plan:<questionId> check records', () => {
+      const capPkg = {
+        metadata: { promptVersion: '2.10.0' },
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          practice: [{
+            stage: 'cap-transfer',
+            questions: [{
+              id: 'c1',
+              itemType: 'inference',
+              prompt: 'Why were the streets wet?',
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: { questions: [] },
+        },
+        qualityEvidence: {
+          criticalChecks: [{
+            id: 'cap-plan:c1',
+            passed: true,
+            evidence: JSON.stringify({
+              evidenceScope: 'primary_reading',
+              evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mia saw wet streets.' }],
+            }),
+          }],
+        },
+      }
+      const report = auditReadingEvidenceBoundary(capPkg)
+      expect(report.passed).toBe(true)
+      expect(report.findings).toEqual([])
+    })
+
+    it('passes a non-CAP reading question with valid internal evidence-plan:<questionId>', () => {
+      const nonCapPkg = {
+        metadata: { promptVersion: '2.10.0' },
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          practice: [{
+            stage: 'guided',
+            questions: [{
+              id: 'g1',
+              itemType: 'detail',
+              targetIds: ['reading-detail'],
+              prompt: 'What did Mia see on the streets?',
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: { questions: [] },
+        },
+        qualityEvidence: {
+          criticalChecks: [{
+            id: 'evidence-plan:g1',
+            passed: true,
+            evidence: JSON.stringify({
+              evidenceScope: 'primary_reading',
+              evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mia saw wet streets.' }],
+            }),
+          }],
+        },
+      }
+      const report = auditReadingEvidenceBoundary(nonCapPkg)
+      expect(report.passed).toBe(true)
+      expect(report.findings).toEqual([])
+    })
+
+    it('fails when a reading-dependent non-CAP question lacks an evidence plan under prompt 2.10', () => {
+      const missingPlanPkg = {
+        metadata: { promptVersion: '2.10.0' },
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          practice: [{
+            stage: 'guided',
+            questions: [{
+              id: 'g1',
+              itemType: 'detail',
+              targetIds: ['reading-detail'],
+              prompt: 'What did Mia see on the streets?',
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: { questions: [] },
+        },
+        qualityEvidence: { criticalChecks: [] },
+      }
+      const report = auditReadingEvidenceBoundary(missingPlanPkg)
+      expect(report.passed).toBe(false)
+      expect(report.findings.join('\n')).toContain('EVIDENCE_PLAN_MISSING:g1')
+    })
+
+    it('rejects paraphrased instruction-only evidence even when prompt contains no direct quote', () => {
+      const paraphrasedLeakPkg = {
+        metadata: { promptVersion: '2.10.0' },
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          instruction: [{ id: 'inst-1', titleZh: '情態助動詞', patterns: ['You must use may / might / could to express possibility.'] }],
+          practice: [{
+            stage: 'guided',
+            questions: [{
+              id: 'g1',
+              itemType: 'detail',
+              targetIds: ['reading-detail'],
+              prompt: 'Which auxiliary verb indicates possibility in the text?',
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: { questions: [] },
+        },
+        qualityEvidence: {
+          criticalChecks: [{
+            id: 'evidence-plan:g1',
+            passed: true,
+            evidence: JSON.stringify({
+              evidenceScope: 'primary_reading',
+              evidenceAnchors: [{
+                location: 'studentLesson.reading.blocks.0.text',
+                anchorText: 'express possibility', // Only in instruction!
+              }],
+            }),
+          }],
+        },
+      }
+      const report = auditReadingEvidenceBoundary(paraphrasedLeakPkg)
+      expect(report.passed).toBe(false)
+      expect(report.findings.join('\n')).toContain('EVIDENCE_BOUNDARY_LEAKAGE:g1')
+    })
+
+    it('detects cross-section leakage when non-reading item quotes instruction boxes directly', () => {
       const leakyPkg = {
         studentLesson: {
           reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
@@ -299,6 +429,7 @@ describe('CAP precedent deterministic quality floor', () => {
 
     it('passes standard vocabulary and grammar recall questions without requiring anchors or precedents', () => {
       const recallPkg = {
+        metadata: { promptVersion: '2.10.0' },
         studentLesson: {
           reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
           instruction: [{ id: 'inst-1', titleZh: '規則動詞過去式', explanationZh: '動詞字尾加 ed。' }],
@@ -307,6 +438,7 @@ describe('CAP precedent deterministic quality floor', () => {
             questions: [{
               id: 'vocab-1',
               itemType: 'vocabulary',
+              targetIds: ['vocab-umbrella'],
               prompt: 'Select the best word: She held her ______ in the rain.',
               options: ['umbrella', 'chair', 'banana', 'pencil'],
               writingLines: 0,
@@ -317,6 +449,7 @@ describe('CAP precedent deterministic quality floor', () => {
             questions: [{
               id: 'grammar-1',
               itemType: 'grammar',
+              targetIds: ['grammar-past-tense'],
               prompt: 'Change "close" to past tense: Yesterday, she ______ the door.',
               writingLines: 2,
               difficulty: 'on-level',

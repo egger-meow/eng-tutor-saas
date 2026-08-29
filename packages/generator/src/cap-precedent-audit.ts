@@ -6,6 +6,7 @@ import {
   type CapAssessmentIntent,
   type CapAssessmentPlan,
 } from './cap-assessment-plan-contract.js'
+import { isPromptVersionGte } from './engine-version.js'
 
 export type { CapAssessmentIntent, CapAssessmentPlan } from './cap-assessment-plan-contract.js'
 
@@ -422,6 +423,16 @@ export function auditCapPrecedentPackage(
   return { passed: findings.length === 0, findings }
 }
 
+export interface GenericEvidencePlan {
+  evidenceScope?: string
+  evidenceAnchors?: Array<{
+    location: string
+    anchorText: string
+  }>
+  intentionalRecall?: boolean
+  evidenceMode?: string
+}
+
 export interface EvidenceBoundaryAuditResult {
   passed: boolean
   findings: string[]
@@ -436,6 +447,9 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
   const pkg = pkgInput as PackageLike
   const findings: string[] = []
   if (!pkg?.studentLesson) return { passed: true, findings }
+
+  const rawPrompt = (pkg as any).metadata?.promptVersion
+  const isGoverned = !rawPrompt || isPromptVersionGte(rawPrompt, 2, 9)
 
   const readingBlocks = (pkg.studentLesson.reading?.blocks ?? []) as Array<Record<string, unknown>>
   const readingFullText = readingBlocks
@@ -471,51 +485,94 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
   ]
 
   for (const { stage, question } of allQuestions) {
-    const plan = parseJsonCheck<CapAssessmentPlan>(pkg, `cap-plan-${question.id}`)
-    const isComprehension = COMPREHENSION_TYPES.has(question.itemType)
-    const isReadingTargeted = Array.isArray((question as any).targetIds) && (question as any).targetIds.some((t: string) => t.includes('reading') || t.includes('inference') || t.includes('evidence'))
-    const isReadingDependent = stage === 'cap-transfer' || isComprehension || isReadingTargeted || plan?.evidenceMode === 'text_only' || plan?.evidenceMode === 'multi_document'
+    const plan =
+      parseJsonCheck<GenericEvidencePlan>(pkg, `cap-plan:${question.id}`) ||
+      parseJsonCheck<GenericEvidencePlan>(pkg, `evidence-plan:${question.id}`) ||
+      parseJsonCheck<GenericEvidencePlan>(pkg, `cap-plan-${question.id}`) ||
+      parseJsonCheck<GenericEvidencePlan>(pkg, `evidence-plan-${question.id}`)
 
-    if (plan) {
-      if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading' && isReadingDependent) {
-        findings.push(
-          `EVIDENCE_BOUNDARY_VIOLATION:${question.id}: reading-dependent question cannot claim evidence from "${plan.evidenceScope}"; evidenceScope must be primary_reading`,
+    const hasReadingTarget =
+      Array.isArray((question as any).targetIds) &&
+      (question as any).targetIds.some((t: string) => {
+        const lower = t.toLowerCase()
+        return (
+          lower.includes('reading') ||
+          lower.includes('inference') ||
+          lower.includes('detail') ||
+          lower.includes('main-idea') ||
+          lower.includes('evidence')
         )
-      }
+      })
 
-      if (plan.evidenceAnchors && Array.isArray(plan.evidenceAnchors)) {
-        for (const anchor of plan.evidenceAnchors) {
-          const locMatch = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail|speaker|note)$/u.exec(
-            anchor.location ?? '',
+    const isComprehension = COMPREHENSION_TYPES.has(question.itemType)
+    const isRecallType = RECALL_TYPES.has(question.itemType)
+    const isExplicitRecall =
+      plan?.intentionalRecall === true || (isRecallType && !hasReadingTarget && !plan?.evidenceAnchors?.length)
+
+    const isReadingDependent =
+      stage === 'cap-transfer' ||
+      isComprehension ||
+      hasReadingTarget ||
+      plan?.evidenceMode === 'text_only' ||
+      plan?.evidenceMode === 'multi_document' ||
+      plan?.evidenceScope === 'primary_reading'
+
+    if (isReadingDependent && !isExplicitRecall) {
+      if (isGoverned && !plan) {
+        findings.push(
+          `EVIDENCE_PLAN_MISSING:${question.id}: reading-dependent question requires an internal evidence-plan:<id> or cap-plan:<id> check`,
+        )
+      } else if (plan) {
+        if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading') {
+          findings.push(
+            `EVIDENCE_BOUNDARY_VIOLATION:${question.id}: reading-dependent question cannot claim evidence from "${plan.evidenceScope}"; evidenceScope must be primary_reading`,
           )
-          if (!locMatch) {
-            findings.push(
-              `EVIDENCE_LOCATION_INVALID:${question.id}:${anchor.location}: location must resolve to a studentLesson.reading.blocks field`,
+        }
+
+        if (!Array.isArray(plan.evidenceAnchors) || plan.evidenceAnchors.length === 0) {
+          findings.push(
+            `EVIDENCE_ANCHORS_MISSING:${question.id}: reading-dependent question requires at least one canonical evidence anchor`,
+          )
+        } else {
+          for (const anchor of plan.evidenceAnchors) {
+            const locMatch = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail|speaker|note)$/u.exec(
+              anchor.location ?? '',
             )
-          } else {
-            const blockIndex = Number(locMatch[1])
-            const field = locMatch[2]!
-            const block = readingBlocks[blockIndex]
-            const prose = block?.[field]
-            if (typeof prose !== 'string') {
-              findings.push(`EVIDENCE_LOCATION_NOT_FOUND:${question.id}:${anchor.location}`)
-            } else if (typeof anchor.anchorText === 'string' && anchor.anchorText.trim().length > 0) {
-              const normProse = prose.toLowerCase().replace(/\s+/gu, ' ')
-              const normAnchor = anchor.anchorText.toLowerCase().replace(/\s+/gu, ' ').trim()
-              if (!normProse.includes(normAnchor)) {
-                findings.push(
-                  `EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchor text "${anchor.anchorText}" not found at ${anchor.location}`,
-                )
-              }
+            if (!locMatch) {
+              findings.push(
+                `EVIDENCE_LOCATION_INVALID:${question.id}:${anchor.location}: location must resolve to a studentLesson.reading.blocks field`,
+              )
             } else {
-              findings.push(`EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchorText must be non-empty string`)
+              const blockIndex = Number(locMatch[1])
+              const field = locMatch[2]!
+              const block = readingBlocks[blockIndex]
+              const prose = block?.[field]
+              if (typeof prose !== 'string') {
+                findings.push(`EVIDENCE_LOCATION_NOT_FOUND:${question.id}:${anchor.location}`)
+              } else if (typeof anchor.anchorText === 'string' && anchor.anchorText.trim().length > 0) {
+                const normProse = prose.toLowerCase().replace(/\s+/gu, ' ')
+                const normAnchor = anchor.anchorText.toLowerCase().replace(/\s+/gu, ' ').trim()
+                if (!normProse.includes(normAnchor)) {
+                  if (instructionFullText.includes(normAnchor)) {
+                    findings.push(
+                      `EVIDENCE_BOUNDARY_LEAKAGE:${question.id}: declared evidence anchor "${anchor.anchorText}" exists only in instruction/box content, not in primary reading prose at ${anchor.location}`,
+                    )
+                  } else {
+                    findings.push(
+                      `EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchor text "${anchor.anchorText}" not found at ${anchor.location}`,
+                    )
+                  }
+                }
+              } else {
+                findings.push(`EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchorText must be non-empty string`)
+              }
             }
           }
         }
       }
     }
 
-    // Verify quoted phrases inside prompt against reading text
+    // Defense-in-depth: verify exact quoted reading phrases in question prompt against reading text
     const quotedMatches = question.prompt.match(/(?:["“]([^"”]+)["”]|(?:'|‘)([^'’]{4,})(?:'|’))/gu) ?? []
     for (const rawQuoted of quotedMatches) {
       const cleanQuote = rawQuoted.replace(/^["“'‘]|["”'’]$/gu, '').trim()
@@ -526,7 +583,7 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
             findings.push(
               `EVIDENCE_BOUNDARY_LEAKAGE:${question.id}: quoted prompt text "${cleanQuote}" exists only in instruction/box content, not in primary reading prose`,
             )
-          } else if (isReadingDependent) {
+          } else if (isReadingDependent && !isExplicitRecall) {
             findings.push(
               `EVIDENCE_QUOTE_MISMATCH:${question.id}: quoted prompt text "${cleanQuote}" does not exist in primary reading prose`,
             )

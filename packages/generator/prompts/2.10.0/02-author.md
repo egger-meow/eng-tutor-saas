@@ -5,8 +5,10 @@ Apply the complete inherited authoring contract, with Curriculum Schema 2.3.0 an
 ## 1. Strict Primary Reading Evidence Boundary
 
 All reading comprehension and reading-based CAP assessment items must draw evidence exclusively from `studentLesson.reading.blocks`:
-- **No Cross-Section Instruction Leakage**: Never write a reading comprehension item whose required fact, sentence, or grammatical example exists only in an instruction box, tip note, practice header, or homework prompt.
-- **Explicit Location Anchoring**: Every reading assessment item must specify valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where the `anchorText` is verbatim present.
+- **Explicit Location Anchoring**:
+  - Every CAP-governed assessment item must specify valid `evidenceAnchors` in its internal `cap-plan:<questionId>` check.
+  - Every non-CAP reading-dependent assessment item (e.g. guided/independent reading comprehension, detail, inference) must specify a compact internal `evidence-plan:<questionId>` check in `qualityEvidence.criticalChecks` declaring `evidenceScope: "primary_reading"` and valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where `anchorText` occurs verbatim.
+  - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
 - **Quote Verifiability**: Any quoted sentence or phrase appearing inside a question prompt must be verbatim present in the declared reading passage blocks.
 
 ## 2. Modality Preservation & Textual Entailment

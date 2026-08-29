@@ -26,8 +26,8 @@ sourceHashes:
   "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
   "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
   "packages/generator/prompts/2.10.0/01-plan.md": "9290b2d412dabd3a1fc4a96afa6d34a247219ccb9e083d1bb6596ef7c374fede"
-  "packages/generator/prompts/2.10.0/02-author.md": "438c7558baa2f554b8ae6c1a034cee397169f58bfa63d7f9e613c45e5824a63c"
-  "packages/generator/prompts/2.10.0/03-critic.md": "c597ec379cba605bc9abf685b3fcd50f4bae1c8189c4a7f2fa9d9ab2100e9b46"
+  "packages/generator/prompts/2.10.0/02-author.md": "6e0c8c4b85d261ef40187639f61ed1d14e139eb8362260b1317e559e94798bff"
+  "packages/generator/prompts/2.10.0/03-critic.md": "246a2bf5d41b1e3c116d5824b6b011a1541e213d9e8095aefe72494e550b0e32"
   "packages/generator/prompts/2.10.0/04-repair.md": "1f08a6b147926b374a4ca546ff919848b0b29c19881cd1b45d28aec8f055b5b3"
   "packages/generator/src/curriculum-package-schema.ts": "6ce3751c552fda9002b1ed34d019d6c0b6f07f5da1450c123c9b21c2baf91343"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
@@ -1243,8 +1243,10 @@ Apply the complete inherited authoring contract, with Curriculum Schema 2.3.0 an
 ## 1. Strict Primary Reading Evidence Boundary
 
 All reading comprehension and reading-based CAP assessment items must draw evidence exclusively from `studentLesson.reading.blocks`:
-- **No Cross-Section Instruction Leakage**: Never write a reading comprehension item whose required fact, sentence, or grammatical example exists only in an instruction box, tip note, practice header, or homework prompt.
-- **Explicit Location Anchoring**: Every reading assessment item must specify valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where the `anchorText` is verbatim present.
+- **Explicit Location Anchoring**:
+  - Every CAP-governed assessment item must specify valid `evidenceAnchors` in its internal `cap-plan:<questionId>` check.
+  - Every non-CAP reading-dependent assessment item (e.g. guided/independent reading comprehension, detail, inference) must specify a compact internal `evidence-plan:<questionId>` check in `qualityEvidence.criticalChecks` declaring `evidenceScope: "primary_reading"` and valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where `anchorText` occurs verbatim.
+  - Pure vocabulary and grammar recall items remain exempt unless they explicitly claim reading evidence.
 - **Quote Verifiability**: Any quoted sentence or phrase appearing inside a question prompt must be verbatim present in the declared reading passage blocks.
 
 ## 2. Modality Preservation & Textual Entailment
@@ -1421,7 +1423,11 @@ Verify cognitive mechanism diversity across practice questions. Reject question 
 ## 5. `level-calibration`
 Verify that language complexity, reading passage depth, and cognitive demand match the learner's diagnosed band. Reject artificial linguistic flattening or low-level D1/D2 confinement for advanced learners.
 
-The critic must record explicit findings or check items with substantive text for each of these 5 dimensions in `qualityEvidence.criticalChecks` or `criticFindings`.
+## Critic Acceptance & Recording Contract
+- **Passing Verification**: All five mandatory dimensions require a substantive (>= 30 characters) passing critical check (`passed: true`) in `qualityEvidence.criticalChecks` for final deterministic approval.
+- **Defect Tracking**: When defects or quality failures are discovered during review, record them in `qualityEvidence.criticFindings` with appropriate severity (`'critical'` or `'warning'`).
+- **Post-Repair Re-Verification**: After a critical finding is repaired by the repair engine, the corresponding dimension must be re-verified with a passing critical check (`passed: true`), and the finding must document its `resolution`.
+- **Unresolved Findings Blocking**: Any unresolved critical finding (`severity: 'critical'` with missing/empty `resolution`) strictly blocks publication.
 
 ## 8. Prompt 04: Repair Specialist
 # Prompt 04: Repair (v2.10.0)

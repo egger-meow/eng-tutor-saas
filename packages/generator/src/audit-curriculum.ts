@@ -6,6 +6,9 @@ import { extractBlockTexts, resolveQuestionAnswerLetter } from './normalize-curr
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
 import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
 import { auditCapPrecedentPackage, auditReadingEvidenceBoundary } from './cap-precedent-audit.js'
+import { normalizePromptVersion, isPromptVersionGte } from './engine-version.js'
+
+export { normalizePromptVersion, isPromptVersionGte }
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -272,24 +275,6 @@ function cjk(value: string): number { return (value.match(/[\u3400-\u9fff]/gu) ?
 const NON_EXECUTABLE_INSTRUCTION_ZH = /^(?:加油|待補|待填|無|略|任務|說明|練習|題目|todo|tbd|n\/a)[！!。.？?\s]*$/iu
 
 function hasExecutableInstructionZh(value: string): boolean { return cjk(value) >= 1 && !NON_EXECUTABLE_INSTRUCTION_ZH.test(value.trim()) }
-
-/** Normalizes prompt version strings by removing optional "prompt/" prefix */
-export function normalizePromptVersion(rawPromptVersion?: string | null): string {
-  if (!rawPromptVersion) return ''
-  return rawPromptVersion.replace(/^prompt\//u, '').trim()
-}
-
-/** Checks whether a prompt version string meets or exceeds the specified target major/minor version */
-export function isPromptVersionGte(rawPromptVersion: string | undefined | null, targetMajor: number, targetMinor: number): boolean {
-  const norm = normalizePromptVersion(rawPromptVersion)
-  const match = norm.match(/^(\d+)\.(\d+)(?:\.(\d+))?/u)
-  if (!match) return false
-  const major = parseInt(match[1]!, 10)
-  const minor = parseInt(match[2]!, 10)
-  if (major > targetMajor) return true
-  if (major === targetMajor && minor >= targetMinor) return true
-  return false
-}
 
 /** Deterministic publish gate. This complements (never replaces) the independent LLM critic. */
 export function auditCurriculumPackage(

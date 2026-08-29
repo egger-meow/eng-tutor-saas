@@ -47,3 +47,21 @@ export function formatEngineEraLabel(era: EraTag, engineVersion?: string | null)
 export function formatEngineVersion(engineVersion?: string | null): string {
   return `Engine v${engineVersion || CURRENT_ENGINE_VERSION}`
 }
+
+/** Normalizes prompt version strings by removing optional "prompt/" prefix */
+export function normalizePromptVersion(rawPromptVersion?: string | null): string {
+  if (!rawPromptVersion) return ''
+  return rawPromptVersion.replace(/^prompt\//u, '').trim()
+}
+
+/** Checks whether a prompt version string meets or exceeds the specified target major/minor version */
+export function isPromptVersionGte(rawPromptVersion: string | undefined | null, targetMajor: number, targetMinor: number): boolean {
+  const norm = normalizePromptVersion(rawPromptVersion)
+  const match = norm.match(/^(\d+)\.(\d+)(?:\.(\d+))?/u)
+  if (!match) return false
+  const major = parseInt(match[1]!, 10)
+  const minor = parseInt(match[2]!, 10)
+  if (major > targetMajor) return true
+  if (major === targetMajor && minor >= targetMinor) return true
+  return false
+}

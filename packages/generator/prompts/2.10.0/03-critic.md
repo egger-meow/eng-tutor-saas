@@ -19,4 +19,8 @@ Verify cognitive mechanism diversity across practice questions. Reject question 
 ## 5. `level-calibration`
 Verify that language complexity, reading passage depth, and cognitive demand match the learner's diagnosed band. Reject artificial linguistic flattening or low-level D1/D2 confinement for advanced learners.
 
-The critic must record explicit findings or check items with substantive text for each of these 5 dimensions in `qualityEvidence.criticalChecks` or `criticFindings`.
+## Critic Acceptance & Recording Contract
+- **Passing Verification**: All five mandatory dimensions require a substantive (>= 30 characters) passing critical check (`passed: true`) in `qualityEvidence.criticalChecks` for final deterministic approval.
+- **Defect Tracking**: When defects or quality failures are discovered during review, record them in `qualityEvidence.criticFindings` with appropriate severity (`'critical'` or `'warning'`).
+- **Post-Repair Re-Verification**: After a critical finding is repaired by the repair engine, the corresponding dimension must be re-verified with a passing critical check (`passed: true`), and the finding must document its `resolution`.
+- **Unresolved Findings Blocking**: Any unresolved critical finding (`severity: 'critical'` with missing/empty `resolution`) strictly blocks publication.

@@ -217,14 +217,38 @@ describe('production failure regressions', () => {
       { id: 'level-calibration', passed: true, evidence: 'Language complexity and cognitive depth are properly calibrated to the learner profile without downshifting.' },
     )
 
-    // Standard vocabulary recall item in practice (not in cap-transfer)
+    // Populate evidence plans for reading-dependent questions in canonical fixture
+    const readingQuestionIds = ['G2', 'G3', 'I1', 'I2', 'I3', 'P1', 'R1', 'H2', 'H3']
+    for (const qId of readingQuestionIds) {
+      pkg.qualityEvidence.criticalChecks.push({
+        id: `evidence-plan:${qId}`,
+        passed: true,
+        evidence: JSON.stringify({
+          evidenceScope: 'primary_reading',
+          evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mina joins a school robotics club' }],
+        }),
+      })
+    }
+    for (const qId of ['C1', 'C2', 'C3']) {
+      pkg.qualityEvidence.criticalChecks.push({
+        id: `cap-plan:${qId}`,
+        passed: true,
+        evidence: JSON.stringify({
+          precedentRef: '113-cap-reading-main-idea-01',
+          evidenceScope: 'primary_reading',
+          evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mina joins a school robotics club' }],
+        }),
+      })
+    }
+
+    // Standard vocabulary recall item in practice (not in cap-transfer, no evidence plan)
     const vocabQuestion = pkg.studentLesson.practice[0]!.questions[0]!
     vocabQuestion.itemType = 'vocabulary'
     vocabQuestion.targetIds = ['vocab-experiment']
     vocabQuestion.prompt = 'Choose the word that best completes the sentence: The scientist planned a new sort.'
     vocabQuestion.options = ['sort', 'water', 'sky', 'lunch']
 
-    // Standard grammar recall item in homework
+    // Standard grammar recall item in homework (no evidence plan)
     const grammarQuestion = pkg.studentLesson.homework.questions[0]!
     grammarQuestion.itemType = 'grammar'
     grammarQuestion.targetIds = ['grammar-do-does']
