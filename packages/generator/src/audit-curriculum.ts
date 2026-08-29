@@ -5,7 +5,7 @@ import type { CurriculumPackage } from './curriculum-package-schema.js'
 import { extractBlockTexts, resolveQuestionAnswerLetter } from './normalize-curriculum-package.js'
 import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' with { type: 'json' }
 import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
-import { auditCapPrecedentPackage } from './cap-precedent-audit.js'
+import { auditCapPrecedentPackage, auditReadingEvidenceBoundary } from './cap-precedent-audit.js'
 
 export type CurriculumAuditTier = 'auto-derived' | 'structural-critical' | 'semantic-critical'
 
@@ -273,6 +273,24 @@ const NON_EXECUTABLE_INSTRUCTION_ZH = /^(?:加油|待補|待填|無|略|任務|�
 
 function hasExecutableInstructionZh(value: string): boolean { return cjk(value) >= 1 && !NON_EXECUTABLE_INSTRUCTION_ZH.test(value.trim()) }
 
+/** Normalizes prompt version strings by removing optional "prompt/" prefix */
+export function normalizePromptVersion(rawPromptVersion?: string | null): string {
+  if (!rawPromptVersion) return ''
+  return rawPromptVersion.replace(/^prompt\//u, '').trim()
+}
+
+/** Checks whether a prompt version string meets or exceeds the specified target major/minor version */
+export function isPromptVersionGte(rawPromptVersion: string | undefined | null, targetMajor: number, targetMinor: number): boolean {
+  const norm = normalizePromptVersion(rawPromptVersion)
+  const match = norm.match(/^(\d+)\.(\d+)(?:\.(\d+))?/u)
+  if (!match) return false
+  const major = parseInt(match[1]!, 10)
+  const minor = parseInt(match[2]!, 10)
+  if (major > targetMajor) return true
+  if (major === targetMajor && minor >= targetMinor) return true
+  return false
+}
+
 /** Deterministic publish gate. This complements (never replaces) the independent LLM critic. */
 export function auditCurriculumPackage(
   input: unknown,
@@ -304,13 +322,18 @@ export function auditCurriculumPackage(
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
-  const isCapGovernedPrompt =
-    Boolean(pkg.metadata.promptVersion) &&
-    /prompt\/(?:2\.(?:9|10|[1-9]\d)|\d{2,})/u.test(pkg.metadata.promptVersion)
+  const rawPrompt = pkg.metadata.promptVersion ?? ''
+  const isCapGovernedPrompt = isPromptVersionGte(rawPrompt, 2, 9)
+  const isCritic5DimGovernedPrompt = isPromptVersionGte(rawPrompt, 2, 10)
 
-  if (isCapGovernedPrompt || pkg.metadata.promptVersion.startsWith('2.9') || pkg.metadata.promptVersion.startsWith('2.10')) {
+  if (isCapGovernedPrompt) {
     const capAudit = auditCapPrecedentPackage(pkg)
     for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)
+  }
+
+  const evidenceAudit = auditReadingEvidenceBoundary(pkg)
+  for (const message of evidenceAudit.findings) {
+    add('semantic-critical', 'evidence-boundary', 'critical', message)
   }
 
   if ('grounding' in pkg) {
@@ -463,7 +486,7 @@ export function auditCurriculumPackage(
     )
   }
 
-  // 5 Mandatory Critic Dimensions for prompt versions >= 2.9.0 / schema 2.3.0
+  // 5 Mandatory Critic Dimensions for prompt versions >= 2.10.0 / schema 2.3.0
   const MANDATORY_CRITIC_DIMENSIONS = [
     'evidence-boundary',
     'answer-entailment',
@@ -472,10 +495,11 @@ export function auditCurriculumPackage(
     'level-calibration',
   ] as const
 
-  if (isCapGovernedPrompt) {
+  if (isCritic5DimGovernedPrompt) {
     const checks = pkg.qualityEvidence.criticalChecks ?? []
     const findingsList = pkg.qualityEvidence.criticFindings ?? []
 
+    // 1. Critic Coverage
     for (const dim of MANDATORY_CRITIC_DIMENSIONS) {
       const checkMatch = checks.find(
         (c) => c.id === dim || c.id === `critic-${dim}` || c.id.includes(dim),
@@ -501,6 +525,49 @@ export function auditCurriculumPackage(
           'critical',
           `資深審查者 (Critic) 對 "${dim}" 維度的證據不足 (${evidenceText.trim().length} 字 < 30 字)。必須提供包含具體題號、單字或數據的實質審查證據。`,
         )
+      }
+
+      // 2. Mandatory Dimension Acceptance (must have a passed check)
+      if (checkMatch && checkMatch.passed === false) {
+        add(
+          'semantic-critical',
+          'critic-acceptance',
+          'critical',
+          `資深審查者 (Critic) 檢驗 "${dim}" 維度未通過 (passed: false)。必須由修復引擎完成修復並通過檢驗後方可發布。`,
+        )
+      } else if (!checkMatch || !checkMatch.passed) {
+        add(
+          'semantic-critical',
+          'critic-acceptance',
+          'critical',
+          `資深審查者 (Critic) 對 "${dim}" 維度尚未驗證通過 (缺少 passed: true 紀錄)。`,
+        )
+      }
+    }
+
+    // 3. Global Critical Checks Acceptance (all criticalChecks must be passed)
+    for (const check of checks) {
+      if (check.passed === false) {
+        add(
+          'semantic-critical',
+          'critic-acceptance',
+          'critical',
+          `關鍵檢驗項目 "${check.id}" 未通過 (passed: false)。必須由修復引擎完成修復並通過檢驗後方可發布。`,
+        )
+      }
+    }
+
+    // 4. Critic Findings Resolution Check
+    for (const f of findingsList) {
+      if (f.severity === 'critical') {
+        if (!f.resolution || f.resolution.trim().length === 0) {
+          add(
+            'semantic-critical',
+            'critic-acceptance',
+            'critical',
+            `資深審查者 (Critic) 在 "${f.dimension}" 發現未修復的重大缺失: "${f.finding}"。必須由修復引擎完成修復並記錄 resolution。`,
+          )
+        }
       }
     }
   }

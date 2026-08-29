@@ -106,7 +106,7 @@ function fiveGramHashes(text: string): Set<string> {
 }
 
 function parseJsonCheck<T>(pkg: PackageLike, id: string): T | null {
-  const check = pkg.qualityEvidence.criticalChecks.find((item) => item.id === id && item.passed)
+  const check = pkg?.qualityEvidence?.criticalChecks?.find((item) => item.id === id && item.passed)
   if (!check) return null
   try {
     return JSON.parse(check.evidence) as T
@@ -417,6 +417,123 @@ export function auditCapPrecedentPackage(
   const extraAggregateRefs = [...packageRefs].filter((ref) => !planRefs.has(ref))
   if (missingAggregateRefs.length > 0 || extraAggregateRefs.length > 0) {
     findings.push('CAP_PROVENANCE_INCONSISTENT: qualityEvidence.precedentRefs must equal the union of per-item cap-plan precedentRefs')
+  }
+
+  return { passed: findings.length === 0, findings }
+}
+
+export interface EvidenceBoundaryAuditResult {
+  passed: boolean
+  findings: string[]
+}
+
+/**
+ * Generic deterministic evidence-boundary audit for all reading-dependent questions across practice and homework.
+ * Ensures questions claiming reading evidence draw exclusively from primary reading prose,
+ * and detects cross-section instruction leakage without forcing vocabulary/grammar recall into CAP precedent machinery.
+ */
+export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundaryAuditResult {
+  const pkg = pkgInput as PackageLike
+  const findings: string[] = []
+  if (!pkg?.studentLesson) return { passed: true, findings }
+
+  const readingBlocks = (pkg.studentLesson.reading?.blocks ?? []) as Array<Record<string, unknown>>
+  const readingFullText = readingBlocks
+    .flatMap((b) => Object.values(b).filter((v): v is string => typeof v === 'string'))
+    .join(' ')
+    .toLowerCase()
+    .replace(/\s+/gu, ' ')
+
+  // Extract non-reading instruction / box content to detect cross-section leakage
+  const instructionSections = (pkg as any).studentLesson?.instruction ?? []
+  const instructionTexts: string[] = []
+  for (const inst of instructionSections) {
+    if (inst.titleZh) instructionTexts.push(inst.titleZh)
+    if (inst.explanationZh) instructionTexts.push(inst.explanationZh)
+    for (const p of inst.patterns ?? []) instructionTexts.push(p)
+    for (const ex of inst.workedExamples ?? []) {
+      if (ex.example) instructionTexts.push(ex.example)
+      if (ex.walkthroughZh) instructionTexts.push(ex.walkthroughZh)
+    }
+    for (const cm of inst.commonMistakes ?? []) {
+      if (cm.wrong) instructionTexts.push(cm.wrong)
+      if (cm.corrected) instructionTexts.push(cm.corrected)
+      if (cm.whyZh) instructionTexts.push(cm.whyZh)
+    }
+  }
+  const instructionFullText = instructionTexts.join(' ').toLowerCase().replace(/\s+/gu, ' ')
+
+  const allPractice = pkg.studentLesson?.practice ?? []
+  const allHomework = pkg.studentLesson?.homework?.questions ?? []
+  const allQuestions: Array<{ stage: string; question: QuestionLike }> = [
+    ...allPractice.flatMap((stage) => stage.questions.map((q) => ({ stage: stage.stage, question: q }))),
+    ...allHomework.map((q) => ({ stage: 'homework', question: q })),
+  ]
+
+  for (const { stage, question } of allQuestions) {
+    const plan = parseJsonCheck<CapAssessmentPlan>(pkg, `cap-plan-${question.id}`)
+    const isComprehension = COMPREHENSION_TYPES.has(question.itemType)
+    const isReadingTargeted = Array.isArray((question as any).targetIds) && (question as any).targetIds.some((t: string) => t.includes('reading') || t.includes('inference') || t.includes('evidence'))
+    const isReadingDependent = stage === 'cap-transfer' || isComprehension || isReadingTargeted || plan?.evidenceMode === 'text_only' || plan?.evidenceMode === 'multi_document'
+
+    if (plan) {
+      if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading' && isReadingDependent) {
+        findings.push(
+          `EVIDENCE_BOUNDARY_VIOLATION:${question.id}: reading-dependent question cannot claim evidence from "${plan.evidenceScope}"; evidenceScope must be primary_reading`,
+        )
+      }
+
+      if (plan.evidenceAnchors && Array.isArray(plan.evidenceAnchors)) {
+        for (const anchor of plan.evidenceAnchors) {
+          const locMatch = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail|speaker|note)$/u.exec(
+            anchor.location ?? '',
+          )
+          if (!locMatch) {
+            findings.push(
+              `EVIDENCE_LOCATION_INVALID:${question.id}:${anchor.location}: location must resolve to a studentLesson.reading.blocks field`,
+            )
+          } else {
+            const blockIndex = Number(locMatch[1])
+            const field = locMatch[2]!
+            const block = readingBlocks[blockIndex]
+            const prose = block?.[field]
+            if (typeof prose !== 'string') {
+              findings.push(`EVIDENCE_LOCATION_NOT_FOUND:${question.id}:${anchor.location}`)
+            } else if (typeof anchor.anchorText === 'string' && anchor.anchorText.trim().length > 0) {
+              const normProse = prose.toLowerCase().replace(/\s+/gu, ' ')
+              const normAnchor = anchor.anchorText.toLowerCase().replace(/\s+/gu, ' ').trim()
+              if (!normProse.includes(normAnchor)) {
+                findings.push(
+                  `EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchor text "${anchor.anchorText}" not found at ${anchor.location}`,
+                )
+              }
+            } else {
+              findings.push(`EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchorText must be non-empty string`)
+            }
+          }
+        }
+      }
+    }
+
+    // Verify quoted phrases inside prompt against reading text
+    const quotedMatches = question.prompt.match(/(?:["“]([^"”]+)["”]|(?:'|‘)([^'’]{4,})(?:'|’))/gu) ?? []
+    for (const rawQuoted of quotedMatches) {
+      const cleanQuote = rawQuoted.replace(/^["“'‘]|["”'’]$/gu, '').trim()
+      if (cleanQuote.length >= 4 && !/^(?:A|B|C|D|\d+)$/i.test(cleanQuote)) {
+        const normQuote = cleanQuote.toLowerCase().replace(/\s+/gu, ' ')
+        if (!readingFullText.includes(normQuote)) {
+          if (instructionFullText.includes(normQuote)) {
+            findings.push(
+              `EVIDENCE_BOUNDARY_LEAKAGE:${question.id}: quoted prompt text "${cleanQuote}" exists only in instruction/box content, not in primary reading prose`,
+            )
+          } else if (isReadingDependent) {
+            findings.push(
+              `EVIDENCE_QUOTE_MISMATCH:${question.id}: quoted prompt text "${cleanQuote}" does not exist in primary reading prose`,
+            )
+          }
+        }
+      }
+    }
   }
 
   return { passed: findings.length === 0, findings }

@@ -2767,7 +2767,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.4.0, schema 2.3.0, and prompt 2.9.2. Prompt 2.4.0 through 2.8.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 remains the inherited recency-aware overlay, Prompt 2.9.1 introduced the authoritative CAP precedent-first assessment contract, and Prompt 2.9.2 makes its serialized assessment-plan vocabulary machine-readable and shared by authoring and deterministic audit without changing the canonical grounding shape or CAP quality floor.
+New production authoring uses Engine 1.5.0, schema 2.3.0, and prompt 2.10.0. Prompt 2.4.0 through 2.8.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 remains the inherited recency-aware overlay, Prompt 2.9.x introduced the authoritative CAP precedent-first assessment contract and serialized assessment-plan vocabulary, and Prompt 2.10.0 upgrades the quality contract with strict primary-reading evidence boundaries, epistemic modality truth, and a 5-dimension adversarial critic gate.
 
 ---
 

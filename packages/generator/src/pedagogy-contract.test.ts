@@ -9,7 +9,7 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.9.2 active invariant contract with frozen 2.4.0 through 2.8.0 inheritance', () => {
+describe('Prompt 2.10.0 active invariant contract with frozen 2.4.0 through 2.8.0 inheritance', () => {
   it('enforces active Prompt 2.4.0 Wave 2 pedagogy invariants (Trigger-Pattern-Trap-Try, distractor reasoning, non-tautological explanations)', async () => {
     const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
     const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')

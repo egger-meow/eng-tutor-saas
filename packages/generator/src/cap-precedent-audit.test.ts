@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   auditCapPrecedentFloor,
   auditCapPrecedentPackage,
+  auditReadingEvidenceBoundary,
   retrieveCapPrecedents,
   type CapPrecedentRuntimeBundle,
 } from './cap-precedent-audit.js'
@@ -270,5 +271,62 @@ describe('CAP precedent deterministic quality floor', () => {
     const report = auditCapPrecedentPackage(pkg(plan(), quoteMismatchQuestion), runtime)
     expect(report.passed).toBe(false)
     expect(report.findings.join('\n')).toContain('CAP_QUOTE_EVIDENCE_MISMATCH:q1')
+  })
+
+  describe('auditReadingEvidenceBoundary', () => {
+    it('detects cross-section leakage when non-reading item quotes instruction boxes', () => {
+      const leakyPkg = {
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          instruction: [{ id: 'inst-1', titleZh: '情態助動詞', patterns: ['You must use may / might / could to express possibility.'] }],
+          practice: [{
+            stage: 'guided',
+            questions: [{
+              id: 'g1',
+              itemType: 'detail',
+              prompt: 'Based on the lesson, what does "may / might / could" mean?',
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: { questions: [] },
+        },
+      }
+      const report = auditReadingEvidenceBoundary(leakyPkg)
+      expect(report.passed).toBe(false)
+      expect(report.findings.join('\n')).toContain('EVIDENCE_BOUNDARY_LEAKAGE:g1')
+    })
+
+    it('passes standard vocabulary and grammar recall questions without requiring anchors or precedents', () => {
+      const recallPkg = {
+        studentLesson: {
+          reading: { blocks: [{ type: 'paragraph', text: 'Mia saw wet streets. She closed her umbrella.' }] },
+          instruction: [{ id: 'inst-1', titleZh: '規則動詞過去式', explanationZh: '動詞字尾加 ed。' }],
+          practice: [{
+            stage: 'guided',
+            questions: [{
+              id: 'vocab-1',
+              itemType: 'vocabulary',
+              prompt: 'Select the best word: She held her ______ in the rain.',
+              options: ['umbrella', 'chair', 'banana', 'pencil'],
+              writingLines: 0,
+              difficulty: 'on-level',
+            }],
+          }],
+          homework: {
+            questions: [{
+              id: 'grammar-1',
+              itemType: 'grammar',
+              prompt: 'Change "close" to past tense: Yesterday, she ______ the door.',
+              writingLines: 2,
+              difficulty: 'on-level',
+            }],
+          },
+        },
+      }
+      const report = auditReadingEvidenceBoundary(recallPkg)
+      expect(report.passed).toBe(true)
+      expect(report.findings).toEqual([])
+    })
   })
 })

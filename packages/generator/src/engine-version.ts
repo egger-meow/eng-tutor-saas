@@ -1,11 +1,11 @@
 /**
  * Canonical Central Engine Versioning for 紙屬英文
  *
- * - `CURRENT_ENGINE_VERSION`: Semantic version of the generation & pedagogy engine (currently '1.4.0')
+ * - `CURRENT_ENGINE_VERSION`: Semantic version of the generation & pedagogy engine (currently '1.5.0')
  * - `CURRENT_SCHEMA_VERSION`: Canonical schema version for curriculum package structure ('2.3.0')
- * - `CURRENT_PROMPT_VERSION`: Active prompt suite version ('2.9.2')
+ * - `CURRENT_PROMPT_VERSION`: Active prompt suite version ('2.10.0')
  * - `CURRENT_ERA_TAG`: Stable machine era identifier ('engine_v1')
- * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.1.0')
+ * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.2.0')
  */
 
 export const CURRENT_RELEASE_ID = 'rel_1.5.0'
