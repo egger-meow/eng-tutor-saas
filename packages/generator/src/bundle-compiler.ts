@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { CURRENT_ENGINE_VERSION } from './engine-version.js'
+import { serializedCapAssessmentPlanContract } from './cap-assessment-plan-contract.js'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(currentDir, '../../..')
@@ -106,6 +107,7 @@ export const SOURCE_FILES = [
   'docs/curriculum-quality-rubric.md',
   'docs/product-rules.md',
   'packages/generator/curriculum/cap-precedent-contract.md',
+  'packages/generator/src/cap-assessment-plan-contract.ts',
   'packages/generator/curriculum/cap-precedent-cards.json',
   'packages/generator/curriculum/cap-precedent-routing-index.json',
 ] as const
@@ -216,7 +218,7 @@ export async function compileProductionBundle(
   const readPromptStage = async (fileName: string) => {
     const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
       .replaceAll('2.2.0', '2.3.0')
-      .replaceAll('2.4.0', '2.9.1')
+      .replaceAll('2.4.0', '2.9.2')
     const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
     const workloadOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.6.0/${fileName}`), 'utf8')
     const mcqOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.7.0/${fileName}`), 'utf8')
@@ -238,9 +240,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.9.1-prod',
+    bundleVersion: '2.9.2-prod',
     schemaVersion: '2.3.0',
-    promptVersion: '2.9.1',
+    promptVersion: '2.9.2',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
@@ -291,6 +293,11 @@ export async function compileProductionBundle(
     '',
     '## 2A. CAP Precedent-First Contract',
     precedentContract.trim().replace(/\r\n/g, '\n'),
+    '',
+    '### Canonical CAP Assessment Plan Contract',
+    '```json',
+    serializedCapAssessmentPlanContract(),
+    '```',
     '',
     '## 2B. Compact CAP Precedent Routing Index',
     '```json',

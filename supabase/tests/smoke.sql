@@ -14,6 +14,9 @@ declare
   bridge_context jsonb;
   progression_context jsonb;
   bridge_fingerprint text;
+  bridge_submit_result jsonb;
+  bridge_attempt_before integer;
+  bridge_submission_count integer;
   first_package jsonb;
   second_package jsonb;
   completed_material_id uuid;
@@ -443,7 +446,7 @@ begin
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke')
   into bridge_claim_result;
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
     or not (bridge_claim_result ? 'claimed')
     or not (bridge_claim_result ? 'claimedCount')
     or not (bridge_claim_result ? 'normalCapacity')
@@ -531,7 +534,7 @@ begin
   delete from public.children
   where id = '00000000-0000-0000-0000-000000000006';
 
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
     or bridge_fingerprint !~ '^sha256:[0-9a-f]{64}$' then
     raise exception 'ChatGPT bridge did not return a server-owned SHA-256 fingerprint';
   end if;
@@ -563,7 +566,51 @@ begin
       'schemaVersion', '2.3.0', 'jobId', bridge_job_id::text,
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ));
-  perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', first_package);
+  select attempt_count into bridge_attempt_before
+  from public.generation_jobs where id = bridge_job_id;
+  select count(*) into bridge_submission_count
+  from private_generation.curriculum_submissions where job_id = bridge_job_id;
+
+  select private_generation.chatgpt_submit_curriculum_package_v2(
+    bridge_job_id, 'bridge-smoke', '{"metadata":'
+  ) into bridge_submit_result;
+  if bridge_submit_result <> jsonb_build_object(
+      'accepted', false, 'persisted', false,
+      'errorCode', 'INVALID_JSON_PAYLOAD', 'retryable', true
+    ) then
+    raise exception 'submit-v2 did not return structured invalid JSON recovery: %', bridge_submit_result;
+  end if;
+  if (select count(*) from private_generation.curriculum_submissions where job_id = bridge_job_id) <> bridge_submission_count
+    or (select attempt_count from public.generation_jobs where id = bridge_job_id) <> bridge_attempt_before then
+    raise exception 'malformed submit-v2 JSON persisted a submission or consumed retry budget';
+  end if;
+
+  select private_generation.chatgpt_submit_curriculum_package_v2(
+    bridge_job_id, 'bridge-smoke', first_package::text
+  ) into bridge_submit_result;
+  if bridge_submit_result ->> 'status' <> 'pending' then
+    raise exception 'valid submit-v2 payload did not persist: %', bridge_submit_result;
+  end if;
+  perform private_generation.chatgpt_submit_curriculum_package_v2(
+    bridge_job_id, 'bridge-smoke', first_package::text
+  );
+  if (select count(*) from private_generation.curriculum_submissions where job_id = bridge_job_id) <> bridge_submission_count + 1 then
+    raise exception 'submit-v2 idempotent retry persisted more than once';
+  end if;
+
+  blocked := false;
+  begin
+    perform private_generation.chatgpt_submit_curriculum_package_v2(
+      bridge_job_id,
+      'bridge-smoke',
+      jsonb_set(first_package, '{metadata,semanticMutation}', 'true'::jsonb, true)::text
+    );
+  exception when others then
+    blocked := true;
+  end;
+  if not blocked then
+    raise exception 'submit-v2 allowed semantic mutation within one authoring attempt';
+  end if;
   select canonical_source into first_package
   from private_generation.curriculum_submissions
   where job_id = bridge_job_id and authoring_attempt = 1;
@@ -621,7 +668,7 @@ begin
   end if;
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke') into bridge_claim_result;
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.2.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
     or not (bridge_claim_result ? 'claimed')
     or not (bridge_claim_result ? 'claimedCount')
     or not (bridge_claim_result ? 'normalCapacity')
@@ -652,7 +699,7 @@ begin
     'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repairMarker', 'targeted-attempt-2'
   ));
-  perform private_generation.chatgpt_submit_curriculum_package(bridge_job_id, 'bridge-smoke', second_package);
+  perform private_generation.chatgpt_submit_curriculum_package_v2(bridge_job_id, 'bridge-smoke', second_package::text);
   if (select canonical_source from private_generation.curriculum_submissions
       where job_id = bridge_job_id and authoring_attempt = 1) <> first_package then
     raise exception 'attempt 1 was mutated while submitting attempt 2';
@@ -1346,6 +1393,11 @@ begin
   end if;
   if has_function_privilege('service_role', 'private_generation.chatgpt_submit_curriculum_package(uuid,text,jsonb)', 'execute') then
     raise exception 'service role can bypass the app-only ChatGPT bridge';
+  end if;
+  if has_function_privilege('anon', 'private_generation.chatgpt_submit_curriculum_package_v2(uuid,text,text)', 'execute')
+    or has_function_privilege('authenticated', 'private_generation.chatgpt_submit_curriculum_package_v2(uuid,text,text)', 'execute')
+    or has_function_privilege('service_role', 'private_generation.chatgpt_submit_curriculum_package_v2(uuid,text,text)', 'execute') then
+    raise exception 'unauthorized role can execute chatgpt_submit_curriculum_package_v2 RPC';
   end if;
   if has_function_privilege('anon', 'private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)', 'execute')
     or has_function_privilege('authenticated', 'private_generation.chatgpt_release_unsubmitted_claim(uuid,text,text,text)', 'execute')
