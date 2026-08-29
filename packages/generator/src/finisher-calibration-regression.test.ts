@@ -168,18 +168,18 @@ describe('Finisher false-positive calibration', () => {
     const pkg = canonicalPackage()
     const firstTextBlock = pkg.studentLesson.reading.blocks.find((block: any) => typeof block.text === 'string')
     expect(firstTextBlock).toBeDefined()
-    firstTextBlock.text += ' The thin string is easy to see.'
+    firstTextBlock.text += ' The thin one is easy to see.'
     pkg.studentLesson.vocabulary.push({
       id: 'v-thin-regression',
       word: 'thin',
       partOfSpeech: 'adj.',
       meaningZh: '細的',
       pronunciationHint: null,
-      exampleEn: 'The thin string is easy to see.',
+      exampleEn: 'The thin one is easy to see.',
       exampleZh: '細弦很容易看到。',
       status: 'new',
     })
-    pkg.studentLesson.practice[0].questions[0].prompt = 'The thinner string is thinner.'
+    pkg.studentLesson.practice[0].questions[0].prompt = 'The thinner one is thinner.'
 
     const lexicalFindings = auditCurriculumPackage(pkg).findings.filter((finding) => finding.dimension === 'lexical-ceiling')
     expect(lexicalFindings).toEqual([])

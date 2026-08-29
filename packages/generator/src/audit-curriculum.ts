@@ -80,6 +80,21 @@ const IRREGULAR_INFLECTIONS: Readonly<Record<string, string[]>> = Object.entries
   {} as Record<string, string[]>,
 )
 
+function comparativeBaseCandidates(word: string, suffix: 'er' | 'est'): string[] {
+  const stem = word.slice(0, -suffix.length)
+  const candidates = new Set<string>([stem, `${stem}e`])
+
+  // happier/happiest -> happy
+  if (stem.endsWith('i') && stem.length > 1) candidates.add(`${stem.slice(0, -1)}y`)
+
+  // thinner/thinnest -> thin; bigger/biggest -> big
+  if (stem.length >= 2 && stem.at(-1) === stem.at(-2) && /[bcdfghjklmnpqrstvwxyz]$/u.test(stem)) {
+    candidates.add(stem.slice(0, -1))
+  }
+
+  return [...candidates]
+}
+
 function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   const normalized = word.toLowerCase().replace(/[’‘]/gu, "'").replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
   let w = normalized
@@ -128,8 +143,8 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   if (w.endsWith('ing') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e') || isBase(w.slice(0, -4)))) return true
   if (w.endsWith('ly') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
   if (w.endsWith('y') && isBase(w.slice(0, -1))) return true // e.g. shine -> shiny
-  if (w.endsWith('er') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
-  if (w.endsWith('est') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -2)))) return true
+  if (w.endsWith('er') && comparativeBaseCandidates(w, 'er').some(isBase)) return true
+  if (w.endsWith('est') && comparativeBaseCandidates(w, 'est').some(isBase)) return true
   if (w.endsWith('ty') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
   if (w.endsWith('ity') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e'))) return true
   if (w.endsWith('able') && (isBase(w.slice(0, -4)) || isBase(w.slice(0, -4) + 'e'))) return true
@@ -170,12 +185,16 @@ function getValidWordVariants(word: string): Set<string> {
   if (w.endsWith('y') && !/[aeiou]y$/u.test(w)) {
     variants.add(w.slice(0, -1) + 'ies')
     variants.add(w.slice(0, -1) + 'ied')
+    variants.add(w.slice(0, -1) + 'ier')
+    variants.add(w.slice(0, -1) + 'iest')
   } else if (/(?:s|sh|ch|x|z|o)$/u.test(w)) {
     variants.add(w + 'es')
   } else if (w.endsWith('e')) {
     variants.add(w + 's')
     variants.add(w + 'd')
     variants.add(w.slice(0, -1) + 'ing')
+    variants.add(w + 'r')
+    variants.add(w + 'st')
   } else {
     variants.add(w + 's')
   }
@@ -189,6 +208,7 @@ function getValidWordVariants(word: string): Set<string> {
       variants.add(w + lastChar + 'ed')
       variants.add(w + lastChar + 'ing')
       variants.add(w + lastChar + 'er')
+      variants.add(w + lastChar + 'est')
     }
   }
 
