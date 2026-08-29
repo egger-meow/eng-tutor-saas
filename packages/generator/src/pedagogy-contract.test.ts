@@ -10,7 +10,26 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.10.1 active invariant contract with frozen 2.4.0 through 2.8.0 and 2.10.0 inheritance', () => {
+describe('Prompt 2.11.0 consolidated active invariant contract with frozen historical provenance', () => {
+
+  it('keeps the active production prompt compact while covering the generalized exact-attribution hole', async () => {
+    const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/01-plan.md'), 'utf8')
+    const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/02-author.md'), 'utf8')
+    const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/03-critic.md'), 'utf8')
+    const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/04-repair.md'), 'utf8')
+
+    for (const stage of [plan, author, critic, repair]) {
+      expect(stage).toContain('2.11.0')
+      expect(stage).not.toContain('Apply the complete inherited')
+    }
+    expect(plan).toContain('explicit learner/profile/parent feedback')
+    expect(plan).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
+    expect(author).toContain('Do not fuse mode A')
+    expect(critic).toContain('Broad topical relevance is insufficient')
+    expect(critic).toContain('one mode’s limit to another mode’s workflow')
+    expect(repair).toContain('source/fact -> claim -> exact reading prose -> dependent instruction/question -> dependent answer/rationale')
+    expect(critic).not.toContain('Require ≥7 genuinely new lexical units')
+  })
   it('enforces active Prompt 2.4.0 Wave 2 pedagogy invariants (Trigger-Pattern-Trap-Try, distractor reasoning, non-tautological explanations)', async () => {
     const author240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/02-author.md'), 'utf8')
     const critic240 = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.4.0/03-critic.md'), 'utf8')
@@ -120,9 +139,9 @@ describe('Prompt 2.10.1 active invariant contract with frozen 2.4.0 through 2.8.
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.10.1-prod"')
+    expect(bundle).toContain('bundleVersion: "2.11.0-prod"')
     expect(bundle).toContain('schemaVersion: "2.4.0"')
-    expect(bundle).toContain('engineVersion: "1.5.0"')
+    expect(bundle).toContain('engineVersion: "1.6.0"')
 
     // Assert adaptiveExtension is optional in Schema 2.4 studentLesson
     const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape

@@ -1495,6 +1495,8 @@ Production assessment authoring consumes only the deterministically compiled **a
 
 ---
 
+Named-entity factual accuracy is relationship-specific. For claims about a named product, organization, model, version, mode, feature, API, policy, mechanism, or similarly scoped entity, semantic Author/Critic review must verify `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`. Broad topical relevance does not establish that binding, and separately true fragments from different modes/features must never be fused into a false relationship. This is a semantic grounding responsibility, not a deterministic product-keyword validator.
+
 # 62. Vocabulary Source
 
 Vocabulary progression should use an official / appropriate junior-high common-vocabulary foundation, including the existing 1200 + 800 concept used by `eng-tutor`.
@@ -2770,7 +2772,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.5.0, schema 2.4.0, and prompt 2.10.1. Prompt 2.4.0 through 2.8.0 and 2.10.0 sources are frozen historical inputs; historical packages remain readable but are not valid targets for new authoring. Prompt 2.8.0 remains the inherited recency-aware overlay, Prompt 2.9.x introduced the authoritative CAP precedent-first assessment contract and serialized assessment-plan vocabulary, Prompt 2.10.0 froze historical Week 1 inputs, and Prompt 2.10.1 with Schema 2.4.0 establishes structured response layout capabilities, relaxed heuristic lexical limits, and adversarial scope/constraint quality-hardening.
+New production authoring uses Engine 1.6.0, Schema 2.4.0, and Prompt 2.11.0. Prompt 2.11.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
 
 ---
 
@@ -3723,6 +3725,7 @@ Automated or semi-automated validation should eventually check:
 * current-event review distinguishes event dates from publication dates, rejects stale/undated required sources and unsupported recency, and never uses one universal age cutoff;
 * provenance timestamps are causal: `publishedAt`, when present, is not later than `accessedAt`, and neither source access nor publication is later than `researchedAt`;
 * required grounding accuracy and copyright critical checks pass.
+* semantic grounding accuracy verifies exact named-entity/version/mode capability and control-flow bindings, rejecting feature/mode fusion and unsupported composite attribution even when the sources are broadly topical.
 * Prompt 2.9+ normal assessment/application/comprehension items have per-item CAP assessment plans; relevant authoritative precedent retrieval cannot be silently skipped, while `anchor`, `blend`, and `calibration` modes may legitimately produce different structures.
 * package-level CAP precedent refs equal the union of per-item refs and resolve only to the authoritative non-holdout runtime bundle.
 * CAP language difficulty and cognitive depth are validated independently; simplifying English must not silently erase planned reasoning.
@@ -4199,6 +4202,9 @@ For weekly-material work specifically:
 28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
 29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, or cognitive-depth/shallow-assessment failures. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition and targeted repair.
 30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation.
+31. Grounding review for named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, and similar scoped entities must verify the exact relationship `entity/version/mode -> capability/behavior -> control flow/condition/limit/qualifier`. Reject semantic feature fusion or compositional attribution; do not implement product-specific deterministic keyword rules as a substitute for Critic judgment.
+32. Prompt 2.11.0 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
+
 
 ---
 
