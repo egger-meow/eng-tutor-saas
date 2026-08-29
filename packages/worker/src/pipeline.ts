@@ -144,7 +144,6 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
   const findings: CurriculumFailureEvidence['findings'] = []
   const vocabCapsule = context.vocabularyCapsule as Record<string, unknown> | undefined
   const knownVocabulary = progressionSet(vocabCapsule, ['dueForReview', 'weakRecent', 'uncertain', 'recentlyMastered'])
-  const dueVocabulary = progressionSet(vocabCapsule, ['dueForReview', 'weakRecent'])
   const introduced = new Set(pkg.trackingDelta.introducedVocabularyIds)
   const reviewed = new Set(pkg.trackingDelta.reviewedVocabularyIds)
 
@@ -159,8 +158,11 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
     if ((item.status === 'review' || item.status === 'repeated-miss') && !reviewed.has(item.id)) {
       findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.reviewedVocabularyIds', message: `Review vocabulary card "${item.word}" is missing from reviewedVocabularyIds.` })
     }
-    if ((item.status === 'review' || item.status === 'repeated-miss') && knownVocabulary.size > 0 && !dueVocabulary.has(item.id)) {
-      findings.push({ source: 'validation', dimension: 'forward-progression', path: `studentLesson.vocabulary.${item.id}`, message: `Review vocabulary "${item.word}" is not due or supported by actual difficulty evidence.` })
+    // Review timing is advisory to the Finisher: recent source-material feedback and the semantic Author/Critic
+    // may legitimately pull any previously exposed word back into review even when the scheduling capsule
+    // has not yet projected it into dueForReview/weakRecent. Keep only the objective exposure invariant hard.
+    if ((item.status === 'review' || item.status === 'repeated-miss') && knownVocabulary.size > 0 && !wasExposed) {
+      findings.push({ source: 'validation', dimension: 'forward-progression', path: `studentLesson.vocabulary.${item.id}`, message: `Review vocabulary "${item.word}" must have been previously exposed before it can be labeled review.` })
     }
   }
   for (const id of introduced) {
