@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { TabId, OperationsOverview, FailureIntelligence } from '../client/types.js'
 
 interface NavigationProps {
@@ -9,6 +9,22 @@ interface NavigationProps {
 }
 
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, overview, failures }) => {
+  const navRef = useRef<HTMLElement>(null)
+  const activeBtnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (activeBtnRef.current && navRef.current) {
+      const nav = navRef.current
+      const btn = activeBtnRef.current
+      const navRect = nav.getBoundingClientRect()
+      const btnRect = btn.getBoundingClientRect()
+
+      if (btnRect.left < navRect.left || btnRect.right > navRect.right) {
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+      }
+    }
+  }, [activeTab])
+
   const stuckCount = overview?.queueStats.overdueOrStuck || 0
   const failureCount = failures?.totalFailures || overview?.queueStats.failed || 0
   const tabs: Array<{ id: TabId; label: string; badge?: number; isAlert?: boolean }> = [
@@ -22,9 +38,26 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
     { id: 'waitlist', label: '等候名單', badge: overview?.capacity?.waitingCount || undefined },
     { id: 'export', label: 'AI 資料匯出' },
   ]
-  return <nav className="cockpit-nav" aria-label="管理功能">
-    {tabs.map((tab) => <button key={tab.id} className={'nav-tab-btn ' + (activeTab === tab.id ? 'active' : '')} onClick={() => setActiveTab(tab.id)}>
-      <span>{tab.label}</span>{tab.badge !== undefined && <span className={'tab-badge ' + (tab.isAlert ? 'alert' : '')}>{tab.badge}</span>}
-    </button>)}
-  </nav>
-}
+
+  return (
+    <nav className="cockpit-nav" ref={navRef} aria-label="管理功能">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.id
+        return (
+          <button
+            key={tab.id}
+            ref={isActive ? activeBtnRef : undefined}
+            className={'nav-tab-btn ' + (isActive ? 'active' : '')}
+            onClick={() => setActiveTab(tab.id)}
+            type="button"
+          >
+            <span>{tab.label}</span>
+            {tab.badge !== undefined && (
+              <span className={'tab-badge ' + (tab.isAlert ? 'alert' : '')}>{tab.badge}</span>
+            )}
+          </button>
+        )
+      })}
+    </nav>
+  )
+}

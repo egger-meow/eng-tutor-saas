@@ -130,10 +130,10 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
     <div>
       {/* Search Header */}
       <div className="cockpit-card" style={{ marginBottom: '20px' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <form onSubmit={handleSubmit} className="timeline-search-form">
           {data.availableChildren && data.availableChildren.length > 0 && (
-            <div style={{ minWidth: '220px' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+            <div className="timeline-search-field-grow">
+              <label className="form-label">
                 選擇在學孩子 (Quick Select)
               </label>
               <select
@@ -144,7 +144,7 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                   setInputWeek('')
                   onSearch(newChildId, '')
                 }}
-                style={{ width: '100%', background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '13px' }}
+                className="form-select"
               >
                 {data.availableChildren.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -155,21 +155,21 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
             </div>
           )}
 
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-              或手動輸入孩子 ID
+          <div className="timeline-search-field-grow">
+            <label className="form-label">
+              手動輸入孩子 ID
             </label>
             <input
               type="text"
               placeholder="輸入孩子 UUID…"
               value={inputChildId}
               onChange={(e) => setInputChildId(e.target.value)}
-              style={{ width: '100%', background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '13px' }}
+              className="form-input"
             />
           </div>
 
-          <div style={{ width: '160px' }}>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
+          <div className="timeline-search-field-sm">
+            <label className="form-label">
               教材週次
             </label>
             <input
@@ -177,17 +177,17 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
               placeholder="YYYY-MM-DD"
               value={inputWeek}
               onChange={(e) => setInputWeek(e.target.value)}
-              style={{ width: '100%', background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '13px' }}
+              className="form-input"
             />
           </div>
 
-          <div style={{ alignSelf: 'flex-end' }}>
+          <div className="timeline-search-action">
             <button
               type="submit"
-              className="refresh-btn"
-              style={{ background: '#2563eb', color: '#fff', borderColor: '#3b82f6', padding: '7px 16px', fontWeight: 600 }}
+              className="create-btn"
+              style={{ padding: '8px 18px' }}
             >
-              🔍 檢索生命週期
+              🔍 檢索
             </button>
           </div>
         </form>

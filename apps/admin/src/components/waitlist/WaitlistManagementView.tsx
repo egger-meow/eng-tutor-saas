@@ -225,7 +225,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
   return (
     <div className="tab-view-container">
       {/* 1. Top KPI Grid */}
-      <div className="overview-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: '24px' }}>
+      <div className="overview-stats-grid">
         <div className="stat-card">
           <div className="stat-label">系統容量上限 (Capacity)</div>
           <div className="stat-value highlight">{data.capacity} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>人</span></div>
@@ -366,7 +366,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
       <div className="section-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
           {/* Status Filter Tabs */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="sub-filter-bar" style={{ margin: 0 }}>
             {[
               { id: 'all', label: `全部 (${data.entries.length})` },
               { id: 'waiting', label: `等候中 (${data.waitingCount})` },
@@ -375,6 +375,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
             ].map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setStatusFilter(tab.id)}
                 style={{
                   padding: '6px 14px',
@@ -386,6 +387,7 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
                   background: statusFilter === tab.id ? '#1e3a8a' : '#1e293b',
                   color: statusFilter === tab.id ? '#93c5fd' : '#cbd5e1',
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {tab.label}
@@ -394,25 +396,18 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
           </div>
 
           {/* Search & Fallback Actions */}
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <input
               type="text"
               placeholder="搜尋 Email 或孩子姓名..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '6px',
-                border: '1px solid #475569',
-                background: '#0f172a',
-                color: '#f8fafc',
-                fontSize: '13px',
-                width: '200px',
-              }}
+              className="table-search-input"
             />
 
             {selectedChildIds.length > 0 && (
               <button
+                type="button"
                 className="action-btn"
                 onClick={handleBatchRelease}
                 style={{ background: '#059669', color: '#fff', fontSize: '13px', padding: '6px 12px' }}
@@ -422,11 +417,12 @@ export const WaitlistManagementView: React.FC<WaitlistManagementViewProps> = ({
             )}
 
             <button
+              type="button"
               className="action-btn"
               onClick={handleCopyEmails}
               style={{ background: '#334155', color: '#cbd5e1', fontSize: '13px', padding: '6px 12px' }}
             >
-              📋 {copyToast ? '已複製 Email 清單！' : '複製 Email 清單 (Fallback)'}
+              📋 {copyToast ? '已複製 Email 清單！' : '複製 Email 清單'}
             </button>
           </div>
         </div>

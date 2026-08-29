@@ -190,7 +190,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>以確定性詞彙分群，供未來 AI Prompt 迭代</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '12px', marginTop: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginTop: '12px' }}>
           {topicClusters.map((cluster) => (
             <div key={cluster.topic} className="topic-cluster-card">
               <div className="topic-header">
@@ -238,20 +238,20 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
 
       {/* Searchable Raw Feedback Stream */}
       <div className="cockpit-card">
-        <div className="section-title">
+        <div className="section-title search-section-title">
           <span>家長回饋明細檢索</span>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="feedback-search-controls">
             <input
               type="text"
               placeholder="搜尋關鍵字 (如: 段考, 單字, 喜歡)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '4px 10px', borderRadius: '4px', fontSize: '12px', width: '220px' }}
+              className="feedback-search-input"
             />
             <select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
-              style={{ background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}
+              className="feedback-filter-select"
             >
               <option value="all">全部難度</option>
               <option value="good">剛剛好</option>
@@ -261,7 +261,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
             <select
               value={weakAreaFilter}
               onChange={(e) => setWeakAreaFilter(e.target.value)}
-              style={{ background: 'var(--bg-main)', border: '1px solid var(--border-strong)', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}
+              className="feedback-filter-select"
             >
               <option value="all">全部弱項</option>
               <option value="vocabulary">單字</option>
@@ -271,6 +271,7 @@ export const ParentFeedbackIntelligenceView: React.FC<ParentFeedbackIntelligence
             </select>
           </div>
         </div>
+
 
         <div className="data-table-wrapper" style={{ marginTop: '12px' }}>
           <table className="cockpit-table">

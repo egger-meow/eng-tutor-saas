@@ -437,87 +437,92 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
 
       {/* Feedback Modal */}
       {showFeedbackModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '24px',
-        }}>
-          <div className="cockpit-card" style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', background: '#0f172a', border: '1px solid #334155' }}>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', marginBottom: '12px' }}>
-              📝 填寫測試學習反饋 (Week {status?.completedWeeksCount})
+        <div className="modal-overlay">
+          <div className="cockpit-card modal-dialog-lg" style={{ maxWidth: '560px' }}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-main)' }}>
+                📝 填寫測試學習反饋 (Week {status?.completedWeeksCount})
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowFeedbackModal(false)}
+                className="modal-close-btn"
+                aria-label="關閉"
+              >
+                ✕
+              </button>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-              此反饋將以 production 格式寫入，並於按下「Advance 1 Test Week」時成為下一週生成的參考依據。
-            </p>
 
-            <form onSubmit={handleSaveFeedback} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                  難易度感受 (Difficulty)
-                </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {[
-                    { val: 1, label: '太簡單 (1)' },
-                    { val: 2, label: '偏易 (2)' },
-                    { val: 3, label: '適中 (3)' },
-                    { val: 4, label: '偏難 (4)' },
-                    { val: 5, label: '太難 (5)' },
-                  ].map((d) => (
-                    <button
-                      key={d.val}
-                      type="button"
-                      onClick={() => setFeedbackDifficulty(d.val)}
-                      style={{
-                        flex: 1,
-                        padding: '6px 4px',
-                        fontSize: '11px',
-                        borderRadius: '4px',
-                        background: feedbackDifficulty === d.val ? '#7c3aed' : 'var(--bg-main)',
-                        color: feedbackDifficulty === d.val ? '#fff' : '#94a3b8',
-                        border: '1px solid var(--border-strong)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 14px' }}>
+                此反饋將以 production 格式寫入，並於按下「推進 1 個測試週」時成為下一週生成的參考依據。
+              </p>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
-                  完成度 (Completion Rate)
-                </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {[0, 25, 50, 75, 100].map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setFeedbackCompletion(c)}
-                      style={{
-                        flex: 1,
-                        padding: '6px 4px',
-                        fontSize: '11px',
-                        borderRadius: '4px',
-                        background: feedbackCompletion === c ? '#2563eb' : 'var(--bg-main)',
-                        color: feedbackCompletion === c ? '#fff' : '#94a3b8',
-                        border: '1px solid var(--border-strong)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {c}%
-                    </button>
-                  ))}
+              <form id="test-feedback-form" onSubmit={handleSaveFeedback} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label className="form-label">
+                    難易度感受 (Difficulty)
+                  </label>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[
+                      { val: 1, label: '太簡單 (1)' },
+                      { val: 2, label: '偏易 (2)' },
+                      { val: 3, label: '適中 (3)' },
+                      { val: 4, label: '偏難 (4)' },
+                      { val: 5, label: '太難 (5)' },
+                    ].map((d) => (
+                      <button
+                        key={d.val}
+                        type="button"
+                        onClick={() => setFeedbackDifficulty(d.val)}
+                        style={{
+                          flex: '1 1 50px',
+                          minWidth: '55px',
+                          padding: '6px 4px',
+                          fontSize: '11px',
+                          borderRadius: '4px',
+                          background: feedbackDifficulty === d.val ? '#7c3aed' : 'var(--bg-main)',
+                          color: feedbackDifficulty === d.val ? '#fff' : '#94a3b8',
+                          border: '1px solid var(--border-strong)',
+                          cursor: 'pointer',
+                          minHeight: '34px',
+                        }}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <label className="form-label">
+                    完成度 (Completion Rate)
+                  </label>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[0, 25, 50, 75, 100].map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setFeedbackCompletion(c)}
+                        style={{
+                          flex: '1 1 45px',
+                          minWidth: '45px',
+                          padding: '6px 4px',
+                          fontSize: '11px',
+                          borderRadius: '4px',
+                          background: feedbackCompletion === c ? '#2563eb' : 'var(--bg-main)',
+                          color: feedbackCompletion === c ? '#fff' : '#94a3b8',
+                          border: '1px solid var(--border-strong)',
+                          cursor: 'pointer',
+                          minHeight: '34px',
+                        }}
+                      >
+                        {c}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
 
               <div>
                 <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 600 }}>
@@ -620,34 +625,23 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '24px',
-        }}>
-          <div className="cockpit-card" style={{ maxWidth: '520px', width: '100%', background: '#0f172a', border: '1px solid #ef4444', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+        <div className="modal-overlay">
+          <div className="cockpit-card modal-dialog-sm" style={{ border: '1px solid #ef4444' }}>
             <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', marginBottom: '12px' }}>
-              ⚠️ 重設測試學員回開通起點 （重設至開通起點）？
+              ⚠️ 重設測試學員回開通起點？
             </div>
             <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6', marginBottom: '14px' }}>
               此操作為 <strong>長週期測試環境專用</strong>：
             </p>
             <ul style={{ fontSize: '12px', color: '#94a3b8', lineHeight: '1.6', paddingLeft: '20px', margin: '0 0 16px' }}>
-              <li><strong>完整保留</strong>：家長帳號、孩子 Profile、基準等級、年級 (G7-9)、版本 (康軒/翰林/南一)、興趣偏好、訂閱資格。</li>
+              <li><strong>完整保留</strong>：家長帳號、孩子 Profile、基準等級、年級、版本、興趣偏好、訂閱資格。</li>
               <li><strong>清空重設</strong>：已生成之每週教材、反饋、單字記憶、文法進度、歷史摘要與 Quality Observations。</li>
               <li><strong>自動清理</strong>：透過 Supabase Storage API 清除已上傳之私有 PDF 檔案。</li>
               <li><strong>重新排程</strong>：立即建立一份全新的 第 1 週 待生成任務。</li>
@@ -656,7 +650,6 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               <button
                 type="button"
                 className="refresh-btn"
-                style={{ background: 'transparent', color: '#94a3b8', borderColor: '#475569' }}
                 onClick={() => setShowResetModal(false)}
                 disabled={actionLoading}
               >
@@ -664,8 +657,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               </button>
               <button
                 type="button"
-                className="refresh-btn"
-                style={{ background: '#dc2626', color: '#fff', borderColor: '#ef4444', fontWeight: 700 }}
+                className="action-btn-danger"
                 onClick={handleResetConfirm}
                 disabled={actionLoading}
               >

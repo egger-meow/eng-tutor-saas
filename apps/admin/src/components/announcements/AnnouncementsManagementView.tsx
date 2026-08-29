@@ -161,31 +161,19 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
   const stats = data?.stats || { total: 0, draft: 0, published: 0, archived: 0 }
 
   return (
-    <div className="cockpit-view-container">
+    <div className="cockpit-view-container announcements-view">
       {/* Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="view-header-bar">
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
-            公告管理
-          </h2>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+          <h2 className="view-page-title">公告管理</h2>
+          <p className="view-page-subtitle">
             發布與管理給家長查看的產品改版、教材更新與維護公告。
           </p>
         </div>
 
         <button
           type="button"
-          className="button button-action"
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#059669',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '14px',
-          }}
+          className="create-btn"
           onClick={openCreateModal}
         >
           ＋ 建立新公告
@@ -193,7 +181,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
       </div>
 
       {/* Filter Tabs & Stats Bar */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div className="sub-filter-bar" role="tablist" aria-label="公告狀態篩選">
         <button
           type="button"
           className={`nav-tab-btn ${currentFilter === 'all' ? 'active' : ''}`}
@@ -225,21 +213,21 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
       </div>
 
       {/* Announcements Table */}
-      <div className="cockpit-card" style={{ padding: '0', overflow: 'hidden' }}>
+      <div className="data-table-wrapper">
         {announcements.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="table-empty-notice">
             目前沒有符合條件的公告項目。
           </div>
         ) : (
-          <table className="cockpit-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="cockpit-table">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
-                <th style={{ padding: '12px 16px', width: '90px' }}>狀態</th>
-                <th style={{ padding: '12px 16px', width: '100px' }}>分類</th>
-                <th style={{ padding: '12px 16px' }}>標題</th>
-                <th style={{ padding: '12px 16px', width: '160px' }}>發布時間</th>
-                <th style={{ padding: '12px 16px', width: '160px' }}>更新時間</th>
-                <th style={{ padding: '12px 16px', width: '140px', textAlign: 'right' }}>操作</th>
+              <tr>
+                <th style={{ width: '90px' }}>狀態</th>
+                <th style={{ width: '100px' }}>分類</th>
+                <th>標題</th>
+                <th style={{ width: '150px' }}>發布時間</th>
+                <th style={{ width: '150px' }}>更新時間</th>
+                <th style={{ width: '130px', textAlign: 'right' }}>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -248,17 +236,17 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 const statusInfo = STATUS_MAP[item.status] || STATUS_MAP.draft
 
                 return (
-                  <tr key={item.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px 16px' }}>
+                  <tr key={item.id}>
+                    <td>
                       <span className={statusInfo.badgeClass}>{statusInfo.label}</span>
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td>
                       <span
                         style={{
                           display: 'inline-block',
                           padding: '2px 8px',
                           borderRadius: '999px',
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 600,
                           backgroundColor: catInfo.bg,
                           color: catInfo.color,
@@ -267,8 +255,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         {catInfo.label}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '4px' }}>
                         {item.title}
                       </div>
                       <div
@@ -284,18 +272,17 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         {item.body.slice(0, 80)}
                       </div>
                     </td>
-                    <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                    <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       {formatDate(item.published_at)}
                     </td>
-                    <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                    <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       {formatDate(item.updated_at)}
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '8px' }}>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'inline-flex', gap: '6px' }}>
                         <button
                           type="button"
-                          className="button button-quiet"
-                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          className="action-btn-sm"
                           onClick={() => openEditModal(item)}
                         >
                           編輯
@@ -304,8 +291,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         {item.status !== 'archived' && (
                           <button
                             type="button"
-                            className="button button-quiet"
-                            style={{ padding: '4px 8px', fontSize: '12px', color: '#b91c1c' }}
+                            className="action-btn-sm danger"
                             onClick={() => setConfirmArchiveId(item.id)}
                           >
                             封存
@@ -323,35 +309,16 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
 
       {/* Confirmation Modal for Archive */}
       {confirmArchiveId && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            className="cockpit-card"
-            style={{
-              width: '420px',
-              padding: '24px',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <h3 style={{ margin: '0 0 12px', fontSize: '16px', color: '#1e293b' }}>確認封存此公告？</h3>
-            <p style={{ margin: '0 0 20px', fontSize: '14px', color: '#64748b', lineHeight: 1.5 }}>
+        <div className="modal-overlay">
+          <div className="cockpit-card modal-dialog-sm">
+            <h3 style={{ margin: '0 0 12px', fontSize: '16px', color: 'var(--text-main)' }}>確認封存此公告？</h3>
+            <p style={{ margin: '0 0 20px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
               封存後，此公告將立即從家長端的「最新消息」移除，但仍會保留在後台歷史紀錄中。
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
-                className="button button-quiet"
+                className="refresh-btn"
                 disabled={isSubmitting}
                 onClick={() => setConfirmArchiveId(null)}
               >
@@ -359,8 +326,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
               </button>
               <button
                 type="button"
-                className="button"
-                style={{ backgroundColor: '#dc2626', color: 'white', border: 'none' }}
+                className="action-btn-danger"
                 disabled={isSubmitting}
                 onClick={() => handleArchive(confirmArchiveId)}
               >
@@ -373,82 +339,38 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
 
       {/* Editor Modal */}
       {isEditorOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-        >
-          <div
-            className="cockpit-card"
-            style={{
-              width: 'min(780px, 100%)',
-              maxHeight: '90vh',
-              display: 'flex',
-              flexDirection: 'column',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              padding: 0,
-            }}
-          >
+        <div className="modal-overlay">
+          <div className="cockpit-card modal-dialog-lg">
             {/* Modal Header */}
-            <div
-              style={{
-                padding: '16px 24px',
-                borderBottom: '1px solid var(--border-color)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: '18px', color: '#1e293b' }}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-main)' }}>
                 {editingItem ? '編輯公告' : '建立新公告'}
               </h3>
               <button
                 type="button"
                 onClick={closeEditor}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                }}
+                className="modal-close-btn"
+                aria-label="關閉"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+            <div className="modal-body">
               {feedbackMessage && (
                 <div
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    marginBottom: '16px',
-                    fontSize: '13px',
-                    backgroundColor: feedbackMessage.type === 'error' ? '#fee2e2' : '#dcfce7',
-                    color: feedbackMessage.type === 'error' ? '#991b1b' : '#166534',
-                  }}
+                  className={`modal-feedback-alert ${feedbackMessage.type}`}
                 >
                   {feedbackMessage.text}
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="form-row-2col">
                 <div>
                   <label
                     htmlFor="announcement-title"
-                    style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}
+                    className="form-label"
                   >
                     公告標題 *
                   </label>
@@ -458,21 +380,14 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="例：每週教材現在更懂孩子的回饋了"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '14px',
-                      boxSizing: 'border-box',
-                    }}
+                    className="form-input"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="announcement-category"
-                    style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}
+                    className="form-label"
                   >
                     分類 *
                   </label>
@@ -480,15 +395,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     id="announcement-category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value as AnnouncementCategory)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '14px',
-                      backgroundColor: 'white',
-                      boxSizing: 'border-box',
-                    }}
+                    className="form-select"
                   >
                     <option value="feature">新功能</option>
                     <option value="material">教材更新</option>
@@ -499,11 +406,12 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
               </div>
 
               {/* Markdown Body Tabs */}
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginTop: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <label
                     htmlFor="announcement-body"
-                    style={{ fontSize: '13px', fontWeight: 600 }}
+                    className="form-label"
+                    style={{ marginBottom: 0 }}
                   >
                     公告內容 (Markdown) *
                   </label>
@@ -511,30 +419,14 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     <button
                       type="button"
                       onClick={() => setPreviewTab('write')}
-                      style={{
-                        padding: '3px 10px',
-                        fontSize: '12px',
-                        borderRadius: '4px',
-                        border: '1px solid #cbd5e1',
-                        backgroundColor: previewTab === 'write' ? '#0f172a' : '#f8fafc',
-                        color: previewTab === 'write' ? 'white' : '#475569',
-                        cursor: 'pointer',
-                      }}
+                      className={`editor-tab-btn ${previewTab === 'write' ? 'active' : ''}`}
                     >
                       編輯
                     </button>
                     <button
                       type="button"
                       onClick={() => setPreviewTab('preview')}
-                      style={{
-                        padding: '3px 10px',
-                        fontSize: '12px',
-                        borderRadius: '4px',
-                        border: '1px solid #cbd5e1',
-                        backgroundColor: previewTab === 'preview' ? '#0f172a' : '#f8fafc',
-                        color: previewTab === 'preview' ? 'white' : '#475569',
-                        cursor: 'pointer',
-                      }}
+                      className={`editor-tab-btn ${previewTab === 'preview' ? 'active' : ''}`}
                     >
                       即時預覽
                     </button>
@@ -546,31 +438,12 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     id="announcement-body"
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    rows={12}
+                    rows={10}
                     placeholder="支援段落、粗體 (**text**)、清單 (- 或 1.)、連結 ([text](url)) 等輕量 Markdown。"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '14px',
-                      fontFamily: 'monospace',
-                      lineHeight: 1.5,
-                      boxSizing: 'border-box',
-                      resize: 'vertical',
-                    }}
+                    className="form-textarea"
                   />
                 ) : (
-                  <div
-                    style={{
-                      minHeight: '260px',
-                      padding: '16px',
-                      borderRadius: '6px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#f8fafc',
-                      fontSize: '14px',
-                    }}
-                  >
+                  <div className="markdown-preview-container">
                     <MarkdownPreview content={body} />
                   </div>
                 )}
@@ -578,28 +451,19 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
             </div>
 
             {/* Modal Footer Actions */}
-            <div
-              style={{
-                padding: '16px 24px',
-                borderTop: '1px solid var(--border-color)',
-                backgroundColor: '#f8fafc',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
+            <div className="modal-footer">
               <div>
                 {editingItem?.published_at && (
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>
-                    原始發布時間：{formatDate(editingItem.published_at)}
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                    原始發布：{formatDate(editingItem.published_at)}
                   </span>
                 )}
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   type="button"
-                  className="button button-quiet"
+                  className="refresh-btn"
                   disabled={isSubmitting}
                   onClick={closeEditor}
                 >
@@ -609,26 +473,25 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 {(!editingItem || editingItem.status === 'draft') && (
                   <button
                     type="button"
-                    className="button"
-                    style={{ backgroundColor: '#475569', color: 'white', border: 'none' }}
+                    className="refresh-btn"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-main)' }}
                     disabled={isSubmitting}
                     onClick={() => handleSave('draft')}
                   >
-                    {isSubmitting ? '儲存中…' : '儲存為草稿'}
+                    {isSubmitting ? '儲存中…' : '存草稿'}
                   </button>
                 )}
 
                 <button
                   type="button"
-                  className="button"
-                  style={{ backgroundColor: '#059669', color: 'white', border: 'none' }}
+                  className="create-btn"
                   disabled={isSubmitting}
                   onClick={() => handleSave('published')}
                 >
                   {isSubmitting
                     ? '處理中…'
                     : editingItem?.status === 'published'
-                    ? '更新發布內容'
+                    ? '更新發布'
                     : '立即發布'}
                 </button>
               </div>
