@@ -1770,6 +1770,15 @@ begin
   if exists (select 1 from public.feedback where child_id = '00000000-0000-0000-0000-000000000099') then
     raise exception 'feedback was not cleared on reset';
   end if;
+  if exists (select 1 from public.child_learning_evidence where child_id = '00000000-0000-0000-0000-000000000099') then
+    raise exception 'child learning evidence was not cleared on reset';
+  end if;
+  if exists (select 1 from public.child_weekly_learning_snapshots where child_id = '00000000-0000-0000-0000-000000000099') then
+    raise exception 'child snapshots were not cleared on reset';
+  end if;
+  if exists (select 1 from public.feedback_memory_processing where child_id = '00000000-0000-0000-0000-000000000099') then
+    raise exception 'feedback memory processing was not cleared on reset';
+  end if;
   if (select count(*) from public.generation_jobs where child_id = '00000000-0000-0000-0000-000000000099' and status = 'pending') <> 1 then
     raise exception 'did not recreate exactly one fresh pending job on reset';
   end if;
