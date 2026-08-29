@@ -18,13 +18,13 @@ Also inspect personalization, grammar/vocabulary progression truth, self-study c
 
 ## 2. Grounding accuracy and exact attribution
 
-`grounding-accuracy` is a semantic gate, not a topical-source check. For every central factual proposition, verify that the cited fact/source supports the complete relationship the lesson states.
+`grounding-accuracy` is a semantic gate, not a topical-source check. For every central factual proposition, verify that the cited fact/source supports the complete relationship the lesson states. Broad topical relevance is insufficient.
 
 For named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, or similarly scoped entities, explicitly test:
 
 `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`
 
-Reject when the lesson swaps modes, merges features, transfers one mode's numeric limit to another mode's workflow, drops decisive conditions, converts marketing language into stronger fact, or fuses separately true fragments into a false relationship. A source being broadly about the same product or organization does **not** establish this binding.
+Reject when the lesson swaps modes, merges features, transfers one mode's numeric limit to another mode's workflow, drops decisive conditions, converts marketing language into stronger fact, or fuses separately true fragments into a false relationship. In particular, never transfer one mode’s limit to another mode’s workflow. A source being broadly about the same product or organization does **not** establish this binding.
 
 When a factual comparison is central to the lesson or multiple closely named modes/features appear in the source set, adversarially cross-check the bindings rather than assuming nearby source text belongs to the same feature.
 
