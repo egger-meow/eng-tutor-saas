@@ -2169,6 +2169,18 @@ export class AdminService {
       suggestedRemedy: string
       era: EraTag
       engineVersion?: string | null
+      occurrences: Array<{
+        id: string
+        jobId: string
+        childId?: string
+        childPseudonym: string
+        materialWeek: string
+        attempt: number
+        timestamp: string
+        message: string
+        stage: string
+        failureEvidence?: Record<string, unknown> | null
+      }>
     }> = {}
 
     const qualityRules: Record<string, {
@@ -2210,6 +2222,8 @@ export class AdminService {
           sampleMessage: msg,
           suggestedRemedy: this.suggestRemedy(code),
           era: jobEra,
+          engineVersion: job.engine_version || null,
+          occurrences: [],
         }
       }
       errorClusters[code].count++
@@ -2222,6 +2236,24 @@ export class AdminService {
         errorClusters[code].sampleMessage = msg
       }
 
+      const jobChildDisplayName = job.child_id ? childMap.get(job.child_id) : null
+      const jobPseudonym = job.child_id ? this.maskName(jobChildDisplayName, job.child_id) : `Job #${job.id.slice(0, 6)}`
+      const jobTimestamp = job.updated_at || job.created_at || new Date().toISOString()
+      const jobAttempt = Number(job.attempt_count) || 1
+
+      errorClusters[code].occurrences.push({
+        id: job.id,
+        jobId: job.id,
+        childId: job.child_id || undefined,
+        childPseudonym: jobPseudonym,
+        materialWeek: job.material_week || 'Week Cycle',
+        attempt: jobAttempt,
+        timestamp: jobTimestamp,
+        message: msg,
+        stage,
+        failureEvidence: job.failure_evidence || null,
+      })
+
       if (code === 'QUALITY_REJECTED' || msg.includes('Quality rubric') || msg.includes('Ceiling') || msg.includes('Jargon') || msg.includes('Guard')) {
         const ruleName = msg.includes(':') ? msg.split(':')[1].trim() : (code === 'QUALITY_REJECTED' ? 'Quality Rubric Rule' : code)
         if (!qualityRules[ruleName]) {
@@ -2231,18 +2263,29 @@ export class AdminService {
             description: msg,
             sampleFinding: msg,
             era: jobEra,
+            engineVersion: job.engine_version || null,
             children: new Set(), attempts: new Set(), recentExamples: [],
           }
         }
         qualityRules[ruleName].count++
         if (job.child_id) qualityRules[ruleName].children.add(job.child_id)
-        qualityRules[ruleName].attempts.add(Number(job.attempt_count) || 0)
+        qualityRules[ruleName].attempts.add(jobAttempt)
+        qualityRules[ruleName].recentExamples.push({
+          jobId: job.id,
+          childId: job.child_id || undefined,
+          childPseudonym: jobPseudonym,
+          materialWeek: job.material_week || 'Week Cycle',
+          attempt: jobAttempt,
+          timestamp: jobTimestamp,
+          message: msg,
+          evidence: job.failure_evidence || {},
+        })
       }
 
       recentFailuresList.push({
         id: job.id,
         jobId: job.id,
-        childPseudonym: this.maskName(childMap.get(job.child_id), job.child_id),
+        childPseudonym: jobPseudonym,
         materialWeek: job.material_week || 'Week Cycle',
         stage,
         errorCode: code,
@@ -2258,7 +2301,12 @@ export class AdminService {
       })
     }
 
+    const jobMap = new Map(allJobs.map((j) => [j.id, j]))
+
     for (const sub of activeFailedSubmissions) {
+      const parentJob = jobMap.get(sub.job_id)
+      const effectiveChildId = sub.child_id || parentJob?.child_id || undefined
+      const effectiveMaterialWeek = sub.material_week || parentJob?.material_week || 'Week Cycle'
       const code = sub.error_code || (sub.status === 'quality_rejected' ? 'QUALITY_REJECTED' : 'CURRICULUM_PIPELINE_FAILED')
       const msg = sub.error_message || (sub.status === 'quality_rejected' ? 'Curriculum quality verification rejected by Finisher' : 'Finisher processing failure')
       const stage = sub.status === 'quality_rejected' ? 'finisher_audit' : 'chatgpt_authoring'
@@ -2290,14 +2338,34 @@ export class AdminService {
           sampleMessage: msg,
           suggestedRemedy: this.suggestRemedy(code),
           era: subEra,
+          engineVersion: sub.engine_version || null,
+          occurrences: [],
         }
       }
       errorClusters[code].count++
-      if (sub.child_id) {
-        errorClusters[code].affectedChildren.add(sub.child_id)
+      if (effectiveChildId) {
+        errorClusters[code].affectedChildren.add(effectiveChildId)
       } else {
         errorClusters[code].affectedChildren.add(sub.job_id)
       }
+
+      const childDisplayName = effectiveChildId ? childMap.get(effectiveChildId) : null
+      const pseudonym = effectiveChildId ? this.maskName(childDisplayName, effectiveChildId) : `Job #${sub.job_id.slice(0, 6)}`
+      const subTimestamp = sub.processed_at || sub.submitted_at || new Date().toISOString()
+      const subAttempt = Number(sub.authoring_attempt) || 1
+
+      errorClusters[code].occurrences.push({
+        id: `${sub.job_id}_${sub.authoring_attempt}`,
+        jobId: sub.job_id,
+        childId: effectiveChildId,
+        childPseudonym: pseudonym,
+        materialWeek: effectiveMaterialWeek,
+        attempt: subAttempt,
+        timestamp: subTimestamp,
+        message: msg,
+        stage,
+        failureEvidence: sub.failure_evidence || null,
+      })
 
       if (sub.failure_evidence && typeof sub.failure_evidence === 'object') {
         const evidence = sub.failure_evidence as any
@@ -2311,34 +2379,31 @@ export class AdminService {
               description: finding.description || finding.message || ruleName,
               sampleFinding: finding.message || JSON.stringify(finding),
               era: subEra,
+              engineVersion: sub.engine_version || null,
               children: new Set(), attempts: new Set(), recentExamples: [],
             }
           }
           qualityRules[ruleName].count++
-          qualityRules[ruleName].children.add(sub.child_id || sub.job_id)
-          qualityRules[ruleName].attempts.add(Number(sub.authoring_attempt) || 0)
-          if (qualityRules[ruleName].recentExamples.length < 5) {
-            qualityRules[ruleName].recentExamples.push({
-              jobId: sub.job_id,
-              childPseudonym: sub.child_id ? this.maskName(childMap.get(sub.child_id), sub.child_id) : `Job #${sub.job_id.slice(0, 6)}`,
-              materialWeek: sub.material_week || 'Week Cycle',
-              attempt: Number(sub.authoring_attempt) || 0,
-              timestamp: sub.processed_at || sub.submitted_at,
-              message: finding.message || finding.description || ruleName,
-              evidence: sub.failure_evidence,
-            })
-          }
+          qualityRules[ruleName].children.add(effectiveChildId || sub.job_id)
+          qualityRules[ruleName].attempts.add(subAttempt)
+          qualityRules[ruleName].recentExamples.push({
+            jobId: sub.job_id,
+            childId: effectiveChildId,
+            childPseudonym: pseudonym,
+            materialWeek: effectiveMaterialWeek,
+            attempt: subAttempt,
+            timestamp: subTimestamp,
+            message: finding.message || finding.description || ruleName,
+            evidence: sub.failure_evidence,
+          })
         }
       }
-
-      const childDisplayName = sub.child_id ? childMap.get(sub.child_id) : null
-      const pseudonym = sub.child_id ? this.maskName(childDisplayName, sub.child_id) : `Job #${sub.job_id.slice(0, 6)}`
 
       recentFailuresList.push({
         id: `${sub.job_id}_${sub.authoring_attempt}`,
         jobId: sub.job_id,
         childPseudonym: pseudonym,
-        materialWeek: sub.material_week || 'Week Cycle',
+        materialWeek: effectiveMaterialWeek,
         stage,
         errorCode: code,
         errorMessage: msg,
@@ -2389,6 +2454,7 @@ export class AdminService {
       suggestedRemedy: data.suggestedRemedy,
       era: data.era,
       engineVersion: data.engineVersion,
+      occurrences: data.occurrences.sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
     })).sort((a, b) => b.count - a.count)
 
     const qualityRuleViolations: FailureIntelligence['qualityRuleViolations'] = Object.entries(qualityRules).map(([rule, data]) => ({
@@ -2401,7 +2467,7 @@ export class AdminService {
       engineVersion: data.engineVersion,
       affectedChildrenCount: data.children.size,
       attempts: [...data.attempts].sort((a, b) => a - b),
-      recentExamples: data.recentExamples,
+      recentExamples: data.recentExamples.sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
     })).sort((a, b) => b.count - a.count)
 
     const dailyTrend: FailureIntelligence['dailyTrend'] = Object.entries(dailyCounts)

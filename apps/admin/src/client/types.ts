@@ -331,6 +331,18 @@ export interface FailureIntelligence {
     suggestedRemedy: string
     era: EraTag
     engineVersion?: string | null
+    occurrences?: Array<{
+      id: string
+      jobId: string
+      childId?: string
+      childPseudonym: string
+      materialWeek: string
+      attempt: number
+      timestamp: string
+      message: string
+      stage: string
+      failureEvidence?: Record<string, unknown> | null
+    }>
   }>
   qualityRuleViolations: Array<{
     rule: string
@@ -344,6 +356,7 @@ export interface FailureIntelligence {
     attempts: number[]
     recentExamples: Array<{
       jobId: string
+      childId?: string
       childPseudonym: string
       materialWeek: string
       attempt: number

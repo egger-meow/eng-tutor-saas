@@ -574,6 +574,8 @@ describe('AdminService Authoritative Truth Layer', () => {
           data: [
             {
               job_id: 'job-err-2',
+              child_id: 'c-1',
+              material_week: '2026-08-17',
               authoring_attempt: 1,
               status: 'quality_rejected',
               error_code: 'QUALITY_REJECTED',
@@ -620,6 +622,16 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(failures.qualityRuleViolations[0].rule).toBe('Lexical Ceiling Guard')
     expect(failures.qualityRuleViolations[0].category).toBe('lexical_ceiling')
     expect(failures.qualityRuleViolations[0].sampleFinding).toContain('meticulous')
+    expect(failures.qualityRuleViolations[0].recentExamples.length).toBe(1)
+    expect(failures.qualityRuleViolations[0].recentExamples[0].childId).toBe('c-1')
+    expect(failures.qualityRuleViolations[0].recentExamples[0].childPseudonym).toBe('林*豪')
+    expect(failures.qualityRuleViolations[0].recentExamples[0].materialWeek).toBe('2026-08-17')
+    expect(failures.qualityRuleViolations[0].recentExamples[0].attempt).toBe(1)
+
+    expect(clipped?.occurrences?.length).toBe(1)
+    expect(clipped?.occurrences?.[0].childId).toBe('c-1')
+    expect(clipped?.occurrences?.[0].childPseudonym).toBe('林*豪')
+    expect(clipped?.occurrences?.[0].materialWeek).toBe('2026-08-17')
   })
 
   it('aggregates Parent Feedback Intelligence with deterministic keyword clustering and PII masking', async () => {
