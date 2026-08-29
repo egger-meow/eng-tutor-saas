@@ -87,7 +87,7 @@ export {
   FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS,
 } from './validate-curriculum-package.js'
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
-export { auditCurriculumPackage } from './audit-curriculum.js'
+export { auditCurriculumPackage, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
 export { auditCapPrecedentFloor, auditCapPrecedentPackage, auditReadingEvidenceBoundary, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'
 export type { CapAssessmentIntent, CapAssessmentPlan, CapDesignAnchor, CapPrecedentAuditResult, CapPrecedentRuntimeBundle, EvidenceBoundaryAuditResult, GenericEvidencePlan } from './cap-precedent-audit.js'
