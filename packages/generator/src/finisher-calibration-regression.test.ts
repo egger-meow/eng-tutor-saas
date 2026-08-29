@@ -141,6 +141,19 @@ describe('Finisher false-positive calibration', () => {
     expect(evidenceReport.passed).toBe(true)
   })
 
+  it('keeps a constructed speaker quote exempt even when the follow-up asks students to use the reading', () => {
+    const pkg = constructedClaimPackage() as any
+    pkg.studentLesson.practice[0].questions[0].prompt =
+      'A student says, "Every tight string must sound higher than every loose string." According to the reading, why is this claim too strong?'
+
+    const capReport = auditCapPrecedentPackage(pkg, capRuntime)
+    expect(capReport.findings.join('\n')).not.toContain('CAP_QUOTE_EVIDENCE_MISMATCH:C3')
+
+    const evidenceReport = auditReadingEvidenceBoundary(pkg)
+    expect(evidenceReport.findings.join('\n')).not.toContain('EVIDENCE_QUOTE_MISMATCH:C3')
+    expect(evidenceReport.passed).toBe(true)
+  })
+
   it('still rejects a quote that the question explicitly attributes to the reading but that is absent from reading prose', () => {
     const pkg = constructedClaimPackage() as any
     pkg.studentLesson.practice[0].questions[0].prompt =

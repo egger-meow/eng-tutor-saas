@@ -224,16 +224,19 @@ function studentAssessmentText(pkg: PackageLike, question: QuestionLike): string
   return `${reading} ${question.prompt} ${(question.options ?? []).join(' ')}`
 }
 
-const PASSAGE_QUOTE_ATTRIBUTION = /(?:\b(?:according to|from)\s+(?:the\s+)?(?:reading|passage|article|text)\b|\bin\s+(?:the\s+)?(?:reading|passage|article|text|sentence|paragraph(?:\s+\d+)?)\b|\b(?:the\s+)?(?:reading|passage|article|text|writer|author)\s+(?:says?|states?|writes?|notes?|explains?|mentions?)\b)/iu
+const PASSAGE_QUOTE_ATTRIBUTION = /(?:\b(?:according to|from)\s+(?:the\s+)?(?:reading|passage|article|text)\b|\bin\s+(?:the\s+)?(?:reading|passage|article|text|sentence|paragraph(?:\s+\d+)?)\b|\b(?:the\s+)?(?:reading|passage|article|text|writer|author)\s+(?:says?|states?|writes?|notes?|explains?|mentions?|includes?|uses?)\b)/iu
+const CONSTRUCTED_QUOTE_SPEAKER = /\b(?:(?:a|one|another|your)\s+)?(?:student|classmate|learner|reader|friend|person|someone|somebody)\s+(?:says?|claims?|argues?|thinks?|suggests?|writes?)\s*,?\s*$/iu
 
 /**
  * Quote-verbatim checking is defense-in-depth for text attributed to the passage.
- * Constructed claims such as A student says, "..." are assessment stimuli,
- * not passage quotations; their correctness is governed by canonical evidence anchors.
+ * A clearly constructed speaker quote takes precedence over nearby instructions such
+ * as "According to the reading"; canonical evidence anchors still govern the answer.
  */
 function quoteClaimsPassageSource(prompt: string, rawQuoted: string): boolean {
   const quoteIndex = prompt.indexOf(rawQuoted)
   if (quoteIndex < 0) return false
+  const prefix = prompt.slice(Math.max(0, quoteIndex - 160), quoteIndex)
+  if (CONSTRUCTED_QUOTE_SPEAKER.test(prefix)) return false
   const start = Math.max(0, quoteIndex - 180)
   const end = Math.min(prompt.length, quoteIndex + rawQuoted.length + 180)
   return PASSAGE_QUOTE_ATTRIBUTION.test(prompt.slice(start, end))
