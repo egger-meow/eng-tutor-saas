@@ -6,6 +6,12 @@ import {
   retrieveCapPrecedents,
   type CapPrecedentRuntimeBundle,
 } from './cap-precedent-audit.js'
+import {
+  CAP_ASSESSMENT_PLAN_BASE_KEYS,
+  CAP_ASSESSMENT_PLAN_FORBIDDEN_ALIASES,
+  CAP_ASSESSMENT_PLAN_MODE_KEYS,
+  validateCapAssessmentPlan,
+} from './cap-assessment-plan-contract.js'
 
 const card = {
   ref: 'cap-0123456789ab', genre: 'article_informational', primarySkill: 'local_inference', secondarySkills: [],
@@ -23,7 +29,7 @@ const runtime: CapPrecedentRuntimeBundle = {
 }
 const provenance = JSON.stringify({ capKnowledgeVersion: 'k', capCorpusHash: 'a'.repeat(64), capBundleVersion: 'b', plannerVersion: 'p', qualityFloorVersion: 'q' })
 const plan = (overrides = {}) => JSON.stringify({
-  learningObjective: 'infer from evidence', primarySkill: 'local_inference', secondarySkills: [],
+  learningObjective: 'infer from evidence', primarySkill: 'local_inference', secondarySkills: [], genre: 'article_informational',
   targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D2_single_step_inference', evidenceMode: 'text_only',
   evidenceSpan: 'cross_sentence_local', reasoningOperations: ['connect evidence'], precedentRefs: ['cap-0123456789ab'],
   precedentMode: 'anchor', borrowedDesignPrinciples: ['two clues jointly decide'], distractorStrategies: ['partial_truth'],
@@ -41,6 +47,17 @@ const pkg = (planEvidence: string | null, question = { id: 'q1', itemType: 'infe
 })
 
 describe('CAP precedent deterministic quality floor', () => {
+  it('uses one strict canonical CAP-plan vocabulary for authoring and audit', () => {
+    const parsed = JSON.parse(plan())
+    expect(Object.keys(parsed).sort()).toEqual([...CAP_ASSESSMENT_PLAN_BASE_KEYS, ...CAP_ASSESSMENT_PLAN_MODE_KEYS.anchor].sort())
+    expect(CAP_ASSESSMENT_PLAN_FORBIDDEN_ALIASES.every((key) => !(key in parsed))).toBe(true)
+    expect(validateCapAssessmentPlan(parsed)).toEqual({ valid: true, errors: [] })
+
+    const drifted = { ...parsed, objective: parsed.learningObjective }
+    delete drifted.learningObjective
+    expect(validateCapAssessmentPlan(drifted)).toMatchObject({ valid: false })
+  })
+
   it('keeps the low-level unknown/missing ref primitive', () => {
     const available = new Set(['cap-0123456789ab'])
     expect(auditCapPrecedentFloor({ capTransferQuestionCount: 1, precedentRefs: [], availableRefs: available }).passed).toBe(false)
@@ -103,6 +120,10 @@ describe('CAP precedent deterministic quality floor', () => {
   ])('accepts %s mode without requiring structural imitation', (precedentMode, modeEvidence) => {
     const modePlan = plan({
       precedentMode,
+      borrowedDesignPrinciples: undefined,
+      synthesizedDesignPrinciples: undefined,
+      benchmarkQualities: undefined,
+      noveltyRationale: undefined,
       ...modeEvidence,
       preservedMechanics: undefined,
       adaptationStrategy: undefined,
@@ -110,7 +131,7 @@ describe('CAP precedent deterministic quality floor', () => {
       evidenceMode: precedentMode === 'calibration' ? 'multi_document' : 'text_only',
       evidenceSpan: precedentMode === 'calibration' ? 'multi_paragraph_global' : 'cross_sentence_local',
     })
-    expect(auditCapPrecedentPackage(pkg(modePlan), runtime).passed).toBe(true)
+    expect(auditCapPrecedentPackage(pkg(modePlan), runtime).findings).toEqual([])
   })
 
   it('blocks blank-page assessment authoring when a relevant precedent exists', () => {
@@ -162,6 +183,7 @@ describe('CAP precedent deterministic quality floor', () => {
   it('rejects D3/D4 collapse even in calibration mode', () => {
     const collapsed = plan({
       precedentMode: 'calibration',
+      borrowedDesignPrinciples: undefined,
       benchmarkQualities: ['multi-step synthesis'],
       noveltyRationale: 'A new structure intended to maintain multi-step reasoning.',
       targetCognitiveDepth: 'D3_multi_step_synthesis',

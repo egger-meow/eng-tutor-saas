@@ -22,9 +22,9 @@ describe('bundle-compiler', () => {
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
     expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.9.1')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.9.1-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(28)
+    expect(freshBundle.metadata.promptVersion).toBe('2.9.2')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.9.2-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(29)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
     expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -49,12 +49,47 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).not.toContain('copyGuardHashes')
   })
 
+  it('embeds the exact machine-readable CAP assessment-plan contract', async () => {
+    const freshBundle = await compileProductionBundle(REPO_ROOT)
+    expect(freshBundle.content).toContain('### Canonical CAP Assessment Plan Contract')
+    for (const key of ['learningObjective', 'targetLanguageDifficulty', 'targetCognitiveDepth', 'intentionalRecall']) {
+      expect(freshBundle.content).toContain(`"${key}"`)
+    }
+    expect(freshBundle.content).toContain('"borrowedDesignPrinciples"')
+    expect(freshBundle.content).toContain('"synthesizedDesignPrinciples"')
+    expect(freshBundle.content).toContain('"benchmarkQualities"')
+    expect(freshBundle.content).toContain('"noveltyRationale"')
+  })
+
   it('keeps public web research in the scheduled production input contract', async () => {
     const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
 
     expect(schedule).toContain('exactly three authorized production inputs')
     expect(schedule).toContain('3. public web research, used only for privacy-safe, non-private curriculum-topic grounding')
     expect(schedule).not.toContain('exactly two authorized production inputs')
+  })
+
+  it('uses one authoritative claim as the first production mutation without catalog preflight', async () => {
+    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
+    const claim = "select private_generation.chatgpt_claim_generation_batch('chatgpt-work-daily') as result;"
+    const privateCalls = [...schedule.matchAll(/select private_generation\.chatgpt_[\s\S]*?;/gu)].map((match) => match[0])
+
+    expect(privateCalls[0]).toBe(claim)
+    expect(schedule.match(/chatgpt_claim_generation_batch\('chatgpt-work-daily'\)/gu)).toHaveLength(1)
+    expect(schedule).not.toMatch(/select[\s\S]{0,200}to_regprocedure/gu)
+    expect(schedule).toContain('PIPELINE_BRIDGE_MISSING or PRECHECK_BLOCKED')
+    expect(schedule).toContain('including its `bridgeVersion`')
+  })
+
+  it('submits serialized text through v2 and keeps ambiguous recovery fail-closed', async () => {
+    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
+
+    expect(schedule).toContain('chatgpt_submit_curriculum_package_v2')
+    expect(schedule).not.toContain('$curriculum$::jsonb')
+    expect(schedule).toContain('INVALID_JSON_PAYLOAD')
+    expect(schedule).toContain('correct serialization only')
+    expect(schedule).toContain('chatgpt_curriculum_submission_status')
+    expect(schedule).toContain('chatgpt_release_unsubmitted_claim')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {

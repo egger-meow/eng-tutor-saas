@@ -1,7 +1,7 @@
 ---
-bundleVersion: "2.9.1-prod"
+bundleVersion: "2.9.2-prod"
 schemaVersion: "2.3.0"
-promptVersion: "2.9.1"
+promptVersion: "2.9.2"
 engineVersion: "1.4.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
@@ -30,7 +30,8 @@ sourceHashes:
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
   "docs/curriculum-quality-rubric.md": "4dc0dbaa56f410ddbf283facab201b07b9843e6205c0710234636d474bb4170f"
   "docs/product-rules.md": "7d91b8ba65200d6af4f8c4be16e4d819d26008a2e8f13d9c4f8c70c0c036338b"
-  "packages/generator/curriculum/cap-precedent-contract.md": "d63aa547441f29a60a6913831d24397e9a89a25b12fb85158595de60bc462e4c"
+  "packages/generator/curriculum/cap-precedent-contract.md": "8a36f81329e4cda58d2fc08a81a7984902cd65d8cdd19f7c87c3420fdcc5de02"
+  "packages/generator/src/cap-assessment-plan-contract.ts": "4b0e2fb13e9311d21a90088acae0a6d3955e3f22dc8bfafc14121988ccbc1d83"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
   "packages/generator/curriculum/cap-precedent-routing-index.json": "eca426ee315000a72d977d297384e29855c087f7950f9537f6af5e4dbd5a3773"
 ---
@@ -140,27 +141,26 @@ Reject a package if a child needs a tutor to understand a new task, if an answer
 
 ## Invariant
 
-Normal assessment first consults relevant authoritative non-holdout CAP knowledge, then reuses, recombines, or surpasses mechanics. **CAP is the floor, not the mold.**
+Consult authoritative non-holdout knowledge first. **CAP is the floor, not the mold.**
 
 ## Retrieval and plan
 
 Route 195 cards by skill **or** structural relevance: reasoning, depth, evidence, genre, or distractors. Read only 1–2 same-SHA shards; never raw history, PDFs, holdouts, or full runtime. Vary strong ties deterministically and softly down-rank recent refs/mechanics when supplied. Quality outranks diversity; no quotas.
 
-Each governed item needs passed `cap-plan:<questionId>` JSON with objective, skills/genre, language/depth, evidence/reasoning/distractors, `precedentRefs`, `precedentMode`, recall/fallback, plus:
+Every governed `cap-plan:<questionId>` matches the machine contract below. Aliases are invalid.
 
-- `anchor`: `borrowedDesignPrinciples`;
-- `blend`: `synthesizedDesignPrinciples`;
-- `calibration`: `benchmarkQualities` and `noveltyRationale`.
-
-Modes need not match topology, answer construction, distractors, or primary skill. Package refs equal per-item refs. Relevant CAP requires refs; otherwise give `noPrecedentReason`. Recall exemption covers only vocabulary/grammar retrieval outside CAP transfer. A1/A2 may retain D2/D3 reasoning.
+Modes may change structure. Package refs equal item refs. Relevant CAP requires refs or `noPrecedentReason`. Recall is only vocabulary/grammar outside CAP transfer. A1/A2 may retain D2/D3 reasoning.
 
 ## Quality, critic, and provenance
 
 Finisher fails closed on unavailable authority, provenance/hash mismatch, unknown/holdout refs, missing consultation, invalid recall, inconsistent refs, copying, ambiguous/unsupported answers, decorative or dictionary comprehension, depth collapse, or missing meaningful four-option distractors—not repeated refs or structural novelty.
 
-Semantic Critic flags mechanically repetitive evidence/mechanics, reskins, and archetype overuse; pedagogically justified practice may repeat. Repair only genuine failures and dependents.
+Critic rejects mechanically repetitive work but permits pedagogically justified practice. `cap-provenance` records versions.
 
-`cap-provenance` records exact knowledge/corpus/bundle/planner/floor versions. Mock/provisional knowledge is forbidden.
+### Canonical CAP Assessment Plan Contract
+```json
+{"contractVersion":"1.0.0","additionalProperties":false,"required":["learningObjective","primarySkill","secondarySkills","genre","targetLanguageDifficulty","targetCognitiveDepth","evidenceMode","evidenceSpan","reasoningOperations","distractorStrategies","precedentRefs","precedentMode","intentionalRecall","noPrecedentReason"],"forbiddenAliases":["objective","languageDifficulty","cognitiveDepth","isRecall"],"modes":{"anchor":["borrowedDesignPrinciples"],"blend":["synthesizedDesignPrinciples"],"calibration":["benchmarkQualities","noveltyRationale"]},"serializedExamples":{"anchor":{"learningObjective":"Infer a result by combining two clues.","primarySkill":"local_inference","secondarySkills":["information_integration"],"genre":"article_informational","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D2_single_step_inference","evidenceMode":"text_only","evidenceSpan":"cross_sentence_local","reasoningOperations":["connect two clues"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"anchor","intentionalRecall":false,"noPrecedentReason":null,"borrowedDesignPrinciples":["make both clues necessary"]},"blend":{"learningObjective":"Compare evidence before choosing a claim.","primarySkill":"information_integration","secondarySkills":["local_inference"],"genre":"multi_document_comparison","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"multi_document","evidenceSpan":"multi_paragraph_global","reasoningOperations":["compare claims across sources"],"distractorStrategies":["unsupported_world_knowledge"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"blend","intentionalRecall":false,"noPrecedentReason":null,"synthesizedDesignPrinciples":["combine comparison with causal elimination"]},"calibration":{"learningObjective":"Evaluate which explanation best fits all evidence.","primarySkill":"purpose_speaker_intent","secondarySkills":["information_integration"],"genre":"dialogue","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"text_only","evidenceSpan":"multi_paragraph_global","reasoningOperations":["test each explanation against all evidence"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"calibration","intentionalRecall":false,"noPrecedentReason":null,"benchmarkQualities":["requires evidence integration"],"noveltyRationale":"Uses a new evidence arrangement while preserving the reasoning floor."}}}
+```
 
 ## 2B. Compact CAP Precedent Routing Index
 ```json
@@ -621,9 +621,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.9.1)
+# Prompt 01: Planning (v2.9.2)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.1).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
 
 ---
 
@@ -867,9 +867,9 @@ For a selected current angle, set `temporalMode: current`, record `researchedAt`
 Freshness is topic-aware, not one universal day cutoff. Very fast-moving claims require substantially newer credible evidence; a slower domain may support an older development that remains current for the way the lesson presents it. Cross-check important propositions where appropriate. Exclude rumors, unsupported predictions, speculation, and social-media hearsay from factual lesson claims.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.9.1)
+# Prompt 02: Material Authoring (v2.9.2)
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.1).
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
 
 ---
 
@@ -1176,9 +1176,9 @@ Recency is a context, not the learning objective unless the plan explicitly make
 Current selection grants no quality exemption. Preserve meaningful factual density, source quality, developmental appropriateness, personalization quality, copyright safety, and independently entailed answers. Grounding and selection evidence remain internal; Student and Parent PDFs receive no engineering citations or research machinery.
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.9.1)
+# Prompt 03: Critic (v2.9.2)
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.1).
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
 
 ---
 
@@ -1314,9 +1314,9 @@ Reject stale material presented as current, required-but-undated sources, incons
 Reject news-shaped prose that follows a source's headline, lead, framing, ordering, or distinctive wording; factual embellishment outside approved facts; and any break in `Source -> Fact -> Claim -> Actual lesson prose`. Current material receives no relaxation of grounding accuracy, copyright, factual density, lexical, grammar, CAP, workload, personalization, or entailment gates.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.9.1)
+# Prompt 04: Repair (v2.9.2)
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.1).
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
 
 ---
 

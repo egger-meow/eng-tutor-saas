@@ -1,6 +1,13 @@
 import { createHash } from 'node:crypto'
 
 import runtimeJson from '../curriculum/cap-precedent-cards.json' with { type: 'json' }
+import {
+  validateCapAssessmentPlan,
+  type CapAssessmentIntent,
+  type CapAssessmentPlan,
+} from './cap-assessment-plan-contract.js'
+
+export type { CapAssessmentIntent, CapAssessmentPlan } from './cap-assessment-plan-contract.js'
 
 export interface CapPrecedentAuditInput {
   capTransferQuestionCount: number
@@ -45,35 +52,6 @@ export interface CapPrecedentRuntimeBundle {
   plannerVersion: string
   qualityFloorVersion: string
   cards: CapDesignAnchor[]
-}
-
-export interface CapAssessmentIntent {
-  learningObjective: string
-  primarySkill: string
-  secondarySkills?: string[]
-  genre?: string
-  targetLanguageDifficulty: string
-  targetCognitiveDepth: string
-  evidenceMode: string
-  evidenceSpan: string
-  reasoningOperations: string[]
-  distractorStrategies?: string[]
-}
-
-export interface CapAssessmentPlan extends CapAssessmentIntent {
-  precedentRefs: string[]
-  precedentMode: 'anchor' | 'blend' | 'calibration'
-  borrowedDesignPrinciples?: string[]
-  synthesizedDesignPrinciples?: string[]
-  benchmarkQualities?: string[]
-  noveltyRationale?: string
-  /** Prompt 2.9.0 compatibility only; structural imitation is not required in 2.9.1. */
-  preservedMechanics?: string[]
-  /** Prompt 2.9.0 compatibility only; mode-specific evidence supersedes it. */
-  adaptationStrategy?: string[]
-  distractorStrategies: string[]
-  intentionalRecall?: boolean
-  noPrecedentReason?: string | null
 }
 
 export interface CapRetrievalPreferences {
@@ -283,6 +261,12 @@ export function auditCapPrecedentPackage(
     const plan = parseJsonCheck<CapAssessmentPlan>(pkg, `cap-plan:${question.id}`)
     if (!plan) {
       findings.push(`CAP_ITEM_PLAN_MISSING:${question.id}: every normal assessment/application item requires an internal CAP assessment plan`)
+      continue
+    }
+
+    const contractResult = validateCapAssessmentPlan(plan)
+    if (!contractResult.valid) {
+      findings.push(`CAP_ITEM_PLAN_INCOMPLETE:${question.id}: ${contractResult.errors.join('; ')}`)
       continue
     }
 
