@@ -335,6 +335,78 @@ export function auditCapPrecedentPackage(
         findings.push(`CAP_COPY_OVERLAP:${question.id}: multiple five-word phrase fingerprints overlap historical anchor material; adapt mechanics, not wording`)
       }
     }
+
+    // Explicit Per-Item Evidence Boundary & Anchor Validation
+    const isReadingDependent =
+      stage === 'cap-transfer' ||
+      COMPREHENSION_TYPES.has(question.itemType) ||
+      plan.evidenceMode === 'text_only' ||
+      plan.evidenceMode === 'multi_document'
+
+    if (isReadingDependent) {
+      if (plan.evidenceScope && plan.evidenceScope !== 'primary_reading') {
+        findings.push(
+          `CAP_EVIDENCE_BOUNDARY_VIOLATION:${question.id}: reading-dependent question cannot claim evidence from "${plan.evidenceScope}"; evidenceScope must be primary_reading`,
+        )
+      }
+      if (plan.evidenceScope === 'primary_reading' || (!plan.evidenceScope && !plan.intentionalRecall)) {
+        if (!Array.isArray(plan.evidenceAnchors) || plan.evidenceAnchors.length === 0) {
+          findings.push(
+            `CAP_EVIDENCE_ANCHORS_MISSING:${question.id}: reading-dependent question requires at least one canonical evidence anchor`,
+          )
+        } else {
+          for (const anchor of plan.evidenceAnchors) {
+            const locMatch = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail)$/u.exec(
+              anchor.location ?? '',
+            )
+            if (!locMatch) {
+              findings.push(
+                `CAP_EVIDENCE_LOCATION_INVALID:${question.id}:${anchor.location}: location must resolve to a studentLesson.reading.blocks field`,
+              )
+            } else {
+              const blockIndex = Number(locMatch[1])
+              const field = locMatch[2]!
+              const block = pkg.studentLesson.reading?.blocks?.[blockIndex] as unknown as Record<string, unknown> | undefined
+              const prose = block?.[field]
+              if (typeof prose !== 'string') {
+                findings.push(`CAP_EVIDENCE_LOCATION_NOT_FOUND:${question.id}:${anchor.location}`)
+              } else if (typeof anchor.anchorText === 'string' && anchor.anchorText.trim().length > 0) {
+                const normProse = prose.toLowerCase().replace(/\s+/gu, ' ')
+                const normAnchor = anchor.anchorText.toLowerCase().replace(/\s+/gu, ' ').trim()
+                if (!normProse.includes(normAnchor)) {
+                  findings.push(
+                    `CAP_EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchor text "${anchor.anchorText}" not found at ${anchor.location}`,
+                  )
+                }
+              } else {
+                findings.push(`CAP_EVIDENCE_ANCHOR_TEXT_MISSING:${question.id}: anchorText must be non-empty string`)
+              }
+            }
+          }
+        }
+      }
+
+      // Defense-in-depth: verify exact quoted reading phrases in question prompt exist in reading text
+      const quotedMatches = question.prompt.match(/(?:["“]([^"”]+)["”]|(?:'|‘)([^'’]{4,})(?:'|’))/gu) ?? []
+      if (quotedMatches.length > 0 && pkg.studentLesson.reading?.blocks) {
+        const readingFullText = (pkg.studentLesson.reading.blocks ?? [])
+          .flatMap((b) => Object.values(b).filter((v): v is string => typeof v === 'string'))
+          .join(' ')
+          .toLowerCase()
+          .replace(/\s+/gu, ' ')
+        for (const rawQuoted of quotedMatches) {
+          const cleanQuote = rawQuoted.replace(/^["“'‘]|["”'’]$/gu, '').trim()
+          if (cleanQuote.length >= 4 && !/^(?:A|B|C|D|\d+)$/i.test(cleanQuote)) {
+            const normQuote = cleanQuote.toLowerCase().replace(/\s+/gu, ' ')
+            if (!readingFullText.includes(normQuote)) {
+              findings.push(
+                `CAP_QUOTE_EVIDENCE_MISMATCH:${question.id}: quoted prompt text "${cleanQuote}" does not exist in declared reading evidence`,
+              )
+            }
+          }
+        }
+      }
+    }
   }
 
   const packageRefs = new Set(pkg.qualityEvidence.precedentRefs ?? [])

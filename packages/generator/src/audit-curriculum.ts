@@ -23,15 +23,64 @@ export type CurriculumAuditReport = {
 }
 
 const canonicalVocabSet = new Set(vocabulary2000.map((v) => v.word.toLowerCase()))
+
 const IRREGULAR_BASE_FORMS: Readonly<Record<string, string>> = {
-  has: 'have',
-  had: 'have',
-  was: 'be',
-  were: 'be',
+  // be / have / do
+  has: 'have', had: 'have', having: 'have',
+  am: 'be', is: 'be', are: 'be', was: 'be', were: 'be', been: 'be', being: 'be',
+  does: 'do', did: 'do', done: 'do', doing: 'do',
+  // irregular verbs
+  ate: 'eat', eaten: 'eat',
+  became: 'become', begun: 'begin', began: 'begin',
+  bit: 'bite', bitten: 'bite',
+  blew: 'blow', blown: 'blow',
+  broke: 'break', broken: 'break',
+  bought: 'buy', brought: 'bring', built: 'build',
+  caught: 'catch', chose: 'choose', chosen: 'choose',
+  came: 'come', cost: 'cost', cut: 'cut',
+  drawn: 'draw', drew: 'draw', driven: 'drive', drove: 'drive',
+  drank: 'drink', drunk: 'drink',
+  fallen: 'fall', fell: 'fall', felt: 'feel',
+  found: 'find', flown: 'fly', flew: 'fly',
+  forgot: 'forget', forgotten: 'forget',
+  froze: 'freeze', frozen: 'freeze',
+  gave: 'give', given: 'give', went: 'go', gone: 'go',
+  grew: 'grow', grown: 'grow',
+  heard: 'hear', held: 'hold', kept: 'keep',
+  knew: 'know', known: 'know',
+  laid: 'lay', led: 'lead', left: 'leave',
+  lost: 'lose', made: 'make', meant: 'mean',
+  met: 'meet', paid: 'pay', read: 'read',
+  ridden: 'ride', rode: 'ride', risen: 'rise', rose: 'rise',
+  ran: 'run', said: 'say', saw: 'see', seen: 'see',
+  sold: 'sell', sent: 'send', shook: 'shake', shaken: 'shake',
+  shone: 'shine', shot: 'shoot', shown: 'show', showed: 'show',
+  shut: 'shut', slept: 'sleep', slid: 'slide',
+  spoken: 'speak', spoke: 'speak', spent: 'spend',
+  stood: 'stand', stole: 'steal', stolen: 'steal',
+  struck: 'strike', stricken: 'strike',
+  swam: 'swim', swum: 'swim',
+  taken: 'take', took: 'take', taught: 'teach',
+  told: 'tell', thought: 'think', thrown: 'throw', threw: 'throw',
+  understood: 'understand', woke: 'wake', woken: 'wake',
+  wore: 'wear', worn: 'wear', won: 'win', written: 'write', wrote: 'write',
+  // irregular plurals & nouns
+  children: 'child', men: 'man', women: 'woman', feet: 'foot', teeth: 'tooth',
+  mice: 'mouse', people: 'person', data: 'data',
 }
 
+const IRREGULAR_INFLECTIONS: Readonly<Record<string, string[]>> = Object.entries(IRREGULAR_BASE_FORMS).reduce(
+  (acc, [inflected, base]) => {
+    acc[base] = acc[base] ? [...acc[base], inflected] : [inflected]
+    return acc
+  },
+  {} as Record<string, string[]>,
+)
+
 function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
-  const w = word.toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
+  const normalized = word.toLowerCase().replace(/[’‘]/gu, "'").replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
+  let w = normalized
+  if (w.endsWith("'s")) w = w.slice(0, -2)
   if (!w || /^\d+$/u.test(w) || w.length <= 2) return true
 
   if (w.includes('-')) {
@@ -47,7 +96,9 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
     'hasn', 'haven', 'hadn', 'couldn', 'shouldn', 'wouldn', 'should', 'would', 'might', 'must',
     's', 're', 've', 'll', 'd', 'm',
     'option', 'opt', 'recall', 'blank', 'item', 'choice', 'passage', 'sentence', 'statement', 'question',
-    'answer', 'code',
+    'answer', 'code', 'text', 'clue', 'vocabulary', 'vocab', 'grammar', 'reading', 'writing',
+    'listen', 'listening', 'speak', 'speaking', 'cite', 'explain', 'underline', 'circle', 'fill',
+    'meaning', 'dialogue', 'pronunciation',
   ].includes(w)) {
     return true
   }
@@ -57,6 +108,15 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   const irregularBase = IRREGULAR_BASE_FORMS[w]
   if (irregularBase && isBase(irregularBase)) return true
 
+  // Transparent prefixes
+  if (w.startsWith('un') && (isBase(w.slice(2)) || (IRREGULAR_BASE_FORMS[w.slice(2)] && isBase(IRREGULAR_BASE_FORMS[w.slice(2)]!)))) return true
+  if (w.startsWith('re') && (isBase(w.slice(2)) || (IRREGULAR_BASE_FORMS[w.slice(2)] && isBase(IRREGULAR_BASE_FORMS[w.slice(2)]!)))) return true
+  if (w.startsWith('dis') && isBase(w.slice(3))) return true
+  if (w.startsWith('mis') && isBase(w.slice(3))) return true
+  if (w.startsWith('non') && isBase(w.slice(3))) return true
+  if (w.startsWith('pre') && isBase(w.slice(3))) return true
+
+  // Suffixes
   if (w.endsWith('s') && isBase(w.slice(0, -1))) return true
   if (w.endsWith('es') && isBase(w.slice(0, -2))) return true
   if (w.endsWith('ies') && isBase(w.slice(0, -3) + 'y')) return true
@@ -68,7 +128,25 @@ function isApprovedWord(word: string, taughtWords: Set<string>): boolean {
   if (w.endsWith('er') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
   if (w.endsWith('est') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -2)))) return true
   if (w.endsWith('ty') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -1)))) return true
+  if (w.endsWith('ity') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e'))) return true
+  if (w.endsWith('able') && (isBase(w.slice(0, -4)) || isBase(w.slice(0, -4) + 'e'))) return true
+  if (w.endsWith('ible') && isBase(w.slice(0, -4))) return true
+  if (w.endsWith('ment') && isBase(w.slice(0, -4))) return true
+  if (w.endsWith('ness') && (isBase(w.slice(0, -4)) || isBase(w.slice(0, -5) + 'y'))) return true
+  if (w.endsWith('less') && isBase(w.slice(0, -4))) return true
+  if (w.endsWith('ful') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -4) + 'y'))) return true
   if (w.endsWith('ion') && (isBase(w.slice(0, -3)) || isBase(w.slice(0, -3) + 'e') || isBase(w.slice(0, -4)) || isBase(w.slice(0, -4) + 'e') || isBase(w.slice(0, -5)))) return true
+  if (w.endsWith('al') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -2) + 'e') || isBase(w.slice(0, -2) + 'ic') || isBase(w.slice(0, -2) + 'y'))) return true
+  if (w.endsWith('ic') && (isBase(w.slice(0, -2)) || isBase(w.slice(0, -2) + 'y') || isBase(w.slice(0, -2) + 'e') || isBase(w.slice(0, -2) + 'ist'))) return true
+
+  // Common educational compound words formed by 2 approved base words (e.g. sunlight = sun + light)
+  if (w.length >= 6) {
+    for (let split = 3; split <= w.length - 3; split += 1) {
+      const left = w.slice(0, split)
+      const right = w.slice(split)
+      if (isBase(left) && isBase(right)) return true
+    }
+  }
 
   return false
 }
@@ -77,6 +155,12 @@ function getValidWordVariants(word: string): Set<string> {
   const w = word.toLowerCase().trim().replace(/^[^a-z0-9]+|[^a-z0-9]+$/gu, '')
   const variants = new Set<string>([w])
   if (!w || w.length < 2) return variants
+
+  // Add irregular inflections if base word is known
+  const inflections = IRREGULAR_INFLECTIONS[w]
+  if (inflections) {
+    for (const inf of inflections) variants.add(inf)
+  }
 
   // Controlled inflection rules
   // 1. Plural / 3rd person singular s/es/ies
@@ -164,10 +248,13 @@ function buildAllowedEntitiesSet(pkg: CurriculumPackage): Set<string> {
     }
   }
 
+  const grounding = 'grounding' in pkg && pkg.grounding ? (pkg.grounding as { topic?: string; sources?: Array<{ title?: string }> }) : null
   const interestSources = [
     ...pkg.learnerSnapshot.specificInterests,
     ...pkg.learnerSnapshot.changedInterests,
     pkg.metadata.childId,
+    ...(grounding?.topic ? [grounding.topic] : []),
+    ...(grounding?.sources ? grounding.sources.map((s) => s.title || '') : []),
   ]
   for (const source of interestSources) {
     if (typeof source === 'string') {
@@ -217,7 +304,11 @@ export function auditCurriculumPackage(
   const findings: CurriculumAuditFinding[] = []
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => findings.push({ tier, dimension, severity, message })
 
-  if (pkg.metadata.promptVersion.startsWith('2.9')) {
+  const isCapGovernedPrompt =
+    Boolean(pkg.metadata.promptVersion) &&
+    /prompt\/(?:2\.(?:9|10|[1-9]\d)|\d{2,})/u.test(pkg.metadata.promptVersion)
+
+  if (isCapGovernedPrompt || pkg.metadata.promptVersion.startsWith('2.9') || pkg.metadata.promptVersion.startsWith('2.10')) {
     const capAudit = auditCapPrecedentPackage(pkg)
     for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)
   }
@@ -265,9 +356,24 @@ export function auditCurriculumPackage(
   const rawPassageText = blockTexts.join(' ')
   const taughtVocab = new Set(pkg.studentLesson.vocabulary.flatMap((v) => lexicalUnitTokens(v.word)))
 
+  // Lexical Anchor: new/extension words MUST appear in reading passage
   for (const vocab of pkg.studentLesson.vocabulary) {
     if (!wordAppearsInText(vocab.word, rawPassageText)) {
-      add('auto-derived', 'lexical-anchor', 'warning', `核心單字 "${vocab.word}" 未出現在閱讀文章中。文章是單字學習的語境錨點，建議核心單字來自文章。`)
+      if (vocab.status === 'new' || vocab.status === 'extension') {
+        add(
+          'semantic-critical',
+          'lexical-anchor',
+          'critical',
+          `全新/延伸核心單字 "${vocab.word}" 未出現在閱讀文章中。文章是新單字學習的必要語境錨點，新單字必須直接融入閱讀文章。`,
+        )
+      } else {
+        add(
+          'auto-derived',
+          'lexical-anchor',
+          'warning',
+          `複習/常錯核心單字 "${vocab.word}" 未出現在閱讀文章中。建議盡可能在文章中提供語境。`,
+        )
+      }
     }
   }
 
@@ -289,22 +395,114 @@ export function auditCurriculumPackage(
   ]
   const allStudentTokens = studentFacingTexts.join(' ').split(/\s+/u).filter(Boolean)
 
-  const unapprovedWords = new Set<string>()
+  const unapprovedWordCounts = new Map<string, number>()
   for (const token of allStudentTokens) {
-    const clean = token.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
+    const clean = token.replace(/[’‘]/gu, "'").replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/gu, '')
     if (!clean) continue
     if (isApprovedWord(clean, taughtVocab)) continue
-    const normalized = clean.toLowerCase()
+    let normalized = clean.toLowerCase()
+    if (normalized.endsWith("'s")) normalized = normalized.slice(0, -2)
     if (allowedEntities.has(normalized)) continue
 
-    unapprovedWords.add(normalized)
+    unapprovedWordCounts.set(normalized, (unapprovedWordCounts.get(normalized) ?? 0) + 1)
   }
 
-  const uniqueUnapproved = Array.from(unapprovedWords)
-  if (uniqueUnapproved.length > 3) {
-    add('auto-derived', 'lexical-ceiling', 'warning', `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，建議將其替換為課綱單字或加入核心單字教學。`)
+  // Detect context-clue target questions
+  const contextClueQuestions = questions.filter((q) =>
+    q.itemType === 'context-clue' ||
+    /\b(?:mean|meaning|definition|refer|refers|means)\b/i.test(q.prompt)
+  )
+
+  const untaughtTargetWords: string[] = []
+  for (const [unapprovedWord] of unapprovedWordCounts.entries()) {
+    for (const q of contextClueQuestions) {
+      const promptLower = q.prompt.toLowerCase()
+      const regex = new RegExp(`\\b${unapprovedWord}\\b`, 'iu')
+      if (regex.test(promptLower) || promptLower.includes(`"${unapprovedWord}"`) || promptLower.includes(`“${unapprovedWord}”`)) {
+        untaughtTargetWords.push(unapprovedWord)
+        break
+      }
+    }
+  }
+
+  const repeatedUnapprovedWords = Array.from(unapprovedWordCounts.entries())
+    .filter(([_, count]) => count >= 2)
+    .map(([w]) => w)
+
+  const uniqueUnapproved = Array.from(unapprovedWordCounts.keys())
+
+  if (untaughtTargetWords.length > 0) {
+    add(
+      'semantic-critical',
+      'lexical-ceiling',
+      'critical',
+      `語境推論/字義題直接以未列入核心單字且超出課綱範圍的單字 (${untaughtTargetWords.join(', ')}) 作為作答標的。超出課綱之生難字若作為題目核心測驗目標，必須列入核心單字教學。`,
+    )
+  }
+
+  if (repeatedUnapprovedWords.length > 0) {
+    add(
+      'semantic-critical',
+      'lexical-ceiling',
+      'critical',
+      `教材中重複出現 (${repeatedUnapprovedWords.join(', ')}) 等多個未在 2000 單字表且未列入本週教學的生難字。重複出現的生難字會大幅增加理解障礙，應替換為課綱單字或納入核心單字。`,
+    )
+  } else if (uniqueUnapproved.length > 3) {
+    add(
+      'semantic-critical',
+      'lexical-ceiling',
+      'critical',
+      `教材中出現多個未在課綱 2000 單字表內、亦未列入本週核心單字說明的生難詞彙 (${uniqueUnapproved.slice(0, 4).join(', ')})，累積未說明單字超過 3 個，可能造成過度閱讀阻礙。請將其替換或加入核心單字教學。`,
+    )
   } else if (uniqueUnapproved.length >= 1) {
-    add('auto-derived', 'lexical-ceiling', 'warning', `教材中出現少數超綱且未說明的單字 (${uniqueUnapproved.join(', ')})。`)
+    add(
+      'auto-derived',
+      'lexical-ceiling',
+      'warning',
+      `教材中出現少數超綱且未說明的單字 (${uniqueUnapproved.join(', ')})。`,
+    )
+  }
+
+  // 5 Mandatory Critic Dimensions for prompt versions >= 2.9.0 / schema 2.3.0
+  const MANDATORY_CRITIC_DIMENSIONS = [
+    'evidence-boundary',
+    'answer-entailment',
+    'lexical-integrity',
+    'task-topology',
+    'level-calibration',
+  ] as const
+
+  if (isCapGovernedPrompt) {
+    const checks = pkg.qualityEvidence.criticalChecks ?? []
+    const findingsList = pkg.qualityEvidence.criticFindings ?? []
+
+    for (const dim of MANDATORY_CRITIC_DIMENSIONS) {
+      const checkMatch = checks.find(
+        (c) => c.id === dim || c.id === `critic-${dim}` || c.id.includes(dim),
+      )
+      const findingMatch = findingsList.find(
+        (f) => f.dimension === dim || f.dimension.includes(dim),
+      )
+
+      const evidenceText = checkMatch?.evidence || findingMatch?.finding || ''
+      const isSubstantive = typeof evidenceText === 'string' && evidenceText.trim().length >= 30
+
+      if (!checkMatch && !findingMatch) {
+        add(
+          'semantic-critical',
+          'critic-coverage',
+          'critical',
+          `缺少資深審查者 (Critic) 對 "${dim}" 維度的檢驗紀錄。品質合約要求對 5 項核心維度進行實質審查。`,
+        )
+      } else if (!isSubstantive) {
+        add(
+          'semantic-critical',
+          'critic-coverage',
+          'critical',
+          `資深審查者 (Critic) 對 "${dim}" 維度的證據不足 (${evidenceText.trim().length} 字 < 30 字)。必須提供包含具體題號、單字或數據的實質審查證據。`,
+        )
+      }
+    }
   }
 
   const targetIds = new Set(pkg.learningPlan.targets.map((target) => target.id))

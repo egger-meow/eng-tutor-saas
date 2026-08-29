@@ -95,8 +95,8 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '根據文章內容回答問題。',
         hintZh: '請參考步驟第二段。',
         questions: [
-          { id: 'G1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What should you do if the ambient light exceeds forty lux?', options: ['Adjust the shade hood over the lens.', 'Turn off all sensors immediately.', 'Replace the white board with a black one.', 'Stop writing in the notebook.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['The camera is an essential sensor.', 'The camera are an essential sensor.', 'The camera be an essential sensor.', 'The camera am an essential sensor.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'G1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What should you do if the light is too bright?', options: ['Place a small mirror to block the extra light.', 'Turn off all sensors immediately.', 'Replace the white board with a black one.', 'Stop writing in the notebook.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['The camera is a useful machine.', 'The camera are a useful machine.', 'The camera be a useful machine.', 'The camera am a useful machine.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -106,9 +106,9 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '依據文章判斷邏輯。',
         hintZh: null,
         questions: [
-          { id: 'I1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Why do we need to adjust the shade hood?', options: undefined, writingLines: 2, difficulty: 'on-level' },
-          { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: The optical sensors ______ ready for testing.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-          { id: 'I3', targetIds: ['target-reading-inference'], itemType: 'short-response', prompt: 'What does the team verify before starting the trial?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Why do we need to place a small mirror?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: The light sensors ______ ready for testing.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I3', targetIds: ['target-reading-inference'], itemType: 'short-response', prompt: 'What does the team check before starting the test?', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -118,9 +118,9 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '選出最符合文意的推論。',
         hintZh: null,
         questions: [
-          { id: 'C1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What is the main goal of the calibration steps described in the text?', options: ['To ensure consistent sensor accuracy.', 'To buy new optical cameras.', 'To paint the laboratory white.', 'To shorten the competition time.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'C2', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What can we infer about testing in a dark room?', options: ['The shade hood may not need adjustment.', 'The motor will stop immediately.', 'The sensor will definitely fail.', 'The white board cannot be used.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence uses be-verbs correctly?', options: ['These robots are fast and reliable.', 'These robots is fast and reliable.', 'These robots be fast and reliable.', 'These robots am fast and reliable.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'Why do students follow the steps in the reading?', options: ['To help the robot work well.', 'To buy new cameras.', 'To paint the room white.', 'To finish the test quickly.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C2', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What is likely true about testing in a dark room?', options: ['The mirror may not be needed.', 'The robot will stop immediately.', 'The sensor will fail.', 'The white board cannot be used.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence is correct?', options: ['These robots are fast and useful.', 'These robots is fast and useful.', 'These robots be fast and useful.', 'These robots am fast and useful.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -147,24 +147,24 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
 
     const homeworkQuestions: CurriculumQuestion[] = [
       { id: 'H1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Use the word measure in a complete sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-      { id: 'H2', targetIds: ['target-review-questions'], itemType: 'short-response', prompt: 'Why do we use does instead of do with a singular subject?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+      { id: 'H2', targetIds: ['target-review-questions'], itemType: 'short-response', prompt: 'Why do we use does instead of do with he, she, or it?', options: undefined, writingLines: 2, difficulty: 'on-level' },
       { id: 'H3', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Write one sentence with connect.', options: undefined, writingLines: 2, difficulty: 'on-level' },
     ]
 
     const week4Answers: CurriculumPackage['answers'] = [
-      { questionId: 'G1', answer: 'Adjust the shade hood over the lens.', acceptedAnswers: ['A', 'Adjust the shade hood over the lens.'], explanationZh: '根據第二段，光線超過 40 lux 時應調整遮光罩。', likelyMisconceptionZh: '若選 B 則忽略了文中具體的調整指示。', followUpZh: null },
-      { questionId: 'G2', answer: 'The camera is an essential sensor.', acceptedAnswers: ['A', 'The camera is an essential sensor.'], explanationZh: '單數主詞 The camera 搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I1', answer: 'To protect the sensor from strong ambient light.', acceptedAnswers: ['To protect the sensor from strong ambient light.'], explanationZh: '調整遮光罩是為了避免強光干擾感測器。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I2', answer: 'are', acceptedAnswers: ['are'], explanationZh: '複數主詞 The optical sensors 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I3', answer: 'The contrast of the black line on white board.', acceptedAnswers: ['The contrast of the black line.'], explanationZh: '第三段提到確認黑線在白板上的對比度。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C1', answer: 'To ensure consistent sensor accuracy.', acceptedAnswers: ['A', 'To ensure consistent sensor accuracy.'], explanationZh: '全文說明透過校正步驟確保感測器準確度。', likelyMisconceptionZh: '若選 D 則誤解了實驗目的。', followUpZh: null },
-      { questionId: 'C2', answer: 'The shade hood may not need adjustment.', acceptedAnswers: ['A', 'The shade hood may not need adjustment.'], explanationZh: '文中說明光線超過 40 lux 才需調整遮光罩。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C3', answer: 'These robots are fast and reliable.', acceptedAnswers: ['A', 'These robots are fast and reliable.'], explanationZh: '複數名詞搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'P1', answer: 'The sensor is very sensitive.', acceptedAnswers: ['The sensor is very sensitive.'], explanationZh: '正確使用 is。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'G1', answer: 'Place a small mirror to block the extra light.', acceptedAnswers: ['A', 'Place a small mirror to block the extra light.'], explanationZh: '根據第二段，光線太亮時應放置小鏡子擋住多餘光線。', likelyMisconceptionZh: '若選 B 則忽略了文中具體的調整指示。', followUpZh: null },
+      { questionId: 'G2', answer: 'The camera is a useful machine.', acceptedAnswers: ['A', 'The camera is a useful machine.'], explanationZh: '單數主詞 The camera 搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I1', answer: 'To block the extra light.', acceptedAnswers: ['To block the extra light.'], explanationZh: '放置鏡子是為了擋住過亮的光線。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I2', answer: 'are', acceptedAnswers: ['are'], explanationZh: '複數主詞 The light sensors 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I3', answer: 'The black line on white board.', acceptedAnswers: ['The black line on white board.'], explanationZh: '第三段提到確認黑線在白板上的位置。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C1', answer: 'To help the robot work well.', acceptedAnswers: ['A', 'To help the robot work well.'], explanationZh: '全文說明透過調整步驟確保機器人正常運作。', likelyMisconceptionZh: '若選 D 則誤解了實驗目的。', followUpZh: null },
+      { questionId: 'C2', answer: 'The mirror may not be needed.', acceptedAnswers: ['A', 'The mirror may not be needed.'], explanationZh: '文中說明光線太亮才需放置鏡子。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C3', answer: 'These robots are fast and useful.', acceptedAnswers: ['A', 'These robots are fast and useful.'], explanationZh: '複數名詞搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'P1', answer: 'The sensor is very small.', acceptedAnswers: ['The sensor is very small.'], explanationZh: '正確使用 is。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'R1', answer: 'Does the sensor detect the black line?', acceptedAnswers: ['Does the sensor detect the black line?'], explanationZh: '第三人稱單數使用 Does 且動詞回到原形 detect。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'H1', answer: 'Please measure the length of the table.', acceptedAnswers: ['Please measure the length of the table.'], explanationZh: '正確使用 measure 作為動詞。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'H2', answer: 'Because does is used for third-person singular subjects.', acceptedAnswers: ['Because does is used for third-person singular subjects.'], explanationZh: '第三人稱單數主詞使用助動詞 does。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'H3', answer: 'Connect the wire carefully.', acceptedAnswers: ['Connect the wire carefully.'], explanationZh: '正確使用 connect。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'H2', answer: 'Because does is used for he, she, or it.', acceptedAnswers: ['Because does is used for he, she, or it.'], explanationZh: '第三人稱單數主詞使用助動詞 does。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'H3', answer: 'Connect the parts carefully.', acceptedAnswers: ['Connect the parts carefully.'], explanationZh: '正確使用 connect。', likelyMisconceptionZh: null, followUpZh: null },
     ]
 
     const week4Package: CurriculumPackage = {
@@ -236,7 +236,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
       },
       trackingDelta: {
         introducedVocabularyIds: ['v-sensor', 'v-adjust', 'v-light', 'v-mirror', 'v-measure', 'v-connect', 'v-signal'],
-        reviewedVocabularyIds: ['v-experiment', 'v-record'],
+        reviewedVocabularyIds: [],
         exposedGrammarTargetIds: [selectedNewGrammar],
         exposedReadingTargetIds: ['target-reading-inference'],
         exposedCommunicationFunctionIds: ['cf-describing-problems-troubleshooting'],
@@ -263,10 +263,10 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
           contextZh: '機器人社團進行光學感測器靈敏度校正實驗的情境。',
           genre: 'instructions',
           blocks: [
-            { type: 'paragraph', text: 'When testing an optical sensor in a bright room, the robot often makes mistakes because sunlight interferes with optical signals. Follow these calibration steps to ensure consistent accuracy throughout all school tournament matches.' },
-            { type: 'paragraph', text: 'First, measure the ambient light level near the testing field carefully. If the value exceeds forty lux, adjust the shade hood over the lens before starting the motor. This prevents glare from blinding the camera.' },
-            { type: 'paragraph', text: 'Next, place the black test line on a clean white board. Verify that the sensor detects the contrast immediately without delay, ensuring all wire connections remain secure and tightly connected to the power board.' },
-            { type: 'paragraph', text: 'Finally, record the output values in your laboratory notebook before starting the automated trial. Careful preparation and accurate records help every student engineer troubleshoot problems successfully during competition.' },
+            { type: 'paragraph', text: 'When testing a light sensor in a bright room, the robot often makes mistakes because bright light affects the signal. Follow these simple steps to help the robot work well during all school games.' },
+            { type: 'paragraph', text: 'First, measure the light near the test board carefully. If the light is too bright, place a small mirror to block the extra light, and adjust the camera before starting the robot.' },
+            { type: 'paragraph', text: 'Next, place the black line on a clean white board. Check that the sensor receives the signal without delay, making sure all parts connect safely to the board.' },
+            { type: 'paragraph', text: 'Finally, write down the test numbers in your notebook before starting the test. Good notes and clear records help every student fix problems quickly during the test.' },
           ],
           wordCount: 155,
           readingTipsZh: ['注意步驟順序副詞 First, Next, Finally', '找出光線過亮時的調整方式'],
@@ -280,10 +280,10 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
             patterns: ['Subject + be-verb + noun/adjective'],
             workedExamples: [
               { example: 'The camera is an essential sensor.', walkthroughZh: '單數主詞搭配 is。' },
-              { example: 'These sensors are very accurate.', walkthroughZh: '複數主詞搭配 are。' },
+              { example: 'These sensors are very good.', walkthroughZh: '複數主詞搭配 are。' },
             ],
             commonMistakes: [
-              { wrong: 'The sensors is accurate.', corrected: 'The sensors are accurate.', whyZh: '複數主詞不可使用 is。' },
+              { wrong: 'The sensors is good.', corrected: 'The sensors are good.', whyZh: '複數主詞不可使用 is。' },
             ],
           },
         ],
@@ -364,8 +364,8 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '選出正確的動詞形式。',
         hintZh: '注意 Does 後面的動詞。',
         questions: [
-          { id: 'G1', targetIds: ['target-primary-repeat-grammar'], itemType: 'inference', prompt: 'Which sentence correctly asks about the machine?', options: ['Does the robot connect to the battery?', 'Does the robot connects to the battery?', 'Do the robot connect to the battery?', 'Is the robot connect to the battery?'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'G2', targetIds: ['target-reading'], itemType: 'inference', prompt: 'What does Sam notice?', options: ['The red light flashes.', 'The battery is missing.', 'The wire is broken.', 'The motor is hot.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'G1', targetIds: ['g7-do-does-questions'], itemType: 'inference', prompt: 'Which sentence correctly asks about the machine?', options: ['Does the robot connect to the battery?', 'Does the robot connects to the battery?', 'Do the robot connect to the battery?', 'Is the robot connect to the battery?'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'G2', targetIds: ['target-reading'], itemType: 'inference', prompt: 'What does Sam notice?', options: ['The red light flashes.', 'The battery is missing.', 'The line is broken.', 'The motor is hot.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -375,9 +375,9 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '寫出完整問句。',
         hintZh: null,
         questions: [
-          { id: 'I1', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'Write a question asking if Sam needs a new tool using Does.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I1', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'Write a question asking if Sam needs a new part using Does.', options: undefined, writingLines: 2, difficulty: 'on-level' },
           { id: 'I2', targetIds: ['target-vocab'], itemType: 'short-response', prompt: 'Use repair in a sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-          { id: 'I3', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'Does the team test the motor again? Answer with a full sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'I3', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'Does the team test the motor again? Answer with a full sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -387,9 +387,9 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '選出適當答案。',
         hintZh: null,
         questions: [
-          { id: 'C1', targetIds: ['target-reading'], itemType: 'inference', prompt: 'Why do Leo and Sam check the connection again?', options: ['Because the sensors do not receive any signal.', 'Because the machine is completely repaired.', 'Because the blue wire is disconnected.', 'Because they finished the tournament.'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'C2', targetIds: ['target-primary-repeat-grammar'], itemType: 'inference', prompt: 'Which question uses does correctly?', options: ['Does Eric like pizza?', 'Does Eric likes pizza?', 'Do Eric like pizza?', 'Is Eric like pizza?'], writingLines: 0, difficulty: 'on-level' },
-          { id: 'C3', targetIds: ['target-reading'], itemType: 'inference', prompt: 'What will the engineers do next?', options: ['Inspect the components carefully.', 'Leave the classroom.', 'Throw away the sensors.', 'Buy a new table.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C1', targetIds: ['target-reading'], itemType: 'inference', prompt: 'Why do Leo and Sam check the connection again?', options: ['Because the machines do not receive any signal.', 'Because the machine is completely repaired.', 'Because the blue line is broken.', 'Because they finished the game.'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C2', targetIds: ['g7-do-does-questions'], itemType: 'inference', prompt: 'Which question uses does correctly?', options: ['Does Eric like pizza?', 'Does Eric likes pizza?', 'Do Eric like pizza?', 'Is Eric like pizza?'], writingLines: 0, difficulty: 'on-level' },
+          { id: 'C3', targetIds: ['target-reading'], itemType: 'inference', prompt: 'What will the students do next?', options: ['Check all parts carefully.', 'Leave the classroom.', 'Throw away the machines.', 'Buy a new table.'], writingLines: 0, difficulty: 'on-level' },
         ],
       },
       {
@@ -399,7 +399,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '造出一個 Does 問句。',
         hintZh: null,
         questions: [
-          { id: 'P1', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'Write one Does question about a computer.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'P1', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'Write one Does question about a computer.', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
       {
@@ -409,26 +409,26 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         instructionsZh: '回答規則問題。',
         hintZh: null,
         questions: [
-          { id: 'R1', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'When using Does in a question, what form must the main verb be?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'R1', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'When using Does in a question, what form must the main verb be?', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
     ]
 
     const repeatHomework: CurriculumQuestion[] = [
       { id: 'H1', targetIds: ['target-vocab'], itemType: 'short-response', prompt: 'Use repair in a sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-      { id: 'H2', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'Fix the error: Does Eric likes pizza?', options: undefined, writingLines: 2, difficulty: 'on-level' },
-      { id: 'H3', targetIds: ['target-primary-repeat-grammar'], itemType: 'short-response', prompt: 'Write a Does question.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+      { id: 'H2', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'Fix the error: Does Eric likes pizza?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+      { id: 'H3', targetIds: ['g7-do-does-questions'], itemType: 'short-response', prompt: 'Write a Does question.', options: undefined, writingLines: 2, difficulty: 'on-level' },
     ]
 
     const repeatAnswers: CurriculumPackage['answers'] = [
       { questionId: 'G1', answer: 'Does the robot connect to the battery?', acceptedAnswers: ['A', 'Does the robot connect to the battery?'], explanationZh: 'Does 後面主要動詞使用原形 connect。', likelyMisconceptionZh: '選 B 則忘記將動詞還原。', followUpZh: null },
       { questionId: 'G2', answer: 'The red light flashes.', acceptedAnswers: ['A', 'The red light flashes.'], explanationZh: '對話中 Sam 提到紅燈閃爍。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I1', answer: 'Does Sam need a new tool?', acceptedAnswers: ['Does Sam need a new tool?'], explanationZh: '使用 Does 開頭並將 need 設為原形。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I1', answer: 'Does Sam need a new part?', acceptedAnswers: ['Does Sam need a new part?'], explanationZh: '使用 Does 開頭並將 need 設為原形。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'I2', answer: 'I can repair the broken machine.', acceptedAnswers: ['I can repair the broken machine.'], explanationZh: '正確使用 repair。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'I3', answer: 'Yes, they do.', acceptedAnswers: ['Yes, they do.'], explanationZh: '使用 do 回答。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C1', answer: 'Because the sensors do not receive any signal.', acceptedAnswers: ['A', 'Because the sensors do not receive any signal.'], explanationZh: '對話第四行 Sam 說明感測器未收到訊號。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C1', answer: 'Because the machines do not receive any signal.', acceptedAnswers: ['A', 'Because the machines do not receive any signal.'], explanationZh: '對話第四行 Sam 說明感測器未收到訊號。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'C2', answer: 'Does Eric like pizza?', acceptedAnswers: ['A', 'Does Eric like pizza?'], explanationZh: 'Does 後方動詞使用原形 like。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C3', answer: 'Inspect the components carefully.', acceptedAnswers: ['A', 'Inspect the components carefully.'], explanationZh: '最後一段提到兩人仔細檢查零件。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C3', answer: 'Check all parts carefully.', acceptedAnswers: ['A', 'Check all parts carefully.'], explanationZh: '最後一段提到兩人仔細檢查零件。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'P1', answer: 'Does the computer work well?', acceptedAnswers: ['Does the computer work well?'], explanationZh: '正確使用 Does 與原形動詞。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'R1', answer: 'Base form (原形動詞).', acceptedAnswers: ['Base form', '原形動詞'], explanationZh: '主要動詞必須回到原形。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'H1', answer: 'I can repair this robot.', acceptedAnswers: ['I can repair this robot.'], explanationZh: '正確使用 repair。', likelyMisconceptionZh: null, followUpZh: null },
@@ -468,7 +468,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         difficultyBand: '國中七年級 / 針對性複習',
         targets: [
           {
-            id: 'target-primary-repeat-grammar',
+            id: 'g7-do-does-questions',
             domain: 'grammar',
             description: '依家長回饋加強 Do / Does 疑問句動詞還原規則。',
             evidence: [{ source: 'feedback', detail: parentFeedbackDirective.parentNote }],
@@ -496,7 +496,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
       },
       trackingDelta: {
         introducedVocabularyIds: ['v-repair', 'v-connect', 'v-signal', 'v-battery', 'v-switch', 'v-motor', 'v-power'],
-        reviewedVocabularyIds: ['v-camera'],
+        reviewedVocabularyIds: [],
         exposedGrammarTargetIds: ['g7-do-does-questions'],
         exposedReadingTargetIds: ['target-reading'],
         exposedCommunicationFunctionIds: ['cf-describing-problems-troubleshooting'],
@@ -511,7 +511,7 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
         },
         vocabulary: [
           { id: 'v-repair', word: 'repair', partOfSpeech: 'v.', meaningZh: '修理', pronunciationHint: null, exampleEn: 'Can you repair the broken sensor?', exampleZh: '你能修理損壞的感測器嗎？', status: 'new' },
-          { id: 'v-connect', word: 'connect', partOfSpeech: 'v.', meaningZh: '連接', pronunciationHint: null, exampleEn: 'Connect the blue wire to the port.', exampleZh: '將藍色電線連接到插孔。', status: 'new' },
+          { id: 'v-connect', word: 'connect', partOfSpeech: 'v.', meaningZh: '連接', pronunciationHint: null, exampleEn: 'Connect the blue line to the port.', exampleZh: '將藍色電線連接到插孔。', status: 'new' },
           { id: 'v-signal', word: 'signal', partOfSpeech: 'n.', meaningZh: '訊號', pronunciationHint: null, exampleEn: 'The receiver caught the signal.', exampleZh: '接收器接收到了訊號。', status: 'new' },
           { id: 'v-battery', word: 'battery', partOfSpeech: 'n.', meaningZh: '電池', pronunciationHint: null, exampleEn: 'The battery needs charging.', exampleZh: '電池需要充電。', status: 'new' },
           { id: 'v-switch', word: 'switch', partOfSpeech: 'n.', meaningZh: '開關', pronunciationHint: null, exampleEn: 'Flip the power switch on.', exampleZh: '打開電源開關。', status: 'new' },
@@ -519,19 +519,21 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
           { id: 'v-power', word: 'power', partOfSpeech: 'n.', meaningZh: '電力；能量', pronunciationHint: null, exampleEn: 'Check the power level.', exampleZh: '檢查電力水準。', status: 'new' },
         ],
         reading: {
-          title: 'Testing the Circuit Connection',
+          title: 'Testing the Machine Connection',
           contextZh: '兩位工程師透過問答排查電路訊號的情境。',
           genre: 'dialogue',
           blocks: [
-            { type: 'dialogue', speaker: 'Leo', text: 'Does this blue wire connect to the main power board properly before the match begins today?' },
-            { type: 'dialogue', speaker: 'Sam', text: 'Yes, it does. But why does the red warning light flash repeatedly right now on the control panel?' },
-            { type: 'dialogue', speaker: 'Leo', text: 'Do the sensors receive any signal from the remote control unit when you turn on the power switch?' },
-            { type: 'dialogue', speaker: 'Sam', text: 'No, they do not. Let us check the battery level and wire connection once again to repair the circuit.' },
-            { type: 'dialogue', speaker: 'Leo', text: 'Does the electric motor need a higher voltage setting to operate smoothly under heavy load?' },
-            { type: 'dialogue', speaker: 'Sam', text: 'No, it does not. The motor requires only standard battery power when all cables are firmly attached.' },
-            { type: 'paragraph', text: 'Both student engineers carefully inspect every electronic component on the laboratory table to make sure the robot works safely and accurately before the tournament starts.' },
+            { type: 'dialogue', speaker: 'Leo', text: 'Does this blue part connect to the power board safely before the game begins today?' },
+            { type: 'dialogue', speaker: 'Sam', text: 'Yes, it does. But why does the red light flash again and again right now on the board?' },
+            { type: 'dialogue', speaker: 'Leo', text: 'Do the machines receive any signal when you turn on the power switch?' },
+            { type: 'dialogue', speaker: 'Sam', text: 'No, they do not. Let us check the battery and repair the machine once again.' },
+            { type: 'dialogue', speaker: 'Leo', text: 'Does the motor need more power to work well under a heavy box on the floor?' },
+            { type: 'dialogue', speaker: 'Sam', text: 'No, it does not. The motor needs only enough battery power when all parts are ready.' },
+            { type: 'dialogue', speaker: 'Leo', text: 'Does the green light turn on when the battery connects to the machine?' },
+            { type: 'dialogue', speaker: 'Sam', text: 'Yes, it does. Now the signal travels through the line without any trouble.' },
+            { type: 'paragraph', text: 'Both students carefully check every part on the table to make sure the robot works safely before the game starts.' },
           ],
-          wordCount: 160,
+          wordCount: 136,
           readingTipsZh: ['注意 Does 後面主要動詞 connect 是原形', '注意 Do 與複數主詞 sensors 的搭配'],
           sourceNote: 'Lab Troubleshooting Log',
         },
@@ -542,11 +544,11 @@ describe('Kobe Production Longitudinal Progression & Feedback Dominance Regressi
             explanationZh: '當助動詞 Does 出現時，它已經承擔了第三人稱單數標記，後方主要動詞必須回到原形。',
             patterns: ['Does + He/She/It + 原形動詞...?'],
             workedExamples: [
-              { example: 'Does the robot work properly?', walkthroughZh: '主詞 the robot 是單數，使用 Does，work 必須是原形。' },
-              { example: 'Do the wheels turn smoothly?', walkthroughZh: '主詞 the wheels 是複數，使用 Do。' },
+              { example: 'Does the robot work well?', walkthroughZh: '主詞 the robot 是單數，使用 Does，work 必須是原形。' },
+              { example: 'Do the wheels turn quickly?', walkthroughZh: '主詞 the wheels 是複數，使用 Do。' },
             ],
             commonMistakes: [
-              { wrong: 'Does the robot works properly?', corrected: 'Does the robot work properly?', whyZh: 'Does 後面動詞必須還原為原形 work，不可保留 s。' },
+              { wrong: 'Does the robot works well?', corrected: 'Does the robot work well?', whyZh: 'Does 後面動詞必須還原為原形 work，不可保留 s。' },
             ],
           },
         ],

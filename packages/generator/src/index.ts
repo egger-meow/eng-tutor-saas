@@ -79,6 +79,8 @@ export { auditCurriculumPackage } from './audit-curriculum.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
 export { auditCapPrecedentFloor, auditCapPrecedentPackage, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'
 export type { CapAssessmentIntent, CapAssessmentPlan, CapDesignAnchor, CapPrecedentAuditResult, CapPrecedentRuntimeBundle } from './cap-precedent-audit.js'
+export { CAP_ASSESSMENT_PLAN_BASE_KEYS, CAP_ASSESSMENT_PLAN_CONTRACT, validateCapAssessmentPlan } from './cap-assessment-plan-contract.js'
+export type { CapEvidenceScope, CapEvidenceAnchor } from './cap-assessment-plan-contract.js'
 export {
   countWords,
   extractBlockTexts,

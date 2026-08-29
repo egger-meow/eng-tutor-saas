@@ -1,5 +1,5 @@
 ---
-profileVersion: "1.1.0"
+profileVersion: "1.2.0"
 modelId: "gemini-3.7-flash"
 modelPatterns:
   - "gemini-3.7-flash"
@@ -9,7 +9,7 @@ modelPatterns:
   - "gemini-2.5-flash"
   - "models/gemini-2.5-flash"
 description: "Model-specific semantic critique profile for Gemini 3.7 Flash authoring"
-updatedAt: "2026-08-18"
+updatedAt: "2026-08-29"
 ---
 
 # Gemini 3.7 Flash Quality Profile
@@ -61,6 +61,28 @@ Before submission, specifically inspect:
   - Verify every multiple-choice correct option and Parent rationale is directly entailed by the source text.
   - Never combine separately mentioned true details into a new unsupported claim or composite statement.
   - Global Answer Integrity: Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+
+### 6. Primary Reading Evidence Boundary
+- **Target Area:** `evidence-boundary`
+- **Rule ID:** `gemini-evid-06`
+- **Description:** Verify that reading comprehension and CAP questions draw evidence strictly from `studentLesson.reading.blocks`.
+- **Check Points:**
+  - Never reference sentences or examples located in instruction boxes or practice prompts as reading evidence.
+  - Ensure all quoted prompt strings match reading block prose verbatim.
+
+### 7. Epistemic Modality Preservation
+- **Target Area:** `answer-entailment`
+- **Rule ID:** `gemini-modality-07`
+- **Description:** Preserve strict modality in parent answers and explanations.
+- **Check Points:**
+  - Never convert hypothetical passage conditions into asserted historical facts or fabricated records.
+
+### 8. Task Topology & Mechanism Diversity
+- **Target Area:** `task-topology`
+- **Rule ID:** `gemini-topology-08`
+- **Description:** Prevent question template collapse across practice sections.
+- **Check Points:**
+  - Ensure diverse cognitive tasks (retrieval, condition-result mapping, causal deduction, lexical transfer).
 
 ## Human-Maintained Observations
 

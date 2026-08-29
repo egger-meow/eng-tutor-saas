@@ -5,6 +5,17 @@ import { goldenContextA } from './fixtures/golden-contexts.js'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { REPO_ROOT } from './bundle-compiler.js'
+import { validPackage } from './curriculum-package.test.js'
+import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
+import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
+
+function canonicalPackage(): any {
+  const v20 = validPackage()
+  const v21 = upgradeV20ToV21(v20 as any)
+  const v22 = upgradeV21ToV22(v21)
+  delete (v22.studentLesson.reading as any).paragraphs
+  return v22
+}
 
 describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
   let samplePackage: any
@@ -137,20 +148,20 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     expect(genreFinding).toBeDefined()
   })
 
-  it('Tier 1 (WARNING TELEMETRY): treats lexical-ceiling and lexical-anchor as warning-only telemetry without failing quality gate', () => {
-    const mutated = structuredClone(samplePackage)
-    // 1. Lexical ceiling violation (inject off-list advanced vocabulary)
-    mutated.studentLesson.practice[0].questions[0].prompt = 'Does the ephemeral juxtaposition cause ubiquitous dichotomy in empirical methodology?'
-    // 2. Lexical anchor violation (vocabulary word not present in reading passage)
+  it('Tier 1 (WARNING TELEMETRY): treats isolated lexical-ceiling and review lexical-anchor as warning-only telemetry without failing quality gate', () => {
+    const mutated = canonicalPackage()
+    // 1. Isolated lexical ceiling telemetry (1-2 off-list words)
+    mutated.studentLesson.practice[0].questions[0].prompt = 'Does the quantum device improve testing in the workshop?'
+    // 2. Review lexical anchor telemetry (review vocabulary word not present in reading passage)
     mutated.studentLesson.vocabulary.push({
-      id: 'v-unanchored',
+      id: 'v-unanchored-review',
       word: 'xylophone',
       partOfSpeech: 'n.',
       meaningZh: '木琴',
       pronunciationHint: null,
       exampleEn: 'He plays the xylophone.',
       exampleZh: '他彈奏木琴。',
-      status: 'new',
+      status: 'review',
     })
 
     const audit = auditCurriculumPackage(mutated)
@@ -164,5 +175,25 @@ describe('Wave 3 Finisher 3-Tier Classification & Normalization', () => {
     const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding).toBeDefined()
     expect(anchorFinding?.severity).toBe('warning')
+  })
+
+  it('Tier 3 (SEMANTIC CRITICAL): fails quality gate when new vocabulary is unanchored or severe lexical ceiling violation occurs', () => {
+    const mutated = canonicalPackage()
+    mutated.studentLesson.vocabulary.push({
+      id: 'v-unanchored-new',
+      word: 'astronomy',
+      partOfSpeech: 'n.',
+      meaningZh: '天文學',
+      pronunciationHint: null,
+      exampleEn: 'He studies astronomy.',
+      exampleZh: '他研究天文學。',
+      status: 'new',
+    })
+
+    const audit = auditCurriculumPackage(mutated)
+    expect(audit.passed).toBe(false)
+    const anchorFinding = audit.findings.find((f) => f.dimension === 'lexical-anchor')
+    expect(anchorFinding?.tier).toBe('semantic-critical')
+    expect(anchorFinding?.severity).toBe('critical')
   })
 })

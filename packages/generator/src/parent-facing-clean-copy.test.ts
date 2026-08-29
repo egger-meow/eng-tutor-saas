@@ -95,10 +95,10 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
         contextZh: '機器人社團進行光學感測器靈敏度校正實驗的情境。',
         genre: 'instructions',
         blocks: [
-          { type: 'paragraph', text: 'When testing an optical sensor in a bright room, the robot often makes mistakes because sunlight interferes with optical signals. Follow these calibration steps to ensure consistent accuracy throughout all school tournament matches.' },
-          { type: 'paragraph', text: 'First, measure the ambient light level near the testing field carefully. If the value exceeds forty lux, adjust the shade hood over the lens before starting the motor. This prevents glare from blinding the camera.' },
-          { type: 'paragraph', text: 'Next, place the black test line on a clean white board. Verify that the sensor detects the contrast immediately without delay, ensuring all wire connections remain secure and tightly connected to the power board.' },
-          { type: 'paragraph', text: 'Finally, record the output values in your laboratory notebook before starting the automated trial. Careful preparation and accurate records help every student engineer troubleshoot problems successfully during competition.' },
+          { type: 'paragraph', text: 'When testing a light sensor in a bright room, the robot often makes mistakes because strong sun light affects the signal. Follow these simple steps to help the robot work well during all school games.' },
+          { type: 'paragraph', text: 'First, measure the light near the test board carefully. If the light is too bright, place a small mirror to block the extra light, and adjust the camera before starting the robot.' },
+          { type: 'paragraph', text: 'Next, place the black line on a clean white board. Check that the sensor receives the signal without delay, making sure all parts connect safely to the board.' },
+          { type: 'paragraph', text: 'Finally, write down the test numbers in your notebook before starting the test. Careful work and good records help every student fix problems quickly during the test.' },
         ],
         wordCount: 155,
         readingTipsZh: ['注意步驟順序副詞 First, Next, Finally', '找出光線過亮時的調整方式'],
@@ -111,11 +111,11 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
           explanationZh: '說明主詞與 be 動詞的搭配原則。',
           patterns: ['Subject + be-verb + noun/adjective'],
           workedExamples: [
-            { example: 'The camera is an essential sensor.', walkthroughZh: '單數主詞搭配 is。' },
-            { example: 'These sensors are very accurate.', walkthroughZh: '複數主詞搭配 are。' },
+            { example: 'The camera is a useful sensor.', walkthroughZh: '單數主詞搭配 is。' },
+            { example: 'These sensors are very fast.', walkthroughZh: '複數主詞搭配 are。' },
           ],
           commonMistakes: [
-            { wrong: 'The sensors is accurate.', corrected: 'The sensors are accurate.', whyZh: '複數主詞不可使用 is。' },
+            { wrong: 'The sensors is fast.', corrected: 'The sensors are fast.', whyZh: '複數主詞不可使用 is。' },
           ],
         },
       ],
@@ -127,8 +127,8 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
           instructionsZh: '根據文章內容回答問題。',
           hintZh: '請參考步驟第二段。',
           questions: [
-            { id: 'G1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What should you do if the ambient light exceeds forty lux?', options: ['Adjust the shade hood over the lens.', 'Turn off all sensors immediately.', 'Replace the white board with a black one.', 'Stop writing in the notebook.'], writingLines: 0, difficulty: 'on-level' },
-            { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['The camera is an essential sensor.', 'The camera are an essential sensor.', 'The camera be an essential sensor.', 'The camera am an essential sensor.'], writingLines: 0, difficulty: 'on-level' },
+            { id: 'G1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What should you do if the light is too bright?', options: ['Place a small mirror to block the extra light.', 'Turn off all sensors immediately.', 'Replace the white board with a black one.', 'Stop writing in the notebook.'], writingLines: 0, difficulty: 'on-level' },
+            { id: 'G2', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Choose the correct sentence:', options: ['The camera is a useful machine.', 'The camera are a useful machine.', 'The camera be a useful machine.', 'The camera am a useful machine.'], writingLines: 0, difficulty: 'on-level' },
           ],
         },
         {
@@ -138,9 +138,9 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
           instructionsZh: '依據文章判斷邏輯。',
           hintZh: null,
           questions: [
-            { id: 'I1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Why do we need to adjust the shade hood?', options: undefined, writingLines: 2, difficulty: 'on-level' },
-            { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: The optical sensors ______ ready for testing.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-            { id: 'I3', targetIds: ['target-reading-inference'], itemType: 'short-response', prompt: 'What does the team verify before starting the trial?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+            { id: 'I1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Why do we need to place a small mirror?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+            { id: 'I2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Complete the sentence: The light sensors ______ ready for testing.', options: undefined, writingLines: 2, difficulty: 'on-level' },
+            { id: 'I3', targetIds: ['target-reading-inference'], itemType: 'short-response', prompt: 'What does the team check before starting the test?', options: undefined, writingLines: 2, difficulty: 'on-level' },
           ],
         },
         {
@@ -150,9 +150,9 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
           instructionsZh: '選出最符合文意的推論。',
           hintZh: null,
           questions: [
-            { id: 'C1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What is the main goal of the calibration steps described in the text?', options: ['To ensure consistent sensor accuracy.', 'To buy new optical cameras.', 'To paint the laboratory white.', 'To shorten the competition time.'], writingLines: 0, difficulty: 'on-level' },
-            { id: 'C2', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What can we infer about testing in a dark room?', options: ['The shade hood may not need adjustment.', 'The motor will stop immediately.', 'The sensor will definitely fail.', 'The white board cannot be used.'], writingLines: 0, difficulty: 'on-level' },
-            { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence uses be-verbs correctly?', options: ['These robots are fast and reliable.', 'These robots is fast and reliable.', 'These robots be fast and reliable.', 'These robots am fast and reliable.'], writingLines: 0, difficulty: 'on-level' },
+            { id: 'C1', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'Why do students follow the steps in the reading?', options: ['To help the robot work well.', 'To buy new cameras.', 'To paint the room white.', 'To finish the test quickly.'], writingLines: 0, difficulty: 'on-level' },
+            { id: 'C2', targetIds: ['target-reading-inference'], itemType: 'inference', prompt: 'What is likely true about testing in a dark room?', options: ['The mirror may not be needed.', 'The robot will stop immediately.', 'The sensor will fail.', 'The white board cannot be used.'], writingLines: 0, difficulty: 'on-level' },
+            { id: 'C3', targetIds: ['target-new-grammar'], itemType: 'inference', prompt: 'Which sentence is correct?', options: ['These robots are fast and useful.', 'These robots is fast and useful.', 'These robots be fast and useful.', 'These robots am fast and useful.'], writingLines: 0, difficulty: 'on-level' },
           ],
         },
         {
@@ -182,25 +182,25 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
         estimatedMinutes: 15,
         questions: [
           { id: 'H1', targetIds: ['target-core-vocabulary'], itemType: 'short-response', prompt: 'Use the word measure in a complete sentence.', options: undefined, writingLines: 2, difficulty: 'on-level' },
-          { id: 'H2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Why do we use does instead of do with a singular subject?', options: undefined, writingLines: 2, difficulty: 'on-level' },
+          { id: 'H2', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Why do we use does instead of do with he, she, or it?', options: undefined, writingLines: 2, difficulty: 'on-level' },
           { id: 'H3', targetIds: ['target-new-grammar'], itemType: 'short-response', prompt: 'Write one sentence with connect.', options: undefined, writingLines: 2, difficulty: 'on-level' },
         ],
       },
     },
     answers: [
-      { questionId: 'G1', answer: 'Adjust the shade hood over the lens.', acceptedAnswers: ['A', 'Adjust the shade hood over the lens.'], explanationZh: '根據第二段，光線超過 40 lux 時應調整遮光罩。', likelyMisconceptionZh: '若選 B 則忽略了文中具體的調整指示。', followUpZh: null },
-      { questionId: 'G2', answer: 'The camera is an essential sensor.', acceptedAnswers: ['A', 'The camera is an essential sensor.'], explanationZh: '單數主詞 The camera 搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I1', answer: 'To protect the sensor from strong ambient light.', acceptedAnswers: ['To protect the sensor from strong ambient light.'], explanationZh: '調整遮光罩是為了避免強光干擾感測器。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I2', answer: 'are', acceptedAnswers: ['are'], explanationZh: '複數主詞 The optical sensors 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'I3', answer: 'The contrast of the black line on white board.', acceptedAnswers: ['The contrast of the black line.'], explanationZh: '第三段提到確認黑線在白板上的對比度。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C1', answer: 'To ensure consistent sensor accuracy.', acceptedAnswers: ['A', 'To ensure consistent sensor accuracy.'], explanationZh: '全文說明透過校正步驟確保感測器準確度。', likelyMisconceptionZh: '若選 D 則誤解了實驗目的。', followUpZh: null },
-      { questionId: 'C2', answer: 'The shade hood may not need adjustment.', acceptedAnswers: ['A', 'The shade hood may not need adjustment.'], explanationZh: '文中說明光線超過 40 lux 才需調整遮光罩。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'C3', answer: 'These robots are fast and reliable.', acceptedAnswers: ['A', 'These robots are fast and reliable.'], explanationZh: '複數名詞搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'P1', answer: 'The sensor is very sensitive.', acceptedAnswers: ['The sensor is very sensitive.'], explanationZh: '正確使用 is。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'G1', answer: 'Place a small mirror to block the extra light.', acceptedAnswers: ['A', 'Place a small mirror to block the extra light.'], explanationZh: '根據第二段，光線太亮時應放置小鏡子擋住多餘光線。', likelyMisconceptionZh: '若選 B 則忽略了文中具體的調整指示。', followUpZh: null },
+      { questionId: 'G2', answer: 'The camera is a useful machine.', acceptedAnswers: ['A', 'The camera is a useful machine.'], explanationZh: '單數主詞 The camera 搭配 is。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I1', answer: 'To block the extra light.', acceptedAnswers: ['To block the extra light.'], explanationZh: '放置鏡子是為了擋住過亮的光線。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I2', answer: 'are', acceptedAnswers: ['are'], explanationZh: '複數主詞 The light sensors 搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'I3', answer: 'The black line on white board.', acceptedAnswers: ['The black line on white board.'], explanationZh: '第三段提到確認黑線在白板上的位置。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C1', answer: 'To help the robot work well.', acceptedAnswers: ['A', 'To help the robot work well.'], explanationZh: '全文說明透過調整步驟確保機器人正常運作。', likelyMisconceptionZh: '若選 D 則誤解了實驗目的。', followUpZh: null },
+      { questionId: 'C2', answer: 'The mirror may not be needed.', acceptedAnswers: ['A', 'The mirror may not be needed.'], explanationZh: '文中說明光線太亮才需放置鏡子。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'C3', answer: 'These robots are fast and useful.', acceptedAnswers: ['A', 'These robots are fast and useful.'], explanationZh: '複數名詞搭配 are。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'P1', answer: 'The sensor is very small.', acceptedAnswers: ['The sensor is very small.'], explanationZh: '正確使用 is。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'R1', answer: 'Does the sensor detect the black line?', acceptedAnswers: ['Does the sensor detect the black line?'], explanationZh: '第三人稱單數使用 Does 且動詞回到原形 detect。', likelyMisconceptionZh: null, followUpZh: null },
       { questionId: 'H1', answer: 'Please measure the length of the table.', acceptedAnswers: ['Please measure the length of the table.'], explanationZh: '正確使用 measure 作為動詞。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'H2', answer: 'Because does is used for third-person singular subjects.', acceptedAnswers: ['Because does is used for third-person singular subjects.'], explanationZh: '第三人稱單數主詞使用助動詞 does。', likelyMisconceptionZh: null, followUpZh: null },
-      { questionId: 'H3', answer: 'Connect the wire carefully.', acceptedAnswers: ['Connect the wire carefully.'], explanationZh: '正確使用 connect。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'H2', answer: 'Because does is used for he, she, or it.', acceptedAnswers: ['Because does is used for he, she, or it.'], explanationZh: '第三人稱單數主詞使用助動詞 does。', likelyMisconceptionZh: null, followUpZh: null },
+      { questionId: 'H3', answer: 'Connect the parts carefully.', acceptedAnswers: ['Connect the parts carefully.'], explanationZh: '正確使用 connect。', likelyMisconceptionZh: null, followUpZh: null },
     ],
     parentSummary: {
       focusZh: '感測器除錯推論與新文法句型',
@@ -266,6 +266,7 @@ describe('Parent-Facing Curriculum Copy & Jargon Prohibition', () => {
     it('passes for clean, natural parent summary copy', () => {
       const report = auditCurriculumPackage(baseValidPackage)
       const parentFindings = report.findings.filter((f) => f.dimension === 'parent-personalization')
+      console.log('parent-facing report findings:', report.findings)
       expect(parentFindings).toEqual([])
       expect(report.passed).toBe(true)
     })

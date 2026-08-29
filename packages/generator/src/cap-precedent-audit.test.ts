@@ -31,7 +31,9 @@ const provenance = JSON.stringify({ capKnowledgeVersion: 'k', capCorpusHash: 'a'
 const plan = (overrides = {}) => JSON.stringify({
   learningObjective: 'infer from evidence', primarySkill: 'local_inference', secondarySkills: [], genre: 'article_informational',
   targetLanguageDifficulty: 'A1_elementary', targetCognitiveDepth: 'D2_single_step_inference', evidenceMode: 'text_only',
-  evidenceSpan: 'cross_sentence_local', reasoningOperations: ['connect evidence'], precedentRefs: ['cap-0123456789ab'],
+  evidenceSpan: 'cross_sentence_local', evidenceScope: 'primary_reading',
+  evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mia saw wet streets.' }],
+  reasoningOperations: ['connect evidence'], precedentRefs: ['cap-0123456789ab'],
   precedentMode: 'anchor', borrowedDesignPrinciples: ['two clues jointly decide'], distractorStrategies: ['partial_truth'],
   intentionalRecall: false, noPrecedentReason: null, ...overrides,
 })
@@ -216,5 +218,57 @@ describe('CAP precedent deterministic quality floor', () => {
     })))
     expect(auditCapPrecedentPackage(repeated, runtime).findings).not.toContain('CAP_PRECEDENT_MONOCULTURE: four or more assessment items cannot all reuse one design anchor')
     expect(auditCapPrecedentPackage(repeated, runtime).passed).toBe(true)
+  })
+
+  it('rejects evidenceScope pointing to instruction for reading-dependent item', () => {
+    const invalidScopePlan = plan({
+      evidenceScope: 'instruction',
+      evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'Mia saw wet streets.' }],
+    })
+    const report = auditCapPrecedentPackage(pkg(invalidScopePlan), runtime)
+    expect(report.passed).toBe(false)
+    expect(report.findings.join('\n')).toContain('CAP_EVIDENCE_BOUNDARY_VIOLATION:q1')
+  })
+
+  it('rejects reading-dependent item when evidence anchors are missing', () => {
+    const noAnchorsPlan = plan({
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [],
+    })
+    const report = auditCapPrecedentPackage(pkg(noAnchorsPlan), runtime)
+    expect(report.passed).toBe(false)
+    expect(report.findings.join('\n')).toContain('CAP_EVIDENCE_ANCHORS_MISSING:q1')
+  })
+
+  it('rejects evidence anchor pointing outside reading blocks (e.g. instruction)', () => {
+    const badLocPlan = plan({
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [{ location: 'studentLesson.instruction.0.explanationZh', anchorText: 'Mia saw wet streets.' }],
+    })
+    const report = auditCapPrecedentPackage(pkg(badLocPlan), runtime)
+    expect(report.passed).toBe(false)
+    expect(report.findings.join('\n')).toContain('CAP_EVIDENCE_LOCATION_INVALID:q1')
+  })
+
+  it('rejects evidence anchor when anchorText does not exist in referenced reading block', () => {
+    const missingTextPlan = plan({
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [{ location: 'studentLesson.reading.blocks.0.text', anchorText: 'The robot exploded.' }],
+    })
+    const report = auditCapPrecedentPackage(pkg(missingTextPlan), runtime)
+    expect(report.passed).toBe(false)
+    expect(report.findings.join('\n')).toContain('CAP_EVIDENCE_ANCHOR_TEXT_MISSING:q1')
+  })
+
+  it('rejects reading item whose prompt quotes text from outside primary reading', () => {
+    const quoteMismatchQuestion = {
+      id: 'q1',
+      itemType: 'inference' as const,
+      prompt: 'In the sentence "May, might, and could express possibility", what is the main rule?',
+      options: ['A', 'B', 'C', 'D'],
+    }
+    const report = auditCapPrecedentPackage(pkg(plan(), quoteMismatchQuestion), runtime)
+    expect(report.passed).toBe(false)
+    expect(report.findings.join('\n')).toContain('CAP_QUOTE_EVIDENCE_MISMATCH:q1')
   })
 })

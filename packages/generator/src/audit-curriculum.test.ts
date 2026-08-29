@@ -114,9 +114,9 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor')
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('warning')
+    expect(anchorFinding?.severity).toBe('critical')
     expect(anchorFinding?.message).toContain('astronomy')
-    expect(report.passed).toBe(true)
+    expect(report.passed).toBe(false)
   })
 
   it('enforces comprehensive lexical ceiling: detects untaught high-difficulty words across options and practice', () => {
@@ -133,8 +133,8 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
     expect(lexicalFinding).toBeDefined()
-    expect(lexicalFinding?.severity).toBe('warning')
-    expect(report.passed).toBe(true)
+    expect(lexicalFinding?.severity).toBe('critical')
+    expect(report.passed).toBe(false)
   })
 
   it('flags genre-block mismatch when dialogue genre lacks dialogue blocks', () => {
@@ -186,8 +186,8 @@ describe('curriculum audit & lexical contract', () => {
     const report = auditCurriculumPackage(pkg)
     const anchorFinding = report.findings.find((f) => f.dimension === 'lexical-anchor' && f.message.includes('car'))
     expect(anchorFinding).toBeDefined()
-    expect(anchorFinding?.severity).toBe('warning')
-    expect(report.passed).toBe(true)
+    expect(anchorFinding?.severity).toBe('critical')
+    expect(report.passed).toBe(false)
   })
 
   it('accepts valid morphological variants: carry is anchored by carries or carrying', () => {
@@ -256,12 +256,12 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.passed).toBe(false)
   })
 
-  it('flags capitalized advanced non-allowlist words as warning telemetry without hard rejection', () => {
+  it('flags isolated advanced non-allowlist words as warning telemetry without hard rejection', () => {
     const pkg = canonicalPackage()
-    // Inject capitalized obscure words that are not in the approved vocab, not dialogue speakers, and not interests
+    // Inject 1-2 non-repeated obscure words that are not in the approved vocab, not dialogue speakers, and not interests
     pkg.studentLesson.reading.blocks[0] = {
       type: 'paragraph',
-      text: 'Sophisticated Quantum Epistemology Obfuscates our daily robot testing procedures in the workshop today.',
+      text: 'A quantum device helps our daily robot testing procedures in the workshop today.',
     }
     const report = auditCurriculumPackage(pkg)
     const lexicalFinding = report.findings.find((f) => f.dimension === 'lexical-ceiling')
@@ -496,7 +496,7 @@ function make12McqPackage(answerLetters: string[]): any {
 
   const baseOptions = [
     'Mina tests the camera carefully.',
-    'Ken checks the sensor angle.',
+    'Ken checks the light above the camera.',
     'The club needs new parts.',
     'The robot works well today.',
   ]

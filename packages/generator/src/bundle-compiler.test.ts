@@ -11,6 +11,7 @@ import {
   computeFrozen250Hashes,
   computeFrozen260Hashes,
   computeFrozen270Hashes,
+  computeFrozen280Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
@@ -22,9 +23,9 @@ describe('bundle-compiler', () => {
 
     expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
     expect(freshBundle.metadata.schemaVersion).toBe('2.3.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.9.2')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.9.2-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(29)
+    expect(freshBundle.metadata.promptVersion).toBe('2.10.0')
+    expect(freshBundle.metadata.bundleVersion).toBe('2.10.0-prod')
+    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(33)
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
     expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
     expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -169,9 +170,18 @@ describe('bundle-compiler', () => {
     })
   })
 
-  it('keeps compiled bundle size within grounded-production budget (< 10000 words)', async () => {
+  it('verifies that prompts/2.8.0 recency overlay remains byte-for-byte frozen', async () => {
+    expect(await computeFrozen280Hashes(REPO_ROOT)).toEqual({
+      'packages/generator/prompts/2.8.0/01-plan.md': '23286427fd1b7cc9c6cca1509304d7d4a7e5627c562432150bc56b242fd43954',
+      'packages/generator/prompts/2.8.0/02-author.md': 'b2c72237b77a437747107818483ac3fa5e5ec08748d4a91aae1ef69118a229f1',
+      'packages/generator/prompts/2.8.0/03-critic.md': '325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5',
+      'packages/generator/prompts/2.8.0/04-repair.md': 'bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2',
+    })
+  })
+
+  it('keeps compiled bundle size within grounded-production budget (< 15000 words)', async () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
     const wordCount = freshBundle.content.trim().split(/\s+/u).length
-    expect(wordCount).toBeLessThan(10000)
+    expect(wordCount).toBeLessThan(15000)
   })
 })

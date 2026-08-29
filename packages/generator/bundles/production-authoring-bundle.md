@@ -1,8 +1,8 @@
 ---
-bundleVersion: "2.9.2-prod"
+bundleVersion: "2.10.0-prod"
 schemaVersion: "2.3.0"
-promptVersion: "2.9.2"
-engineVersion: "1.4.0"
+promptVersion: "2.10.0"
+engineVersion: "1.5.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/prompts/2.4.0/01-plan.md": "35db191f7e011c54f087114fffa1e9350b3d89b138e499bef45b6e581dbf0853"
@@ -25,13 +25,17 @@ sourceHashes:
   "packages/generator/prompts/2.8.0/02-author.md": "b2c72237b77a437747107818483ac3fa5e5ec08748d4a91aae1ef69118a229f1"
   "packages/generator/prompts/2.8.0/03-critic.md": "325b34e097bc1b49fb30368515fad9814fa5d9f9a101b1a4d4ee3974ee2dcca5"
   "packages/generator/prompts/2.8.0/04-repair.md": "bc2b923eac5ccf231fede5c5717a995cf206cd77a3495b8a55adc9df0e9e33f2"
+  "packages/generator/prompts/2.10.0/01-plan.md": "9290b2d412dabd3a1fc4a96afa6d34a247219ccb9e083d1bb6596ef7c374fede"
+  "packages/generator/prompts/2.10.0/02-author.md": "438c7558baa2f554b8ae6c1a034cee397169f58bfa63d7f9e613c45e5824a63c"
+  "packages/generator/prompts/2.10.0/03-critic.md": "c597ec379cba605bc9abf685b3fcd50f4bae1c8189c4a7f2fa9d9ab2100e9b46"
+  "packages/generator/prompts/2.10.0/04-repair.md": "1f08a6b147926b374a4ca546ff919848b0b29c19881cd1b45d28aec8f055b5b3"
   "packages/generator/src/curriculum-package-schema.ts": "6ce3751c552fda9002b1ed34d019d6c0b6f07f5da1450c123c9b21c2baf91343"
-  "packages/generator/quality-profiles/default.md": "8a25579f69c28b34f67a35407b4ec6008477b51810ad88d01817a202cbb37cac"
-  "packages/generator/quality-profiles/gemini-3.7-flash.md": "f44e911b43b4ff5e25ad6c7037086b2509c9ffe051f14a8652ed0e883c901a36"
-  "docs/curriculum-quality-rubric.md": "4dc0dbaa56f410ddbf283facab201b07b9843e6205c0710234636d474bb4170f"
+  "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
+  "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
+  "docs/curriculum-quality-rubric.md": "fc9c9bdabc6cb1c7f9640310f9b4b4da974d4c27a3bacf7059783f2d9c5dfc69"
   "docs/product-rules.md": "7d91b8ba65200d6af4f8c4be16e4d819d26008a2e8f13d9c4f8c70c0c036338b"
   "packages/generator/curriculum/cap-precedent-contract.md": "036ad256be8d16ab98776a1d5e30770154265247535c6b1b3e5315da6bf27e6b"
-  "packages/generator/src/cap-assessment-plan-contract.ts": "4b0e2fb13e9311d21a90088acae0a6d3955e3f22dc8bfafc14121988ccbc1d83"
+  "packages/generator/src/cap-assessment-plan-contract.ts": "5ed552ce3254b6b3eefe4c0b66861ba125b0ef76d372d7e4f10073676c30bcec"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
   "packages/generator/curriculum/cap-precedent-routing-index.json": "eca426ee315000a72d977d297384e29855c087f7950f9537f6af5e4dbd5a3773"
 ---
@@ -106,9 +110,11 @@ This is the review contract for every weekly package. It distills the teaching r
 - The student packet teaches before it tests: Chinese explanation, worked examples, guided attempt, independent attempt (including a required Core Evidence/Organizer task), CAP-style transfer (with text-evidence critical thinking), sentence production (2 items), delayed retrieval (2 items), and spaced homework.
 - A coherent reading uses the learner's actual level and detailed interests as a meaningful problem situation (~300–380 words and 10–12 core vocabulary items for normal-budget baseline, smoothly scaled with available study time). Interest never replaces the learning need, and the same hook is not copied week after week.
 - Plain text reading contract: Reading blocks contain clean text without inline HTML markup; the server PDF renderer owns deterministic target vocabulary and canonical grammar pattern highlighting.
-- The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota.
-- Reading practice covers detail, main idea, inference, and context clues over time. Normal items consult CAP in `anchor`, `blend`, or `calibration` mode as a quality floor, never a structural mold. Semantic Critic flags unjustified repetition/reskinning while allowing pedagogically justified practice; quality outranks diversity.
-- Global Answer Integrity: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options must never combine separately mentioned true facts from different places into an unsupported composite claim.
+- Strict Primary Reading Evidence Boundary: Reading comprehension items and CAP precedent assessment plans must declare `evidenceScope: "primary_reading"` and bind exact `evidenceAnchors` matching primary reading blocks. Reject any reading item that relies on subsequent grammar instruction or student activity boxes for evidence.
+- The hardest useful vocabulary in the passage, options, examples, and homework is either a declared core word, a known word, or a necessary proper noun. Core vocabulary is selected for learning value, not quota. New/extension words must appear directly in the reading passage as context anchors. Out-of-ceiling untaught words are strictly audited with differentiated severity (critical for assessed items, repeated occurrences >= 2, or > 3 items; warnings for 1-3 isolated unassessed occurrences).
+- Reading practice covers detail, main idea, inference, and context clues over time. Normal items consult CAP in `anchor`, `blend`, or `calibration` mode as a quality floor, never a structural mold. Reasoning mechanisms must vary across stages to prevent mechanical template collapse.
+- Global Answer Integrity & Epistemic Modality: Every correct answer and parent rationale must be directly text-supported or explicitly framed as inference. Correct options and parent rubrics must never convert hypothetical passage conditions into fabricated observed records or combine separately mentioned true facts into an unsupported composite claim.
+- Adversarial Quality Gate: Critic must perform substantive verification across 5 mandatory dimensions (`evidence-boundary`, `answer-entailment`, `lexical-integrity`, `task-topology`, `level-calibration`) before material approval.
 - MCQ Answer-Position Integrity: Correct multiple-choice answer positions must be distributed across (A), (B), (C), and (D). Reject packages where all or near-all answers are concentrated in one position (single position > 60% when N >= 6, or 100% when N >= 4) or where identical answers repeat in runs of 4 or more. Natural variance is expected without artificial 25/25/25/25 balancing; targeted repair reorders options rather than rewriting valid questions.
 - Profile `weekly_minutes` is `targetMinutes`; `estimatedMinutes` remains deterministic, represented-work truth. Never copy them. Require the rounded inclusive 85%-115% band, otherwise emit `BUDGET_UNDERFILLED`/`BUDGET_OVERFILLED`, repair useful content surgically, recompute, and re-audit. Exceptions require specific passed `workload-budget-exception` evidence and are never valid outside the deterministic 75%-125% hard bound.
 - Every student question has a stable ID, target, writing space, and a parent-readable answer with a concise reason, genuine accepted variants, and a useful misconception when needed. The answer projection does not assign routine teaching or follow-up work to the parent.
@@ -159,7 +165,7 @@ Critic rejects mechanically repetitive work but permits pedagogically justified 
 
 ### Canonical CAP Assessment Plan Contract
 ```json
-{"contractVersion":"1.0.0","additionalProperties":false,"required":["learningObjective","primarySkill","secondarySkills","genre","targetLanguageDifficulty","targetCognitiveDepth","evidenceMode","evidenceSpan","reasoningOperations","distractorStrategies","precedentRefs","precedentMode","intentionalRecall","noPrecedentReason"],"forbiddenAliases":["objective","languageDifficulty","cognitiveDepth","isRecall"],"modes":{"anchor":["borrowedDesignPrinciples"],"blend":["synthesizedDesignPrinciples"],"calibration":["benchmarkQualities","noveltyRationale"]},"serializedExamples":{"anchor":{"learningObjective":"Infer a result by combining two clues.","primarySkill":"local_inference","secondarySkills":["information_integration"],"genre":"article_informational","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D2_single_step_inference","evidenceMode":"text_only","evidenceSpan":"cross_sentence_local","reasoningOperations":["connect two clues"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"anchor","intentionalRecall":false,"noPrecedentReason":null,"borrowedDesignPrinciples":["make both clues necessary"]},"blend":{"learningObjective":"Compare evidence before choosing a claim.","primarySkill":"information_integration","secondarySkills":["local_inference"],"genre":"multi_document_comparison","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"multi_document","evidenceSpan":"multi_paragraph_global","reasoningOperations":["compare claims across sources"],"distractorStrategies":["unsupported_world_knowledge"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"blend","intentionalRecall":false,"noPrecedentReason":null,"synthesizedDesignPrinciples":["combine comparison with causal elimination"]},"calibration":{"learningObjective":"Evaluate which explanation best fits all evidence.","primarySkill":"purpose_speaker_intent","secondarySkills":["information_integration"],"genre":"dialogue","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"text_only","evidenceSpan":"multi_paragraph_global","reasoningOperations":["test each explanation against all evidence"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"calibration","intentionalRecall":false,"noPrecedentReason":null,"benchmarkQualities":["requires evidence integration"],"noveltyRationale":"Uses a new evidence arrangement while preserving the reasoning floor."}}}
+{"contractVersion":"1.1.0","additionalProperties":false,"required":["learningObjective","primarySkill","secondarySkills","genre","targetLanguageDifficulty","targetCognitiveDepth","evidenceMode","evidenceSpan","evidenceScope","evidenceAnchors","reasoningOperations","distractorStrategies","precedentRefs","precedentMode","intentionalRecall","noPrecedentReason"],"forbiddenAliases":["objective","languageDifficulty","cognitiveDepth","isRecall"],"modes":{"anchor":["borrowedDesignPrinciples"],"blend":["synthesizedDesignPrinciples"],"calibration":["benchmarkQualities","noveltyRationale"]},"serializedExamples":{"anchor":{"learningObjective":"Infer a result by combining two clues.","primarySkill":"local_inference","secondarySkills":["information_integration"],"genre":"article_informational","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D2_single_step_inference","evidenceMode":"text_only","evidenceSpan":"cross_sentence_local","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"Mia saw wet streets.","isExplicit":true}],"reasoningOperations":["connect two clues"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"anchor","intentionalRecall":false,"noPrecedentReason":null,"borrowedDesignPrinciples":["make both clues necessary"]},"blend":{"learningObjective":"Compare evidence before choosing a claim.","primarySkill":"information_integration","secondarySkills":["local_inference"],"genre":"multi_document_comparison","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"multi_document","evidenceSpan":"multi_paragraph_global","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"The first report showed high numbers.","isExplicit":true},{"location":"studentLesson.reading.blocks.1.text","anchorText":"The second report showed lower numbers.","isExplicit":true}],"reasoningOperations":["compare claims across sources"],"distractorStrategies":["unsupported_world_knowledge"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"blend","intentionalRecall":false,"noPrecedentReason":null,"synthesizedDesignPrinciples":["combine comparison with causal elimination"]},"calibration":{"learningObjective":"Evaluate which explanation best fits all evidence.","primarySkill":"purpose_speaker_intent","secondarySkills":["information_integration"],"genre":"dialogue","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"text_only","evidenceSpan":"multi_paragraph_global","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"Jay said the battery was hot.","isExplicit":true}],"reasoningOperations":["test each explanation against all evidence"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"calibration","intentionalRecall":false,"noPrecedentReason":null,"benchmarkQualities":["requires evidence integration"],"noveltyRationale":"Uses a new evidence arrangement while preserving the reasoning floor."}}}
 ```
 
 ## 2B. Compact CAP Precedent Routing Index
@@ -180,14 +186,14 @@ Before critique or submission, resolve the authoring model quality profile deter
 
 ### Bundled fallback profile
 ---
-profileVersion: "1.0.0"
+profileVersion: "1.2.0"
 modelId: "default"
 modelPatterns:
   - "default"
   - "fallback"
   - "*"
 description: "Universal fallback pre-submit quality profile for models without specific observed semantic biases"
-updatedAt: "2026-08-18"
+updatedAt: "2026-08-29"
 ---
 
 # Default Pre-Submit Quality Profile
@@ -199,7 +205,7 @@ It defines standard pre-submit critique invariants and provides a clean containe
 
 ### Bundled Gemini profile
 ---
-profileVersion: "1.1.0"
+profileVersion: "1.2.0"
 modelId: "gemini-3.7-flash"
 modelPatterns:
   - "gemini-3.7-flash"
@@ -209,7 +215,7 @@ modelPatterns:
   - "gemini-2.5-flash"
   - "models/gemini-2.5-flash"
 description: "Model-specific semantic critique profile for Gemini 3.7 Flash authoring"
-updatedAt: "2026-08-18"
+updatedAt: "2026-08-29"
 ---
 
 # Gemini 3.7 Flash Quality Profile
@@ -261,6 +267,28 @@ Before submission, specifically inspect:
   - Verify every multiple-choice correct option and Parent rationale is directly entailed by the source text.
   - Never combine separately mentioned true details into a new unsupported claim or composite statement.
   - Global Answer Integrity: Correct answers and Parent rationales must be directly supported by the source, or explicitly framed as inference.
+
+### 6. Primary Reading Evidence Boundary
+- **Target Area:** `evidence-boundary`
+- **Rule ID:** `gemini-evid-06`
+- **Description:** Verify that reading comprehension and CAP questions draw evidence strictly from `studentLesson.reading.blocks`.
+- **Check Points:**
+  - Never reference sentences or examples located in instruction boxes or practice prompts as reading evidence.
+  - Ensure all quoted prompt strings match reading block prose verbatim.
+
+### 7. Epistemic Modality Preservation
+- **Target Area:** `answer-entailment`
+- **Rule ID:** `gemini-modality-07`
+- **Description:** Preserve strict modality in parent answers and explanations.
+- **Check Points:**
+  - Never convert hypothetical passage conditions into asserted historical facts or fabricated records.
+
+### 8. Task Topology & Mechanism Diversity
+- **Target Area:** `task-topology`
+- **Rule ID:** `gemini-topology-08`
+- **Description:** Prevent question template collapse across practice sections.
+- **Check Points:**
+  - Ensure diverse cognitive tasks (retrieval, condition-result mapping, causal deduction, lexical transfer).
 
 ## 4. Curriculum Package Schema
 ```typescript
@@ -621,9 +649,9 @@ export type CurriculumQuestion = z.infer<typeof Question>
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Planning (v2.9.2)
+# Prompt 01: Planning (v2.10.0)
 
-You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
+You are the Planning Engine for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
 
 ---
 
@@ -866,10 +894,41 @@ For a selected current angle, set `temporalMode: current`, record `researchedAt`
 
 Freshness is topic-aware, not one universal day cutoff. Very fast-moving claims require substantially newer credible evidence; a slower domain may support an older development that remains current for the way the lesson presents it. Cross-check important propositions where appropriate. Exclude rumors, unsupported predictions, speculation, and social-media hearsay from factual lesson claims.
 
-## 6. Prompt 02: Authoring Engine
-# Prompt 02: Material Authoring (v2.9.2)
+---
 
-You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
+# Prompt 01 Overlay: Calibrated Planning, Lexical Hierarchy & Task Topology (v2.10.0)
+
+Apply the complete inherited planning contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+
+## 1. Learner-Level Calibration & Linguistic Depth
+
+Calibrate the lesson plan to the learner's diagnosed band:
+- **Foundational / Intermediate Learners**: Focus on clear structural supports, explicit syntax, and targeted scaffolding.
+- **Advanced / High-Stage Learners**: Demand authentic paragraph depth, rich descriptive vocabulary, multi-clause syntax, and nuanced inferential challenges. Avoid artificially flattening reading passages or restricting question prompts to trivial D1/D2 matching.
+
+## 2. Lexical Hierarchy & Core Vocabulary Allocation
+
+Allocate core-vocabulary capacity to genuine learning needs:
+- Teach high-leverage target words and difficult passage-critical terms in the core vocabulary set.
+- Do not waste core vocabulary capacity on trivial words while leaving harder, passage-critical words (such as `baseline`, `reveal`, `unusual`, `affected`, `revise`, `informed`) untaught and unglossed.
+- Ensure all intended new and extension vocabulary items can be naturally anchored in the primary reading passage.
+
+## 3. Task Topology & Cognitive Mechanism Diversity
+
+Plan varied assessment mechanisms across practice sections:
+- Avoid repetitive question template collapse where multiple items reuse the same reasoning mechanic (e.g. repeated simple keyword lookups or identical conditional checks).
+- Deliberately plan distinct cognitive tasks across the progression: direct retrieval, condition-result mapping, inferential explanation, context-clue deduction, and open transfer.
+
+## 4. Evidence Scope Planning
+
+Explicitly assign and constrain the evidence scope for every planned assessment item:
+- Items assessing reading comprehension or reading-based CAP transfer must be designated with `evidenceScope: "primary_reading"`.
+- Never plan reading comprehension questions that rely on instruction headers, vocabulary definitions, or external background knowledge as reading evidence.
+
+## 6. Prompt 02: Authoring Engine
+# Prompt 02: Material Authoring (v2.10.0)
+
+You are the Curriculum Author for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
 
 ---
 
@@ -1175,10 +1234,36 @@ Recency is a context, not the learning objective unless the plan explicitly make
 
 Current selection grants no quality exemption. Preserve meaningful factual density, source quality, developmental appropriateness, personalization quality, copyright safety, and independently entailed answers. Grounding and selection evidence remain internal; Student and Parent PDFs receive no engineering citations or research machinery.
 
-## 7. Prompt 03: Critic Engine
-# Prompt 03: Critic (v2.9.2)
+---
 
-You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
+# Prompt 02 Overlay: Evidence Boundaries, Modality Truth & Lexical Integrity (v2.10.0)
+
+Apply the complete inherited authoring contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+
+## 1. Strict Primary Reading Evidence Boundary
+
+All reading comprehension and reading-based CAP assessment items must draw evidence exclusively from `studentLesson.reading.blocks`:
+- **No Cross-Section Instruction Leakage**: Never write a reading comprehension item whose required fact, sentence, or grammatical example exists only in an instruction box, tip note, practice header, or homework prompt.
+- **Explicit Location Anchoring**: Every reading assessment item must specify valid `evidenceAnchors` pointing to `studentLesson.reading.blocks.<idx>.<field>` where the `anchorText` is verbatim present.
+- **Quote Verifiability**: Any quoted sentence or phrase appearing inside a question prompt must be verbatim present in the declared reading passage blocks.
+
+## 2. Modality Preservation & Textual Entailment
+
+Preserve strict factual truth and epistemic modality across all question prompts, parent answers, and explanations:
+- **Hypothetical vs. Observed Distinction**: If the passage describes a condition or hypothetical scenario ("If eaten portions are high...", "It could happen that..."), never convert it into an asserted historical record or observed fact ("the record shows that eaten portions remained high for days").
+- **No Invented Evidence**: Never synthesize ungrounded backstory, fabricated data logs, or phantom experiments in parent answer rubrics or multiple-choice distractors.
+
+## 3. Lexical Integrity & Anchored Core Vocabulary
+
+Ensure strict alignment between vocabulary cards and authored text:
+- **Mandatory Reading Anchoring**: Every core vocabulary item with `status: 'new'` or `'extension'` must appear directly in the primary reading passage text.
+- **Ceiling & Target Integrity**: Never target an untaught, out-of-ceiling word with a context-clue or definition question unless adequate context clues are explicitly built into the primary reading text.
+- **Linguistic Richness**: Maintain level-appropriate sentence variety, cohesive conjunctions, and expressive phrasing suited to the learner's calibrated band.
+
+## 7. Prompt 03: Critic Engine
+# Prompt 03: Critic (v2.10.0)
+
+You are the Adversarial Senior Curriculum Critic for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
 
 ---
 
@@ -1313,10 +1398,35 @@ Reject stale material presented as current, required-but-undated sources, incons
 
 Reject news-shaped prose that follows a source's headline, lead, framing, ordering, or distinctive wording; factual embellishment outside approved facts; and any break in `Source -> Fact -> Claim -> Actual lesson prose`. Current material receives no relaxation of grounding accuracy, copyright, factual density, lexical, grammar, CAP, workload, personalization, or entailment gates.
 
-## 8. Prompt 04: Repair Specialist
-# Prompt 04: Repair (v2.9.2)
+---
 
-You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.9.2).
+# Prompt 03 Overlay: Mandatory 5-Dimension Adversarial Critic (v2.10.0)
+
+Apply the complete inherited independent critic contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+
+In addition to structural, CAP, grounding, and workload audits, the critic MUST independently evaluate and record substantive, non-empty verification evidence (minimum 30 characters each) across the following 5 critical quality dimensions:
+
+## 1. `evidence-boundary`
+Verify that all reading comprehension and reading-based CAP questions draw evidence strictly and exclusively from `studentLesson.reading.blocks`. Reject any item where the targeted sentence or example was located in an instruction box, tip note, or practice prompt.
+
+## 2. `answer-entailment`
+Verify that all open-response parent answers, rubrics, and multiple-choice options strictly preserve epistemic modality. Reject any package where hypothetical passage conditions ("if X happens") were converted into asserted observed facts or fabricated records ("records showed that X stayed high").
+
+## 3. `lexical-integrity`
+Verify that all new/extension core vocabulary items are anchored in the primary reading passage, that core vocabulary capacity was not wasted on trivial words while leaving hard words untaught, and that untaught above-ceiling words are not targeted in context-clue questions without textual clues.
+
+## 4. `task-topology`
+Verify cognitive mechanism diversity across practice questions. Reject question template collapse where multiple items reuse the same shallow reasoning mechanic or repetitive matching schema.
+
+## 5. `level-calibration`
+Verify that language complexity, reading passage depth, and cognitive demand match the learner's diagnosed band. Reject artificial linguistic flattening or low-level D1/D2 confinement for advanced learners.
+
+The critic must record explicit findings or check items with substantive text for each of these 5 dimensions in `qualityEvidence.criticalChecks` or `criticFindings`.
+
+## 8. Prompt 04: Repair Specialist
+# Prompt 04: Repair (v2.10.0)
+
+You are the Targeted Curriculum Repair Specialist for **紙屬英文** (Curriculum Version 2.3.0, Prompt Version 2.10.0).
 
 ---
 
@@ -1377,3 +1487,27 @@ When rejection concerns freshness, temporal classification, current-topic select
 When a current candidate is pedagogically inferior, preserve or restore the defensible evergreen selection instead of forcing news-shaped filler. When a current angle remains best but its evidence is stale, undated, speculative, or inadequate, replace or verify only the affected research and prose. Never fix recency by fabricating dates, relabeling evergreen material as current, weakening citations, or deleting valid provenance.
 
 Preserve valid research, valid unrelated lesson sections, immutable previous attempts, retry semantics, and all Claim/Submit/Finisher/storage boundaries. This stage does not claim, submit, render, upload, complete, or mutate technical job state.
+
+---
+
+# Prompt 04 Overlay: Targeted Quality Repair & Dependency Closure (v2.10.0)
+
+Apply the complete inherited targeted-repair contract, with Curriculum Schema 2.3.0 and Prompt Version 2.10.0.
+
+When the semantic critic or curriculum audit reports a failure in evidence boundaries, answer entailment, lexical integrity, task topology, or level calibration, perform targeted repair with complete dependency closure:
+
+## 1. Evidence Boundary Repair
+- If a question referenced an instruction box rather than primary reading prose, relocate or re-author the required text into `studentLesson.reading.blocks` or rewrite the question prompt and `evidenceAnchors` to target an authentic reading block.
+- Update all associated `CapAssessmentPlan` anchors to point strictly to valid reading block paths.
+
+## 2. Answer Entailment & Modality Repair
+- If an answer rubric converted a hypothetical condition into an asserted fact, rewrite the answer explanation and criteria to strictly reflect the conditional or modal framing of the source passage.
+
+## 3. Lexical Integrity Repair
+- If a new vocabulary item is unanchored, weave it naturally into the reading text or replace it with a genuine passage-derived word.
+- If hard words were left untaught while core slots were spent on basic words, reallocate the vocabulary card slots to teach the high-leverage passage terms.
+
+## 4. Topology & Calibration Repair
+- If questions exhibit mechanical collapse or level mismatch, re-author the offending items to introduce diverse cognitive operations and appropriate linguistic depth.
+
+Always preserve unaffected sections, maintain valid provenance chains, and update all corresponding critic and audit records atomically.

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -80,6 +80,13 @@ export const FROZEN_270_FILES = [
   'packages/generator/prompts/2.7.0/04-repair.md',
 ] as const
 
+export const FROZEN_280_FILES = [
+  'packages/generator/prompts/2.8.0/01-plan.md',
+  'packages/generator/prompts/2.8.0/02-author.md',
+  'packages/generator/prompts/2.8.0/03-critic.md',
+  'packages/generator/prompts/2.8.0/04-repair.md',
+] as const
+
 export const SOURCE_FILES = [
   'packages/generator/prompts/2.4.0/01-plan.md',
   'packages/generator/prompts/2.4.0/02-author.md',
@@ -101,6 +108,10 @@ export const SOURCE_FILES = [
   'packages/generator/prompts/2.8.0/02-author.md',
   'packages/generator/prompts/2.8.0/03-critic.md',
   'packages/generator/prompts/2.8.0/04-repair.md',
+  'packages/generator/prompts/2.10.0/01-plan.md',
+  'packages/generator/prompts/2.10.0/02-author.md',
+  'packages/generator/prompts/2.10.0/03-critic.md',
+  'packages/generator/prompts/2.10.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'packages/generator/quality-profiles/default.md',
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
@@ -200,6 +211,16 @@ export async function computeFrozen270Hashes(repoRoot: string = REPO_ROOT): Prom
   return hashes
 }
 
+export async function computeFrozen280Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+  const hashes: Record<string, string> = {}
+  for (const relativePath of FROZEN_280_FILES) {
+    const fullPath = resolve(repoRoot, relativePath)
+    const content = await readFile(fullPath, 'utf8')
+    hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
+  }
+  return hashes
+}
+
 export async function computeFrozen230Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
   const hashes: Record<string, string> = {}
   for (const relativePath of FROZEN_230_FILES) {
@@ -218,12 +239,13 @@ export async function compileProductionBundle(
   const readPromptStage = async (fileName: string) => {
     const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
       .replaceAll('2.2.0', '2.3.0')
-      .replaceAll('2.4.0', '2.9.2')
+      .replaceAll('2.4.0', '2.10.0')
     const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
     const workloadOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.6.0/${fileName}`), 'utf8')
     const mcqOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.7.0/${fileName}`), 'utf8')
     const recencyOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.8.0/${fileName}`), 'utf8')
-    return `${base.trim()}\n\n---\n\n${groundingOverlay.trim()}\n\n---\n\n${workloadOverlay.trim()}\n\n---\n\n${mcqOverlay.trim()}\n\n---\n\n${recencyOverlay.trim()}\n`
+    const qualityOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.10.0/${fileName}`), 'utf8')
+    return `${base.trim()}\n\n---\n\n${groundingOverlay.trim()}\n\n---\n\n${workloadOverlay.trim()}\n\n---\n\n${mcqOverlay.trim()}\n\n---\n\n${recencyOverlay.trim()}\n\n---\n\n${qualityOverlay.trim()}\n`
   }
   const plan = await readPromptStage('01-plan.md')
   const author = await readPromptStage('02-author.md')
@@ -240,9 +262,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.9.2-prod',
+    bundleVersion: '2.10.0-prod',
     schemaVersion: '2.3.0',
-    promptVersion: '2.9.2',
+    promptVersion: '2.10.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
@@ -329,4 +351,18 @@ export async function compileProductionBundle(
     metadata,
     content: `${frontmatter}\n\n${body}`,
   }
+}
+
+export async function writeProductionBundle(repoRoot: string = REPO_ROOT): Promise<void> {
+  const bundle = await compileProductionBundle(repoRoot)
+  const outputPath = resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md')
+  await writeFile(outputPath, bundle.content, 'utf8')
+  console.log(`Compiled production bundle to ${outputPath}`)
+}
+
+if (process.argv[1] && process.argv[1].includes('bundle-compiler')) {
+  writeProductionBundle().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
 }

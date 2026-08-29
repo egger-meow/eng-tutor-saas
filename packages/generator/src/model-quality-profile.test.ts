@@ -235,15 +235,18 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
     it('resolves exact model gemini-3.7-flash without fallback', async () => {
       const profile = await resolveQualityProfile('gemini-3.7-flash')
       expect(profile.name).toBe('gemini-3.7-flash')
-      expect(profile.version).toBe('1.1.0')
+      expect(profile.version).toBe('1.2.0')
       expect(profile.isFallback).toBe(false)
-      expect(profile.activeRules.length).toBe(5)
+      expect(profile.activeRules.length).toBe(8)
       expect(profile.activeRules.map((r) => r.id)).toEqual([
         'gemini-nat-01',
         'gemini-gram-02',
         'gemini-zh-03',
         'gemini-exp-04',
         'gemini-entail-05',
+        'gemini-evid-06',
+        'gemini-modality-07',
+        'gemini-topology-08',
       ])
     })
 
@@ -274,7 +277,7 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
 
     it('separates active rules from human-maintained observations in gemini-3.7-flash profile', async () => {
       const profile = await resolveQualityProfile('gemini-3.7-flash')
-      expect(profile.activeRules.length).toBe(5)
+      expect(profile.activeRules.length).toBe(8)
       expect(profile.observations).toEqual([])
     })
   })
@@ -290,7 +293,7 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       expect(result.success).toBe(true)
       expect(result.provenance?.actualModel).toBe('gpt-4o')
       expect(result.provenance?.resolvedQualityProfile).toBe('default')
-      expect(result.provenance?.qualityProfileVersion).toBe('1.0.0')
+      expect(result.provenance?.qualityProfileVersion).toBe('1.2.0')
       expect(result.provenance?.isFallback).toBe(true)
       expect(result.provenance?.activeRulesCount).toBe(0)
       expect(result.provenance?.repairedFields).toEqual([])
@@ -312,9 +315,9 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       expect(result.success).toBe(true)
       expect(result.provenance?.actualModel).toBe('gemini-3.7-flash')
       expect(result.provenance?.resolvedQualityProfile).toBe('gemini-3.7-flash')
-      expect(result.provenance?.qualityProfileVersion).toBe('1.1.0')
+      expect(result.provenance?.qualityProfileVersion).toBe('1.2.0')
       expect(result.provenance?.profileName).toBe('gemini-3.7-flash')
-      expect(result.provenance?.profileVersion).toBe('1.1.0')
+      expect(result.provenance?.profileVersion).toBe('1.2.0')
       expect(result.provenance?.isFallback).toBe(false)
       expect(result.provenance?.appliedRules).toEqual([
         'gemini-nat-01',
@@ -322,6 +325,9 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
         'gemini-zh-03',
         'gemini-exp-04',
         'gemini-entail-05',
+        'gemini-evid-06',
+        'gemini-modality-07',
+        'gemini-topology-08',
       ])
 
       const check = result.curriculumPackage!.qualityEvidence.criticalChecks.find(
@@ -331,7 +337,7 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       expect(check?.passed).toBe(true)
       expect(check?.evidence).toContain('actualModel=gemini-3.7-flash')
       expect(check?.evidence).toContain('resolvedQualityProfile=gemini-3.7-flash')
-      expect(check?.evidence).toContain('qualityProfileVersion=1.1.0')
+      expect(check?.evidence).toContain('qualityProfileVersion=1.2.0')
     })
 
     it('surgically repairs Chinese terminology artifacts (初中 -> 國中) while strictly preserving IDs and structure', async () => {

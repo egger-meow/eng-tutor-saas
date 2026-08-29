@@ -7,6 +7,8 @@ export const CAP_ASSESSMENT_PLAN_BASE_KEYS = [
   'targetCognitiveDepth',
   'evidenceMode',
   'evidenceSpan',
+  'evidenceScope',
+  'evidenceAnchors',
   'reasoningOperations',
   'distractorStrategies',
   'precedentRefs',
@@ -30,6 +32,19 @@ export const CAP_ASSESSMENT_PLAN_FORBIDDEN_ALIASES = [
 
 export type CapPrecedentMode = keyof typeof CAP_ASSESSMENT_PLAN_MODE_KEYS
 
+export type CapEvidenceScope =
+  | 'primary_reading'
+  | 'instruction'
+  | 'prior_knowledge'
+  | 'vocabulary_table'
+  | 'standalone'
+
+export interface CapEvidenceAnchor {
+  location: string
+  anchorText: string
+  isExplicit?: boolean
+}
+
 export interface CapAssessmentIntent {
   learningObjective: string
   primarySkill: string
@@ -39,6 +54,8 @@ export interface CapAssessmentIntent {
   targetCognitiveDepth: string
   evidenceMode: string
   evidenceSpan: string
+  evidenceScope: CapEvidenceScope
+  evidenceAnchors: CapEvidenceAnchor[]
   reasoningOperations: string[]
   distractorStrategies: string[]
 }
@@ -55,7 +72,7 @@ export interface CapAssessmentPlan extends CapAssessmentIntent {
 }
 
 export const CAP_ASSESSMENT_PLAN_CONTRACT = {
-  contractVersion: '1.0.0',
+  contractVersion: '1.1.0',
   additionalProperties: false,
   required: CAP_ASSESSMENT_PLAN_BASE_KEYS,
   forbiddenAliases: CAP_ASSESSMENT_PLAN_FORBIDDEN_ALIASES,
@@ -70,6 +87,14 @@ export const CAP_ASSESSMENT_PLAN_CONTRACT = {
       targetCognitiveDepth: 'D2_single_step_inference',
       evidenceMode: 'text_only',
       evidenceSpan: 'cross_sentence_local',
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [
+        {
+          location: 'studentLesson.reading.blocks.0.text',
+          anchorText: 'Mia saw wet streets.',
+          isExplicit: true,
+        },
+      ],
       reasoningOperations: ['connect two clues'],
       distractorStrategies: ['partial_truth'],
       precedentRefs: ['cap-0123456789ab'],
@@ -87,6 +112,19 @@ export const CAP_ASSESSMENT_PLAN_CONTRACT = {
       targetCognitiveDepth: 'D3_multi_step_synthesis',
       evidenceMode: 'multi_document',
       evidenceSpan: 'multi_paragraph_global',
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [
+        {
+          location: 'studentLesson.reading.blocks.0.text',
+          anchorText: 'The first report showed high numbers.',
+          isExplicit: true,
+        },
+        {
+          location: 'studentLesson.reading.blocks.1.text',
+          anchorText: 'The second report showed lower numbers.',
+          isExplicit: true,
+        },
+      ],
       reasoningOperations: ['compare claims across sources'],
       distractorStrategies: ['unsupported_world_knowledge'],
       precedentRefs: ['cap-0123456789ab'],
@@ -104,6 +142,14 @@ export const CAP_ASSESSMENT_PLAN_CONTRACT = {
       targetCognitiveDepth: 'D3_multi_step_synthesis',
       evidenceMode: 'text_only',
       evidenceSpan: 'multi_paragraph_global',
+      evidenceScope: 'primary_reading',
+      evidenceAnchors: [
+        {
+          location: 'studentLesson.reading.blocks.0.text',
+          anchorText: 'Jay said the battery was hot.',
+          isExplicit: true,
+        },
+      ],
       reasoningOperations: ['test each explanation against all evidence'],
       distractorStrategies: ['partial_truth'],
       precedentRefs: ['cap-0123456789ab'],
@@ -136,6 +182,13 @@ export function validateCapAssessmentPlan(value: unknown): { valid: boolean; err
     if (!allowed.has(key)) errors.push(`unknown CAP-plan key: ${key}`)
   }
   if (!modeKeys.length) errors.push('precedentMode must be anchor, blend, or calibration')
+
+  if (plan.evidenceScope !== undefined && typeof plan.evidenceScope !== 'string') {
+    errors.push('evidenceScope must be a string')
+  }
+  if (plan.evidenceAnchors !== undefined && !Array.isArray(plan.evidenceAnchors)) {
+    errors.push('evidenceAnchors must be an array')
+  }
 
   return { valid: errors.length === 0, errors }
 }

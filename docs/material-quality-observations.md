@@ -97,3 +97,12 @@ Promotion requires at least one of:
 4. a deterministic integrity issue where incorrect output can be objectively proven.
 
 Prefer telemetry or warnings over hard rejection when the concern is stylistic, distributional, or pedagogically context-dependent.
+
+## Promoted Quality Invariants (Engine 1.5.0 / Prompt 2.10.0)
+
+Following human review of production materials, four systemic failure classes were formally promoted into contracts, deterministic audits, and prompt overlays:
+
+1. **Evidence-Boundary Integrity:** `evidenceScope: "primary_reading"` and explicit block-level `evidenceAnchors` in CAP assessment plans; deterministic audit rejects reading questions that reference non-reading instruction/activity boxes.
+2. **Answer Grounding & Epistemic Modality Preservation:** Rationale and open response rubrics must strictly preserve textual conditions without fabricating observed outcomes or records.
+3. **Lexical Integrity & Differentiated Ceiling Severity:** Mandatory context anchoring for new vocabulary in reading passages; out-of-ceiling untaught words trigger critical failures if assessed, repeated (>= 2), or excessive (> 3), while isolated single occurrences emit warnings; comprehensive morphological inflection/derivation and compound word normalization.
+4. **Task Topology & Adversarial Quality Gate:** Mandatory 5-dimension substantive verification (`evidence-boundary`, `answer-entailment`, `lexical-integrity`, `task-topology`, `level-calibration`) in the critic gate to prevent mechanical template collapse and ensure level calibration.

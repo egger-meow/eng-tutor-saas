@@ -136,15 +136,15 @@ export function classifyQualityEra(item: QualityEraItem): EraTag {
   const schema = item.schemaVersion || item.canonicalSource?.metadata?.schemaVersion || item.failureEvidence?.schemaVersion || null
   const prompt = item.promptVersion || item.canonicalSource?.metadata?.promptVersion || item.failureEvidence?.promptVersion || null
 
-  const isLegacySchema = Boolean(schema && (schema.startsWith('1.') || schema.startsWith('2.0') || schema.startsWith('2.1') || schema === '2.0.0' || schema === '2.1.0'))
-  const isLegacyPrompt = Boolean(prompt && (prompt.startsWith('1.') || prompt.startsWith('2.0') || prompt.startsWith('2.1') || prompt.startsWith('2.2') || prompt.startsWith('2.3') || prompt === '2.0.0' || prompt === '2.1.0' || prompt === '2.2.0' || prompt === '2.3.0'))
+  const isLegacySchema = Boolean(schema && (/^1\./u.test(schema) || /^2\.[01](?:\.|$)/u.test(schema)))
+  const isLegacyPrompt = Boolean(prompt && (/^1\./u.test(prompt) || /^2\.[0-3](?:\.|$)/u.test(prompt) || /^prompt\/2\.[0-3](?:\.|$)/u.test(prompt)))
 
   if (isLegacySchema || isLegacyPrompt) {
     return 'historical'
   }
 
-  const isSchemaCurrent = Boolean(!schema || schema.startsWith('2.2') || schema.startsWith('2.3'))
-  const isPromptCurrent = Boolean(!prompt || prompt.startsWith('2.4') || prompt.startsWith('2.5') || prompt.startsWith('2.6') || prompt.startsWith('2.7') || prompt.startsWith('2.8') || prompt.startsWith('2.9') || prompt === '2.4.0-prod' || prompt === 'prompt/2.4.0')
+  const isSchemaCurrent = Boolean(!schema || /^2\.(?:[2-9]|\d{2,})/u.test(schema))
+  const isPromptCurrent = Boolean(!prompt || /^2\.(?:[4-9]|\d{2,})/u.test(prompt) || /^prompt\/2\.(?:[4-9]|\d{2,})/u.test(prompt) || prompt.endsWith('-prod'))
 
   if (isSchemaCurrent && isPromptCurrent && (schema || prompt)) {
     return 'engine_v1'

@@ -1,12 +1,12 @@
 ---
-profileVersion: "1.0.0"
+profileVersion: "1.2.0"
 modelId: "default"
 modelPatterns:
   - "default"
   - "fallback"
   - "*"
 description: "Universal fallback pre-submit quality profile for models without specific observed semantic biases"
-updatedAt: "2026-08-18"
+updatedAt: "2026-08-29"
 ---
 
 # Default Pre-Submit Quality Profile

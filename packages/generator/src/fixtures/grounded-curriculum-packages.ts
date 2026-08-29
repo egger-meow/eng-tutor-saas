@@ -46,9 +46,9 @@ const THEME_RESEARCH = {
       publisher: 'U.S. Department of Energy',
     },
     claims: [
-      'Photovoltaic cells convert sunlight into electrical energy.',
-      'Many cells can be connected together in a solar panel.',
-      'The electricity can power devices or enter an electrical grid.',
+      'Photovoltaic cells turn sunlight into electrical energy.',
+      'Many solar cells connect together into a large frame.',
+      'The electricity can power machines or enter the city system.',
     ],
   },
 } satisfies Record<GroundedFixtureTheme, {
@@ -100,6 +100,11 @@ export function makeGroundedCurriculumPackage(
   value.qualityEvidence.criticalChecks.push(
     { id: 'grounding-accuracy', passed: true, evidence: 'Critic verified each factual proposition against its declared source.' },
     { id: 'grounding-copyright', passed: true, evidence: 'Critic verified original educational synthesis without source-shaped copying.' },
+    { id: 'evidence-boundary', passed: true, evidence: 'All reading questions draw evidence strictly from primary reading blocks without cross-section instruction leakage.' },
+    { id: 'answer-entailment', passed: true, evidence: 'Open response and MCQ explanations preserve strict textual entailment and modal conditions without inventing observed facts.' },
+    { id: 'lexical-integrity', passed: true, evidence: 'All new vocabulary items are anchored in the reading passage, and no untaught out-of-ceiling words are directly assessed.' },
+    { id: 'task-topology', passed: true, evidence: 'Reasoning mechanisms vary purposefully across guided, independent, and transfer stages without mechanical template collapse.' },
+    { id: 'level-calibration', passed: true, evidence: 'Language complexity and cognitive depth are properly calibrated to the learner profile without downshifting.' },
   )
   return value
 }
