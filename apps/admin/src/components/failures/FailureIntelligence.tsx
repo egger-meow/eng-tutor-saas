@@ -244,10 +244,70 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Main Section: Chronological Finisher Quality Failures List */}
+      {/* Quality Rule Distribution & Statistics Section */}
       <div className="section-title" style={{ marginTop: '24px' }}>
         <div>
-          <span>Finisher 品質審核未通過即時紀錄 (Recent Quality Audit Failures)</span>
+          <span>Finisher 品質違規類型統計與分佈 (Quality Rule Distribution & Breakdown)</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 'normal', marginLeft: '12px' }}>
+            統計各品質規則違規佔比與影響範圍（點擊規則卡片可直接篩選下方最新紀錄）
+          </span>
+        </div>
+        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+          共 {totalQualityViolations} 次違規 · {data.qualityRuleViolations.length} 條規則
+        </span>
+      </div>
+
+      {data.qualityRuleViolations.length > 0 && (
+        <div className="quality-rule-grid">
+          {data.qualityRuleViolations.map((rule) => {
+            const isSelected = selectedRuleFilter === rule.rule
+            const percentage = totalQualityViolations > 0 ? Math.round((rule.count / totalQualityViolations) * 100) : 0
+
+            return (
+              <button
+                key={rule.rule}
+                className={`cockpit-card quality-rule-card ${isSelected ? 'active-filter' : ''}`}
+                onClick={() => setSelectedRuleFilter(isSelected ? 'all' : rule.rule)}
+                title={`點擊${isSelected ? '取消篩選' : '篩選'}此規則紀錄`}
+              >
+                <div className="pipeline-title" style={{ padding: '0 0 8px 0', borderBottom: 'none' }}>
+                  <strong><code>{rule.rule}</code></strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>{percentage}%</span>
+                    <b style={{ color: 'var(--status-rose)', fontSize: '18px' }}>{rule.count} 次</b>
+                  </div>
+                </div>
+
+                {/* Distribution Progress Bar */}
+                <div style={{ width: '100%', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden', margin: '4px 0 8px 0' }}>
+                  <div style={{ width: `${percentage}%`, height: '100%', background: 'linear-gradient(90deg, #f43f5e, #fb7185)', borderRadius: '2px' }} />
+                </div>
+
+                <p style={{ fontSize: '12px', margin: '4px 0 8px 0', lineHeight: 1.4, color: 'var(--text-muted)' }}>
+                  {rule.description}
+                </p>
+
+                <div className="pipeline-job-meta" style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                  <span>影響 {rule.affectedChildrenCount} 位學員</span>
+                  <span>常見嘗試：{rule.attempts.join('、') || '1'}</span>
+                </div>
+
+                <div className="quality-card-action">
+                  <span style={{ color: isSelected ? '#93c5fd' : '#60a5fa', fontWeight: isSelected ? 600 : 400 }}>
+                    {isSelected ? '✓ 已套用篩選（再次點擊取消）' : '點擊篩選下方紀錄 →'}
+                  </span>
+                  <span>{isSelected ? '✕' : '↓'}</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Main Section: Chronological Finisher Quality Failures List */}
+      <div className="section-title" style={{ marginTop: '28px' }}>
+        <div>
+          <span>Finisher 品質審核未通過即時紀錄流 (Recent Quality Audit Failures Stream)</span>
           <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 'normal', marginLeft: '12px' }}>
             依發生時間降冪排序（最新在前），同次生成的違規項目已合併為單一紀錄清單
           </span>

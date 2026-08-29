@@ -1687,7 +1687,7 @@ button, input, select, textarea {
   color: var(--text-main);
   text-align: left;
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   border: 1px solid var(--border-subtle);
   touch-action: manipulation;
 }
@@ -1695,6 +1695,12 @@ button, input, select, textarea {
 .quality-rule-card:hover {
   border-color: #3b82f6;
   background: var(--bg-hover);
+}
+
+.quality-rule-card.active-filter {
+  border-color: #3b82f6;
+  background: rgba(30, 58, 138, 0.25);
+  box-shadow: 0 0 0 1px #3b82f6, 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .quality-rule-card:active {
