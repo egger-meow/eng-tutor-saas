@@ -22,7 +22,7 @@ Before writing any proposition about a named product, organization, model, versi
 
 Do not treat topical relevance as factual support. Do not fuse mode A's limit, mode B's workflow, or separately true fragments into one unsupported composite claim. When a source distinguishes multiple features or modes, preserve the distinction in prose. If the distinction is too complex for the learner, simplify the factual claim instead of merging it.
 
-For `current` grounding, preserve publication/event timing and supported recency. Marketing or product announcements establish what was announced; do not silently upgrade attributed claims into independently verified facts.
+For `current` grounding, preserve publication/event timing and supported recency. Do not convert forecasts, rumors, social-media claims, or marketing language into stronger facts. Product announcements establish what was announced; do not silently upgrade attributed claims into independently verified facts.
 
 ## 3. Evidence and answer integrity
 
