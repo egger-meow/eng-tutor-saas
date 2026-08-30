@@ -168,24 +168,24 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <FadeInUp delay={0.1} className="sample-personalization-explainer">
             <div className="sample-context-card">
               <div className="sample-context-header">
-                <span className="sample-context-badge">範例拆解</span>
-                <h3 className="sample-context-title">興趣怎麼真的改變這份教材？</h3>
+                <span className="sample-context-badge">真實第 3 週範例</span>
+                <h3 className="sample-context-title">這不是為廣告另外做的展示教材</h3>
               </div>
 
               <p className="sample-context-meta">
-                <strong>範例學生</strong>：國一 ｜ 英文基礎建立中 ｜ 每週約 75 分鐘 ｜ 目標：<strong>閱讀理解</strong>
+                <strong>範例學生</strong>：國一 ｜ 第 3 週 ｜ 預計 94 分鐘 ｜ 目標：<strong>閱讀理解、證據整合與位置表達</strong>
               </p>
               <p className="sample-context-narrative">
-                孩子喜歡 Minecraft、科技與解謎，因此這週不是把興趣名稱貼在制式文章上，而是把它轉化成方塊建造遊戲感的科技門故障排除任務：讀訊號、比較測試結果、找出文章證據，再練 am / is / are。
+                這是同一名內部測試學生連續使用到第 3 週後，系統實際產出的 Student PDF 與 Parent Answer PDF。公開版只展示教材，不公開學生身分、原始回饋或內部生成資料。
               </p>
 
               <div className="sample-flow-strip" aria-label="個人化教材生成流程">
                 <div className="sample-flow-node">
                   <span className="node-label">孩子的興趣</span>
                   <div className="node-tags">
-                    <span className="tag-pill tag-accent">Minecraft</span>
-                    <span className="tag-pill tag-accent">科技</span>
-                    <span className="tag-pill tag-accent">解謎</span>
+                    <span className="tag-pill tag-accent">遊戲</span>
+                    <span className="tag-pill tag-accent">AI</span>
+                    <span className="tag-pill tag-accent">音樂科技</span>
                   </div>
                 </div>
 
@@ -195,7 +195,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                   <span className="node-label">目前程度</span>
                   <div className="node-tags">
                     <span className="tag-pill">國一</span>
-                    <span className="tag-pill">英文基礎建立中</span>
+                    <span className="tag-pill">第 3 週</span>
                   </div>
                 </div>
 
@@ -204,7 +204,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 <div className="sample-flow-node">
                   <span className="node-label">學習目標</span>
                   <div className="node-tags">
-                    <span className="tag-pill">閱讀理解</span>
+                    <span className="tag-pill">位置介系詞</span>
+                    <span className="tag-pill">跨段證據推論</span>
                   </div>
                 </div>
 
@@ -212,17 +213,17 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
                 <div className="sample-flow-node node-output">
                   <span className="node-label">本週教材</span>
-                  <strong className="output-title">The Signal Door Test</strong>
-                  <span className="output-subtitle">科技故障排除閱讀＋be 動詞＋證據判讀</span>
+                  <strong className="output-title">How Does a Game Place Sound Around You?</strong>
+                  <span className="output-subtitle">spatial audio 閱讀＋at/on/in＋distance/direction/obstruction 推論</span>
                 </div>
               </div>
 
               <div className="sample-context-footer">
                 <p className="footer-message">
-                  <strong>孩子喜歡什麼，決定我們怎麼帶他進入英文；他最後學會的，仍然是能帶去學校、段考與會考的英文能力。</strong>
+                  <strong>興趣不是只換故事皮膚；這週把遊戲聲音帶進 spatial audio，真正練的是位置介系詞、閱讀證據與多條件推論。</strong>
                 </p>
                 <p className="footer-subtext">
-                  主題是引導閱讀的興趣載體，累積的單字、文法、上下文理解與推論能力皆能跨題材轉移。
+                  這兩份 PDF 就是系統實際產出的教材，不是另外製作的展示稿。
                 </p>
               </div>
             </div>
