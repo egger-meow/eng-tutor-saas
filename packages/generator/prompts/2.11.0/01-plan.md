@@ -32,9 +32,11 @@ After the single authoritative batch claim, conduct privacy-safe public research
 Explore, select, drill down, verify, then build canonical grounding. Prefer primary/official and other reliable sources appropriate to the proposition. Extract propositions rather than source prose. `temporalMode` is explicit:
 
 - `evergreen` for durable knowledge;
-- `current` when recency materially matters, with valid publication dates, event/publication distinction, topic-aware freshness, and credible current evidence.
+- `current` when recency materially matters; record `researchedAt`, require valid `publishedAt` for sources establishing the current development, distinguish event from publication timing, and use topic-aware freshness with credible current evidence.
 
-Do not force current events. Compare recent and durable angles when useful and choose the one that best serves learning, reliability, lexical feasibility, factual depth, copyright safety, and age appropriateness.
+Classify time sensitivity internally as durable or fast-moving. For a fast-moving domain, actively discover credible recent developments with date-aware research before selection and compare them with durable candidates. If a recent candidate serves the learning target equally well or better while remaining reliable, teachable, age-appropriate, lexically feasible, factually useful, and copyright-safe, prefer it over generic evergreen noun-skinning.
+
+Do not force `current`. Prefer a durable fallback when recent candidates are rumor, prediction, weakly sourced, trivial, too complex, unsafe, vocabulary-heavy, factually thin, or pedagogically inferior. Choose the angle that best serves learning rather than recency for its own sake.
 
 ### Exact attribution invariant
 
