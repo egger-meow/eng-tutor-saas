@@ -5,9 +5,9 @@ promptVersion: "2.11.0"
 engineVersion: "1.6.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.11.0/01-plan.md": "9b2eafc10242878fa40d32ef7a2b16460779e5b416278a170b62f29c62725735"
-  "packages/generator/prompts/2.11.0/02-author.md": "a4ba8056f34ee65db8828f35e8fae645c78c978cfe1f0d78ea13e0e7869f88bf"
-  "packages/generator/prompts/2.11.0/03-critic.md": "39806db7a22d75a96407102e9ba0626e51cb6cd0ced9144a776b66715deb27f4"
+  "packages/generator/prompts/2.11.0/01-plan.md": "0c835b600d403d01e4e48051573b86ea13034fdbdeb44d0a4a3509c357096590"
+  "packages/generator/prompts/2.11.0/02-author.md": "44bcff6f7933343670d901a59b749a01e0c31bb79dfbda63d71ca7478105413b"
+  "packages/generator/prompts/2.11.0/03-critic.md": "9326e2708447474b14644ad6c664bd773fe0896bc8286fc6580da981360f9c99"
   "packages/generator/prompts/2.11.0/04-repair.md": "d2178ee0c0e1b202211533f0724b686576bba1124e3d2961977870571e109286"
   "packages/generator/src/curriculum-package-schema.ts": "f55d16962a96b426788f1d3ef3c358fbaac2f273d525e2015be2d715291ab8d7"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
@@ -771,9 +771,11 @@ After the single authoritative batch claim, conduct privacy-safe public research
 Explore, select, drill down, verify, then build canonical grounding. Prefer primary/official and other reliable sources appropriate to the proposition. Extract propositions rather than source prose. `temporalMode` is explicit:
 
 - `evergreen` for durable knowledge;
-- `current` when recency materially matters, with valid publication dates, event/publication distinction, topic-aware freshness, and credible current evidence.
+- `current` when recency materially matters; record `researchedAt`, require valid `publishedAt` for sources establishing the current development, distinguish event from publication timing, and use topic-aware freshness with credible current evidence.
 
-Do not force current events. Compare recent and durable angles when useful and choose the one that best serves learning, reliability, lexical feasibility, factual depth, copyright safety, and age appropriateness.
+Classify time sensitivity internally as durable or fast-moving. For a fast-moving domain, actively discover credible recent developments with date-aware research before selection and compare them with durable candidates. If a recent candidate serves the learning target equally well or better while remaining reliable, teachable, age-appropriate, lexically feasible, factually useful, and copyright-safe, prefer it over generic evergreen noun-skinning.
+
+Do not force `current`. Prefer a durable fallback when recent candidates are rumor, prediction, weakly sourced, trivial, too complex, unsafe, vocabulary-heavy, factually thin, or pedagogically inferior. Choose the angle that best serves learning rather than recency for its own sake.
 
 ### Exact attribution invariant
 
@@ -818,7 +820,7 @@ Before writing any proposition about a named product, organization, model, versi
 
 Do not treat topical relevance as factual support. Do not fuse mode A's limit, mode B's workflow, or separately true fragments into one unsupported composite claim. When a source distinguishes multiple features or modes, preserve the distinction in prose. If the distinction is too complex for the learner, simplify the factual claim instead of merging it.
 
-For `current` grounding, preserve publication/event timing and supported recency. Marketing or product announcements establish what was announced; do not silently upgrade attributed claims into independently verified facts.
+For `current` grounding, preserve publication/event timing and supported recency. Do not convert forecasts, rumors, social-media claims, or marketing language into stronger facts. Product announcements establish what was announced; do not silently upgrade attributed claims into independently verified facts.
 
 ## 3. Evidence and answer integrity
 
@@ -873,7 +875,9 @@ Reject when the lesson swaps modes, merges features, transfers one mode's numeri
 
 When a factual comparison is central to the lesson or multiple closely named modes/features appear in the source set, adversarially cross-check the bindings rather than assuming nearby source text belongs to the same feature.
 
-For `current` material, also verify publication/event dates, topic-aware freshness, recency claims, and the newest credible evidence reasonably needed for the way the lesson presents the topic. Reject rumor, prediction, unsupported speculation, stale-as-current framing, or required-but-undated evidence.
+For a fast-moving domain, require substantive inspection of credible recent developments unless the planning evidence gives a defensible pedagogical reason. Reject generic evergreen noun-skinning when a strong, reliable, teachable current angle served the target equally well or better; also reject `current` chosen merely because it is recent when a durable angle is clearer, safer, better sourced, or pedagogically stronger. A well-supported evergreen fallback remains valid when recent candidates are speculative, weak, unsafe, too complex, vocabulary-heavy, factually thin, or otherwise inferior.
+
+For `current` material, verify publication/event dates, topic-aware freshness, recency claims, and the newest credible evidence reasonably needed for the way the lesson presents the topic. Reject rumor, prediction, unsupported speculation, stale-as-current framing, required-but-undated evidence, and any recency claim not supported by its cited source.
 
 Copyright/original-synthesis review remains independent: factual accuracy does not excuse source-shaped prose or protected copying.
 
