@@ -77,15 +77,17 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).toContain('可以直接把紙本教材寄到家嗎？')
   })
 
-  it('presents the production Signal Door sample with truthful personalization claims', () => {
+  it('presents the real Week 3 production sample with truthful de-identified claims', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).toContain('The Signal Door Test')
-    expect(html).toContain('興趣怎麼真的改變這份教材？')
-    expect(html).toContain('方塊建造遊戲感的科技門故障排除任務')
-    expect(html).toContain('國一 ｜ 英文基礎建立中 ｜ 每週約 75 分鐘')
+    expect(html).toContain('How Does a Game Place Sound Around You?')
+    expect(html).toContain('真實第 3 週範例')
+    expect(html).toContain('這不是為廣告另外做的展示教材')
+    expect(html).toContain('國一 ｜ 第 3 週 ｜ 預計 94 分鐘')
+    expect(html).toContain('不公開學生身分、原始回饋或內部生成資料')
     expect(html).not.toContain('developing')
     expect(html).toContain('samples/sample-student.pdf')
     expect(html).toContain('samples/sample-parent-answer.pdf')
+    expect(html).not.toContain('The Signal Door Test')
     expect(html).not.toContain('The Rooftop Garden Challenge')
   })
 })
