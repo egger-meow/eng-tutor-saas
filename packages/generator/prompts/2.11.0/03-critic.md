@@ -28,7 +28,9 @@ Reject when the lesson swaps modes, merges features, transfers one mode's numeri
 
 When a factual comparison is central to the lesson or multiple closely named modes/features appear in the source set, adversarially cross-check the bindings rather than assuming nearby source text belongs to the same feature.
 
-For `current` material, also verify publication/event dates, topic-aware freshness, recency claims, and the newest credible evidence reasonably needed for the way the lesson presents the topic. Reject rumor, prediction, unsupported speculation, stale-as-current framing, or required-but-undated evidence.
+For a fast-moving domain, require substantive inspection of credible recent developments unless the planning evidence gives a defensible pedagogical reason. Reject generic evergreen noun-skinning when a strong, reliable, teachable current angle served the target equally well or better; also reject `current` chosen merely because it is recent when a durable angle is clearer, safer, better sourced, or pedagogically stronger. A well-supported evergreen fallback remains valid when recent candidates are speculative, weak, unsafe, too complex, vocabulary-heavy, factually thin, or otherwise inferior.
+
+For `current` material, verify publication/event dates, topic-aware freshness, recency claims, and the newest credible evidence reasonably needed for the way the lesson presents the topic. Reject rumor, prediction, unsupported speculation, stale-as-current framing, required-but-undated evidence, and any recency claim not supported by its cited source.
 
 Copyright/original-synthesis review remains independent: factual accuracy does not excuse source-shaped prose or protected copying.
 
