@@ -39,16 +39,19 @@ export function DashboardPage({ session }: { session: Session }) {
             </button>
           </section>
         ) : data.children.length === 0 ? (
-          <section className="zero-state">
-            <p className="eyebrow">{capacityFull ? '候補資料先準備好' : '從第一週開始'}</p>
-            <h1>{capacityFull ? '目前名額已滿，先建立孩子學習資料' : '先告訴我們孩子現在的學習狀態'}</h1>
+          <section className="zero-state onboarding-card-hero">
+            <div className="onboarding-badge">{capacityFull ? '名額候補' : '免費體驗第一週'}</div>
+            <h1>{capacityFull ? '目前名額已滿，完成基本資料保留候補席次' : '只差最後一步：告訴我們孩子的基本資料，就能免費取得第一週教材'}</h1>
             <p>{capacityFull
-              ? '建立資料不會收費，也不會先開始訂閱或產生教材。有名額時我們會寄 Email 通知你，再決定是否開始。'
-              : '大約幾分鐘即可完成；資料越具體，第一份教材越貼近孩子。'}</p>
-            <button className="button" type="button" onClick={() => navigate('/children/new')}>
-              建立孩子學習資料
+              ? '建立資料不會收費，也不需綁定信用卡。有名額釋出時我們會寄 Email 通知你，再決定是否開始。'
+              : '完全免費生成第一週專屬學習包（含學生教材與家長解答），不需綁定信用卡，2 分鐘即可完成。'}</p>
+
+            <button className="button button-large" type="button" onClick={() => navigate('/children/new')}>
+              {capacityFull ? '開始填寫候補資料' : '立即為孩子準備第一週教材'}
             </button>
+            <p className="zero-state-footnote">✨ 所有填寫資料日後皆可隨時在後台修改，不確定的欄位可先選大概。</p>
           </section>
+
         ) : (
           <div className="dashboard-container">
             <header className="dashboard-top-header">

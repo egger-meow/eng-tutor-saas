@@ -3,7 +3,8 @@ import type { ChildProfileInput } from './child-profiles'
 
 export const MIN_WEEKLY_MINUTES = 30
 export const MAX_WEEKLY_MINUTES = 240
-export const profileStepCount = 6
+export const profileStepCount = 3
+export const DEFAULT_LEARNING_GOAL = '建立自主閱讀習慣，穩固國中核心單字與文法能力'
 
 export type ProfileDraft = {
   displayName: string
@@ -41,13 +42,17 @@ export const emptyProfileDraft: ProfileDraft = {
 
 export function validateProfileStep(step: number, draft: ProfileDraft): Record<string, string> {
   const errors: Record<string, string> = {}
-  if (step === 1 && !draft.displayName.trim()) errors.displayName = '請填寫孩子暱稱。'
-  if (step === 1 && !['incoming_grade_7', 'grade_7', 'grade_8', 'grade_9'].includes(draft.gradeStage)) errors.grade = '請選擇目前就學階段。'
-  if (step === 2 && !draft.baselineLevel) errors.baselineLevel = '請選擇整體程度。'
-  if (step === 5 && (draft.weeklyMinutes < MIN_WEEKLY_MINUTES || draft.weeklyMinutes > MAX_WEEKLY_MINUTES)) errors.weeklyMinutes = '每週時間請填 30 到 240 分鐘。'
-  if (step === 6 && !draft.learningGoals.trim()) errors.learningGoals = '請至少填寫一項學習目標。'
+  if (step === 1) {
+    if (!draft.displayName.trim()) errors.displayName = '請填寫孩子暱稱。'
+    if (!['incoming_grade_7', 'grade_7', 'grade_8', 'grade_9'].includes(draft.gradeStage)) errors.grade = '請選擇目前就學階段。'
+    if (!draft.baselineLevel) errors.baselineLevel = '請選擇整體程度。'
+  }
+  if (step === 3 && (draft.weeklyMinutes < MIN_WEEKLY_MINUTES || draft.weeklyMinutes > MAX_WEEKLY_MINUTES)) {
+    errors.weeklyMinutes = '每週時間請填 30 到 240 分鐘。'
+  }
   return errors
 }
+
 
 export function profileDraftFromChild(child: ChildWithProfile): ProfileDraft {
   const preferences = child.profile?.preferences ?? {}
@@ -93,7 +98,7 @@ export function toChildProfileInput(draft: ProfileDraft): ChildProfileInput {
     vocabulary_level: draft.vocabularyLevel || null,
     grammar_level: draft.grammarLevel || null,
     weekly_minutes: draft.weeklyMinutes,
-    learning_goals: draft.learningGoals.trim() || null,
+    learning_goals: draft.learningGoals.trim() || DEFAULT_LEARNING_GOAL,
     school_progress: draft.currentChapter.trim() || null,
     parent_expectations: draft.parentExpectations.trim() || null,
     preferences: {

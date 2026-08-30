@@ -60,7 +60,7 @@ describe('logged-in 100+ capacity boundary', () => {
     const html = renderToStaticMarkup(<DashboardPage session={session} />)
 
     expect(html).toContain('目前名額已滿')
-    expect(html).toContain('先建立孩子學習資料')
+    expect(html).toContain('保留候補席次')
     expect(html).toContain('不會收費')
   })
 
@@ -105,7 +105,7 @@ describe('logged-in 100+ capacity boundary', () => {
 
     expect(html).not.toContain('候補名單')
     expect(html).not.toContain('目前名額已滿')
-    expect(html).toContain('先認識孩子')
+    expect(html).toContain('孩子基本資料')
     expect(html).toContain('孩子暱稱')
   })
 
@@ -134,7 +134,8 @@ describe('logged-in 100+ capacity boundary', () => {
     expect(html).not.toContain('候補名單')
     expect(html).not.toContain('目前名額已滿')
     expect(html).not.toContain('隔天開放下載')
-    expect(html).toContain('先認識孩子')
+    expect(html).toContain('孩子基本資料')
     expect(html).toContain('孩子暱稱')
   })
 })
+
