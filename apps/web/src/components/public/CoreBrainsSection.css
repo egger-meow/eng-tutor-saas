@@ -204,11 +204,15 @@
 
   .core-brains-equation > b {
     justify-self: center;
-    transform: rotate(90deg);
     font-size: 1rem;
   }
 
   .core-brains-equation > .core-brains-arrow {
+    font-size: 0;
+  }
+
+  .core-brains-arrow::before {
+    content: '\2193';
     font-size: 1.15rem;
   }
 
