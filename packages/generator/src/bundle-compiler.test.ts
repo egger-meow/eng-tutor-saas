@@ -13,44 +13,38 @@ import {
   computeFrozen270Hashes,
   computeFrozen280Hashes,
   computeFrozen2100Hashes,
+  computeFrozen2101Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
 describe('bundle-compiler', () => {
-  it('generates a deterministic production bundle with matching source hashes and no drift', async () => {
-    const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
-    const existingBundle = await readFile(bundlePath, 'utf8')
-    const freshBundle = await compileProductionBundle(REPO_ROOT)
+  it('generates a compact deterministic 2.11.0 production bundle with no historical overlay sediment', async () => {
+  const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
+  const existingBundle = await readFile(bundlePath, 'utf8')
+  const freshBundle = await compileProductionBundle(REPO_ROOT)
 
-    expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
-    expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
-    expect(freshBundle.metadata.promptVersion).toBe('2.10.1')
-    expect(freshBundle.metadata.bundleVersion).toBe('2.10.1-prod')
-    expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(33)
-    expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/default.md')
-    expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/quality-profiles/gemini-3.7-flash.md')
-    expect(freshBundle.content).toContain('Source -> Fact -> Claim')
-    expect(freshBundle.content).toContain('studentLesson.reading.blocks.1.text')
-    expect(freshBundle.content).toContain('temporalMode')
-    expect(freshBundle.content).toContain('There is no N/A mode')
-    expect(freshBundle.content).not.toContain('Maintain `schemaVersion: "2.2.0"`')
-    expect(freshBundle.content).not.toContain('CurriculumPackageSchema` (2.2.0)')
-    expect(freshBundle.content).toContain('Preserve valid research and unaffected authored content')
-    expect(freshBundle.content).toContain('Re-research only when the rejection concerns grounding accuracy')
-    expect(freshBundle.content).toContain('Never transmit child names, child/job IDs')
-    expect(freshBundle.content).toContain('Only the independent critic may add or mark')
-    expect(freshBundle.content).not.toContain('Before output, add passed `qualityEvidence.criticalChecks`')
-    expect(freshBundle.content).toContain('CAP Precedent-First Assessment Contract')
-    expect(freshBundle.content).toContain('cap-plan:<questionId>')
-    expect(freshBundle.content).toContain('precedentMode')
-    expect(freshBundle.content).toContain('CAP is the floor, not the mold')
-    expect(freshBundle.content).toContain('mechanically repetitive')
-    expect(freshBundle.content).toContain('pedagogically justified')
-    expect(freshBundle.content).toContain('A1/A2 may retain D2/D3 reasoning')
-    expect(freshBundle.content).toContain('Relevant CAP requires `precedentRefs`. Only when no relevant authoritative precedent exists may refs be empty')
-    expect(freshBundle.content).toContain('cap-precedent-shards')
-    expect(freshBundle.content).not.toContain('copyGuardHashes')
-  })
+  expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
+  expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
+  expect(freshBundle.metadata.promptVersion).toBe('2.11.0')
+  expect(freshBundle.metadata.bundleVersion).toBe('2.11.0-prod')
+  expect(freshBundle.metadata.engineVersion).toBe('1.6.0')
+  expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/01-plan.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/03-critic.md')
+  expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.4.0/01-plan.md')
+  expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.10.1/03-critic.md')
+  expect(freshBundle.content).toContain('Source -> Fact -> Claim')
+  expect(freshBundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
+  expect(freshBundle.content).toContain('A source being broadly about the same product or organization is not enough')
+  expect(freshBundle.content).toContain('CAP is the quality floor, not a mold')
+  expect(freshBundle.content).toContain('responseLayout')
+  expect(freshBundle.content).toContain('### Canonical CAP Assessment Plan Contract')
+  expect(freshBundle.content).not.toContain('Prompt 01 Overlay:')
+  expect(freshBundle.content).not.toContain('Prompt 03 Overlay:')
+  expect(freshBundle.content).not.toContain('Require ≥7 genuinely new lexical units')
+  expect(freshBundle.content).not.toContain('Curriculum Version 2.2.0, Prompt Version 2.4.0')
+  expect(freshBundle.content).not.toContain('copyGuardHashes')
+})
 
   it('embeds the exact machine-readable CAP assessment-plan contract', async () => {
     const freshBundle = await compileProductionBundle(REPO_ROOT)
@@ -195,4 +189,14 @@ describe('bundle-compiler', () => {
     const wordCount = freshBundle.content.trim().split(/\s+/u).length
     expect(wordCount).toBeLessThan(15000)
   })
+
+it('verifies that prompts/2.10.1 final overlay remains byte-for-byte frozen after consolidation', async () => {
+  expect(await computeFrozen2101Hashes(REPO_ROOT)).toEqual({
+    'packages/generator/prompts/2.10.1/01-plan.md': '6059eacfbda5ddd37fd398220538e6f86111d9366f1679b935a40e67dae63e68',
+    'packages/generator/prompts/2.10.1/02-author.md': '2b8b74e0f9ba840e7037089083aad6f07bff50c9c52c4dc05ef0a91ba7629d4a',
+    'packages/generator/prompts/2.10.1/03-critic.md': '2027d1291f7caa3df9c5b0062f42c573a2eab5a131320e13ecaa0d420810d7fd',
+    'packages/generator/prompts/2.10.1/04-repair.md': '38e3b5080c44d76531f9948ecf71d6fc4d606a580e3490672c8b1ef6d7ee4941',
+  })
+})
+
 })

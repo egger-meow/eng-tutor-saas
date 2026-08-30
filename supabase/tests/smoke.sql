@@ -455,8 +455,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.5.1: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.6.0' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.6.0: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -682,8 +682,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.5.1: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.6.0' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.6.0: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -1030,7 +1030,7 @@ begin
     select item into mismatch_context
     from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
     where item #>> '{job,id}' = mismatch_job_id::text;
-    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.1' then
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.6.0' then
       raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
     end if;
 
@@ -1046,7 +1046,7 @@ begin
     perform public.worker_claim_curriculum_submissions('mismatch-finisher', 5);
     if not public.worker_finish_curriculum_submission(
       mismatch_job_id, 1, 'mismatch-finisher', 'technical_failed', 'RELEASE_MISMATCH',
-      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.5.1'
+      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.6.0'
     ) then
       raise exception 'failed to record RELEASE_MISMATCH technical failure';
     end if;
@@ -1078,8 +1078,8 @@ begin
       raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
     end if;
 
-    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.5.1 and NO retryContext (fresh authoring, not quality repair)
-    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.5.1'
+    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.6.0 and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.6.0'
       or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
       or mismatch_context ? 'retryContext' then
       raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;

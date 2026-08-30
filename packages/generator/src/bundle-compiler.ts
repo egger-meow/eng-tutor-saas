@@ -94,31 +94,18 @@ export const FROZEN_2100_FILES = [
   'packages/generator/prompts/2.10.0/04-repair.md',
 ] as const
 
-export const SOURCE_FILES = [
-  'packages/generator/prompts/2.4.0/01-plan.md',
-  'packages/generator/prompts/2.4.0/02-author.md',
-  'packages/generator/prompts/2.4.0/03-critic.md',
-  'packages/generator/prompts/2.4.0/04-repair.md',
-  'packages/generator/prompts/2.5.0/01-plan.md',
-  'packages/generator/prompts/2.5.0/02-author.md',
-  'packages/generator/prompts/2.5.0/03-critic.md',
-  'packages/generator/prompts/2.5.0/04-repair.md',
-  'packages/generator/prompts/2.6.0/01-plan.md',
-  'packages/generator/prompts/2.6.0/02-author.md',
-  'packages/generator/prompts/2.6.0/03-critic.md',
-  'packages/generator/prompts/2.6.0/04-repair.md',
-  'packages/generator/prompts/2.7.0/01-plan.md',
-  'packages/generator/prompts/2.7.0/02-author.md',
-  'packages/generator/prompts/2.7.0/03-critic.md',
-  'packages/generator/prompts/2.7.0/04-repair.md',
-  'packages/generator/prompts/2.8.0/01-plan.md',
-  'packages/generator/prompts/2.8.0/02-author.md',
-  'packages/generator/prompts/2.8.0/03-critic.md',
-  'packages/generator/prompts/2.8.0/04-repair.md',
+export const FROZEN_2101_FILES = [
   'packages/generator/prompts/2.10.1/01-plan.md',
   'packages/generator/prompts/2.10.1/02-author.md',
   'packages/generator/prompts/2.10.1/03-critic.md',
   'packages/generator/prompts/2.10.1/04-repair.md',
+] as const
+
+export const SOURCE_FILES = [
+  'packages/generator/prompts/2.11.0/01-plan.md',
+  'packages/generator/prompts/2.11.0/02-author.md',
+  'packages/generator/prompts/2.11.0/03-critic.md',
+  'packages/generator/prompts/2.11.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'packages/generator/quality-profiles/default.md',
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
@@ -238,6 +225,16 @@ export async function computeFrozen2100Hashes(repoRoot: string = REPO_ROOT): Pro
   return hashes
 }
 
+export async function computeFrozen2101Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+  const hashes: Record<string, string> = {}
+  for (const relativePath of FROZEN_2101_FILES) {
+    const fullPath = resolve(repoRoot, relativePath)
+    const content = await readFile(fullPath, 'utf8')
+    hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
+  }
+  return hashes
+}
+
 export async function computeFrozen230Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
   const hashes: Record<string, string> = {}
   for (const relativePath of FROZEN_230_FILES) {
@@ -254,19 +251,8 @@ export async function compileProductionBundle(
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
   const readPromptStage = async (fileName: string) => {
-    const base = (await readFile(resolve(repoRoot, `packages/generator/prompts/2.4.0/${fileName}`), 'utf8'))
-      .replaceAll('Curriculum Version 2.2.0, Prompt Version 2.4.0', 'Curriculum Version 2.4.0, Prompt Version 2.10.1')
-      .replaceAll('(v2.4.0)', '(v2.10.1)')
-      .replaceAll('Schema 2.2.0', 'Schema 2.4.0')
-      .replaceAll('schemaVersion: "2.2.0"', 'schemaVersion: "2.4.0"')
-      .replaceAll('Curriculum Version 2.2.0', 'Curriculum Version 2.4.0')
-      .replaceAll('CurriculumPackageSchema` (2.2.0)', 'CurriculumPackageSchema` (2.4.0)')
-    const groundingOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.5.0/${fileName}`), 'utf8')
-    const workloadOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.6.0/${fileName}`), 'utf8')
-    const mcqOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.7.0/${fileName}`), 'utf8')
-    const recencyOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.8.0/${fileName}`), 'utf8')
-    const qualityOverlay = await readFile(resolve(repoRoot, `packages/generator/prompts/2.10.1/${fileName}`), 'utf8')
-    return `${base.trim()}\n\n---\n\n${groundingOverlay.trim()}\n\n---\n\n${workloadOverlay.trim()}\n\n---\n\n${mcqOverlay.trim()}\n\n---\n\n${recencyOverlay.trim()}\n\n---\n\n${qualityOverlay.trim()}\n`
+    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+    return `${stage.trim()}\n`
   }
   const plan = await readPromptStage('01-plan.md')
   const author = await readPromptStage('02-author.md')
@@ -283,9 +269,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.10.1-prod',
+    bundleVersion: '2.11.0-prod',
     schemaVersion: '2.4.0',
-    promptVersion: '2.10.1',
+    promptVersion: '2.11.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
