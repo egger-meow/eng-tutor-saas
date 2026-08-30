@@ -5,6 +5,7 @@ import { Header } from './components/Header.js'
 import { Navigation } from './components/Navigation.js'
 import { AnomalyBanner } from './components/AnomalyBanner.js'
 import { OperationsOverviewView } from './components/overview/OperationsOverview.js'
+import { ConversionFunnelView } from './components/funnel/ConversionFunnelView.js'
 import { AnnouncementsManagementView } from './components/announcements/AnnouncementsManagementView.js'
 import { SubscriptionRevenueView } from './components/subscriptions/SubscriptionRevenueView.js'
 import { FailureIntelligenceView } from './components/failures/FailureIntelligence.js'
@@ -14,7 +15,8 @@ import { ChildWeekTimelineView } from './components/timeline/ChildWeekTimeline.j
 import { WaitlistManagementView } from './components/waitlist/WaitlistManagementView.js'
 import { AiDatasetExportView } from './components/export/AiDatasetExport.js'
 
-const VALID_TABS: TabId[] = ['overview', 'announcements', 'subscriptions', 'failures', 'feedback', 'product', 'timeline', 'waitlist', 'export']
+const VALID_TABS: TabId[] = ['overview', 'funnel', 'announcements', 'subscriptions', 'failures', 'feedback', 'product', 'timeline', 'waitlist', 'export']
+
 
 function getStoredTab(): TabId {
   if (typeof window === 'undefined') return 'overview'
@@ -68,6 +70,9 @@ export const App: React.FC = () => {
   const {
     health,
     overview,
+    funnel,
+    funnelRangeDays,
+    setFunnelRangeDays,
     announcements,
     announcementsFilter,
     setAnnouncementsFilter,
@@ -132,7 +137,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {loading && !overview && !announcements && !subscriptions && !failures && !feedback && !productFeedback && !timeline && !waitlist && !aiExport ? (
+        {loading && !overview && !funnel && !announcements && !subscriptions && !failures && !feedback && !productFeedback && !timeline && !waitlist && !aiExport ? (
           <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--text-muted)' }}>載入管理資料中…</div>
         ) : (
           <>
@@ -140,6 +145,14 @@ export const App: React.FC = () => {
               <OperationsOverviewView
                 data={overview}
                 onDrillDownTimeline={handleDrillDownTimeline}
+              />
+            )}
+
+            {activeTab === 'funnel' && (
+              <ConversionFunnelView
+                data={funnel}
+                rangeDays={funnelRangeDays}
+                onRangeChange={setFunnelRangeDays}
               />
             )}
 
@@ -151,6 +164,7 @@ export const App: React.FC = () => {
                 onRefresh={() => refreshCurrentTab(false)}
               />
             )}
+
 
             {activeTab === 'subscriptions' && (
               <SubscriptionRevenueView

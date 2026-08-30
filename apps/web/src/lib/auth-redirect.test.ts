@@ -11,4 +11,10 @@ describe('buildAuthRedirectUrl', () => {
     expect(buildAuthRedirectUrl('http://localhost:5173'))
       .toBe('http://localhost:5173/')
   })
+
+  it('appends query parameters when provided', () => {
+    expect(buildAuthRedirectUrl('https://paperbond.jjmowlab.com', { aid: 'anon-uuid-123' }))
+      .toBe('https://paperbond.jjmowlab.com/?aid=anon-uuid-123')
+  })
 })
+

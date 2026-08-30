@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AuthPanel } from '../components/auth/AuthPanel'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicFooter } from '../components/layout/PublicFooter'
@@ -10,7 +10,9 @@ import { FadeInUp } from '../components/motion/FadeInUp'
 import { StaggerContainer, StaggerItem } from '../components/motion/StaggerContainer'
 import { PageTransition } from '../components/motion/PageTransition'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
+import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
+
 
 const abilityBenefits = [
   ['願意開始讀', '先用孩子有興趣、也有內容的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
@@ -59,6 +61,10 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
         ? null
         : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
 
+  useEffect(() => {
+    trackLandingView()
+  }, [])
+
   return (
     <AppShell className="landing-page" header={<PublicHeader />}>
       <PageTransition>
@@ -84,12 +90,13 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               </div>
             )}
             <div className="hero-actions">
-              <a className="button hero-cta" href={cta.href}>{cta.label}</a>
-              <a className="text-link" href="#samples">先看真實教材 ↓</a>
+              <a className="button hero-cta" href={cta.href} onClick={() => trackFreeTrialClick('hero')}>{cta.label}</a>
+              <a className="text-link" href="#samples" onClick={() => trackSampleClick('hero_samples_link')}>先看真實教材 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
           </FadeInUp>
+
 
           <FadeInUp delay={0.15} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
             <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
@@ -232,14 +239,14 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <StaggerContainer className="document-pair pdf-preview-grid" staggerDelay={0.15}>
             <StaggerItem reveal="left"><article className="pdf-preview-card">
               <p className="document-label">Student PDF</p><h3>答案不會先出現，留給孩子真正思考</h3>
-              <a className="pdf-preview" href="/samples/sample-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF">
+              <a className="pdf-preview" href="/samples/sample-student.pdf" target="_blank" rel="noreferrer" onClick={() => trackSampleClick('sample_student_pdf')} aria-label="另開視窗查看學生教材 PDF">
                 <iframe title="Student PDF 教材預覽" src="/samples/sample-student.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實教材 ↗</span>
               </a>
               <ul className="preview-notes"><li>清楚告訴孩子每一區怎麼做</li><li>自然閱讀、單字、文法、理解與回想練習</li></ul>
             </article></StaggerItem>
             <StaggerItem reveal="right"><article className="pdf-preview-card">
               <p className="document-label">Parent Answer PDF</p><h3>完整答案分開放，家長不用先備課</h3>
-              <a className="pdf-preview" href="/samples/sample-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF">
+              <a className="pdf-preview" href="/samples/sample-parent-answer.pdf" target="_blank" rel="noreferrer" onClick={() => trackSampleClick('sample_parent_answer_pdf')} aria-label="另開視窗查看家長解答 PDF">
                 <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-parent-answer.pdf#page=1&view=FitH&toolbar=0" /><span>放大查看真實解答 ↗</span>
               </a>
               <ul className="preview-notes"><li>完整答案、簡短解釋與觀察重點</li><li>不用會教英文，也知道孩子卡在哪裡</li></ul>
@@ -293,7 +300,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <section className="public-section parent-role">
           <FadeInUp reveal="left"><p className="overline">家長每週要做什麼？</p><h2>列印、觀察、點幾下回饋。<br />不用自己當英文老師。</h2><p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p></FadeInUp>
-          <FadeInUp reveal="pop" delay={0.1}><a className="button mid-page-cta" href={cta.href}>{cta.label}</a></FadeInUp>
+          <FadeInUp reveal="pop" delay={0.1}><a className="button mid-page-cta" href={cta.href} onClick={() => trackFreeTrialClick('mid_page')}>{cta.label}</a></FadeInUp>
         </section>
 
         <FadeInUp reveal="right"><FounderSummary /></FadeInUp>
@@ -326,8 +333,9 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <section className="public-section login-section" id="login">
           <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : enrollment === null ? '可以先建立或登入家長帳號；目前正在確認服務名額。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{capacityOpen && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
-          <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist">登記候補</a> : <AuthPanel />}</FadeInUp>
+          <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist" onClick={() => trackFreeTrialClick('waitlist')}>登記候補</a> : <AuthPanel />}</FadeInUp>
         </section>
+
         <section className="public-section improvement-note" aria-labelledby="improvement-note-title">
           <FadeInUp reveal="left" className="improvement-note-inner">
             <p className="overline">持續改善，也保持透明</p>

@@ -24,6 +24,7 @@ import { AnnouncementsPage } from './routes/AnnouncementsPage'
 import { AnnouncementDetailPage } from './routes/AnnouncementDetailPage'
 import { PayPage } from './routes/PayPage'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
+import { trackAuthComplete } from './lib/analytics'
 
 function App() {
   const route = useRoute()
@@ -41,12 +42,14 @@ function App() {
       setReady(true)
       if (nextSession) {
         void flushPendingLegalAcceptance()
+        trackAuthComplete({ user_id: nextSession.user.id })
       }
     }
     void supabase.auth.getSession().then(({ data }) => { handleSession(data.session) })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => { handleSession(nextSession) })
     return () => subscription.unsubscribe()
   }, [isPaymentLinkRoute])
+
 
   // Paddle must see `_ptxn` as soon as its public default payment page loads.
   // Do not put this route behind the Supabase session lookup above.

@@ -17,7 +17,8 @@ export {
 import type { EraTag } from '@paper-english/generator/engine-version'
 export type { EraTag }
 
-export type TabId = 'overview' | 'announcements' | 'subscriptions' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
+export type TabId = 'overview' | 'funnel' | 'announcements' | 'subscriptions' | 'failures' | 'feedback' | 'product' | 'timeline' | 'waitlist' | 'export'
+
 
 export interface HealthState {
   status: string
@@ -911,3 +912,78 @@ export interface AnnouncementActionResult {
   error?: string
   message?: string
 }
+
+export type FunnelStepName =
+  | 'landing_view'
+  | 'sample_click'
+  | 'free_trial_click'
+  | 'email_submit'
+  | 'auth_complete'
+  | 'child_form_start'
+  | 'child_created'
+  | 'onboarding_complete'
+
+export interface FunnelStepMetric {
+  name: FunnelStepName
+  label: string
+  description: string
+  count: number
+  uniqueVisitors: number
+  conversionFromPrevPercent: number
+  conversionFromLandingPercent: number
+  dropOffCount: number
+  dropOffPercent: number
+}
+
+export interface FunnelChannelMetric {
+  channel: 'direct' | 'facebook' | 'google' | 'other'
+  label: string
+  landingViews: number
+  authCompleted: number
+  childrenCreated: number
+  onboarded: number
+  conversionPercent: number
+}
+
+export interface FunnelDeviceMetric {
+  device: 'desktop' | 'mobile' | 'tablet' | 'unknown'
+  label: string
+  count: number
+  percent: number
+}
+
+export interface FunnelTrendPoint {
+  date: string
+  landing_view: number
+  sample_click: number
+  free_trial_click: number
+  email_submit: number
+  auth_complete: number
+  child_form_start: number
+  child_created: number
+  onboarding_complete: number
+}
+
+export interface ConversionFunnelData {
+  rangeDays: number
+  startDate: string
+  endDate: string
+  totalEvents: number
+  uniqueLandingVisitors: number
+  steps: FunnelStepMetric[]
+  overallConversionPercent: number
+  biggestDropOff: {
+    fromStep: string
+    fromLabel: string
+    toStep: string
+    toLabel: string
+    dropCount: number
+    dropPercent: number
+  } | null
+  channels: FunnelChannelMetric[]
+  devices: FunnelDeviceMetric[]
+  trends: FunnelTrendPoint[]
+  internalTestEventsFiltered: number
+  dataSources: DataSourceStatus[]
+}
+

@@ -3316,6 +3316,81 @@ begin
 
   perform set_config('role', 'none', true);
 
+  -- First-Party Conversion Funnel Analytics Tests
+  if has_table_privilege('anon', 'public.funnel_events', 'select')
+     or has_table_privilege('anon', 'public.funnel_events', 'insert')
+     or has_table_privilege('anon', 'public.funnel_events', 'update')
+     or has_table_privilege('anon', 'public.funnel_events', 'delete') then
+    raise exception 'REGRESSION: anon role has direct table privileges on funnel_events';
+  end if;
+
+  if has_table_privilege('authenticated', 'public.funnel_events', 'select')
+     or has_table_privilege('authenticated', 'public.funnel_events', 'insert')
+     or has_table_privilege('authenticated', 'public.funnel_events', 'update')
+     or has_table_privilege('authenticated', 'public.funnel_events', 'delete') then
+    raise exception 'REGRESSION: authenticated role has direct table privileges on funnel_events';
+  end if;
+
+  -- 1) Anonymous event recording
+  perform set_config('role', 'anon', true);
+  declare
+    anon_event_id uuid;
+    auth_event_id uuid;
+  begin
+    anon_event_id := public.record_funnel_event(
+      p_event_name := 'landing_view',
+      p_anonymous_id := 'anon_test_123',
+      p_path := '/',
+      p_referrer := 'https://facebook.com',
+      p_utm_source := 'fb',
+      p_utm_campaign := 'launch',
+      p_device_class := 'mobile',
+      p_metadata := '{"source_section":"hero","email":"leak@test.com","ip":"1.2.3.4"}'::jsonb
+    );
+
+    if anon_event_id is null then
+      raise exception 'record_funnel_event failed for anonymous caller';
+    end if;
+
+    -- 2) Authenticated event recording
+    perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000001', true);
+    perform set_config('role', 'authenticated', true);
+
+    auth_event_id := public.record_funnel_event(
+      p_event_name := 'auth_complete',
+      p_anonymous_id := 'anon_test_123',
+      p_path := '/dashboard',
+      p_device_class := 'desktop'
+    );
+
+    if auth_event_id is null then
+      raise exception 'record_funnel_event failed for authenticated caller';
+    end if;
+
+    -- Reset role to service/postgres to verify inserted rows
+    perform set_config('role', 'none', true);
+
+    if (select user_id from public.funnel_events where id = anon_event_id) is not null then
+      raise exception 'anonymous event recorded non-null user_id';
+    end if;
+
+    if (select user_id from public.funnel_events where id = auth_event_id) <> '00000000-0000-0000-0000-000000000001'::uuid then
+      raise exception 'authenticated event did not record matching auth user_id';
+    end if;
+
+    -- Check that PII was stripped from metadata
+    if (select metadata ? 'email' or metadata ? 'ip' from public.funnel_events where id = anon_event_id) then
+      raise exception 'record_funnel_event did not strip PII keys from metadata';
+    end if;
+
+    if (select (metadata->>'source_section') from public.funnel_events where id = anon_event_id) <> 'hero' then
+      raise exception 'record_funnel_event did not preserve safe metadata fields';
+    end if;
+
+    -- Clean up test events
+    delete from public.funnel_events where id in (anon_event_id, auth_event_id);
+  end;
+
   -- Clean up
   delete from public.announcements
   where id in (
@@ -3332,3 +3407,4 @@ end;
 $$;
 
 rollback;
+

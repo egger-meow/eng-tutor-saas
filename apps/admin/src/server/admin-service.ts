@@ -4,6 +4,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { PipelineJobRow } from '../client/types.js'
 export * from '../client/types.js'
 
+
+
 export const OPERATIONS_MATERIALS_SELECT = 'id, child_id, material_week, revision, rule_version, prompt_version, generator_version, model_name, student_pdf_path, parent_answer_pdf_path, canonical_source, created_at'
 
 type PipelineInput = {
@@ -143,7 +145,14 @@ import {
   type DataSourceStatus,
   type OperationsOverview,
   type SubscriptionRevenueData,
+  type ConversionFunnelData,
+  type FunnelStepName,
+  type FunnelStepMetric,
+  type FunnelChannelMetric,
+  type FunnelDeviceMetric,
+  type FunnelTrendPoint,
   type FailureIntelligence,
+
   type ParentFeedbackIntelligence,
   type ProductFeedbackIntelligence,
   type ChildWeekTimeline,
@@ -1602,6 +1611,239 @@ export class AdminService {
       })).sort((a, b) => b.startDate.localeCompare(a.startDate)),
     }
   }
+
+  public async getConversionFunnelData(rangeDays = 7): Promise<ConversionFunnelData> {
+    const client = this.ensureClient()
+    const days = [1, 7, 14, 30, 90, 180, 365].includes(rangeDays) ? rangeDays : (rangeDays > 0 ? rangeDays : 7)
+    const dataSources: DataSourceStatus[] = []
+
+    const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    const startIso = start.toISOString()
+
+    const [eventsData, childrenData] = await Promise.all([
+      this.safeQuery<any[]>('funnel_events', () => client.from('funnel_events').select('*').gte('created_at', startIso).order('created_at', { ascending: true }).limit(50000), dataSources),
+      this.safeQuery<any[]>('children', () => client.from('children').select('id, parent_id, is_internal_test'), dataSources),
+    ])
+
+    const allEvents = (eventsData as any[]) || []
+    const children = (childrenData as any[]) || []
+    const internalChildIds = new Set(children.filter((c) => c.is_internal_test).map((c) => c.id))
+    const internalUserIds = new Set(children.filter((c) => c.is_internal_test && c.parent_id).map((c) => c.parent_id))
+
+
+    let internalFilteredCount = 0
+    const events = allEvents.filter((event) => {
+      const isInternalChild = event.child_id && internalChildIds.has(event.child_id)
+      const isInternalUser = event.user_id && internalUserIds.has(event.user_id)
+      const isTestMeta = Boolean(event.metadata?.is_internal || event.metadata?.test_mode)
+      if (isInternalChild || isInternalUser || isTestMeta) {
+        internalFilteredCount++
+        return false
+      }
+      return true
+    })
+
+    const STEP_DEFS: Array<{ name: FunnelStepName; label: string; description: string }> = [
+      { name: 'landing_view', label: '首頁瀏覽 (Landing View)', description: '訪客進入紙屬英文公開首頁' },
+      { name: 'sample_click', label: '範例查看 (Sample Click)', description: '點擊教材範例或下載預覽 PDF' },
+      { name: 'free_trial_click', label: '點擊體驗/註冊 (CTA Click)', description: '點擊免費體驗、方案或立即開始按鈕' },
+      { name: 'email_submit', label: '送出 Email (Email Submit)', description: '家長成功送出安全登入 / 註冊連結' },
+      { name: 'auth_complete', label: '登入成功 (Auth Complete)', description: '完成 Magic Link 驗證建立有效會員 Session' },
+      { name: 'child_form_start', label: '開始填寫資料 (Form Start)', description: '進入新增孩子學習資料第一步驟' },
+      { name: 'child_created', label: '建立孩子檔案 (Child Created)', description: '成功送出年級與基礎資料建立孩子紀錄' },
+      { name: 'onboarding_complete', label: '完成學習設定 (Onboarded)', description: '完成 6 步驟個人化學習資料儲存' },
+    ]
+
+    const stepEventMap = new Map<FunnelStepName, any[]>()
+    for (const def of STEP_DEFS) {
+      stepEventMap.set(def.name, [])
+    }
+    for (const event of events) {
+      const list = stepEventMap.get(event.event_name as FunnelStepName)
+      if (list) list.push(event)
+    }
+
+    const stepMetrics: FunnelStepMetric[] = []
+    let previousUnique = 0
+    const landingEvents = stepEventMap.get('landing_view') || []
+    const uniqueLandingVisitors = new Set(landingEvents.map((e) => e.anonymous_id || e.user_id)).size || (landingEvents.length > 0 ? landingEvents.length : 1)
+
+    for (let i = 0; i < STEP_DEFS.length; i++) {
+      const def = STEP_DEFS[i]!
+      const stepEvents = stepEventMap.get(def.name) || []
+      const count = stepEvents.length
+      const uniqueVisitors = new Set(stepEvents.map((e) => e.anonymous_id || e.user_id)).size
+
+      const conversionFromPrevPercent = i === 0
+        ? 100
+        : previousUnique > 0
+          ? Math.round((uniqueVisitors / previousUnique) * 1000) / 10
+          : 0
+
+      const conversionFromLandingPercent = uniqueLandingVisitors > 0
+        ? Math.round((uniqueVisitors / uniqueLandingVisitors) * 1000) / 10
+        : 0
+
+      const dropOffCount = i === 0 ? 0 : Math.max(0, previousUnique - uniqueVisitors)
+      const dropOffPercent = i === 0 || previousUnique === 0
+        ? 0
+        : Math.round((dropOffCount / previousUnique) * 1000) / 10
+
+      stepMetrics.push({
+        name: def.name,
+        label: def.label,
+        description: def.description,
+        count,
+        uniqueVisitors,
+        conversionFromPrevPercent,
+        conversionFromLandingPercent,
+        dropOffCount,
+        dropOffPercent,
+      })
+
+      previousUnique = uniqueVisitors
+    }
+
+    // Identify biggest drop-off
+    let biggestDropOff: ConversionFunnelData['biggestDropOff'] = null
+    let maxDropCount = -1
+    for (let i = 0; i < stepMetrics.length - 1; i++) {
+      const current = stepMetrics[i]!
+      const next = stepMetrics[i + 1]!
+      const dropCount = Math.max(0, current.uniqueVisitors - next.uniqueVisitors)
+      const dropPercent = current.uniqueVisitors > 0 ? Math.round((dropCount / current.uniqueVisitors) * 1000) / 10 : 0
+      if (current.uniqueVisitors > 0 && dropCount > maxDropCount) {
+        maxDropCount = dropCount
+        biggestDropOff = {
+          fromStep: current.name,
+          fromLabel: current.label,
+          toStep: next.name,
+          toLabel: next.label,
+          dropCount,
+          dropPercent,
+        }
+      }
+    }
+
+    // Traffic Channel Breakdown
+    const channelEvents = {
+      direct: { landing: new Set<string>(), auth: new Set<string>(), created: new Set<string>(), onboarded: new Set<string>() },
+      facebook: { landing: new Set<string>(), auth: new Set<string>(), created: new Set<string>(), onboarded: new Set<string>() },
+      google: { landing: new Set<string>(), auth: new Set<string>(), created: new Set<string>(), onboarded: new Set<string>() },
+      other: { landing: new Set<string>(), auth: new Set<string>(), created: new Set<string>(), onboarded: new Set<string>() },
+    }
+
+    const classifyChannel = (event: any): 'direct' | 'facebook' | 'google' | 'other' => {
+      const src = (event.utm_source || '').toLowerCase()
+      const ref = (event.referrer || '').toLowerCase()
+      if (src.includes('fb') || src.includes('facebook') || src.includes('instagram') || src.includes('meta') || src.includes('ig') ||
+          ref.includes('facebook.com') || ref.includes('fb.me') || ref.includes('instagram.com') || ref.includes('l.facebook.com') || ref.includes('m.facebook.com')) {
+        return 'facebook'
+      }
+      if (src.includes('google') || src.includes('search') || src.includes('bing') || src.includes('yahoo') ||
+          ref.includes('google.com') || ref.includes('bing.com') || ref.includes('yahoo.com')) {
+        return 'google'
+      }
+      if (!event.utm_source && (!event.referrer || ref.includes(event.path || '/'))) {
+        return 'direct'
+      }
+      return 'other'
+    }
+
+    for (const event of events) {
+      const channel = classifyChannel(event)
+      const visitorId = event.anonymous_id || event.user_id || event.id
+      if (event.event_name === 'landing_view') channelEvents[channel].landing.add(visitorId)
+      if (event.event_name === 'auth_complete') channelEvents[channel].auth.add(visitorId)
+      if (event.event_name === 'child_created') channelEvents[channel].created.add(visitorId)
+      if (event.event_name === 'onboarding_complete') channelEvents[channel].onboarded.add(visitorId)
+    }
+
+    const channelLabels: Record<string, string> = {
+      facebook: 'Facebook / Meta 廣告與社群',
+      direct: '直接流量 (Direct)',
+      google: 'Google / 搜尋引擎 (Search)',
+      other: '其他來源與 UTM 標記',
+    }
+
+    const channels: FunnelChannelMetric[] = (['facebook', 'direct', 'google', 'other'] as const).map((key) => {
+      const landingViews = channelEvents[key].landing.size
+      const authCompleted = channelEvents[key].auth.size
+      const childrenCreated = channelEvents[key].created.size
+      const onboarded = channelEvents[key].onboarded.size
+      const conversionPercent = landingViews > 0 ? Math.round((onboarded / landingViews) * 1000) / 10 : 0
+      return {
+        channel: key,
+        label: channelLabels[key] || key,
+        landingViews,
+        authCompleted,
+        childrenCreated,
+        onboarded,
+        conversionPercent,
+      }
+    })
+
+    // Devices
+    const deviceCounts = { desktop: 0, mobile: 0, tablet: 0, unknown: 0 }
+    for (const event of events) {
+      const dev = (event.device_class as keyof typeof deviceCounts) || 'unknown'
+      if (deviceCounts[dev] !== undefined) deviceCounts[dev]++
+      else deviceCounts.unknown++
+    }
+    const totalDeviceEvents = events.length || 1
+    const devices: FunnelDeviceMetric[] = [
+      { device: 'mobile', label: '行動手機 (Mobile)', count: deviceCounts.mobile, percent: Math.round((deviceCounts.mobile / totalDeviceEvents) * 1000) / 10 },
+      { device: 'desktop', label: '桌上型電腦 (Desktop)', count: deviceCounts.desktop, percent: Math.round((deviceCounts.desktop / totalDeviceEvents) * 1000) / 10 },
+      { device: 'tablet', label: '平板 (Tablet)', count: deviceCounts.tablet, percent: Math.round((deviceCounts.tablet / totalDeviceEvents) * 1000) / 10 },
+      { device: 'unknown', label: '未知/其他', count: deviceCounts.unknown, percent: Math.round((deviceCounts.unknown / totalDeviceEvents) * 1000) / 10 },
+    ]
+
+    // Trend points (bucketed by day or hour if 1 day)
+    const trendMap = new Map<string, FunnelTrendPoint>()
+    for (const event of events) {
+      const dateStr = days === 1 ? String(event.created_at).slice(0, 13) + ':00' : String(event.created_at).slice(0, 10)
+      if (!trendMap.has(dateStr)) {
+        trendMap.set(dateStr, {
+          date: dateStr,
+          landing_view: 0,
+          sample_click: 0,
+          free_trial_click: 0,
+          email_submit: 0,
+          auth_complete: 0,
+          child_form_start: 0,
+          child_created: 0,
+          onboarding_complete: 0,
+        })
+      }
+      const point = trendMap.get(dateStr)!
+      if (point[event.event_name as FunnelStepName] !== undefined) {
+        point[event.event_name as FunnelStepName]++
+      }
+    }
+    const trends = Array.from(trendMap.values()).sort((a, b) => a.date.localeCompare(b.date))
+
+    const finalStep = stepMetrics[stepMetrics.length - 1]
+    const overallConversionPercent = finalStep && uniqueLandingVisitors > 0
+      ? Math.round((finalStep.uniqueVisitors / uniqueLandingVisitors) * 1000) / 10
+      : 0
+
+    return {
+      rangeDays: days,
+      startDate: startIso,
+      endDate: new Date().toISOString(),
+      totalEvents: events.length,
+      uniqueLandingVisitors,
+      steps: stepMetrics,
+      overallConversionPercent,
+      biggestDropOff,
+      channels,
+      devices,
+      trends,
+      internalTestEventsFiltered: internalFilteredCount,
+      dataSources,
+    }
+  }
+
   public async getFailureIntelligence(era: QualityEra = 'current'): Promise<FailureIntelligence> {
     const client = this.ensureClient()
     const dataSources: DataSourceStatus[] = []

@@ -2,6 +2,7 @@ import { productConfig } from '../../content/site'
 import { annualMonthlyEquivalentTwd, annualSavingsTwd, formatPrice } from '../../lib/billing-plans'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../../lib/enrollment'
 import { CapacityStatus } from './CapacityStatus'
+import { trackFreeTrialClick } from '../../lib/analytics'
 
 export function PricingSection({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
   const { state: hookEnrollment } = useEnrollmentState(propEnrollment)
@@ -45,10 +46,11 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
           <p className="founding-remaining">🎟️ 目前剩 <strong>{foundingRemaining}</strong> 個創始優惠席次</p>
         </div>
       )}
-      <a className="button pricing-cta" href={cta.href}>{cta.label}</a>
+      <a className="button pricing-cta" href={cta.href} onClick={() => trackFreeTrialClick('pricing')}>{cta.label}</a>
       {capacityOpen && <p className="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>}
     </article>
     <CapacityStatus enrollment={enrollment} />
     <p className="capacity-explainer">第一階段預計服務 100 位孩子，計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補，既有家庭不受影響。</p>
   </section>
 }
+

@@ -21,7 +21,9 @@ import type {
   UpdateCapacityResult,
   RetryNotificationResult,
   SubscriptionRevenueData,
+  ConversionFunnelData,
   AnnouncementsAdminData,
+
   CreateAnnouncementInput,
   UpdateAnnouncementInput,
   AnnouncementActionResult,
@@ -92,7 +94,9 @@ export const adminApi = {
   getFeedback: () => fetchJson<ParentFeedbackIntelligence>('/api/intelligence/feedback'),
   getProductFeedback: () => fetchJson<ProductFeedbackIntelligence>('/api/intelligence/product-feedback'),
   getSubscriptions: (days = 90) => fetchJson<SubscriptionRevenueData>('/api/subscriptions?days=' + days),
+  getFunnel: (days = 7) => fetchJson<ConversionFunnelData>('/api/funnel?days=' + days),
   getAnnouncements: (status?: string) => fetchJson<AnnouncementsAdminData>(`/api/announcements${status && status !== 'all' ? `?status=${status}` : ''}`),
+
   createAnnouncement: (input: CreateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/create', input as unknown as Record<string, unknown>),
   updateAnnouncement: (input: UpdateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/update', input as unknown as Record<string, unknown>),
   archiveAnnouncement: (id: string) => postJson<AnnouncementActionResult>('/api/announcements/archive', { id }),

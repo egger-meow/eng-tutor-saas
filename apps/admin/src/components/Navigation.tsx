@@ -29,6 +29,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
   const failureCount = failures?.totalFailures || overview?.queueStats.failed || 0
   const tabs: Array<{ id: TabId; label: string; badge?: number; isAlert?: boolean }> = [
     { id: 'overview', label: '營運總覽', badge: stuckCount || undefined, isAlert: stuckCount > 0 },
+    { id: 'funnel', label: '轉換漏斗' },
     { id: 'announcements', label: '公告管理' },
     { id: 'timeline', label: '學員管理 / 生成測試' },
     { id: 'subscriptions', label: '訂閱與營收' },
@@ -38,6 +39,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab,
     { id: 'waitlist', label: '等候名單', badge: overview?.capacity?.waitingCount || undefined },
     { id: 'export', label: 'AI 資料匯出' },
   ]
+
 
   return (
     <nav className="cockpit-nav" ref={navRef} aria-label="管理功能">

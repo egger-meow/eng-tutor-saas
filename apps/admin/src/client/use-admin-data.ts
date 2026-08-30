@@ -12,6 +12,7 @@ import type {
   QualityEra,
   WaitlistData,
   SubscriptionRevenueData,
+  ConversionFunnelData,
   AnnouncementsAdminData,
   AnnouncementStatus,
 } from './types.js'
@@ -19,7 +20,10 @@ import type {
 export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   const [health, setHealth] = useState<HealthState | null>(null)
   const [overview, setOverview] = useState<OperationsOverview | null>(null)
+  const [funnel, setFunnel] = useState<ConversionFunnelData | null>(null)
+  const [funnelRangeDays, setFunnelRangeDays] = useState(7)
   const [announcements, setAnnouncements] = useState<AnnouncementsAdminData | null>(null)
+
   const [announcementsFilter, setAnnouncementsFilter] = useState<AnnouncementStatus | 'all'>('all')
   const [failures, setFailures] = useState<FailureIntelligence | null>(null)
   const [feedback, setFeedback] = useState<ParentFeedbackIntelligence | null>(null)
@@ -62,6 +66,12 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
         case 'overview': {
           tabPromise = adminApi.getOverview(qualityEra).then((res) => {
             setOverview(res)
+          })
+          break
+        }
+        case 'funnel': {
+          tabPromise = adminApi.getFunnel(funnelRangeDays).then((res) => {
+            setFunnel(res)
           })
           break
         }
@@ -128,7 +138,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek, subscriptionRangeDays, announcementsFilter])
+  }, [activeTab, qualityEra, refreshHealth, timelineChildId, timelineWeek, subscriptionRangeDays, funnelRangeDays, announcementsFilter])
 
   // Instant Child Switching via Cache + Background Revalidation
   const selectChildTimeline = useCallback((childId: string, week?: string) => {
@@ -184,6 +194,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
 
     const hasData = Boolean(
       (activeTab === 'overview' && overview) ||
+      (activeTab === 'funnel' && funnel) ||
       (activeTab === 'subscriptions' && subscriptions) ||
       (activeTab === 'failures' && failures) ||
       (activeTab === 'feedback' && feedback) ||
@@ -197,7 +208,7 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
       setLoading(true)
     }
     refreshCurrentTab(false)
-  }, [refreshCurrentTab, activeTab])
+  }, [refreshCurrentTab, activeTab, funnelRangeDays])
 
   // Periodic background refresh
   useEffect(() => {
@@ -211,6 +222,9 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
   return {
     health,
     overview,
+    funnel,
+    funnelRangeDays,
+    setFunnelRangeDays,
     subscriptions,
     subscriptionRangeDays,
     setSubscriptionRangeDays,
@@ -237,4 +251,5 @@ export function useAdminData(activeTab: TabId, refreshIntervalSec = 30) {
     setQualityEra,
   }
 }
+
 

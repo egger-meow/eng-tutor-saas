@@ -15,5 +15,7 @@ supabase/.temp/
 generated/
 output/
 tmp/pdfs/
+.playwright-mcp/
 
 !apps/web/public/samples/*.pdf
+

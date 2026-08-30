@@ -15,6 +15,7 @@ import { createChild, listChildren, updateChild } from '../lib/children'
 import { useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { emptyProfileDraft, profileDraftFromChild, profileStepCount, readDraft, saveDraft, toChildProfileInput, validateProfileStep, type ProfileDraft } from '../lib/profile-form'
 import { getSupabaseClient } from '../lib/supabase'
+import { trackChildFormStart, trackChildCreated, trackOnboardingComplete } from '../lib/analytics'
 
 const stepMeta = [
   ['先認識孩子', '只需要暱稱和目前年級。'],
@@ -53,6 +54,12 @@ export function ChildOnboardingPage({
   const capacityFull = Boolean(enrollment && (enrollment.status !== 'open' || enrollment.remaining <= 0))
 
   useEffect(() => {
+    if (isNewChild) {
+      trackChildFormStart()
+    }
+  }, [isNewChild])
+
+  useEffect(() => {
     if (!childId || initialDraft || readDraft(storageKey)) return
     void Promise.all([listChildren(), listChildProfiles([childId])]).then(([children, profiles]) => {
       const child = children.find((item) => item.id === childId)
@@ -87,14 +94,21 @@ export function ChildOnboardingPage({
     try {
       const childInput = { display_name: draft.displayName, grade: draft.grade, grade_stage: draft.gradeStage, textbook_version: draft.textbookVersion }
       const id = childId ?? await createChild(childInput)
+      if (!childId) {
+        trackChildCreated(id)
+      }
       if (childId) await updateChild(childId, childInput)
       await saveChildProfile(id, toChildProfileInput(draft))
+      if (!childId) {
+        trackOnboardingComplete(id)
+      }
       window.sessionStorage.removeItem(storageKey)
       navigate(`/children/${id}`)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '無法儲存學習資料，請稍後再試。')
     } finally { setBusy(false) }
   }
+
 
   const StepComponent = [AboutStep, LevelStep, SchoolStep, InterestsStep, RoutineStep, GoalsStep][step - 1]
   const [title, description] = stepMeta[step - 1]

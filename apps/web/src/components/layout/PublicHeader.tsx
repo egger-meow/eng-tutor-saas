@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
+import { trackSampleClick, trackFreeTrialClick } from '../../lib/analytics'
 
 const links = [
   { href: '/#personalization', label: '如何調整' },
@@ -48,6 +49,9 @@ export function PublicHeader() {
                 href={link.href}
                 className="nav-link"
                 onClick={(e) => {
+                  if (link.href.includes('samples')) {
+                    trackSampleClick('nav_header')
+                  }
                   setMobileMenuOpen(false)
                   handleInternalLink(e)
                 }}
@@ -59,7 +63,15 @@ export function PublicHeader() {
           <a className="nav-link nav-login" href="/#login" onClick={(event) => { setMobileMenuOpen(false); handleInternalLink(event) }}>
             <span className="nav-link-text">已有帳號？登入</span>
           </a>
-          <a className="nav-link nav-primary-cta" href={cta.href === '#login' ? '/#login' : cta.href} onClick={(event) => { setMobileMenuOpen(false); handleInternalLink(event) }}>
+          <a
+            className="nav-link nav-primary-cta"
+            href={cta.href === '#login' ? '/#login' : cta.href}
+            onClick={(event) => {
+              trackFreeTrialClick('nav_header')
+              setMobileMenuOpen(false)
+              handleInternalLink(event)
+            }}
+          >
             <span className="nav-link-text">{cta.label}</span>
           </a>
         </nav>
@@ -67,3 +79,4 @@ export function PublicHeader() {
     </header>
   )
 }
+

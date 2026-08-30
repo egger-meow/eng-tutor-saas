@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { buildAuthRedirectUrl } from '../../lib/auth-redirect'
 import { getSupabaseClient } from '../../lib/supabase'
 import { clearPendingLegalAcceptance, recordPendingLegalAcceptance } from '../../lib/legal-acceptance'
+import { getAnonymousId, trackEmailSubmit } from '../../lib/analytics'
 
 export function AuthPanel() {
   const [email, setEmail] = useState('')
@@ -13,10 +14,11 @@ export function AuthPanel() {
     setBusy(true)
     setNotice(null)
     recordPendingLegalAcceptance()
+    const anonymousId = getAnonymousId()
     const { error } = await getSupabaseClient().auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: buildAuthRedirectUrl(window.location.origin),
+        emailRedirectTo: buildAuthRedirectUrl(window.location.origin, { aid: anonymousId }),
       },
     })
     setBusy(false)
@@ -24,9 +26,11 @@ export function AuthPanel() {
       clearPendingLegalAcceptance()
       setNotice({ kind: 'error', text: error.message })
     } else {
+      trackEmailSubmit()
       setNotice({ kind: 'success', text: '登入連結已寄出，請回到 Email 信箱完成登入。' })
     }
   }
+
 
   return (
     <section className="auth-panel" aria-labelledby="auth-title">

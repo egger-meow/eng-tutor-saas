@@ -458,6 +458,14 @@ export async function handleApiRequest(
         res.end(JSON.stringify(data))
         return true
       }
+
+      case '/api/funnel': {
+        const requestedDays = Number(parsedUrl.query.days || parsedUrl.query.rangeDays || 7)
+        const data = await service.getConversionFunnelData(requestedDays)
+        res.statusCode = 200
+        res.end(JSON.stringify(data))
+        return true
+      }
       case '/api/intelligence/failures': {
         const era = (parsedUrl.query.era as any) || 'current'
         const data = await service.getFailureIntelligence(era)
