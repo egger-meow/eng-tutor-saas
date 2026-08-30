@@ -64,7 +64,7 @@ describe('production failure regressions', () => {
     expect(audit.findings.find((f) => f.dimension === 'lexical-anchor')?.severity).toBe('warning')
   })
 
-  it('rejects bare CURRENT_PROMPT_VERSION (2.10.0) packages missing mandatory critic dimensions', () => {
+  it('rejects bare CURRENT_PROMPT_VERSION (2.11.0) packages missing mandatory critic dimensions', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks = [
@@ -319,39 +319,31 @@ describe('production failure regressions', () => {
     expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
   })
 
-  describe('Prompt 2.10.1 Behavioral Contracts', () => {
-    it('authoring and critic overlays mandate preserving decisive control conditions for bounded causal claims', async () => {
+  describe('Prompt 2.11.0 generalized behavioral contracts', () => {
+    it('author and critic preserve exact attribution and decisive qualifiers without feature fusion', async () => {
       const bundle = await compileProductionBundle()
-      expect(bundle.metadata.promptVersion).toBe('2.10.1')
+      expect(bundle.metadata.promptVersion).toBe('2.11.0')
       expect(bundle.metadata.schemaVersion).toBe('2.4.0')
 
-      // Authoring contract must explicitly require qualifier scope preservation
-      expect(bundle.content).toContain('Condition & Qualifier Scope Preservation')
-      expect(bundle.content).toContain('strictly preserve decisive qualifiers and control conditions')
-      expect(bundle.content).toContain('never drop "at the same length and tension"')
-
-      // Critic contract must evaluate qualifier preservation under answer-entailment
-      expect(bundle.content).toContain('preserve decisive control conditions / qualifiers (e.g. holding length and tension equal when comparing thickness)')
+      expect(bundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
+      expect(bundle.content).toContain("Do not fuse mode A's limit, mode B's workflow, or separately true fragments into one unsupported composite claim")
+      expect(bundle.content).toContain('never transfer one mode’s limit to another mode’s workflow')
     })
 
-    it('authoring and critic overlays mandate exact prompt constraint compliance in model answers', async () => {
+    it('author, critic, and repair require exact task-constraint compliance in model answers', async () => {
       const bundle = await compileProductionBundle()
 
-      // Authoring contract must mandate constraint compliance (e.g. sentence count)
-      expect(bundle.content).toContain('Task Instruction & Constraint Compliance')
-      expect(bundle.content).toContain('If a question requests "in two complete sentences", the model answer must contain exactly two sentences')
-
-      // Critic contract must mandate checking task constraint compliance
-      expect(bundle.content).toContain('obey all explicit constraints stated in the question prompt (e.g. requested sentence counts)')
+      expect(bundle.content).toContain('Model answers and accepted answers must obey every explicit task constraint')
+      expect(bundle.content).toContain('if a prompt asks for a sequence, comparison, number of sentences, reasons, or constraints, the model answer must genuinely satisfy all of them')
+      expect(bundle.content).toContain('Explicit task constraint failure: make the model answer actually obey requested counts, sentence form, comparison controls, or procedure completeness')
     })
 
-    it('authoring and critic overlays distinguish valid stylistic paraphrasing from dropped control conditions', async () => {
+    it('targeted repair preserves unaffected content while restoring exact bindings and required qualifiers', async () => {
       const bundle = await compileProductionBundle()
 
-      // Repair contract preserves valid unaffected content while repairing dropped qualifiers
-      expect(bundle.content).toContain('Answer Entailment & Condition Scope Repairs')
-      expect(bundle.content).toContain('Ensure model answers preserve decisive qualifiers')
-      expect(bundle.content).toContain('Preserve Unaffected Content')
+      expect(bundle.content).toContain('Repair only the rejected content plus fragments that logically depend on it')
+      expect(bundle.content).toContain('source/fact -> claim -> exact reading prose -> dependent instruction/question -> dependent answer/rationale')
+      expect(bundle.content).toContain('Never fix attribution by deleting a qualifier that the source requires')
     })
   })
 })
