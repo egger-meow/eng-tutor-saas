@@ -1,5 +1,7 @@
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { compileProductionBundle, REPO_ROOT } from './bundle-compiler.js'
+import { REPO_ROOT } from './bundle-compiler.js'
 import { makeGroundedCurriculumPackage, validateCurriculumPackage } from './index.js'
 import { validPackage } from './curriculum-package.test.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
@@ -12,51 +14,51 @@ function groundedPackage() {
 }
 
 async function activeStages() {
-  const { content } = await compileProductionBundle(REPO_ROOT)
-  const planStart = content.indexOf('# Prompt 01 Overlay: Recency-Aware Grounded Planning')
-  const authorStart = content.indexOf('# Prompt 02 Overlay: Current-Event Educational Synthesis')
-  const criticStart = content.indexOf('# Prompt 03 Overlay: Recency-Aware Grounding Critic')
-  const repairStart = content.indexOf('# Prompt 04 Overlay: Recency-Aware Targeted Repair')
-  return {
-    plan: content.slice(planStart, authorStart),
-    author: content.slice(authorStart, criticStart),
-    critic: content.slice(criticStart, repairStart),
-    repair: content.slice(repairStart),
-  }
+  const promptRoot = resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0')
+  const [plan, author, critic, repair] = await Promise.all([
+    readFile(resolve(promptRoot, '01-plan.md'), 'utf8'),
+    readFile(resolve(promptRoot, '02-author.md'), 'utf8'),
+    readFile(resolve(promptRoot, '03-critic.md'), 'utf8'),
+    readFile(resolve(promptRoot, '04-repair.md'), 'utf8'),
+  ])
+  return { plan, author, critic, repair }
 }
 
-describe('Prompt 2.8.0 recency-aware grounding behavior', () => {
-  it('requires discovery and fair preference for a strong current candidate in a fast-moving domain', async () => {
+describe('Prompt 2.11.0 consolidated recency-aware grounding behavior', () => {
+  it('requires substantive recent discovery and fair preference for a strong current candidate in a fast-moving domain', async () => {
     const { plan, critic } = await activeStages()
-    expect(plan).toMatch(/fast-moving[\s\S]*actively discover recent real-world developments/)
-    expect(plan).toMatch(/compare candidates by learning-target fit[\s\S]*source reliability[\s\S]*lexical feasibility[\s\S]*freshness/)
-    expect(plan).toMatch(/recent development serves the target equally well or better, prefer it/)
-    expect(critic).toMatch(/generic evergreen noun-skinning[\s\S]*strong, reliable, teachable current angle was available/)
+    expect(plan).toContain('Classify time sensitivity internally as durable or fast-moving')
+    expect(plan).toContain('For a fast-moving domain, actively discover credible recent developments with date-aware research before selection')
+    expect(plan).toContain('prefer it over generic evergreen noun-skinning')
+    expect(critic).toContain('For a fast-moving domain, require substantive inspection of credible recent developments')
+    expect(critic).toContain('Reject generic evergreen noun-skinning when a strong, reliable, teachable current angle served the target equally well or better')
   })
 
   it('keeps evergreen fallback valid when recent candidates are poor and does not newsify durable topics', async () => {
     const { plan, critic } = await activeStages()
-    expect(plan).toMatch(/durable \/ primarily evergreen[\s\S]*recent events are unlikely to materially improve/)
-    expect(plan).toMatch(/Do not force `current`[\s\S]*rumor[\s\S]*weakly sourced[\s\S]*too complex[\s\S]*pedagogically inferior/)
-    expect(critic).toMatch(/Do not require `current`[\s\S]*well-explained evergreen fallback passes/)
-    expect(critic).toMatch(/current event selected merely because it is recent[\s\S]*pedagogically stronger/)
+    expect(plan).toContain('Do not force `current`')
+    expect(plan).toMatch(/recent candidates are rumor, prediction, weakly sourced, trivial, too complex, unsafe, vocabulary-heavy, factually thin, or pedagogically inferior/)
+    expect(critic).toContain('A well-supported evergreen fallback remains valid')
+    expect(critic).toContain('reject `current` chosen merely because it is recent')
   })
 
-  it('keeps every private learner attribute outside public query construction', async () => {
+  it('keeps private learner attributes outside public query construction', async () => {
     const { plan } = await activeStages()
-    const forbidden = ['child or parent names', 'child IDs', 'job IDs', 'school', 'grade', 'English level', 'textbook state', 'feedback', 'mistakes', 'learning history', 'profile prose', 'private context notes']
-    expect(plan).toContain('Search executors receive generalized public topic terms only')
-    for (const field of forbidden) expect(plan).toContain(field)
-    expect(plan).toContain('never query construction')
+    expect(plan).toContain('Search queries may contain generalized public topic terms only')
+    for (const field of ['learner identity', 'IDs', 'school', 'grade/level', 'feedback', 'mistakes', 'history', 'profile prose', 'private notes']) {
+      expect(plan).toContain(field)
+    }
   })
 
   it('requires topic-aware publication evidence and rejects rumor or unsupported recency semantically', async () => {
     const { plan, author, critic } = await activeStages()
-    expect(plan).toMatch(/set `temporalMode: current`[\s\S]*record `researchedAt`[\s\S]*require valid `publishedAt`/)
-    expect(plan).toContain('Freshness is topic-aware, not one universal day cutoff')
-    expect(author).toMatch(/forecasts, rumors, marketing language, or social-media claims into facts/)
-    expect(critic).toMatch(/each recency claim is actually supported by its cited source/)
-    expect(critic).toMatch(/Pass `grounding-freshness` only after recording substantive evidence/)
+    expect(plan).toContain('record `researchedAt`')
+    expect(plan).toContain('require valid `publishedAt`')
+    expect(plan).toContain('distinguish event from publication timing')
+    expect(plan).toContain('topic-aware freshness')
+    expect(author).toContain('Do not convert forecasts, rumors, social-media claims, or marketing language into stronger facts')
+    expect(critic).toContain('any recency claim not supported by its cited source')
+    expect(critic).toContain('required-but-undated evidence')
   })
 
   it('enforces current publication metadata and exact Source -> Fact -> Claim -> prose provenance deterministically', () => {
@@ -82,10 +84,11 @@ describe('Prompt 2.8.0 recency-aware grounding behavior', () => {
     }
   })
 
-  it('limits repair to research and prose fragments that depend on the rejected temporal decision', async () => {
+  it('limits repair to research and authored fragments that depend on the rejected temporal decision', async () => {
     const { repair } = await activeStages()
-    expect(repair).toMatch(/re-open only the dependent research decision, grounding facts\/claims, and authored prose fragments/)
-    expect(repair).toMatch(/Preserve valid research, valid unrelated lesson sections, immutable previous attempts, retry semantics/)
-    expect(repair).toMatch(/does not claim, submit, render, upload, complete, or mutate technical job state/)
+    expect(repair).toContain('Repair only the rejected content plus fragments that logically depend on it')
+    expect(repair).toContain('Re-research only when the failure concerns grounding accuracy, source adequacy, temporal freshness, or a changed factual dependency')
+    expect(repair).toContain('update only the stale/unsupported recency evidence and dependent claims')
+    expect(repair).toContain('Preserve immutable prior attempts')
   })
 })
