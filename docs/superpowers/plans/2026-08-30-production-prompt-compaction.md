@@ -43,6 +43,7 @@
 - [x] Create concise 2.11.0 prompt files that encode current effective invariants once, without historical overlay headings or superseded numeric lexical gates.
 - [x] Add exact-attribution language to product/rubric/SPEC grounding contracts and state that semantic Critic owns relationship accuracy.
 - [x] Preserve deterministic Finisher boundary and historical prompt immutability.
+- [x] Preserve the useful 2.8 recency contract in consolidated form: fast-moving discovery, current-vs-evergreen selection, privacy-safe research, explicit current timing metadata, topic-aware freshness, and dependency-scoped repair.
 
 ### Task 2: Compiler and version reset
 
