@@ -6,7 +6,8 @@ button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: var(--color-action); text-underline-offset: .2em; }
 a:hover { color: var(--color-action-hover); }
-a.button:not(.button-secondary):not(.button-quiet):hover { color: white; }
+a.button:not(.button-secondary):not(.button-quiet):hover,
+a.button:not(.button-secondary):not(.button-quiet):active { color: white; }
 h1, h2, h3 { margin-block: 0; color: var(--color-ink); font-family: var(--font-display); font-weight: 600; line-height: 1.35; }
 h1 { font-size: clamp(2.65rem, 6vw, 5.5rem); letter-spacing: -.045em; }
 h2 { font-size: clamp(1.65rem, 3vw, 2.5rem); }
