@@ -216,14 +216,9 @@
 }
 
 .onboarding-container .onboarding-optional-details summary > span {
-  margin-left: 0;
   color: var(--color-muted);
   font-size: 0.78rem;
   font-weight: 500;
-}
-
-.onboarding-container .onboarding-optional-details summary > span + * {
-  margin-left: auto;
 }
 
 .onboarding-container .optional-details-body {
@@ -347,7 +342,7 @@
     margin-inline: calc(var(--space-4) * -1);
     padding: 0.8rem var(--space-4) max(0.8rem, env(safe-area-inset-bottom));
     border-top: 1px solid var(--color-rule);
-    background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+    background: color-mix(in srgb, var(--color-canvas) 94%, transparent);
     backdrop-filter: blur(10px);
   }
 
