@@ -41,20 +41,15 @@ describe('ChildSubscription Component', () => {
       />
     )
 
-    // Shows active state
     expect(html).toContain('訂閱中')
     expect(html).toContain('目前方案：')
     expect(html).toContain('月繳方案・每月 NT$499')
     expect(html).toContain('本期至：')
     expect(html).toContain('取消續訂')
-
-    // Must NOT have direct plan change button
     expect(html).not.toContain('變更方案')
     expect(html).not.toContain('變更為年繳')
     expect(html).not.toContain('變更為月繳')
     expect(html).not.toContain('選擇付款週期')
-
-    // Shows reassuring copy about changing plans after period end
     expect(html).toContain('如果只是想改付款週期也沒問題。本期結束後，可以重新選擇月繳或年繳方案。')
   })
 
@@ -81,16 +76,11 @@ describe('ChildSubscription Component', () => {
       />
     )
 
-    // Shows canceled renewal state
     expect(html).toContain('已取消自動續訂')
     expect(html).toContain('目前方案仍可使用至')
     expect(html).toContain('到期後可以重新選擇月繳或年繳方案。')
-
-    // Shows Resume button
     expect(html).toContain('恢復自動續訂')
     expect(html).toContain('點擊代表放棄更換／停止方案，繼續目前方案的自動續訂。')
-
-    // Must NOT show plan selector or direct switch button
     expect(html).not.toContain('選擇付款週期')
     expect(html).not.toContain('變更方案')
   })
@@ -126,7 +116,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('並開始訂閱')
   })
 
-  it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation and lock CTA', () => {
+  it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation and lock CTA without exposing live seat count', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1',
       childId: 'child-123',
@@ -155,7 +145,8 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('NT$499')
     expect(html).toContain('NT$349')
     expect(html).toContain('創始 30 名限定')
-    expect(html).toContain('目前只剩 7 個創始優惠席次')
+    expect(html).toContain('目前仍有創始優惠名額')
+    expect(html).not.toContain('目前只剩 7 個創始優惠席次')
     expect(html).toContain('持續訂閱期間，NT$349 創始價固定保留')
     expect(html).toContain('鎖定 NT$349 創始價')
     expect(html).toMatch(/checked="" value="monthly"/)
@@ -185,7 +176,6 @@ describe('ChildSubscription Component', () => {
       />
     )
 
-    // Must show standard NT$499 without strike-through or discount badge
     expect(html).toContain('月繳 NT$499')
     expect(html).not.toContain('strike-price')
     expect(html).not.toContain('NT$349')
@@ -298,6 +288,7 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('NT$499')
     expect(html).toContain('鎖定 NT$349 創始價')
   })
+
   it('9. active redeemed Founder shows effective NT$349 price and Founder badge', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
