@@ -215,15 +215,17 @@ describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
     expect(html).not.toContain('同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。')
   })
 
-  it('clearly separates 30 founding discount seats from 100 system capacity', () => {
+  it('keeps Founding 30 and 100-child service capacity clear without exposing live counts', () => {
     const html = renderToStaticMarkup(<PricingSection enrollment={openWithFounding} />)
 
     expect(html).toContain('創始 30・月繳限定')
     expect(html).toContain('前 30 位持續訂閱期間固定 NT$349／月')
-    expect(html).toContain('目前剩 <strong>30</strong> 個創始優惠席次')
+    expect(html).toContain('創始 30 優惠目前仍有名額')
     expect(html).toContain('目前開放加入')
-    expect(html).toContain('第一階段預計服務 <strong>100 位孩子</strong>，目前已有 <strong>1 位加入</strong>。')
+    expect(html).toContain('第一階段預計服務 <strong>100 位孩子</strong>，目前仍有服務名額。')
     expect(html).toContain('額滿後新加入者會先進入候補，既有家庭不受影響。')
+    expect(html).not.toContain('目前剩 <strong>30</strong> 個創始優惠席次')
+    expect(html).not.toContain('目前已有 <strong>1 位加入</strong>')
     expect(html).not.toContain('還剩 99 個名額')
   })
 })
