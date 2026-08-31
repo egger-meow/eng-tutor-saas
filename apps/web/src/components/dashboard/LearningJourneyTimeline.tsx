@@ -118,10 +118,8 @@ export function LearningJourneyTimeline({
     return { item, x, y }
   })
 
-  const totalWidth = Math.max(
-    PADDING_X * 2 + (sortedItems.length - 1) * STEP_WIDTH,
-    280
-  )
+  const totalWidth =
+    PADDING_X * 2 + (sortedItems.length > 0 ? (sortedItems.length - 1) * STEP_WIDTH : 0)
 
   // Construct path string for constellation line
   const pathD =
@@ -153,7 +151,7 @@ export function LearningJourneyTimeline({
       <div className="constellation-scroll-wrapper" ref={scrollContainerRef}>
         <div
           className="constellation-canvas-container"
-          style={{ width: `${totalWidth}px`, minWidth: '100%', height: '116px' }}
+          style={{ width: `${totalWidth}px`, height: '116px' }}
         >
           {/* Background SVG connecting line */}
           <svg

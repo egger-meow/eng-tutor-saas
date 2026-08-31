@@ -183,4 +183,24 @@ describe('LearningJourneyTimeline Component', () => {
     // Falls back gracefully to truthful uncertainty label
     expect(html).toContain('尚待觀察')
   })
+
+  it('8. synchronizes container width with SVG viewBox and aligns node coordinates precisely without drift', () => {
+    const html = renderToStaticMarkup(
+      <LearningJourneyTimeline items={sampleTimeline} loadingMore={false} onLoadMore={vi.fn()} />
+    )
+
+    // For 3 items: totalWidth is PADDING_X * 2 + 2 * STEP_WIDTH = 48 * 2 + 2 * 76 = 248px
+    expect(html).toContain('width:248px')
+    expect(html).toContain('viewBox="0 0 248 116"')
+    expect(html).not.toContain('min-width')
+    expect(html).not.toContain('minWidth')
+
+    // SVG path connects the calculated coordinates (48, 56) -> (124, 42) -> (200, 64)
+    expect(html).toContain('d=" M 48 56 L 124 42 L 200 64"')
+
+    // Week nodes have matching style left coordinates (48px, 124px, 200px)
+    expect(html).toContain('style="left:48px;top:56px"')
+    expect(html).toContain('style="left:124px;top:42px"')
+    expect(html).toContain('style="left:200px;top:64px"')
+  })
 })
