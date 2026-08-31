@@ -67,7 +67,7 @@ export function ChildSubscription({
           <div className="founder-badge-ribbon">
             <span>👑 創始 30 名限定</span>
             {typeof foundingRemaining === 'number' && foundingRemaining > 0 && (
-              <span className="founder-seat-urgency">・目前只剩 {foundingRemaining} 個創始優惠席次</span>
+              <span className="founder-seat-urgency">・目前仍有創始優惠名額</span>
             )}
           </div>
         )}
