@@ -12,7 +12,7 @@ export function CapacityStatus({ enrollment: propEnrollment }: { enrollment?: En
         <div className="capacity-status-content">
           <div className="capacity-status-headline">
             <strong>目前開放加入</strong>
-            <span>第一階段預計服務 <strong>{state.capacity} 位孩子</strong>，目前已有 <strong>{state.activeCount} 位加入</strong>。</span>
+            <span>第一階段預計服務 <strong>{state.capacity} 位孩子</strong>，目前仍有服務名額。</span>
           </div>
           <span className="capacity-status-note">額滿後新加入者會先進入候補，既有家庭不受影響。</span>
         </div>
