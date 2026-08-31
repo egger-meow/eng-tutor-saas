@@ -43,7 +43,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
             <strong>前 30 位持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong>
             <span>第一週免費。標準月費 NT${formatPrice(productConfig.standardPrice)}；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。</span>
           </div>
-          <p className="founding-remaining">🎟️ 目前剩 <strong>{foundingRemaining}</strong> 個創始優惠席次</p>
+          <p className="founding-remaining">🎟️ 創始 30 優惠目前仍有名額</p>
         </div>
       )}
       <a className="button pricing-cta" href={cta.href} onClick={() => trackFreeTrialClick('pricing')}>{cta.label}</a>
