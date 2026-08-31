@@ -3,9 +3,9 @@ import { levels } from '../step-types'
 
 const gradeStages = [
   { value: 'incoming_grade_7', label: '即將升國一' },
-  { value: 'grade_7', label: '國中七年級' },
-  { value: 'grade_8', label: '國中八年級' },
-  { value: 'grade_9', label: '國中九年級' },
+  { value: 'grade_7', label: '國一' },
+  { value: 'grade_8', label: '國二' },
+  { value: 'grade_9', label: '國三' },
 ] as const
 
 export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
@@ -19,11 +19,11 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
   return (
     <div className="onboarding-step-content">
       <label className="field-group">
-        <span className="field-title">孩子暱稱 <small className="field-hint">（小名或英文名）</small></span>
+        <span className="field-title">孩子怎麼稱呼？ <small className="field-hint">小名或英文名就可以</small></span>
         <input
           autoFocus
           maxLength={80}
-          placeholder="例如：Jonathan、翔翔、Emma"
+          placeholder="例如：翔翔、Emma"
           value={draft.displayName}
           onChange={(event) => update({ displayName: event.target.value })}
           aria-invalid={Boolean(errors.displayName)}
@@ -33,7 +33,7 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
 
       <div className="field-group">
         <span className="field-title">目前就學階段</span>
-        <div className="pill-selector" role="radiogroup" aria-label="目前就學階段">
+        <div className="pill-selector onboarding-grade-grid" role="radiogroup" aria-label="目前就學階段">
           {gradeStages.map((stage) => {
             const isSelected = draft.gradeStage === stage.value
             return (
@@ -54,7 +54,7 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
       </div>
 
       <div className="field-group">
-        <span className="field-title">整體英文程度概況 <small className="field-hint">（大概即可，不需要先考試）</small></span>
+        <span className="field-title">孩子目前的英文，大概在哪裡？ <small className="field-hint">憑印象選即可，不用先考試</small></span>
         <div className="level-card-grid" role="radiogroup" aria-label="整體英文程度">
           {levels.map((lvl) => {
             const isSelected = draft.baselineLevel === lvl.value
