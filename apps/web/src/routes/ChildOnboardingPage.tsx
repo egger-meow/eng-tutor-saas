@@ -13,11 +13,12 @@ import { useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { emptyProfileDraft, profileDraftFromChild, profileStepCount, readDraft, saveDraft, toChildProfileInput, validateProfileStep, type ProfileDraft } from '../lib/profile-form'
 import { getSupabaseClient } from '../lib/supabase'
 import { trackChildFormStart, trackChildCreated, trackOnboardingComplete } from '../lib/analytics'
+import '../styles/onboarding-refinement.css'
 
 const stepMeta = [
-  ['孩子基本資料與程度', '只需要暱稱、就學階段與大概的英文程度，不需先考試。'],
-  ['學校進度與興趣偏好', '點選熱門主題或填寫課本版本，讓每週閱讀更自然。'],
-  ['學習節奏與目標', '設定每週可投入的時間，立即為孩子準備第一週專屬教材。'],
+  ['先抓孩子現在的大概位置', '暱稱、年級、英文程度，憑印象選就可以。'],
+  ['孩子最近真的喜歡什麼？', '先選興趣大類，再補幾個他最近真的在看的、玩的或著迷的東西。'],
+  ['最後，設定每週節奏', '選一個做得到的時間，再告訴我們最希望先加強什麼。'],
 ] as const
 
 type ChildOnboardingPageProps = {
@@ -113,17 +114,17 @@ export function ChildOnboardingPage({
           {isNewChild && (
             <header className="onboarding-welcome-header">
               <div className="onboarding-badge">
-                {capacityFull ? '保留候補資格' : '免費體驗第一週'}
+                {capacityFull ? '保留候補資格' : '第一週免費'}
               </div>
               <h1 className="onboarding-main-title">
                 {capacityFull
-                  ? '目前名額已滿，完成基本資料為孩子保留候補席次'
-                  : '只差最後一步：告訴我們孩子的基本資料，就能免費取得第一週教材'}
+                  ? '三步就好，先留下孩子的學習資料'
+                  : '三步就好，先讓我們認識孩子'}
               </h1>
               <p className="onboarding-main-desc">
                 {capacityFull
-                  ? '填寫基本資料不需綁定信用卡，也不會開始收費。有名額時我們會第一時間寄信通知您。'
-                  : '完全免費體驗第一週專屬教材（含學生練習與家長解答），不需綁定信用卡，日後皆可隨時調整。'}
+                  ? '不用考試、不綁卡，大概填就可以。完成後先保留候補資格，有名額時再通知您。'
+                  : '不用考試、不綁卡，大概填就可以；之後每週都還會依實際使用狀況繼續調整。'}
               </p>
             </header>
           )}
@@ -139,7 +140,7 @@ export function ChildOnboardingPage({
                   type="button"
                   onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}
                 >
-                  {step === 1 ? '取消' : '上一步'}
+                  {step === 1 ? (isNewChild ? '稍後再填' : '取消') : '上一步'}
                 </button>
                 <button
                   className="button"
@@ -147,7 +148,7 @@ export function ChildOnboardingPage({
                   disabled={busy}
                   onClick={() => step === profileStepCount ? void save() : next()}
                 >
-                  {busy ? '準備教材中…' : step === profileStepCount ? (isNewChild ? '完成並取得第一週免費教材' : '儲存學習資料') : '繼續'}
+                  {busy ? '儲存中…' : step === profileStepCount ? (isNewChild ? '完成，開始準備第一週教材' : '儲存學習資料') : '繼續'}
                 </button>
               </>
             }
