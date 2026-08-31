@@ -91,7 +91,7 @@ describe('logged-in 100+ capacity boundary', () => {
     expect(html).toContain('不會開始訂閱或產生教材')
     expect(html).toContain('Email')
     expect(html).toContain('決定是否訂閱')
-    expect(html).toContain('孩子暱稱')
+    expect(html).toContain('孩子怎麼稱呼')
     expect(html).not.toContain('隔天開放下載')
   })
 
@@ -105,8 +105,8 @@ describe('logged-in 100+ capacity boundary', () => {
 
     expect(html).not.toContain('候補名單')
     expect(html).not.toContain('目前名額已滿')
-    expect(html).toContain('孩子基本資料')
-    expect(html).toContain('孩子暱稱')
+    expect(html).toContain('先抓孩子現在的大概位置')
+    expect(html).toContain('孩子怎麼稱呼')
   })
 
   it('editing an existing child profile does not show waitlist notice even when capacity is full', () => {
@@ -134,8 +134,7 @@ describe('logged-in 100+ capacity boundary', () => {
     expect(html).not.toContain('候補名單')
     expect(html).not.toContain('目前名額已滿')
     expect(html).not.toContain('隔天開放下載')
-    expect(html).toContain('孩子基本資料')
-    expect(html).toContain('孩子暱稱')
+    expect(html).toContain('先抓孩子現在的大概位置')
+    expect(html).toContain('孩子怎麼稱呼')
   })
 })
-
