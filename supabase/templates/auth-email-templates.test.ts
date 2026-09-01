@@ -17,8 +17,8 @@ const templates = [
     type: 'magic_link',
     file: 'magic-link.html',
     subject: '登入紙屬英文',
-    reason: '要求取得安全登入連結',
-    cta: '登入紙屬英文',
+    reason: '完成孩子設定或安全登入紙屬英文',
+    cta: '繼續紙屬英文',
   },
   {
     type: 'recovery',
