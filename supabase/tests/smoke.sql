@@ -446,7 +446,7 @@ begin
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke')
   into bridge_claim_result;
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.4.0'
     or not (bridge_claim_result ? 'claimed')
     or not (bridge_claim_result ? 'claimedCount')
     or not (bridge_claim_result ? 'normalCapacity')
@@ -534,7 +534,7 @@ begin
   delete from public.children
   where id = '00000000-0000-0000-0000-000000000006';
 
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.4.0'
     or bridge_fingerprint !~ '^sha256:[0-9a-f]{64}$' then
     raise exception 'ChatGPT bridge did not return a server-owned SHA-256 fingerprint';
   end if;
@@ -668,7 +668,7 @@ begin
   end if;
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke') into bridge_claim_result;
-  if bridge_claim_result ->> 'bridgeVersion' <> '1.3.0'
+  if bridge_claim_result ->> 'bridgeVersion' <> '1.4.0'
     or not (bridge_claim_result ? 'claimed')
     or not (bridge_claim_result ? 'claimedCount')
     or not (bridge_claim_result ? 'normalCapacity')
@@ -1019,10 +1019,10 @@ begin
 
     insert into public.generation_jobs (
       id, child_id, material_week, rule_version, idempotency_key, status,
-      scheduled_for, generation_due_at, feedback_cutoff_at, max_attempts
+      scheduled_for, release_at, feedback_cutoff_at, generation_due_at, max_attempts
     ) values (
-      mismatch_job_id, mismatch_child_id, '2026-W36', '1.0.0', 'idemp:rel-mismatch-1', 'pending',
-      now() - interval '1 hour', now() - interval '30 minutes', now() - interval '2 hours', 5
+      mismatch_job_id, mismatch_child_id, current_date, '1.0.0', 'idemp:rel-mismatch-1', 'pending',
+      now() - interval '1 hour', now() + interval '12 hours', now() + interval '12 hours' - interval '48 hours', now() + interval '12 hours' - interval '24 hours', 5
     );
 
     -- 1. Claim job for Attempt 1
@@ -3332,6 +3332,7 @@ begin
   end if;
 
   -- 1) Anonymous event recording
+  perform set_config('request.jwt.claim.sub', '', true);
   perform set_config('role', 'anon', true);
   declare
     anon_event_id uuid;
@@ -3389,6 +3390,265 @@ begin
 
     -- Clean up test events
     delete from public.funnel_events where id in (anon_event_id, auth_event_id);
+  end;
+
+  -- =========================================================================
+  -- Regression Tests: Subscription Pause Clock & Service Time Cadence Invariant
+  -- "教材週次是 service time，不是 wall-clock time。訂多久，就往前走多久；沒訂的日子不存在。"
+  -- =========================================================================
+  declare
+    pause_child_id uuid := '00000000-0000-0000-0000-000000000301';
+    claimed_child_id uuid := '00000000-0000-0000-0000-000000000302';
+    resub_child_id uuid := '00000000-0000-0000-0000-000000000303';
+    pause_w1_mat_id uuid := '00000000-0000-0000-0000-000000000501';
+    pause_w2_job_id uuid := '00000000-0000-0000-0000-000000000401';
+    claimed_job_id uuid := '00000000-0000-0000-0000-000000000402';
+    reanchored_job record;
+    claimed_count integer;
+    completed_w2_mat_id uuid;
+    next_w3_job record;
+    w3_claimed_count integer;
+    active_claim_before record;
+    active_claim_after record;
+    resub_m1_id uuid := '00000000-0000-0000-0000-000000000502';
+    resub_m2_id uuid := '00000000-0000-0000-0000-000000000503';
+    resub_w3_job_id uuid := '00000000-0000-0000-0000-000000000403';
+    resub_completed_m3_id uuid;
+    resub_page record;
+  begin
+    -- -----------------------------------------------------------------------
+    -- Test Case 1: Free Week 1 -> 3-week delay -> Paid Activation
+    -- Proves: Stale pending job is re-anchored to tomorrow BEFORE claim.
+    -- Proves: Next job (Week 3) is scheduled 7 days in future.
+    -- Proves: Machine-gun catch-up is broken (subsequent claim yields 0 jobs).
+    -- -----------------------------------------------------------------------
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+    values (pause_child_id, '00000000-0000-0000-0000-000000000001', 'Pause Clock Student', 7, 'grade_7', 'Asia/Taipei');
+
+    -- Insert completed Week 1 material delivered 21 days ago
+    insert into public.materials (id, child_id, material_week, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+    values (pause_w1_mat_id, pause_child_id, current_date - 21, '1.0.0', '{}'::jsonb, 's1.pdf', 'p1.pdf');
+
+    -- Associate auto-enqueued initial generation job with completed Week 1 material
+    update public.generation_jobs
+    set material_id = pause_w1_mat_id, status = 'completed', completed_at = now() - interval '21 days',
+        material_week = current_date - 21,
+        idempotency_key = pause_child_id::text || ':' || (current_date - 21)::text || ':r1',
+        release_at = now() - interval '21 days',
+        feedback_cutoff_at = now() - interval '21 days' - interval '48 hours',
+        generation_due_at = now() - interval '21 days' - interval '24 hours'
+    where child_id = pause_child_id and source_material_id is null;
+
+    -- Week 2 job was scheduled 14 days ago and is severely overdue
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at
+    ) values (
+      pause_w2_job_id, pause_child_id, current_date - 14, 'curriculum-rules/1.0.0',
+      pause_child_id::text || ':stale_w2', 'pending', now() - interval '15 days',
+      pause_w1_mat_id, now() - interval '14 days', now() - interval '16 days', now() - interval '15 days'
+    );
+
+    -- Unpaid beta child cannot claim Week 2
+    if exists (
+      select 1 from private_generation.claim_due_generation_jobs('worker_pause_test') where id = pause_w2_job_id
+    ) then
+      raise exception 'Test 1 Failure: unpaid child claimed overdue Week 2 job';
+    end if;
+
+    -- Parent pays 21 days later: Paddle webhook fires with active
+    perform public.process_paddle_subscription_event_v2(
+      'evt_pause_clock_1', 'subscription.created', clock_timestamp(),
+      pause_child_id, 'sub_pause_1', 'ctm_pause_1', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', null, null, null, null, false, null, null
+    );
+
+    -- ASSERTION BEFORE CLAIM: Stale job was re-anchored to tomorrow (future release_at > now())
+    select * into reanchored_job from public.generation_jobs where id = pause_w2_job_id;
+
+    if reanchored_job.release_at <= now() then
+      raise exception 'Test 1 Failure: job release_at was not re-anchored to future: %', reanchored_job.release_at;
+    end if;
+
+    if reanchored_job.generation_due_at > now() then
+      raise exception 'Test 1 Failure: re-anchored generation_due_at should be claimable now (<= now()): %', reanchored_job.generation_due_at;
+    end if;
+
+    if reanchored_job.material_week <> ((now() at time zone 'Asia/Taipei')::date + 1) then
+      raise exception 'Test 1 Failure: re-anchored material_week mismatch: expected %, got %',
+        ((now() at time zone 'Asia/Taipei')::date + 1), reanchored_job.material_week;
+    end if;
+
+    if reanchored_job.status <> 'pending' then
+      raise exception 'Test 1 Failure: re-anchored status must be pending, got %', reanchored_job.status;
+    end if;
+
+    -- Worker claims the re-anchored job
+    select count(*) into claimed_count
+    from private_generation.claim_due_generation_jobs('worker_pause_test')
+    where id = pause_w2_job_id;
+
+    if claimed_count <> 1 then
+      raise exception 'Test 1 Failure: worker failed to claim re-anchored Week 2 job';
+    end if;
+
+    -- Finisher completes the job
+    completed_w2_mat_id := public.worker_complete_generation_job(
+      pause_w2_job_id,
+      'worker_pause_test',
+      pause_child_id::text || '/' || pause_w2_job_id::text || '/student.pdf',
+      pause_child_id::text || '/' || pause_w2_job_id::text || '/parent-answer.pdf',
+      '{"metadata": {"schemaVersion": "1.0.0"}}'::jsonb,
+      '{"unit": "Unit 2"}'::jsonb,
+      'prompt-1.0.0',
+      'generator-1.0.0',
+      'gemini-2.5-flash'
+    );
+
+    -- ASSERTION: Next job (Week 3) is scheduled for 7 days in the future
+    select * into next_w3_job
+    from public.generation_jobs
+    where child_id = pause_child_id and source_material_id = completed_w2_mat_id;
+
+    if next_w3_job.id is null then
+      raise exception 'Test 1 Failure: Week 3 job was not scheduled';
+    end if;
+
+    if next_w3_job.release_at <= now() then
+      raise exception 'Test 1 Failure: Week 3 job release_at must be in the future, got %', next_w3_job.release_at;
+    end if;
+
+    -- ASSERTION: Worker runs claim again -> MUST RETURN 0 JOBS! No machine gun cascade!
+    select count(*) into w3_claimed_count
+    from private_generation.claim_due_generation_jobs('worker_pause_test')
+    where child_id = pause_child_id;
+
+    if w3_claimed_count <> 0 then
+      raise exception 'Test 1 Failure: Week 3 job was prematurely claimed! Machine-gun catch-up detected!';
+    end if;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 2: In-Progress Worker Claim Protection
+    -- Proves: Webhook NEVER steals or resets an active claimed job.
+    -- -----------------------------------------------------------------------
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+    values (claimed_child_id, '00000000-0000-0000-0000-000000000001', 'Claim Protection Student', 7, 'grade_7', 'Asia/Taipei');
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      release_at, feedback_cutoff_at, generation_due_at, claimed_by, lease_expires_at, attempt_count
+    ) values (
+      claimed_job_id, claimed_child_id, current_date, 'curriculum-rules/1.0.0',
+      claimed_child_id::text || ':active_claim', 'claimed', now(),
+      now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+      'worker_actively_working', now() + interval '30 minutes', 1
+    );
+
+    select * into active_claim_before from public.generation_jobs where id = claimed_job_id;
+
+    -- Paddle webhook fires for this child
+    perform public.process_paddle_subscription_event_v2(
+      'evt_pause_clock_2', 'subscription.created', clock_timestamp(),
+      claimed_child_id, 'sub_pause_2', 'ctm_pause_2', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', null, null, null, null, false, null, null
+    );
+
+    select * into active_claim_after from public.generation_jobs where id = claimed_job_id;
+
+    if active_claim_after.status <> 'claimed'
+      or active_claim_after.claimed_by <> 'worker_actively_working'
+      or active_claim_after.lease_expires_at <> active_claim_before.lease_expires_at
+      or active_claim_after.attempt_count <> 1
+    then
+      raise exception 'Test 2 Failure: active claimed job was stolen or reset by subscription webhook!';
+    end if;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 3: Cancellation Gap & Canonical Week Number Authority
+    -- Proves: Week number represents service sequence (Week 3), not elapsed calendar weeks (Week 15).
+    -- -----------------------------------------------------------------------
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+    values (resub_child_id, '00000000-0000-0000-0000-000000000001', 'Resub Sequence Student', 7, 'grade_7', 'Asia/Taipei');
+
+    -- Clear auto-enqueued initial generation job to stage explicit multi-month history
+    delete from public.generation_jobs where child_id = resub_child_id;
+
+    -- Insert Week 1 (90 days ago) and Week 2 (83 days ago)
+    insert into public.materials (id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path, created_at)
+    values (resub_m1_id, resub_child_id, current_date - 90, 1, '1.0.0', '{}'::jsonb, 's1.pdf', 'p1.pdf', now() - interval '90 days');
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at, material_id, completed_at
+    ) values (
+      '00000000-0000-0000-0000-000000000491', resub_child_id, current_date - 90, 'curriculum-rules/1.0.0',
+      resub_child_id::text || ':w1', 'completed', now() - interval '91 days',
+      null, now() - interval '90 days', now() - interval '92 days', now() - interval '91 days',
+      resub_m1_id, now() - interval '90 days'
+    );
+
+    insert into public.materials (id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path, created_at)
+    values (resub_m2_id, resub_child_id, current_date - 83, 1, '1.0.0', '{}'::jsonb, 's2.pdf', 'p2.pdf', now() - interval '83 days');
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at, material_id, completed_at
+    ) values (
+      '00000000-0000-0000-0000-000000000492', resub_child_id, current_date - 83, 'curriculum-rules/1.0.0',
+      resub_child_id::text || ':w2', 'completed', now() - interval '84 days',
+      resub_m1_id, now() - interval '83 days', now() - interval '85 days', now() - interval '84 days',
+      resub_m2_id, now() - interval '83 days'
+    );
+
+    -- Pending Week 3 job was left stale when canceled
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at
+    ) values (
+      resub_w3_job_id, resub_child_id, current_date - 76, 'curriculum-rules/1.0.0',
+      resub_child_id::text || ':w3_stale', 'pending', now() - interval '77 days',
+      resub_m2_id, now() - interval '76 days', now() - interval '78 days', now() - interval '77 days'
+    );
+
+    -- Subscription is reactivated today (after 76-day cancellation gap)
+    perform public.process_paddle_subscription_event_v2(
+      'evt_pause_clock_3', 'subscription.created', clock_timestamp(),
+      resub_child_id, 'sub_pause_3', 'ctm_pause_3', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', null, null, null, null, false, null, null
+    );
+
+    -- Worker claims the re-anchored Week 3 job
+    perform private_generation.claim_due_generation_jobs('worker_resub_test');
+
+    -- Finisher completes Week 3
+    resub_completed_m3_id := public.worker_complete_generation_job(
+      resub_w3_job_id,
+      'worker_resub_test',
+      resub_child_id::text || '/' || resub_w3_job_id::text || '/student.pdf',
+      resub_child_id::text || '/' || resub_w3_job_id::text || '/parent-answer.pdf',
+      '{"metadata": {"schemaVersion": "1.0.0"}}'::jsonb,
+      '{"unit": "Unit 3"}'::jsonb,
+      'prompt-1.0.0',
+      'generator-1.0.0',
+      'gemini-2.5-flash'
+    );
+
+    -- Query get_owned_released_materials_page to verify authoritative week numbering
+    select * into resub_page
+    from public.get_owned_released_materials_page(resub_child_id, 5, 0, now() + interval '2 days')
+    order by material_week desc
+    limit 1;
+
+    if resub_page.id <> resub_completed_m3_id then
+      raise exception 'Test 3 Failure: latest material id mismatch: expected %, got %', resub_completed_m3_id, resub_page.id;
+    end if;
+
+    if resub_page.week_number <> 3 then
+      raise exception 'Test 3 Failure: week_number authority violation! Expected Week 3 (service time), got Week %', resub_page.week_number;
+    end if;
   end;
 
   -- Clean up

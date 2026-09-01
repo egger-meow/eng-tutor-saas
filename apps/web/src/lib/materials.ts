@@ -297,11 +297,12 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
     if (firstMaterial.error) throw firstMaterial.error
     if (futureMaterials.error) throw futureMaterials.error
 
-    const releasedRows = (releasedPage.data ?? []) as Array<Record<string, any> & { total_count: number | string }>
+    const releasedRows = (releasedPage.data ?? []) as Array<Record<string, any> & { total_count: number | string; week_number?: number | null }>
     const totalReleased = releasedRows.length > 0 ? Number(releasedRows[0]!.total_count) : 0
-    const futureRows = (futureMaterials.data ?? []).map((material) => ({
+    const futureRows = (futureMaterials.data ?? []).map((material, index) => ({
       ...material,
       release_at: childJobs.find((job) => job.material_id === material.id)?.release_at ?? null,
+      week_number: totalReleased + index + 1,
     }))
     return {
       childId,
@@ -340,7 +341,9 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
       ...material,
       generation_summary: material.generation_summary as Record<string, unknown>,
       release_at: material.release_at ?? null,
-      week_number: materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
+      week_number: (typeof material.week_number === 'number' && material.week_number > 0)
+        ? material.week_number
+        : materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
       feedback: feedbackByMaterial.get(material.id) ?? null,
     })) as Material[],
     hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, offset + page.releasedRows.length < page.totalReleased])),

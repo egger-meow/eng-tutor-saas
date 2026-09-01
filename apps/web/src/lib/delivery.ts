@@ -76,15 +76,21 @@ export function getDeliveryViewModel(
         : nextJobReleaseAt
           ? new Date(nextJobReleaseAt)
           : null
+      const isPastRelease = releaseAt && releaseAt <= now
+      const effectiveNextDeliveryAt = isPastRelease ? null : releaseAt
       const feedbackReceived = Boolean(currentMaterial.feedback)
       return {
-        nextDeliveryAt: releaseAt,
-        feedbackCutoffAt: releaseAt ? new Date(releaseAt.getTime() - (2 * day)) : null,
+        nextDeliveryAt: effectiveNextDeliveryAt,
+        feedbackCutoffAt: effectiveNextDeliveryAt ? new Date(effectiveNextDeliveryAt.getTime() - (2 * day)) : null,
         feedbackState: feedbackReceived ? 'received' : 'open',
         headline: '需訂閱以開啟下一週教材',
         detail: feedbackReceived
-          ? `本週回饋已收到！完成訂閱後，系統將依回饋${releaseAt ? `於 ${formatTaipeiDate(releaseAt)}` : ''} 交付下一份專屬教材。`
-          : `第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋${releaseAt ? `於 ${formatTaipeiDate(releaseAt)}` : ''} 繼續為孩子準備專屬教材。`,
+          ? (effectiveNextDeliveryAt
+              ? `本週回饋已收到！完成訂閱後，系統將依回饋於 ${formatTaipeiDate(effectiveNextDeliveryAt)} 交付下一份專屬教材。`
+              : '本週回饋已收到！完成訂閱後，系統將依回饋為孩子準備下一份專屬教材。')
+          : (effectiveNextDeliveryAt
+              ? `第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋於 ${formatTaipeiDate(effectiveNextDeliveryAt)} 繼續為孩子準備專屬教材。`
+              : '第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋為孩子準備下一份專屬教材。'),
         action: {
           label: '前往選擇方案訂閱',
           href: '/billing',

@@ -671,6 +671,7 @@ Therefore:
 * the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
 * Week 1 is the sole early-release exception: when the deterministic Finisher successfully completes both PDFs before that timestamp, completion immediately becomes the actual `release_at` and the parent may download both files at once;
 * Week 2 is scheduled from Week 1's actual release anchor plus seven days. If Week 1 completes today, Week 2 is due today + 7 days; if Week 1 completes tomorrow, Week 2 is due tomorrow + 7 days;
+* Week 1 is a standalone evaluation and calibration packet. If the parent does not immediately subscribe, Week 2 sits pending but unentitled. When the parent subsequently activates a paid subscription, the pending Week 2 job is re-anchored to the activation moment (next calendar day delivery), preventing overdue calendar catch-up;
 * for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
 * the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
 * expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
@@ -2499,6 +2500,21 @@ The system should distribute generation workload rather than accidentally schedu
 
 For the first packet only, successful Finisher completion may advance the actual Week 1 `release_at`. The Week 2 release and generation deadlines must then be derived from that actual Week 1 release anchor plus seven days, rather than from the superseded next-day expectation.
 
+### Subscription Pause Clock & Service Time Cadence
+
+Material delivery cadence operates strictly on **service time**, not wall-clock calendar time:
+
+> **訂多久，就往前走多久。沒訂的日子不存在。**
+
+Calendar days without active entitlement (free Week 1 post-release evaluation window, paused, canceled, past-due, or unpaid lapse) completely pause the generation clock and do NOT advance curriculum weeks or accumulate overdue releases.
+
+When a paid subscription is first activated or resumed after an entitlement gap:
+1. The unmaterialized pending job is re-anchored to the activation date (delivery on the next calendar day 00:00 in the child's configured timezone);
+2. Its `generation_due_at` is set to `release_at - 24 hours` so it is claimable by the authoring worker during the next daily authoring run;
+3. Its `material_week` and `idempotency_key` are updated to match the re-anchored date;
+4. The deterministic Finisher ensures that subsequent weekly jobs are scheduled strictly in the future (`greatest(effective_release_at + interval '7 days', tomorrow)`);
+5. Missed calendar weeks are NEVER backfilled or generated retroactively.
+
 
 ---
 
@@ -2655,6 +2671,8 @@ The default normal capacity is 15 jobs per daily run. It is not a delivery cap:
 * unused capacity never causes a job that is still waiting for feedback to run early.
 
 Each child has an independent rolling cadence. A successful delivery schedules the next `release_at` exactly seven days after the existing release anchor, not seven days after generation happens to finish. The feedback cutoff is 48 hours before release and the generation deadline is 24 hours before release.
+
+This rolling seven-day cadence applies to continuous active subscription periods. During periods without entitlement, the rolling cadence clock is paused. The Finisher enforces a defensive future guard (`greatest(effective_release_at + interval '7 days', tomorrow)`) to physically prevent scheduling any subsequent job in the past.
 
 ---
 
@@ -2953,7 +2971,10 @@ Recommended behavior:
 
 * cancellation stops future paid entitlement after the current paid period;
 * already generated historical materials remain accessible to the owning parent while the account remains available;
-* future generations stop when entitlement ends.
+* future generations stop when entitlement ends;
+* when a parent resubscribes after an arbitrary cancellation gap (e.g. 3 months), the service resumes with the **next unconsumed material** in the sequential curriculum;
+* the release cadence is re-anchored to the resumption date without backfilling or catching up missed calendar time;
+* `child_weekly_learning_snapshots.sequence_number` is the sole canonical parent-facing Week N authority; week numbering represents completed educational packets in service sequence, not elapsed calendar weeks.
 
 Exact legal/refund language must be displayed appropriately before paid launch.
 

@@ -46,3 +46,85 @@ describe('buildMaterialHistoryView', () => {
     expect(view.historyCount).toBe(11)
   })
 })
+
+describe('listMaterialsWithClient - Service Time Week Numbering', () => {
+  it('preserves canonical week_number from RPC across multi-month subscription gaps', async () => {
+    const mockClient = {
+      from: (table: string) => {
+        if (table === 'generation_jobs') {
+          return {
+            select: () => ({
+              in: () => Promise.resolve({ data: [], error: null }),
+            }),
+          }
+        }
+        if (table === 'materials') {
+          return {
+            select: () => ({
+              eq: () => ({
+                order: () => ({
+                  limit: () => ({
+                    maybeSingle: () => Promise.resolve({ data: { material_week: '2026-08-01' }, error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'feedback') {
+          return {
+            select: () => ({
+              in: () => ({
+                in: () => Promise.resolve({ data: [], error: null }),
+              }),
+            }),
+          }
+        }
+        throw new Error(`Unexpected table ${table}`)
+      },
+      rpc: (fn: string) => {
+        if (fn === 'get_owned_released_materials_page') {
+          return Promise.resolve({
+            data: [
+              {
+                id: 'm-2',
+                child_id: 'child-1',
+                material_week: '2026-10-01',
+                revision: 1,
+                student_pdf_path: 's2.pdf',
+                parent_answer_pdf_path: 'p2.pdf',
+                generation_summary: {},
+                created_at: '2026-10-01T00:00:00Z',
+                release_at: '2026-10-01T00:00:00Z',
+                week_number: 2,
+                total_count: 2,
+              },
+              {
+                id: 'm-1',
+                child_id: 'child-1',
+                material_week: '2026-08-01',
+                revision: 1,
+                student_pdf_path: 's1.pdf',
+                parent_answer_pdf_path: 'p1.pdf',
+                generation_summary: {},
+                created_at: '2026-08-01T00:00:00Z',
+                release_at: '2026-08-01T00:00:00Z',
+                week_number: 1,
+                total_count: 2,
+              },
+            ],
+            error: null,
+          })
+        }
+        throw new Error(`Unexpected rpc ${fn}`)
+      },
+    }
+
+    const { listMaterialsWithClient } = await import('./materials')
+    const res = await listMaterialsWithClient(mockClient as any, ['child-1'])
+    expect(res.materials.map(m => ({ id: m.id, week: m.week_number }))).toEqual([
+      { id: 'm-2', week: 2 },
+      { id: 'm-1', week: 1 },
+    ])
+  })
+})

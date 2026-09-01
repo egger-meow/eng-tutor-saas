@@ -452,6 +452,30 @@ describe('Subscription Gating for Delivery Status', () => {
     expect(view.action?.href).toBe('/billing')
   })
 
+  it('does not display a stale past date in subscription prompt when nextJobReleaseAt has passed', () => {
+    const now = new Date('2026-08-25T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: true })
+    const trialingChild = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-1',
+        childId: 'child-1',
+        status: 'trialing' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: null,
+        currentPeriodEnd: '2026-08-21T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'eligible' as const,
+      },
+    }
+
+    const view = getDeliveryViewModel(trialingChild, currentWeek1, null, '2026-08-21T01:00:00Z', now)
+    expect(view.headline).toBe('需訂閱以開啟下一週教材')
+    expect(view.detail).toBe('本週回饋已收到！完成訂閱後，系統將依回饋為孩子準備下一份專屬教材。')
+    expect(view.nextDeliveryAt).toBeNull()
+  })
+
   it('shows expired status and reactivation CTA when subscription is canceled', () => {
     const now = new Date('2026-08-16T07:00:00Z')
     const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
