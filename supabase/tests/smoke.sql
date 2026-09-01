@@ -3649,6 +3649,177 @@ begin
     if resub_page.week_number <> 3 then
       raise exception 'Test 3 Failure: week_number authority violation! Expected Week 3 (service time), got Week %', resub_page.week_number;
     end if;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 4: Continuous Active Subscriber with Overdue Job
+    -- Invariant: Routine webhook (active -> active) MUST NOT re-anchor or reset attempts.
+    -- Overdue job remains mandatory and preserves original SLA deadlines.
+    -- -----------------------------------------------------------------------
+    declare
+      ca_child_id uuid := '00000000-0000-0000-0000-000000000304';
+      ca_job_id uuid := '00000000-0000-0000-0000-000000000404';
+      ca_orig_release timestamptz := now() - interval '6 hours';
+      ca_orig_due timestamptz := now() - interval '30 hours';
+      ca_orig_cutoff timestamptz := now() - interval '54 hours';
+      ca_job_after record;
+    begin
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+      values (ca_child_id, '00000000-0000-0000-0000-000000000001', 'Continuous Active Student', 7, 'grade_7', 'Asia/Taipei');
+
+      delete from public.generation_jobs where child_id = ca_child_id;
+
+      -- Set up already active Paddle subscription
+      update public.subscriptions
+      set provider = 'paddle',
+          provider_customer_id = 'ctm_ca_1',
+          provider_subscription_id = 'sub_ca_1',
+          status = 'active',
+          plan_code = 'standard_monthly',
+          billing_interval = 'month',
+          price_twd = 499,
+          current_period_start = now() - interval '10 days',
+          current_period_end = now() + interval '20 days',
+          cancel_at_period_end = false,
+          provider_event_at = now() - interval '10 days'
+      where child_id = ca_child_id;
+
+      -- Job is overdue due to generator delay, attempt_count is 2
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at, attempt_count
+      ) values (
+        ca_job_id, ca_child_id, current_date, 'curriculum-rules/1.0.0',
+        ca_child_id::text || ':ca_overdue', 'pending', now() - interval '35 hours',
+        ca_orig_release, ca_orig_cutoff, ca_orig_due, 2
+      );
+
+      -- Routine webhook arrives: subscription.updated with status='active'
+      perform public.process_paddle_subscription_event_v2(
+        'evt_ca_routine_1', 'subscription.updated', clock_timestamp(),
+        ca_child_id, 'sub_ca_1', 'ctm_ca_1', 'active',
+        'standard_monthly', 'month', 499, now() - interval '10 days', now() + interval '20 days', false,
+        null, null, null, null, null, false, null, null
+      );
+
+      -- ASSERTION: Job was NOT re-anchored to tomorrow; attempt_count was NOT wiped
+      select * into ca_job_after from public.generation_jobs where id = ca_job_id;
+
+      if ca_job_after.release_at <> ca_orig_release then
+        raise exception 'Test 4 Failure: continuous active overdue job was wrongly re-anchored! Expected %, got %',
+          ca_orig_release, ca_job_after.release_at;
+      end if;
+
+      if ca_job_after.attempt_count <> 2 then
+        raise exception 'Test 4 Failure: attempt_count was wrongly wiped on continuous active webhook! Expected 2, got %',
+          ca_job_after.attempt_count;
+      end if;
+    end;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 5: Active Submission Protection on Pending Job
+    -- Invariant: Even on entitlement transition, a pending job with an in-flight
+    -- curriculum submission (pending/processing) MUST NOT be re-anchored.
+    -- -----------------------------------------------------------------------
+    declare
+      as_child_id uuid := '00000000-0000-0000-0000-000000000305';
+      as_job_id uuid := '00000000-0000-0000-0000-000000000405';
+      as_orig_release timestamptz := now() - interval '6 hours';
+      as_orig_due timestamptz := now() - interval '30 hours';
+      as_orig_cutoff timestamptz := now() - interval '54 hours';
+      as_job_after record;
+    begin
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+      values (as_child_id, '00000000-0000-0000-0000-000000000001', 'Active Submission Student', 7, 'grade_7', 'Asia/Taipei');
+
+      delete from public.generation_jobs where child_id = as_child_id;
+
+      -- Pending job created
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at, attempt_count
+      ) values (
+        as_job_id, as_child_id, current_date, 'curriculum-rules/1.0.0',
+        as_child_id::text || ':as_pending', 'pending', now() - interval '35 hours',
+        as_orig_release, as_orig_cutoff, as_orig_due, 1
+      );
+
+      -- In-flight curriculum submission exists (e.g. processing by Finisher)
+      insert into private_generation.curriculum_submissions (
+        job_id, authoring_attempt, generation_worker_id, canonical_source, status, processor_id, processor_lease_expires_at
+      ) values (
+        as_job_id, 1, 'worker_as', '{"metadata": {"schemaVersion": "1.0.0"}}'::jsonb, 'processing', 'finisher_as', now() + interval '20 minutes'
+      );
+
+      -- Entitlement transition webhook arrives: none -> active
+      perform public.process_paddle_subscription_event_v2(
+        'evt_as_transition_1', 'subscription.created', clock_timestamp(),
+        as_child_id, 'sub_as_1', 'ctm_as_1', 'active',
+        'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+        'dsc_founder', null, null, null, null, false, null, null
+      );
+
+      -- ASSERTION: Job was protected from re-anchor because active submission exists
+      select * into as_job_after from public.generation_jobs where id = as_job_id;
+
+      if as_job_after.release_at <> as_orig_release then
+        raise exception 'Test 5 Failure: pending job with active submission was wrongly re-anchored! Expected %, got %',
+          as_orig_release, as_job_after.release_at;
+      end if;
+    end;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 6: Resumption source_material_id Canonical Sequence Authority
+    -- Invariant: Prioritize child_weekly_learning_snapshots.sequence_number
+    -- over calendar date when linking resumption job source_material_id.
+    -- -----------------------------------------------------------------------
+    declare
+      seq_child_id uuid := '00000000-0000-0000-0000-000000000306';
+      seq_m_date_later uuid := '00000000-0000-0000-0000-000000000507'; -- sequence 1, but later date
+      seq_m_canonical uuid := '00000000-0000-0000-0000-000000000508';   -- sequence 2, earlier date
+      seq_resumed_job record;
+    begin
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+      values (seq_child_id, '00000000-0000-0000-0000-000000000001', 'Sequence Authority Student', 7, 'grade_7', 'Asia/Taipei');
+
+      delete from public.generation_jobs where child_id = seq_child_id;
+
+      -- Material 1: sequence 1
+      insert into public.materials (id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path, created_at)
+      values (seq_m_date_later, seq_child_id, current_date - 10, 1, '1.0.0', '{}'::jsonb, 's1.pdf', 'p1.pdf', now() - interval '10 days');
+
+      insert into public.child_weekly_learning_snapshots (child_id, material_id, sequence_number, material_week, recorded_at)
+      values (seq_child_id, seq_m_date_later, 1, current_date - 10, now() - interval '10 days');
+
+      -- Material 2: canonical sequence 2 (even if material_week was recorded as earlier)
+      insert into public.materials (id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path, created_at)
+      values (seq_m_canonical, seq_child_id, current_date - 20, 1, '1.0.0', '{}'::jsonb, 's2.pdf', 'p2.pdf', now() - interval '5 days');
+
+      insert into public.child_weekly_learning_snapshots (child_id, material_id, sequence_number, material_week, recorded_at)
+      values (seq_child_id, seq_m_canonical, 2, current_date - 20, now() - interval '5 days');
+
+      -- No pending job exists (gap after cancellation)
+      -- Webhook fires to reactivate subscription
+      perform public.process_paddle_subscription_event_v2(
+        'evt_seq_resub_1', 'subscription.created', clock_timestamp(),
+        seq_child_id, 'sub_seq_1', 'ctm_seq_1', 'active',
+        'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+        'dsc_founder', null, null, null, null, false, null, null
+      );
+
+      -- ASSERTION: The new resumed job points to seq_m_canonical (sequence 2), NOT seq_m_date_later
+      select * into seq_resumed_job
+      from public.generation_jobs
+      where child_id = seq_child_id and material_id is null;
+
+      if seq_resumed_job.id is null then
+        raise exception 'Test 6 Failure: resumed generation job was not created';
+      end if;
+
+      if seq_resumed_job.source_material_id <> seq_m_canonical then
+        raise exception 'Test 6 Failure: source_material_id authority violation! Expected % (sequence 2), got %',
+          seq_m_canonical, seq_resumed_job.source_material_id;
+      end if;
+    end;
   end;
 
   -- Clean up

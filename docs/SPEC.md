@@ -2508,12 +2508,15 @@ Material delivery cadence operates strictly on **service time**, not wall-clock 
 
 Calendar days without active entitlement (free Week 1 post-release evaluation window, paused, canceled, past-due, or unpaid lapse) completely pause the generation clock and do NOT advance curriculum weeks or accumulate overdue releases.
 
-When a paid subscription is first activated or resumed after an entitlement gap:
-1. The unmaterialized pending job is re-anchored to the activation date (delivery on the next calendar day 00:00 in the child's configured timezone);
-2. Its `generation_due_at` is set to `release_at - 24 hours` so it is claimable by the authoring worker during the next daily authoring run;
-3. Its `material_week` and `idempotency_key` are updated to match the re-anchored date;
-4. The deterministic Finisher ensures that subsequent weekly jobs are scheduled strictly in the future (`greatest(effective_release_at + interval '7 days', tomorrow)`);
-5. Missed calendar weeks are NEVER backfilled or generated retroactively.
+When a paid subscription is first activated or resumed after an entitlement gap (**entitlement transitions** such as `beta` → `active/trialing`, `paused`/`past_due`/`canceled` → `active`, or `none` → `active`):
+1. The unmaterialized candidate job is re-anchored to the activation date (delivery on the next calendar day 00:00 in the child's configured timezone);
+2. **Active Claim and Active Submission Protection**: Re-anchoring strictly excludes jobs with an active worker lease (`status = 'claimed'` with `lease_expires_at >= now()`) or ANY in-flight submission (`curriculum_submissions` with `status in ('pending', 'processing')`) across any job status. Active claims and active submissions are never touched or reset mid-flight;
+3. Its `generation_due_at` is set to `release_at - 24 hours` so it is claimable by the authoring worker during the next authoring run;
+4. Its `material_week` and `idempotency_key` are updated to match the re-anchored date, and `attempt_count` is reset to 0;
+5. If no pending job exists and the child already has past materials, resumption links `source_material_id` strictly according to the canonical sequence authority (`child_weekly_learning_snapshots.sequence_number` desc);
+6. The deterministic Finisher ensures that subsequent weekly jobs are scheduled strictly in the future (`greatest(effective_release_at + interval '7 days', tomorrow)`);
+7. Missed calendar weeks are NEVER backfilled or generated retroactively;
+8. **Continuous Active Service**: Subscribers already holding continuous active entitlement (e.g. `active` → `active` or `trialing` → `active`) maintain rolling weekly cadence without re-anchoring. Routine billing events must never wash away overdue generation deadlines or reset attempt counts; continuous-active overdue jobs remain mandatory and must continue to be pursued.
 
 
 ---
