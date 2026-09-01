@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
-import { defaultRepoRoot, runLocalCodexAuthoringBatch, stableCodexExecutable, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
+import { buildPrivatePlanningCapsule, defaultRepoRoot, runLocalCodexAuthoringBatch, stableCodexExecutable, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -74,6 +74,19 @@ describe('public research privacy boundary', () => {
     retryContext: { feedback: 'Needs more writing space' },
     inputFingerprint: 'abcdef0123456789',
   }
+
+  it('bounds private planning input to topic fields without identifiers or feedback', () => {
+    const capsule = buildPrivatePlanningCapsule(context)
+    expect(capsule).toEqual({
+      purpose: 'generalized English-learning public research',
+      topics: ['ocean animals'],
+      repairMode: true,
+    })
+    const serialized = JSON.stringify(capsule)
+    expect(serialized).not.toContain('Private Learner')
+    expect(serialized).not.toContain('01234567-89ab')
+    expect(serialized).not.toContain('Needs more writing space')
+  })
 
   it('allows only generalized, digit-free public topics', () => {
     expect(validatePublicResearchBrief({

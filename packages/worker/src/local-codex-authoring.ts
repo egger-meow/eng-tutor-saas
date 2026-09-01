@@ -138,14 +138,40 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   return pkg
 }
 
-function planningPrompt(contextPath: string): string {
+function planningPrompt(planningContextPath: string): string {
   return [
     'You are a privacy boundary inside a local curriculum runner. Web access is disabled.',
-    `Read the private claimed context at ${contextPath}.`,
+    `Read the bounded private topic capsule at ${planningContextPath}.`,
     'Produce a generalized public-research brief containing only impersonal English-learning topics and factual concepts useful for the material.',
     'Never include or paraphrase names, UUIDs, email addresses, school, age, grade/level, textbook state, feedback, mistakes, learning history, profile prose, private notes, or quotations from the context.',
     'Use no digits. Return only JSON shaped exactly as {"queries":["..."],"topicSummary":"..."}, with 1-4 short queries.',
   ].join('\n')
+}
+
+function collectTopicStrings(value: unknown, output: string[], key = ''): void {
+  if (output.length >= 20) return
+  if (typeof value === 'string' && /(interest|topic|theme|genre|subject|hobby)/iu.test(key)) {
+    const normalized = value.trim().replace(/\s+/gu, ' ')
+    if (normalized.length >= 3) output.push(normalized.slice(0, 120))
+    return
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectTopicStrings(item, output, key)
+    return
+  }
+  if (value && typeof value === 'object') {
+    for (const [nestedKey, item] of Object.entries(value)) collectTopicStrings(item, output, nestedKey)
+  }
+}
+
+export function buildPrivatePlanningCapsule(context: Record<string, unknown>): Record<string, unknown> {
+  const topics: string[] = []
+  collectTopicStrings(context, topics)
+  return {
+    purpose: 'generalized English-learning public research',
+    topics: [...new Set(topics)].slice(0, 20),
+    repairMode: context.retryContext !== undefined,
+  }
 }
 
 function collectPrivateStrings(value: unknown, output: Set<string>, key = ''): void {
@@ -227,6 +253,8 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   await mkdir(jobDir, { recursive: true })
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
+  const planningContextPath = resolve(jobDir, 'planning-context.json')
+  await writeFile(planningContextPath, JSON.stringify(buildPrivatePlanningCapsule(context)), { encoding: 'utf8', mode: 0o600 })
   const briefPath = resolve(jobDir, 'research-brief.json')
   await run(codexExecutable, [
     'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
@@ -234,7 +262,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
     '--config', PRIVATE_CODEX_CONFIG,
     '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
     '--output-last-message', briefPath,
-    planningPrompt(contextPath),
+    planningPrompt(planningContextPath),
   ], { cwd: repoRoot })
   const brief = validatePublicResearchBrief(parseCodexJson(await readFile(briefPath, 'utf8')), context)
   const publicDir = resolve(repoRoot, '.runtime/public-research', jobId)
