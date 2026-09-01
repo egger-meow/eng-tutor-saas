@@ -30,6 +30,17 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
 
 export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
 
+function requireWritingSpace(question: { itemType: string; options?: string[]; writingLines: number; responseLayout?: ResponseLayout }, ctx: z.RefinementCtx): void {
+  const writtenResponse = !question.options && ['translation', 'sentence-production', 'short-response'].includes(question.itemType)
+  const hasWritingSpace = question.writingLines >= 1
+    || (question.responseLayout?.type === 'lines' && (question.responseLayout.lineCount ?? 0) >= 1)
+    || question.responseLayout?.type === 'table'
+    || question.responseLayout?.type === 'organizer'
+  if (writtenResponse && !hasWritingSpace) {
+    ctx.addIssue({ code: 'custom', path: ['writingLines'], message: 'Written responses require writing space' })
+  }
+}
+
 export const QuestionLegacySchema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
@@ -38,7 +49,7 @@ export const QuestionLegacySchema = z.strictObject({
   options: z.array(Text).length(4).optional(),
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
-})
+}).superRefine(requireWritingSpace)
 
 export type QuestionLegacy = z.infer<typeof QuestionLegacySchema>
 
@@ -51,7 +62,7 @@ export const QuestionV24Schema = z.strictObject({
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
   responseLayout: ResponseLayoutSchema.optional(),
-})
+}).superRefine(requireWritingSpace)
 
 export type QuestionV24 = z.infer<typeof QuestionV24Schema>
 export const QuestionSchema = QuestionV24Schema

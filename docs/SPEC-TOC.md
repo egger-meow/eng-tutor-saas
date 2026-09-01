@@ -38,7 +38,7 @@
 | 46–67 | Learning memory, `eng-tutor` upstream, curriculum, vocabulary, grammar |
 | 68–87 | Weekly package, Student PDF, Parent Answer PDF, homework, PDF design |
 | 88–113 | Learning method, vocabulary notebook, AI literacy, parent guide, feedback |
-| 114–132 | Generation jobs, Scheduled ChatGPT worker, retries, versioning, history |
+| 114–132 | Generation jobs, local Codex authoring worker, retries, versioning, history |
 | 133–153 | Paddle billing, entitlement, Supabase schema, storage, privacy, RLS |
 | 154–167 | Frontend, Cloudflare Workers Static Assets, routes, dashboard, marketing messages |
 | 168–184 | Analytics, validation, operations, testing, non-goals |

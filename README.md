@@ -41,7 +41,7 @@ The deploy environment requires GitHub repository variables `VITE_SUPABASE_URL`,
 
 `pnpm test:e2e` is local-only and refuses non-local Supabase URLs. It creates a synthetic parent, child, and Week 1 job; renders and uploads both PDFs; verifies an authenticated signed download; submits feedback; confirms that Week 2 receives it; then removes all synthetic records and artifacts.
 
-Read `docs/SPEC.md` before changing product behavior. The ChatGPT Work schedule's operational contract is in `docs/generation-workflow.md`.
+Read `docs/SPEC.md` before changing product behavior. The local Codex production authoring contract is in `docs/local-codex-production-authoring.md`.
 
 ## Generate the synthetic PDF pair
 

@@ -5,6 +5,7 @@ import { buildCurriculumPromptBundle } from './prompt-v2.js'
 import { processCurriculumSubmissions } from './submission-processor.js'
 import { dispatchMaterialEmails } from './material-email.js'
 import { createSmtpEmailProvider } from './transactional-email.js'
+import { runLocalCodexAuthoringBatch } from './local-codex-authoring.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -16,6 +17,13 @@ function option(name: string, required = true): string | undefined {
 async function main(): Promise<void> {
   const command = process.argv[2]
   const client = createWorkerClient()
+
+  if (command === 'author-local-codex') {
+    const result = await runLocalCodexAuthoringBatch(client)
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+    if (result.failed > 0) process.exitCode = 1
+    return
+  }
 
   if (command === 'dispatch-material-emails') {
     const workerId = option('worker') ?? ''
@@ -104,7 +112,7 @@ async function main(): Promise<void> {
     return
   }
 
-  throw new Error('Usage: worker <claim|context|prompt-v2|fail|complete|complete-v2|process-submissions|dispatch-material-emails> [options]')
+  throw new Error('Usage: worker <author-local-codex|claim|context|prompt-v2|fail|complete|complete-v2|process-submissions|dispatch-material-emails> [options]')
 }
 
 main().catch((error: unknown) => {

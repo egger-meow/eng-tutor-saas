@@ -9,7 +9,7 @@ sourceHashes:
   "packages/generator/prompts/2.11.0/02-author.md": "44bcff6f7933343670d901a59b749a01e0c31bb79dfbda63d71ca7478105413b"
   "packages/generator/prompts/2.11.0/03-critic.md": "9326e2708447474b14644ad6c664bd773fe0896bc8286fc6580da981360f9c99"
   "packages/generator/prompts/2.11.0/04-repair.md": "d2178ee0c0e1b202211533f0724b686576bba1124e3d2961977870571e109286"
-  "packages/generator/src/curriculum-package-schema.ts": "f55d16962a96b426788f1d3ef3c358fbaac2f273d525e2015be2d715291ab8d7"
+  "packages/generator/src/curriculum-package-schema.ts": "3b86d1d2966c8f914ab2700ee6fbe9927c78fca848383bde7fb2123a2fe654cf"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "28b2550f54ce02f9b60b6a4a49a149f39cf0b0285238608a28b40a20aefdcb74"
@@ -313,6 +313,17 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
 
 export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
 
+function requireWritingSpace(question: { itemType: string; options?: string[]; writingLines: number; responseLayout?: ResponseLayout }, ctx: z.RefinementCtx): void {
+  const writtenResponse = !question.options && ['translation', 'sentence-production', 'short-response'].includes(question.itemType)
+  const hasWritingSpace = question.writingLines >= 1
+    || (question.responseLayout?.type === 'lines' && (question.responseLayout.lineCount ?? 0) >= 1)
+    || question.responseLayout?.type === 'table'
+    || question.responseLayout?.type === 'organizer'
+  if (writtenResponse && !hasWritingSpace) {
+    ctx.addIssue({ code: 'custom', path: ['writingLines'], message: 'Written responses require writing space' })
+  }
+}
+
 export const QuestionLegacySchema = z.strictObject({
   id: StableId,
   targetIds: z.array(StableId).min(1).max(4),
@@ -321,7 +332,7 @@ export const QuestionLegacySchema = z.strictObject({
   options: z.array(Text).length(4).optional(),
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
-})
+}).superRefine(requireWritingSpace)
 
 export type QuestionLegacy = z.infer<typeof QuestionLegacySchema>
 
@@ -334,7 +345,7 @@ export const QuestionV24Schema = z.strictObject({
   writingLines: z.number().int().min(0).max(10),
   difficulty: z.enum(['supported', 'on-level', 'stretch']),
   responseLayout: ResponseLayoutSchema.optional(),
-})
+}).superRefine(requireWritingSpace)
 
 export type QuestionV24 = z.infer<typeof QuestionV24Schema>
 export const QuestionSchema = QuestionV24Schema

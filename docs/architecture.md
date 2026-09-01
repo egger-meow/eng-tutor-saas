@@ -8,7 +8,7 @@
 - Supabase Storage: private student and parent-answer PDFs.
 - `packages/generator`: shared contracts and deterministic curriculum assembly rules.
 - `packages/pdf`: PDF artifact and renderer boundaries.
-- ChatGPT Work: future privileged daily worker. It is external to the deployed SPA.
+- Local Windows Codex runner: privileged daily curriculum author. It is external to the deployed SPA and hands immutable submissions to the GitHub Actions Finisher.
 
 ## Trust Model
 

@@ -58,35 +58,25 @@ describe('bundle-compiler', () => {
     expect(freshBundle.content).toContain('"noveltyRationale"')
   })
 
-  it('keeps public web research in the scheduled production input contract', async () => {
-    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
-
-    expect(schedule).toContain('exactly three authorized production inputs')
-    expect(schedule).toContain('3. public web research, used only for privacy-safe, non-private curriculum-topic grounding')
-    expect(schedule).not.toContain('exactly two authorized production inputs')
+  it('keeps privacy-safe public research in the local production contract', async () => {
+    const schedule = await readFile(resolve(REPO_ROOT, 'docs/local-codex-production-authoring.md'), 'utf8')
+    expect(schedule).toContain('Private contexts and candidate packages')
+    expect(schedule).not.toContain('Supabase ChatGPT connector is required')
   })
 
   it('uses one authoritative claim as the first production mutation without catalog preflight', async () => {
-    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
-    const claim = "select private_generation.chatgpt_claim_generation_batch('chatgpt-work-daily') as result;"
-    const privateCalls = [...schedule.matchAll(/select private_generation\.chatgpt_[\s\S]*?;/gu)].map((match) => match[0])
-
-    expect(privateCalls[0]).toBe(claim)
-    expect(schedule.match(/chatgpt_claim_generation_batch\('chatgpt-work-daily'\)/gu)).toHaveLength(1)
-    expect(schedule).not.toMatch(/select[\s\S]{0,200}to_regprocedure/gu)
-    expect(schedule).toContain('PIPELINE_BRIDGE_MISSING or PRECHECK_BLOCKED')
-    expect(schedule).toContain('including its `bridgeVersion`')
+    const runner = await readFile(resolve(REPO_ROOT, 'packages/worker/src/local-codex-authoring.ts'), 'utf8')
+    expect(runner.match(/worker_claim_local_authoring_batch/gu)).toHaveLength(1)
+    expect(runner).not.toContain('chatgpt_recover_claimed_generation_batch')
+    expect(runner).not.toContain('OPENAI_API_KEY')
   })
 
   it('submits serialized text through v2 and keeps ambiguous recovery fail-closed', async () => {
-    const schedule = await readFile(resolve(REPO_ROOT, 'docs/chatgpt-work-daily-schedule.md'), 'utf8')
-
-    expect(schedule).toContain('chatgpt_submit_curriculum_package_v2')
-    expect(schedule).not.toContain('$curriculum$::jsonb')
-    expect(schedule).toContain('INVALID_JSON_PAYLOAD')
-    expect(schedule).toContain('correct serialization only')
-    expect(schedule).toContain('chatgpt_curriculum_submission_status')
-    expect(schedule).toContain('chatgpt_release_unsubmitted_claim')
+    const runner = await readFile(resolve(REPO_ROOT, 'packages/worker/src/local-codex-authoring.ts'), 'utf8')
+    expect(runner).toContain('worker_submit_local_curriculum_package')
+    expect(runner).toContain('worker_local_curriculum_submission_status')
+    expect(runner).toContain('worker_release_local_unsubmitted_claim')
+    expect(runner).toContain('releaseConfirmedUnsubmitted')
   })
 
   it('verifies that prompts/2.0.1 baseline remains byte-for-byte frozen', async () => {

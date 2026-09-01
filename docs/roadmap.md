@@ -21,7 +21,7 @@ Current implementation now proves that loop locally, including private parent do
 
 - Provision staging and production Supabase projects.
 - Complete a manual end-to-end generation run.
-- Create the ChatGPT Work project with GitHub and Supabase access.
+- Keep the local Windows Codex production authoring task operational with ChatGPT-authenticated CLI access and the narrow Supabase service-role bridge.
 - Add the daily schedule from `docs/generation-workflow.md` with default limit `15`.
 - Monitor backlog, failures, cost, quality, and turnaround before raising the 100-child beta cap.
 

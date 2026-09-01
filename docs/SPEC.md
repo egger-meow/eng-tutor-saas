@@ -664,7 +664,7 @@ Not merely screenshots or demo copy.
 
 ## Week 1 Delivery Timing
 
-Week 1 is not generated immediately upon onboarding completion. The sole curriculum author (ChatGPT Scheduled Work) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
+Week 1 is not generated immediately upon onboarding completion. The sole curriculum author (the repository-owned local Windows Codex CLI runner) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
 
 Therefore:
 
@@ -678,7 +678,7 @@ Therefore:
 * when no generation job exists yet (prior to completing onboarding/child setup), the fallback truthfully states `完成孩子資料後，我們會開始準備第一份教材。`;
 * `generation_jobs.release_at` remains the canonical parent-facing delivery timestamp.
 
-The initial job's `scheduled_for` is set to the registration moment so it is immediately eligible for the next 00:15 Scheduled authoring run.
+The initial job's `scheduled_for` is set to the registration moment so it is immediately eligible for the next 00:15 local authoring run.
 
 ---
 
@@ -2502,9 +2502,9 @@ For the first packet only, successful Finisher completion may advance the actual
 
 Initial intended orchestrator:
 
-> **Scheduled ChatGPT / ChatGPT Work scheduled task**
+> **Repository-owned local Windows Codex CLI runner**
 
-The task may run daily.
+Windows Task Scheduler may invoke the runner daily. Codex CLI authenticates with an existing ChatGPT login and uses GPT-5.6 Sol with low reasoning; production authoring must not require an OpenAI API key, Responses API integration, ChatGPT app/plugin permission, or Supabase ChatGPT connector.
 
 Its job is to:
 
@@ -2513,11 +2513,11 @@ Its job is to:
 3. read production generation rules;
 4. load permitted child state from Supabase;
 5. generate canonical material source;
-6. produce or invoke deterministic PDF rendering;
-7. store outputs privately;
-8. write material metadata;
-9. update job status;
-10. record actionable failures.
+6. validate and repair the canonical source locally;
+7. submit it through the immutable curriculum submission bridge;
+8. leave deterministic PDF rendering and private Storage writes to the GitHub Actions Finisher;
+9. recover uncertain submissions by read-after-write status;
+10. release only confirmed-unsubmitted claims and record actionable failures.
 
 ---
 
@@ -2595,7 +2595,7 @@ This avoids two competing generation systems.
 
 # 121. Future Worker Migration
 
-Scheduled ChatGPT is not a permanent architectural dependency.
+The local scheduler and Codex CLI are replaceable orchestration details; the queue, claim, immutable submission, and deterministic Finisher boundaries remain authoritative.
 
 After validation, the worker may intentionally migrate to:
 
@@ -4191,7 +4191,7 @@ For weekly-material work specifically:
 17. Bind every factual claim to exact canonical lesson prose. For current material, require valid publication dates, distinguish event and publication timing, and independently verify topic-aware freshness; reject stale evidence, unsupported recency, rumor, prediction, speculation, and social-media hearsay.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
 19. Treat profile `weekly_minutes` as `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`.
-20. Scheduled Work plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
+20. Local Codex authoring plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
 21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
 22. Prefer a strong, reliable, age-appropriate, lexically feasible current angle only when it serves the learning target equally well or better. Do not force current; preserve an explainable evergreen fallback when recent candidates are weak, unsafe, too complex, factually thin, copyright-dependent, or pedagogically inferior.
 23. Current selection never relaxes source quality, factual density, original synthesis, semantic lexical appropriateness, grammar, CAP relevance, answer entailment, workload, copyright, or personalization review.
@@ -4223,8 +4223,8 @@ For weekly-material work specifically:
        ┌───────────┴───────────┐
        │                       │
        ▼                       ▼
-Cloudflare Worker              Worker
-Static Assets frontend    Scheduled ChatGPT MVP
+Cloudflare Worker         Local Windows runner
+Static Assets frontend       Codex CLI author
        │                       │
        └───────────┬───────────┘
                    ▼
