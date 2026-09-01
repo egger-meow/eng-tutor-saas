@@ -1,0 +1,4 @@
+-- Historical production cleanup marker.
+-- The incident-only public service bridge and one-shot emergency helper were
+-- removed after pg_cron successfully staged the production batch. Clean
+-- environments never create those temporary objects, so no DDL is required.

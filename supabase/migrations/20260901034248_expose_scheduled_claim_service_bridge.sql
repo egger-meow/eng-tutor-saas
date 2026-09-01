@@ -1,0 +1,5 @@
+-- Historical production migration marker.
+-- A temporary service-role claim bridge was created during the 2026-09-01
+-- connector safety incident and removed immediately after server-side pg_cron
+-- claim staging became authoritative. Clean environments intentionally keep
+-- this migration as a no-op so the temporary public bridge is never exposed.
