@@ -366,10 +366,12 @@ Show pricing / capacity
 ↓
 CTA
 ↓
-Signup / Login
+Start child profile onboarding
+↓
+Email authentication / account binding
 ```
 
-The product experience begins before authentication.
+The product experience begins before authentication. For a first-time free-Week-1 visitor, the child-learning questionnaire begins on the public landing surface before Email authentication. Existing parents retain a direct-login path.
 
 ---
 
@@ -422,7 +424,7 @@ Current capacity
 ↓
 FAQ
 ↓
-Signup / Login CTA
+Onboarding / Login CTA
 ```
 
 The exact visual layout may change.
@@ -562,7 +564,7 @@ Billing is per child.
 
 Standard pricing:
 
-> **NT$499 / month / child** or **NT$4,999 / year / child**
+> **NT$499 / month / child** or **NT$4,999 / child / year**
 
 Example:
 
@@ -632,18 +634,24 @@ Referral codes and rewards are out of scope.
 ---
 # 24. Free Week 1
 
-For the founding cohort, the ideal entry flow is:
+For the founding cohort, the ideal first-time entry flow is:
 
 ```text
 Landing
 ↓
 Free Week 1 CTA
 ↓
-Parent login
+Complete child learning profile on the public landing surface
 ↓
-Create child
+Enter parent Email
 ↓
-Complete profile
+Magic Link authentication
+↓
+Atomically bind the completed onboarding to the authenticated parent
+↓
+Create the real child + profile exactly once
+↓
+Child management / Dashboard
 ↓
 Week 1 generation (next-day delivery expectation)
 ↓
@@ -655,6 +663,12 @@ Provide feedback
 ↓
 Decide whether to subscribe
 ```
+
+The parent must never be asked to repeat the child questionnaire after authentication. From the parent's perspective, the child setup is already complete before Email is requested; authentication merely verifies ownership and binds that completed setup to the account.
+
+Because a mobile visitor may fill the form inside an in-app browser and open the Magic Link in another browser, the handoff must not rely only on browser-local storage. Before authentication, the completed draft may be held briefly in a private server-side handoff. The URL carries only an opaque token, never child-profile fields or parent Email. Finalization requires the authenticated account Email to match the Email that created the handoff and must be idempotent.
+
+Existing parents may bypass the first-time questionnaire and use the direct Email login path.
 
 The goal is to allow a parent to evaluate:
 
@@ -854,6 +868,10 @@ MVP login methods:
 * or Email Magic Link.
 
 Traditional passwords are not required for MVP.
+
+For first-time Free Week 1 onboarding, authentication occurs after the parent finishes the public child questionnaire. Before authentication, no canonical `children.parent_id` ownership row exists. The completed draft is held only in a short-lived private handoff and becomes a real child/profile after the matching Email account authenticates. Finalization must reject mismatched authenticated Email identities and must return the same child on a safe retry rather than create duplicates.
+
+Existing parents continue to have a direct Email-login path that does not require filling another child questionnaire.
 
 ---
 
@@ -1079,27 +1097,35 @@ Examples:
 
 # 44. Parent Onboarding
 
-Recommended initial flow:
+Recommended first-time flow:
 
 ```text
 Landing
 ↓
-Email authentication
+Free Week 1 CTA
 ↓
-Create child
+Child core profile
 ↓
-Child profile
+Learning context / interests
 ↓
-Learning context
+Weekly learning rhythm
 ↓
-Founding eligibility / pricing
+Parent Email
+↓
+Magic Link authentication
+↓
+Bind completed draft to authenticated parent
 ↓
 First generation
 ↓
-Dashboard
+Child management / Dashboard
 ```
 
 The initial form should ideally take only a few minutes.
+
+The first-time landing flow should reuse the same profile fields, validation, and child/profile semantics as authenticated child creation. Do not maintain two incompatible onboarding models. The public flow may persist same-browser progress locally for convenience, but cross-browser completion must use the private server-side handoff described in Section 24.
+
+No production `children` row may be owned by an unauthenticated visitor. Authentication is the ownership boundary, not the point at which the parent has to start the questionnaire over.
 
 ---
 
@@ -1447,7 +1473,8 @@ It owns:
 * compact weekly history;
 * operational settings;
 * waitlist;
-* private file storage.
+* private file storage;
+* short-lived private pre-auth onboarding handoffs.
 
 ---
 
@@ -3029,6 +3056,8 @@ subscriptions
 
 enrollment_settings
 waitlist
+
+private short-lived onboarding handoffs
 ```
 
 The final physical schema may normalize or combine some entities if ownership and semantics remain clear.
@@ -3106,6 +3135,8 @@ Data minimization is mandatory.
 
 Do not require information merely because it might be interesting.
 
+A first-time visitor's pre-auth onboarding draft is customer data and must be treated as private even before an account exists. It must live outside browser-readable public tables, direct `anon` / `authenticated` table access must be revoked, and access must occur only through narrow reviewed handoff functions. The handoff URL must contain only a high-entropy opaque token; the database stores only its cryptographic hash. The pending draft expires quickly. After successful binding, the pre-auth Email and draft payload are scrubbed immediately while the minimum opaque binding record required for idempotent retry may remain.
+
 ---
 
 # 147. Child Personal Information
@@ -3159,6 +3190,8 @@ owned student
 ↓
 owned child resources
 ```
+
+The private pre-auth onboarding handoff is not an owned child resource yet and must not be made browsable through RLS. It stays in a private schema with direct client table privileges revoked; narrow security-definer functions enforce creation, expiry, matching authenticated Email, one-time binding, and idempotent retry.
 
 ---
 
@@ -3294,7 +3327,7 @@ Recommended MVP routes:
 /
 ```
 
-Landing / marketing / login entry.
+Landing / marketing / onboarding / login entry.
 
 ```text
 /dashboard
@@ -3306,7 +3339,7 @@ Parent dashboard.
 /children/new
 ```
 
-Create child.
+Create another child after authentication.
 
 ```text
 /children/:id
@@ -3521,19 +3554,27 @@ Example:
 
 # 168. Analytics and Early Funnel
 
-MVP should measure at least:
+The first-time Free Week 1 funnel is defined in this order:
 
 ```text
 landing view
-→ signup
+→ sample click
+→ free trial CTA click
+→ child form start
+→ email submit
+→ auth complete
 → child created
-→ profile completed
+→ onboarding complete
 → Week 1 generated
 → Student PDF downloaded
 → feedback submitted
 → paid conversion
 → month 2 retention
 ```
+
+`child_form_start` occurs when the visitor actually begins interacting with the child questionnaire, not merely because the landing component exists on the page. `child_created` and `onboarding_complete` occur only after authenticated handoff finalization succeeds. Analytics must preserve anonymous attribution across the Magic Link so the pre-auth and post-auth steps can be connected without putting child data in analytics metadata.
+
+Existing-parent direct login remains a separate valid path and must not be misrepresented as first-time onboarding.
 
 ---
 
@@ -3597,6 +3638,8 @@ Supabase Dashboard plus targeted internal tooling is acceptable.
 The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is exhaustive for active jobs and is derived from the current job and latest matching authoring attempt only. Claimed jobs remain visible before submission, and `technical_failed` Finisher work remains retryable in `AWAITING FINISHER`. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand, where total demand is service children plus waiting children plus released-not-converted children. The current engine manifest is declared by production repository code as the canonical runtime specification (`CURRENT_ENGINE_MANIFEST`). Expected versions are synchronized with the active engine manifest so that historical artifacts do not generate artificial drift errors. Material release truth comes from `generation_jobs.release_at`.
 
 Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
+
+The conversion-funnel UI must render the first-time funnel in the product order defined by Section 168. During a rollout window that contains events from both the former auth-first flow and the new child-first flow, the UI must not present an impossible greater-than-100% step conversion as if it were a clean cohort measurement; mixed-definition history should be identified or treated as non-comparable for that transition.
 
 Engine Inspector displays the active engine specification as green 規格已全面生效. The active runtime specification is declared by `CURRENT_ENGINE_MANIFEST` (Release ID, Engine, Schema, Prompt, Quality Profile, Worker, and PDF Renderer).
 
@@ -3730,7 +3773,11 @@ At minimum test:
 * private file access;
 * feedback ownership;
 * profile edit behavior;
-* historical packet immutability.
+* historical packet immutability;
+* landing-first onboarding starts with child data rather than an Email gate;
+* pre-auth onboarding data is not directly readable through public client roles;
+* onboarding handoff token expiry, token hashing, authenticated-Email binding, cross-browser completion, and idempotent retry;
+* onboarding finalization creates exactly one owned child/profile and reuses the existing child insert/capacity/Week 1 pipeline;
 * release-time email eligibility, retry bounds, atomic concurrent claims, and provider idempotency;
 * invalid, expired, revoked, cross-child, cross-week, and unreleased scoped material access;
 * equivalent scoped authorization for both private PDF artifacts without weakening normal Dashboard RLS.
@@ -3790,6 +3837,9 @@ Test explicitly that:
 * siblings do not share learning progress;
 * unsigned public PDF URLs do not work;
 * service-role credentials never appear in frontend bundles;
+* `anon` and normal authenticated browser roles cannot select the private pending-onboarding table directly;
+* a pending onboarding cannot be finalized by a different authenticated Email account;
+* successful finalization scrubs the pre-auth Email and child-draft payload while preserving only the minimum opaque idempotency record;
 * public research-query construction receives generalized topic terms only and cannot receive child/parent identity, child/job IDs, school, grade/level, textbook state, feedback, mistakes, history, profile prose, or private notes.
 
 ---
@@ -3961,14 +4011,18 @@ Success:
 
 # 192. Definition of Done: Account
 
-A parent can:
+A first-time parent can:
 
 1. open the website;
-2. authenticate;
-3. create Child A;
-4. create Child B;
-5. edit both;
-6. never see cross-child state contamination.
+2. start and complete the first child's learning questionnaire before authentication;
+3. enter the parent Email only after the child questionnaire is complete;
+4. authenticate through the Magic Link and have that exact completed draft bound once to the authenticated account without retyping it;
+5. land directly in the created child's management area;
+6. create Child B through the authenticated child-creation path;
+7. edit both children;
+8. never see cross-child or cross-family state contamination.
+
+An existing parent can still authenticate directly without filling a new child questionnaire.
 
 ---
 
@@ -4077,7 +4131,8 @@ The beta is not ready until:
 * private PDFs are actually private;
 * one family cannot read another family's state;
 * service-role keys are server-only;
-* real child data is absent from Git.
+* real child data is absent from Git;
+* pre-auth onboarding drafts are private, short-lived, token-hash protected, Email-bound at finalization, and scrubbed after successful binding.
 
 ---
 
