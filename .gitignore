@@ -17,5 +17,7 @@ output/
 tmp/pdfs/
 .playwright-mcp/
 .runtime/
+.runtime/private-generation/
+.runtime/logs/
 
 !apps/web/public/samples/*.pdf
