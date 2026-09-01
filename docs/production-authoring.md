@@ -167,4 +167,5 @@ Paper English supports switching between local authoring and server-side online 
 | **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` |
 | **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` |
 | **Local Batch Runner** | `docs/local-codex-production-authoring.md` | `pnpm worker generate-claimed` | `worker_submit_local_curriculum_package` |
-| **ChatGPT Online / Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `/batch` (`docs/authoring-bridge-openapi.yaml`) | Authoring Bridge `/submit` (OpenAPI Action) |
+| **ChatGPT Online Manual (Custom GPT)** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `/batch` (`docs/authoring-bridge-openapi.yaml`) | Authoring Bridge `/submit` (OpenAPI Action) |
+| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Server-staged snapshot (16:10 UTC cron) | Connected app bridge submission |

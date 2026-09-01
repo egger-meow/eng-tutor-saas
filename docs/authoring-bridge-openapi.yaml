@@ -2,33 +2,23 @@ openapi: 3.0.3
 info:
   title: Paper English Curriculum Authoring Bridge API
   description: >
-    Narrow, purpose-built HTTP API for curriculum authoring agents.
-    Exposes only 3 non-destructive, business-level operations with zero generic SQL
-    or database access, completely eliminating OpenAI connector safety gates.
-  version: 1.0.0
+    Narrow, purpose-built HTTP API for online curriculum authoring.
+    Exposes only 4 non-destructive, business-level operations with zero generic SQL
+    or database access, removing generic database query capability and minimizing
+    the externally exposed write surface.
+  version: 1.1.0
 servers:
-  - url: https://{projectRef}.supabase.co/functions/v1/authoring-bridge
-    description: Supabase Edge Functions Authoring Bridge
-    variables:
-      projectRef:
-        default: egger-meow-tutor
-        description: Supabase project reference
+  - url: https://ykzszjrqynrhgdhoeovo.supabase.co/functions/v1/authoring-bridge
+    description: Production Supabase Edge Functions Authoring Bridge
 paths:
   /batch:
     get:
       summary: Recover Active Staged Batch
       description: >
         Recovers the server-staged batch of due curriculum generation jobs
-        claimed for the specified worker ID without mutating database state.
+        claimed for chatgpt-work-daily without mutating database state.
+        Worker identity is pinned server-side.
       operationId: recoverActiveBatch
-      parameters:
-        - name: worker_id
-          in: query
-          required: true
-          description: Unique identifier of the authoring worker (e.g. chatgpt-work-daily)
-          schema:
-            type: string
-            example: chatgpt-work-daily
       responses:
         '200':
           description: Active batch claimed jobs snapshot
@@ -37,6 +27,10 @@ paths:
               schema:
                 type: object
                 properties:
+                  bridgeVersion:
+                    type: string
+                  source:
+                    type: string
                   claimed:
                     type: array
                     items:
@@ -62,12 +56,18 @@ paths:
                           type: object
                   claimedCount:
                     type: integer
-                  hasActiveClaim:
+                  normalCapacity:
+                    type: integer
+                  mandatoryCapacityOverride:
                     type: boolean
+                  oldestOutstandingDeadline:
+                    type: string
         '401':
           description: Missing or invalid authorization token
         '500':
           description: Server error
+        '503':
+          description: Bridge secret not configured
 
   /submit:
     post:
@@ -75,6 +75,7 @@ paths:
       description: >
         Submits an authored and locally validated canonical curriculum package
         into private_generation.curriculum_submissions for deterministic Finisher rendering.
+        Worker identity is pinned server-side to chatgpt-work-daily.
       operationId: submitCurriculumPackage
       requestBody:
         required: true
@@ -84,16 +85,12 @@ paths:
               type: object
               required:
                 - jobId
-                - workerId
                 - package
               properties:
                 jobId:
                   type: string
                   format: uuid
                   description: Target generation job UUID
-                workerId:
-                  type: string
-                  description: Identifier of claiming worker
                 package:
                   type: object
                   description: Canonical CurriculumPackage matching Schema 2.4.0
@@ -120,6 +117,8 @@ paths:
           description: Invalid request or schema validation failure
         '401':
           description: Unauthorized
+        '500':
+          description: Server error
 
   /status:
     get:
@@ -127,6 +126,7 @@ paths:
       description: >
         Read-after-write verification to check whether a package submission
         is persisted, pending Finisher processing, or already completed.
+        Worker identity is pinned server-side to chatgpt-work-daily.
       operationId: getSubmissionStatus
       parameters:
         - name: job_id
@@ -135,11 +135,6 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: worker_id
-          in: query
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: Authoritative status of curriculum submission
@@ -155,11 +150,66 @@ paths:
                     enum: [pending, completed, failed, not_found]
                   authoringAttempt:
                     type: integer
+        '400':
+          description: Missing job_id parameter
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+
+  /release:
+    post:
+      summary: Release Unsubmitted Claim
+      description: >
+        Narrow release operation that verifies no immutable curriculum submission exists
+        for the current authoring attempt before releasing the claim back to pending.
+        Worker identity is pinned server-side to chatgpt-work-daily.
+      operationId: releaseUnsubmittedClaim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - jobId
+              properties:
+                jobId:
+                  type: string
+                  format: uuid
+                  description: Target generation job UUID
+                errorCode:
+                  type: string
+                  description: Short error category code
+                  example: SUBMIT_TRANSPORT_FAILED
+                errorMessage:
+                  type: string
+                  description: Actionable failure reason
+      responses:
+        '200':
+          description: Claim successfully released back to pending
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: pending
+        '400':
+          description: Missing required fields or submission exists
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
-      description: Dedicated authoring bridge secret token
+      description: Dedicated authoring bridge secret token (AUTHORING_BRIDGE_SECRET)
 security:
   - BearerAuth: []
