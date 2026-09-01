@@ -28,7 +28,15 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
   const { latestMaterial, pastMaterials, futureMaterials, historyCount } = buildMaterialHistoryView(materials, releasedMaterialCount)
   // The immediate next prepared material is the earliest unreleased one
   const nextPreparedMaterial = futureMaterials[futureMaterials.length - 1] ?? null
-  const delivery = getDeliveryViewModel(child, latestMaterial, nextPreparedMaterial, child.next_job_release_at, undefined, child.has_past_due_job)
+  const delivery = getDeliveryViewModel(
+    child,
+    latestMaterial,
+    nextPreparedMaterial,
+    child.next_job_release_at,
+    undefined,
+    child.has_past_due_job,
+    child.has_active_generation_failure,
+  )
 
   return (
     <motion.article
@@ -163,8 +171,8 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
               </section>
             ) : (
               <section className="empty-state">
-                <h2>{nextPreparedMaterial ? '第一份教材已準備完成' : '第一份教材準備中'}</h2>
-                <p>{nextPreparedMaterial ? '內容已先完成準備，到了開放日期即可下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
+                <h2>{nextPreparedMaterial ? '第一份教材已準備完成' : child.has_active_generation_failure ? '第一份教材品質複檢中' : '第一份教材準備中'}</h2>
+                <p>{nextPreparedMaterial ? '內容已先完成準備，到了開放日期即可下載。' : child.has_active_generation_failure ? '第一份教材正在進行教學團隊人工品質審核與微調，確認符合孩子程度後即可下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
               </section>
             )}
             {!child.waitlist || child.waitlist.status === 'converted' ? (

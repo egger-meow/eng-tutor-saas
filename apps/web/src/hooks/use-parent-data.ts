@@ -12,6 +12,7 @@ export type ChildWithProfile = Child & {
   waitlist?: OwnedWaitlistEntry | null
   next_job_release_at?: string | null
   has_past_due_job?: boolean
+  has_active_generation_failure?: boolean
 }
 
 type ParentDataSnapshot = {
@@ -58,7 +59,15 @@ export function useParentData(parentUserId: string) {
       const profiles = await listChildProfiles(childRows.map((child) => child.id))
       const profileMap = new Map(profiles.map((profile) => [profile.child_id, profile]))
       const childIds = childRows.map((child) => child.id)
-      const page = childIds.length > 0 ? await listMaterials(childIds) : { materials: [], hasMoreByChild: {}, releasedCountByChild: {}, releasedLoadedByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
+      const page = childIds.length > 0 ? await listMaterials(childIds) : {
+        materials: [],
+        hasMoreByChild: {},
+        releasedCountByChild: {},
+        releasedLoadedByChild: {},
+        nextJobReleaseAtByChild: {},
+        hasPastDueUnmaterializedJobByChild: {},
+        hasActiveGenerationFailureByChild: {},
+      }
       const joined = childRows.map((child) => ({
         ...child,
         profile: profileMap.get(child.id) ?? null,
@@ -66,6 +75,7 @@ export function useParentData(parentUserId: string) {
         waitlist: waitlistMap.get(child.id) ?? null,
         next_job_release_at: page.nextJobReleaseAtByChild[child.id] ?? null,
         has_past_due_job: Boolean(page.hasPastDueUnmaterializedJobByChild[child.id]),
+        has_active_generation_failure: Boolean(page.hasActiveGenerationFailureByChild?.[child.id]),
       }))
       const nextSnapshot = {
         children: joined,

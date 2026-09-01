@@ -397,6 +397,55 @@ describe('Week 1 Delivery Timing — Retry and Pre-Onboarding States', () => {
     expect(view.detail).toBe('完成孩子資料後，我們會開始準備第一份教材。')
     expect(view.nextDeliveryAt).toBeNull()
   })
+
+  it('Case 17: active subscriber with unmaterialized failed job shows quality review state (post-Week 1)', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z', withFeedback: false })
+    const activeChildWithFailure = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-active',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-09-14T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'none' as const,
+      },
+      has_active_generation_failure: true,
+    }
+
+    const view = getDeliveryViewModel(activeChildWithFailure, currentWeek1, null, null, now)
+    expect(view.headline).toBe('教材正在進行品質複檢')
+    expect(view.detail).toBe('本週教材在自動生成品質檢查時未達嚴格標準，教學團隊已接手進行人工微調與確認，完成後將儘速開放下載。')
+    expect(view.nextDeliveryAt).toBeNull()
+  })
+
+  it('Case 18: active subscriber with unmaterialized failed job shows quality review state (Week 1 pre-material)', () => {
+    const now = new Date('2026-08-16T07:00:00Z')
+    const activeChildWithFailure = {
+      ...baseChild,
+      subscription: {
+        id: 'sub-active',
+        childId: 'child-1',
+        status: 'active' as const,
+        planCode: 'standard_monthly',
+        billingInterval: 'month' as const,
+        priceTwd: 499,
+        currentPeriodEnd: '2026-09-14T00:00:00Z',
+        cancelAtPeriodEnd: false,
+        foundingStatus: 'none' as const,
+      },
+      has_active_generation_failure: true,
+    }
+
+    const view = getDeliveryViewModel(activeChildWithFailure, null, null, null, now)
+    expect(view.headline).toBe('第一份教材品質複檢中')
+    expect(view.detail).toBe('第一份教材正在進行教學團隊人工品質審核與微調，確認符合孩子程度後即可下載。')
+    expect(view.nextDeliveryAt).toBeNull()
+  })
 })
 
 describe('Subscription Gating for Delivery Status', () => {

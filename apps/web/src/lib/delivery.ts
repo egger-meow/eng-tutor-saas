@@ -34,6 +34,7 @@ export function getDeliveryViewModel(
   nextJobReleaseAtOrNow?: string | null | Date,
   nowInput?: Date,
   hasPastDueJobInput?: boolean,
+  hasActiveGenerationFailureInput?: boolean,
 ): DeliveryViewModel {
   let nextPrepared: Material | null = null
   let nextJobReleaseAt: string | null = null
@@ -41,6 +42,9 @@ export function getDeliveryViewModel(
   let hasPastDueJob = typeof hasPastDueJobInput === 'boolean'
     ? hasPastDueJobInput
     : Boolean((child as { has_past_due_job?: boolean } | null)?.has_past_due_job)
+  let hasActiveGenerationFailure = typeof hasActiveGenerationFailureInput === 'boolean'
+    ? hasActiveGenerationFailureInput
+    : Boolean((child as { has_active_generation_failure?: boolean } | null)?.has_active_generation_failure)
 
   if (nextPreparedMaterial instanceof Date) {
     now = nextPreparedMaterial
@@ -232,7 +236,20 @@ export function getDeliveryViewModel(
   }
 
   // Precedence 3: If neither a prepared material release_at nor an owned future generation_jobs.release_at
-  // is available, distinguish whether a past-due unmaterialized job exists (under retry/preparation) vs no job at all.
+  // is available, distinguish whether an active generation failure exists vs a past-due unmaterialized job
+  // (under retry/preparation) vs normal fallback.
+  if (hasActiveGenerationFailure) {
+    return {
+      nextDeliveryAt: null,
+      feedbackCutoffAt: null,
+      feedbackState: currentMaterial?.feedback ? 'received' : 'waiting',
+      headline: currentMaterial ? '教材正在進行品質複檢' : '第一份教材品質複檢中',
+      detail: currentMaterial
+        ? '本週教材在自動生成品質檢查時未達嚴格標準，教學團隊已接手進行人工微調與確認，完成後將儘速開放下載。'
+        : '第一份教材正在進行教學團隊人工品質審核與微調，確認符合孩子程度後即可下載。',
+    }
+  }
+
   return {
     nextDeliveryAt: null,
     feedbackCutoffAt: null,

@@ -40,6 +40,7 @@ export type MaterialPage = {
   releasedLoadedByChild: Record<string, number>
   nextJobReleaseAtByChild: Record<string, string | null>
   hasPastDueUnmaterializedJobByChild: Record<string, boolean>
+  hasActiveGenerationFailureByChild: Record<string, boolean>
 }
 
 export type MaterialPageOptions = {
@@ -249,7 +250,15 @@ export async function listMaterials(childIds: string[], options: MaterialPageOpt
 }
 
 export async function listMaterialsWithClient(client: SupabaseClient, childIds: string[], options: MaterialPageOptions = {}, now = new Date()): Promise<MaterialPage> {
-  if (childIds.length === 0) return { materials: [], hasMoreByChild: {}, releasedCountByChild: {}, releasedLoadedByChild: {}, nextJobReleaseAtByChild: {}, hasPastDueUnmaterializedJobByChild: {} }
+  if (childIds.length === 0) return {
+    materials: [],
+    hasMoreByChild: {},
+    releasedCountByChild: {},
+    releasedLoadedByChild: {},
+    nextJobReleaseAtByChild: {},
+    hasPastDueUnmaterializedJobByChild: {},
+    hasActiveGenerationFailureByChild: {},
+  }
   const limit = options.limit ?? 5
   const offset = options.offset ?? 0
   const includeFuture = options.includeFuture ?? offset === 0
@@ -326,9 +335,11 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
 
   const nextJobReleaseAtByChild: Record<string, string | null> = {}
   const hasPastDueUnmaterializedJobByChild: Record<string, boolean> = {}
+  const hasActiveGenerationFailureByChild: Record<string, boolean> = {}
   const nowMs = now.getTime()
   for (const childId of childIds) {
     const childJobs = activeJobs.filter((j) => j.child_id === childId)
+    const rawChildJobs = (jobs ?? []).filter((j) => j.child_id === childId)
     nextJobReleaseAtByChild[childId] = findNextFutureJobReleaseAt(childJobs, now)
     hasPastDueUnmaterializedJobByChild[childId] = childJobs.some((j) => {
       if (j.material_id) return false
@@ -336,6 +347,9 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
       const jobTime = Date.parse(j.release_at)
       return Number.isNaN(jobTime) || jobTime <= nowMs
     })
+    const hasUnmaterializedFailed = rawChildJobs.some((j) => !j.material_id && j.status === 'failed')
+    const hasActiveJob = childJobs.some((j) => !j.material_id)
+    hasActiveGenerationFailureByChild[childId] = hasUnmaterializedFailed && !hasActiveJob
   }
 
   return {
@@ -353,6 +367,7 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
     releasedLoadedByChild: Object.fromEntries(pages.map((page) => [page.childId, page.releasedRows.length])),
     nextJobReleaseAtByChild,
     hasPastDueUnmaterializedJobByChild,
+    hasActiveGenerationFailureByChild,
   }
 }
 

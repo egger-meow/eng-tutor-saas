@@ -193,4 +193,77 @@ describe('listMaterialsWithClient - Service Time Week Numbering', () => {
     const res = await listMaterialsWithClient(mockClient as any, ['child-1'])
     expect(res.hasPastDueUnmaterializedJobByChild['child-1']).toBe(false)
   })
+
+  it('correctly computes hasActiveGenerationFailureByChild for unmaterialized failed jobs without active jobs', async () => {
+    const mockClient = {
+      from: (table: string) => {
+        if (table === 'generation_jobs') {
+          return {
+            select: () => ({
+              in: () => Promise.resolve({
+                data: [
+                  {
+                    material_id: null,
+                    child_id: 'child-failed-only',
+                    release_at: '2026-01-01T00:00:00Z',
+                    status: 'failed',
+                  },
+                  {
+                    material_id: null,
+                    child_id: 'child-failed-with-pending',
+                    release_at: '2026-01-01T00:00:00Z',
+                    status: 'failed',
+                  },
+                  {
+                    material_id: null,
+                    child_id: 'child-failed-with-pending',
+                    release_at: '2026-01-05T00:00:00Z',
+                    status: 'pending',
+                  },
+                ],
+                error: null,
+              }),
+            }),
+          }
+        }
+        if (table === 'materials') {
+          return {
+            select: () => ({
+              eq: () => ({
+                order: () => ({
+                  limit: () => ({
+                    maybeSingle: () => Promise.resolve({ data: null, error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'feedback') {
+          return {
+            select: () => ({
+              in: () => ({
+                in: () => Promise.resolve({ data: [], error: null }),
+              }),
+            }),
+          }
+        }
+        throw new Error(`Unexpected table ${table}`)
+      },
+      rpc: (fn: string) => {
+        if (fn === 'get_owned_released_materials_page') {
+          return Promise.resolve({
+            data: [],
+            error: null,
+          })
+        }
+        throw new Error(`Unexpected rpc ${fn}`)
+      },
+    }
+
+    const { listMaterialsWithClient } = await import('./materials')
+    const res = await listMaterialsWithClient(mockClient as any, ['child-failed-only', 'child-failed-with-pending'])
+    expect(res.hasActiveGenerationFailureByChild['child-failed-only']).toBe(true)
+    expect(res.hasActiveGenerationFailureByChild['child-failed-with-pending']).toBe(false)
+  })
 })
