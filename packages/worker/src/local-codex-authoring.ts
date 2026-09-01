@@ -27,6 +27,16 @@ export function defaultRepoRoot(): string {
   return fileURLToPath(new URL('../../../', import.meta.url))
 }
 
+export function stableCodexExecutable(environment: NodeJS.ProcessEnv = process.env): string {
+  if (process.platform !== 'win32') return 'codex'
+  const appData = environment.APPDATA
+  if (!appData) throw new Error('STABLE_CODEX_CLI_NOT_FOUND: APPDATA is unavailable')
+  return resolve(
+    appData,
+    'npm/node_modules/@openai/codex/node_modules/@openai/codex-win32-x64/vendor/x86_64-pc-windows-msvc/bin/codex.exe',
+  )
+}
+
 type ClaimBatch = {
   bridgeVersion: string
   claimed: Array<Record<string, unknown>>
@@ -70,21 +80,22 @@ function versionAtLeast(actual: string, minimum: string): boolean {
   return left[0] > right[0] || (left[0] === right[0] && (left[1] > right[1] || (left[1] === right[1] && left[2] >= right[2])))
 }
 
-export async function verifyCodexCli(run: ProcessRunner = execFile): Promise<{ version: string }> {
-  const versionResult = await run('codex', ['--version'])
+export async function verifyCodexCli(run: ProcessRunner = execFile): Promise<{ version: string; executable: string }> {
+  const executable = stableCodexExecutable()
+  const versionResult = await run(executable, ['--version'])
   const version = versionResult.stdout.trim()
   if (!versionAtLeast(version, MINIMUM_CODEX_VERSION)) {
     throw new Error(`CODEX_VERSION_UNSUPPORTED: require >= ${MINIMUM_CODEX_VERSION}, found ${version}`)
   }
-  const help = await run('codex', ['exec', '--help'])
+  const help = await run(executable, ['exec', '--help'])
   for (const flag of ['--ephemeral', '--model', '--config', '--sandbox', '--ignore-user-config', '--output-last-message']) {
     if (!help.stdout.includes(flag)) throw new Error(`CODEX_EXEC_UNSUPPORTED: missing ${flag}`)
   }
-  const auth = await run('codex', ['login', 'status'])
+  const auth = await run(executable, ['login', 'status'])
   if (!/Logged in using ChatGPT/iu.test(`${auth.stdout}\n${auth.stderr}`)) {
     throw new Error('CODEX_CHATGPT_AUTH_REQUIRED: run codex login and choose ChatGPT; API-key authentication is not accepted')
   }
-  return { version }
+  return { version, executable }
 }
 
 function contextIdentity(context: Record<string, unknown>): { jobId: string; childId: string; fingerprint: string } {
@@ -210,14 +221,14 @@ async function cleanupRuntime(runtimeRoot: string): Promise<void> {
   }
 }
 
-async function authorOne(repoRoot: string, context: Record<string, unknown>, run: ProcessRunner): Promise<CurriculumPackage> {
+async function authorOne(repoRoot: string, context: Record<string, unknown>, codexExecutable: string, run: ProcessRunner): Promise<CurriculumPackage> {
   const { jobId } = contextIdentity(context)
   const jobDir = resolve(repoRoot, '.runtime/private-generation', jobId)
   await mkdir(jobDir, { recursive: true })
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
   const briefPath = resolve(jobDir, 'research-brief.json')
-  await run('codex', [
+  await run(codexExecutable, [
     'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
     '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
     '--config', PRIVATE_CODEX_CONFIG,
@@ -231,7 +242,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, run
   const groundingPath = resolve(jobDir, 'grounding.md')
   const publicGroundingPath = resolve(publicDir, 'grounding.md')
   try {
-    await run('codex', [
+    await run(codexExecutable, [
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
       '--config', PUBLIC_RESEARCH_CODEX_CONFIG,
@@ -247,7 +258,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, run
   let issue: string | undefined
   for (let round = 0; round <= MAX_REPAIR_ROUNDS; round += 1) {
     const outputPath = resolve(jobDir, `package-${round}.json`)
-    await run('codex', [
+    await run(codexExecutable, [
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
       '--config', PRIVATE_CODEX_CONFIG,
@@ -307,7 +318,7 @@ export async function runLocalCodexAuthoringBatch(
     const { jobId } = contextIdentity(context)
     const jobDir = resolve(runtimeRoot, jobId)
     try {
-      const pkg = await authorOne(repoRoot, context, run)
+      const pkg = await authorOne(repoRoot, context, preflight.executable, run)
       const payload = JSON.stringify(pkg)
       const submitted = await client.rpc('worker_submit_local_curriculum_package', {
         p_job_id: jobId, p_generation_worker_id: workerId, p_payload_text: payload,

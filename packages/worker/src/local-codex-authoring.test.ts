@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
-import { defaultRepoRoot, runLocalCodexAuthoringBatch, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
+import { defaultRepoRoot, runLocalCodexAuthoringBatch, stableCodexExecutable, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -12,11 +12,11 @@ describe('local Codex authoring preflight', () => {
       if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --output-last-message', stderr: '' }
       return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
     }
-    await expect(verifyCodexCli(run)).resolves.toEqual({ version: 'codex-cli 0.149.1' })
+    await expect(verifyCodexCli(run)).resolves.toEqual({ version: 'codex-cli 0.149.1', executable: stableCodexExecutable() })
     expect(calls).toEqual([
-      { file: 'codex', args: ['--version'] },
-      { file: 'codex', args: ['exec', '--help'] },
-      { file: 'codex', args: ['login', 'status'] },
+      { file: stableCodexExecutable(), args: ['--version'] },
+      { file: stableCodexExecutable(), args: ['exec', '--help'] },
+      { file: stableCodexExecutable(), args: ['login', 'status'] },
     ])
     expect(JSON.stringify(calls)).not.toContain('OPENAI_API_KEY')
   })
@@ -34,6 +34,13 @@ describe('local Codex authoring preflight', () => {
 describe('one invocation owns one authoritative claim', () => {
   it('resolves the repository root independently of pnpm package cwd', () => {
     expect(defaultRepoRoot().replaceAll('\\', '/')).toMatch(/eng-tutor-saas\/$/u)
+  })
+
+  it('pins Windows execution to the stable npm Codex binary, not the desktop alpha binary', () => {
+    if (process.platform === 'win32') {
+      expect(stableCodexExecutable().replaceAll('\\', '/')).toContain('/npm/node_modules/@openai/codex/')
+      expect(stableCodexExecutable().replaceAll('\\', '/')).not.toContain('/OpenAI/Codex/bin/')
+    }
   })
 
   it('calls the local authoritative claim bridge exactly once', async () => {
