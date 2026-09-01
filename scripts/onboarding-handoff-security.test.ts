@@ -3,7 +3,12 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const migration = readFileSync(
-  resolve(import.meta.dirname, '..', 'supabase', 'migrations', '20260902021500_landing_first_onboarding_handoff.sql'),
+  resolve(import.meta.dirname, '..', 'supabase', 'migrations', '20260901184240_landing_first_onboarding_handoff.sql'),
+  'utf8',
+)
+
+const rlsMigration = readFileSync(
+  resolve(import.meta.dirname, '..', 'supabase', 'migrations', '20260901184404_harden_pending_onboarding_rls.sql'),
   'utf8',
 )
 
@@ -14,6 +19,10 @@ describe('landing-first onboarding handoff security contract', () => {
     expect(migration).toContain('grant execute on function public.create_pending_onboarding(text, jsonb, text, text) to anon, authenticated, service_role')
     expect(migration).toContain('revoke all on function public.finalize_pending_onboarding(text) from public, anon')
     expect(migration).toContain('grant execute on function public.finalize_pending_onboarding(text) to authenticated, service_role')
+  })
+
+  it('keeps the private handoff table deny-by-default with RLS defense in depth', () => {
+    expect(rlsMigration).toContain('alter table if exists private_generation.pending_onboardings enable row level security')
   })
 
   it('stores only a token hash and binds finalization to the authenticated email', () => {
