@@ -25,7 +25,7 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
   it('proves /start performs one authoritative claim under pinned online manual worker identity', async () => {
     const edgeFunctionSource = await readFile(resolve(root, 'supabase/functions/authoring-bridge/index.ts'), 'utf8')
     expect(edgeFunctionSource).toContain("PINNED_ONLINE_MANUAL_WORKER_ID = 'chatgpt-online-manual'")
-    expect(edgeFunctionSource).toContain("rpc('worker_start_online_manual_authoring_batch', {\n        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,")
+    expect(edgeFunctionSource).toContain("rpc('worker_start_authoring_batch', {\n        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,")
 
     const migration = await readFile(resolve(root, 'supabase/migrations/20260901080000_atomic_online_manual_authoring_start.sql'), 'utf8')
     expect(migration).toContain('public.worker_start_online_manual_authoring_batch(worker_id text)')

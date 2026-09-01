@@ -82,10 +82,11 @@ Deno.serve(async (request) => {
 
   try {
     // 1. Start Authoring Batch: POST /start
-    // Requirement 3: Atomically verifies zero conflicting active authoring leases,
+    // Requirement 1-3: Shared transaction-scoped advisory lock serializes start across all executors.
+    // Atomically verifies zero conflicting active authoring leases,
     // then performs exactly one authoritative production batch claim under pinned online manual identity.
     if (request.method === 'POST' && path === '/start') {
-      const { data, error } = await client.rpc('worker_start_online_manual_authoring_batch', {
+      const { data, error } = await client.rpc('worker_start_authoring_batch', {
         worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
       })
       if (error) {

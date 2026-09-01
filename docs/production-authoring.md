@@ -46,7 +46,7 @@ Local Windows execution is a primary local environment, but it is **one client o
 Before performing any curriculum generation or repair work, every authoring executor MUST:
 1. **Read `packages/generator/bundles/production-authoring-bundle.md`**: Treat this current compiled bundle as the authoritative, non-negotiable curriculum-generation contract. Do not rely on agents discovering the bundle indirectly through `AGENTS.md` or `SPEC.md`.
 2. **Verify and record bundle provenance**: Check and record the current repository Git commit SHA and the bundle frontmatter metadata (`bundleVersion`, `promptVersion`, `schemaVersion`) before claiming any production queue batch.
-3. **Strict real data fidelity**: Adhere strictly to the core pedagogical guidelines, CAP alignment, and real data rules in the bundle. Never invent synthetic exercises or mock data.
+3. **Strict real data fidelity**: Adhere strictly to the core pedagogical guidelines, CAP alignment, and real data rules in the bundle. Forbid invented learner, private, or source facts, while explicitly authoring the new educational passages and exercises required by the production bundle.
 
 ---
 
