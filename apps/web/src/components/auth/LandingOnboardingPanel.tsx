@@ -10,6 +10,7 @@ import { createPendingOnboarding } from '../../lib/onboarding-handoff'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
 import { getSupabaseClient } from '../../lib/supabase'
 import '../../styles/onboarding-refinement.css'
+import '../../styles/landing-onboarding.css'
 
 const LANDING_DRAFT_KEY = 'paper-english:landing-profile-draft'
 
