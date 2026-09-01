@@ -2,6 +2,7 @@ import { execFile as execFileCallback } from 'node:child_process'
 import { hostname } from 'node:os'
 import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import {
   auditCurriculumPackage,
@@ -21,6 +22,10 @@ export const LOCAL_AUTHORING_WORKER_PREFIX = 'local-codex'
 const MAX_REPAIR_ROUNDS = 2
 const PRIVATE_CODEX_CONFIG = 'web_search="disabled"'
 const PUBLIC_RESEARCH_CODEX_CONFIG = 'web_search="live"'
+
+export function defaultRepoRoot(): string {
+  return fileURLToPath(new URL('../../../', import.meta.url))
+}
 
 type ClaimBatch = {
   bridgeVersion: string
@@ -279,7 +284,7 @@ async function releaseConfirmedUnsubmitted(client: WorkerClient, jobId: string, 
 
 export async function runLocalCodexAuthoringBatch(
   client: WorkerClient,
-  repoRoot = process.cwd(),
+  repoRoot = defaultRepoRoot(),
   run: ProcessRunner = execFile,
 ): Promise<LocalAuthoringSummary> {
   const preflight = await verifyCodexCli(run)

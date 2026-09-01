@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
-import { runLocalCodexAuthoringBatch, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
+import { defaultRepoRoot, runLocalCodexAuthoringBatch, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -32,6 +32,10 @@ describe('local Codex authoring preflight', () => {
 })
 
 describe('one invocation owns one authoritative claim', () => {
+  it('resolves the repository root independently of pnpm package cwd', () => {
+    expect(defaultRepoRoot().replaceAll('\\', '/')).toMatch(/eng-tutor-saas\/$/u)
+  })
+
   it('calls the local authoritative claim bridge exactly once', async () => {
     const rpcCalls: string[] = []
     const client: WorkerClient = {
