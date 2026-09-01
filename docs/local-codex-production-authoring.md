@@ -27,9 +27,9 @@ pnpm worker author-local-codex
 
 The worker loads `SUPABASE_URL` and `SUPABASE_SECRET_KEY` from the existing root `.env` without printing them. One invocation performs exactly one authoritative batch claim. It processes returned jobs in order, preserves server-owned fingerprints and retry context, validates locally, performs at most two surgical repair rounds, and submits immutable canonical JSON. It never renders PDFs.
 
-Private context is available only to planning and authoring stages that set `web_search="disabled"`. A separate live-search stage receives only a validated, digit-free generalized brief; the runner rejects identifiers, contact data, personal attributes, profile/feedback language, URLs, and exact sensitive context values before that stage starts. The public stage runs from an isolated empty working directory and cannot receive the private context path.
+Private context is available only to planning and authoring stages that set `web_search="disabled"`. Planning receives a bounded topic-only capsule, while authoring receives the complete authoritative context. A separate live-search stage receives only a validated, digit-free generalized brief; the runner rejects identifiers, contact data, personal attributes, profile/feedback language, URLs, and exact sensitive context values before that stage starts. Planning and public research run from separate isolated OS temporary directories, preventing repository instruction discovery and keeping the public stage away from the private context path.
 
-Private contexts and candidate packages live only under the git-ignored `.runtime/private-generation/` directory. The isolated public stage uses `.runtime/public-research/`. Successful and failed job directories are removed; abandoned private directories older than 24 hours are cleaned at startup. Privacy-safe daily logs are written under `.runtime/logs/`.
+Private contexts and candidate packages live only under the git-ignored `.runtime/private-generation/` directory. Isolated planning/research temporary directories are removed immediately after their stage. Successful and failed job directories are removed; abandoned private directories older than 24 hours are cleaned at startup. Privacy-safe daily logs are written under `.runtime/logs/`.
 
 ## Windows Task Scheduler
 

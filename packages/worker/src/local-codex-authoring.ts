@@ -1,6 +1,6 @@
 import { execFile as execFileCallback } from 'node:child_process'
-import { hostname } from 'node:os'
-import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
+import { hostname, tmpdir } from 'node:os'
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -253,20 +253,25 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   await mkdir(jobDir, { recursive: true })
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
-  const planningContextPath = resolve(jobDir, 'planning-context.json')
-  await writeFile(planningContextPath, JSON.stringify(buildPrivatePlanningCapsule(context)), { encoding: 'utf8', mode: 0o600 })
-  const briefPath = resolve(jobDir, 'research-brief.json')
-  await run(codexExecutable, [
-    'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
-    '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
-    '--config', PRIVATE_CODEX_CONFIG,
-    '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
-    '--output-last-message', briefPath,
-    planningPrompt(planningContextPath),
-  ], { cwd: repoRoot })
-  const brief = validatePublicResearchBrief(parseCodexJson(await readFile(briefPath, 'utf8')), context)
-  const publicDir = resolve(repoRoot, '.runtime/public-research', jobId)
-  await mkdir(publicDir, { recursive: true })
+  const planningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-private-plan-'))
+  let brief: string
+  try {
+    const planningContextPath = resolve(planningDir, 'planning-context.json')
+    const briefPath = resolve(planningDir, 'research-brief.json')
+    await writeFile(planningContextPath, JSON.stringify(buildPrivatePlanningCapsule(context)), { encoding: 'utf8', mode: 0o600 })
+    await run(codexExecutable, [
+      'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
+      '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
+      '--config', PRIVATE_CODEX_CONFIG,
+      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
+      '--output-last-message', briefPath,
+      planningPrompt(planningContextPath),
+    ], { cwd: planningDir })
+    brief = validatePublicResearchBrief(parseCodexJson(await readFile(briefPath, 'utf8')), context)
+  } finally {
+    await rm(planningDir, { recursive: true, force: true })
+  }
+  const publicDir = await mkdtemp(resolve(tmpdir(), 'paper-english-public-research-'))
   const groundingPath = resolve(jobDir, 'grounding.md')
   const publicGroundingPath = resolve(publicDir, 'grounding.md')
   try {
