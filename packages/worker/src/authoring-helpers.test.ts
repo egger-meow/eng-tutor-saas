@@ -94,6 +94,21 @@ describe('checkActiveLeaseState', () => {
     expect(state.isOwnedByCaller).toBe(true)
     expect(state.claimedBy).toBe('worker-me')
   })
+
+  it('fails closed and blocks claim if lease RPC returns an error', async () => {
+    const client: WorkerClient = {
+      rpc: vi.fn(async () => {
+        return { data: null, error: { message: 'database connection error' } }
+      }),
+      storage: { from: vi.fn() as any },
+    }
+
+    const state = await checkActiveLeaseState(client, 'worker-me')
+    expect(state.hasActiveClaim).toBe(true)
+    expect(state.canClaim).toBe(false)
+    expect(state.isOwnedByCaller).toBe(false)
+    expect(state.message).toContain('fail-closed')
+  })
 })
 
 describe('claimProductionBatch safety', () => {

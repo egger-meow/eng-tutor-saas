@@ -153,7 +153,7 @@ Paper English supports switching between local authoring and server-side online 
   ```powershell
   pnpm worker production-authoring mode --set local
   ```
-- **Set online mode** (enables 00:10 UTC pg_cron claim for ChatGPT Scheduled Work):
+- **Set online mode** (enables 16:10 UTC / 00:10 Taipei Time pg_cron claim for ChatGPT Scheduled Work):
   ```powershell
   pnpm worker production-authoring mode --set online
   ```
@@ -167,4 +167,4 @@ Paper English supports switching between local authoring and server-side online 
 | **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` |
 | **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` |
 | **Local Batch Runner** | `docs/local-codex-production-authoring.md` | `pnpm worker generate-claimed` | `worker_submit_local_curriculum_package` |
-| **ChatGPT Online / Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | `private_generation.chatgpt_recover_claimed_generation_batch` (00:10 UTC cron) | `private_generation.chatgpt_submit_curriculum_package_v2` |
+| **ChatGPT Online / Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `/batch` (`docs/authoring-bridge-openapi.yaml`) | Authoring Bridge `/submit` (OpenAPI Action) |

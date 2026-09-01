@@ -44,14 +44,14 @@ function unwrap<T>(result: { data: T | null; error: { message: string } | null }
 export async function checkActiveLeaseState(client: WorkerClient, workerId?: string): Promise<LeaseStatus> {
   const leasesResult = await client.rpc('worker_get_active_generation_leases', {})
   if (leasesResult.error) {
-    // If the lease RPC is not available in legacy schema, fall back to safe assumption
+    // Fail-closed for production collision safety: if lease state cannot be verified, block claiming
     return {
-      hasActiveClaim: false,
+      hasActiveClaim: true,
       isOwnedByCaller: false,
-      claimedBy: null,
+      claimedBy: 'unknown',
       jobIds: [],
-      canClaim: true,
-      message: 'Active lease RPC unavailable; assuming queue is claimable',
+      canClaim: false,
+      message: `Active lease check failed (${leasesResult.error.message}); claiming blocked for collision safety (fail-closed)`,
     }
   }
 

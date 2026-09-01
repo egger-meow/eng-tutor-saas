@@ -1,0 +1,165 @@
+openapi: 3.0.3
+info:
+  title: Paper English Curriculum Authoring Bridge API
+  description: >
+    Narrow, purpose-built HTTP API for curriculum authoring agents.
+    Exposes only 3 non-destructive, business-level operations with zero generic SQL
+    or database access, completely eliminating OpenAI connector safety gates.
+  version: 1.0.0
+servers:
+  - url: https://{projectRef}.supabase.co/functions/v1/authoring-bridge
+    description: Supabase Edge Functions Authoring Bridge
+    variables:
+      projectRef:
+        default: egger-meow-tutor
+        description: Supabase project reference
+paths:
+  /batch:
+    get:
+      summary: Recover Active Staged Batch
+      description: >
+        Recovers the server-staged batch of due curriculum generation jobs
+        claimed for the specified worker ID without mutating database state.
+      operationId: recoverActiveBatch
+      parameters:
+        - name: worker_id
+          in: query
+          required: true
+          description: Unique identifier of the authoring worker (e.g. chatgpt-work-daily)
+          schema:
+            type: string
+            example: chatgpt-work-daily
+      responses:
+        '200':
+          description: Active batch claimed jobs snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  claimed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        jobId:
+                          type: string
+                          format: uuid
+                        childId:
+                          type: string
+                          format: uuid
+                        targetWeek:
+                          type: string
+                        inputFingerprint:
+                          type: string
+                        profile:
+                          type: object
+                        curriculumCapsules:
+                          type: array
+                          items:
+                            type: object
+                        retryContext:
+                          type: object
+                  claimedCount:
+                    type: integer
+                  hasActiveClaim:
+                    type: boolean
+        '401':
+          description: Missing or invalid authorization token
+        '500':
+          description: Server error
+
+  /submit:
+    post:
+      summary: Submit Canonical Curriculum Package
+      description: >
+        Submits an authored and locally validated canonical curriculum package
+        into private_generation.curriculum_submissions for deterministic Finisher rendering.
+      operationId: submitCurriculumPackage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - jobId
+                - workerId
+                - package
+              properties:
+                jobId:
+                  type: string
+                  format: uuid
+                  description: Target generation job UUID
+                workerId:
+                  type: string
+                  description: Identifier of claiming worker
+                package:
+                  type: object
+                  description: Canonical CurriculumPackage matching Schema 2.4.0
+      responses:
+        '200':
+          description: Submission accepted or deduplicated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  submissionId:
+                    type: string
+                    format: uuid
+                  authoringAttempt:
+                    type: integer
+                  deduplicated:
+                    type: boolean
+                  status:
+                    type: string
+        '400':
+          description: Invalid request or schema validation failure
+        '401':
+          description: Unauthorized
+
+  /status:
+    get:
+      summary: Get Submission Status
+      description: >
+        Read-after-write verification to check whether a package submission
+        is persisted, pending Finisher processing, or already completed.
+      operationId: getSubmissionStatus
+      parameters:
+        - name: job_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: worker_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authoritative status of curriculum submission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  submissionFound:
+                    type: boolean
+                  status:
+                    type: string
+                    enum: [pending, completed, failed, not_found]
+                  authoringAttempt:
+                    type: integer
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Dedicated authoring bridge secret token
+security:
+  - BearerAuth: []
