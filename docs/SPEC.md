@@ -2498,22 +2498,28 @@ For the first packet only, successful Finisher completion may advance the actual
 
 ---
 
-# 117. MVP Generation Worker
+# 117. Executor-Agnostic Generation Worker
 
-Initial intended orchestrator:
+Authoring architecture is governed by the canonical executor-agnostic protocol in `docs/production-authoring.md`.
 
-> **Repository-owned local Windows Codex CLI runner**
+Supported interchangeable authoring executors:
 
-Windows Task Scheduler may invoke the runner daily. Codex CLI authenticates with an existing ChatGPT login and uses GPT-5.6 Sol with low reasoning; production authoring must not require an OpenAI API key, Responses API integration, ChatGPT app/plugin permission, or Supabase ChatGPT connector.
+1. **Interactive local agents** (Antigravity, local Codex CLI interactive sessions);
+2. **Codex Desktop Scheduler** (scheduled background authoring tasks);
+3. **Repository local runner** (`pnpm worker author-local-codex` or helper CLI);
+4. **ChatGPT online / manual execution** (staged claims, browser prompt execution);
+5. **ChatGPT Scheduled Work** (daily server-side scheduled claims via pg_cron).
+
+Local Windows execution is a primary local environment, but it is an interchangeable adapter of the protocol rather than the exclusive architecture. Production authoring authenticates with an existing ChatGPT login and uses GPT-5.6 Sol; production authoring must not require an OpenAI API key, Responses API integration, or ChatGPT app/plugin permissions.
 
 Its job is to:
 
-1. read due `generation_jobs`;
-2. claim eligible jobs;
+1. read due `generation_jobs` and verify absence of colliding leases;
+2. claim eligible jobs via authoritative batch claim;
 3. read production generation rules;
 4. load permitted child state from Supabase;
 5. generate canonical material source;
-6. validate and repair the canonical source locally;
+6. validate and repair the canonical source locally against Schema 2.4.0 and the CAP quality floor;
 7. submit it through the immutable curriculum submission bridge;
 8. leave deterministic PDF rendering and private Storage writes to the GitHub Actions Finisher;
 9. recover uncertain submissions by read-after-write status;
@@ -4223,8 +4229,8 @@ For weekly-material work specifically:
        ┌───────────┴───────────┐
        │                       │
        ▼                       ▼
-Cloudflare Worker         Local Windows runner
-Static Assets frontend       Codex CLI author
+Cloudflare Worker         Interchangeable Authors
+Static Assets frontend    (Local Codex / Desktop / Agent / ChatGPT)
        │                       │
        └───────────┬───────────┘
                    ▼
@@ -4233,7 +4239,8 @@ Static Assets frontend       Codex CLI author
      jobs / subscriptions / materials
                    │
                    ▼
-           Private weekly PDFs
+       Deterministic Finisher (GHA)
+       Storage / Private weekly PDFs
 ```
 
 ---

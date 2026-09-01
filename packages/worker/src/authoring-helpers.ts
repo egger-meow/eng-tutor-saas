@@ -55,7 +55,7 @@ export async function checkActiveLeaseState(client: WorkerClient, workerId?: str
     }
   }
 
-  const activeLeases = (leasesResult.data ?? []) as Array<{ id: string; claimed_by: string; lease_expires_at: string }>
+  const activeLeases = (leasesResult.data ?? []) as Array<{ id?: string; jobId?: string; claimed_by?: string; workerId?: string; lease_expires_at?: string; claimExpiresAt?: string }>
   if (!Array.isArray(activeLeases) || activeLeases.length === 0) {
     return {
       hasActiveClaim: false,
@@ -67,10 +67,10 @@ export async function checkActiveLeaseState(client: WorkerClient, workerId?: str
     }
   }
 
-  const distinctClaimants = [...new Set(activeLeases.map((l) => l.claimed_by))]
+  const distinctClaimants = [...new Set(activeLeases.map((l) => l.claimed_by ?? l.workerId ?? 'unknown'))]
   const primaryClaimant = distinctClaimants[0] ?? 'unknown'
   const isOwned = Boolean(workerId && primaryClaimant === workerId)
-  const jobIds = activeLeases.map((l) => l.id)
+  const jobIds = activeLeases.map((l) => l.id ?? l.jobId ?? '')
 
   return {
     hasActiveClaim: true,

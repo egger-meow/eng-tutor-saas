@@ -165,7 +165,7 @@
 114. **Generation Must Use Explicit Jobs**
 115. **Generation Job Suggested Structure**
 116. **Next Generation Time**
-117. **MVP Generation Worker**
+117. **Executor-Agnostic Generation Worker**
 118. **Worker Reads Three Sources**
 119. **Worker Does Not Normally Read `eng-tutor`**
 120. **Scheduled Worker and GitHub Actions**

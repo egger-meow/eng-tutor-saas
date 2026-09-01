@@ -20,13 +20,12 @@ declare
 begin
   select coalesce(jsonb_agg(jsonb_build_object(
     'jobId', id,
-    'workerId', generation_worker_id,
-    'claimedAt', claimed_at,
-    'claimExpiresAt', claim_expires_at
+    'workerId', claimed_by,
+    'claimExpiresAt', lease_expires_at
   )), '[]'::jsonb)
   into result
   from public.generation_jobs
-  where status = 'claimed' and claim_expires_at > now();
+  where status = 'claimed' and lease_expires_at > now();
 
   return result;
 end;

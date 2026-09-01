@@ -64,7 +64,7 @@ async function main(): Promise<void> {
       const jobId = option('job')!
       const pkgPath = option('package')!
       const rawPackage = JSON.parse(await readFile(pkgPath, 'utf8')) as unknown
-      const result = await submitProductionPackage(client, workerId, jobId, rawPackage)
+      const result = await submitProductionPackage(client, jobId, workerId, rawPackage)
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       if (!result.submitted) process.exitCode = 1
       return
@@ -73,7 +73,7 @@ async function main(): Promise<void> {
     if (action === 'submission-status') {
       const workerId = option('worker')!
       const jobId = option('job')!
-      const result = await getSubmissionStatus(client, workerId, jobId)
+      const result = await getSubmissionStatus(client, jobId, workerId)
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       return
     }
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
       const jobId = option('job')!
       const code = option('code')!
       const message = option('message')!
-      const result = await releaseUnsubmittedClaim(client, workerId, jobId, code, message)
+      const result = await releaseUnsubmittedClaim(client, jobId, workerId, code, message)
       process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       return
     }
