@@ -88,7 +88,7 @@ export async function verifyCodexCli(run: ProcessRunner = execFile): Promise<{ v
     throw new Error(`CODEX_VERSION_UNSUPPORTED: require >= ${MINIMUM_CODEX_VERSION}, found ${version}`)
   }
   const help = await run(executable, ['exec', '--help'])
-  for (const flag of ['--ephemeral', '--model', '--config', '--sandbox', '--ignore-user-config', '--output-last-message']) {
+  for (const flag of ['--ephemeral', '--model', '--config', '--sandbox', '--ignore-user-config', '--skip-git-repo-check', '--output-last-message']) {
     if (!help.stdout.includes(flag)) throw new Error(`CODEX_EXEC_UNSUPPORTED: missing ${flag}`)
   }
   const auth = await run(executable, ['login', 'status'])
@@ -263,7 +263,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
       '--config', PRIVATE_CODEX_CONFIG,
-      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
+      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', briefPath,
       planningPrompt(planningContextPath),
     ], { cwd: planningDir })
@@ -279,7 +279,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
       '--config', PUBLIC_RESEARCH_CODEX_CONFIG,
-      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
+      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', publicGroundingPath,
       researchPrompt(brief),
     ], { cwd: publicDir })

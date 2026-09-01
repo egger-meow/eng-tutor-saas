@@ -9,7 +9,7 @@ describe('local Codex authoring preflight', () => {
     const run = async (file: string, args: string[]) => {
       calls.push({ file, args })
       if (args[0] === '--version') return { stdout: 'codex-cli 0.149.1\n', stderr: '' }
-      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --output-last-message', stderr: '' }
+      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
       return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
     }
     await expect(verifyCodexCli(run)).resolves.toEqual({ version: 'codex-cli 0.149.1', executable: stableCodexExecutable() })
@@ -24,7 +24,7 @@ describe('local Codex authoring preflight', () => {
   it('rejects API-key or missing authentication instead of falling back', async () => {
     const run = async (_file: string, args: string[]) => {
       if (args[0] === '--version') return { stdout: 'codex-cli 0.149.1', stderr: '' }
-      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --output-last-message', stderr: '' }
+      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
       return { stdout: 'Logged in using an API key', stderr: '' }
     }
     await expect(verifyCodexCli(run)).rejects.toThrow('CODEX_CHATGPT_AUTH_REQUIRED')
@@ -58,7 +58,7 @@ describe('one invocation owns one authoritative claim', () => {
     const run = async (file: string, args: string[]) => {
       if (file === 'git') return { stdout: '0123456789abcdef0123456789abcdef01234567\n', stderr: '' }
       if (args[0] === '--version') return { stdout: 'codex-cli 0.149.1\n', stderr: '' }
-      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --output-last-message', stderr: '' }
+      if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
       return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
     }
     const summary = await runLocalCodexAuthoringBatch(client, process.cwd(), run)
@@ -112,5 +112,6 @@ describe('public research privacy boundary', () => {
     expect(source).not.toContain('researchPrompt(context')
     expect(source).toContain("LOCAL_CODEX_MODEL = 'gpt-5.6-sol'")
     expect(source).toContain("LOCAL_CODEX_REASONING = 'low'")
+    expect(source).toContain("'--skip-git-repo-check'")
   })
 })
