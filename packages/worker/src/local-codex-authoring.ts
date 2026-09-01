@@ -1,9 +1,8 @@
-import { execFile as execFileCallback } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { hostname, tmpdir } from 'node:os'
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { promisify } from 'node:util'
 import {
   auditCurriculumPackage,
   validateCurriculumPackage,
@@ -14,7 +13,6 @@ import {
 } from '@paper-english/generator'
 import type { WorkerClient } from './pipeline.js'
 
-const execFile = promisify(execFileCallback)
 export const LOCAL_CODEX_MODEL = 'gpt-5.6-sol'
 export const LOCAL_CODEX_REASONING = 'low'
 export const MINIMUM_CODEX_VERSION = '0.144.0'
@@ -46,7 +44,23 @@ type ClaimBatch = {
   oldestOutstandingDeadline: string | null
 }
 
-type ProcessRunner = (file: string, args: string[], options?: { cwd?: string }) => Promise<{ stdout: string; stderr: string }>
+type ProcessRunner = (file: string, args: string[], options?: { cwd?: string; input?: string }) => Promise<{ stdout: string; stderr: string }>
+
+const runProcess: ProcessRunner = (file, args, options = {}) => new Promise((resolvePromise, reject) => {
+  const child = spawn(file, args, { cwd: options.cwd, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+  let stdout = ''
+  let stderr = ''
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  child.stdout.on('data', (chunk: string) => { stdout += chunk })
+  child.stderr.on('data', (chunk: string) => { stderr += chunk })
+  child.on('error', () => reject(new Error('LOCAL_PROCESS_START_FAILED')))
+  child.on('close', (code) => {
+    if (code === 0) resolvePromise({ stdout, stderr })
+    else reject(new Error(`LOCAL_PROCESS_FAILED:${code ?? 'unknown'}`))
+  })
+  child.stdin.end(options.input ?? '')
+})
 
 export type LocalAuthoringSummary = {
   gitSha: string
@@ -80,7 +94,7 @@ function versionAtLeast(actual: string, minimum: string): boolean {
   return left[0] > right[0] || (left[0] === right[0] && (left[1] > right[1] || (left[1] === right[1] && left[2] >= right[2])))
 }
 
-export async function verifyCodexCli(run: ProcessRunner = execFile): Promise<{ version: string; executable: string }> {
+export async function verifyCodexCli(run: ProcessRunner = runProcess): Promise<{ version: string; executable: string }> {
   const executable = stableCodexExecutable()
   const versionResult = await run(executable, ['--version'])
   const version = versionResult.stdout.trim()
@@ -138,10 +152,10 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   return pkg
 }
 
-function planningPrompt(planningContextPath: string): string {
+function planningPrompt(capsule: Record<string, unknown>): string {
   return [
     'You are a privacy boundary inside a local curriculum runner. Web access is disabled.',
-    `Read the bounded private topic capsule at ${planningContextPath}.`,
+    `Use this bounded private topic capsule: ${JSON.stringify(capsule)}`,
     'Produce a generalized public-research brief containing only impersonal English-learning topics and factual concepts useful for the material.',
     'Never include or paraphrase names, UUIDs, email addresses, school, age, grade/level, textbook state, feedback, mistakes, learning history, profile prose, private notes, or quotations from the context.',
     'Use no digits. Return only JSON shaped exactly as {"queries":["..."],"topicSummary":"..."}, with 1-4 short queries.',
@@ -219,15 +233,15 @@ function researchPrompt(brief: string): string {
   ].join('\n')
 }
 
-function authoringPrompt(repoRoot: string, contextPath: string, groundingPath: string, previousOutputPath?: string, issue?: string): string {
-  const retry = previousOutputPath
-    ? `This is a surgical repair round. Read the previous package at ${previousOutputPath}. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}`
+function authoringPrompt(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string): string {
+  const retry = previousOutput
+    ? `This is a surgical repair round. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}\nPREVIOUS PACKAGE:\n${previousOutput}`
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
   return [
     'You are the private curriculum author inside a reviewed local runner. Do not access Supabase or mutate repository files.',
-    `Read the authoritative production bundle at ${resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md')}.`,
-    `Read the private claimed context at ${contextPath}. Never quote or expose its private contents.`,
-    `Read the public factual grounding at ${groundingPath}. Web access is disabled in this private stage.`,
+    `AUTHORITATIVE PRODUCTION BUNDLE:\n${bundle}`,
+    `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(context)}`,
+    `PUBLIC FACTUAL GROUNDING (web access is disabled in this private stage):\n${grounding}`,
     retry,
     `Set metadata.model exactly to ${LOCAL_CODEX_MODEL}, schemaVersion to ${CURRENT_SCHEMA_VERSION}, promptVersion to prompt/${CURRENT_PROMPT_VERSION}, engineVersion to ${CURRENT_ENGINE_VERSION}, and copy the server inputFingerprint exactly.`,
     'Every translation, sentence-production, or short-response item without options must provide writingLines >= 1 or a valid non-empty responseLayout.',
@@ -256,17 +270,15 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   const planningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-private-plan-'))
   let brief: string
   try {
-    const planningContextPath = resolve(planningDir, 'planning-context.json')
     const briefPath = resolve(planningDir, 'research-brief.json')
-    await writeFile(planningContextPath, JSON.stringify(buildPrivatePlanningCapsule(context)), { encoding: 'utf8', mode: 0o600 })
     await run(codexExecutable, [
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
       '--config', PRIVATE_CODEX_CONFIG,
       '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', briefPath,
-      planningPrompt(planningContextPath),
-    ], { cwd: planningDir })
+      '-',
+    ], { cwd: planningDir, input: planningPrompt(buildPrivatePlanningCapsule(context)) })
     brief = validatePublicResearchBrief(parseCodexJson(await readFile(briefPath, 'utf8')), context)
   } finally {
     await rm(planningDir, { recursive: true, force: true })
@@ -281,14 +293,16 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       '--config', PUBLIC_RESEARCH_CODEX_CONFIG,
       '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', publicGroundingPath,
-      researchPrompt(brief),
-    ], { cwd: publicDir })
+      '-',
+    ], { cwd: publicDir, input: researchPrompt(brief) })
     await writeFile(groundingPath, await readFile(publicGroundingPath, 'utf8'), { encoding: 'utf8', mode: 0o600 })
   } finally {
     await rm(publicDir, { recursive: true, force: true })
   }
   let previousPath: string | undefined
   let issue: string | undefined
+  const bundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+  const grounding = await readFile(groundingPath, 'utf8')
   for (let round = 0; round <= MAX_REPAIR_ROUNDS; round += 1) {
     const outputPath = resolve(jobDir, `package-${round}.json`)
     await run(codexExecutable, [
@@ -297,8 +311,11 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       '--config', PRIVATE_CODEX_CONFIG,
       '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
       '--output-last-message', outputPath,
-      authoringPrompt(repoRoot, contextPath, groundingPath, previousPath, issue),
-    ], { cwd: repoRoot })
+      '-',
+    ], {
+      cwd: repoRoot,
+      input: authoringPrompt(bundle, context, grounding, previousPath ? await readFile(previousPath, 'utf8') : undefined, issue),
+    })
     const raw = parseCodexJson(await readFile(outputPath, 'utf8'))
     try {
       return validateAuthoredPackage(raw, context)
@@ -329,7 +346,7 @@ async function releaseConfirmedUnsubmitted(client: WorkerClient, jobId: string, 
 export async function runLocalCodexAuthoringBatch(
   client: WorkerClient,
   repoRoot = defaultRepoRoot(),
-  run: ProcessRunner = execFile,
+  run: ProcessRunner = runProcess,
 ): Promise<LocalAuthoringSummary> {
   const preflight = await verifyCodexCli(run)
   const git = await run('git', ['rev-parse', 'HEAD'], { cwd: repoRoot })
