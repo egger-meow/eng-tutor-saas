@@ -22,6 +22,7 @@
     "admin:build": "pnpm --filter @paper-english/admin build",
     "admin:start": "pnpm --filter @paper-english/admin start",
     "worker": "pnpm --filter @paper-english/worker worker",
+    "production-authoring": "pnpm --filter @paper-english/worker worker production-authoring",
     "history-exams": "tsx scripts/history-exams/src/cli.ts"
   },
   "devDependencies": {

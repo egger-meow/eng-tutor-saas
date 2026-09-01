@@ -6,6 +6,16 @@ import { processCurriculumSubmissions } from './submission-processor.js'
 import { dispatchMaterialEmails } from './material-email.js'
 import { createSmtpEmailProvider } from './transactional-email.js'
 import { runLocalCodexAuthoringBatch } from './local-codex-authoring.js'
+import {
+  checkActiveLeaseState,
+  claimProductionBatch,
+  getSchedulerMode,
+  getSubmissionStatus,
+  releaseUnsubmittedClaim,
+  setSchedulerMode,
+  submitProductionPackage,
+  validatePreSubmitPackage,
+} from './authoring-helpers.js'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -17,6 +27,84 @@ function option(name: string, required = true): string | undefined {
 async function main(): Promise<void> {
   const command = process.argv[2]
   const client = createWorkerClient()
+
+  if (command === 'production-authoring') {
+    const action = process.argv[3]
+    if (!action) {
+      throw new Error('Action required: status, claim, validate, submit, submission-status, release, mode')
+    }
+
+    if (action === 'status') {
+      const workerId = option('worker', false)
+      const result = await checkActiveLeaseState(client, workerId)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      return
+    }
+
+    if (action === 'claim') {
+      const workerId = option('worker')!
+      const result = await claimProductionBatch(client, workerId)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      return
+    }
+
+    if (action === 'validate') {
+      const pkgPath = option('package')!
+      const ctxPath = option('context')!
+      const rawPackage = JSON.parse(await readFile(pkgPath, 'utf8')) as unknown
+      const rawContext = JSON.parse(await readFile(ctxPath, 'utf8')) as Record<string, unknown>
+      const result = validatePreSubmitPackage(rawPackage, rawContext)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      if (!result.valid) process.exitCode = 1
+      return
+    }
+
+    if (action === 'submit') {
+      const workerId = option('worker')!
+      const jobId = option('job')!
+      const pkgPath = option('package')!
+      const rawPackage = JSON.parse(await readFile(pkgPath, 'utf8')) as unknown
+      const result = await submitProductionPackage(client, workerId, jobId, rawPackage)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      if (!result.submitted) process.exitCode = 1
+      return
+    }
+
+    if (action === 'submission-status') {
+      const workerId = option('worker')!
+      const jobId = option('job')!
+      const result = await getSubmissionStatus(client, workerId, jobId)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      return
+    }
+
+    if (action === 'release') {
+      const workerId = option('worker')!
+      const jobId = option('job')!
+      const code = option('code')!
+      const message = option('message')!
+      const result = await releaseUnsubmittedClaim(client, workerId, jobId, code, message)
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      return
+    }
+
+    if (action === 'mode') {
+      const modeArg = process.argv[4] ?? option('set', false)
+      if (modeArg) {
+        if (modeArg !== 'local' && modeArg !== 'online') {
+          throw new Error('Mode must be "local" or "online"')
+        }
+        const updated = await setSchedulerMode(client, modeArg)
+        process.stdout.write(`${JSON.stringify({ mode: updated }, null, 2)}\n`)
+        return
+      }
+      const current = await getSchedulerMode(client)
+      process.stdout.write(`${JSON.stringify({ mode: current }, null, 2)}\n`)
+      return
+    }
+
+    throw new Error(`Unknown production-authoring action: ${action}`)
+  }
 
   if (command === 'author-local-codex') {
     const result = await runLocalCodexAuthoringBatch(client)
