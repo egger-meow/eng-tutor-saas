@@ -31,4 +31,10 @@ describe('landing-first onboarding handoff security contract', () => {
     expect(migration).toContain('update public.child_profiles')
     expect(migration).toContain('consumed_by = v_user_id')
   })
+
+  it('scrubs the pre-auth email and child draft immediately after successful binding', () => {
+    expect(migration).toContain("normalized_email = 'consumed:' || v_pending.id::text")
+    expect(migration).toContain("draft = '{}'::jsonb")
+    expect(migration).not.toContain("consumed_at is not null and consumed_at < now() - interval '1 day'")
+  })
 })
