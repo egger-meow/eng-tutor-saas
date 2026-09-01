@@ -6,13 +6,30 @@ const corsHeaders = {
   'access-control-allow-headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-export const PINNED_WORKER_ID = 'chatgpt-work-daily'
+export const PINNED_ONLINE_MANUAL_WORKER_ID = 'chatgpt-online-manual'
+export const PINNED_SCHEDULED_WORKER_ID = 'chatgpt-work-daily'
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'content-type': 'application/json', 'cache-control': 'no-store' },
   })
+}
+
+async function resolveJobWorkerId(
+  client: ReturnType<typeof createClient>,
+  jobId: string
+): Promise<string> {
+  const { data } = await client
+    .from('generation_jobs')
+    .select('claimed_by')
+    .eq('id', jobId)
+    .maybeSingle()
+
+  if (data?.claimed_by === PINNED_SCHEDULED_WORKER_ID) {
+    return PINNED_SCHEDULED_WORKER_ID
+  }
+  return PINNED_ONLINE_MANUAL_WORKER_ID
 }
 
 Deno.serve(async (request) => {
@@ -64,21 +81,47 @@ Deno.serve(async (request) => {
   const path = url.pathname.replace(/^\/(?:functions\/v1\/)?authoring-bridge/, '').replace(/\/$/, '')
 
   try {
-    // 1. Recover Batch: GET /batch
-    // Requirement 1: exact RPC argument is worker_id
-    // Requirement 3: worker identity is pinned server-side to chatgpt-work-daily
-    if (request.method === 'GET' && (path === '/batch' || path === '')) {
-      const { data, error } = await client.rpc('worker_recover_active_authoring_batch', {
-        worker_id: PINNED_WORKER_ID,
+    // 1. Start Authoring Batch: POST /start
+    // Requirement 3: Atomically verifies zero conflicting active authoring leases,
+    // then performs exactly one authoritative production batch claim under pinned online manual identity.
+    if (request.method === 'POST' && path === '/start') {
+      const { data, error } = await client.rpc('worker_start_online_manual_authoring_batch', {
+        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
       })
+      if (error) {
+        const isConflict =
+          error.message?.includes('ACTIVE_AUTHORING_LEASE_CONFLICT') ||
+          error.message?.includes('CONFLICT')
+        return json(isConflict ? 409 : 500, {
+          error: isConflict ? 'lease_conflict' : 'database_error',
+          message: error.message,
+        })
+      }
+      return json(200, data ?? { claimed: [], claimedCount: 0 })
+    }
+
+    // 2. Recover Active Batch: GET /batch
+    // Recovers an already-claimed active batch without triggering a new claim.
+    if (request.method === 'GET' && (path === '/batch' || path === '')) {
+      let { data, error } = await client.rpc('worker_recover_active_authoring_batch', {
+        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
+      })
+      if (!error && (!data || data.claimedCount === 0)) {
+        const scheduled = await client.rpc('worker_recover_active_authoring_batch', {
+          worker_id: PINNED_SCHEDULED_WORKER_ID,
+        })
+        if (!scheduled.error && scheduled.data && scheduled.data.claimedCount > 0) {
+          data = scheduled.data
+        }
+      }
       if (error) {
         return json(500, { error: error.message })
       }
       return json(200, data ?? { claimed: [], claimedCount: 0 })
     }
 
-    // 2. Submit Package: POST /submit
-    // Requirement 3: worker identity is pinned server-side to chatgpt-work-daily
+    // 3. Submit Package: POST /submit
+    // Worker identity is pinned server-side to the reviewed online author identities.
     if (request.method === 'POST' && path === '/submit') {
       const body = (await request.json()) as {
         jobId?: string
@@ -97,10 +140,11 @@ Deno.serve(async (request) => {
         })
       }
 
+      const workerId = await resolveJobWorkerId(client, jobId)
       const payloadText = typeof rawPackage === 'string' ? rawPackage : JSON.stringify(rawPackage)
       const { data, error } = await client.rpc('worker_submit_local_curriculum_package', {
         p_job_id: jobId,
-        p_generation_worker_id: PINNED_WORKER_ID,
+        p_generation_worker_id: workerId,
         p_payload_text: payloadText,
       })
 
@@ -110,16 +154,16 @@ Deno.serve(async (request) => {
       return json(200, data)
     }
 
-    // 3. Get Status: GET /status?job_id=...
-    // Requirement 3: worker identity is pinned server-side to chatgpt-work-daily
+    // 4. Get Status: GET /status?job_id=...
     if (request.method === 'GET' && path === '/status') {
       const jobId = url.searchParams.get('job_id') ?? url.searchParams.get('jobId')
       if (!jobId) {
         return json(400, { error: 'missing_parameter', message: 'job_id is required' })
       }
+      const workerId = await resolveJobWorkerId(client, jobId)
       const { data, error } = await client.rpc('worker_local_curriculum_submission_status', {
         job_id: jobId,
-        worker_id: PINNED_WORKER_ID,
+        worker_id: workerId,
       })
       if (error) {
         return json(500, { error: error.message })
@@ -127,8 +171,8 @@ Deno.serve(async (request) => {
       return json(200, data)
     }
 
-    // 4. Release Unsubmitted Claim: POST /release
-    // Requirement 5: Narrow release operation that verifies no submission exists before releasing
+    // 5. Release Unsubmitted Claim: POST /release
+    // Narrow release operation that verifies no submission exists before releasing
     if (request.method === 'POST' && path === '/release') {
       const body = (await request.json()) as {
         jobId?: string
@@ -144,11 +188,13 @@ Deno.serve(async (request) => {
       }
 
       const errorCode = body.errorCode ?? body.error_code ?? 'SUBMIT_TRANSPORT_FAILED'
-      const errorMessage = body.errorMessage ?? body.error_message ?? 'Unsubmitted claim released via authoring bridge'
+      const errorMessage =
+        body.errorMessage ?? body.error_message ?? 'Unsubmitted claim released via authoring bridge'
+      const workerId = await resolveJobWorkerId(client, jobId)
 
       const { data, error } = await client.rpc('worker_release_local_unsubmitted_claim', {
         job_id: jobId,
-        worker_id: PINNED_WORKER_ID,
+        worker_id: workerId,
         error_code: errorCode,
         error_message: errorMessage,
       })

@@ -41,7 +41,16 @@ Local Windows execution is a primary local environment, but it is **one client o
 
 ---
 
-## 2. Queue & Lease Protocol (Collision Prevention)
+## 2. Mandatory Input: Compiled Production Authoring Bundle
+
+Before performing any curriculum generation or repair work, every authoring executor MUST:
+1. **Read `packages/generator/bundles/production-authoring-bundle.md`**: Treat this current compiled bundle as the authoritative, non-negotiable curriculum-generation contract. Do not rely on agents discovering the bundle indirectly through `AGENTS.md` or `SPEC.md`.
+2. **Verify and record bundle provenance**: Check and record the current repository Git commit SHA and the bundle frontmatter metadata (`bundleVersion`, `promptVersion`, `schemaVersion`) before claiming any production queue batch.
+3. **Strict real data fidelity**: Adhere strictly to the core pedagogical guidelines, CAP alignment, and real data rules in the bundle. Never invent synthetic exercises or mock data.
+
+---
+
+## 3. Queue & Lease Protocol (Collision Prevention)
 
 Before claiming any production work, an executor must never blindly claim. It must check for active authoritative leases.
 
@@ -62,7 +71,7 @@ Before claiming any production work, an executor must never blindly claim. It mu
 
 ---
 
-## 3. Authoritative Retry & Targeted Repair Contract
+## 4. Authoritative Retry & Targeted Repair Contract
 
 When a claimed job has an existing authoring attempt that failed validation or quality review, the claim payload includes an authoritative `retryContext`.
 
@@ -78,7 +87,7 @@ When a claimed job has an existing authoring attempt that failed validation or q
 
 ---
 
-## 4. Pre-Submit Validation
+## 5. Pre-Submit Validation
 
 Every package must be validated locally before submitting over the wire.
 
@@ -98,7 +107,7 @@ Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true
 
 ---
 
-## 5. Immutable Submission & Read-After-Write Verification
+## 6. Immutable Submission & Read-After-Write Verification
 
 ### Submission Bridge
 - **Helper CLI**:
@@ -122,7 +131,7 @@ Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true
 
 ---
 
-## 6. Deterministic Finisher Execution
+## 7. Deterministic Finisher Execution
 
 PDF rendering and Supabase storage uploads are **never performed by the authoring executor**. They belong exclusively to the deterministic Finisher.
 
@@ -141,7 +150,7 @@ PDF rendering and Supabase storage uploads are **never performed by the authorin
 
 ---
 
-## 7. Scheduler Modes: Local vs. Online
+## 8. Scheduler Modes: Local vs. Online
 
 Paper English supports switching between local authoring and server-side online authoring without schema or codebase changes.
 
@@ -161,12 +170,12 @@ Paper English supports switching between local authoring and server-side online 
 
 ---
 
-## 8. Supported Executor Adapters
+## 9. Supported Executor Adapters
 
-| Executor | Documentation / Guide | Claim / Ingestion Path | Submission Path |
-| :--- | :--- | :--- | :--- |
-| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` |
-| **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` |
-| **Local Batch Runner** | `docs/local-codex-production-authoring.md` | `pnpm worker generate-claimed` | `worker_submit_local_curriculum_package` |
-| **ChatGPT Online Manual (Custom GPT)** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `/batch` (`docs/authoring-bridge-openapi.yaml`) | Authoring Bridge `/submit` (OpenAPI Action) |
-| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Server-staged snapshot (16:10 UTC cron) | Connected app bridge submission |
+| Executor | Documentation / Guide | Claim / Ingestion Path | Submission Path | Status / Release |
+| :--- | :--- | :--- | :--- | :--- |
+| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` | `submission-status` / `release` |
+| **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` | Helper CLI status |
+| **Local Batch Runner** | `docs/local-codex-production-authoring.md` | `pnpm worker generate-claimed` | `worker_submit_local_curriculum_package` | Finisher / Status RPC |
+| **ChatGPT Online Manual (Custom GPT)** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `POST /start` (or `GET /batch` recovery) | Authoring Bridge `POST /submit` | `GET /status`, `POST /release` |
+| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Server-staged snapshot (16:10 UTC cron) | Connected app bridge submission | Connected app bridge status |
