@@ -102,8 +102,7 @@ begin
   end if;
 
   delete from private_generation.pending_onboardings
-  where (consumed_at is null and expires_at < now())
-     or (consumed_at is not null and consumed_at < now() - interval '1 day');
+  where consumed_at is null and expires_at < now();
 
   v_token := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
   v_token_hash := encode(extensions.digest(v_token, 'sha256'), 'hex');
@@ -268,7 +267,9 @@ begin
   end if;
 
   update private_generation.pending_onboardings
-  set consumed_at = now(),
+  set normalized_email = 'consumed:' || v_pending.id::text,
+      draft = '{}'::jsonb,
+      consumed_at = now(),
       consumed_by = v_user_id,
       child_id = v_child_id,
       updated_at = now()
@@ -284,4 +285,4 @@ grant execute on function public.finalize_pending_onboarding(text) to authentica
 comment on function public.create_pending_onboarding(text, jsonb, text, text) is
   'Stores a short-lived private child-profile draft before Magic Link authentication and returns an opaque one-time handoff token.';
 comment on function public.finalize_pending_onboarding(text) is
-  'After Magic Link authentication, atomically binds the matching pending onboarding to the authenticated parent and creates the child/profile exactly once.';
+  'After Magic Link authentication, atomically binds the matching pending onboarding to the authenticated parent and creates the child/profile exactly once, then scrubs the pre-auth PII.';
