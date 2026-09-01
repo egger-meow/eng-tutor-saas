@@ -66,11 +66,12 @@ Before claiming any production work, an executor must never blindly claim. It mu
 
 When a claimed job has an existing authoring attempt that failed validation or quality review, the claim payload includes an authoritative `retryContext`.
 
-### Invariants for Retries:
-1. **Evidence-Driven**: Targeted repair MUST be guided strictly by `retryContext.findings` and `retryContext.failureEvidence`.
-2. **Immutability & Preservation**: Preserve all valid package content, stable IDs, stage ordering, learning objectives, and `inputFingerprint`.
-3. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass quality checks.
-4. **Writing Space & Schema 2.4.0**:
+### Invariants for Authoring & Retries:
+1. **Authoritative Curriculum Bundle**: Authoring executors MUST read `packages/generator/bundles/production-authoring-bundle.md` and treat the current compiled production-authoring bundle as the authoritative curriculum authoring contract.
+2. **Evidence-Driven**: Targeted repair MUST be guided strictly by `retryContext.findings` and `retryContext.failureEvidence`.
+3. **Immutability & Preservation**: Preserve all valid package content, stable IDs, stage ordering, learning objectives, and `inputFingerprint`.
+4. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass quality checks.
+5. **Writing Space & Schema 2.4.0**:
    - Non-MCQ questions (`translation`, `sentence-production`, `short-response`) require `writingLines >= 1` or a valid `responseLayout` (`lines`, `table`, or `organizer`).
    - Assessment items in `cap-transfer`, `independent` (4 options), and `homework` (4 options) require corresponding internal `cap-plan:<questionId>` checks in `qualityEvidence.criticalChecks`. Intentional grammar/vocabulary recall items outside `cap-transfer` must explicitly declare `"intentionalRecall": true`.
    - Reading-dependent items require an internal `evidence-plan:<questionId>` with canonical `evidenceAnchors` resolving to `studentLesson.reading.blocks`.

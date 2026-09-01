@@ -20,6 +20,34 @@ Windows Task Scheduler / Interactive Agent / Codex CLI
 
 The authoring protocol is executor-agnostic. Top-level agents (such as Antigravity or an interactive Codex CLI session), the Codex Desktop Scheduler, and the repository CLI runner all interact with the database using the same helper layer (`packages/worker/src/authoring-helpers.ts`).
 
+## Codex Desktop Scheduler Prompt
+
+When configuring a Codex Desktop scheduled task, use this exact prompt:
+
+```text
+Open C:\IDEA\eng-tutor-saas.
+
+Read AGENTS.md and follow its SPEC-reading protocol for curriculum generation.
+
+Then read:
+- docs/production-authoring.md
+- docs/local-codex-production-authoring.md
+- packages/generator/bundles/production-authoring-bundle.md
+
+Treat the current compiled production-authoring bundle as the authoritative curriculum authoring contract.
+
+Execute exactly one production authoring run using the local adapter.
+
+Use the local Supabase credentials and repository-owned claim/submit/validation helpers.
+You are the production author: perform planning, privacy-safe web research, grounding, authoring, independent critic, targeted repair, validation, and submission yourself.
+
+Do not spawn another Codex process.
+Never claim more than once.
+Preserve every server-owned inputFingerprint exactly.
+Treat retryContext as authoritative.
+Never render or upload PDFs; hand accepted submissions to the deterministic Finisher.
+```
+
 ## Interactive / Agent Authoring Workflow
 
 When an interactive agent or engineer runs production authoring:
