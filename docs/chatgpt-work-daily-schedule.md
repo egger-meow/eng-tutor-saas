@@ -21,7 +21,13 @@ The intended production Supabase project is:
 Use this exact project ref for all authorized Supabase bridge calls.
 Do not infer or select another Supabase project.
 
-Supabase Cron is the sole production claim mutator for `chatgpt-work-daily`. At 00:10 Asia/Taipei it executes the existing authoritative `private_generation.chatgpt_claim_generation_batch('chatgpt-work-daily')` boundary inside Postgres. Scheduled Work starts five minutes later and only recovers that active server-staged batch. Scheduled Work must never issue the mutating claim SQL itself.
+Supabase Cron is the sole production claim mutator for `chatgpt-work-daily`. At 00:10 Asia/Taipei it executes the existing authoritative claim boundary inside Postgres. The exact server-side Cron command is documented here for regression/audit purposes only and is deliberately outside the Scheduled Work paste-ready prompt:
+
+```sql
+select private_generation.chatgpt_claim_generation_batch('chatgpt-work-daily') as result;
+```
+
+Scheduled Work starts five minutes later and only recovers that active server-staged batch. Scheduled Work must never issue the mutating claim SQL itself.
 
 GitHub Actions is a separate deterministic finisher. It never authors curriculum. It checks submitted canonical JSON hourly (and supports manual dispatch), reruns repository-owned validation, renders both PDFs, inspects them, uploads them privately, and transactionally completes the job.
 
@@ -60,7 +66,7 @@ SERVER-STAGED AUTHORITATIVE CLAIM — SCHEDULED WORK IS READ-ONLY
 
 Supabase server-side Cron is the sole claim mutator. It runs at 00:10 Asia/Taipei, before this Scheduled Work task, and invokes the existing authoritative claim boundary for worker `chatgpt-work-daily`. That database boundary still enforces entitlement, feedback eligibility, normal capacity, mandatory deadline override, ordering, idempotency, attempt accounting, server-owned snapshots, and the cloud-authoring lease.
 
-Do not query `pg_catalog`, `information_schema`, `to_regprocedure`, or any other catalog/introspection surface. Do not execute `private_generation.chatgpt_claim_generation_batch` from Scheduled Work and do not issue any replacement claim mutation.
+Do not query `pg_catalog`, `information_schema`, `to_regprocedure`, or any other catalog/introspection surface. Do not execute the mutating claim boundary from Scheduled Work and do not issue any replacement claim mutation.
 
 After reading the current production bundle and recording its Git SHA, execute exactly once:
 
