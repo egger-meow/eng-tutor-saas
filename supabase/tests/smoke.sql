@@ -3820,6 +3820,129 @@ begin
           seq_m_canonical, seq_resumed_job.source_material_id;
       end if;
     end;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 7: Terminal Submission Protection & Immutable Attempt Collision Guard
+    -- Invariant: If a job has terminal submission history (e.g. quality_rejected attempt 1),
+    -- on resume: old job is canceled (retaining full submission history for audit),
+    -- a fresh job is created with tomorrow's anchor and fresh attempt counter,
+    -- and worker can claim/submit attempt 1 on the new job without PK collision.
+    -- -----------------------------------------------------------------------
+    declare
+      t7_child_id uuid := '00000000-0000-0000-0000-000000000307';
+      t7_old_job_id uuid := '00000000-0000-0000-0000-000000000407';
+      t7_old_job record;
+      t7_new_job record;
+      t7_claimed_job record;
+    begin
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+      values (t7_child_id, '00000000-0000-0000-0000-000000000001', 'Terminal Submission Student', 7, 'grade_7', 'Asia/Taipei');
+
+      delete from public.generation_jobs where child_id = t7_child_id;
+
+      -- 1. Initial generation job (attempt_count = 1)
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at, attempt_count
+      ) values (
+        t7_old_job_id, t7_child_id, current_date - 10, 'curriculum-rules/1.0.0',
+        t7_child_id::text || ':t7_old', 'pending', now() - interval '10 days',
+        now() - interval '9 days', now() - interval '11 days', now() - interval '10 days', 1
+      );
+
+      -- 2. Recorded quality_rejected submission on attempt 1
+      insert into private_generation.curriculum_submissions (
+        job_id, authoring_attempt, generation_worker_id, canonical_source, status, error_code, error_message
+      ) values (
+        t7_old_job_id, 1, 'worker_t7', '{"metadata": {"schemaVersion": "1.0.0"}}'::jsonb, 'quality_rejected', 'QUALITY_BELOW_THRESHOLD', 'Vocabulary density too low'
+      );
+
+      -- 3. Entitlement lapse (subscription canceled)
+      update public.subscriptions
+      set provider = 'paddle',
+          provider_customer_id = 'ctm_t7_1',
+          provider_subscription_id = 'sub_t7_1',
+          status = 'canceled',
+          plan_code = 'standard_monthly',
+          billing_interval = 'month',
+          price_twd = 499,
+          current_period_start = now() - interval '30 days',
+          current_period_end = now() - interval '5 days',
+          cancel_at_period_end = true,
+          provider_event_at = now() - interval '5 days'
+      where child_id = t7_child_id;
+
+      -- 4. Subscription resumes (entitlement transition to active)
+      perform public.process_paddle_subscription_event_v2(
+        'evt_t7_resume_1', 'subscription.created', clock_timestamp(),
+        t7_child_id, 'sub_t7_2', 'ctm_t7_1', 'active',
+        'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+        'dsc_founder', null, null, null, null, false, null, null
+      );
+
+      -- ASSERTION A: Old job was NOT mutated in place or reset to attempt 0; it was marked canceled
+      select * into t7_old_job from public.generation_jobs where id = t7_old_job_id;
+
+      if t7_old_job.status <> 'canceled' then
+        raise exception 'Test 7 Failure: old job with terminal submission was not marked canceled! Got status: %', t7_old_job.status;
+      end if;
+
+      if t7_old_job.attempt_count <> 1 then
+        raise exception 'Test 7 Failure: old job attempt_count was wrongly mutated! Expected 1, got %', t7_old_job.attempt_count;
+      end if;
+
+      -- Verify old submission is untouched
+      if not exists (
+        select 1 from private_generation.curriculum_submissions
+        where job_id = t7_old_job_id and authoring_attempt = 1 and status = 'quality_rejected'
+      ) then
+        raise exception 'Test 7 Failure: historical quality_rejected submission was deleted or altered!';
+      end if;
+
+      -- ASSERTION B: A new generation job was created for tomorrow's anchor
+      select * into t7_new_job
+      from public.generation_jobs
+      where child_id = t7_child_id and status = 'pending' and material_id is null;
+
+      if t7_new_job.id is null then
+        raise exception 'Test 7 Failure: fresh generation job was not created on resume';
+      end if;
+
+      if t7_new_job.id = t7_old_job_id then
+        raise exception 'Test 7 Failure: new job reused the old job ID!';
+      end if;
+
+      if t7_new_job.attempt_count <> 0 then
+        raise exception 'Test 7 Failure: new job attempt_count should start at 0, got %', t7_new_job.attempt_count;
+      end if;
+
+      -- ASSERTION C: Worker can claim new job and submit attempt 1 without collision!
+      update public.generation_jobs
+      set status = 'claimed',
+          claimed_by = 'worker_t7_new',
+          lease_expires_at = now() + interval '30 minutes',
+          attempt_count = attempt_count + 1
+      where id = t7_new_job.id
+      returning * into t7_claimed_job;
+
+      if t7_claimed_job.attempt_count <> 1 then
+        raise exception 'Test 7 Failure: claimed job attempt_count should be 1, got %', t7_claimed_job.attempt_count;
+      end if;
+
+      -- Insert attempt 1 submission for the NEW job
+      insert into private_generation.curriculum_submissions (
+        job_id, authoring_attempt, generation_worker_id, canonical_source, status
+      ) values (
+        t7_new_job.id, t7_claimed_job.attempt_count, 'worker_t7_new',
+        '{"metadata": {"schemaVersion": "1.0.0", "target": "Fresh Curriculum"}}'::jsonb,
+        'processing'
+      );
+
+      -- Verify both submissions exist independently without PK collision
+      if (select count(*) from private_generation.curriculum_submissions where job_id in (t7_old_job_id, t7_new_job.id)) <> 2 then
+        raise exception 'Test 7 Failure: expected 2 distinct submissions across old and new jobs';
+      end if;
+    end;
   end;
 
   -- Clean up

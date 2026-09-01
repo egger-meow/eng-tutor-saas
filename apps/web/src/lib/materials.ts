@@ -257,12 +257,14 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
 
   const { data: jobs, error: jobsError } = await client
     .from('generation_jobs')
-    .select('material_id, child_id, release_at')
+    .select('material_id, child_id, release_at, status')
     .in('child_id', childIds)
   if (jobsError) throw jobsError
 
+  const activeJobs = (jobs ?? []).filter((job: any) => job.status !== 'canceled')
+
   const pages = await Promise.all(childIds.map(async (childId) => {
-    const childJobs = (jobs ?? []).filter((job) => job.child_id === childId)
+    const childJobs = activeJobs.filter((job) => job.child_id === childId)
     const futureMaterialIds = includeFuture
       ? childJobs
         .filter((job) => job.material_id && job.release_at && Date.parse(job.release_at) > now.getTime())
@@ -326,7 +328,7 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
   const hasPastDueUnmaterializedJobByChild: Record<string, boolean> = {}
   const nowMs = now.getTime()
   for (const childId of childIds) {
-    const childJobs = (jobs ?? []).filter((j) => j.child_id === childId)
+    const childJobs = activeJobs.filter((j) => j.child_id === childId)
     nextJobReleaseAtByChild[childId] = findNextFutureJobReleaseAt(childJobs, now)
     hasPastDueUnmaterializedJobByChild[childId] = childJobs.some((j) => {
       if (j.material_id) return false
