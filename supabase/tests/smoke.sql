@@ -3943,6 +3943,150 @@ begin
         raise exception 'Test 7 Failure: expected 2 distinct submissions across old and new jobs';
       end if;
     end;
+
+    -- -----------------------------------------------------------------------
+    -- Test Case 8: Supersede Unmaterialized Failed Jobs on Entitlement Resume
+    -- Invariant: If a job reached status = 'failed' (e.g. max_attempts reached with
+    -- terminal quality_rejected / technical_failed submissions):
+    -- 1. On entitlement resume, the old failed job must be superseded -> 'canceled'.
+    -- 2. Its idempotency slot must be released so the new job can occupy tomorrow's anchor.
+    -- 3. Its historical submissions must remain untouched for auditing.
+    -- 4. A brand-new generation job is created for tomorrow with attempt_count = 0.
+    -- 5. Worker can claim and submit attempt 1 on the new job without PK collision.
+    -- 6. Parent view (excluding canceled/failed jobs) sees only the new pending job.
+    -- -----------------------------------------------------------------------
+    declare
+      t8_child_id uuid := '00000000-0000-0000-0000-000000000308';
+      t8_old_job_id uuid := '00000000-0000-0000-0000-000000000408';
+      t8_old_job record;
+      t8_new_job record;
+      t8_claimed_job record;
+      t8_tomorrow_date date;
+      t8_active_jobs_count integer;
+    begin
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
+      values (t8_child_id, '00000000-0000-0000-0000-000000000001', 'Failed Status Student', 8, 'grade_8', 'Asia/Taipei');
+
+      delete from public.generation_jobs where child_id = t8_child_id;
+
+      t8_tomorrow_date := ((now() at time zone 'Asia/Taipei')::date) + 1;
+
+      -- 1. Old generation job that exhausted attempts and reached terminal 'failed' status
+      -- Note: deliberately setting idempotency_key to tomorrow's slot to prove that without slot release,
+      -- a collision would prevent the fresh job from being inserted!
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at, attempt_count
+      ) values (
+        t8_old_job_id, t8_child_id, t8_tomorrow_date, 'curriculum-rules/1.0.0',
+        t8_child_id::text || ':' || t8_tomorrow_date::text || ':r1', 'failed', now() - interval '2 days',
+        now() - interval '1 day', now() - interval '3 days', now() - interval '2 days', 2
+      );
+
+      -- 2. Terminal quality_rejected submissions for attempts 1 and 2
+      insert into private_generation.curriculum_submissions (
+        job_id, authoring_attempt, generation_worker_id, canonical_source, status, error_code, error_message
+      ) values (
+        t8_old_job_id, 1, 'worker_t8', '{"metadata": {"attempt": 1}}'::jsonb, 'quality_rejected', 'QUALITY_BELOW_THRESHOLD', 'Attempt 1 failed quality'
+      ), (
+        t8_old_job_id, 2, 'worker_t8', '{"metadata": {"attempt": 2}}'::jsonb, 'quality_rejected', 'QUALITY_BELOW_THRESHOLD', 'Attempt 2 failed quality (max attempts)'
+      );
+
+      -- 3. Entitlement lapse (subscription canceled)
+      update public.subscriptions
+      set provider = 'paddle',
+          provider_customer_id = 'ctm_t8_1',
+          provider_subscription_id = 'sub_t8_1',
+          status = 'canceled',
+          plan_code = 'standard_monthly',
+          billing_interval = 'month',
+          price_twd = 499,
+          current_period_start = now() - interval '30 days',
+          current_period_end = now() - interval '3 days',
+          cancel_at_period_end = true,
+          provider_event_at = now() - interval '3 days'
+      where child_id = t8_child_id;
+
+      -- 4. Subscription resumes (entitlement transition to active)
+      perform public.process_paddle_subscription_event_v2(
+        'evt_t8_resume_1', 'subscription.created', clock_timestamp(),
+        t8_child_id, 'sub_t8_2', 'ctm_t8_1', 'active',
+        'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+        'dsc_founder', null, null, null, null, false, null, null
+      );
+
+      -- ASSERTION A: Old failed job was superseded -> canceled, and its slot released
+      select * into t8_old_job from public.generation_jobs where id = t8_old_job_id;
+
+      if t8_old_job.status <> 'canceled' then
+        raise exception 'Test 8 Failure: old failed job was not superseded to canceled! Got status: %', t8_old_job.status;
+      end if;
+
+      if t8_old_job.idempotency_key not like '%:canceled:%' then
+        raise exception 'Test 8 Failure: old failed job idempotency_key was not released! Got: %', t8_old_job.idempotency_key;
+      end if;
+
+      -- Verify historical submissions are intact
+      if (select count(*) from private_generation.curriculum_submissions where job_id = t8_old_job_id and status = 'quality_rejected') <> 2 then
+        raise exception 'Test 8 Failure: historical submissions of failed job were mutated or lost!';
+      end if;
+
+      -- ASSERTION B: Fresh job was successfully created for tomorrow's anchor
+      select * into t8_new_job
+      from public.generation_jobs
+      where child_id = t8_child_id and status = 'pending' and material_id is null;
+
+      if t8_new_job.id is null then
+        raise exception 'Test 8 Failure: brand new generation job was not created for resumed student';
+      end if;
+
+      if t8_new_job.id = t8_old_job_id then
+        raise exception 'Test 8 Failure: fresh job reused old job id!';
+      end if;
+
+      if t8_new_job.attempt_count <> 0 then
+        raise exception 'Test 8 Failure: fresh job attempt_count should be 0, got %', t8_new_job.attempt_count;
+      end if;
+
+      if t8_new_job.idempotency_key <> (t8_child_id::text || ':' || t8_tomorrow_date::text || ':r1') then
+        raise exception 'Test 8 Failure: fresh job idempotency key mismatch! Got: %', t8_new_job.idempotency_key;
+      end if;
+
+      -- ASSERTION C: Worker claims new job and submits attempt 1 cleanly without collision
+      update public.generation_jobs
+      set status = 'claimed',
+          claimed_by = 'worker_t8_new',
+          lease_expires_at = now() + interval '30 minutes',
+          attempt_count = attempt_count + 1
+      where id = t8_new_job.id
+      returning * into t8_claimed_job;
+
+      if t8_claimed_job.attempt_count <> 1 then
+        raise exception 'Test 8 Failure: claimed job attempt_count should be 1, got %', t8_claimed_job.attempt_count;
+      end if;
+
+      insert into private_generation.curriculum_submissions (
+        job_id, authoring_attempt, generation_worker_id, canonical_source, status
+      ) values (
+        t8_new_job.id, t8_claimed_job.attempt_count, 'worker_t8_new',
+        '{"metadata": {"schemaVersion": "1.0.0", "target": "Fresh Curriculum T8"}}'::jsonb,
+        'processing'
+      );
+
+      -- Total submissions across t8: 2 historical + 1 new = 3
+      if (select count(*) from private_generation.curriculum_submissions where job_id in (t8_old_job_id, t8_new_job.id)) <> 3 then
+        raise exception 'Test 8 Failure: expected 3 total submissions (2 old + 1 new)';
+      end if;
+
+      -- ASSERTION D: Parent dashboard query view (excluding canceled and failed)
+      select count(*) into t8_active_jobs_count
+      from public.generation_jobs
+      where child_id = t8_child_id and status not in ('canceled', 'failed');
+
+      if t8_active_jobs_count <> 1 then
+        raise exception 'Test 8 Failure: parent view should only see 1 active job, got %', t8_active_jobs_count;
+      end if;
+    end;
   end;
 
   -- Clean up

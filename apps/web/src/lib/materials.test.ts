@@ -127,4 +127,70 @@ describe('listMaterialsWithClient - Service Time Week Numbering', () => {
       { id: 'm-1', week: 1 },
     ])
   })
+
+  it('excludes canceled and failed generation jobs from hasPastDueUnmaterializedJobByChild', async () => {
+    const mockClient = {
+      from: (table: string) => {
+        if (table === 'generation_jobs') {
+          return {
+            select: () => ({
+              in: () => Promise.resolve({
+                data: [
+                  {
+                    material_id: null,
+                    child_id: 'child-1',
+                    release_at: '2026-01-01T00:00:00Z',
+                    status: 'canceled',
+                  },
+                  {
+                    material_id: null,
+                    child_id: 'child-1',
+                    release_at: '2026-01-02T00:00:00Z',
+                    status: 'failed',
+                  },
+                ],
+                error: null,
+              }),
+            }),
+          }
+        }
+        if (table === 'materials') {
+          return {
+            select: () => ({
+              eq: () => ({
+                order: () => ({
+                  limit: () => ({
+                    maybeSingle: () => Promise.resolve({ data: null, error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'feedback') {
+          return {
+            select: () => ({
+              in: () => ({
+                in: () => Promise.resolve({ data: [], error: null }),
+              }),
+            }),
+          }
+        }
+        throw new Error(`Unexpected table ${table}`)
+      },
+      rpc: (fn: string) => {
+        if (fn === 'get_owned_released_materials_page') {
+          return Promise.resolve({
+            data: [],
+            error: null,
+          })
+        }
+        throw new Error(`Unexpected rpc ${fn}`)
+      },
+    }
+
+    const { listMaterialsWithClient } = await import('./materials')
+    const res = await listMaterialsWithClient(mockClient as any, ['child-1'])
+    expect(res.hasPastDueUnmaterializedJobByChild['child-1']).toBe(false)
+  })
 })

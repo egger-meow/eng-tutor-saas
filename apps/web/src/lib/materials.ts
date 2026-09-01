@@ -261,7 +261,7 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
     .in('child_id', childIds)
   if (jobsError) throw jobsError
 
-  const activeJobs = (jobs ?? []).filter((job: any) => job.status !== 'canceled')
+  const activeJobs = (jobs ?? []).filter((job: any) => job.status !== 'canceled' && job.status !== 'failed')
 
   const pages = await Promise.all(childIds.map(async (childId) => {
     const childJobs = activeJobs.filter((job) => job.child_id === childId)
