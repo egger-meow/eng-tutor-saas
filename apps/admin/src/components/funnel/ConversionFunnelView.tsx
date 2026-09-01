@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ConversionFunnelData } from '../../client/types.js'
+import { normalizeLandingFirstFunnel } from './landing-first-funnel.js'
 
 interface Props {
   data: ConversionFunnelData | null
@@ -17,16 +18,16 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
   }
 
   const {
-    steps,
+    steps: rawSteps,
     uniqueLandingVisitors,
     overallConversionPercent,
-    biggestDropOff,
     channels,
     devices,
     trends,
     internalTestEventsFiltered,
     totalEvents,
   } = data
+  const { steps, biggestDropOff } = normalizeLandingFirstFunnel(rawSteps)
 
   const maxStepVisitors = Math.max(...steps.map((s) => s.uniqueVisitors), 1)
 
@@ -37,7 +38,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         <div>
           <h2 className="funnel-title">轉換漏斗分析 (Conversion Funnel)</h2>
           <p className="funnel-subtitle">
-            第一方即時轉換漏斗：追蹤訪客由首頁瀏覽、教材範例、安全登入至完成 6 步驟孩子學習檔案的端到端轉換。
+            第一方即時轉換漏斗：追蹤訪客由首頁瀏覽、教材範例、開始填孩子資料、Email 驗證到完成孩子學習檔案的端到端轉換。
           </p>
         </div>
         <div className="funnel-controls">
@@ -76,22 +77,22 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         </div>
 
         <div className="funnel-kpi-card">
+          <div className="kpi-label">開始填孩子資料</div>
+          <div className="kpi-value">
+            {steps.find((s) => s.name === 'child_form_start')?.uniqueVisitors.toLocaleString() || 0}
+          </div>
+          <div className="kpi-desc">
+            開始率 {steps.find((s) => s.name === 'child_form_start')?.conversionFromLandingPercent || 0}%
+          </div>
+        </div>
+
+        <div className="funnel-kpi-card">
           <div className="kpi-label">送出 Email 驗證</div>
           <div className="kpi-value">
             {steps.find((s) => s.name === 'email_submit')?.uniqueVisitors.toLocaleString() || 0}
           </div>
           <div className="kpi-desc">
-            送出率 {steps.find((s) => s.name === 'email_submit')?.conversionFromLandingPercent || 0}%
-          </div>
-        </div>
-
-        <div className="funnel-kpi-card">
-          <div className="kpi-label">登入成功 (Auth Complete)</div>
-          <div className="kpi-value">
-            {steps.find((s) => s.name === 'auth_complete')?.uniqueVisitors.toLocaleString() || 0}
-          </div>
-          <div className="kpi-desc">
-            驗證轉換 {steps.find((s) => s.name === 'auth_complete')?.conversionFromPrevPercent || 0}%
+            填表後送出 {steps.find((s) => s.name === 'email_submit')?.conversionFromPrevPercent || 0}%
           </div>
         </div>
 
@@ -110,7 +111,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           {biggestDropOff ? (
             <>
               <div className="kpi-value highlight-rose">
-                -{biggestDropOff.dropCount} 人 ({biggestDropOff.dropPercent}%)
+                -{biggestDropOff.count} 人 ({biggestDropOff.percent}%)
               </div>
               <div className="kpi-desc">
                 {biggestDropOff.fromLabel.split(' ')[0]} ➔ {biggestDropOff.toLabel.split(' ')[0]}
@@ -126,7 +127,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
       <div className="funnel-card">
         <h3 className="card-heading">8 階段轉換漏斗進程 (Step-by-Step Funnel)</h3>
         <p className="card-subheading">
-          精確掌握從公開流量到登入、建檔、完成設定的各階段流失與轉換率。
+          精確掌握從公開流量到填寫孩子資料、Email 驗證、登入與完成設定的各階段流失與轉換率。
         </p>
 
         <div className="funnel-steps-table-wrapper">
@@ -276,9 +277,9 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
                   <th>首頁瀏覽</th>
                   <th>範例點擊</th>
                   <th>點擊體驗</th>
+                  <th>開始填表</th>
                   <th>送出 Email</th>
                   <th>登入成功</th>
-                  <th>開始填表</th>
                   <th>建立孩子</th>
                   <th>完成設定</th>
                 </tr>
@@ -292,9 +293,9 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
                     <td>{t.landing_view}</td>
                     <td>{t.sample_click}</td>
                     <td>{t.free_trial_click}</td>
+                    <td>{t.child_form_start}</td>
                     <td>{t.email_submit}</td>
                     <td>{t.auth_complete}</td>
-                    <td>{t.child_form_start}</td>
                     <td>{t.child_created}</td>
                     <td>
                       <strong className="text-emerald">{t.onboarding_complete}</strong>
