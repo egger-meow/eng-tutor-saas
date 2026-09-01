@@ -14,7 +14,7 @@ function groundedPackage() {
 }
 
 async function activeStages() {
-  const promptRoot = resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0')
+  const promptRoot = resolve(REPO_ROOT, 'packages/generator/prompts/2.11.1')
   const [plan, author, critic, repair] = await Promise.all([
     readFile(resolve(promptRoot, '01-plan.md'), 'utf8'),
     readFile(resolve(promptRoot, '02-author.md'), 'utf8'),
@@ -24,7 +24,7 @@ async function activeStages() {
   return { plan, author, critic, repair }
 }
 
-describe('Prompt 2.11.0 consolidated recency-aware grounding behavior', () => {
+describe('Prompt 2.11.1 consolidated recency-aware grounding behavior', () => {
   it('requires substantive recent discovery and fair preference for a strong current candidate in a fast-moving domain', async () => {
     const { plan, critic } = await activeStages()
     expect(plan).toContain('Classify time sensitivity internally as durable or fast-moving')

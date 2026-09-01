@@ -7,6 +7,7 @@ import vocabulary2000 from './curriculum-maps/official/vocabulary-2000.json' wit
 import { evaluateWorkloadFit, isWithinWorkloadExceptionBand, WORKLOAD_BUDGET_EXCEPTION_CHECK_ID } from './workload-fit.js'
 import { auditCapPrecedentPackage, auditReadingEvidenceBoundary } from './cap-precedent-audit.js'
 import { normalizePromptVersion, isPromptVersionGte } from './engine-version.js'
+import { auditLexicalRetrievalQuality } from './lexical-retrieval-audit.js'
 
 export { normalizePromptVersion, isPromptVersionGte }
 
@@ -350,6 +351,12 @@ export function auditCurriculumPackage(
   const isCapGovernedPrompt = isPromptVersionGte(rawPrompt, 2, 9)
   const isCritic5DimGovernedPrompt = isPromptVersionGte(rawPrompt, 2, 10)
 
+  if (isPromptVersionGte(rawPrompt, 2, 11, 1)) {
+    const lexicalRetrievalAudit = auditLexicalRetrievalQuality(pkg)
+    for (const message of lexicalRetrievalAudit.findings) {
+      add('semantic-critical', 'lexical-retrieval-quality', 'critical', message)
+    }
+  }
   if (isCapGovernedPrompt) {
     const capAudit = auditCapPrecedentPackage(pkg)
     for (const message of capAudit.findings) add('semantic-critical', 'cap-precedent-floor', 'critical', message)

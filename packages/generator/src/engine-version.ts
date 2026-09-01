@@ -3,7 +3,7 @@
  *
  * - `CURRENT_ENGINE_VERSION`: Semantic version of the generation & pedagogy engine (currently '1.6.0')
  * - `CURRENT_SCHEMA_VERSION`: Canonical schema version for curriculum package structure ('2.4.0')
- * - `CURRENT_PROMPT_VERSION`: Active consolidated prompt suite version ('2.11.0')
+ * - `CURRENT_PROMPT_VERSION`: Active consolidated prompt suite version ('2.11.1')
  * - `CURRENT_ERA_TAG`: Stable machine era identifier ('engine_v1')
  * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.2.0')
  */
@@ -11,7 +11,7 @@
 export const CURRENT_RELEASE_ID = 'rel_1.6.0'
 export const CURRENT_ENGINE_VERSION = '1.6.0'
 export const CURRENT_SCHEMA_VERSION = '2.4.0'
-export const CURRENT_PROMPT_VERSION = '2.11.0'
+export const CURRENT_PROMPT_VERSION = '2.11.1'
 export const CURRENT_ERA_TAG = 'engine_v1' as const
 export const CURRENT_QUALITY_PROFILE_VERSION = '1.2.0'
 export const CURRENT_WORKER_VERSION = '1.5.0'
@@ -55,13 +55,15 @@ export function normalizePromptVersion(rawPromptVersion?: string | null): string
 }
 
 /** Checks whether a prompt version string meets or exceeds the specified target major/minor version */
-export function isPromptVersionGte(rawPromptVersion: string | undefined | null, targetMajor: number, targetMinor: number): boolean {
+export function isPromptVersionGte(rawPromptVersion: string | undefined | null, targetMajor: number, targetMinor: number, targetPatch = 0): boolean {
   const norm = normalizePromptVersion(rawPromptVersion)
   const match = norm.match(/^(\d+)\.(\d+)(?:\.(\d+))?/u)
   if (!match) return false
   const major = parseInt(match[1]!, 10)
   const minor = parseInt(match[2]!, 10)
+  const patch = parseInt(match[3] ?? '0', 10)
   if (major > targetMajor) return true
-  if (major === targetMajor && minor >= targetMinor) return true
+  if (major === targetMajor && minor > targetMinor) return true
+  if (major === targetMajor && minor === targetMinor && patch >= targetPatch) return true
   return false
 }

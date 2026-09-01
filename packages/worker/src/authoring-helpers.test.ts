@@ -231,7 +231,7 @@ function makeValidV24Package(jobId: string, childId: string, fingerprint: string
   v24.metadata.childId = childId
   v24.metadata.inputFingerprint = fingerprint
   v24.metadata.model = 'gpt-5.6-sol'
-  v24.metadata.promptVersion = 'prompt/2.11.0'
+  v24.metadata.promptVersion = 'prompt/2.11.1'
   v24.metadata.engineVersion = '1.6.0'
 
   const precedent = 'cap-ea8d068eb1d8'

@@ -100,7 +100,7 @@ Every package must be validated locally before submitting over the wire.
   - `inputFingerprint` exact match against claimed context.
   - `jobId` and `childId` exact match.
   - `model` metadata (must indicate `gpt-5.6-sol`).
-  - `promptVersion` (matches active production prompt, e.g. `prompt/2.11.0`).
+  - `promptVersion` (matches active production prompt, e.g. `prompt/2.11.1`).
   - Finisher audit policy (`auditCurriculumPackage` with `applyFinisherAuditPolicy`).
 
 Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true`.

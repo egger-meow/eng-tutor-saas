@@ -14,7 +14,7 @@ const explicitLexicalRecallPackage = {
     practice: [
       {
         stage: 'independent',
-        questions: [{ id: 'I3', itemType: 'context-clue' }],
+        questions: [{ id: 'I3', itemType: 'context-clue', prompt: 'The scientist repeats the test to ______ the cause of the error.' }],
       },
     ],
   },
@@ -59,6 +59,29 @@ describe('Finisher audit authority boundary', () => {
 
     expect(result.passed).toBe(true)
     expect(result.findings.every((finding) => finding.severity === 'warning')).toBe(true)
+  })
+
+  it('never downgrades a bare bilingual lookup even when intentionalRecall is true', () => {
+    const barePackage = structuredClone(explicitLexicalRecallPackage)
+    barePackage.studentLesson.practice[0]!.questions[0]!.prompt = 'Write the English word for「海岸」.'
+
+    const result = applyFinisherAuditPolicy(report([
+      {
+        tier: 'semantic-critical',
+        dimension: 'cap-precedent-floor',
+        severity: 'critical',
+        message: 'CAP_RECALL_EXEMPTION_INVALID:I3: lexical retrieval classification mismatch',
+      },
+      {
+        tier: 'semantic-critical',
+        dimension: 'lexical-retrieval-quality',
+        severity: 'critical',
+        message: 'BARE_BILINGUAL_LOOKUP:I3:independent: context required',
+      },
+    ]), barePackage)
+
+    expect(result.passed).toBe(false)
+    expect(result.findings.every((finding) => finding.severity === 'critical')).toBe(true)
   })
 
   it('still hard-fails a recall exemption without package evidence proving lexical or grammar retrieval', () => {

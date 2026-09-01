@@ -14,23 +14,24 @@ import {
   computeFrozen280Hashes,
   computeFrozen2100Hashes,
   computeFrozen2101Hashes,
+  computeFrozen2110Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
 describe('bundle-compiler', () => {
-  it('generates a compact deterministic 2.11.0 production bundle with no historical overlay sediment', async () => {
+  it('generates a compact deterministic 2.11.1 production bundle with no historical overlay sediment', async () => {
   const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
   const existingBundle = await readFile(bundlePath, 'utf8')
   const freshBundle = await compileProductionBundle(REPO_ROOT)
 
   expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
   expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
-  expect(freshBundle.metadata.promptVersion).toBe('2.11.0')
-  expect(freshBundle.metadata.bundleVersion).toBe('2.11.0-prod')
+  expect(freshBundle.metadata.promptVersion).toBe('2.11.1')
+  expect(freshBundle.metadata.bundleVersion).toBe('2.11.1-prod')
   expect(freshBundle.metadata.engineVersion).toBe('1.6.0')
   expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/01-plan.md')
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.0/03-critic.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.1/01-plan.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.1/03-critic.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.4.0/01-plan.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.10.1/03-critic.md')
   expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -186,6 +187,15 @@ it('verifies that prompts/2.10.1 final overlay remains byte-for-byte frozen afte
     'packages/generator/prompts/2.10.1/02-author.md': '2b8b74e0f9ba840e7037089083aad6f07bff50c9c52c4dc05ef0a91ba7629d4a',
     'packages/generator/prompts/2.10.1/03-critic.md': '2027d1291f7caa3df9c5b0062f42c573a2eab5a131320e13ecaa0d420810d7fd',
     'packages/generator/prompts/2.10.1/04-repair.md': '38e3b5080c44d76531f9948ecf71d6fc4d606a580e3490672c8b1ef6d7ee4941',
+  })
+})
+
+it('verifies that prompts/2.11.0 consolidated baseline remains byte-for-byte frozen after the patch bump', async () => {
+  expect(await computeFrozen2110Hashes(REPO_ROOT)).toEqual({
+    'packages/generator/prompts/2.11.0/01-plan.md': '0c835b600d403d01e4e48051573b86ea13034fdbdeb44d0a4a3509c357096590',
+    'packages/generator/prompts/2.11.0/02-author.md': '44bcff6f7933343670d901a59b749a01e0c31bb79dfbda63d71ca7478105413b',
+    'packages/generator/prompts/2.11.0/03-critic.md': '9326e2708447474b14644ad6c664bd773fe0896bc8286fc6580da981360f9c99',
+    'packages/generator/prompts/2.11.0/04-repair.md': 'd2178ee0c0e1b202211533f0724b686576bba1124e3d2961977870571e109286',
   })
 })
 

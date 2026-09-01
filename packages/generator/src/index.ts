@@ -89,6 +89,7 @@ export {
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
 export { auditCurriculumPackage, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
+export * from './lexical-retrieval-audit.js'
 export { auditCapPrecedentFloor, auditCapPrecedentPackage, auditReadingEvidenceBoundary, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'
 export type { CapAssessmentIntent, CapAssessmentPlan, CapDesignAnchor, CapPrecedentAuditResult, CapPrecedentRuntimeBundle, EvidenceBoundaryAuditResult, GenericEvidencePlan } from './cap-precedent-audit.js'
 export { CAP_ASSESSMENT_PLAN_BASE_KEYS, CAP_ASSESSMENT_PLAN_CONTRACT, validateCapAssessmentPlan } from './cap-assessment-plan-contract.js'

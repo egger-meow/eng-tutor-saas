@@ -1831,6 +1831,8 @@ Homework should primarily review material already introduced during the week.
 
 It should not suddenly teach a new difficult concept.
 
+Retrieval-oriented homework must use meaningful semantic or sentence context. Bare Chinese-to-English or English-to-Chinese lookup and isolated dictionary-definition questions are prohibited even when marked as intentional recall.
+
 ---
 
 # 81. Vocabulary Homework
@@ -1845,6 +1847,8 @@ Vocabulary review may combine:
 * simple production.
 
 The goal is retrieval several days after initial exposure.
+
+Short translation remains valid only when embedded in meaningful semantic or sentence context. Context-free flashcard/dictionary prompts such as asking for an English word from a Chinese gloss, a Chinese meaning from an English word, or “what does X mean?” are not valid student-facing assessment.
 
 ---
 
@@ -2778,7 +2782,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.6.0, Schema 2.4.0, and Prompt 2.11.0. Prompt 2.11.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+New production authoring uses Engine 1.6.0, Schema 2.4.0, and Prompt 2.11.1. Prompt 2.11.1 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
 
 ---
 
@@ -3736,6 +3740,7 @@ Automated or semi-automated validation should eventually check:
 * package-level CAP precedent refs equal the union of per-item refs and resolve only to the authoritative non-holdout runtime bundle.
 * CAP language difficulty and cognitive depth are validated independently; simplifying English must not silently erase planned reasoning.
 * deterministic CAP copy-fingerprint and shallow-assessment checks pass before rendering.
+* a focused cross-stage lexical/grammar quality audit rejects exact high-confidence bare bilingual lookup and isolated dictionary-definition patterns in retrieval, homework, and all other student-facing assessment stages without requiring CAP precedent plans for ordinary contextual retrieval.
 
 ---
 
@@ -4205,11 +4210,11 @@ For weekly-material work specifically:
 25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 26. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP references before writing the item, then anchor, blend, or calibrate a novel design that meets or exceeds the CAP quality floor without requiring structural imitation.
 27. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
-28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval.
+28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval and supplied with meaningful semantic or sentence context. `intentionalRecall: true` never exempts bare bilingual lookup or isolated dictionary-definition questions.
 29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, or cognitive-depth/shallow-assessment failures. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition and targeted repair.
 30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation.
 31. Grounding review for named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, and similar scoped entities must verify the exact relationship `entity/version/mode -> capability/behavior -> control flow/condition/limit/qualifier`. Reject semantic feature fusion or compositional attribution; do not implement product-specific deterministic keyword rules as a substitute for Critic judgment.
-32. Prompt 2.11.0 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
+32. Prompt 2.11.1 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
 
 
 ---

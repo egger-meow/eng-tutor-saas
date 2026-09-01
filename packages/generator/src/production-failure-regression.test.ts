@@ -4,6 +4,7 @@ import { compileProductionBundle, REPO_ROOT } from './bundle-compiler.js'
 import { validPackage } from './curriculum-package.test.js'
 import { resolveQualityProfile } from './quality-profile-loader.js'
 import { CURRENT_PROMPT_VERSION } from './engine-version.js'
+import { auditLexicalRetrievalQuality, BARE_BILINGUAL_LOOKUP_CODE, BARE_DICTIONARY_DEFINITION_CODE } from './lexical-retrieval-audit.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
 
@@ -64,7 +65,7 @@ describe('production failure regressions', () => {
     expect(audit.findings.find((f) => f.dimension === 'lexical-anchor')?.severity).toBe('warning')
   })
 
-  it('rejects bare CURRENT_PROMPT_VERSION (2.11.0) packages missing mandatory critic dimensions', () => {
+  it('rejects bare CURRENT_PROMPT_VERSION (2.11.1) packages missing mandatory critic dimensions', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks = [
@@ -240,6 +241,82 @@ describe('production failure regressions', () => {
     expect(boundaryFindings).toEqual([])
   })
 
+  describe('Prompt 2.11.1 cross-stage lexical retrieval quality', () => {
+    const lexicalOnlyPackage = (retrievalPrompts: string[], homeworkPrompts: string[] = []) => ({
+      studentLesson: {
+        practice: [{
+          stage: 'retrieval',
+          questions: retrievalPrompts.map((prompt, index) => ({ id: 'R' + (index + 1), prompt })),
+        }],
+        homework: {
+          questions: homeworkPrompts.map((prompt, index) => ({ id: 'H' + (index + 1), prompt })),
+        },
+      },
+    } as any)
+
+    it('rejects the real production bare bilingual lookup pattern across retrieval and homework', () => {
+      const report = auditLexicalRetrievalQuality(lexicalOnlyPackage(
+        ['Write the English word for「庇護處；遮蔽」.', 'Write the English word for「生態系」.'],
+        ['Write the English word for「海岸」.'],
+      ))
+
+      expect(report.passed).toBe(false)
+      expect(report.findings).toHaveLength(3)
+      expect(report.findings.every((finding) => finding.startsWith(BARE_BILINGUAL_LOOKUP_CODE))).toBe(true)
+    })
+
+    it('rejects both translation directions and isolated dictionary definitions', () => {
+      const report = auditLexicalRetrievalQuality(lexicalOnlyPackage([
+        'Translate「生態系」into English.',
+        'What does shelter mean?',
+        'Write the Chinese meaning of habitat.',
+      ]))
+
+      expect(report.passed).toBe(false)
+      expect(report.findings.filter((finding) => finding.startsWith(BARE_BILINGUAL_LOOKUP_CODE))).toHaveLength(2)
+      expect(report.findings.filter((finding) => finding.startsWith(BARE_DICTIONARY_DEFINITION_CODE))).toHaveLength(1)
+    })
+
+    it('accepts contextual cloze, meaningful choice, and sentence production retrieval', () => {
+      const report = auditLexicalRetrievalQuality(lexicalOnlyPackage([
+        'The boat returned to the ______ before the storm. Use one word from this week.',
+        'Kelp forests give animals food and ______.',
+        'Write one sentence using shelter to describe the kelp forest.',
+        'Choose the weekly word that best completes this sentence: Young fish hide in the kelp forest for safety.',
+      ]))
+
+      expect(report).toEqual({ passed: true, findings: [] })
+    })
+
+    it('does not let intentionalRecall bypass the integrated production rejection', () => {
+      const pkg = canonicalPackage()
+      pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
+      const retrieval = pkg.studentLesson.practice.find((stage: any) => stage.stage === 'retrieval')
+      const retrievalQuestion = retrieval.questions[0]
+      retrievalQuestion.prompt = 'Write the English word for「庇護處；遮蔽」.'
+      const ecosystemQuestion = pkg.studentLesson.practice.find((stage: any) => stage.stage === 'independent').questions[0]
+      ecosystemQuestion.prompt = 'Write the English word for「生態系」.'
+      const homeworkQuestion = pkg.studentLesson.homework.questions[0]
+      homeworkQuestion.prompt = 'Write the English word for「海岸」.'
+      pkg.qualityEvidence.criticalChecks.push({
+        id: 'cap-plan:' + retrievalQuestion.id,
+        passed: true,
+        evidence: JSON.stringify({
+          learningObjective: 'Retrieve the weekly vocabulary form.',
+          primarySkill: 'vocabulary_in_context',
+          targetCognitiveDepth: 'D1_verbatim_retrieval',
+          intentionalRecall: true,
+        }),
+      })
+
+      const report = auditCurriculumPackage(pkg)
+      const findings = report.findings.filter((finding) => finding.dimension === 'lexical-retrieval-quality')
+      expect(report.passed).toBe(false)
+      expect(findings).toHaveLength(3)
+      expect(findings.every((finding) => finding.severity === 'critical')).toBe(true)
+    })
+  })
+
   it('bundles model quality profiles, resolution rules, and provenance contract', async () => {
     const bundle = await compileProductionBundle(REPO_ROOT)
     const hashes = Object.keys(bundle.metadata.sourceHashes)
@@ -319,10 +396,10 @@ describe('production failure regressions', () => {
     expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
   })
 
-  describe('Prompt 2.11.0 generalized behavioral contracts', () => {
+  describe('Prompt 2.11.1 generalized behavioral contracts', () => {
     it('author and critic preserve exact attribution and decisive qualifiers without feature fusion', async () => {
       const bundle = await compileProductionBundle()
-      expect(bundle.metadata.promptVersion).toBe('2.11.0')
+      expect(bundle.metadata.promptVersion).toBe('2.11.1')
       expect(bundle.metadata.schemaVersion).toBe('2.4.0')
 
       expect(bundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')

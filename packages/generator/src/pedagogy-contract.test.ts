@@ -10,16 +10,16 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.11.0 consolidated active invariant contract with frozen historical provenance', () => {
+describe('Prompt 2.11.1 consolidated active invariant contract with frozen historical provenance', () => {
 
   it('keeps the active production prompt compact while covering the generalized exact-attribution hole', async () => {
-    const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/01-plan.md'), 'utf8')
-    const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/02-author.md'), 'utf8')
-    const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/03-critic.md'), 'utf8')
-    const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.0/04-repair.md'), 'utf8')
+    const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.1/01-plan.md'), 'utf8')
+    const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.1/02-author.md'), 'utf8')
+    const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.1/03-critic.md'), 'utf8')
+    const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.11.1/04-repair.md'), 'utf8')
 
     for (const stage of [plan, author, critic, repair]) {
-      expect(stage).toContain('2.11.0')
+      expect(stage).toContain('2.11.1')
       expect(stage).not.toContain('Apply the complete inherited')
     }
     expect(plan).toContain('explicit learner/profile/parent feedback')
@@ -139,7 +139,7 @@ describe('Prompt 2.11.0 consolidated active invariant contract with frozen histo
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.11.0-prod"')
+    expect(bundle).toContain('bundleVersion: "2.11.1-prod"')
     expect(bundle).toContain('schemaVersion: "2.4.0"')
     expect(bundle).toContain('engineVersion: "1.6.0"')
 

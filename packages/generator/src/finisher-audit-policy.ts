@@ -3,6 +3,7 @@ import {
   type CurriculumAuditFinding,
   type CurriculumAuditReport,
 } from './audit-curriculum.js'
+import { classifyBareLexicalLookupPrompt } from './lexical-retrieval-audit.js'
 
 function isExplicitLexicalOrGrammarRecall(pkgInput: unknown, message: string): boolean {
   const id = /^CAP_RECALL_EXEMPTION_INVALID:([^:]+):/u.exec(message)?.[1]
@@ -13,6 +14,9 @@ function isExplicitLexicalOrGrammarRecall(pkgInput: unknown, message: string): b
     candidate?.stage !== 'cap-transfer' && (candidate?.questions ?? []).some((question: any) => question?.id === id),
   )
   if (!section) return false
+
+  const question = section.questions.find((candidate: any) => candidate?.id === id)
+  if (typeof question?.prompt !== 'string' || classifyBareLexicalLookupPrompt(question.prompt)) return false
 
   const check = (pkg.qualityEvidence?.criticalChecks ?? []).find((candidate: any) =>
     candidate?.id === `cap-plan:${id}` && candidate?.passed === true && typeof candidate?.evidence === 'string',

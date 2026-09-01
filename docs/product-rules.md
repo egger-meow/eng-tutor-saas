@@ -42,6 +42,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 ## Quality Gates
 
 - Consult authoritative non-holdout CAP precedents before normal assessment. Treat CAP as the Taiwan-quality floor, not a structural mold; semantic criticism prefers justified variety without quotas or sacrificing fit.
+- Across every student-facing assessment stage, including retrieval and homework, prohibit bare Chinese↔English lookup and isolated dictionary-definition questions. Intentional recall remains valid only with meaningful semantic or sentence context that tests lexical form, meaning, collocation, discrimination, or usage; `intentionalRecall: true` is never an exemption for context-free lookup.
 - Keep facts age-appropriate and checkable, including exact named-entity/mode/capability attribution.
 - Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
@@ -52,6 +53,6 @@ Web queries contain generalized public topic terms only. Never send child identi
 
 ## Versioning
 
-Production prompt/rule changes are reviewed like code; existing materials retain their original version metadata. Prompt 2.11.0 establishes a consolidated active baseline: production authoring reads the current compact prompt suite directly, while historical prompt suites remain frozen for provenance and legacy interpretation.
+Production prompt/rule changes are reviewed like code; existing materials retain their original version metadata. Prompt 2.11.1 establishes a consolidated active baseline: production authoring reads the current compact prompt suite directly, while historical prompt suites remain frozen for provenance and legacy interpretation.
 
 Future permanent prompt improvements should edit or replace concise sections in the active consolidated baseline instead of resuming an indefinitely growing historical overlay stack. Temporary compatibility overlays are allowed only when truly necessary and should be folded into the next consolidated baseline rather than becoming permanent sediment.

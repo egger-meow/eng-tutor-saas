@@ -1,19 +1,19 @@
 ---
-bundleVersion: "2.11.0-prod"
+bundleVersion: "2.11.1-prod"
 schemaVersion: "2.4.0"
-promptVersion: "2.11.0"
+promptVersion: "2.11.1"
 engineVersion: "1.6.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
-  "packages/generator/prompts/2.11.0/01-plan.md": "0c835b600d403d01e4e48051573b86ea13034fdbdeb44d0a4a3509c357096590"
-  "packages/generator/prompts/2.11.0/02-author.md": "44bcff6f7933343670d901a59b749a01e0c31bb79dfbda63d71ca7478105413b"
-  "packages/generator/prompts/2.11.0/03-critic.md": "9326e2708447474b14644ad6c664bd773fe0896bc8286fc6580da981360f9c99"
-  "packages/generator/prompts/2.11.0/04-repair.md": "d2178ee0c0e1b202211533f0724b686576bba1124e3d2961977870571e109286"
+  "packages/generator/prompts/2.11.1/01-plan.md": "be175144a60ab64446cce47934ca828ba42d08d2cd8682a3c9c0d05607567c36"
+  "packages/generator/prompts/2.11.1/02-author.md": "6b7209c261778ed9616295fb4ed2d1301fb1e5f0adce8408580d1cc9407e306a"
+  "packages/generator/prompts/2.11.1/03-critic.md": "b7ada7e2b14205a3d98d889de4c8110c2e31090e43acff2ff9cc937f9077380d"
+  "packages/generator/prompts/2.11.1/04-repair.md": "059fd0cd6d9fc9532162f55ffc3cb3c05f668f30a763f60cec6b3f8252172ff5"
   "packages/generator/src/curriculum-package-schema.ts": "3b86d1d2966c8f914ab2700ee6fbe9927c78fca848383bde7fb2123a2fe654cf"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
-  "docs/curriculum-quality-rubric.md": "28b2550f54ce02f9b60b6a4a49a149f39cf0b0285238608a28b40a20aefdcb74"
-  "docs/product-rules.md": "b532c793785c774f5fb02a3fb7c502b87b7a6296b1c8a3463ed14381aaf09672"
+  "docs/curriculum-quality-rubric.md": "ca6f086c0114a86e9a1e89094e0fe1b6a274bd9fe40fd987b062246b5496f96a"
+  "docs/product-rules.md": "92eb68c2e58f8bb7e84f07b4ab703ad94377f4089af3bea847764e5e7e281b9f"
   "packages/generator/curriculum/cap-precedent-contract.md": "036ad256be8d16ab98776a1d5e30770154265247535c6b1b3e5315da6bf27e6b"
   "packages/generator/src/cap-assessment-plan-contract.ts": "5ed552ce3254b6b3eefe4c0b66861ba125b0ef76d372d7e4f10073676c30bcec"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
@@ -70,6 +70,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 ## Quality Gates
 
 - Consult authoritative non-holdout CAP precedents before normal assessment. Treat CAP as the Taiwan-quality floor, not a structural mold; semantic criticism prefers justified variety without quotas or sacrificing fit.
+- Across every student-facing assessment stage, including retrieval and homework, prohibit bare Chinese↔English lookup and isolated dictionary-definition questions. Intentional recall remains valid only with meaningful semantic or sentence context that tests lexical form, meaning, collocation, discrimination, or usage; `intentionalRecall: true` is never an exemption for context-free lookup.
 - Keep facts age-appropriate and checkable, including exact named-entity/mode/capability attribution.
 - Reject generic noun-skinning, unsupported claims, stale current-event grounding, source-shaped prose, and claims not bound to actual reading text.
 - Ensure every answer is derivable from taught content or clearly labeled prior knowledge.
@@ -80,7 +81,7 @@ Web queries contain generalized public topic terms only. Never send child identi
 
 ## Versioning
 
-Production prompt/rule changes are reviewed like code; existing materials retain their original version metadata. Prompt 2.11.0 establishes a consolidated active baseline: production authoring reads the current compact prompt suite directly, while historical prompt suites remain frozen for provenance and legacy interpretation.
+Production prompt/rule changes are reviewed like code; existing materials retain their original version metadata. Prompt 2.11.1 establishes a consolidated active baseline: production authoring reads the current compact prompt suite directly, while historical prompt suites remain frozen for provenance and legacy interpretation.
 
 Future permanent prompt improvements should edit or replace concise sections in the active consolidated baseline instead of resuming an indefinitely growing historical overlay stack. Temporary compatibility overlays are allowed only when truly necessary and should be folded into the next consolidated baseline rather than becoming permanent sediment.
 
@@ -103,6 +104,7 @@ This is the semantic review contract for every newly authored weekly package. It
 - Core vocabulary represents genuine learning burden. New/extension items are authentically anchored in the primary reading. Previously exposed vocabulary may recur or be reviewed but is never relabeled new. Hidden lexical difficulty is judged semantically for this learner, not by finite allowlists, morphology rules, fixed counts, or character heuristics.
 - Primary grammar normally advances. Previously exposed grammar may recur in retrieval/application and becomes primary again only when feedback, actual failure evidence, or prerequisite repair supports it.
 - Normal assessment consults authoritative non-holdout CAP precedents in `anchor`, `blend`, or `calibration` mode. CAP is the quality floor, not a structural mold. Language difficulty and cognitive depth are independent.
+- Retrieval is valuable when it uses meaningful semantic or sentence context. Reject bare Chinese→English lookup, bare English→Chinese lookup, isolated “what does X mean?” prompts, duplicated flashcard-style retrieval, and retrieval without contextual usage, collocation, discrimination, or production value across every student-facing stage, including homework. `intentionalRecall: true` permits D1 retrieval but never bypasses this rule.
 - Every correct answer and parent rationale is text-supported or explicitly framed as inference. Preserve epistemic modality, decisive qualifiers, control conditions, requested counts, and executable procedure steps. Never combine separately true facts into an unsupported composite answer.
 - Critic performs substantive review across `evidence-boundary`, `answer-entailment`, `lexical-integrity`, `task-topology`, and `level-calibration`, plus grounding accuracy/copyright/freshness where relevant. These are semantic review responsibilities, not label-bookkeeping gates in Finisher.
 - MCQ answers should be non-predictable and distractors diagnostically meaningful. Do not distort sound questions to chase artificial answer-position percentages.
@@ -123,13 +125,13 @@ This is the semantic review contract for every newly authored weekly package. It
 
 Relevant explicit learner/parent feedback is first-class curriculum evidence and may override default progression or review scheduling heuristics. A quality failure discovered in one packet should first become a **general principle only if the principle truly generalizes**. Do not add product-specific prompt exceptions or deterministic pseudo-semantic rules merely because one example failed.
 
-Prompt 2.11.0 is a consolidated active baseline. Historical prompt suites remain frozen for provenance, but production model context must not grow indefinitely by concatenating obsolete overlays. Future permanent improvements should edit/replace concise active sections or create a new consolidated baseline.
+Prompt 2.11.1 is a consolidated active baseline. Historical prompt suites remain frozen for provenance, but production model context must not grow indefinitely by concatenating obsolete overlays. Future permanent improvements should edit/replace concise active sections or create a new consolidated baseline.
 
 ## Release bar
 
 Semantic release blockers include unsupported or misattributed central facts, stale-as-current claims, copied/source-shaped prose, unresolved evidence-boundary or answer-entailment failures, learner-level mismatch severe enough to block self-study, and unresolved critical Critic findings.
 
-Deterministic Finisher hard failures remain limited to machine-provable integrity such as schema/structure, required references, CAP authority/provenance, exact binding/reference integrity, answer/key structural consistency, release/version integrity, rendering/storage integrity, privacy/safety, and other objective invariants. Approximate style, lexical difficulty, pedagogical scheduling, task diversity, Critic label coverage, finite-list checks, arbitrary counts, percentages, or morphology heuristics are warning/telemetry unless they prove an objective integrity error.
+Deterministic Finisher hard failures remain limited to machine-provable integrity such as schema/structure, required references, CAP authority/provenance, exact binding/reference integrity, answer/key structural consistency, release/version integrity, rendering/storage integrity, privacy/safety, and other objective invariants, plus exact high-confidence bare bilingual/dictionary lookup patterns. Approximate style, lexical difficulty, pedagogical scheduling, task diversity, Critic label coverage, finite-list checks, arbitrary counts, percentages, or morphology heuristics are warning/telemetry unless they prove an objective integrity error.
 
 ## 2A. CAP Precedent-First Contract
 # CAP Precedent-First Assessment Contract
@@ -748,9 +750,9 @@ export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24
 ```
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Consolidated Production Planning (v2.11.0)
+# Prompt 01: Consolidated Production Planning (v2.11.1)
 
-You are the Planning Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.0. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
+You are the Planning Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.1. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
 
 ## 1. Authority and planning order
 
@@ -798,7 +800,7 @@ A source being broadly about the same product or organization is not enough. Nev
 
 ## 4. Assessment planning
 
-For normal assessment/application/comprehension items, consult the authoritative non-holdout CAP runtime bundle before authoring. CAP is the quality floor, not a mold. Use `anchor`, `blend`, or `calibration` based on fit, while keeping language difficulty independent from cognitive depth. Intentional vocabulary/grammar retrieval is valid when explicitly planned as retrieval.
+For normal assessment/application/comprehension items, consult the authoritative non-holdout CAP runtime bundle before authoring. CAP is the quality floor, not a mold. Use `anchor`, `blend`, or `calibration` based on fit, while keeping language difficulty independent from cognitive depth. Intentional vocabulary/grammar retrieval is valid when explicitly planned as retrieval. Retrieval may test lexical form, meaning, collocation, discrimination, or usage, but every student-facing assessment stage—including retrieval and homework—must supply meaningful semantic or sentence context. Never plan bare Chinese-to-English or English-to-Chinese lookup, isolated dictionary-definition questions, or duplicated flashcard-style prompts; intentionalRecall permits D1 retrieval but never exempts context-free lookup.
 
 Reading-comprehension and reading-based CAP-transfer items use `evidenceScope: "primary_reading"` and exact evidence anchors from the primary reading. Plan varied mechanisms across a packet: retrieval, evidence organization, inference, comparison/integration, context clues, and open transfer as appropriate. Do not mechanically require every type each week.
 
@@ -807,9 +809,9 @@ Reading-comprehension and reading-based CAP-transfer items use `evidenceScope: "
 Produce a coherent Schema 2.4.0 learning plan, grounding plan, CAP assessment plans, and internal rationale sufficient for Author and Critic to execute. Internal planning evidence stays out of Student/Parent prose. Prefer clear high-level principles over accumulating exception lists.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Consolidated Production Authoring (v2.11.0)
+# Prompt 02: Consolidated Production Authoring (v2.11.1)
 
-You are the Author Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.0. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative CAP runtime knowledge, and verified public grounding. Do not inherit historical prompt overlays.
+You are the Author Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.1. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative CAP runtime knowledge, and verified public grounding. Do not inherit historical prompt overlays.
 
 ## 1. Teach before testing
 
@@ -843,7 +845,7 @@ Author each question together with its answer object so Student/Parent outputs s
 
 ## 4. Task progression and layouts
 
-Use the planned cognitive progression rather than repeating one template. Include genuine evidence organization before harder transfer when the plan calls for it, then production/retrieval/homework as appropriate. CAP precedent informs reasoning quality without forcing structural imitation.
+Use the planned cognitive progression rather than repeating one template. Across guided, independent, CAP-transfer, production, retrieval, and homework, reject bare bilingual lookup and isolated dictionary-definition prompts. Retrieval remains useful when a meaningful sentence or semantic situation tests lexical form, meaning, collocation, discrimination, or usage; intentionalRecall: true does not authorize context-free translation or definition recall. Include genuine evidence organization before harder transfer when the plan calls for it, then production/retrieval/homework as appropriate. CAP precedent informs reasoning quality without forcing structural imitation.
 
 If a question asks the learner to complete a table, organizer, comparison matrix, or multi-field mapping, include a valid Schema 2.4.0 `responseLayout` with usable headers and rows. Never say "fill in the table below" when no table metadata exists.
 
@@ -856,9 +858,9 @@ Represent real work truthfully. Do not pad with filler, clone exercises, or fals
 Record why this week differs from the prior week in parent-friendly language. Internal provenance, CAP IDs, critic machinery, raw URLs, and engineering terms never appear in learner-facing PDFs.
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Consolidated Adversarial Semantic Critic (v2.11.0)
+# Prompt 03: Consolidated Adversarial Semantic Critic (v2.11.1)
 
-You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.0. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
+You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.4.0 / Prompt 2.11.1. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
 
 Record substantive findings with `info`, `warning`, or `critical`. A critical semantic failure must be repaired before approval. Finisher separately owns objective integrity; your job is semantic, factual, linguistic, pedagogical, and answer-quality judgment.
 
@@ -873,6 +875,8 @@ Review these dimensions substantively rather than as label bookkeeping:
 5. `level-calibration` — Reading, grammar, vocabulary, scaffolding, workload, and reasoning fit the learner's current state and feedback without childish flattening or needless overload.
 
 Also inspect personalization, grammar/vocabulary progression truth, self-study clarity, parent burden, print usability, and response-layout/task alignment wherever relevant.
+
+Apply the critical rule lexical-retrieval-value across every student-facing assessment stage, including retrieval and homework. Explicitly inspect for: bare Chinese→English lookup; bare English→Chinese lookup; isolated “what does X mean?” questions; duplicated flashcard-style retrieval; and retrieval that adds no contextual usage, collocation, discrimination, or production value. intentionalRecall: true may justify D1 retrieval but never excuses context-free translation or dictionary lookup. Record an actionable finding naming each affected question and the missing semantic value, then direct targeted repair into a contextual cloze, meaningful selection, collocation task, or sentence production as appropriate.
 
 ## 2. Grounding accuracy and exact attribution
 
@@ -909,7 +913,7 @@ Judge whether the represented work is meaningful for the learner's target time. 
 Approve only when there are no unresolved critical semantic findings. Keep findings specific enough for targeted repair. Do not rewrite good sections merely to make them different, and do not invent new requirements from old historical prompt text.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Consolidated Targeted Repair (v2.11.0)
+# Prompt 04: Consolidated Targeted Repair (v2.11.1)
 
 Repair an existing Schema 2.4.0 package from Critic or Finisher evidence. Preserve immutable prior attempts. Treat `retryContext.previousCanonicalPackage`, findings, and repair instructions as authoritative when supplied.
 
@@ -941,6 +945,7 @@ For `current` material, update only the stale/unsupported recency evidence and d
 - Lexical issue: simplify, teach/context-support, or correctly classify the affected lexical unit without quota filling.
 - Grammar progression issue: use learner evidence; do not re-promote old grammar without support and do not erase justified feedback-driven review.
 - Task-topology issue: change only the repetitive/weak tasks needed to restore meaningful cognitive variety.
+- Lexical-retrieval-value failure: replace each bare bilingual/dictionary or duplicated flashcard prompt with a meaningful contextual cloze, collocation/discrimination choice, or sentence-production task while preserving the retrieval target and answer alignment. Never retain the bare prompt because intentionalRecall is true.
 - Missing table/organizer rendering metadata: add the valid Schema 2.4.0 `responseLayout` required by the existing prompt.
 - Workload issue: add useful dependent learning work or remove redundancy; never falsify duration metadata.
 

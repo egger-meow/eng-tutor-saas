@@ -101,11 +101,18 @@ export const FROZEN_2101_FILES = [
   'packages/generator/prompts/2.10.1/04-repair.md',
 ] as const
 
-export const SOURCE_FILES = [
+export const FROZEN_2110_FILES = [
   'packages/generator/prompts/2.11.0/01-plan.md',
   'packages/generator/prompts/2.11.0/02-author.md',
   'packages/generator/prompts/2.11.0/03-critic.md',
   'packages/generator/prompts/2.11.0/04-repair.md',
+] as const
+
+export const SOURCE_FILES = [
+  'packages/generator/prompts/2.11.1/01-plan.md',
+  'packages/generator/prompts/2.11.1/02-author.md',
+  'packages/generator/prompts/2.11.1/03-critic.md',
+  'packages/generator/prompts/2.11.1/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'packages/generator/quality-profiles/default.md',
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
@@ -235,6 +242,16 @@ export async function computeFrozen2101Hashes(repoRoot: string = REPO_ROOT): Pro
   return hashes
 }
 
+export async function computeFrozen2110Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+  const hashes: Record<string, string> = {}
+  for (const relativePath of FROZEN_2110_FILES) {
+    const fullPath = resolve(repoRoot, relativePath)
+    const content = await readFile(fullPath, 'utf8')
+    hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
+  }
+  return hashes
+}
+
 export async function computeFrozen230Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
   const hashes: Record<string, string> = {}
   for (const relativePath of FROZEN_230_FILES) {
@@ -251,7 +268,7 @@ export async function compileProductionBundle(
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
   const readPromptStage = async (fileName: string) => {
-    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.0/${fileName}`), 'utf8')
+    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.1/${fileName}`), 'utf8')
     return `${stage.trim()}\n`
   }
   const plan = await readPromptStage('01-plan.md')
@@ -269,9 +286,9 @@ export async function compileProductionBundle(
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.11.0-prod',
+    bundleVersion: '2.11.1-prod',
     schemaVersion: '2.4.0',
-    promptVersion: '2.11.0',
+    promptVersion: '2.11.1',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
