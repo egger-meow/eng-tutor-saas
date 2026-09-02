@@ -57,7 +57,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         <div>
           <h2 className="funnel-title">轉換漏斗分析 (Conversion Funnel)</h2>
           <p className="funnel-subtitle">
-            主漏斗只看「新客建立第一位孩子」：首頁 → 教材範例 → 開始填孩子資料 → Email → Magic Link → 完成設定。已經有孩子的家長會自動移到下方回流分支，不再污染新客轉換率。
+            主漏斗只看「新客建立第一位孩子」：首頁 → 教材範例 → 開始填孩子資料 → Email → 建立孩子 → 完成設定 → Magic Link 綁定帳號。新客整體轉換率以完成第一位孩子設定為準；已經有孩子的家長會自動移到下方回流分支，不再污染新客轉換率。
           </p>
         </div>
         <div className="funnel-controls">
@@ -171,7 +171,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
       <div className="funnel-card">
         <h3 className="card-heading">8 階段新客轉換漏斗 (Step-by-Step Funnel)</h3>
         <p className="card-subheading">
-          精確掌握新客從公開流量到填孩子資料、Email 驗證、登入與第一位孩子完成設定的各階段流失與轉換率。
+          精確掌握新客從公開流量到填孩子資料、Email 送出、第一位孩子完成設定，再到 Magic Link 綁定家長帳號的各階段流失與轉換率。
         </p>
 
         <div className="funnel-steps-table-wrapper">
@@ -227,8 +227,8 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           <h3 className="card-heading">新客流量來源與成效分析 (Traffic Attribution)</h3>
           <p className="card-subheading">區分 Meta / Facebook 廣告、Google 搜尋與直接流量的第一位孩子最終轉換表現。</p>
           <table className="funnel-table">
-            <thead><tr><th>流量來源</th><th style={{ width: '80px' }}>首頁訪客</th><th style={{ width: '80px' }}>登入成功</th><th style={{ width: '80px' }}>建立孩子</th><th style={{ width: '80px' }}>完成設定</th><th style={{ width: '90px' }}>最終轉化率</th></tr></thead>
-            <tbody>{channels.map((ch) => <tr key={ch.channel}><td><strong>{ch.label}</strong></td><td>{ch.landingViews.toLocaleString()}</td><td>{ch.authCompleted.toLocaleString()}</td><td>{ch.childrenCreated.toLocaleString()}</td><td><strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong></td><td><span className="conversion-pill pill-green">{ch.conversionPercent}%</span></td></tr>)}</tbody>
+            <thead><tr><th>流量來源</th><th style={{ width: '80px' }}>首頁訪客</th><th style={{ width: '80px' }}>建立孩子</th><th style={{ width: '80px' }}>完成設定</th><th style={{ width: '80px' }}>帳號綁定</th><th style={{ width: '90px' }}>最終轉化率</th></tr></thead>
+            <tbody>{channels.map((ch) => <tr key={ch.channel}><td><strong>{ch.label}</strong></td><td>{ch.landingViews.toLocaleString()}</td><td>{ch.childrenCreated.toLocaleString()}</td><td><strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong></td><td>{ch.authCompleted.toLocaleString()}</td><td><span className="conversion-pill pill-green">{ch.conversionPercent}%</span></td></tr>)}</tbody>
           </table>
         </div>
 
@@ -247,8 +247,8 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           <h3 className="card-heading">新客轉換漏斗時間趨勢 ({rangeDays === 1 ? '每小時' : '每日'}紀錄)</h3>
           <div className="funnel-steps-table-wrapper">
             <table className="funnel-table">
-              <thead><tr><th>時間 ({rangeDays === 1 ? '時' : '日'})</th><th>首頁瀏覽</th><th>範例點擊</th><th>點擊體驗</th><th>開始填表</th><th>送出 Email</th><th>登入成功</th><th>建立孩子</th><th>完成設定</th></tr></thead>
-              <tbody>{trends.slice().reverse().map((t) => <tr key={t.date}><td><code>{t.date}</code></td><td>{t.landing_view}</td><td>{t.sample_click}</td><td>{t.free_trial_click}</td><td>{t.child_form_start}</td><td>{t.email_submit}</td><td>{t.auth_complete}</td><td>{t.child_created}</td><td><strong className="text-emerald">{t.onboarding_complete}</strong></td></tr>)}</tbody>
+              <thead><tr><th>時間 ({rangeDays === 1 ? '時' : '日'})</th><th>首頁瀏覽</th><th>範例點擊</th><th>點擊體驗</th><th>開始填表</th><th>送出 Email</th><th>建立孩子</th><th>完成設定</th><th>帳號綁定</th></tr></thead>
+              <tbody>{trends.slice().reverse().map((t) => <tr key={t.date}><td><code>{t.date}</code></td><td>{t.landing_view}</td><td>{t.sample_click}</td><td>{t.free_trial_click}</td><td>{t.child_form_start}</td><td>{t.email_submit}</td><td>{t.child_created}</td><td><strong className="text-emerald">{t.onboarding_complete}</strong></td><td>{t.auth_complete}</td></tr>)}</tbody>
             </table>
           </div>
         </div>
