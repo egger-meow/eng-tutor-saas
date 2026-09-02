@@ -26,28 +26,55 @@ function createMockSupabaseClient(tableData: Record<string, any[]>) {
   }
 }
 
+function eventSeries(
+  prefix: string,
+  anonymousId: string,
+  names: string[],
+  startedAt: number,
+  options: { userId?: string; childId?: string; authIndex?: number; childIndex?: number } = {},
+) {
+  return names.map((event_name, index) => ({
+    id: `${prefix}-${index}`,
+    event_name,
+    anonymous_id: anonymousId,
+    user_id: options.userId && index >= (options.authIndex ?? Number.POSITIVE_INFINITY) ? options.userId : null,
+    child_id: options.childId && index >= (options.childIndex ?? Number.POSITIVE_INFINITY) ? options.childId : null,
+    utm_source: 'fb_ad',
+    referrer: 'https://l.facebook.com',
+    device_class: 'mobile',
+    created_at: new Date(startedAt + index * 1000).toISOString(),
+  }))
+}
+
 describe('AdminService returning-parent funnel split', () => {
   it('keeps returning parents out of first-child acquisition conversion and reports their branch separately', async () => {
-    const nowIso = new Date().toISOString()
-    const base = { utm_source: 'fb_ad', referrer: 'https://l.facebook.com', device_class: 'mobile', created_at: nowIso }
+    const now = Date.now() - 60_000
     const events = [
-      ...['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'].map((event_name, index) => ({
-        id: `new-${index}`,
-        event_name,
-        anonymous_id: 'aid-new',
-        user_id: index >= 5 ? 'user-new' : null,
-        child_id: index >= 6 ? 'child-new' : null,
-        ...base,
-      })),
-      ...['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'existing_parent_detected', 'additional_child_confirmed', 'child_created', 'onboarding_complete'].map((event_name, index) => ({
-        id: `return-${index}`,
-        event_name,
+      ...eventSeries(
+        'new',
+        'aid-new',
+        ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'],
+        now,
+        { userId: 'user-new', childId: 'child-new', authIndex: 5, childIndex: 6 },
+      ),
+      ...eventSeries(
+        'return',
+        'aid-return',
+        ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'existing_parent_detected', 'additional_child_confirmed', 'child_created', 'onboarding_complete'],
+        now + 20_000,
+        { userId: 'user-return', childId: 'child-second', authIndex: 5, childIndex: 8 },
+      ),
+      {
+        id: 'archive-1',
+        event_name: 'child_archived',
         anonymous_id: 'aid-return',
-        user_id: index >= 5 ? 'user-return' : null,
-        child_id: index >= 8 ? 'child-second' : null,
-        ...base,
-      })),
-      { id: 'archive-1', event_name: 'child_archived', anonymous_id: 'aid-return', user_id: 'user-return', child_id: 'child-second', ...base },
+        user_id: 'user-return',
+        child_id: 'child-second',
+        utm_source: 'fb_ad',
+        referrer: 'https://l.facebook.com',
+        device_class: 'mobile',
+        created_at: new Date(now + 40_000).toISOString(),
+      },
     ]
 
     const client = createMockSupabaseClient({
@@ -74,5 +101,36 @@ describe('AdminService returning-parent funnel split', () => {
       discardPercent: 0,
     })
     expect(result.childArchivedCount).toBe(1)
+  })
+
+  it('keeps an earlier first-child conversion when the same anonymous browser returns in a later landing visit', async () => {
+    const startedAt = Date.now() - 2 * 60 * 60 * 1000
+    const firstVisit = eventSeries(
+      'first',
+      'aid-shared',
+      ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'],
+      startedAt,
+      { userId: 'user-shared', childId: 'child-first', authIndex: 5, childIndex: 6 },
+    )
+    const returningVisit = eventSeries(
+      'later',
+      'aid-shared',
+      ['landing_view', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'existing_parent_detected', 'pending_onboarding_discarded'],
+      startedAt + 60 * 60 * 1000,
+      { userId: 'user-shared', authIndex: 4 },
+    )
+
+    const client = createMockSupabaseClient({
+      funnel_events: [...firstVisit, ...returningVisit],
+      children: [{ id: 'child-first', parent_id: 'user-shared', is_internal_test: false }],
+    })
+
+    const result = await new LandingFunnelAdminService({ client: client as any }).getConversionFunnelData(7)
+
+    expect(result.uniqueLandingVisitors).toBe(1)
+    expect(result.steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors).toBe(1)
+    expect(result.overallConversionPercent).toBe(100)
+    expect(result.returningParent.detected).toBe(1)
+    expect(result.returningParent.pendingOnboardingDiscarded).toBe(1)
   })
 })
