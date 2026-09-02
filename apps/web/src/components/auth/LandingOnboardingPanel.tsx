@@ -4,11 +4,9 @@ import { AboutStep } from '../onboarding/steps/AboutStep'
 import { SchoolStep } from '../onboarding/steps/SchoolStep'
 import { RoutineStep } from '../onboarding/steps/RoutineStep'
 import { EmailAuthPanel } from './EmailAuthPanel'
-import { buildAuthRedirectUrl } from '../../lib/auth-redirect'
 import { getAnonymousId, trackChildFormStart, trackEmailSubmit } from '../../lib/analytics'
-import { createPendingOnboarding } from '../../lib/onboarding-handoff'
+import { startLandingOnboarding } from '../../lib/onboarding-handoff'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
-import { getSupabaseClient } from '../../lib/supabase'
 import '../../styles/onboarding-refinement.css'
 import '../../styles/landing-onboarding.css'
 
@@ -89,18 +87,12 @@ export function LandingOnboardingPanel() {
     setBusy(true)
     setNotice(null)
     try {
-      const token = await createPendingOnboarding(email, draft)
-      const anonymousId = getAnonymousId()
-      const { error } = await getSupabaseClient().auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          emailRedirectTo: buildAuthRedirectUrl(window.location.origin, {
-            aid: anonymousId,
-            onboarding: token,
-          }),
-        },
+      await startLandingOnboarding({
+        email,
+        draft,
+        anonymousId: getAnonymousId(),
+        redirectOrigin: window.location.origin,
       })
-      if (error) throw error
       trackEmailSubmit({ flow: 'landing_onboarding' })
       setNotice({
         kind: 'success',
