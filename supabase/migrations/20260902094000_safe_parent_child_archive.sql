@@ -38,7 +38,14 @@ begin
   where child_id = p_child_id
   for update;
 
-  if found
+  -- Serialize against the material-email worker before checking send_started_at. Without this
+  -- row lock, the worker could begin SMTP transmission between the precheck and archive update.
+  perform delivery.id
+  from public.material_email_deliveries as delivery
+  where delivery.child_id = p_child_id
+  for update;
+
+  if v_subscription.id is not null
      and v_subscription.provider = 'paddle'
      and v_subscription.status in ('trialing', 'active', 'past_due', 'paused') then
     raise exception '這位孩子目前仍有付費訂閱，請先到訂閱頁取消，待方案結束後再移除孩子。';
