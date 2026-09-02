@@ -9,6 +9,10 @@ export type FunnelEventName =
   | 'child_form_start'
   | 'child_created'
   | 'onboarding_complete'
+  | 'existing_parent_detected'
+  | 'additional_child_confirmed'
+  | 'pending_onboarding_discarded'
+  | 'child_archived'
 
 export type DeviceClass = 'desktop' | 'mobile' | 'tablet' | 'unknown'
 
@@ -66,7 +70,6 @@ export function getAnonymousId(overrideUrlSearch?: string): string {
   const storage = getStorageSafe()
 
   try {
-    // 1. Check URL param 'aid' (e.g. returned from magic link redirect)
     let search = overrideUrlSearch
     if (search === undefined && typeof window !== 'undefined' && window.location) {
       search = window.location.search
@@ -80,13 +83,11 @@ export function getAnonymousId(overrideUrlSearch?: string): string {
       }
     }
 
-    // 2. Check storage
     const stored = storage.getItem(AID_STORAGE_KEY)?.trim()
     if (stored && stored.length <= 64) {
       return stored
     }
 
-    // 3. Generate new ID
     const newId = generateUuid()
     storage.setItem(AID_STORAGE_KEY, newId)
     return newId
@@ -151,7 +152,6 @@ export function getAttributionContext(overrideSearch?: string, overrideReferrer?
   const currentUtmCampaign = searchParams.get('utm_campaign')?.trim() || null
   const currentUtmContent = searchParams.get('utm_content')?.trim() || null
 
-  // Save first touch attribution if not exists
   if (currentUtmSource || currentReferrer) {
     saveInitialAttribution({
       utmSource: currentUtmSource,
@@ -198,7 +198,6 @@ export async function trackFunnelEvent(
     const path = options.path || attr.path
     const now = Date.now()
 
-    // Deduplication check: prevent duplicate triggers within recent window (e.g. React StrictMode)
     const dedupeKey = `${eventName}:${path}:${attr.anonymousId}:${options.childId || ''}`
     if (!options.force) {
       const lastFired = recentEvents.get(dedupeKey)
@@ -208,7 +207,6 @@ export async function trackFunnelEvent(
     }
     recentEvents.set(dedupeKey, now)
 
-    // Cleanup old dedupe entries
     for (const [key, timestamp] of recentEvents.entries()) {
       if (now - timestamp > 10000) {
         recentEvents.delete(key)
@@ -233,7 +231,6 @@ export async function trackFunnelEvent(
 
     const { data, error } = await client.rpc('record_funnel_event', payload)
     if (error) {
-      // Non-blocking: only warn in development, never disrupt user flow
       if (import.meta.env?.DEV) {
         console.warn('[Analytics] record_funnel_event error:', error.message)
       }
@@ -242,7 +239,6 @@ export async function trackFunnelEvent(
 
     return (data as string) || null
   } catch (caught) {
-    // Strict non-blocking guarantee: catch any client or runtime error
     if (import.meta.env?.DEV) {
       console.warn('[Analytics] trackFunnelEvent exception:', caught)
     }
@@ -250,7 +246,6 @@ export async function trackFunnelEvent(
   }
 }
 
-// Convenience helpers
 export function trackLandingView(metadata?: Record<string, unknown>): void {
   void trackFunnelEvent('landing_view', { metadata })
 }
@@ -287,4 +282,20 @@ export function trackChildCreated(childId: string, metadata?: Record<string, unk
 
 export function trackOnboardingComplete(childId: string, metadata?: Record<string, unknown>): void {
   void trackFunnelEvent('onboarding_complete', { childId, metadata, force: true })
+}
+
+export function trackExistingParentDetected(metadata?: Record<string, unknown>): void {
+  void trackFunnelEvent('existing_parent_detected', { metadata, force: true })
+}
+
+export function trackAdditionalChildConfirmed(childId: string, metadata?: Record<string, unknown>): void {
+  void trackFunnelEvent('additional_child_confirmed', { childId, metadata, force: true })
+}
+
+export function trackPendingOnboardingDiscarded(metadata?: Record<string, unknown>): void {
+  void trackFunnelEvent('pending_onboarding_discarded', { metadata, force: true })
+}
+
+export function trackChildArchived(childId: string, metadata?: Record<string, unknown>): void {
+  void trackFunnelEvent('child_archived', { childId, metadata, force: true })
 }
