@@ -17,6 +17,8 @@ export interface LandingOnboardingPrepareInput {
   sessionId: string | null
 }
 
+export type LandingOnboardingStartStatus = 'accepted' | 'waitlisted'
+
 export interface LandingOnboardingStartDeps {
   prepare: (input: LandingOnboardingPrepareInput) => Promise<string>
   sendMagicLink: (input: { email: string; redirectTo: string }) => Promise<void>
@@ -39,10 +41,21 @@ function buildRedirect(origin: string, anonymousId: string, token: string): stri
   return redirect.toString()
 }
 
+function readActivationStatus(value: unknown): LandingOnboardingStartStatus {
+  if (!value || typeof value !== 'object' || !('status' in value)) {
+    throw new Error('invalid_activation_status')
+  }
+  const status = (value as { status?: unknown }).status
+  if (status !== 'accepted' && status !== 'waitlisted') {
+    throw new Error('invalid_activation_status')
+  }
+  return status
+}
+
 export async function startLandingOnboarding(
   input: LandingOnboardingStartInput,
   deps: LandingOnboardingStartDeps,
-): Promise<{ accepted: true }> {
+): Promise<{ status: LandingOnboardingStartStatus }> {
   const redirectOrigin = normalizeOrigin(input.redirectOrigin)
   const allowedOrigins = deps.allowedRedirectOrigins.map(normalizeOrigin)
   if (!allowedOrigins.includes(redirectOrigin)) {
@@ -67,8 +80,8 @@ export async function startLandingOnboarding(
   let lastError: unknown
   for (let attempt = 0; attempt < ACTIVATION_ATTEMPTS; attempt += 1) {
     try {
-      await deps.activate(token)
-      return { accepted: true }
+      const activation = await deps.activate(token)
+      return { status: readActivationStatus(activation) }
     } catch (error) {
       lastError = error
       if (attempt < ACTIVATION_ATTEMPTS - 1) {
