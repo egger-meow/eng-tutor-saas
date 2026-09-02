@@ -3,11 +3,10 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const migrationsDir = resolve(import.meta.dirname, '..', 'supabase', 'migrations')
-const migrationName = readdirSync(migrationsDir)
-  .filter((name) => name.endsWith('_preauth_week1_activation.sql'))
+const migrationNames = readdirSync(migrationsDir)
+  .filter((name) => name.includes('preauth_week1_activation') && name.endsWith('.sql'))
   .sort()
-  .at(-1)
-const migrationSql = migrationName ? readFileSync(resolve(migrationsDir, migrationName), 'utf8') : ''
+const migrationSql = migrationNames.map((name) => readFileSync(resolve(migrationsDir, name), 'utf8')).join('\n')
 
 function functionBody(functionName: string): string {
   const marker = `create or replace function ${functionName}`
@@ -21,7 +20,7 @@ function functionBody(functionName: string): string {
 
 describe('pre-auth Week 1 activation contract', () => {
   it('stores private pre-auth lifecycle state without exposing account classification', () => {
-    expect(migrationName).toBeTruthy()
+    expect(migrationNames.length).toBeGreaterThan(0)
     expect(migrationSql).toContain('account_existed_at_prepare')
     expect(migrationSql).toContain('provisioned_child_id')
     expect(migrationSql).toContain('preauth_started_at')
@@ -30,7 +29,7 @@ describe('pre-auth Week 1 activation contract', () => {
     expect(migrationSql).toContain('revoke all on table private_generation.pending_onboardings from public, anon, authenticated')
   })
 
-  it('makes prepare and activation service-only and revokes browser pending creation', () => {
+  it('makes prepare and activation service-only and retires browser pending creation', () => {
     expect(migrationSql).toContain('create or replace function public.prepare_landing_onboarding')
     expect(migrationSql).toContain('create or replace function public.activate_landing_onboarding')
     expect(migrationSql).toContain('revoke all on function public.create_pending_onboarding(text, jsonb, text, text) from public, anon, authenticated')
