@@ -28,9 +28,9 @@ const STEP_DEFS: Array<{ name: FunnelStepName; label: string; description: strin
   { name: 'free_trial_click', label: '點擊體驗 (CTA Click)', description: '新訪客點擊免費體驗或立即開始按鈕' },
   { name: 'child_form_start', label: '開始填寫孩子資料 (Form Start)', description: '開始 Landing-first 孩子資料流程' },
   { name: 'email_submit', label: '送出 Email (Email Submit)', description: '孩子資料填完後送出安全登入連結' },
-  { name: 'auth_complete', label: '登入成功 (Auth Complete)', description: '完成 Magic Link 驗證建立有效會員 Session' },
-  { name: 'child_created', label: '建立第一位孩子 (Child Created)', description: '成功建立這個帳號的第一位孩子' },
-  { name: 'onboarding_complete', label: '完成第一週設定 (Onboarded)', description: '第一位孩子完成個人化學習資料設定' },
+  { name: 'child_created', label: '建立第一位孩子 (Child Created)', description: 'Email 送出後由可信任伺服器流程建立第一位孩子' },
+  { name: 'onboarding_complete', label: '完成第一週設定 (Onboarded)', description: '第一位孩子完成個人化學習資料設定；此步驟是新客 acquisition KPI' },
+  { name: 'auth_complete', label: '綁定家長帳號 (Auth Complete)', description: '家長之後開啟 Magic Link，建立有效會員 Session 並進入孩子管理' },
 ]
 
 const ACQUISITION_EVENT_NAMES = new Set<string>(STEP_DEFS.map((step) => step.name))
@@ -129,12 +129,12 @@ function buildStepMetrics(events: any[]): { steps: FunnelStepMetric[]; uniqueLan
     }
   }
 
-  const finalUnique = steps.at(-1)?.uniqueVisitors ?? 0
+  const onboardedUnique = steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors ?? 0
   return {
     steps,
     uniqueLandingVisitors,
     biggestDropOff,
-    overallConversionPercent: uniqueLandingVisitors > 0 ? round1((finalUnique / uniqueLandingVisitors) * 100) : 0,
+    overallConversionPercent: uniqueLandingVisitors > 0 ? round1((onboardedUnique / uniqueLandingVisitors) * 100) : 0,
   }
 }
 
