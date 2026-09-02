@@ -47,7 +47,7 @@ function eventSeries(
 }
 
 describe('AdminService returning-parent funnel split', () => {
-  it('keeps returning parents out of first-child acquisition conversion and reports their branch separately', async () => {
+  it('keeps returning parents out of first-child acquisition conversion and reports auth separately', async () => {
     const now = Date.now() - 60_000
     const events = [
       ...eventSeries(
@@ -90,8 +90,9 @@ describe('AdminService returning-parent funnel split', () => {
     expect(result.uniqueLandingVisitors).toBe(1)
     expect(result.overallConversionPercent).toBe(100)
     expect(result.steps.map((step) => step.name)).toEqual([
-      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete', 'auth_complete',
+      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete',
     ])
+    expect(result.authCompletedCount).toBe(1)
     expect(result.steps.find((step) => step.name === 'child_created')?.uniqueVisitors).toBe(1)
     expect(result.returningParent).toEqual({
       detected: 1,
@@ -129,6 +130,7 @@ describe('AdminService returning-parent funnel split', () => {
 
     expect(result.uniqueLandingVisitors).toBe(1)
     expect(result.steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors).toBe(1)
+    expect(result.authCompletedCount).toBe(1)
     expect(result.overallConversionPercent).toBe(100)
     expect(result.returningParent.detected).toBe(1)
     expect(result.returningParent.pendingOnboardingDiscarded).toBe(1)
@@ -151,10 +153,11 @@ describe('AdminService returning-parent funnel split', () => {
     const result = await new LandingFunnelAdminService({ client: client as any }).getConversionFunnelData(7)
 
     expect(result.steps.map((step) => step.name)).toEqual([
-      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete', 'auth_complete',
+      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete',
     ])
     expect(result.steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors).toBe(1)
-    expect(result.steps.find((step) => step.name === 'auth_complete')?.uniqueVisitors).toBe(0)
+    expect(result.steps.some((step) => step.name === 'auth_complete')).toBe(false)
+    expect(result.authCompletedCount).toBe(0)
     expect(result.overallConversionPercent).toBe(100)
   })
 })
