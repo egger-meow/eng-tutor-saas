@@ -55,7 +55,7 @@ Deno.serve(async (request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     })
 
-    await startLandingOnboarding({
+    const result = await startLandingOnboarding({
       email: requiredString(body.email, 'email', 320),
       draft: draft as Record<string, unknown>,
       termsVersion: requiredString(body.termsVersion, 'terms_version', 100),
@@ -89,13 +89,14 @@ Deno.serve(async (request) => {
         if (error) throw error
       },
       activate: async (token) => {
-        const { error } = await client.rpc('activate_landing_onboarding', { p_token: token })
+        const { data, error } = await client.rpc('activate_landing_onboarding', { p_token: token })
         if (error) throw error
+        return data
       },
       sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     })
 
-    return json(200, { accepted: true })
+    return json(200, result)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     const clientError = message.startsWith('invalid_') || message.includes('Invalid ')
