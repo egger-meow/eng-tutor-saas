@@ -1,15 +1,43 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { ChildArchiveControl } from '../components/profile/ChildArchiveControl'
 
-const source = readFileSync(resolve(import.meta.dirname, 'ChildProfilePage.tsx'), 'utf8')
+const noop = vi.fn()
 
 describe('child profile archive UX contract', () => {
-  it('offers an explicit reversible-looking confirmation before soft-removing a child', () => {
-    expect(source).toContain('archiveChild')
-    expect(source).toContain('移除孩子')
-    expect(source).toContain('確認移除')
-    expect(source).toContain('過往教材與帳務紀錄仍會保留')
-    expect(source).toContain('付費訂閱')
+  it('explains the safe removal option before confirmation', () => {
+    const html = renderToStaticMarkup(
+      <ChildArchiveControl
+        childName="小宇"
+        confirming={false}
+        busy={false}
+        error=""
+        onRequestArchive={noop}
+        onConfirmArchive={noop}
+        onCancelArchive={noop}
+      />,
+    )
+
+    expect(html).toContain('移除孩子')
+    expect(html).toContain('不小心重複建立')
+  })
+
+  it('shows history retention and billing guard at the destructive confirmation step', () => {
+    const html = renderToStaticMarkup(
+      <ChildArchiveControl
+        childName="小宇"
+        confirming
+        busy={false}
+        error=""
+        onRequestArchive={noop}
+        onConfirmArchive={noop}
+        onCancelArchive={noop}
+      />,
+    )
+
+    expect(html).toContain('確認移除')
+    expect(html).toContain('過往教材與帳務紀錄仍會保留')
+    expect(html).toContain('付費訂閱')
+    expect(html).toContain('保留孩子')
   })
 })
