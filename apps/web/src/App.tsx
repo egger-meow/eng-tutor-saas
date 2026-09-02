@@ -25,7 +25,14 @@ import { AnnouncementsPage } from './routes/AnnouncementsPage'
 import { AnnouncementDetailPage } from './routes/AnnouncementDetailPage'
 import { PayPage } from './routes/PayPage'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
-import { trackAuthComplete, trackChildCreated, trackOnboardingComplete } from './lib/analytics'
+import {
+  trackAdditionalChildConfirmed,
+  trackAuthComplete,
+  trackChildCreated,
+  trackExistingParentDetected,
+  trackOnboardingComplete,
+  trackPendingOnboardingDiscarded,
+} from './lib/analytics'
 import { listChildren } from './lib/children'
 import {
   clearOnboardingTokenFromUrl,
@@ -73,6 +80,7 @@ function App() {
       setOnboardingError('')
       void finalizePendingOnboarding(token).then(async (result) => {
         if (result.status === 'additional_child_confirmation_required') {
+          trackExistingParentDetected({ flow: 'landing_onboarding' })
           const existingChildren = await listChildren()
           const existingChild = existingChildren[0]
           if (!existingChild) throw new Error('找不到原本的孩子資料，請重新整理後再試。')
@@ -118,6 +126,7 @@ function App() {
       const childId = await confirmAdditionalChildOnboarding(additionalChildConfirmation.token)
       clearLandingHandoffClientState()
       setAdditionalChildConfirmation(null)
+      trackAdditionalChildConfirmed(childId, { flow: 'landing_onboarding' })
       trackChildCreated(childId, { flow: 'landing_onboarding', finalized_after_auth: true, additional_child: true })
       trackOnboardingComplete(childId, { flow: 'landing_onboarding', finalized_after_auth: true, additional_child: true })
       navigate(`/children/${childId}`)
@@ -137,6 +146,7 @@ function App() {
       const existingChildId = additionalChildConfirmation.existingChildId
       clearLandingHandoffClientState()
       setAdditionalChildConfirmation(null)
+      trackPendingOnboardingDiscarded({ flow: 'landing_onboarding' })
       navigate(`/children/${existingChildId}`)
     } catch (caught) {
       setAdditionalChildError(caught instanceof Error ? caught.message : '無法返回原本孩子資料，請稍後再試。')
@@ -145,8 +155,6 @@ function App() {
     }
   }
 
-  // Paddle must see `_ptxn` as soon as its public default payment page loads.
-  // Do not put this route behind the Supabase session lookup above.
   if (isPaymentLinkRoute) return <PayPage />
 
   if (!ready || finalizingOnboarding) return <main className="loading-state" role="status">{finalizingOnboarding ? '正在完成孩子設定…' : '正在確認登入狀態…'}</main>
@@ -172,7 +180,6 @@ function App() {
     )
   }
 
-  // Public/Legal pages accessible regardless of session
   if (route.name === 'privacy') return <PrivacyPage />
   if (route.name === 'terms') return <TermsPage />
   if (route.name === 'refund') return <RefundPage />
