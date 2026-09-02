@@ -1,9 +1,9 @@
 import { createServer } from 'node:http'
-import { AdminService } from './admin-service.js'
+import { LandingFunnelAdminService } from './landing-funnel-admin-service.js'
 import { handleApiRequest } from './api-handler.js'
 
 const PORT = parseInt(process.env.ADMIN_PORT || process.env.PORT || '3001', 10)
-const service = new AdminService()
+const service = new LandingFunnelAdminService()
 
 const server = createServer(async (req, res) => {
   const handled = await handleApiRequest(req, res, service)
