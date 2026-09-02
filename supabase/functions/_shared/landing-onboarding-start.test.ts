@@ -29,7 +29,7 @@ describe('startLandingOnboarding', () => {
     d.sendMagicLink.mockImplementation(async () => { order.push('send'); return undefined })
     d.activate.mockImplementation(async () => { order.push('activate'); return { status: 'accepted' } })
 
-    await expect(startLandingOnboarding(input, d)).resolves.toEqual({ accepted: true })
+    await expect(startLandingOnboarding(input, d)).resolves.toEqual({ status: 'accepted' })
 
     expect(order).toEqual(['prepare', 'send', 'activate'])
     expect(d.prepare).toHaveBeenCalledTimes(1)
@@ -61,7 +61,7 @@ describe('startLandingOnboarding', () => {
       .mockRejectedValueOnce(new Error('network uncertain'))
       .mockResolvedValueOnce({ status: 'accepted' })
 
-    await expect(startLandingOnboarding(input, d)).resolves.toEqual({ accepted: true })
+    await expect(startLandingOnboarding(input, d)).resolves.toEqual({ status: 'accepted' })
 
     expect(d.prepare).toHaveBeenCalledTimes(1)
     expect(d.sendMagicLink).toHaveBeenCalledTimes(1)
@@ -70,14 +70,21 @@ describe('startLandingOnboarding', () => {
     expect(d.sleep).toHaveBeenCalledTimes(2)
   })
 
-  it('returns the same public success shape for accepted and waitlisted activation', async () => {
+  it('propagates the authoritative accepted or waitlisted activation status', async () => {
     const accepted = deps()
     accepted.activate.mockResolvedValueOnce({ status: 'accepted' })
     const waitlisted = deps()
     waitlisted.activate.mockResolvedValueOnce({ status: 'waitlisted' })
 
-    await expect(startLandingOnboarding(input, accepted)).resolves.toEqual({ accepted: true })
-    await expect(startLandingOnboarding(input, waitlisted)).resolves.toEqual({ accepted: true })
+    await expect(startLandingOnboarding(input, accepted)).resolves.toEqual({ status: 'accepted' })
+    await expect(startLandingOnboarding(input, waitlisted)).resolves.toEqual({ status: 'waitlisted' })
+  })
+
+  it('rejects an unexpected activation response instead of inventing success', async () => {
+    const d = deps()
+    d.activate.mockResolvedValueOnce({ accepted: true } as never)
+
+    await expect(startLandingOnboarding(input, d)).rejects.toThrow('invalid_activation_status')
   })
 
   it('rejects an unapproved redirect origin before touching private state', async () => {
