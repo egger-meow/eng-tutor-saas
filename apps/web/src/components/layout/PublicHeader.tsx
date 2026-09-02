@@ -60,12 +60,24 @@ export function PublicHeader() {
               </a>
             )
           })}
-          <a className="nav-link nav-login" href="/#login" onClick={(event) => { setMobileMenuOpen(false); handleInternalLink(event) }}>
+          <a
+            className="nav-link nav-login"
+            href="/#login"
+            onClick={(event) => {
+              setMobileMenuOpen(false)
+              handleInternalLink(event)
+              window.requestAnimationFrame(() => {
+                const loginEl = document.getElementById('login')
+                loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                loginEl?.querySelector('input')?.focus()
+              })
+            }}
+          >
             <span className="nav-link-text">已有帳號？登入</span>
           </a>
           <a
             className="nav-link nav-primary-cta"
-            href={cta.href === '#login' ? '/#login' : cta.href}
+            href={cta.href.startsWith('/') ? cta.href : `/${cta.href}`}
             onClick={(event) => {
               trackFreeTrialClick('nav_header')
               setMobileMenuOpen(false)

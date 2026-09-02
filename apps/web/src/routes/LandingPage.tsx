@@ -63,6 +63,18 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
   useEffect(() => {
     trackLandingView()
+    const handleHash = () => {
+      if (typeof window !== 'undefined' && window.location.hash === '#login') {
+        window.requestAnimationFrame(() => {
+          const loginEl = document.getElementById('login')
+          loginEl?.scrollIntoView({ block: 'start' })
+          loginEl?.querySelector('input')?.focus()
+        })
+      }
+    }
+    handleHash()
+    window.addEventListener('hashchange', handleHash)
+    return () => window.removeEventListener('hashchange', handleHash)
   }, [])
 
   return (
@@ -331,9 +343,34 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </StaggerContainer>
         </section>
 
-        <section className="public-section login-section" id="login">
-          <FadeInUp><p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p><h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '先讓教材認識你的孩子。'}</h2><p>{cta.isWaitlist ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。' : enrollment === null ? '可以先建立或登入家長帳號；目前正在確認服務名額。' : '第一次使用，從家長 Email 建立帳號；已有帳號則使用原本 Email 登入，再回到孩子的教材。'}</p>{capacityOpen && <ul className="login-expectations"><li>建立家長帳號或登入</li><li>填寫一位孩子的學習狀況</li><li>第一份專屬教材預計隔天開放下載</li></ul>}</FadeInUp>
-          <FadeInUp delay={0.15}>{cta.isWaitlist ? <a className="button" href="/waitlist" onClick={() => trackFreeTrialClick('waitlist')}>登記候補</a> : <AuthPanel />}</FadeInUp>
+        <section className="public-section onboarding-login-section" id="onboarding">
+          <FadeInUp className="section-heading">
+            <p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p>
+            <h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '開始為孩子準備專屬教材'}</h2>
+            <p>
+              {cta.isWaitlist
+                ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。'
+                : enrollment === null
+                  ? '目前正在確認服務名額…'
+                  : '第一次使用請先填寫孩子資料；已有帳號的家長可直接輸入 Email 登入。'}
+            </p>
+            {capacityOpen && (
+              <ul className="login-expectations">
+                <li>填寫一位孩子的學習狀況</li>
+                <li>完成 3 個步驟後留下 Email</li>
+                <li>第一份專屬教材預計隔天開放下載</li>
+              </ul>
+            )}
+          </FadeInUp>
+          <FadeInUp delay={0.15}>
+            {cta.isWaitlist ? (
+              <a className="button" href="/waitlist" onClick={() => trackFreeTrialClick('waitlist')}>
+                登記候補
+              </a>
+            ) : (
+              <AuthPanel />
+            )}
+          </FadeInUp>
         </section>
 
         <section className="public-section improvement-note" aria-labelledby="improvement-note-title">

@@ -1,8 +1,11 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage, faqItems } from './LandingPage'
 import { PricingSection } from '../components/public/PricingSection'
 import { PublicFooter } from '../components/layout/PublicFooter'
+import { PublicHeader } from '../components/layout/PublicHeader'
 import { getEnrollmentCta } from '../lib/enrollment'
 
 const confirmedOpenEnrollment = {
@@ -229,3 +232,87 @@ describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
     expect(html).not.toContain('還剩 99 個名額')
   })
 })
+
+describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
+  it('renders both the 3-step child onboarding card and the direct-login card side by side', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+
+    // Two-column container
+    expect(html).toContain('landing-auth-grid')
+
+    // Left primary card (Onboarding)
+    expect(html).toContain('landing-onboarding-card')
+    expect(html).toContain('id="onboarding"')
+    expect(html).toContain('第一次使用？先填孩子資料')
+    expect(html).toContain('第一週免費')
+    expect(html).toContain('不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間')
+    expect(html).toContain('先抓孩子現在的大概位置')
+    expect(html).toContain('孩子怎麼稱呼？')
+
+    // Right secondary card (Direct login)
+    expect(html).toContain('landing-login-card')
+    expect(html).toContain('id="login"')
+    expect(html).toContain('已有帳號？直接登入')
+    expect(html).toContain('輸入原本使用的家長 Email，我們會寄送無密碼登入連結')
+    expect(html).toContain('寄送登入連結')
+  })
+
+  it('allows existing users to log in directly via email without touching child form inputs', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+
+    // Direct login card has immediate email input
+    expect(html).toContain('id="login-email"')
+    expect(html).toContain('已有帳號？直接登入')
+
+    // Onboarding card starts with child profile step 1 without an initial email input
+    const onboardingIndex = html.indexOf('landing-onboarding-card')
+    const loginIndex = html.indexOf('landing-login-card')
+    expect(onboardingIndex).toBeGreaterThan(-1)
+    expect(loginIndex).toBeGreaterThan(onboardingIndex)
+
+    const onboardingSnippet = html.slice(onboardingIndex, loginIndex)
+    expect(onboardingSnippet).toContain('孩子怎麼稱呼？')
+    expect(onboardingSnippet).not.toContain('landing-onboarding-email')
+  })
+
+  it('targets navbar login directly to #login and primary CTA to #onboarding', () => {
+    const headerHtml = renderToStaticMarkup(<PublicHeader />)
+    expect(headerHtml).toContain('href="/#login"')
+    expect(headerHtml).toContain('已有帳號？登入')
+    expect(headerHtml).toContain('href="/#onboarding"')
+
+    const pageHtml = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+    expect(pageHtml).toContain('id="login"')
+    expect(pageHtml).toContain('id="onboarding"')
+  })
+
+  it('audits copy to eliminate contradictory account-creation instructions', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+
+    // Eliminated old misleading instructions
+    expect(html).not.toContain('從家長 Email 建立帳號')
+    expect(html).not.toContain('建立家長帳號或登入')
+
+    // Audited expectations list reflects true child-first order
+    expect(html).toContain('填寫一位孩子的學習狀況')
+    expect(html).toContain('完成 3 個步驟後留下 Email')
+    expect(html).toContain('第一份專屬教材預計隔天開放下載')
+  })
+
+  it('defines responsive 2-column desktop grid and mobile vertical stacking in CSS', () => {
+    const css = readFileSync(fileURLToPath(new URL('../styles/landing-onboarding.css', import.meta.url)), 'utf-8')
+
+    // Desktop 2-column grid
+    expect(css).toContain('.landing-auth-grid')
+    expect(css).toContain('grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr)')
+
+    // Mobile media query stacking
+    expect(css).toContain('@media (max-width: 959px)')
+    expect(css).toContain('grid-template-columns: 1fr')
+    expect(css).toContain('.landing-onboarding-card')
+    expect(css).toContain('order: 1')
+    expect(css).toContain('.landing-login-card')
+    expect(css).toContain('order: 2')
+  })
+})
+

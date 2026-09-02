@@ -127,8 +127,8 @@ export function LandingOnboardingPanel() {
     <div className="onboarding-container landing-onboarding-panel">
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">第一週免費</div>
-        <h2 className="onboarding-main-title">先填孩子資料，最後才需要 Email。</h2>
-        <p className="onboarding-main-desc">不用考試、不綁卡，大概填就可以。三步完成後，我們再寄一個安全連結把資料接到你的家長帳號。</p>
+        <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
+        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後才留下 Email 接收安全連結並建立帳號。</p>
       </header>
       <OnboardingLayout
         step={step}
@@ -136,7 +136,19 @@ export function LandingOnboardingPanel() {
         description={description}
         actions={
           <>
-            <button className="button button-secondary" type="button" onClick={() => step === 1 ? setMode('existing') : setStep((current) => current - 1)}>
+            <button
+              className="button button-secondary"
+              type="button"
+              onClick={() => {
+                if (step === 1) {
+                  const loginEl = document.getElementById('login')
+                  loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  loginEl?.querySelector('input')?.focus()
+                } else {
+                  setStep((current) => current - 1)
+                }
+              }}
+            >
               {step === 1 ? '已有帳號？直接登入' : '上一步'}
             </button>
             <button className="button" type="button" onClick={next}>{step === profileStepCount ? '孩子資料填好了，繼續' : '繼續'}</button>

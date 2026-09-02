@@ -4,10 +4,29 @@ import { getSupabaseClient } from '../../lib/supabase'
 import { clearPendingLegalAcceptance, recordPendingLegalAcceptance } from '../../lib/legal-acceptance'
 import { getAnonymousId, trackEmailSubmit } from '../../lib/analytics'
 
-export function EmailAuthPanel() {
+export type EmailAuthPanelProps = {
+  id?: string
+  inputId?: string
+  overline?: string
+  title?: string
+  description?: string
+  buttonText?: string
+  className?: string
+}
+
+export function EmailAuthPanel({
+  id,
+  inputId,
+  overline = '家長登入',
+  title = '已有帳號？直接登入',
+  description = '輸入原本使用的家長 Email，我們會寄送無密碼登入連結，直接回到孩子管理畫面。不需要重新填寫孩子資料。',
+  buttonText = '寄送登入連結',
+  className = '',
+}: EmailAuthPanelProps = {}) {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null)
+  const resolvedInputId = inputId ?? (id ? `${id}-email` : 'email')
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -32,17 +51,17 @@ export function EmailAuthPanel() {
   }
 
   return (
-    <section className="auth-panel" aria-labelledby="auth-title">
-      <p className="overline">家長 Email</p>
-      <h2 id="auth-title">建立帳號或登入</h2>
-      <p className="muted">第一次使用：輸入 Email 建立家長帳號。已有帳號：輸入原本 Email，我們會寄送登入連結，不需要密碼。</p>
+    <section className={`auth-panel ${className}`.trim()} id={id} aria-labelledby="auth-title">
+      {overline && <p className="overline">{overline}</p>}
+      <h2 id="auth-title">{title}</h2>
+      <p className="muted">{description}</p>
       <form onSubmit={submit}>
-        <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+        <label htmlFor={resolvedInputId}>家長 Email</label>
+        <input id={resolvedInputId} name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
         <p className="auth-legal-consent">
           點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
         </p>
-        <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄送安全登入連結'}</button>
+        <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : buttonText}</button>
       </form>
       {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
     </section>

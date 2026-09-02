@@ -50,10 +50,10 @@ export function useEnrollmentState(initialState?: EnrollmentState | null) {
   return { state, error }
 }
 
-export type EnrollmentCta = { href: '#login' | '/waitlist'; label: string; isWaitlist: boolean }
+export type EnrollmentCta = { href: '#onboarding' | '#login' | '/waitlist'; label: string; isWaitlist: boolean }
 
 export function getEnrollmentCta(state: EnrollmentState | null): EnrollmentCta {
-  if (!state) return { href: '#login', label: '確認目前名額…', isWaitlist: false }
+  if (!state) return { href: '#onboarding', label: '確認目前名額…', isWaitlist: false }
   if (state.status !== 'open' || state.remaining <= 0) return { href: '/waitlist', label: '登記候補', isWaitlist: true }
-  return { href: '#login', label: '免費取得第一週教材', isWaitlist: false }
+  return { href: '#onboarding', label: '免費取得第一週教材', isWaitlist: false }
 }
