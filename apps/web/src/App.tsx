@@ -93,8 +93,6 @@ function App() {
         }
 
         clearLandingHandoffClientState()
-        trackChildCreated(result.childId, { flow: 'landing_onboarding', finalized_after_auth: true })
-        trackOnboardingComplete(result.childId, { flow: 'landing_onboarding', finalized_after_auth: true })
         navigate(`/children/${result.childId}`)
       }).catch((caught) => {
         onboardingFinalizeRef.current = null
