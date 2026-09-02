@@ -264,7 +264,7 @@ content_path = "./supabase/templates/recovery.html"
 # content_path = "./templates/password_changed_notification.html"
 
 [auth.sms]
-# Allow/disallow new user signups via SMS to your project.
+# Allow/disallow new user signups via SMS.
 enable_signup = false
 # If enabled, users need to confirm their phone number before signing in.
 enable_confirmations = false
@@ -430,3 +430,6 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+[functions.start-landing-onboarding]
+verify_jwt = false
