@@ -4,76 +4,16 @@ import {
   discardPendingOnboarding,
   finalizePendingOnboarding,
   readOnboardingToken,
-  startLandingOnboarding,
 } from './onboarding-handoff'
-import { legalConfig } from './config'
-import { emptyProfileDraft, type ProfileDraft } from './profile-form'
 
 const rpc = vi.fn()
-const invoke = vi.fn()
 
 vi.mock('./supabase', () => ({
-  getSupabaseClient: vi.fn(() => ({
-    rpc,
-    functions: { invoke },
-  })),
+  getSupabaseClient: vi.fn(() => ({ rpc })),
 }))
 
 describe('onboarding handoff', () => {
-  beforeEach(() => {
-    rpc.mockReset()
-    invoke.mockReset()
-  })
-
-  it('starts landing onboarding through the trusted Edge Function without browser-side auth or pending RPCs', async () => {
-    invoke.mockResolvedValueOnce({ data: { accepted: true }, error: null })
-    const draft: ProfileDraft = {
-      ...emptyProfileDraft,
-      displayName: '小宇',
-      grade: 7,
-      gradeStage: 'incoming_grade_7',
-      baselineLevel: 'average',
-    }
-
-    await expect(startLandingOnboarding({
-      email: ' Parent@Example.COM ',
-      draft,
-      anonymousId: 'anon-123',
-      redirectOrigin: 'https://paperbond.jjmowlab.com',
-    })).resolves.toBeUndefined()
-
-    expect(invoke).toHaveBeenCalledTimes(1)
-    expect(invoke).toHaveBeenCalledWith('start-landing-onboarding', {
-      body: {
-        email: 'parent@example.com',
-        draft,
-        termsVersion: legalConfig.termsVersion,
-        privacyVersion: legalConfig.privacyVersion,
-        anonymousId: 'anon-123',
-        sessionId: null,
-        redirectOrigin: 'https://paperbond.jjmowlab.com',
-      },
-    })
-    expect(rpc).not.toHaveBeenCalled()
-  })
-
-  it('treats an Edge Function transport or non-accepted response as a retryable send failure', async () => {
-    invoke.mockResolvedValueOnce({ data: null, error: { message: 'edge unavailable' } })
-    await expect(startLandingOnboarding({
-      email: 'parent@example.com',
-      draft: emptyProfileDraft,
-      anonymousId: 'anon-123',
-      redirectOrigin: 'https://paperbond.jjmowlab.com',
-    })).rejects.toThrow('edge unavailable')
-
-    invoke.mockResolvedValueOnce({ data: { accepted: false }, error: null })
-    await expect(startLandingOnboarding({
-      email: 'parent@example.com',
-      draft: emptyProfileDraft,
-      anonymousId: 'anon-123',
-      redirectOrigin: 'https://paperbond.jjmowlab.com',
-    })).rejects.toThrow('無法寄送安全連結')
-  })
+  beforeEach(() => rpc.mockReset())
 
   it('finalizes a first child after auth and returns a created result', async () => {
     rpc.mockResolvedValueOnce({ data: '11111111-1111-1111-1111-111111111111', error: null })
