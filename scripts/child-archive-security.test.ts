@@ -38,4 +38,13 @@ describe('safe parent child archive contract', () => {
     expect(childArchiveMigrations).toContain("set status = 'released'")
     expect(childArchiveMigrations).toContain("release_reason = 'superseded'")
   })
+
+  it('prevents archived children from receiving newly queued material email and revokes old scoped links', () => {
+    expect(childArchiveMigrations).toContain('update public.material_email_deliveries')
+    expect(childArchiveMigrations).toContain("status = 'dead'")
+    expect(childArchiveMigrations).toContain('access_revoked_at = coalesce(access_revoked_at, now())')
+    expect(childArchiveMigrations).toContain('create or replace function public.worker_claim_material_email_deliveries')
+    expect(childArchiveMigrations).toContain('join public.children as child on child.id = material.child_id and child.is_active')
+    expect(childArchiveMigrations).toContain('join public.children as child on child.id = delivery.child_id and child.is_active')
+  })
 })
