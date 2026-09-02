@@ -29,4 +29,13 @@ describe('safe parent child archive contract', () => {
     expect(childArchiveMigrations).toContain("update public.generation_jobs")
     expect(childArchiveMigrations).toContain("status in ('pending', 'claimed')")
   })
+
+  it('does not strand checkout reservations when a child is removed during an unfinished checkout', () => {
+    expect(childArchiveMigrations).toContain('private_generation.founder_checkout_claims')
+    expect(childArchiveMigrations).toContain('private_generation.capacity_checkout_claims')
+    expect(childArchiveMigrations).toContain("status in ('bound', 'release_pending')")
+    expect(childArchiveMigrations).toContain('尚未完成的結帳')
+    expect(childArchiveMigrations).toContain("set status = 'released'")
+    expect(childArchiveMigrations).toContain("release_reason = 'superseded'")
+  })
 })
