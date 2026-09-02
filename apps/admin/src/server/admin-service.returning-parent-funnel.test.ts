@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AdminService } from './admin-service.js'
+import { LandingFunnelAdminService } from './landing-funnel-admin-service.js'
 
 function createMockSupabaseClient(tableData: Record<string, any[]>) {
   return {
@@ -31,7 +31,6 @@ describe('AdminService returning-parent funnel split', () => {
     const nowIso = new Date().toISOString()
     const base = { utm_source: 'fb_ad', referrer: 'https://l.facebook.com', device_class: 'mobile', created_at: nowIso }
     const events = [
-      // Brand-new parent completes the first-child funnel.
       ...['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'].map((event_name, index) => ({
         id: `new-${index}`,
         event_name,
@@ -40,8 +39,6 @@ describe('AdminService returning-parent funnel split', () => {
         child_id: index >= 6 ? 'child-new' : null,
         ...base,
       })),
-
-      // Returning parent reaches the same landing flow but is detected after auth.
       ...['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'existing_parent_detected', 'additional_child_confirmed', 'child_created', 'onboarding_complete'].map((event_name, index) => ({
         id: `return-${index}`,
         event_name,
@@ -61,10 +58,13 @@ describe('AdminService returning-parent funnel split', () => {
       ],
     })
 
-    const result = await new AdminService({ client: client as any }).getConversionFunnelData(7)
+    const result = await new LandingFunnelAdminService({ client: client as any }).getConversionFunnelData(7)
 
     expect(result.uniqueLandingVisitors).toBe(1)
     expect(result.overallConversionPercent).toBe(100)
+    expect(result.steps.map((step) => step.name)).toEqual([
+      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete',
+    ])
     expect(result.steps.find((step) => step.name === 'child_created')?.uniqueVisitors).toBe(1)
     expect(result.returningParent).toEqual({
       detected: 1,
