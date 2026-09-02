@@ -6,12 +6,14 @@ const root = resolve(import.meta.dirname, '..')
 const view = readFileSync(resolve(root, 'apps/admin/src/components/funnel/ConversionFunnelView.tsx'), 'utf8')
 
 describe('admin pre-auth funnel copy contract', () => {
-  it('describes first-child provisioning before later Magic Link account binding', () => {
-    expect(view).toContain('Email → 建立孩子 → 完成設定 → Magic Link 綁定帳號')
-    expect(view).not.toContain('Email → Magic Link → 完成設定')
+  it('presents a seven-step acquisition funnel and Magic Link binding as secondary engagement', () => {
+    expect(view).toContain('7 階段新客轉換漏斗')
+    expect(view).not.toContain('8 階段新客轉換漏斗')
+    expect(view).toContain('Magic Link 帳號綁定 (Secondary)')
+    expect(view).toContain('Email → 建立孩子 → 完成設定')
   })
 
-  it('orders the trend columns by the actual first-time onboarding chronology', () => {
+  it('keeps account binding visible in trends after the acquisition milestones', () => {
     const trendStart = view.indexOf('新客轉換漏斗時間趨勢')
     expect(trendStart).toBeGreaterThanOrEqual(0)
     const trendView = view.slice(trendStart)
