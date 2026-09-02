@@ -9,6 +9,14 @@ export type FinalizePendingOnboardingResult =
   | { status: 'created'; childId: string }
   | { status: 'additional_child_confirmation_required' }
 
+export interface StartLandingOnboardingInput {
+  email: string
+  draft: ProfileDraft
+  anonymousId: string
+  sessionId?: string | null
+  redirectOrigin: string
+}
+
 function cleanOnboardingToken(token: string): string {
   const cleanToken = token.trim()
   if (!cleanToken || cleanToken.length > MAX_HANDOFF_TOKEN_LENGTH) throw new Error('設定連結無效。')
@@ -21,19 +29,26 @@ function isAdditionalChildConfirmationRequired(error: unknown): boolean {
   return message.includes(ADDITIONAL_CHILD_CONFIRMATION_REQUIRED)
 }
 
-export async function createPendingOnboarding(email: string, draft: ProfileDraft): Promise<string> {
-  const normalizedEmail = email.trim().toLowerCase()
+export async function startLandingOnboarding(input: StartLandingOnboardingInput): Promise<void> {
+  const normalizedEmail = input.email.trim().toLowerCase()
   if (!normalizedEmail) throw new Error('請輸入 Email。')
 
-  const { data, error } = await getSupabaseClient().rpc('create_pending_onboarding', {
-    p_email: normalizedEmail,
-    p_draft: draft,
-    p_terms_version: legalConfig.termsVersion,
-    p_privacy_version: legalConfig.privacyVersion,
+  const { data, error } = await getSupabaseClient().functions.invoke('start-landing-onboarding', {
+    body: {
+      email: normalizedEmail,
+      draft: input.draft,
+      termsVersion: legalConfig.termsVersion,
+      privacyVersion: legalConfig.privacyVersion,
+      anonymousId: input.anonymousId,
+      sessionId: input.sessionId?.trim() || null,
+      redirectOrigin: input.redirectOrigin,
+    },
   })
+
   if (error) throw error
-  if (typeof data !== 'string' || !data.trim()) throw new Error('無法建立安全設定連結，請稍後再試。')
-  return data
+  if (!data || typeof data !== 'object' || data.accepted !== true) {
+    throw new Error('無法寄送安全連結，請稍後再試。')
+  }
 }
 
 export async function finalizePendingOnboarding(token: string): Promise<FinalizePendingOnboardingResult> {
