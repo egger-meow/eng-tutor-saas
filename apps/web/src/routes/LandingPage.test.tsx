@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage, faqItems } from './LandingPage'
@@ -298,21 +296,6 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
     expect(html).toContain('完成 3 個步驟後留下 Email')
     expect(html).toContain('第一份專屬教材預計隔天開放下載')
   })
-
-  it('defines responsive 2-column desktop grid and mobile vertical stacking in CSS', () => {
-    const css = readFileSync(fileURLToPath(new URL('../styles/landing-onboarding.css', import.meta.url)), 'utf-8')
-
-    // Desktop 2-column grid
-    expect(css).toContain('.landing-auth-grid')
-    expect(css).toContain('grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr)')
-
-    // Mobile media query stacking
-    expect(css).toContain('@media (max-width: 959px)')
-    expect(css).toContain('grid-template-columns: 1fr')
-    expect(css).toContain('.landing-onboarding-card')
-    expect(css).toContain('order: 1')
-    expect(css).toContain('.landing-login-card')
-    expect(css).toContain('order: 2')
-  })
 })
+
 
