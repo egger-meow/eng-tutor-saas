@@ -4,6 +4,7 @@ import { navigate } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
+import { ChildArchiveControl } from '../components/profile/ChildArchiveControl'
 import { ProfileSummary } from '../components/profile/ProfileSummary'
 import { useParentData } from '../hooks/use-parent-data'
 import { trackChildArchived } from '../lib/analytics'
@@ -43,21 +44,15 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
         <div className="all-child-profiles">{data.children.map((child, index) => <section className="child-profile-section" key={child.id}>
           <header className="child-profile-heading"><div><p className="overline">孩子資料</p><h2>{child.display_name}</h2><p>{gradeStageLabel(child)}</p></div><button className="button" type="button" onClick={() => navigate(`/children/${child.id}/edit`)}>編輯 {child.display_name} 資料</button></header>
           <ProfileSummary child={child} />
-          <section className="empty-state" aria-label={`移除 ${child.display_name}`}>
-            <h3>移除孩子</h3>
-            {archiveConfirmId === child.id ? <>
-              <p>確定要移除 {child.display_name} 嗎？移除後會從家長介面隱藏，過往教材與帳務紀錄仍會保留。</p>
-              <p className="muted">若這位孩子仍有付費訂閱，系統會阻止移除，請先到訂閱頁取消並等方案結束。</p>
-              <div className="onboarding-actions">
-                <button className="button" type="button" disabled={archiveBusyId === child.id} onClick={() => void confirmArchive(child.id)}>{archiveBusyId === child.id ? '處理中…' : '確認移除'}</button>
-                <button className="button button-secondary" type="button" disabled={archiveBusyId === child.id} onClick={() => { setArchiveConfirmId(null); setArchiveError('') }}>保留孩子</button>
-              </div>
-              {archiveError && <p className="notice notice-error" role="alert">{archiveError}</p>}
-            </> : <>
-              <p className="muted">如果是不小心重複建立，或之後不再使用這份孩子資料，可以從這裡安全移除。</p>
-              <button className="button button-secondary" type="button" onClick={() => { setArchiveConfirmId(child.id); setArchiveError('') }}>移除孩子</button>
-            </>}
-          </section>
+          <ChildArchiveControl
+            childName={child.display_name}
+            confirming={archiveConfirmId === child.id}
+            busy={archiveBusyId === child.id}
+            error={archiveConfirmId === child.id ? archiveError : ''}
+            onRequestArchive={() => { setArchiveConfirmId(child.id); setArchiveError('') }}
+            onConfirmArchive={() => void confirmArchive(child.id)}
+            onCancelArchive={() => { setArchiveConfirmId(null); setArchiveError('') }}
+          />
           {index < data.children.length - 1 && <div className="child-profile-divider" aria-hidden="true"><span>下一位孩子</span></div>}
         </section>)}</div>
       </>}
