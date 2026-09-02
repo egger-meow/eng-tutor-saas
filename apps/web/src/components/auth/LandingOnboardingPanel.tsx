@@ -38,6 +38,14 @@ export function LandingOnboardingPanel() {
     trackChildFormStart({ flow: 'landing_onboarding' })
   }
 
+  function scrollToCard() {
+    if (typeof window === 'undefined') return
+    window.requestAnimationFrame(() => {
+      const card = document.getElementById('onboarding') ?? document.querySelector('.landing-onboarding-card')
+      card?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
   function update(patch: Partial<ProfileDraft>) {
     markStarted()
     setDraft((current) => {
@@ -55,9 +63,25 @@ export function LandingOnboardingPanel() {
     if (Object.keys(nextErrors).length > 0) return
     if (step === profileStepCount) {
       setMode('email')
+      scrollToCard()
+      window.requestAnimationFrame(() => {
+        document.getElementById('landing-onboarding-email')?.focus({ preventScroll: true })
+      })
       return
     }
     setStep((current) => Math.min(profileStepCount, current + 1))
+    scrollToCard()
+  }
+
+  function prev() {
+    if (step === 1) {
+      const loginEl = document.getElementById('login')
+      loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      loginEl?.querySelector('input')?.focus()
+    } else {
+      setStep((current) => current - 1)
+      scrollToCard()
+    }
   }
 
   async function submitEmail(event: FormEvent<HTMLFormElement>) {
@@ -100,23 +124,53 @@ export function LandingOnboardingPanel() {
 
   if (mode === 'email') {
     return (
-      <section className="auth-panel landing-onboarding-panel" aria-labelledby="landing-email-title">
-        <p className="overline">孩子資料完成</p>
-        <h2 id="landing-email-title">最後留下 Email，我們把第一週接到你的帳號。</h2>
-        <p className="muted">剛剛填的資料不需要重填。點開 Email 裡的安全連結後，會直接完成帳號設定並進入孩子管理畫面。</p>
-        <form onSubmit={submitEmail}>
-          <label htmlFor="landing-onboarding-email">家長 Email</label>
-          <input id="landing-onboarding-email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-          <p className="auth-legal-consent">
-            點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
-          </p>
-          <div className="onboarding-actions">
-            <button className="button button-secondary" type="button" disabled={busy} onClick={() => setMode('profile')}>上一步</button>
-            <button className="button" type="submit" disabled={busy}>{busy ? '寄送中…' : '寄給我，完成第一週設定'}</button>
+      <div className="onboarding-container landing-onboarding-panel">
+        <header className="onboarding-welcome-header">
+          <div className="onboarding-badge">第一週免費</div>
+          <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
+          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後才留下 Email 接收安全連結並建立帳號。</p>
+        </header>
+        <section className="onboarding-layout" aria-labelledby="landing-email-title">
+          <div className="onboarding-heading">
+            <p className="overline">孩子資料完成（第 3/3 步已完成）</p>
+            <h2 id="landing-email-title">最後留下 Email，我們把第一週接到你的帳號</h2>
+            <p className="muted">剛剛填的資料不需要重填。點開 Email 裡的安全連結後，會直接完成帳號設定並進入孩子管理畫面。</p>
           </div>
-        </form>
-        {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
-      </section>
+          <form onSubmit={submitEmail} className="onboarding-fields">
+            <label htmlFor="landing-onboarding-email">家長 Email</label>
+            <input
+              id="landing-onboarding-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="parent@example.com"
+            />
+            <p className="auth-legal-consent">
+              點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
+            </p>
+            <div className="onboarding-actions">
+              <button
+                className="button button-secondary"
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setMode('profile')
+                  scrollToCard()
+                }}
+              >
+                上一步
+              </button>
+              <button className="button" type="submit" disabled={busy}>
+                {busy ? '寄送中…' : '寄給我，完成第一週設定'}
+              </button>
+            </div>
+          </form>
+          {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
+        </section>
+      </div>
     )
   }
 
@@ -139,15 +193,7 @@ export function LandingOnboardingPanel() {
             <button
               className="button button-secondary"
               type="button"
-              onClick={() => {
-                if (step === 1) {
-                  const loginEl = document.getElementById('login')
-                  loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  loginEl?.querySelector('input')?.focus()
-                } else {
-                  setStep((current) => current - 1)
-                }
-              }}
+              onClick={prev}
             >
               {step === 1 ? '已有帳號？直接登入' : '上一步'}
             </button>

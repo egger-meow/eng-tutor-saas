@@ -343,10 +343,10 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </StaggerContainer>
         </section>
 
-        <section className="public-section onboarding-login-section" id="onboarding">
+        <section className="public-section onboarding-login-section" aria-labelledby="onboarding-section-title">
           <FadeInUp className="section-heading">
             <p className="overline">{cta.isWaitlist ? '候補登記' : '開始使用或登入'}</p>
-            <h2>{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '開始為孩子準備專屬教材'}</h2>
+            <h2 id="onboarding-section-title">{cta.isWaitlist ? '目前名額已滿，先登記候補。' : '開始為孩子準備專屬教材'}</h2>
             <p>
               {cta.isWaitlist
                 ? '初期最多服務 100 位孩子。候補不會先收費，有名額時會通知你。'

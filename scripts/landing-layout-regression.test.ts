@@ -16,5 +16,9 @@ describe('Landing Page Onboarding/Login Layout Regression', () => {
     expect(css).toContain('order: 1')
     expect(css).toContain('.landing-login-card')
     expect(css).toContain('order: 2')
+
+    // Height stability & scroll alignment
+    expect(css).toContain('min-height: clamp(34rem, 60vh, 46rem)')
+    expect(css).toContain('scroll-margin-top: clamp(4rem, 8vw, 6rem)')
   })
 })
