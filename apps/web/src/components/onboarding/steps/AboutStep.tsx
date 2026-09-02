@@ -21,7 +21,6 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
       <label className="field-group">
         <span className="field-title">孩子怎麼稱呼？ <small className="field-hint">小名或英文名就可以</small></span>
         <input
-          autoFocus
           maxLength={80}
           placeholder="例如：翔翔、Emma"
           value={draft.displayName}

@@ -296,6 +296,11 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
     expect(html).toContain('完成 3 個步驟後留下 Email')
     expect(html).toContain('第一份專屬教材預計隔天開放下載')
   })
+
+  it('does not contain autofocus attributes to avoid jumping viewport to the bottom on page load', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+    expect(html).not.toMatch(/\bautofocus\b/i)
+  })
 })
 
 
