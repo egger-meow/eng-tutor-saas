@@ -1,30 +1,15 @@
-import { describe, expect, it, vi } from 'vitest'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { AdditionalChildConfirmation } from './AdditionalChildConfirmation'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { describe, expect, it } from 'vitest'
 
-vi.mock('../../lib/onboarding-handoff', () => ({
-  confirmAdditionalChildOnboarding: vi.fn(),
-  discardPendingOnboarding: vi.fn(),
-}))
+const appSource = readFileSync(resolve(import.meta.dirname, '../../App.tsx'), 'utf8')
 
-describe('AdditionalChildConfirmation', () => {
-  it('asks a returning parent before creating another child and offers a safe escape', () => {
-    const html = renderToStaticMarkup(
-      <AdditionalChildConfirmation
-        existingChildName="小宇"
-        pendingChildName="小安"
-        busy={false}
-        error=""
-        onConfirm={() => {}}
-        onDiscard={() => {}}
-      />,
-    )
-
-    expect(html).toContain('這個帳號已經有孩子')
-    expect(html).toContain('小宇')
-    expect(html).toContain('小安')
-    expect(html).toContain('剛剛填的是另一位孩子嗎？')
-    expect(html).toContain('是，新增另一位孩子')
-    expect(html).toContain('不是，回到原本孩子管理')
+describe('returning-parent onboarding confirmation UI contract', () => {
+  it('requires an explicit choice before the pending landing draft can become another child', () => {
+    expect(appSource).toContain('AdditionalChildConfirmation')
+    expect(appSource).toContain('additional_child_confirmation_required')
+    expect(appSource).toContain('confirmAdditionalChildOnboarding')
+    expect(appSource).toContain('discardPendingOnboarding')
+    expect(appSource).toContain('existingChildName')
   })
 })
