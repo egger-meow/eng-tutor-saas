@@ -1,5 +1,3 @@
-import { legalConfig } from './config'
-import type { ProfileDraft } from './profile-form'
 import { getSupabaseClient } from './supabase'
 
 const MAX_HANDOFF_TOKEN_LENGTH = 256
@@ -8,14 +6,6 @@ const ADDITIONAL_CHILD_CONFIRMATION_REQUIRED = 'ADDITIONAL_CHILD_CONFIRMATION_RE
 export type FinalizePendingOnboardingResult =
   | { status: 'created'; childId: string }
   | { status: 'additional_child_confirmation_required' }
-
-export interface StartLandingOnboardingInput {
-  email: string
-  draft: ProfileDraft
-  anonymousId: string
-  sessionId?: string | null
-  redirectOrigin: string
-}
 
 function cleanOnboardingToken(token: string): string {
   const cleanToken = token.trim()
@@ -27,28 +17,6 @@ function isAdditionalChildConfirmationRequired(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const message = 'message' in error && typeof error.message === 'string' ? error.message : ''
   return message.includes(ADDITIONAL_CHILD_CONFIRMATION_REQUIRED)
-}
-
-export async function startLandingOnboarding(input: StartLandingOnboardingInput): Promise<void> {
-  const normalizedEmail = input.email.trim().toLowerCase()
-  if (!normalizedEmail) throw new Error('請輸入 Email。')
-
-  const { data, error } = await getSupabaseClient().functions.invoke('start-landing-onboarding', {
-    body: {
-      email: normalizedEmail,
-      draft: input.draft,
-      termsVersion: legalConfig.termsVersion,
-      privacyVersion: legalConfig.privacyVersion,
-      anonymousId: input.anonymousId,
-      sessionId: input.sessionId?.trim() || null,
-      redirectOrigin: input.redirectOrigin,
-    },
-  })
-
-  if (error) throw error
-  if (!data || typeof data !== 'object' || data.accepted !== true) {
-    throw new Error('無法寄送安全連結，請稍後再試。')
-  }
 }
 
 export async function finalizePendingOnboarding(token: string): Promise<FinalizePendingOnboardingResult> {
