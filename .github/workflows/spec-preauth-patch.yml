@@ -1,0 +1,341 @@
+name: Temporary preauth SPEC patch
+
+on:
+  push:
+    branches:
+      - design/preauth-week1-activation
+    paths:
+      - .github/workflows/spec-preauth-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-spec:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: design/preauth-week1-activation
+          fetch-depth: 0
+
+      - name: Patch canonical SPEC sections
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/SPEC.md')
+          text = path.read_text(encoding='utf-8')
+
+          sections = {
+          24: '''# 24. Free Week 1
+
+For the founding cohort, the ideal first-time entry flow is:
+
+```text
+Landing
+↓
+Free Week 1 CTA
+↓
+Complete child learning profile on the public landing surface
+↓
+Enter parent Email
+↓
+successful trusted Magic Link dispatch
+↓
+Service-only first-time activation
+↓
+Create the canonical child + profile exactly once
+↓
+Apply capacity / beta / waitlist authority and, when eligible, create the explicit Week 1 generation job through the existing triggers
+↓
+Parent may leave the site while Week 1 is prepared
+↓
+Magic Link authentication / account access
+↓
+Child management / Dashboard
+↓
+Download when released
+↓
+Use at home
+↓
+Provide feedback
+↓
+Decide whether to subscribe
+```
+
+For a genuinely new Email, successful trusted Magic Link dispatch is sufficient to begin first-child provisioning before the parent clicks the Magic Link. Supabase Auth may create or resolve the Auth identity as part of that trusted dispatch, and the service-only activation path may then create the canonical child + profile and reuse the existing child-insert capacity/beta and subscription-triggered explicit Week 1 generation job path. The browser is not trusted to claim that dispatch succeeded.
+
+This pre-auth activation exception applies only when the Email did not exist in Auth before the onboarding request. A pre-existing Auth account receives no pre-auth child mutation. It remains auth-first: after Magic Link authentication, the pending draft may be finalized for a first child or may require explicit additional-child confirmation when the account already has an active child. The anonymous response must not reveal whether the Email already existed.
+
+The parent must never be asked to repeat the child questionnaire after authentication. From the parent's perspective, the child setup is already complete before Email is requested. For a new account, the later Magic Link click provides account access and cleans/binds the already-provisioned handoff; it must not recreate the child, subscription, or generation job.
+
+Because a mobile visitor may fill the form inside an in-app browser and open the Magic Link in another browser, the handoff must not rely only on browser-local storage. The completed draft is held briefly in a private server-side handoff. The URL carries only an opaque token, never child-profile fields or parent Email. The token is hash-protected at rest, the original account-existence classification is preserved across retries, and authenticated finalization requires the matching Email and must be idempotent.
+
+Existing parents may bypass the first-time questionnaire and use the direct Email login path. Direct login never enters the pre-auth child-provisioning path.
+
+The goal is to allow a parent to evaluate:
+
+> the actual personalized product.
+
+Not merely screenshots or demo copy.
+
+## Week 1 Delivery Timing
+
+Week 1 content is not authored synchronously during onboarding. The trusted activation creates the explicit initial generation job when the new child is eligible, while the sole curriculum author (the repository-owned local Windows Codex CLI runner) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
+
+Therefore:
+
+* the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
+* Week 1 is the sole early-release exception: when the deterministic Finisher successfully completes both PDFs before that timestamp, completion immediately becomes the actual `release_at` and the parent may download both files at once;
+* Week 2 is scheduled from Week 1's actual release anchor plus seven days. If Week 1 completes today, Week 2 is due today + 7 days; if Week 1 completes tomorrow, Week 2 is due tomorrow + 7 days;
+* Week 1 is a standalone evaluation and calibration packet. If the parent does not immediately subscribe, Week 2 sits pending but unentitled. When the parent subsequently activates a paid subscription, the pending Week 2 job is re-anchored to the activation moment (next calendar day delivery), preventing overdue calendar catch-up;
+* for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
+* the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
+* expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
+* if the first delivery date passes without successful material completion (e.g. past-due unmaterialized job under retry), the UI falls back to a neutral `第一份教材準備中` state with detail `教材正在完成最後檢查，準備完成後即可下載。` instead of showing a stale date or false delivery claim;
+* when capacity is full, the authoritative waitlist state must be shown and the UI must not claim that Week 1 is being prepared when no generation job exists;
+* `generation_jobs.release_at` remains the canonical parent-facing delivery timestamp.
+
+The initial job's `scheduled_for` is set to the trusted activation moment so it is immediately eligible for the next 00:15 local authoring run.
+
+---''',
+          33: '''# 33. Authentication
+
+Authentication provider:
+
+> **Supabase Auth**
+
+MVP login methods:
+
+* Email OTP;
+* or Email Magic Link.
+
+Traditional passwords are not required for MVP.
+
+For first-time Free Week 1 onboarding, the parent completes the public child questionnaire before Email. The final landing action is one trusted server orchestration: prepare the private handoff, request the Supabase Magic Link, then activate only after Auth confirms the request succeeded. A successful trusted Magic Link dispatch may create or resolve the Auth identity and allow service-only first-child activation before the parent clicks the Magic Link. The anonymous browser never receives service-role authority and cannot assert that Auth dispatch succeeded.
+
+For a genuinely new Email, canonical `children.parent_id` ownership may therefore exist before the browser has an authenticated Session, but it is owned by the Auth user created/resolved by the trusted Auth dispatch, never by an unauthenticated visitor. Later Magic Link authentication verifies account access, finalizes/cleans the matching handoff, and returns the same already-provisioned child rather than creating another one.
+
+This exception never applies to a pre-existing Auth account. The original account-existence state is captured before the Auth request and preserved across uncertain retries. A pre-existing Auth account receives no pre-auth child mutation and remains auth-first. After authentication it may finalize a first child, or, if an active child already exists, must cross the explicit additional-child confirmation boundary.
+
+Public responses are generic and must not reveal account existence. Existing parents continue to have a direct Email-login path that does not require filling another child questionnaire and does not invoke pre-auth child provisioning.
+
+---''',
+          44: '''# 44. Parent Onboarding
+
+Recommended first-time flow:
+
+```text
+Landing
+↓
+Free Week 1 CTA
+↓
+Child core profile
+↓
+Learning context / interests
+↓
+Weekly learning rhythm
+↓
+Parent Email
+↓
+successful trusted Magic Link dispatch
+↓
+Service-only first-time activation
+↓
+Canonical child/profile + capacity state + explicit Week 1 generation job when eligible
+↓
+Parent may leave the site
+↓
+Magic Link authentication / account access
+↓
+Child management / Dashboard
+```
+
+The initial form should ideally take only a few minutes.
+
+The first-time landing flow should reuse the same profile fields, validation, and child/profile semantics as authenticated child creation. Do not maintain two incompatible onboarding models. The public flow may persist same-browser progress locally for convenience, but cross-browser completion must use the private server-side handoff described in Section 24.
+
+For a genuinely first-time Email, successful trusted Magic Link dispatch is the trusted threshold that can start provisioning before the parent clicks the Magic Link. The child is owned by the Auth identity created/resolved by the trusted dispatch; the browser itself remains untrusted and receives no ownership authority. The later link click binds account access to the same already-provisioned child and must be idempotent.
+
+A pre-existing Auth account receives no pre-auth child mutation. It remains auth-first, and an account that already owns an active child must explicitly confirm before the landing draft can become an additional child. The public response must not disclose that this returning-account branch was selected.
+
+From the parent's perspective, finishing the landing questionnaire is the only child-data entry step. Authentication must never make the parent re-enter that questionnaire.
+
+---''',
+          168: '''# 168. Analytics and Early Funnel
+
+The seven-step first-time Free Week 1 acquisition funnel is defined in this order:
+
+```text
+landing view
+→ sample click
+→ free trial CTA click
+→ child form start
+→ email submit
+→ child created
+→ onboarding complete
+```
+
+`child_form_start` occurs when the visitor actually begins interacting with the child questionnaire, not merely because the landing component exists on the page. For the new first-time path, `email_submit`, `child_created`, and `onboarding_complete` are server-authoritative events emitted only after trusted Auth dispatch/activation reaches the corresponding state. The browser must not duplicate those events.
+
+`auth_complete` is a secondary account-access / engagement metric. It may occur later when the parent opens the Magic Link and obtains an authenticated browser Session. It is not part of step-to-step acquisition conversion or drop-off, because a genuinely new parent's child and eligible Week 1 job may already exist before that click.
+
+After acquisition, downstream lifecycle signals continue to include Week 1 generated, Student PDF downloaded, feedback submitted, paid conversion, and month-2 retention. Analytics must preserve first-party attribution across the Magic Link without putting child data or parent Email in analytics metadata.
+
+Existing-parent direct login and the explicit additional-child confirmation/discard branch are separate valid paths and must not be misrepresented as first-time acquisition.
+
+---''',
+          172: '''# 172. Operational Admin Needs
+
+During beta, operator must be able to inspect:
+
+* active children;
+* pending jobs;
+* overdue jobs;
+* failed jobs;
+* generation attempts;
+* subscription state;
+* storage artifacts;
+* feedback;
+* capacity;
+* material email delivery status, attempts, last error, and sent time;
+* scoped-link expiry/revocation state.
+
+A polished admin app is not required initially.
+
+Supabase Dashboard plus targeted internal tooling is acceptable.
+
+The targeted Admin Overview uses one primary three-stage pipeline: `READY TO CLAIM`, `AWAITING FINISHER`, and `FINISHER DONE`. Membership is exhaustive for active jobs and is derived from the current job and latest matching authoring attempt only. Claimed jobs remain visible before submission, and `technical_failed` Finisher work remains retryable in `AWAITING FINISHER`. Each job row links to the child/week Debug Inspector. Capacity is summarized as service children versus capacity, waiting count, and total demand, where total demand is service children plus waiting children plus released-not-converted children. The current engine manifest is declared by production repository code as the canonical runtime specification (`CURRENT_ENGINE_MANIFEST`). Expected versions are synchronized with the active engine manifest so that historical artifacts do not generate artificial drift errors. Material release truth comes from `generation_jobs.release_at`.
+
+Admin primary UI is Traditional Chinese while exact engineering identifiers and version numbers remain unchanged where useful. A dedicated 訂閱與營收 page shows current subscription lifecycle state, event-derived time-range trends and authoritative funnels, plus a pseudonymized subscription table with lifecycle drill-down. Internal-test children are excluded from paid, conversion, churn, and revenue metrics. Periods before lifecycle instrumentation are shown as unavailable evidence, not inferred history.
+
+The conversion-funnel UI must render the seven-stage first-time acquisition funnel from Section 168 and must present Magic Link account binding separately as a secondary engagement/account-access metric. It must not count missing `auth_complete` as acquisition drop-off. Existing-parent/additional-child activity remains a separate branch and is excluded from first-time acquisition conversion.
+
+During a rollout window that contains events from older funnel definitions and the current trusted pre-auth lifecycle, the UI must not present impossible greater-than-100% step conversion as if it were a clean cohort measurement; mixed-definition history should be identified or treated as non-comparable for that transition.
+
+Engine Inspector displays the active engine specification as green 規格已全面生效. The active runtime specification is declared by `CURRENT_ENGINE_MANIFEST` (Release ID, Engine, Schema, Prompt, Quality Profile, Worker, and PDF Renderer).
+
+---''',
+          179: '''# 179. Testing Requirements
+
+At minimum test:
+
+* authentication ownership;
+* RLS;
+* parent with multiple children;
+* no sibling state leakage;
+* job idempotency;
+* generation eligibility;
+* founding pricing state;
+* 100-child capacity enforcement;
+* billing webhook idempotency;
+* private file access;
+* feedback ownership;
+* profile edit behavior;
+* historical packet immutability;
+* landing-first onboarding starts with child data rather than an Email gate;
+* pre-auth onboarding data is not directly readable through public client roles;
+* service-only prepare/activation privileges and the rule that trusted Auth dispatch succeeds before activation;
+* a pre-existing Auth account receives no pre-auth child mutation;
+* retry after an uncertain activation does not reclassify or duplicate the child, subscription, waitlist state, generation job, or authoritative funnel events;
+* first-time activation creates exactly one owned child/profile, preserves the account-existence snapshot, and reuses the existing child insert/capacity/beta/subscription/Week 1 pipeline;
+* capacity-full first-time activation produces the truthful waitlist state and no initial generation job;
+* onboarding handoff token expiry, token hashing, authenticated-Email binding, cross-browser completion, and idempotent retry;
+* Magic Link finalization of a pre-provisioned first child returns the same child and does not recreate acquisition events;
+* returning-account first-child finalization and explicit additional-child confirm/discard behavior;
+* anonymous responses do not disclose whether an Auth account already existed;
+* release-time email eligibility, retry bounds, atomic concurrent claims, and provider idempotency;
+* invalid, expired, revoked, cross-child, cross-week, and unreleased scoped material access;
+* equivalent scoped authorization for both private PDF artifacts without weakening normal Dashboard RLS.
+
+---''',
+          192: '''# 192. Definition of Done: Account
+
+A first-time parent can:
+
+1. open the website;
+2. start and complete the first child's learning questionnaire before authentication;
+3. enter the parent Email only after the child questionnaire is complete;
+4. have a successful trusted Magic Link dispatch starts first-child provisioning without requiring a Magic Link click;
+5. leave the website while an eligible first child's Week 1 job is already queued, or see the truthful waitlist state when capacity is full;
+6. later authenticate through the Magic Link and land directly in the same already-provisioned child without retyping the questionnaire or creating a duplicate;
+7. create Child B through the authenticated child-creation path;
+8. edit both children;
+9. never see cross-child or cross-family state contamination.
+
+A pre-existing Auth account receives no pre-auth child mutation. An existing parent can still authenticate directly without filling a new child questionnaire, and landing-origin additional-child creation requires explicit confirmation when an active child already exists.
+
+---''',
+          193: '''# 193. Definition of Done: First Material
+
+For an eligible child, first-time Email submission can create the canonical child and initial generation job before browser authentication after trusted Auth dispatch succeeds. Magic Link click is not a prerequisite for Week 1 authoring eligibility. Capacity-full children instead enter the authoritative waitlist and must not receive an initial job until legitimately released.
+
+For an eligible child:
+
+1. profile exists;
+2. explicit generation job exists and is idempotent;
+3. worker claims job;
+4. production rules are read;
+5. child state is read;
+6. canonical packet source is generated;
+7. Student PDF renders;
+8. Parent Answer PDF renders;
+9. both are stored privately;
+10. parent can download them after release/account access;
+11. metadata records generation version;
+12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance;
+13. fast-moving interests actively inspect recent developments and prefer a strong current angle when it improves the target, while preserving a defensible evergreen fallback;
+14. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, semantic lexical review, or workload gates;
+15. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
+
+---''',
+          198: '''# 198. Definition of Done: Security
+
+The beta is not ready until:
+
+* RLS is enabled and tested;
+* private PDFs are actually private;
+* one family cannot read another family's state;
+* service-role keys are server-only;
+* real child data is absent from Git;
+* pre-auth onboarding drafts are private, short-lived, token-hash protected, and scrubbed after successful provisioning/binding;
+* service-only prepare and activation functions are not executable by `anon` or normal `authenticated` browser roles;
+* the anonymous browser cannot assert successful Auth dispatch or directly invoke trusted activation;
+* a pre-existing Auth account receives no pre-auth child mutation, including across uncertain retry;
+* account existence is never revealed to the anonymous browser; the public onboarding response remains generic;
+* redirect origins are allowlisted and child/profile fields or parent Email never appear in the Magic Link redirect URL;
+* trusted first-time activation creates child ownership only for the Auth user resolved from the prepared Email and reuses canonical capacity/subscription/job triggers rather than bypassing them;
+* authenticated Magic Link finalization requires the matching Email, returns the same pre-provisioned child idempotently, and rejects mismatched/reused invalid handoffs;
+* the callback removes the opaque onboarding token from the visible URL after successful binding.
+
+---''',
+          }
+
+          def replace_section(source: str, number: int, replacement: str) -> str:
+              start_marker = f'# {number}. '
+              next_marker = f'# {number + 1}. '
+              start = source.index(start_marker)
+              end = source.index(next_marker, start + len(start_marker))
+              prefix = source[:start]
+              suffix = source[end:]
+              return prefix + replacement.rstrip() + '\n\n' + suffix
+
+          for number in sorted(sections):
+              text = replace_section(text, number, sections[number])
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/SPEC.md
+          if git diff --cached --quiet; then
+            echo 'SPEC already patched; nothing to commit.'
+            exit 0
+          fi
+          git commit -m 'docs: align SPEC with preauth Week 1 activation'
+          git push origin HEAD:design/preauth-week1-activation
