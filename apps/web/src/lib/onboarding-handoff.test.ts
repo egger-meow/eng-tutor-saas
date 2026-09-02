@@ -7,7 +7,7 @@ import {
   startLandingOnboarding,
 } from './onboarding-handoff'
 import { legalConfig } from './config'
-import { emptyProfileDraft } from './profile-form'
+import { emptyProfileDraft, type ProfileDraft } from './profile-form'
 
 const rpc = vi.fn()
 const invoke = vi.fn()
@@ -27,7 +27,7 @@ describe('onboarding handoff', () => {
 
   it('starts landing onboarding through the trusted Edge Function without browser-side auth or pending RPCs', async () => {
     invoke.mockResolvedValueOnce({ data: { accepted: true }, error: null })
-    const draft = {
+    const draft: ProfileDraft = {
       ...emptyProfileDraft,
       displayName: '小宇',
       grade: 7,
