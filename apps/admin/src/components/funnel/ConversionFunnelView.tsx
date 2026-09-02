@@ -8,6 +8,17 @@ interface Props {
   onRangeChange: (days: number) => void
 }
 
+type ReturningAwareFunnelData = ConversionFunnelData & {
+  returningParent?: {
+    detected: number
+    additionalChildConfirmed: number
+    pendingOnboardingDiscarded: number
+    confirmationPercent: number
+    discardPercent: number
+  }
+  childArchivedCount?: number
+}
+
 export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRangeChange }) => {
   if (!data) {
     return (
@@ -28,17 +39,25 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
     totalEvents,
   } = data
   const { steps, biggestDropOff } = normalizeLandingFirstFunnel(rawSteps)
+  const extended = data as ReturningAwareFunnelData
+  const returningParent = extended.returningParent ?? {
+    detected: 0,
+    additionalChildConfirmed: 0,
+    pendingOnboardingDiscarded: 0,
+    confirmationPercent: 0,
+    discardPercent: 0,
+  }
+  const childArchivedCount = extended.childArchivedCount ?? 0
 
   const maxStepVisitors = Math.max(...steps.map((s) => s.uniqueVisitors), 1)
 
   return (
     <div className="funnel-container">
-      {/* Top Filter & Meta Bar */}
       <div className="funnel-header-bar">
         <div>
           <h2 className="funnel-title">轉換漏斗分析 (Conversion Funnel)</h2>
           <p className="funnel-subtitle">
-            第一方即時轉換漏斗：追蹤訪客由首頁瀏覽、教材範例、開始填孩子資料、Email 驗證到完成孩子學習檔案的端到端轉換。
+            主漏斗只看「新客建立第一位孩子」：首頁 → 教材範例 → 開始填孩子資料 → Email → Magic Link → 完成設定。已經有孩子的家長會自動移到下方回流分支，不再污染新客轉換率。
           </p>
         </div>
         <div className="funnel-controls">
@@ -68,12 +87,11 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         </div>
       )}
 
-      {/* Top KPI Cards */}
       <div className="funnel-kpi-grid">
         <div className="funnel-kpi-card">
-          <div className="kpi-label">首頁獨立訪客 (Landing)</div>
+          <div className="kpi-label">新客首頁獨立訪客 (Landing)</div>
           <div className="kpi-value">{uniqueLandingVisitors.toLocaleString()}</div>
-          <div className="kpi-desc">期間內進入首頁的獨立訪客數</div>
+          <div className="kpi-desc">已排除被辨識為既有家長的回流訪客</div>
         </div>
 
         <div className="funnel-kpi-card">
@@ -97,12 +115,12 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         </div>
 
         <div className="funnel-kpi-card">
-          <div className="kpi-label">完成孩子檔案 (Onboarded)</div>
+          <div className="kpi-label">完成第一位孩子 (Onboarded)</div>
           <div className="kpi-value highlight-emerald">
             {steps.find((s) => s.name === 'onboarding_complete')?.uniqueVisitors.toLocaleString() || 0}
           </div>
           <div className="kpi-desc">
-            整體轉換率 <strong>{overallConversionPercent}%</strong>
+            新客整體轉換率 <strong>{overallConversionPercent}%</strong>
           </div>
         </div>
 
@@ -123,11 +141,37 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         </div>
       </div>
 
-      {/* Main Funnel Step Breakdown */}
       <div className="funnel-card">
-        <h3 className="card-heading">8 階段轉換漏斗進程 (Step-by-Step Funnel)</h3>
+        <h3 className="card-heading">既有家長回流分支 (Returning Parent)</h3>
+        <p className="card-subheading">家長從 Landing 填完資料後，Magic Link 驗證發現帳號已經有孩子時，會先確認是否真的要新增另一位孩子。</p>
+        <div className="funnel-kpi-grid">
+          <div className="funnel-kpi-card">
+            <div className="kpi-label">辨識為既有家長</div>
+            <div className="kpi-value">{returningParent.detected.toLocaleString()}</div>
+            <div className="kpi-desc">不計入上方新客第一位孩子漏斗</div>
+          </div>
+          <div className="funnel-kpi-card">
+            <div className="kpi-label">確認新增另一位孩子</div>
+            <div className="kpi-value highlight-emerald">{returningParent.additionalChildConfirmed.toLocaleString()}</div>
+            <div className="kpi-desc">確認率 {returningParent.confirmationPercent}%</div>
+          </div>
+          <div className="funnel-kpi-card">
+            <div className="kpi-label">放棄重複／回原孩子</div>
+            <div className="kpi-value">{returningParent.pendingOnboardingDiscarded.toLocaleString()}</div>
+            <div className="kpi-desc">放棄率 {returningParent.discardPercent}%</div>
+          </div>
+          <div className="funnel-kpi-card">
+            <div className="kpi-label">期間內移除孩子</div>
+            <div className="kpi-value">{childArchivedCount.toLocaleString()}</div>
+            <div className="kpi-desc">帳號管理訊號，不算 acquisition 流失</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="funnel-card">
+        <h3 className="card-heading">8 階段新客轉換漏斗 (Step-by-Step Funnel)</h3>
         <p className="card-subheading">
-          精確掌握從公開流量到填寫孩子資料、Email 驗證、登入與完成設定的各階段流失與轉換率。
+          精確掌握新客從公開流量到填孩子資料、Email 驗證、登入與第一位孩子完成設定的各階段流失與轉換率。
         </p>
 
         <div className="funnel-steps-table-wrapper">
@@ -159,38 +203,17 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
                         <span className="step-desc">{step.description}</span>
                       </div>
                     </td>
-                    <td>
-                      <span className="step-unique-badge">{step.uniqueVisitors.toLocaleString()} 人</span>
-                    </td>
+                    <td><span className="step-unique-badge">{step.uniqueVisitors.toLocaleString()} 人</span></td>
                     <td className="text-muted">{step.count.toLocaleString()} 次</td>
                     <td>
                       <div className="funnel-bar-wrapper">
-                        <div
-                          className={'funnel-bar-fill ' + (isFinal ? 'fill-emerald' : 'fill-blue')}
-                          style={{ width: `${Math.max(barWidth, 2)}%` }}
-                        />
+                        <div className={'funnel-bar-fill ' + (isFinal ? 'fill-emerald' : 'fill-blue')} style={{ width: `${Math.max(barWidth, 2)}%` }} />
                         <span className="bar-percent-label">{step.conversionFromLandingPercent}%</span>
                       </div>
                     </td>
-                    <td>
-                      <span className={'conversion-pill ' + (idx === 0 ? 'pill-neutral' : isDropHeavy ? 'pill-rose' : 'pill-green')}>
-                        {idx === 0 ? '基準 (100%)' : `${step.conversionFromPrevPercent}%`}
-                      </span>
-                    </td>
-                    <td>
-                      <strong className={isFinal ? 'text-emerald' : ''}>{step.conversionFromLandingPercent}%</strong>
-                    </td>
-                    <td>
-                      {idx === 0 ? (
-                        <span className="text-dim">—</span>
-                      ) : step.dropOffCount > 0 ? (
-                        <span className={'drop-pill ' + (isDropHeavy ? 'drop-heavy' : '')}>
-                          -{step.dropOffCount} ({step.dropOffPercent}%)
-                        </span>
-                      ) : (
-                        <span className="text-dim">0</span>
-                      )}
-                    </td>
+                    <td><span className={'conversion-pill ' + (idx === 0 ? 'pill-neutral' : isDropHeavy ? 'pill-rose' : 'pill-green')}>{idx === 0 ? '基準 (100%)' : `${step.conversionFromPrevPercent}%`}</span></td>
+                    <td><strong className={isFinal ? 'text-emerald' : ''}>{step.conversionFromLandingPercent}%</strong></td>
+                    <td>{idx === 0 ? <span className="text-dim">—</span> : step.dropOffCount > 0 ? <span className={'drop-pill ' + (isDropHeavy ? 'drop-heavy' : '')}>-{step.dropOffCount} ({step.dropOffPercent}%)</span> : <span className="text-dim">0</span>}</td>
                   </tr>
                 )
               })}
@@ -199,110 +222,33 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         </div>
       </div>
 
-      {/* Two Column Section: Channel Breakdown & Device Distribution */}
       <div className="funnel-two-col-grid">
-        {/* Channel / Referrer Breakdown */}
         <div className="funnel-card">
-          <h3 className="card-heading">流量來源與成效分析 (Traffic Attribution)</h3>
-          <p className="card-subheading">區分 Meta / Facebook 廣告、Google 搜尋與直接流量的最終轉換表現。</p>
-
+          <h3 className="card-heading">新客流量來源與成效分析 (Traffic Attribution)</h3>
+          <p className="card-subheading">區分 Meta / Facebook 廣告、Google 搜尋與直接流量的第一位孩子最終轉換表現。</p>
           <table className="funnel-table">
-            <thead>
-              <tr>
-                <th>流量來源</th>
-                <th style={{ width: '80px' }}>首頁訪客</th>
-                <th style={{ width: '80px' }}>登入成功</th>
-                <th style={{ width: '80px' }}>建立孩子</th>
-                <th style={{ width: '80px' }}>完成設定</th>
-                <th style={{ width: '90px' }}>最終轉化率</th>
-              </tr>
-            </thead>
-            <tbody>
-              {channels.map((ch) => (
-                <tr key={ch.channel}>
-                  <td>
-                    <strong>{ch.label}</strong>
-                  </td>
-                  <td>{ch.landingViews.toLocaleString()}</td>
-                  <td>{ch.authCompleted.toLocaleString()}</td>
-                  <td>{ch.childrenCreated.toLocaleString()}</td>
-                  <td>
-                    <strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong>
-                  </td>
-                  <td>
-                    <span className="conversion-pill pill-green">{ch.conversionPercent}%</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            <thead><tr><th>流量來源</th><th style={{ width: '80px' }}>首頁訪客</th><th style={{ width: '80px' }}>登入成功</th><th style={{ width: '80px' }}>建立孩子</th><th style={{ width: '80px' }}>完成設定</th><th style={{ width: '90px' }}>最終轉化率</th></tr></thead>
+            <tbody>{channels.map((ch) => <tr key={ch.channel}><td><strong>{ch.label}</strong></td><td>{ch.landingViews.toLocaleString()}</td><td>{ch.authCompleted.toLocaleString()}</td><td>{ch.childrenCreated.toLocaleString()}</td><td><strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong></td><td><span className="conversion-pill pill-green">{ch.conversionPercent}%</span></td></tr>)}</tbody>
           </table>
         </div>
 
-        {/* Device Class Breakdown */}
         <div className="funnel-card">
-          <h3 className="card-heading">裝置分佈 (Device Distribution)</h3>
-          <p className="card-subheading">訪客使用的裝置類型統計（行動裝置 vs 桌上型電腦 vs 平板）。</p>
-
+          <h3 className="card-heading">新客裝置分佈 (Device Distribution)</h3>
+          <p className="card-subheading">第一位孩子 acquisition 流程中的裝置事件分佈。</p>
           <div className="device-metric-list">
-            {devices.map((dev) => (
-              <div key={dev.device} className="device-item">
-                <div className="device-info">
-                  <span className="device-label">{dev.label}</span>
-                  <span className="device-count">
-                    <strong>{dev.count.toLocaleString()}</strong> 次 ({dev.percent}%)
-                  </span>
-                </div>
-                <div className="device-bar-bg">
-                  <div className="device-bar-fill" style={{ width: `${dev.percent}%` }} />
-                </div>
-              </div>
-            ))}
+            {devices.map((dev) => <div key={dev.device} className="device-item"><div className="device-info"><span className="device-label">{dev.label}</span><span className="device-count"><strong>{dev.count.toLocaleString()}</strong> 次 ({dev.percent}%)</span></div><div className="device-bar-bg"><div className="device-bar-fill" style={{ width: `${dev.percent}%` }} /></div></div>)}
           </div>
-
-          <div className="device-footer-stat">
-            期間總計觸發事件數：<strong>{totalEvents.toLocaleString()}</strong>
-          </div>
+          <div className="device-footer-stat">期間記錄事件數：<strong>{totalEvents.toLocaleString()}</strong></div>
         </div>
       </div>
 
-      {/* Trend Series Table */}
       {trends.length > 0 && (
         <div className="funnel-card">
-          <h3 className="card-heading">轉換漏斗時間趨勢 ({rangeDays === 1 ? '每小時' : '每日'}紀錄)</h3>
+          <h3 className="card-heading">新客轉換漏斗時間趨勢 ({rangeDays === 1 ? '每小時' : '每日'}紀錄)</h3>
           <div className="funnel-steps-table-wrapper">
             <table className="funnel-table">
-              <thead>
-                <tr>
-                  <th>時間 ({rangeDays === 1 ? '時' : '日'})</th>
-                  <th>首頁瀏覽</th>
-                  <th>範例點擊</th>
-                  <th>點擊體驗</th>
-                  <th>開始填表</th>
-                  <th>送出 Email</th>
-                  <th>登入成功</th>
-                  <th>建立孩子</th>
-                  <th>完成設定</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trends.slice().reverse().map((t) => (
-                  <tr key={t.date}>
-                    <td>
-                      <code>{t.date}</code>
-                    </td>
-                    <td>{t.landing_view}</td>
-                    <td>{t.sample_click}</td>
-                    <td>{t.free_trial_click}</td>
-                    <td>{t.child_form_start}</td>
-                    <td>{t.email_submit}</td>
-                    <td>{t.auth_complete}</td>
-                    <td>{t.child_created}</td>
-                    <td>
-                      <strong className="text-emerald">{t.onboarding_complete}</strong>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              <thead><tr><th>時間 ({rangeDays === 1 ? '時' : '日'})</th><th>首頁瀏覽</th><th>範例點擊</th><th>點擊體驗</th><th>開始填表</th><th>送出 Email</th><th>登入成功</th><th>建立孩子</th><th>完成設定</th></tr></thead>
+              <tbody>{trends.slice().reverse().map((t) => <tr key={t.date}><td><code>{t.date}</code></td><td>{t.landing_view}</td><td>{t.sample_click}</td><td>{t.free_trial_click}</td><td>{t.child_form_start}</td><td>{t.email_submit}</td><td>{t.auth_complete}</td><td>{t.child_created}</td><td><strong className="text-emerald">{t.onboarding_complete}</strong></td></tr>)}</tbody>
             </table>
           </div>
         </div>

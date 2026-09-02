@@ -1,16 +1,41 @@
+import { useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { navigate } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
+import { ChildArchiveControl } from '../components/profile/ChildArchiveControl'
 import { ProfileSummary } from '../components/profile/ProfileSummary'
 import { useParentData } from '../hooks/use-parent-data'
+import { trackChildArchived } from '../lib/analytics'
+import { archiveChild } from '../lib/children'
 import { gradeStageLabel } from '../lib/grade-stage'
 import { getSupabaseClient } from '../lib/supabase'
 
 export function ChildProfilePage({ session, childId }: { session: Session; childId?: string }) {
   const data = useParentData(session.user.id)
+  const [archiveConfirmId, setArchiveConfirmId] = useState<string | null>(null)
+  const [archiveBusyId, setArchiveBusyId] = useState<string | null>(null)
+  const [archiveError, setArchiveError] = useState('')
   const requestedChild = data.children.find((item) => item.id === childId) ?? null
+
+  async function confirmArchive(targetChildId: string) {
+    if (archiveBusyId) return
+    setArchiveBusyId(targetChildId)
+    setArchiveError('')
+    try {
+      await archiveChild(targetChildId)
+      trackChildArchived(targetChildId, { source: 'child_profile' })
+      setArchiveConfirmId(null)
+      await data.refresh()
+      if (childId === targetChildId) navigate('/')
+    } catch (caught) {
+      setArchiveError(caught instanceof Error ? caught.message : '無法移除孩子，請稍後再試。')
+    } finally {
+      setArchiveBusyId(null)
+    }
+  }
+
   return <AppShell header={<ParentNavigation email={session.user.email} childHref={requestedChild ? `/children/${requestedChild.id}` : '/children'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
     <PageTransition>
       {data.loading ? <div className="loading-state" role="status"><div className="loading-spinner" /><p>載入孩子資料中…</p></div> : data.error ? <p className="notice notice-error">{data.error}</p> : data.children.length === 0 ? <p className="notice notice-error">找不到可查看的孩子資料。</p> : <>
@@ -19,6 +44,15 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
         <div className="all-child-profiles">{data.children.map((child, index) => <section className="child-profile-section" key={child.id}>
           <header className="child-profile-heading"><div><p className="overline">孩子資料</p><h2>{child.display_name}</h2><p>{gradeStageLabel(child)}</p></div><button className="button" type="button" onClick={() => navigate(`/children/${child.id}/edit`)}>編輯 {child.display_name} 資料</button></header>
           <ProfileSummary child={child} />
+          <ChildArchiveControl
+            childName={child.display_name}
+            confirming={archiveConfirmId === child.id}
+            busy={archiveBusyId === child.id}
+            error={archiveConfirmId === child.id ? archiveError : ''}
+            onRequestArchive={() => { setArchiveConfirmId(child.id); setArchiveError('') }}
+            onConfirmArchive={() => void confirmArchive(child.id)}
+            onCancelArchive={() => { setArchiveConfirmId(null); setArchiveError('') }}
+          />
           {index < data.children.length - 1 && <div className="child-profile-divider" aria-hidden="true"><span>下一位孩子</span></div>}
         </section>)}</div>
       </>}

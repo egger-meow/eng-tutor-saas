@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createPendingOnboarding, finalizePendingOnboarding, readOnboardingToken } from './onboarding-handoff'
+import {
+  confirmAdditionalChildOnboarding,
+  createPendingOnboarding,
+  discardPendingOnboarding,
+  finalizePendingOnboarding,
+  readOnboardingToken,
+} from './onboarding-handoff'
 import { emptyProfileDraft } from './profile-form'
 
 const rpc = vi.fn()
@@ -29,11 +35,39 @@ describe('onboarding handoff', () => {
     }))
   })
 
-  it('finalizes the handoff after auth and returns the existing or newly-created child id', async () => {
+  it('finalizes a first child after auth and returns a created result', async () => {
     rpc.mockResolvedValueOnce({ data: '11111111-1111-1111-1111-111111111111', error: null })
 
-    await expect(finalizePendingOnboarding('opaque-token')).resolves.toBe('11111111-1111-1111-1111-111111111111')
+    await expect(finalizePendingOnboarding('opaque-token')).resolves.toEqual({
+      status: 'created',
+      childId: '11111111-1111-1111-1111-111111111111',
+    })
     expect(rpc).toHaveBeenCalledWith('finalize_pending_onboarding', { p_token: 'opaque-token' })
+  })
+
+  it('turns the returning-parent database guard into an explicit confirmation state', async () => {
+    rpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'ADDITIONAL_CHILD_CONFIRMATION_REQUIRED' },
+    })
+
+    await expect(finalizePendingOnboarding('opaque-token')).resolves.toEqual({
+      status: 'additional_child_confirmation_required',
+    })
+  })
+
+  it('creates an additional child only through the explicit authenticated confirmation RPC', async () => {
+    rpc.mockResolvedValueOnce({ data: '22222222-2222-2222-2222-222222222222', error: null })
+
+    await expect(confirmAdditionalChildOnboarding('opaque-token')).resolves.toBe('22222222-2222-2222-2222-222222222222')
+    expect(rpc).toHaveBeenCalledWith('confirm_additional_child_onboarding', { p_token: 'opaque-token' })
+  })
+
+  it('can discard the pending landing draft without creating another child', async () => {
+    rpc.mockResolvedValueOnce({ data: true, error: null })
+
+    await expect(discardPendingOnboarding('opaque-token')).resolves.toBeUndefined()
+    expect(rpc).toHaveBeenCalledWith('discard_pending_onboarding', { p_token: 'opaque-token' })
   })
 
   it('reads only a bounded onboarding token from the magic-link return URL', () => {

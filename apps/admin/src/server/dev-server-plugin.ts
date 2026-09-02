@@ -1,14 +1,14 @@
 import type { Plugin } from 'vite'
-import { AdminService } from './admin-service.js'
+import { LandingFunnelAdminService } from './landing-funnel-admin-service.js'
 import { handleApiRequest } from './api-handler.js'
 
 export function adminApiPlugin(): Plugin {
-  let service: AdminService
+  let service: LandingFunnelAdminService
 
   return {
     name: 'admin-api-plugin',
     configureServer(server) {
-      service = new AdminService()
+      service = new LandingFunnelAdminService()
 
       server.middlewares.use(async (req, res, next) => {
         try {

@@ -1,16 +1,23 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+const migrationsDir = resolve(import.meta.dirname, '..', 'supabase', 'migrations')
 const migration = readFileSync(
-  resolve(import.meta.dirname, '..', 'supabase', 'migrations', '20260901184240_landing_first_onboarding_handoff.sql'),
+  resolve(migrationsDir, '20260901184240_landing_first_onboarding_handoff.sql'),
   'utf8',
 )
 
 const rlsMigration = readFileSync(
-  resolve(import.meta.dirname, '..', 'supabase', 'migrations', '20260901184404_harden_pending_onboarding_rls.sql'),
+  resolve(migrationsDir, '20260901184404_harden_pending_onboarding_rls.sql'),
   'utf8',
 )
+
+const onboardingMigrations = readdirSync(migrationsDir)
+  .filter((name) => name.includes('onboarding'))
+  .sort()
+  .map((name) => readFileSync(resolve(migrationsDir, name), 'utf8'))
+  .join('\n')
 
 describe('landing-first onboarding handoff security contract', () => {
   it('keeps pre-auth child data private and exposes only reviewed RPCs', () => {
@@ -39,6 +46,15 @@ describe('landing-first onboarding handoff security contract', () => {
     expect(migration).toContain('insert into public.children')
     expect(migration).toContain('update public.child_profiles')
     expect(migration).toContain('consumed_by = v_user_id')
+  })
+
+  it('requires an explicit authenticated confirmation before a returning parent creates another active child', () => {
+    expect(onboardingMigrations).toContain("raise exception 'ADDITIONAL_CHILD_CONFIRMATION_REQUIRED'")
+    expect(onboardingMigrations).toContain('create or replace function public.confirm_additional_child_onboarding(p_token text)')
+    expect(onboardingMigrations).toContain('create or replace function public.discard_pending_onboarding(p_token text)')
+    expect(onboardingMigrations).toContain('grant execute on function public.confirm_additional_child_onboarding(text) to authenticated, service_role')
+    expect(onboardingMigrations).toContain('grant execute on function public.discard_pending_onboarding(text) to authenticated, service_role')
+    expect(onboardingMigrations).toContain('additional_child_confirmed_at')
   })
 
   it('scrubs the pre-auth email and child draft immediately after successful binding', () => {

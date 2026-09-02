@@ -45,6 +45,6 @@ export async function updateChild(id: string, input: ChildInput): Promise<void> 
 }
 
 export async function archiveChild(id: string): Promise<void> {
-  const { error } = await getSupabaseClient().from('children').update({ is_active: false }).eq('id', id)
+  const { error } = await getSupabaseClient().rpc('archive_owned_child', { p_child_id: id })
   if (error) throw error
 }
