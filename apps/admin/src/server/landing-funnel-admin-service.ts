@@ -18,6 +18,7 @@ export type ReturningParentFunnelSummary = {
 }
 
 export type ExtendedConversionFunnelData = ConversionFunnelData & {
+  authCompletedCount: number
   returningParent: ReturningParentFunnelSummary
   childArchivedCount: number
 }
@@ -30,10 +31,12 @@ const STEP_DEFS: Array<{ name: FunnelStepName; label: string; description: strin
   { name: 'email_submit', label: '送出 Email (Email Submit)', description: '孩子資料填完後送出安全登入連結' },
   { name: 'child_created', label: '建立第一位孩子 (Child Created)', description: 'Email 送出後由可信任伺服器流程建立第一位孩子' },
   { name: 'onboarding_complete', label: '完成第一週設定 (Onboarded)', description: '第一位孩子完成個人化學習資料設定；此步驟是新客 acquisition KPI' },
-  { name: 'auth_complete', label: '綁定家長帳號 (Auth Complete)', description: '家長之後開啟 Magic Link，建立有效會員 Session 並進入孩子管理' },
 ]
 
-const ACQUISITION_EVENT_NAMES = new Set<string>(STEP_DEFS.map((step) => step.name))
+const ACQUISITION_EVENT_NAMES = new Set<string>([
+  ...STEP_DEFS.map((step) => step.name),
+  'auth_complete',
+])
 
 function visitorId(event: any): string {
   return String(event.anonymous_id || event.user_id || event.id || '')
@@ -205,7 +208,12 @@ export class LandingFunnelAdminService extends AdminService {
     const base = await super.getConversionFunnelData(rangeDays)
     const client = (this as unknown as { client: SupabaseClient | null }).client
     if (!client) {
-      return { ...base, returningParent: { detected: 0, additionalChildConfirmed: 0, pendingOnboardingDiscarded: 0, confirmationPercent: 0, discardPercent: 0 }, childArchivedCount: 0 }
+      return {
+        ...base,
+        authCompletedCount: 0,
+        returningParent: { detected: 0, additionalChildConfirmed: 0, pendingOnboardingDiscarded: 0, confirmationPercent: 0, discardPercent: 0 },
+        childArchivedCount: 0,
+      }
     }
 
     const [{ data: rawEvents, error: eventError }, { data: rawChildren, error: childError }] = await Promise.all([
@@ -213,7 +221,12 @@ export class LandingFunnelAdminService extends AdminService {
       client.from('children').select('id, parent_id, is_internal_test'),
     ])
     if (eventError || childError) {
-      return { ...base, returningParent: { detected: 0, additionalChildConfirmed: 0, pendingOnboardingDiscarded: 0, confirmationPercent: 0, discardPercent: 0 }, childArchivedCount: 0 }
+      return {
+        ...base,
+        authCompletedCount: 0,
+        returningParent: { detected: 0, additionalChildConfirmed: 0, pendingOnboardingDiscarded: 0, confirmationPercent: 0, discardPercent: 0 },
+        childArchivedCount: 0,
+      }
     }
 
     const children = (rawChildren || []) as any[]
@@ -226,7 +239,14 @@ export class LandingFunnelAdminService extends AdminService {
     })
 
     const { acquisitionEvents } = splitLandingVisits(events)
-    const firstChild = buildStepMetrics(acquisitionEvents)
+    const acquisitionStepEvents = acquisitionEvents.filter((event) => event.event_name !== 'auth_complete')
+    const firstChild = buildStepMetrics(acquisitionStepEvents)
+    const authCompletedCount = new Set(
+      acquisitionEvents
+        .filter((event) => event.event_name === 'auth_complete')
+        .map(visitorId)
+        .filter(Boolean),
+    ).size
 
     const detected = new Set(events.filter((event) => event.event_name === 'existing_parent_detected').map(visitorId).filter(Boolean)).size
     const additionalChildConfirmed = new Set(events.filter((event) => event.event_name === 'additional_child_confirmed').map(visitorId).filter(Boolean)).size
@@ -240,8 +260,9 @@ export class LandingFunnelAdminService extends AdminService {
       steps: firstChild.steps,
       overallConversionPercent: firstChild.overallConversionPercent,
       biggestDropOff: firstChild.biggestDropOff,
+      authCompletedCount,
       channels: buildChannels(acquisitionEvents),
-      devices: buildDevices(acquisitionEvents),
+      devices: buildDevices(acquisitionStepEvents),
       trends: buildTrends(acquisitionEvents, base.rangeDays),
       returningParent: {
         detected,
