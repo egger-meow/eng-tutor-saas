@@ -32,7 +32,7 @@ describe('pre-auth Week 1 activation contract', () => {
   it('makes prepare and activation service-only and retires browser pending creation', () => {
     expect(migrationSql).toContain('create or replace function public.prepare_landing_onboarding')
     expect(migrationSql).toContain('create or replace function public.activate_landing_onboarding')
-    expect(migrationSql).toContain('revoke all on function public.create_pending_onboarding(text, jsonb, text, text) from public, anon, authenticated')
+    expect(migrationSql).toMatch(/revoke all on function public\.create_pending_onboarding\(text, jsonb, text, text\)\s+from public, anon, authenticated/u)
     expect(migrationSql).toMatch(/grant execute on function public\.prepare_landing_onboarding[\s\S]*?to service_role/u)
     expect(migrationSql).toMatch(/grant execute on function public\.activate_landing_onboarding[\s\S]*?to service_role/u)
   })
