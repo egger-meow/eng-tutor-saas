@@ -17,7 +17,7 @@ function step(name: FunnelStepMetric['name'], uniqueVisitors: number): FunnelSte
 }
 
 describe('landing-first admin funnel', () => {
-  it('places first-child provisioning before later Magic Link account binding and recomputes metrics', () => {
+  it('keeps Magic Link auth outside the seven-step acquisition funnel', () => {
     const result = normalizeLandingFirstFunnel([
       step('landing_view', 100),
       step('sample_click', 50),
@@ -37,13 +37,12 @@ describe('landing-first admin funnel', () => {
       'email_submit',
       'child_created',
       'onboarding_complete',
-      'auth_complete',
     ])
     expect(result.steps[3]?.conversionFromPrevPercent).toBe(87.5)
     expect(result.steps[4]?.conversionFromPrevPercent).toBe(71.4)
     expect(result.steps[5]?.conversionFromPrevPercent).toBe(72)
     expect(result.steps[6]?.conversionFromPrevPercent).toBe(100)
-    expect(result.steps[7]?.conversionFromPrevPercent).toBe(83.3)
+    expect(result.steps.some((item) => item.name === 'auth_complete')).toBe(false)
     expect(result.biggestDropOff?.fromName).toBe('landing_view')
     expect(result.biggestDropOff?.toName).toBe('sample_click')
   })
