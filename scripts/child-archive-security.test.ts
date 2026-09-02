@@ -40,6 +40,10 @@ describe('safe parent child archive contract', () => {
   })
 
   it('prevents archived children from receiving newly queued material email and revokes old scoped links', () => {
+    expect(childArchiveMigrations).toContain('perform delivery.id')
+    expect(childArchiveMigrations).toContain('from public.material_email_deliveries as delivery')
+    expect(childArchiveMigrations).toContain('where delivery.child_id = p_child_id')
+    expect(childArchiveMigrations).toContain('for update;')
     expect(childArchiveMigrations).toContain('update public.material_email_deliveries')
     expect(childArchiveMigrations).toContain("status = 'dead'")
     expect(childArchiveMigrations).toContain('access_revoked_at = coalesce(access_revoked_at, now())')
