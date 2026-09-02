@@ -6,9 +6,9 @@ const LANDING_FIRST_ORDER: FunnelStepName[] = [
   'free_trial_click',
   'child_form_start',
   'email_submit',
-  'auth_complete',
   'child_created',
   'onboarding_complete',
+  'auth_complete',
 ]
 
 function round1(value: number): number {
