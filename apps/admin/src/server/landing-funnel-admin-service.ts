@@ -33,12 +33,53 @@ const STEP_DEFS: Array<{ name: FunnelStepName; label: string; description: strin
   { name: 'onboarding_complete', label: '完成第一週設定 (Onboarded)', description: '第一位孩子完成個人化學習資料設定' },
 ]
 
+const ACQUISITION_EVENT_NAMES = new Set<string>(STEP_DEFS.map((step) => step.name))
+
 function visitorId(event: any): string {
   return String(event.anonymous_id || event.user_id || event.id || '')
 }
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10
+}
+
+function splitLandingVisits(events: any[]): { acquisitionEvents: any[]; returningVisitEvents: any[] } {
+  const byVisitor = new Map<string, any[]>()
+  for (const event of events) {
+    const id = visitorId(event)
+    if (!id) continue
+    byVisitor.set(id, [...(byVisitor.get(id) || []), event])
+  }
+
+  const acquisitionEvents: any[] = []
+  const returningVisitEvents: any[] = []
+
+  for (const visitorEvents of byVisitor.values()) {
+    const ordered = visitorEvents.slice().sort((left, right) => {
+      const timeOrder = String(left.created_at || '').localeCompare(String(right.created_at || ''))
+      return timeOrder !== 0 ? timeOrder : String(left.id || '').localeCompare(String(right.id || ''))
+    })
+
+    let visit: any[] = []
+    const flushVisit = () => {
+      if (visit.length === 0) return
+      const isReturningVisit = visit.some((event) => event.event_name === 'existing_parent_detected')
+      if (isReturningVisit) {
+        returningVisitEvents.push(...visit)
+      } else {
+        acquisitionEvents.push(...visit.filter((event) => ACQUISITION_EVENT_NAMES.has(String(event.event_name))))
+      }
+      visit = []
+    }
+
+    for (const event of ordered) {
+      if (event.event_name === 'landing_view' && visit.length > 0) flushVisit()
+      visit.push(event)
+    }
+    flushVisit()
+  }
+
+  return { acquisitionEvents, returningVisitEvents }
 }
 
 function buildStepMetrics(events: any[]): { steps: FunnelStepMetric[]; uniqueLandingVisitors: number; biggestDropOff: ConversionFunnelData['biggestDropOff']; overallConversionPercent: number } {
@@ -184,11 +225,10 @@ export class LandingFunnelAdminService extends AdminService {
       return !event.metadata?.is_internal && !event.metadata?.test_mode
     })
 
-    const returningIds = new Set(events.filter((event) => event.event_name === 'existing_parent_detected').map(visitorId).filter(Boolean))
-    const acquisitionEvents = events.filter((event) => !returningIds.has(visitorId(event)))
+    const { acquisitionEvents } = splitLandingVisits(events)
     const firstChild = buildStepMetrics(acquisitionEvents)
 
-    const detected = returningIds.size
+    const detected = new Set(events.filter((event) => event.event_name === 'existing_parent_detected').map(visitorId).filter(Boolean)).size
     const additionalChildConfirmed = new Set(events.filter((event) => event.event_name === 'additional_child_confirmed').map(visitorId).filter(Boolean)).size
     const pendingOnboardingDiscarded = new Set(events.filter((event) => event.event_name === 'pending_onboarding_discarded').map(visitorId).filter(Boolean)).size
     const archivedChildIds = new Set(events.filter((event) => event.event_name === 'child_archived').map((event) => String(event.child_id || visitorId(event))).filter(Boolean))
