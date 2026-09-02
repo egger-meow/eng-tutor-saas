@@ -6,6 +6,7 @@ import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
 import { ProfileSummary } from '../components/profile/ProfileSummary'
 import { useParentData } from '../hooks/use-parent-data'
+import { trackChildArchived } from '../lib/analytics'
 import { archiveChild } from '../lib/children'
 import { gradeStageLabel } from '../lib/grade-stage'
 import { getSupabaseClient } from '../lib/supabase'
@@ -23,6 +24,7 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
     setArchiveError('')
     try {
       await archiveChild(targetChildId)
+      trackChildArchived(targetChildId, { source: 'child_profile' })
       setArchiveConfirmId(null)
       await data.refresh()
       if (childId === targetChildId) navigate('/')
