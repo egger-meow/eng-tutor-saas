@@ -79,15 +79,18 @@ export async function startLandingOnboarding(
 
   let lastError: unknown
   for (let attempt = 0; attempt < ACTIVATION_ATTEMPTS; attempt += 1) {
+    let activation: unknown
     try {
-      const activation = await deps.activate(token)
-      return { status: readActivationStatus(activation) }
+      activation = await deps.activate(token)
     } catch (error) {
       lastError = error
       if (attempt < ACTIVATION_ATTEMPTS - 1) {
         await deps.sleep(ACTIVATION_RETRY_DELAYS_MS[attempt] ?? 250)
       }
+      continue
     }
+
+    return { status: readActivationStatus(activation) }
   }
 
   throw lastError instanceof Error ? lastError : new Error('activation_failed')
