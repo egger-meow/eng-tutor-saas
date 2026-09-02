@@ -18,14 +18,15 @@ describe('start-landing-onboarding Edge Function contract', () => {
 
   it('uses the trusted orchestrator and sends the Magic Link between prepare and activation', () => {
     expect(source).toContain("import { startLandingOnboarding } from '../_shared/landing-onboarding-start.ts'")
-    expect(source).toContain('startLandingOnboarding(')
+    expect(source).toContain('const result = await startLandingOnboarding(')
     expect(source).toContain('client.auth.signInWithOtp')
     expect(source).toContain('emailRedirectTo: redirectTo')
     expect(source).toContain('shouldCreateUser: true')
   })
 
-  it('never exposes account classification or child identifiers in the public response', () => {
-    expect(source).toContain("return json(200, { accepted: true })")
+  it('returns only the authoritative accepted or waitlisted status without account classification or child identifiers', () => {
+    expect(source).toContain('return json(200, result)')
+    expect(source).not.toContain("return json(200, { accepted: true })")
     expect(source).not.toMatch(/json\(200,[\s\S]*?(accountExisted|account_existed|childId|child_id)/u)
   })
 
