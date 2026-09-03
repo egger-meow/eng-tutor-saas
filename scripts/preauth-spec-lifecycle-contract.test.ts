@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const spec = readFileSync(resolve(import.meta.dirname, '../docs/SPEC.md'), 'utf8')
+const spec = readFileSync(resolve(import.meta.dirname, '../docs/SPEC.md'), 'utf8').replace(/\r\n/g, '\n')
 
 function section(number: number): string {
   const startMarker = `# ${number}. `

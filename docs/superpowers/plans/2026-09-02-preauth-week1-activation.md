@@ -180,10 +180,10 @@
 - 198 Definition of Done: Security
 - 145 only if clarification is required for notification/dashboard authority
 
-- [ ] **Step 1: Replace the old “Magic Link before child/job” contract with the approved pre-auth first-time activation semantics.**
-- [ ] **Step 2: Preserve returning-account explicit confirmation, material-email authority, capacity, RLS, and one-child-one-subscription rules.**
-- [ ] **Step 3: Self-review the SPEC for contradictions with Sections 17–21, 114, 138, 149, 204–205, 210.**
-- [ ] **Step 4: Commit the SPEC slice.**
+- [x] **Step 1: Replace the old “Magic Link before child/job” contract with the approved pre-auth first-time activation semantics.**
+- [x] **Step 2: Preserve returning-account explicit confirmation, material-email authority, capacity, RLS, and one-child-one-subscription rules.**
+- [x] **Step 3: Self-review the SPEC for contradictions with Sections 17–21, 114, 138, 149, 204–205, 210.**
+- [x] **Step 4: Commit the SPEC slice.**
 
 ### Task 8: Full verification, review, PR, merge, and production delivery
 
