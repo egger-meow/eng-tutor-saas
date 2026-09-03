@@ -102,8 +102,18 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
 
   return (
     <div className="operations-cockpit">
-      <section className="capacity-strip" aria-label="服務容量">
+      <section className="capacity-strip" aria-label="服務容量與公測狀態">
         <div><span>服務中孩子</span><strong>{data.capacity.activeCount} / {data.capacity.maxCapacity}</strong></div>
+        <div>
+          <span>公測階段 (歷史 100 名)</span>
+          <strong style={{ color: data.capacity.freePilotActive ? '#16a34a' : '#6b7280' }}>
+            {data.capacity.freePilotActive ? `進行中 (${data.capacity.freePilotAdmissions ?? 0}/${data.capacity.freePilotLimit ?? 100})` : '已截止'}
+          </strong>
+        </div>
+        <div>
+          <span>學員結構</span>
+          <strong>免費 {data.subscriptionBreakdown.freePilotActiveCount ?? 0} · 付費 {data.subscriptionBreakdown.paidActiveCount}</strong>
+        </div>
         <div><span>等候名單</span><strong>{data.capacity.waitingCount || 0}</strong></div>
         <div><span>總需求</span><strong>{data.capacity.totalDemand}</strong></div>
       </section>

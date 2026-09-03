@@ -2667,7 +2667,8 @@ begin
     raise exception 'forfeited child regained Founder pricing';
   end if;
 
-  -- Decision 11: Free trial strictly Week 1 only (unpaid beta cannot claim Week 2).
+  -- Decision 11: Free Pilot phase enables Week 2 generation without paid subscription.
+  -- After Free Pilot ends, unpaid children cannot claim newly created jobs until paid subscription activates.
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values ('00000000-0000-0000-0000-000000000113', '00000000-0000-0000-0000-000000000001', 'Trial Gen Limit Student', 7, 'grade_7');
 
@@ -2687,14 +2688,36 @@ begin
     now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
   );
 
-  -- Unpaid beta child cannot claim Week 2 job.
-  if exists (
+  -- While Free Pilot is active, unpaid admitted child CAN claim Week 2 job.
+  if not exists (
     select 1 from private_generation.claim_due_generation_jobs('test_worker_smoke') where id = '00000000-0000-0000-0000-000000000202'
   ) then
-    raise exception 'unpaid beta trial was able to claim Week 2 generation job';
+    raise exception 'Free Pilot child was unable to claim Week 2 generation job';
   end if;
 
-  -- Paid activation unlocks Week 2 job.
+  -- Test Post-Pilot Cutover: simulate Free Pilot ended
+  update public.enrollment_settings
+  set free_pilot_ended_at = now() - interval '10 minutes',
+      free_pilot_enabled = false
+  where key = 'default';
+
+  -- Create a job created AFTER pilot ended
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for, source_material_id, release_at, feedback_cutoff_at, generation_due_at, created_at
+  ) values (
+    '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000113', current_date + 14, 'curriculum-rules/1.0.0',
+    '00000000-0000-0000-0000-000000000113:w3', 'pending', now() - interval '1 hour', '00000000-0000-0000-0000-000000000201',
+    now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours', now() - interval '5 minutes'
+  );
+
+  -- Unpaid child cannot claim the post-pilot job
+  if exists (
+    select 1 from private_generation.claim_due_generation_jobs('test_worker_smoke') where id = '00000000-0000-0000-0000-000000000203'
+  ) then
+    raise exception 'unpaid child was able to claim new generation job after free pilot ended';
+  end if;
+
+  -- Paid activation unlocks the post-pilot job.
   perform public.process_paddle_subscription_event_v2(
     'evt_unlock_w2', 'subscription.created', clock_timestamp(),
     '00000000-0000-0000-0000-000000000113', 'sub_unlock_w2', 'ctm_unlock_w2', 'active',
@@ -2704,12 +2727,12 @@ begin
   );
 
   if not exists (
-    select 1 from private_generation.claim_due_generation_jobs('test_worker_smoke') where id = '00000000-0000-0000-0000-000000000202'
+    select 1 from private_generation.claim_due_generation_jobs('test_worker_smoke') where id = '00000000-0000-0000-0000-000000000203'
   ) then
-    raise exception 'paid activation did not unlock Week 2 generation job';
+    raise exception 'paid activation did not unlock generation job after pilot ended';
   end if;
 
-  -- Decision 12: 14-day beta window capacity release test.
+  -- Decision 12: 14-day beta window capacity release test (post-pilot).
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
   values ('00000000-0000-0000-0000-000000000114', '00000000-0000-0000-0000-000000000001', 'Beta Expiry Capacity', 7, 'grade_7');
 
@@ -2723,6 +2746,12 @@ begin
   if (select active_count from public.get_enrollment_state()) <> active_count_before - 1 then
     raise exception 'expired beta trial was not released from service active capacity';
   end if;
+
+  -- Restore Free Pilot active state for remaining tests
+  update public.enrollment_settings
+  set free_pilot_ended_at = null,
+      free_pilot_enabled = true
+  where key = 'default';
 
   -- Item 1: Deployed webhook payload -> actual production RPC signature resolves with exact named arguments.
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
@@ -3417,11 +3446,16 @@ begin
     resub_page record;
   begin
     -- -----------------------------------------------------------------------
-    -- Test Case 1: Free Week 1 -> 3-week delay -> Paid Activation
+    -- Test Case 1: Post-Pilot Unpaid Delay -> Paid Activation
     -- Proves: Stale pending job is re-anchored to tomorrow BEFORE claim.
     -- Proves: Next job (Week 3) is scheduled 7 days in future.
     -- Proves: Machine-gun catch-up is broken (subsequent claim yields 0 jobs).
     -- -----------------------------------------------------------------------
+    update public.enrollment_settings
+    set free_pilot_ended_at = now() - interval '30 days',
+        free_pilot_enabled = false
+    where key = 'default';
+
     insert into public.children (id, parent_id, display_name, grade, grade_stage, timezone)
     values (pause_child_id, '00000000-0000-0000-0000-000000000001', 'Pause Clock Student', 7, 'grade_7', 'Asia/Taipei');
 
@@ -3442,14 +3476,15 @@ begin
     -- Week 2 job was scheduled 14 days ago and is severely overdue
     insert into public.generation_jobs (
       id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
-      source_material_id, release_at, feedback_cutoff_at, generation_due_at
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at, created_at
     ) values (
       pause_w2_job_id, pause_child_id, current_date - 14, 'curriculum-rules/1.0.0',
       pause_child_id::text || ':stale_w2', 'pending', now() - interval '15 days',
-      pause_w1_mat_id, now() - interval '14 days', now() - interval '16 days', now() - interval '15 days'
+      pause_w1_mat_id, now() - interval '14 days', now() - interval '16 days', now() - interval '15 days',
+      now() - interval '14 days'
     );
 
-    -- Unpaid beta child cannot claim Week 2
+    -- Unpaid beta child cannot claim Week 2 after pilot ended
     if exists (
       select 1 from private_generation.claim_due_generation_jobs('worker_pause_test') where id = pause_w2_job_id
     ) then
@@ -3527,6 +3562,12 @@ begin
     if w3_claimed_count <> 0 then
       raise exception 'Test 1 Failure: Week 3 job was prematurely claimed! Machine-gun catch-up detected!';
     end if;
+
+    -- Restore Free Pilot active state
+    update public.enrollment_settings
+    set free_pilot_ended_at = null,
+        free_pilot_enabled = true
+    where key = 'default';
 
     -- -----------------------------------------------------------------------
     -- Test Case 2: In-Progress Worker Claim Protection
@@ -4085,6 +4126,377 @@ begin
 
       if t8_active_jobs_count <> 1 then
         raise exception 'Test 8 Failure: parent view should only see 1 active job, got %', t8_active_jobs_count;
+      end if;
+    end;
+  end;
+
+  -- =======================================================================
+  -- Decision: Comprehensive Free Pilot Phase Invariant Tests
+  -- =======================================================================
+  declare
+    fp_enrollment record;
+    fp_child_1 uuid := '00000000-0000-0000-0000-000000000801';
+    fp_child_internal uuid := '00000000-0000-0000-0000-000000000802';
+    fp_child_founder uuid := '00000000-0000-0000-0000-000000000803';
+    fp_m1_id uuid := '00000000-0000-0000-0000-000000000811';
+    fp_m2_id uuid := '00000000-0000-0000-0000-000000000812';
+    fp_j2_id uuid := '00000000-0000-0000-0000-000000000822';
+    fp_j3_id uuid := '00000000-0000-0000-0000-000000000823';
+    fp_admissions_before integer;
+    fp_founder_before integer;
+    fp_checkout_res record;
+  begin
+    -- 1. Verify get_enrollment_state exposes free pilot properties
+    select * into fp_enrollment from public.get_enrollment_state();
+    if fp_enrollment.free_pilot_active is not true then
+      raise exception 'FP Test: free_pilot_active should be true';
+    end if;
+    if fp_enrollment.free_pilot_limit <> 100 then
+      raise exception 'FP Test: free_pilot_limit should be 100, got %', fp_enrollment.free_pilot_limit;
+    end if;
+
+    select count(*)::integer into fp_admissions_before from private_generation.historical_pilot_admissions;
+
+    -- 2. Real child creation increments historical admissions
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+    values (fp_child_1, '00000000-0000-0000-0000-000000000001', 'FP Student 1', 7, 'grade_7', false);
+
+    if (select count(*) from private_generation.historical_pilot_admissions) <> fp_admissions_before + 1 then
+      raise exception 'FP Test: real child did not increment historical pilot admissions';
+    end if;
+
+    -- 3. Internal test child does NOT increment historical admissions
+    insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+    values (fp_child_internal, '00000000-0000-0000-0000-000000000001', 'FP Internal Student', 7, 'grade_7', true);
+
+    if (select count(*) from private_generation.historical_pilot_admissions) <> fp_admissions_before + 1 then
+      raise exception 'FP Test: internal test child incremented historical pilot admissions';
+    end if;
+
+    -- 4. Free Pilot rolling weekly personalization:
+    -- Week 1 completes -> Week 2 scheduled -> claimed and completed for free without Paddle subscription
+    insert into public.materials (id, child_id, material_week, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+    values (fp_m1_id, fp_child_1, current_date, '1.0.0', '{}'::jsonb, 's1.pdf', 'p1.pdf');
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at
+    ) values (
+      fp_j2_id, fp_child_1, current_date + 7, 'curriculum-rules/1.0.0',
+      fp_child_1::text || ':fp_w2', 'pending', now() - interval '1 hour',
+      fp_m1_id, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+    );
+
+    if not exists (
+      select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = fp_j2_id
+    ) then
+      raise exception 'FP Test: Week 2 job could not be claimed for free under active Free Pilot';
+    end if;
+
+    fp_m2_id := public.worker_complete_generation_job(
+      fp_j2_id, 'worker_fp_test',
+      fp_child_1::text || '/' || fp_j2_id::text || '/student.pdf',
+      fp_child_1::text || '/' || fp_j2_id::text || '/parent-answer.pdf',
+      '{"metadata": {"schemaVersion": "1.0.0"}}'::jsonb, '{"unit": "Unit 2"}'::jsonb,
+      'prompt-1.0.0', 'generator-1.0.0', 'gemini-2.5-flash'
+    );
+
+    -- Week 3 job scheduled
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+      source_material_id, release_at, feedback_cutoff_at, generation_due_at
+    ) values (
+      fp_j3_id, fp_child_1, current_date + 14, 'curriculum-rules/1.0.0',
+      fp_child_1::text || ':fp_w3', 'pending', now() - interval '1 hour',
+      fp_m2_id, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+    );
+
+    if not exists (
+      select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = fp_j3_id
+    ) then
+      raise exception 'FP Test: Week 3 job could not be claimed for free under active Free Pilot';
+    end if;
+
+    -- 5. Voluntary Early Founder Checkout during Free Pilot:
+    -- Admitting child does NOT consume Founder seat
+    select founding_count into fp_founder_before from public.get_enrollment_state();
+
+    insert into public.children (id, parent_id, display_name, grade, grade_stage)
+    values (fp_child_founder, '00000000-0000-0000-0000-000000000001', 'FP Founder Student', 7, 'grade_7');
+
+    if (select founding_count from public.get_enrollment_state()) <> fp_founder_before then
+      raise exception 'FP Test: child admission incorrectly consumed a Founder seat';
+    end if;
+
+    -- Voluntary Paddle checkout succeeds and locks Founder seat
+    select * into fp_checkout_res from public.prepare_paddle_checkout_v2(
+      '00000000-0000-0000-0000-000000000001', fp_child_founder, 'standard_monthly', '2026-08-26-v2'
+    );
+    if not fp_checkout_res.checkout_allowed or not fp_checkout_res.founding_applies then
+      raise exception 'FP Test: voluntary Paddle checkout did not allow Founder eligibility';
+    end if;
+
+    -- Bind claim to Paddle transaction
+    perform public.bind_founder_checkout_transaction(
+      '00000000-0000-0000-0000-000000000001',
+      fp_child_founder,
+      fp_checkout_res.founding_claim_id,
+      'txn_fp_founder_01'
+    );
+
+    -- Complete Paddle checkout
+    perform public.process_paddle_subscription_event_v2(
+      'evt_fp_founder_01', 'subscription.created', clock_timestamp(),
+      fp_child_founder, 'sub_fp_founder', 'ctm_fp_founder', 'active',
+      'standard_monthly', 'month', 499, now(), now() + interval '1 month', false,
+      'dsc_founder', 'dsc_founder', 'active', 'flat', null, true,
+      fp_checkout_res.founding_claim_id, 'txn_fp_founder_01'
+    );
+
+    if (select founding_status from public.subscriptions where child_id = fp_child_founder) <> 'redeemed' then
+      raise exception 'FP Test: voluntary checkout did not redeem Founder seat';
+    end if;
+
+    -- =========================================================================
+    -- ADVERSARIAL TEST 1: Canceled Voluntary Paddle Learner During Active Free Pilot
+    -- =========================================================================
+    -- fp_child_founder is already admitted in historical_pilot_admissions and currently active in Paddle.
+    -- Parent now cancels Paddle subscription while global Free Pilot is still active.
+    update public.subscriptions
+    set status = 'canceled'
+    where child_id = fp_child_founder;
+
+    -- Assert child remains in historical_pilot_admissions and is counted in locked capacity
+    if not exists (
+      select 1 from private_generation.historical_pilot_admissions where child_id = fp_child_founder
+    ) then
+      raise exception 'Adv Test 1 failed: child missing from historical_pilot_admissions';
+    end if;
+
+    -- Create next weekly job for fp_child_founder
+    declare
+      adv_founder_w2_job uuid := '00000000-0000-0000-0000-000000000851';
+    begin
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at
+      ) values (
+        adv_founder_w2_job, fp_child_founder, current_date + 7, 'curriculum-rules/1.0.0',
+        fp_child_founder::text || ':adv_w2', 'pending', now() - interval '1 hour',
+        now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+      );
+
+      if not exists (
+        select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = adv_founder_w2_job
+      ) then
+        raise exception 'Adv Test 1 failed: canceled Paddle child could not claim weekly job under active Free Pilot';
+      end if;
+    end;
+
+    -- =========================================================================
+    -- ADVERSARIAL TEST 2: Batch Waitlist Release Across 100 Threshold (99 -> 100)
+    -- =========================================================================
+    declare
+      adv_cur_count integer;
+      adv_needed integer;
+      adv_i integer;
+      adv_dummy_child uuid;
+      adv_child_batch_1 uuid := '00000000-0000-0000-0000-000000000861';
+      adv_child_batch_2 uuid := '00000000-0000-0000-0000-000000000862';
+      adv_released integer;
+      adv_sub_1 public.subscriptions%rowtype;
+      adv_sub_2 public.subscriptions%rowtype;
+    begin
+      select count(*)::integer into adv_cur_count from private_generation.historical_pilot_admissions;
+      adv_needed := 99 - adv_cur_count;
+
+      for adv_i in 1..adv_needed loop
+        adv_dummy_child := gen_random_uuid();
+        insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+        values (adv_dummy_child, '00000000-0000-0000-0000-000000000001', 'Dummy ' || adv_i, 7, 'grade_7', false);
+      end loop;
+
+      if (select count(*) from private_generation.historical_pilot_admissions) <> 99 then
+        raise exception 'Adv Test 2 setup failed: admissions count is %, expected 99',
+          (select count(*) from private_generation.historical_pilot_admissions);
+      end if;
+
+      -- Ensure capacity allows releasing 2 children
+      update public.enrollment_settings set capacity = 200 where key = 'default';
+
+      -- Create 2 children in waitlist
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+      values
+        (adv_child_batch_1, '00000000-0000-0000-0000-000000000001', 'Batch Child 100', 7, 'grade_7', false),
+        (adv_child_batch_2, '00000000-0000-0000-0000-000000000001', 'Batch Child 101', 7, 'grade_7', false);
+
+      -- Put both in waiting status
+      insert into public.waitlist (parent_id, child_id, email, status)
+      values
+        ('00000000-0000-0000-0000-000000000001', adv_child_batch_1, 'p@ex.com', 'waiting'),
+        ('00000000-0000-0000-0000-000000000001', adv_child_batch_2, 'p@ex.com', 'waiting')
+      on conflict (child_id) do update set status = 'waiting';
+
+      -- Remove subscriptions to test batch release subscription creation
+      delete from public.subscriptions where child_id in (adv_child_batch_1, adv_child_batch_2);
+
+      -- Release both children in a SINGLE atomic call
+      adv_released := public.admin_release_waitlist_children(array[adv_child_batch_1, adv_child_batch_2]);
+      if adv_released <> 2 then
+        raise exception 'Adv Test 2 failed: expected 2 released children, got %', adv_released;
+      end if;
+
+      -- Invariants verification:
+      -- A. Exactly 100 historical admissions
+      if (select count(*) from private_generation.historical_pilot_admissions) <> 100 then
+        raise exception 'Adv Test 2 failed: historical admissions count is %, expected exactly 100',
+          (select count(*) from private_generation.historical_pilot_admissions);
+      end if;
+
+      -- B. Child 1 has sequence 100
+      if not exists (
+        select 1 from private_generation.historical_pilot_admissions
+        where child_id = adv_child_batch_1 and admission_sequence = 100
+      ) then
+        raise exception 'Adv Test 2 failed: Batch Child 1 was not assigned admission sequence 100';
+      end if;
+
+      -- C. Child 2 is NOT in historical_pilot_admissions (no sequence 101)
+      if exists (
+        select 1 from private_generation.historical_pilot_admissions where child_id = adv_child_batch_2
+      ) then
+        raise exception 'Adv Test 2 failed: Batch Child 2 was incorrectly granted pilot admission';
+      end if;
+
+      -- D. Pilot is ended atomically in enrollment_settings
+      if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not false
+        or (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
+        raise exception 'Adv Test 2 failed: free pilot was not atomically closed on 100th child';
+      end if;
+
+      -- E. Subscription verification:
+      -- Batch Child 1 gets current_period_end is null (Free Pilot entitled)
+      select * into adv_sub_1 from public.subscriptions where child_id = adv_child_batch_1;
+      if adv_sub_1.current_period_end is not null then
+        raise exception 'Adv Test 2 failed: Batch Child 1 current_period_end should be null, got %', adv_sub_1.current_period_end;
+      end if;
+
+      -- Batch Child 2 gets current_period_end is not null (post-pilot 14 days)
+      select * into adv_sub_2 from public.subscriptions where child_id = adv_child_batch_2;
+      if adv_sub_2.current_period_end is null then
+        raise exception 'Adv Test 2 failed: Batch Child 2 should have post-pilot 14-day expiry, but got null';
+      end if;
+    end;
+
+    -- =========================================================================
+    -- ADVERSARIAL TEST 3: Ledger Immutability & Monotonic Triggers
+    -- =========================================================================
+    declare
+      adv_err_msg text;
+    begin
+      -- A. Sequence ceiling check (> 100 rejected)
+      begin
+        insert into private_generation.historical_pilot_admissions (
+          child_id, admission_sequence, admitted_at
+        ) values (
+          '00000000-0000-0000-0000-000000000862', 101, now()
+        );
+        raise exception 'Adv Test 3A failed: insert sequence 101 was allowed!';
+      exception when check_violation then
+        null;
+      end;
+
+      -- B. Direct UPDATE on historical_pilot_admissions rejected
+      begin
+        update private_generation.historical_pilot_admissions
+        set admission_sequence = 50
+        where admission_sequence = 100;
+        raise exception 'Adv Test 3B failed: UPDATE on historical_pilot_admissions was allowed!';
+      exception when others then
+        null;
+      end;
+
+      -- C. Direct DELETE on historical_pilot_admissions rejected
+      begin
+        delete from private_generation.historical_pilot_admissions
+        where admission_sequence = 100;
+        raise exception 'Adv Test 3C failed: DELETE on historical_pilot_admissions was allowed!';
+      exception when others then
+        null;
+      end;
+
+      -- D. Monotonic cutover trigger on enrollment_settings (cannot reopen pilot)
+      begin
+        update public.enrollment_settings
+        set free_pilot_enabled = true
+        where key = 'default';
+        raise exception 'Adv Test 3D failed: setting free_pilot_enabled = true after cutover was allowed!';
+      exception when others then
+        null;
+      end;
+
+      begin
+        update public.enrollment_settings
+        set free_pilot_ended_at = null
+        where key = 'default';
+        raise exception 'Adv Test 3E failed: setting free_pilot_ended_at = null after cutover was allowed!';
+      exception when others then
+        null;
+      end;
+    end;
+
+    -- 6. Monotonic cutoff and in-flight job cutover safety:
+    -- Simulate historical admissions reaching 100 (backdate ended_at slightly for in-flight job testing)
+    update public.enrollment_settings
+    set free_pilot_ended_at = now() - interval '5 minutes',
+        free_pilot_enabled = false
+    where key = 'default';
+
+    -- Inactivating/archiving a child does NOT reopen the pilot
+    update public.children set is_active = false where id = fp_child_1;
+    if (select free_pilot_active from public.get_enrollment_state()) is true then
+      raise exception 'FP Test: child inactivation incorrectly re-enabled free pilot';
+    end if;
+
+    -- In-flight job created BEFORE cutover remains claimable
+    declare
+      inflight_job_id uuid := '00000000-0000-0000-0000-000000000831';
+      post_cutoff_job_id uuid := '00000000-0000-0000-0000-000000000832';
+    begin
+      update public.children set is_active = true where id = fp_child_1;
+
+      -- Job created 10 minutes ago (before pilot ended 5 minutes ago)
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        source_material_id, release_at, feedback_cutoff_at, generation_due_at, created_at
+      ) values (
+        inflight_job_id, fp_child_1, current_date + 21, 'curriculum-rules/1.0.0',
+        fp_child_1::text || ':fp_inflight', 'pending', now() - interval '1 hour',
+        fp_m2_id, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+        now() - interval '10 minutes'
+      );
+
+      if not exists (
+        select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = inflight_job_id
+      ) then
+        raise exception 'FP Test: cutover safety failed - in-flight job created before pilot end could not be claimed';
+      end if;
+
+      -- Job created 2 minutes ago (after pilot ended 5 minutes ago) cannot be claimed by unpaid child
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        source_material_id, release_at, feedback_cutoff_at, generation_due_at, created_at
+      ) values (
+        post_cutoff_job_id, fp_child_1, current_date + 28, 'curriculum-rules/1.0.0',
+        fp_child_1::text || ':fp_post_cutoff', 'pending', now() - interval '1 hour',
+        fp_m2_id, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+        now() - interval '2 minutes'
+      );
+
+      if exists (
+        select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = post_cutoff_job_id
+      ) then
+        raise exception 'FP Test: post-cutoff job was claimed by unpaid child';
       end if;
     end;
   end;

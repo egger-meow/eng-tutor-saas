@@ -7,6 +7,7 @@ import { EmailAuthPanel } from './EmailAuthPanel'
 import { getAnonymousId, trackChildFormStart } from '../../lib/analytics'
 import { startLandingOnboarding } from '../../lib/landing-onboarding-start'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
+import { useEnrollmentState } from '../../lib/enrollment'
 import '../../styles/onboarding-refinement.css'
 import '../../styles/landing-onboarding.css'
 
@@ -21,6 +22,7 @@ const stepMeta = [
 type PanelMode = 'profile' | 'email' | 'existing'
 
 export function LandingOnboardingPanel() {
+  const { state: enrollment } = useEnrollmentState()
   const [mode, setMode] = useState<PanelMode>('profile')
   const [step, setStep] = useState(1)
   const [draft, setDraft] = useState<ProfileDraft>(() => readDraft(LANDING_DRAFT_KEY) ?? emptyProfileDraft)
@@ -125,7 +127,7 @@ export function LandingOnboardingPanel() {
     return (
       <div className="onboarding-container landing-onboarding-panel">
         <header className="onboarding-welcome-header">
-          <div className="onboarding-badge">第一週免費</div>
+          <div className="onboarding-badge">{enrollment?.freePilotActive ? '公測每週免費' : '第一週免費'}</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
           <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始準備第一週。</p>
         </header>
@@ -179,7 +181,7 @@ export function LandingOnboardingPanel() {
   return (
     <div className="onboarding-container landing-onboarding-panel">
       <header className="onboarding-welcome-header">
-        <div className="onboarding-badge">第一週免費</div>
+        <div className="onboarding-badge">{enrollment?.freePilotActive ? '公測每週免費' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
         <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會開始準備第一週教材。</p>
       </header>

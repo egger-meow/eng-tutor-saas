@@ -72,10 +72,10 @@
 21. **Subscription Independence**
 22. **Founding 30 Program**
 23. **Founder Price Requires Continuous Subscription**
-24. **Free Week 1**
+24. **Free Pilot Phase & Weekly Personalization**
 25. **Week 1 as Calibration**
-26. **Maximum Initial Capacity**
-27. **Why the 100-Child Cap Exists**
+26. **Maximum Initial Capacity & Free Pilot Threshold**
+27. **Why the 100-Child Cap and Free Pilot Exist**
 28. **Capacity Counter**
 29. **Capacity Definition**
 30. **Capacity States**
@@ -244,12 +244,12 @@
 193. **Definition of Done: First Material**
 194. **Definition of Done: Feedback Personalization**
 195. **Definition of Done: Billing Isolation**
-196. **Definition of Done: Founding Offer**
-197. **Definition of Done: Capacity**
+196. **Definition of Done: Founder Offer**
+197. **Definition of Done: Capacity & Free Pilot**
 198. **Definition of Done: Security**
 199. **Definition of Done: Generation Reliability**
 200. **Definition of Done: Learning Method**
-201. **Post-100 Review**
+201. **Post-100 Review & Pilot Conclusion**
 202. **Future Infrastructure**
 203. **Future Product Possibilities**
 204. **Agent Instructions**

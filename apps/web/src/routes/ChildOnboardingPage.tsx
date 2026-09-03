@@ -114,7 +114,7 @@ export function ChildOnboardingPage({
           {isNewChild && (
             <header className="onboarding-welcome-header">
               <div className="onboarding-badge">
-                {capacityFull ? '保留候補資格' : '第一週免費'}
+                {capacityFull ? '保留候補資格' : enrollment?.freePilotActive ? '公測每週免費' : '第一週免費'}
               </div>
               <h1 className="onboarding-main-title">
                 {capacityFull

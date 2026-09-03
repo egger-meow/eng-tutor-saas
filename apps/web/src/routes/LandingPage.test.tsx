@@ -177,6 +177,23 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
     expect(ctaOpenFounderSoldOut.isWaitlist).toBe(false)
   })
 
+  it('sets CTA to 免費參加公測（每週生成） when freePilotActive is true and capacity is open', () => {
+    const ctaFreePilot = getEnrollmentCta({
+      status: 'open',
+      capacity: 100,
+      activeCount: 15,
+      remaining: 85,
+      foundingLimit: 30,
+      foundingCount: 3,
+      freePilotActive: true,
+      freePilotAdmissions: 15,
+      freePilotLimit: 100,
+    })
+    expect(ctaFreePilot.label).toBe('免費參加公測（每週生成）')
+    expect(ctaFreePilot.isWaitlist).toBe(false)
+    expect(ctaFreePilot.href).toBe('#onboarding')
+  })
+
   it('switches CTA to 登記候補 only when total capacity is full or status is waitlist', () => {
     const ctaWaitlist = getEnrollmentCta({
       status: 'waitlist',
@@ -300,6 +317,25 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
   it('does not contain autofocus attributes to avoid jumping viewport to the bottom on page load', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).not.toMatch(/\bautofocus\b/i)
+  })
+
+  it('renders Free Pilot acquisition badge and messaging when freePilotActive is true', () => {
+    const freePilotEnrollment = {
+      status: 'open' as const,
+      capacity: 100,
+      activeCount: 20,
+      remaining: 80,
+      foundingLimit: 30,
+      foundingCount: 5,
+      freePilotActive: true,
+      freePilotAdmissions: 20,
+      freePilotLimit: 100,
+    }
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    expect(html).toContain('100 位學員以前・全面公測中')
+    expect(html).toContain('每週專屬教材完全免費（免填信用卡）')
+    expect(html).toContain('免費參加公測（每週生成）')
+    expect(html).toContain('公測期間每週專屬教材完全免費（無需信用卡）')
   })
 })
 

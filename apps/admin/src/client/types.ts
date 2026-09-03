@@ -176,6 +176,8 @@ export interface OperationsOverview {
     canceledCount: number
     foundingRedeemedCount: number
     foundingEligibleCount: number
+    freePilotActiveCount?: number
+    voluntarilyPaidCount?: number
   }
   capacity: {
     activeCount: number
@@ -186,6 +188,9 @@ export interface OperationsOverview {
     waitingCount?: number
     releasedCount?: number
     totalDemand: number
+    freePilotActive?: boolean
+    freePilotAdmissions?: number
+    freePilotLimit?: number
   }
   queueStats: {
     pending: number

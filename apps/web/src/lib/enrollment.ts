@@ -11,6 +11,10 @@ export type EnrollmentState = {
   foundingCount: number
   waitingCount?: number
   releasedCount?: number
+  totalDemand?: number
+  freePilotActive?: boolean
+  freePilotAdmissions?: number
+  freePilotLimit?: number
 }
 type EnrollmentRow = {
   status: EnrollmentStatus
@@ -21,6 +25,10 @@ type EnrollmentRow = {
   founding_count: number
   waiting_count?: number
   released_count?: number
+  total_demand?: number
+  free_pilot_active?: boolean
+  free_pilot_admissions?: number
+  free_pilot_limit?: number
 }
 
 export async function getEnrollmentState(): Promise<EnrollmentState> {
@@ -37,6 +45,10 @@ export async function getEnrollmentState(): Promise<EnrollmentState> {
     foundingCount: row.founding_count,
     waitingCount: row.waiting_count ?? 0,
     releasedCount: row.released_count ?? 0,
+    totalDemand: row.total_demand,
+    freePilotActive: row.free_pilot_active ?? false,
+    freePilotAdmissions: row.free_pilot_admissions ?? 0,
+    freePilotLimit: row.free_pilot_limit ?? 100,
   }
 }
 
@@ -55,5 +67,8 @@ export type EnrollmentCta = { href: '#onboarding' | '#login' | '/waitlist'; labe
 export function getEnrollmentCta(state: EnrollmentState | null): EnrollmentCta {
   if (!state) return { href: '#onboarding', label: '確認目前名額…', isWaitlist: false }
   if (state.status !== 'open' || state.remaining <= 0) return { href: '/waitlist', label: '登記候補', isWaitlist: true }
+  if (state.freePilotActive) {
+    return { href: '#onboarding', label: '免費參加公測（每週生成）', isWaitlist: false }
+  }
   return { href: '#onboarding', label: '免費取得第一週教材', isWaitlist: false }
 }

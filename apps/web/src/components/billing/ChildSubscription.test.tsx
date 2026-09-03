@@ -309,4 +309,38 @@ describe('ChildSubscription Component', () => {
   it('10. exports the exact permanent-loss cancellation warning', () => {
     expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。')
   })
+
+  it('11. trialing with freePilotActive=true: displays 公測免費服務中, free weekly reassurance, and voluntary early subscription distinction', () => {
+    const subscription: SubscriptionView = {
+      id: 'sub-beta-1',
+      childId: 'child-123',
+      status: 'trialing',
+      planCode: 'beta_monthly',
+      billingInterval: 'month',
+      priceTwd: null,
+      currentPeriodEnd: '2026-09-16T00:00:00Z',
+      cancelAtPeriodEnd: false,
+      foundingStatus: 'eligible',
+    }
+
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        subscription={subscription}
+        freePilotActive={true}
+        foundingAvailable={true}
+        foundingRemaining={28}
+        onSubscribe={vi.fn()}
+        onCancel={vi.fn()}
+        onResume={vi.fn()}
+      />
+    )
+
+    expect(html).toContain('公測免費服務中')
+    expect(html).toContain('現在不訂閱也能持續免費使用')
+    expect(html).toContain('🎉 公測期間每週專屬教材完全免費，現在不訂閱也能正常使用。')
+    expect(html).toContain('若您希望在創始 30 名額用完前永久鎖定 NT$349/月席次，可提前自願訂閱')
+    expect(html).toContain('自願訂閱會立即開始扣款計費')
+    expect(html).toContain('自願訂閱並鎖定 NT$349 創始價（立即扣款）')
+  })
 })
