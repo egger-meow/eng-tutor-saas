@@ -295,11 +295,11 @@ export function BillingPage({
         {legalError && <p className="notice notice-error" role="alert">{legalError}</p>}
         {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
         {enrollment?.freePilotActive && (
-          <aside className="notice free-pilot-notice" style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#14532d', marginBottom: '1.5rem', padding: '1rem', borderRadius: '8px' }}>
-            <strong>🎉 100 位學員以前・全面公測進行中</strong>
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#166534' }}>
-              公測期間，已加入的孩子每週專屬教材完全免費（無需信用卡）。每週只要完成回饋，系統便會免費生成下一週教材。
-              若希望鎖定未來的創始 30 席次（NT$349/月），亦可自願提前訂閱（會立即開始計費）。
+          <aside className="notice free-pilot-notice" style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#14532d', marginBottom: '1.5rem', padding: '1rem 1.25rem', borderRadius: '8px' }}>
+            <strong style={{ fontSize: '1rem' }}>🔥 前 100 位學員・每週專屬教材全面免費！</strong>
+            <p style={{ margin: '0.35rem 0 0', fontSize: '0.875rem', color: '#166534', lineHeight: '1.6' }}>
+              前 100 位學員期間，已加入的孩子每週專屬教材完全免費（免填信用卡、免綁卡）。每週只要完成回饋，系統持續每週為孩子準備專屬新教材。<br />
+              若希望在 30 席額滿前永久鎖定未來的創始優惠（NT$349/月），亦可自願提前訂閱（會立即開始計費並保留創始價）。
             </p>
           </aside>
         )}

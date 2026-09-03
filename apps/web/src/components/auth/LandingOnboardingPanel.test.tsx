@@ -46,7 +46,7 @@ describe('LandingOnboardingPanel', () => {
     }
 
     const html = renderToStaticMarkup(<LandingOnboardingPanel />)
-    expect(html).toContain('公測每週免費')
+    expect(html).toContain('前 100 位每週免費')
     expect(html).not.toContain('第一週免費')
   })
 })

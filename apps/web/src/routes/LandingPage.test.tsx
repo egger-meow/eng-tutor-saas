@@ -177,7 +177,7 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
     expect(ctaOpenFounderSoldOut.isWaitlist).toBe(false)
   })
 
-  it('sets CTA to 免費參加公測（每週生成） when freePilotActive is true and capacity is open', () => {
+  it('sets CTA to 立即免費開始（每週專屬教材 NT$0） when freePilotActive is true and capacity is open', () => {
     const ctaFreePilot = getEnrollmentCta({
       status: 'open',
       capacity: 100,
@@ -189,7 +189,7 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
       freePilotAdmissions: 15,
       freePilotLimit: 100,
     })
-    expect(ctaFreePilot.label).toBe('免費參加公測（每週生成）')
+    expect(ctaFreePilot.label).toBe('立即免費開始（每週專屬教材 NT$0）')
     expect(ctaFreePilot.isWaitlist).toBe(false)
     expect(ctaFreePilot.href).toBe('#onboarding')
   })
@@ -332,10 +332,12 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
       freePilotLimit: 100,
     }
     const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
-    expect(html).toContain('100 位學員以前・全面公測中')
+    expect(html).toContain('前 100 位學員・全面免費')
     expect(html).toContain('每週專屬教材完全免費（免填信用卡）')
-    expect(html).toContain('免費參加公測（每週生成）')
-    expect(html).toContain('公測期間每週專屬教材完全免費（無需信用卡）')
+    expect(html).toContain('立即免費開始（每週專屬教材 NT$0）')
+    expect(html).toContain('每週專屬教材完全免費（免填信用卡、免綁卡）')
+    expect(html).toContain('NT$0')
+    expect(html).toContain('前 100 位每週免費')
   })
 })
 

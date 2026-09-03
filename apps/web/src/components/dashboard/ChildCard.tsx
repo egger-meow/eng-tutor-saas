@@ -57,8 +57,14 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             )}
             {child.subscription?.foundingStatus === 'redeemed' && (
               <span className="status-label status-founder">創始 30</span>
-            )}            {child.subscription?.status === 'trialing' && (
-              <span className="status-label status-trialing">體驗期</span>
+            )}
+            {child.subscription?.status === 'trialing' && (
+              <span
+                className="status-label status-trialing"
+                style={!child.subscription.currentPeriodEnd ? { background: '#dcfce7', color: '#15803d' } : undefined}
+              >
+                {!child.subscription.currentPeriodEnd ? '每週免費中' : '體驗期'}
+              </span>
             )}
             {child.subscription?.status === 'canceled' && (
               <span className="status-label status-canceled">已到期</span>

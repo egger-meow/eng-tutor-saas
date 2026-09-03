@@ -40,14 +40,34 @@ export function DashboardPage({ session }: { session: Session }) {
           </section>
         ) : data.children.length === 0 ? (
           <section className="zero-state onboarding-card-hero">
-            <div className="onboarding-badge">{capacityFull ? '名額候補' : '免費體驗第一週'}</div>
-            <h1>{capacityFull ? '目前名額已滿，完成基本資料保留候補席次' : '只差最後一步：告訴我們孩子的基本資料，就能免費取得第一週教材'}</h1>
-            <p>{capacityFull
-              ? '建立資料不會收費，也不需綁定信用卡。有名額釋出時我們會寄 Email 通知你，再決定是否開始。'
-              : '完全免費生成第一週專屬學習包（含學生教材與家長解答），不需綁定信用卡，2 分鐘即可完成。'}</p>
+            <div className="onboarding-badge">
+              {capacityFull
+                ? '名額候補'
+                : enrollment?.freePilotActive
+                  ? '前 100 位全面免費'
+                  : '免費體驗第一週'}
+            </div>
+            <h1>
+              {capacityFull
+                ? '目前名額已滿，完成基本資料保留候補席次'
+                : enrollment?.freePilotActive
+                  ? '只差最後一步：告訴我們孩子的基本資料，每週專屬教材全面免費！'
+                  : '只差最後一步：告訴我們孩子的基本資料，就能免費取得第一週教材'}
+            </h1>
+            <p>
+              {capacityFull
+                ? '建立資料不會收費，也不需綁定信用卡。有名額釋出時我們會寄 Email 通知你，再決定是否開始。'
+                : enrollment?.freePilotActive
+                  ? '前 100 位學員期間，每週專屬教材完全免費（免填信用卡、免綁卡）。每週只要完成回饋，系統持續每週為孩子準備專屬教材。'
+                  : '完全免費生成第一週專屬學習包（含學生教材與家長解答），不需綁定信用卡，2 分鐘即可完成。'}
+            </p>
 
             <button className="button button-large" type="button" onClick={() => navigate('/children/new')}>
-              {capacityFull ? '開始填寫候補資料' : '立即為孩子準備第一週教材'}
+              {capacityFull
+                ? '開始填寫候補資料'
+                : enrollment?.freePilotActive
+                  ? '立即為孩子準備專屬教材（每週 NT$0 免費）'
+                  : '立即為孩子準備第一週教材'}
             </button>
             <p className="zero-state-footnote">✨ 所有填寫資料日後皆可隨時在後台修改，不確定的欄位可先選大概。</p>
           </section>

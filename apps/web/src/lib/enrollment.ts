@@ -68,7 +68,7 @@ export function getEnrollmentCta(state: EnrollmentState | null): EnrollmentCta {
   if (!state) return { href: '#onboarding', label: '確認目前名額…', isWaitlist: false }
   if (state.status !== 'open' || state.remaining <= 0) return { href: '/waitlist', label: '登記候補', isWaitlist: true }
   if (state.freePilotActive) {
-    return { href: '#onboarding', label: '免費參加公測（每週生成）', isWaitlist: false }
+    return { href: '#onboarding', label: '立即免費開始（每週專屬教材 NT$0）', isWaitlist: false }
   }
   return { href: '#onboarding', label: '免費取得第一週教材', isWaitlist: false }
 }

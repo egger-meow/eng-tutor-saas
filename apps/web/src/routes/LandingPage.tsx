@@ -40,9 +40,9 @@ export const faqItems = [
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
-  ['目前需要付費嗎？', '目前正處於 100 位學員以前的全面公測階段，已錄取的孩子每週專屬教材完全免費，免填信用卡。只要每週填寫回饋，系統便會免費生成下一週教材。未來公測結束後，才會轉為以孩子為單位的標準訂閱方案（月繳 NT$499 或年繳 NT$4,999）；公測期間家長亦可自願提前訂閱以鎖定創始 30 名額。'],
-  ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（前 30 個月繳訂閱）。公測期間雖可免費使用，但若您希望在 30 個名額額滿前鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
-  ['100 位額滿後會怎麼樣？', '第一階段上限是真實的服務容量上限。當服務達 100 位孩子時，新加入者會先進入候補；公測階段也會在歷史錄取滿 100 位學員後圓滿結束，後續回歸標準付費服務。既有家庭照常收到教材。'],
+  ['目前需要付費嗎？', '目前在歷史累計滿 100 位學員以前，每週專屬教材完全免費（免填信用卡、免綁卡）。只要每週填寫孩子的作答回饋，系統便會免費生成下一週教材。當歷史累計滿 100 位學員後，系統將進入正式維運並全面恢復標準收費（月繳 NT$499 或年繳 NT$4,999）；目前額度內家長亦可自願提前訂閱以永久鎖定創始 30 席次。'],
+  ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。目前每週專屬教材雖完全免費，但若您希望在 30 席額滿前永久鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
+  ['100 位額滿後會怎麼樣？', '100 位上限是我們確保教材生成品質與真實資源的容量上限。當服務達 100 位孩子時，新加入者會先進入候補；初期免費階段也會在歷史錄取滿 100 位學員後圓滿結束，後續系統進入正式維運並全面恢復標準收費方案。'],
 ] as const
 
 export function LandingPage({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
@@ -59,7 +59,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
     : cta.isWaitlist
       ? '目前服務名額已滿；候補不會先收費。'
       : isFreePilot
-        ? '🎉 全面公測進行中：100 位學員以前，每週專屬教材完全免費（無需信用卡）。'
+        ? '🔥 前 100 位學員限定：每週專屬教材完全免費（免填信用卡、免綁卡），每週填回饋即持續免費出教材。'
         : showFounding
           ? null
           : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
@@ -96,13 +96,13 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <li>家長不用找教材、備課或出題</li>
             </ul>
             {isFreePilot ? (
-              <div className="hero-founding-badge" aria-label="公測免費說明" style={{ background: '#f0fdf4', borderColor: '#86efac' }}>
+              <div className="hero-founding-badge" aria-label="每週免費說明" style={{ background: '#f0fdf4', borderColor: '#86efac' }}>
                 <div className="hero-founding-badge-main">
-                  <span className="hero-founding-tag" style={{ background: '#16a34a', color: '#fff' }}>100 位學員以前・全面公測中</span>
+                  <span className="hero-founding-tag" style={{ background: '#16a34a', color: '#fff' }}>前 100 位學員・全面免費</span>
                   <strong className="hero-founding-price" style={{ color: '#14532d' }}>每週專屬教材完全免費（免填信用卡）</strong>
                 </div>
                 <span className="hero-founding-sub" style={{ color: '#166534' }}>
-                  每週完成孩子回饋，系統持續為他準備下週專屬教材
+                  只要每週完成孩子作答回饋，系統持續每週為他準備專屬教材
                   {showFounding ? ' · 亦可提前自願訂閱鎖定創始 NT$349/月席次' : ''}
                 </span>
               </div>
@@ -123,7 +123,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && (
               <p className="hero-delivery-note">
                 {isFreePilot
-                  ? '完成孩子資料後，第一份專屬教材預計隔天開放下載。公測期間每週填寫回饋即可持續免費生成。'
+                  ? '完成孩子資料後，第一份專屬教材預計隔天開放下載。前 100 位學員每週填寫回饋即可免費持續領取（NT$0）。'
                   : '完成孩子資料後，第一份專屬教材預計隔天開放下載。'}
               </p>
             )}
