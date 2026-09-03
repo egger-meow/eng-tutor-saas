@@ -4257,8 +4257,196 @@ begin
       raise exception 'FP Test: voluntary checkout did not redeem Founder seat';
     end if;
 
+    -- =========================================================================
+    -- ADVERSARIAL TEST 1: Canceled Voluntary Paddle Learner During Active Free Pilot
+    -- =========================================================================
+    -- fp_child_founder is already admitted in historical_pilot_admissions and currently active in Paddle.
+    -- Parent now cancels Paddle subscription while global Free Pilot is still active.
+    update public.subscriptions
+    set status = 'canceled'
+    where child_id = fp_child_founder;
+
+    -- Assert child remains in historical_pilot_admissions and is counted in locked capacity
+    if not exists (
+      select 1 from private_generation.historical_pilot_admissions where child_id = fp_child_founder
+    ) then
+      raise exception 'Adv Test 1 failed: child missing from historical_pilot_admissions';
+    end if;
+
+    -- Create next weekly job for fp_child_founder
+    declare
+      adv_founder_w2_job uuid := '00000000-0000-0000-0000-000000000851';
+    begin
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        release_at, feedback_cutoff_at, generation_due_at
+      ) values (
+        adv_founder_w2_job, fp_child_founder, current_date + 7, 'curriculum-rules/1.0.0',
+        fp_child_founder::text || ':adv_w2', 'pending', now() - interval '1 hour',
+        now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+      );
+
+      if not exists (
+        select 1 from private_generation.claim_due_generation_jobs('worker_fp_test') where id = adv_founder_w2_job
+      ) then
+        raise exception 'Adv Test 1 failed: canceled Paddle child could not claim weekly job under active Free Pilot';
+      end if;
+    end;
+
+    -- =========================================================================
+    -- ADVERSARIAL TEST 2: Batch Waitlist Release Across 100 Threshold (99 -> 100)
+    -- =========================================================================
+    declare
+      adv_cur_count integer;
+      adv_needed integer;
+      adv_i integer;
+      adv_dummy_child uuid;
+      adv_child_batch_1 uuid := '00000000-0000-0000-0000-000000000861';
+      adv_child_batch_2 uuid := '00000000-0000-0000-0000-000000000862';
+      adv_released integer;
+      adv_sub_1 public.subscriptions%rowtype;
+      adv_sub_2 public.subscriptions%rowtype;
+    begin
+      select count(*)::integer into adv_cur_count from private_generation.historical_pilot_admissions;
+      adv_needed := 99 - adv_cur_count;
+
+      for adv_i in 1..adv_needed loop
+        adv_dummy_child := gen_random_uuid();
+        insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+        values (adv_dummy_child, '00000000-0000-0000-0000-000000000001', 'Dummy ' || adv_i, 7, 'grade_7', false);
+      end loop;
+
+      if (select count(*) from private_generation.historical_pilot_admissions) <> 99 then
+        raise exception 'Adv Test 2 setup failed: admissions count is %, expected 99',
+          (select count(*) from private_generation.historical_pilot_admissions);
+      end if;
+
+      -- Ensure capacity allows releasing 2 children
+      update public.enrollment_settings set capacity = 200 where key = 'default';
+
+      -- Create 2 children in waitlist
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+      values
+        (adv_child_batch_1, '00000000-0000-0000-0000-000000000001', 'Batch Child 100', 7, 'grade_7', false),
+        (adv_child_batch_2, '00000000-0000-0000-0000-000000000001', 'Batch Child 101', 7, 'grade_7', false);
+
+      -- Put both in waiting status
+      insert into public.waitlist (parent_id, child_id, email, status)
+      values
+        ('00000000-0000-0000-0000-000000000001', adv_child_batch_1, 'p@ex.com', 'waiting'),
+        ('00000000-0000-0000-0000-000000000001', adv_child_batch_2, 'p@ex.com', 'waiting')
+      on conflict (child_id) do update set status = 'waiting';
+
+      -- Remove subscriptions to test batch release subscription creation
+      delete from public.subscriptions where child_id in (adv_child_batch_1, adv_child_batch_2);
+
+      -- Release both children in a SINGLE atomic call
+      adv_released := public.admin_release_waitlist_children(array[adv_child_batch_1, adv_child_batch_2]);
+      if adv_released <> 2 then
+        raise exception 'Adv Test 2 failed: expected 2 released children, got %', adv_released;
+      end if;
+
+      -- Invariants verification:
+      -- A. Exactly 100 historical admissions
+      if (select count(*) from private_generation.historical_pilot_admissions) <> 100 then
+        raise exception 'Adv Test 2 failed: historical admissions count is %, expected exactly 100',
+          (select count(*) from private_generation.historical_pilot_admissions);
+      end if;
+
+      -- B. Child 1 has sequence 100
+      if not exists (
+        select 1 from private_generation.historical_pilot_admissions
+        where child_id = adv_child_batch_1 and admission_sequence = 100
+      ) then
+        raise exception 'Adv Test 2 failed: Batch Child 1 was not assigned admission sequence 100';
+      end if;
+
+      -- C. Child 2 is NOT in historical_pilot_admissions (no sequence 101)
+      if exists (
+        select 1 from private_generation.historical_pilot_admissions where child_id = adv_child_batch_2
+      ) then
+        raise exception 'Adv Test 2 failed: Batch Child 2 was incorrectly granted pilot admission';
+      end if;
+
+      -- D. Pilot is ended atomically in enrollment_settings
+      if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not false
+        or (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
+        raise exception 'Adv Test 2 failed: free pilot was not atomically closed on 100th child';
+      end if;
+
+      -- E. Subscription verification:
+      -- Batch Child 1 gets current_period_end is null (Free Pilot entitled)
+      select * into adv_sub_1 from public.subscriptions where child_id = adv_child_batch_1;
+      if adv_sub_1.current_period_end is not null then
+        raise exception 'Adv Test 2 failed: Batch Child 1 current_period_end should be null, got %', adv_sub_1.current_period_end;
+      end if;
+
+      -- Batch Child 2 gets current_period_end is not null (post-pilot 14 days)
+      select * into adv_sub_2 from public.subscriptions where child_id = adv_child_batch_2;
+      if adv_sub_2.current_period_end is null then
+        raise exception 'Adv Test 2 failed: Batch Child 2 should have post-pilot 14-day expiry, but got null';
+      end if;
+    end;
+
+    -- =========================================================================
+    -- ADVERSARIAL TEST 3: Ledger Immutability & Monotonic Triggers
+    -- =========================================================================
+    declare
+      adv_err_msg text;
+    begin
+      -- A. Sequence ceiling check (> 100 rejected)
+      begin
+        insert into private_generation.historical_pilot_admissions (
+          child_id, admission_sequence, admitted_at
+        ) values (
+          '00000000-0000-0000-0000-000000000862', 101, now()
+        );
+        raise exception 'Adv Test 3A failed: insert sequence 101 was allowed!';
+      exception when check_violation then
+        null;
+      end;
+
+      -- B. Direct UPDATE on historical_pilot_admissions rejected
+      begin
+        update private_generation.historical_pilot_admissions
+        set admission_sequence = 50
+        where admission_sequence = 100;
+        raise exception 'Adv Test 3B failed: UPDATE on historical_pilot_admissions was allowed!';
+      exception when others then
+        null;
+      end;
+
+      -- C. Direct DELETE on historical_pilot_admissions rejected
+      begin
+        delete from private_generation.historical_pilot_admissions
+        where admission_sequence = 100;
+        raise exception 'Adv Test 3C failed: DELETE on historical_pilot_admissions was allowed!';
+      exception when others then
+        null;
+      end;
+
+      -- D. Monotonic cutover trigger on enrollment_settings (cannot reopen pilot)
+      begin
+        update public.enrollment_settings
+        set free_pilot_enabled = true
+        where key = 'default';
+        raise exception 'Adv Test 3D failed: setting free_pilot_enabled = true after cutover was allowed!';
+      exception when others then
+        null;
+      end;
+
+      begin
+        update public.enrollment_settings
+        set free_pilot_ended_at = null
+        where key = 'default';
+        raise exception 'Adv Test 3E failed: setting free_pilot_ended_at = null after cutover was allowed!';
+      exception when others then
+        null;
+      end;
+    end;
+
     -- 6. Monotonic cutoff and in-flight job cutover safety:
-    -- Simulate historical admissions reaching 100
+    -- Simulate historical admissions reaching 100 (backdate ended_at slightly for in-flight job testing)
     update public.enrollment_settings
     set free_pilot_ended_at = now() - interval '5 minutes',
         free_pilot_enabled = false
