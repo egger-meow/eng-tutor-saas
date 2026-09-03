@@ -42,7 +42,7 @@ export const faqItems = [
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
   ['目前需要付費嗎？', '目前在歷史累計滿 100 位學員以前，每週專屬教材完全免費（免填信用卡、免綁卡）。只要每週填寫孩子的作答回饋，系統便會免費生成下一週教材。當歷史累計滿 100 位學員後，系統將進入正式維運並全面恢復標準收費（月繳 NT$499 或年繳 NT$4,999）；目前額度內家長亦可自願提前訂閱以永久鎖定創始 30 席次。'],
   ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。目前每週專屬教材雖完全免費，但若您希望在 30 席額滿前永久鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
-  ['100 位額滿後會怎麼樣？', '100 位上限是我們確保教材生成品質與真實資源的容量上限。當服務達 100 位孩子時，新加入者會先進入候補；初期免費階段也會在歷史錄取滿 100 位學員後圓滿結束，後續系統進入正式維運並全面恢復標準收費方案。'],
+  ['100 位額滿後會怎麼樣？', '100 位上限是我們確保教材生成品質與真實資源的容量上限。當服務達 100 位孩子時，新加入者會先進入候補；初期免費階段在歷史錄取滿 100 位學員後結束。結束後，已完成與正在準備中的教材不受影響；後續每週服務將依當時訂閱方案繼續。'],
 ] as const
 
 export function LandingPage({ enrollment: propEnrollment }: { enrollment?: EnrollmentState | null } = {}) {
@@ -52,15 +52,16 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
   const cta = getEnrollmentCta(enrollment)
   const foundingRemaining = enrollment ? Math.max(enrollment.foundingLimit - enrollment.foundingCount, 0) : null
   const capacityOpen = Boolean(enrollment && enrollment.status === 'open' && enrollment.remaining > 0)
-  const showFounding = capacityOpen && foundingRemaining !== null && foundingRemaining > 0
+  const foundingAvailable = foundingRemaining !== null && foundingRemaining > 0
+  const showFounding = foundingAvailable
   const isFreePilot = Boolean(enrollment?.freePilotActive)
   const heroNote = enrollment === null
     ? '正在確認目前名額與優惠…'
-    : cta.isWaitlist
-      ? '目前服務名額已滿；候補不會先收費。'
-      : isFreePilot
-        ? '🔥 前 100 位學員限定：每週專屬教材完全免費（免填信用卡、免綁卡），每週填回饋即持續免費出教材。'
-        : showFounding
+    : isFreePilot
+      ? '🔥 前 100 位學員限定：每週專屬教材完全免費（免填信用卡、免綁卡），每週填回饋即持續免費出教材。'
+      : cta.isWaitlist
+        ? (foundingAvailable ? '目前服務名額已滿，候補不會先收費；創始 NT$349/月優惠目前仍有名額。' : '目前服務名額已滿；候補不會先收費。')
+        : foundingAvailable
           ? null
           : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
 
@@ -103,16 +104,22 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 </div>
                 <span className="hero-founding-sub" style={{ color: '#166534' }}>
                   只要每週完成孩子作答回饋，系統持續每週為他準備專屬教材
-                  {showFounding ? ' · 亦可提前自願訂閱鎖定創始 NT$349/月席次' : ''}
+                  {foundingAvailable ? ' · 亦可提前自願訂閱鎖定創始 NT$349/月席次' : ''}
                 </span>
               </div>
-            ) : showFounding ? (
+            ) : foundingAvailable ? (
               <div className="hero-founding-badge" aria-label="創始優惠說明">
                 <div className="hero-founding-badge-main">
                   <span className="hero-founding-tag">創始 30 名限定</span>
-                  <strong className="hero-founding-price">月繳 NT$349，持續訂閱期間價格固定不變</strong>
+                  <strong className="hero-founding-price">
+                    {capacityOpen ? '月繳 NT$349，持續訂閱期間價格固定不變' : '月繳 NT$349（目前仍有名額）'}
+                  </strong>
                 </div>
-                <span className="hero-founding-sub">標準價 NT$499/月 · 第一週免費</span>
+                <span className="hero-founding-sub">
+                  {capacityOpen
+                    ? '標準價 NT$499/月 · 第一週免費'
+                    : '目前服務名額已滿候補中 · 開放名額後即可選擇訂閱鎖定 NT$349/月'}
+                </span>
               </div>
             ) : null}
             <div className="hero-actions">

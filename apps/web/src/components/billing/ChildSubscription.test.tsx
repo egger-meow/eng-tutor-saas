@@ -343,4 +343,37 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('自願訂閱會立即開始扣款計費')
     expect(html).toContain('自願訂閱並鎖定 NT$349 創始價（立即扣款）')
   })
+
+  it('12. post-pilot with freePilotActive=false and currentPeriodEnd=null: displays 初期免費階段已結束 and guides to paid plans', () => {
+    const subscription: SubscriptionView = {
+      id: 'sub-beta-1',
+      childId: 'child-123',
+      status: 'trialing',
+      planCode: 'beta_monthly',
+      billingInterval: null,
+      priceTwd: null,
+      currentPeriodEnd: null,
+      cancelAtPeriodEnd: false,
+      foundingStatus: 'eligible',
+    }
+
+    const html = renderToStaticMarkup(
+      <ChildSubscription
+        child={mockChild}
+        subscription={subscription}
+        freePilotActive={false}
+        foundingAvailable={true}
+        foundingRemaining={19}
+        onSubscribe={vi.fn()}
+        onCancel={vi.fn()}
+        onResume={vi.fn()}
+      />
+    )
+
+    expect(html).toContain('初期免費階段已結束')
+    expect(html).toContain('已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。')
+    expect(html).toContain('月繳 NT$349')
+    expect(html).toContain('年繳 NT$4,999')
+    expect(html).toContain('鎖定 NT$349 創始價')
+  })
 })

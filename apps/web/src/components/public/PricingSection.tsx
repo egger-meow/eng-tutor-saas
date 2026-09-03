@@ -119,15 +119,17 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
         </div>
       </div>
       <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
-      {capacityOpen && foundingRemaining !== null && foundingRemaining > 0 && (
+      {foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
-          <p className="status-label">創始 30・{enrollment?.freePilotActive ? '自願提前訂閱' : '月繳限定'}</p>
+          <p className="status-label">創始 30・{enrollment?.freePilotActive ? '自願提前訂閱' : capacityOpen ? '月繳限定' : '名額保留中'}</p>
           <div className="founding-copy">
             <strong>前 30 位持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong>
             <span>
               {enrollment?.freePilotActive
                 ? '目前前 100 位學員每週完全免費！如果您希望在 30 席額滿前永久鎖定未來 NT$349/月優惠，可自願提前啟用月繳訂閱（會立即開始計費並永久鎖定創始價）。若不急著鎖定席次，可繼續享受每週免費教材。'
-                : '第一週免費。標準月費 NT$' + formatPrice(productConfig.standardPrice) + '；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。'}
+                : capacityOpen
+                  ? '第一週免費。標準月費 NT$' + formatPrice(productConfig.standardPrice) + '；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。'
+                  : '創始 NT$349/月優惠目前仍有名額。新學員目前先登記候補，名額開放後即可選擇訂閱鎖定優惠價格。'}
             </span>
           </div>
           <p className="founding-remaining">🎟️ 創始 30 優惠目前仍有名額（剩餘 {foundingRemaining} 席）</p>
@@ -145,8 +147,8 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
     <CapacityStatus enrollment={enrollment} />
     <p className="capacity-explainer">
       {enrollment?.freePilotActive
-        ? '每週專屬教材免費以歷史累計前 100 位孩子為限。累積滿 100 位學員後，系統將進入正式維運並全面恢復標準收費；非永久免費，滿額前加入的孩子在 100 位以前每週填寫回饋皆享免費。'
-        : '第一階段預計服務 100 位孩子，計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補，既有家庭不受影響。'}
+        ? '每週專屬教材免費以歷史累計前 100 位孩子為限。累積滿 100 位學員後，系統將進入正式維運並全面恢復標準收費；初期免費階段結束後，已完成與正在準備中的教材不受影響，後續每週服務將依當時訂閱方案繼續。'
+        : '服務計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補；已完成與正在準備中的教材不受影響，後續每週服務依訂閱方案繼續。'}
     </p>
   </section>
 }

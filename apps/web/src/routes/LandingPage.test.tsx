@@ -339,6 +339,26 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
     expect(html).toContain('NT$0')
     expect(html).toContain('前 100 位每週免費')
   })
+
+  it('displays Founding offer when capacity is full (100/100) but Founding spots remain', () => {
+    const postPilotFullEnrollment = {
+      status: 'waitlist' as const,
+      capacity: 100,
+      activeCount: 100,
+      remaining: 0,
+      foundingLimit: 30,
+      foundingCount: 11,
+      freePilotActive: false,
+      freePilotAdmissions: 100,
+      freePilotLimit: 100,
+    }
+    const html = renderToStaticMarkup(<LandingPage enrollment={postPilotFullEnrollment} />)
+    expect(html).toContain('創始 30 名限定')
+    expect(html).toContain('月繳 NT$349（目前仍有名額）')
+    expect(html).toContain('創始 NT$349/月優惠目前仍有名額')
+    expect(html).toContain('創始 30・名額保留中')
+    expect(html).toContain('登記候補')
+  })
 })
 
 

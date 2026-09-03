@@ -229,12 +229,15 @@ export function ChildSubscription({
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const isCanceledAutoRenew = Boolean(subscription.cancelAtPeriodEnd && ['active', 'past_due', 'paused'].includes(subscription.status))
   const isFreePilotActiveChild = Boolean(freePilotActive && subscription.status === 'trialing')
+  const isPilotEndedChild = Boolean(!freePilotActive && subscription.status === 'trialing' && !subscription.currentPeriodEnd)
 
   const [title, description] = isCanceledAutoRenew
     ? ['已取消自動續訂', `目前方案仍可使用至 ${periodEnd ?? '本期結束'}。到期後可以重新選擇月繳或年繳方案。`]
     : isFreePilotActiveChild
       ? ['每週專屬教材全面免費中', '前 100 位學員期間，每週專屬教材完全免費（免填信用卡、免綁卡）。孩子每週只要填寫回饋，系統持續每週為他準備專屬新教材！現在不訂閱也能持續免費使用。']
-      : labels[subscription.status]
+      : isPilotEndedChild
+        ? ['初期免費階段已結束', '已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。']
+        : labels[subscription.status]
 
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
   const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
@@ -252,8 +255,14 @@ export function ChildSubscription({
         </div>
         <p>
           <span
-            className={`status-label status-${isFreePilotActiveChild ? 'free-pilot' : isCanceledAutoRenew ? 'paused' : subscription.status}`}
-            style={isFreePilotActiveChild ? { background: '#16a34a', color: '#fff' } : undefined}
+            className={`status-label status-${isFreePilotActiveChild ? 'free-pilot' : isPilotEndedChild ? 'pilot-ended' : isCanceledAutoRenew ? 'paused' : subscription.status}`}
+            style={
+              isFreePilotActiveChild
+                ? { background: '#16a34a', color: '#fff' }
+                : isPilotEndedChild
+                  ? { background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }
+                  : undefined
+            }
           >
             {title}
           </span>

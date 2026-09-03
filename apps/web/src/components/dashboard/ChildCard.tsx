@@ -10,6 +10,7 @@ import { PersonalizationSummary } from './PersonalizationSummary'
 import { DeliveryStatus } from './DeliveryStatus'
 import { MaterialHistory } from '../materials/MaterialHistory'
 import { LearningJourneyPanel } from './LearningJourneyPanel'
+import { useEnrollmentState } from '../../lib/enrollment'
 
 interface ChildCardProps {
   child: ChildWithProfile
@@ -23,6 +24,7 @@ interface ChildCardProps {
 }
 
 export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, hasMoreMaterials, releasedMaterialCount, loadingMoreMaterials, defaultExpanded = false }: ChildCardProps) {
+  const { state: enrollment } = useEnrollmentState()
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [historyOpen, setHistoryOpen] = useState(false)
   const { latestMaterial, pastMaterials, futureMaterials, historyCount } = buildMaterialHistoryView(materials, releasedMaterialCount)
@@ -61,9 +63,19 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             {child.subscription?.status === 'trialing' && (
               <span
                 className="status-label status-trialing"
-                style={!child.subscription.currentPeriodEnd ? { background: '#dcfce7', color: '#15803d' } : undefined}
+                style={
+                  !child.subscription.currentPeriodEnd
+                    ? enrollment?.freePilotActive
+                      ? { background: '#dcfce7', color: '#15803d' }
+                      : { background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }
+                    : undefined
+                }
               >
-                {!child.subscription.currentPeriodEnd ? '每週免費中' : '體驗期'}
+                {!child.subscription.currentPeriodEnd
+                  ? enrollment?.freePilotActive
+                    ? '每週免費中'
+                    : '免費階段已結束'
+                  : '體驗期'}
               </span>
             )}
             {child.subscription?.status === 'canceled' && (
