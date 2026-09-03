@@ -39,9 +39,9 @@
 - service-only activation helper, e.g. `public.activate_landing_onboarding(text) returns jsonb`
 - updated authenticated `finalize_pending_onboarding(text)` / confirm / discard semantics
 
-- [ ] **Step 1: Extend static security contract tests** to require pending columns equivalent to `account_existed_at_prepare`, `provisioned_child_id`, `preauth_started_at`, attribution fields; service-only EXECUTE for prepare/activate; no anon/auth direct table access; authenticated-only finalization/confirm/discard.
-- [ ] **Step 2: Add DB smoke cases** for brand-new pre-auth activation, retry idempotency, canonical beta + exactly one Week 1 job, capacity-full waitlist/no-job, pre-existing account no pre-auth child, pre-provisioned Magic Link finalization returning the same child, mismatched-email rejection, existing-parent confirm/discard.
-- [ ] **Step 3: Run targeted static tests / DB smoke if available** and confirm RED because the new lifecycle does not exist yet.
+- [x] **Step 1: Extend static security contract tests** to require pending columns equivalent to `account_existed_at_prepare`, `provisioned_child_id`, `preauth_started_at`, attribution fields; service-only EXECUTE for prepare/activate; no anon/auth direct table access; authenticated-only finalization/confirm/discard.
+- [x] **Step 2: Add DB smoke cases** for brand-new pre-auth activation, retry idempotency, canonical beta + exactly one Week 1 job, capacity-full waitlist/no-job, pre-existing account no pre-auth child, pre-provisioned Magic Link finalization returning the same child, mismatched-email rejection, existing-parent confirm/discard.
+- [x] **Step 3: Run targeted static tests / DB smoke if available** and confirm RED because the new lifecycle does not exist yet.
 
 ### Task 2: Implement the forward-only pre-auth activation migration
 
@@ -60,10 +60,10 @@
 - `finalize_pending_onboarding` binds an already-provisioned child to the matching authenticated Email and scrubs remaining pending Email; it must not create again.
 - Pre-existing account with no active child may create its first child on authenticated finalization; active-child account still returns `ADDITIONAL_CHILD_CONFIRMATION_REQUIRED` until explicit confirm.
 
-- [ ] **Step 1: Implement only enough SQL to satisfy the RED contracts.**
-- [ ] **Step 2: Run targeted static tests and `pnpm test:db` (or the repo-supported DB smoke command).**
-- [ ] **Step 3: Verify GREEN and inspect the migration for lock order, privileges, idempotency, and trigger reuse.**
-- [ ] **Step 4: Commit the DB slice.**
+- [x] **Step 1: Implement only enough SQL to satisfy the RED contracts.**
+- [x] **Step 2: Run targeted static tests and `pnpm test:db` (or the repo-supported DB smoke command).**
+- [x] **Step 3: Verify GREEN and inspect the migration for lock order, privileges, idempotency, and trigger reuse.**
+- [x] **Step 4: Commit the DB slice.**
 
 ### Task 3: Add trusted Edge Function orchestration
 
@@ -86,11 +86,11 @@
 - Allow production `https://paperbond.jjmowlab.com` and explicit local/test origins only; reject arbitrary redirect hosts.
 - Do not log Email/profile payload.
 
-- [ ] **Step 1: Write a failing function/source contract** for prepare → Auth send → activate ordering, no activation on Auth error, generic response, and origin allowlist.
-- [ ] **Step 2: Run targeted test and verify RED.**
-- [ ] **Step 3: Implement the Edge Function and config entry.**
-- [ ] **Step 4: Run targeted test and TypeScript checks that cover Supabase functions.**
-- [ ] **Step 5: Commit the Edge slice.**
+- [x] **Step 1: Write a failing function/source contract** for prepare → Auth send → activate ordering, no activation on Auth error, generic response, and origin allowlist.
+- [x] **Step 2: Run targeted test and verify RED.**
+- [x] **Step 3: Implement the Edge Function and config entry.**
+- [x] **Step 4: Run targeted test and TypeScript checks that cover Supabase functions.**
+- [x] **Step 5: Commit the Edge slice.**
 
 ### Task 4: Move the landing final step to the Edge orchestration and new promise
 
@@ -119,11 +119,11 @@
 - Remove browser `trackEmailSubmit` / landing `trackChildCreated` / landing `trackOnboardingComplete` emissions that would duplicate server-authoritative events.
 - Keep `trackAuthComplete` as engagement and keep returning-parent branch events unless moved server-side deliberately.
 
-- [ ] **Step 1: Write RED tests** for Edge helper payload/result parsing, new copy/button, accepted/waitlisted states, and no direct `signInWithOtp` in landing onboarding.
-- [ ] **Step 2: Run targeted web tests and verify RED.**
-- [ ] **Step 3: Implement helper/component/App changes.**
-- [ ] **Step 4: Run targeted web tests and verify GREEN.**
-- [ ] **Step 5: Commit the web slice.**
+- [x] **Step 1: Write RED tests** for Edge helper payload/result parsing, new copy/button, accepted/waitlisted states, and no direct `signInWithOtp` in landing onboarding.
+- [x] **Step 2: Run targeted web tests and verify RED.**
+- [x] **Step 3: Implement helper/component/App changes.**
+- [x] **Step 4: Run targeted web tests and verify GREEN.**
+- [x] **Step 5: Commit the web slice.**
 
 ### Task 5: Update the shared Magic Link template without adding another welcome-email system
 
@@ -136,10 +136,10 @@
 - It must not state that clicking the link is required to start Week 1.
 - It may say the secure link lets the parent enter/manage the parent area; actual Week 1 delivery remains the existing material-release email pipeline.
 
-- [ ] **Step 1: Update template contract test first and verify RED.**
-- [ ] **Step 2: Update the template with dual-purpose wording.**
-- [ ] **Step 3: Run template tests and verify GREEN.**
-- [ ] **Step 4: Commit the email-copy slice.**
+- [x] **Step 1: Update template contract test first and verify RED.**
+- [x] **Step 2: Update the template with dual-purpose wording.**
+- [x] **Step 3: Run template tests and verify GREEN.**
+- [x] **Step 4: Commit the email-copy slice.**
 
 ### Task 6: Make Admin acquisition funnel auth-optional
 
@@ -158,10 +158,10 @@
 - `auth_complete` remains visible as a separate engagement/account-access metric but is not used in step-to-step acquisition conversion/dropoff.
 - Existing-parent/additional-child branch remains separate and excluded from first-time acquisition.
 
-- [ ] **Step 1: Update normalization/service tests first and verify RED under the old 8-step funnel.**
-- [ ] **Step 2: Implement the 7-step acquisition order and secondary auth presentation.**
-- [ ] **Step 3: Run Admin targeted tests and verify GREEN.**
-- [ ] **Step 4: Commit the Admin slice.**
+- [x] **Step 1: Update normalization/service tests first and verify RED under the old 8-step funnel.**
+- [x] **Step 2: Implement the 7-step acquisition order and secondary auth presentation.**
+- [x] **Step 3: Run Admin targeted tests and verify GREEN.**
+- [x] **Step 4: Commit the Admin slice.**
 
 ### Task 7: Update canonical SPEC to the approved lifecycle
 
@@ -187,12 +187,12 @@
 
 ### Task 8: Full verification, review, PR, merge, and production delivery
 
-- [ ] **Step 1: Run `pnpm lint`.** Expected PASS.
-- [ ] **Step 2: Run `pnpm test`.** Expected PASS.
-- [ ] **Step 3: Run `pnpm test:db`.** Expected PASS where local DB dependencies are available; otherwise rely on CI/production migration validation and report the exact limitation.
-- [ ] **Step 4: Run `pnpm typecheck`.** Expected PASS.
-- [ ] **Step 5: Run `pnpm build`.** Expected PASS.
-- [ ] **Step 6: Use verification-before-completion and requesting-code-review on the final branch diff. Fix only evidence-backed findings and rerun affected/full gates.**
+- [x] **Step 1: Run `pnpm lint`.** Expected PASS.
+- [x] **Step 2: Run `pnpm test`.** Expected PASS.
+- [x] **Step 3: Run `pnpm test:db`.** Expected PASS where local DB dependencies are available; otherwise rely on CI/production migration validation and report the exact limitation.
+- [x] **Step 4: Run `pnpm typecheck`.** Expected PASS.
+- [x] **Step 5: Run `pnpm build`.** Expected PASS.
+- [x] **Step 6: Use verification-before-completion and requesting-code-review on the final branch diff. Fix only evidence-backed findings and rerun affected/full gates.**
 - [ ] **Step 7: Open a non-draft PR from `design/preauth-week1-activation` to `main`, wait for CI, and merge only if the verified head is unchanged and green.**
 - [ ] **Step 8: Apply the forward-only migration to production Supabase and verify remote migration history + RPC ACL/read-after-write behavior.**
 - [ ] **Step 9: Deploy `start-landing-onboarding` Edge Function and verify its production deployment/config.**
