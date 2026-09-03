@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   confirmAdditionalChildOnboarding,
-  createPendingOnboarding,
   discardPendingOnboarding,
   finalizePendingOnboarding,
   readOnboardingToken,
 } from './onboarding-handoff'
-import { emptyProfileDraft } from './profile-form'
 
 const rpc = vi.fn()
 
@@ -16,24 +14,6 @@ vi.mock('./supabase', () => ({
 
 describe('onboarding handoff', () => {
   beforeEach(() => rpc.mockReset())
-
-  it('creates an opaque pending onboarding without writing a child before authentication', async () => {
-    rpc.mockResolvedValueOnce({ data: 'opaque-token', error: null })
-
-    const token = await createPendingOnboarding(' Parent@Example.COM ', {
-      ...emptyProfileDraft,
-      displayName: '小宇',
-      grade: 7,
-      gradeStage: 'incoming_grade_7',
-      baselineLevel: 'average',
-    })
-
-    expect(token).toBe('opaque-token')
-    expect(rpc).toHaveBeenCalledWith('create_pending_onboarding', expect.objectContaining({
-      p_email: 'parent@example.com',
-      p_draft: expect.objectContaining({ displayName: '小宇', gradeStage: 'incoming_grade_7' }),
-    }))
-  })
 
   it('finalizes a first child after auth and returns a created result', async () => {
     rpc.mockResolvedValueOnce({ data: '11111111-1111-1111-1111-111111111111', error: null })

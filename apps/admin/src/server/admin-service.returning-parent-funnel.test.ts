@@ -47,15 +47,15 @@ function eventSeries(
 }
 
 describe('AdminService returning-parent funnel split', () => {
-  it('keeps returning parents out of first-child acquisition conversion and reports their branch separately', async () => {
+  it('keeps returning parents out of first-child acquisition conversion and reports auth separately', async () => {
     const now = Date.now() - 60_000
     const events = [
       ...eventSeries(
         'new',
         'aid-new',
-        ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'],
+        ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete', 'auth_complete'],
         now,
-        { userId: 'user-new', childId: 'child-new', authIndex: 5, childIndex: 6 },
+        { userId: 'user-new', childId: 'child-new', authIndex: 5, childIndex: 5 },
       ),
       ...eventSeries(
         'return',
@@ -90,8 +90,9 @@ describe('AdminService returning-parent funnel split', () => {
     expect(result.uniqueLandingVisitors).toBe(1)
     expect(result.overallConversionPercent).toBe(100)
     expect(result.steps.map((step) => step.name)).toEqual([
-      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete',
+      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete',
     ])
+    expect(result.authCompletedCount).toBe(1)
     expect(result.steps.find((step) => step.name === 'child_created')?.uniqueVisitors).toBe(1)
     expect(result.returningParent).toEqual({
       detected: 1,
@@ -108,9 +109,9 @@ describe('AdminService returning-parent funnel split', () => {
     const firstVisit = eventSeries(
       'first',
       'aid-shared',
-      ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'auth_complete', 'child_created', 'onboarding_complete'],
+      ['landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete', 'auth_complete'],
       startedAt,
-      { userId: 'user-shared', childId: 'child-first', authIndex: 5, childIndex: 6 },
+      { userId: 'user-shared', childId: 'child-first', authIndex: 5, childIndex: 5 },
     )
     const returningVisit = eventSeries(
       'later',
@@ -129,8 +130,34 @@ describe('AdminService returning-parent funnel split', () => {
 
     expect(result.uniqueLandingVisitors).toBe(1)
     expect(result.steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors).toBe(1)
+    expect(result.authCompletedCount).toBe(1)
     expect(result.overallConversionPercent).toBe(100)
     expect(result.returningParent.detected).toBe(1)
     expect(result.returningParent.pendingOnboardingDiscarded).toBe(1)
+  })
+
+  it('keeps first-child acquisition conversion at onboarded even before the parent opens the Magic Link', async () => {
+    const startedAt = Date.now() - 60_000
+    const events = eventSeries(
+      'new-no-auth',
+      'aid-no-auth',
+      ['landing_view', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete'],
+      startedAt,
+      { userId: 'user-no-auth', childId: 'child-no-auth', authIndex: 4, childIndex: 4 },
+    )
+    const client = createMockSupabaseClient({
+      funnel_events: events,
+      children: [{ id: 'child-no-auth', parent_id: 'user-no-auth', is_internal_test: false }],
+    })
+
+    const result = await new LandingFunnelAdminService({ client: client as any }).getConversionFunnelData(7)
+
+    expect(result.steps.map((step) => step.name)).toEqual([
+      'landing_view', 'sample_click', 'free_trial_click', 'child_form_start', 'email_submit', 'child_created', 'onboarding_complete',
+    ])
+    expect(result.steps.find((step) => step.name === 'onboarding_complete')?.uniqueVisitors).toBe(1)
+    expect(result.steps.some((step) => step.name === 'auth_complete')).toBe(false)
+    expect(result.authCompletedCount).toBe(0)
+    expect(result.overallConversionPercent).toBe(100)
   })
 })

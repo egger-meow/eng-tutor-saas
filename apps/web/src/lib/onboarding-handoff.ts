@@ -1,5 +1,3 @@
-import { legalConfig } from './config'
-import type { ProfileDraft } from './profile-form'
 import { getSupabaseClient } from './supabase'
 
 const MAX_HANDOFF_TOKEN_LENGTH = 256
@@ -19,21 +17,6 @@ function isAdditionalChildConfirmationRequired(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false
   const message = 'message' in error && typeof error.message === 'string' ? error.message : ''
   return message.includes(ADDITIONAL_CHILD_CONFIRMATION_REQUIRED)
-}
-
-export async function createPendingOnboarding(email: string, draft: ProfileDraft): Promise<string> {
-  const normalizedEmail = email.trim().toLowerCase()
-  if (!normalizedEmail) throw new Error('請輸入 Email。')
-
-  const { data, error } = await getSupabaseClient().rpc('create_pending_onboarding', {
-    p_email: normalizedEmail,
-    p_draft: draft,
-    p_terms_version: legalConfig.termsVersion,
-    p_privacy_version: legalConfig.privacyVersion,
-  })
-  if (error) throw error
-  if (typeof data !== 'string' || !data.trim()) throw new Error('無法建立安全設定連結，請稍後再試。')
-  return data
 }
 
 export async function finalizePendingOnboarding(token: string): Promise<FinalizePendingOnboardingResult> {

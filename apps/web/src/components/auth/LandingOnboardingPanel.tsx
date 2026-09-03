@@ -4,11 +4,9 @@ import { AboutStep } from '../onboarding/steps/AboutStep'
 import { SchoolStep } from '../onboarding/steps/SchoolStep'
 import { RoutineStep } from '../onboarding/steps/RoutineStep'
 import { EmailAuthPanel } from './EmailAuthPanel'
-import { buildAuthRedirectUrl } from '../../lib/auth-redirect'
-import { getAnonymousId, trackChildFormStart, trackEmailSubmit } from '../../lib/analytics'
-import { createPendingOnboarding } from '../../lib/onboarding-handoff'
+import { getAnonymousId, trackChildFormStart } from '../../lib/analytics'
+import { startLandingOnboarding } from '../../lib/landing-onboarding-start'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
-import { getSupabaseClient } from '../../lib/supabase'
 import '../../styles/onboarding-refinement.css'
 import '../../styles/landing-onboarding.css'
 
@@ -89,25 +87,26 @@ export function LandingOnboardingPanel() {
     setBusy(true)
     setNotice(null)
     try {
-      const token = await createPendingOnboarding(email, draft)
-      const anonymousId = getAnonymousId()
-      const { error } = await getSupabaseClient().auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          emailRedirectTo: buildAuthRedirectUrl(window.location.origin, {
-            aid: anonymousId,
-            onboarding: token,
-          }),
-        },
+      const result = await startLandingOnboarding({
+        email,
+        draft,
+        anonymousId: getAnonymousId(),
+        redirectOrigin: window.location.origin,
       })
-      if (error) throw error
-      trackEmailSubmit({ flow: 'landing_onboarding' })
-      setNotice({
-        kind: 'success',
-        text: '孩子資料已填完。安全連結已寄到你的 Email，點開後就會完成帳號設定並直接進入孩子管理畫面。',
-      })
+
+      if (result.status === 'waitlisted') {
+        setNotice({
+          kind: 'success',
+          text: '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。',
+        })
+      } else {
+        setNotice({
+          kind: 'success',
+          text: '完成了，第一週教材已開始準備。教材完成後會直接寄到你的 Email，不需要一直留在網站上。',
+        })
+      }
     } catch (caught) {
-      setNotice({ kind: 'error', text: caught instanceof Error ? caught.message : '無法寄送安全連結，請稍後再試。' })
+      setNotice({ kind: 'error', text: caught instanceof Error ? caught.message : '無法開始第一週教材，請稍後再試。' })
     } finally {
       setBusy(false)
     }
@@ -128,13 +127,13 @@ export function LandingOnboardingPanel() {
         <header className="onboarding-welcome-header">
           <div className="onboarding-badge">第一週免費</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後才留下 Email 接收安全連結並建立帳號。</p>
+          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始準備第一週。</p>
         </header>
         <section className="onboarding-layout" aria-labelledby="landing-email-title">
           <div className="onboarding-heading">
             <p className="overline">孩子資料完成（第 3/3 步已完成）</p>
-            <h2 id="landing-email-title">最後留下 Email，我們把第一週接到你的帳號</h2>
-            <p className="muted">剛剛填的資料不需要重填。點開 Email 裡的安全連結後，會直接完成帳號設定並進入孩子管理畫面。</p>
+            <h2 id="landing-email-title">最後留下 Email，第一週做好直接寄給你</h2>
+            <p className="muted">剛剛填的資料不需要重填。送出後就會開始準備第一週教材；安全連結則用來登入與管理孩子。</p>
           </div>
           <form onSubmit={submitEmail} className="onboarding-fields">
             <label htmlFor="landing-onboarding-email">家長 Email</label>
@@ -164,7 +163,7 @@ export function LandingOnboardingPanel() {
                 上一步
               </button>
               <button className="button" type="submit" disabled={busy}>
-                {busy ? '寄送中…' : '寄給我，完成第一週設定'}
+                {busy ? '啟動中…' : '開始準備第一週教材'}
               </button>
             </div>
           </form>
@@ -182,7 +181,7 @@ export function LandingOnboardingPanel() {
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">第一週免費</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後才留下 Email 接收安全連結並建立帳號。</p>
+        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會開始準備第一週教材。</p>
       </header>
       <OnboardingLayout
         step={step}

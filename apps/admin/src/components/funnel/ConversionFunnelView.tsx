@@ -9,6 +9,7 @@ interface Props {
 }
 
 type ReturningAwareFunnelData = ConversionFunnelData & {
+  authCompletedCount?: number
   returningParent?: {
     detected: number
     additionalChildConfirmed: number
@@ -40,6 +41,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
   } = data
   const { steps, biggestDropOff } = normalizeLandingFirstFunnel(rawSteps)
   const extended = data as ReturningAwareFunnelData
+  const authCompletedCount = extended.authCompletedCount ?? 0
   const returningParent = extended.returningParent ?? {
     detected: 0,
     additionalChildConfirmed: 0,
@@ -57,7 +59,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
         <div>
           <h2 className="funnel-title">轉換漏斗分析 (Conversion Funnel)</h2>
           <p className="funnel-subtitle">
-            主漏斗只看「新客建立第一位孩子」：首頁 → 教材範例 → 開始填孩子資料 → Email → Magic Link → 完成設定。已經有孩子的家長會自動移到下方回流分支，不再污染新客轉換率。
+            主漏斗只看「新客建立第一位孩子」：首頁 → 教材範例 → 開始填孩子資料 → Email → 建立孩子 → 完成設定。Magic Link 綁定帳號是後續 engagement，不算 acquisition 流失；已經有孩子的家長也會自動移到下方回流分支。
           </p>
         </div>
         <div className="funnel-controls">
@@ -124,6 +126,12 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           </div>
         </div>
 
+        <div className="funnel-kpi-card">
+          <div className="kpi-label">Magic Link 帳號綁定 (Secondary)</div>
+          <div className="kpi-value">{authCompletedCount.toLocaleString()}</div>
+          <div className="kpi-desc">後續帳號存取訊號，不計入 acquisition 流失</div>
+        </div>
+
         <div className="funnel-kpi-card drop-alert-card">
           <div className="kpi-label">最大流失環節 (Largest Drop-off)</div>
           {biggestDropOff ? (
@@ -169,9 +177,9 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
       </div>
 
       <div className="funnel-card">
-        <h3 className="card-heading">8 階段新客轉換漏斗 (Step-by-Step Funnel)</h3>
+        <h3 className="card-heading">7 階段新客轉換漏斗 (Step-by-Step Funnel)</h3>
         <p className="card-subheading">
-          精確掌握新客從公開流量到填孩子資料、Email 驗證、登入與第一位孩子完成設定的各階段流失與轉換率。
+          精確掌握新客從公開流量到填孩子資料、Email 送出與第一位孩子完成設定的各階段流失。Magic Link 帳號綁定獨立顯示，不參與這裡的逐步轉換率。
         </p>
 
         <div className="funnel-steps-table-wrapper">
@@ -227,14 +235,14 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           <h3 className="card-heading">新客流量來源與成效分析 (Traffic Attribution)</h3>
           <p className="card-subheading">區分 Meta / Facebook 廣告、Google 搜尋與直接流量的第一位孩子最終轉換表現。</p>
           <table className="funnel-table">
-            <thead><tr><th>流量來源</th><th style={{ width: '80px' }}>首頁訪客</th><th style={{ width: '80px' }}>登入成功</th><th style={{ width: '80px' }}>建立孩子</th><th style={{ width: '80px' }}>完成設定</th><th style={{ width: '90px' }}>最終轉化率</th></tr></thead>
-            <tbody>{channels.map((ch) => <tr key={ch.channel}><td><strong>{ch.label}</strong></td><td>{ch.landingViews.toLocaleString()}</td><td>{ch.authCompleted.toLocaleString()}</td><td>{ch.childrenCreated.toLocaleString()}</td><td><strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong></td><td><span className="conversion-pill pill-green">{ch.conversionPercent}%</span></td></tr>)}</tbody>
+            <thead><tr><th>流量來源</th><th style={{ width: '80px' }}>首頁訪客</th><th style={{ width: '80px' }}>建立孩子</th><th style={{ width: '80px' }}>完成設定</th><th style={{ width: '80px' }}>帳號綁定</th><th style={{ width: '90px' }}>Onboarded 轉化率</th></tr></thead>
+            <tbody>{channels.map((ch) => <tr key={ch.channel}><td><strong>{ch.label}</strong></td><td>{ch.landingViews.toLocaleString()}</td><td>{ch.childrenCreated.toLocaleString()}</td><td><strong className="text-emerald">{ch.onboarded.toLocaleString()}</strong></td><td>{ch.authCompleted.toLocaleString()}</td><td><span className="conversion-pill pill-green">{ch.conversionPercent}%</span></td></tr>)}</tbody>
           </table>
         </div>
 
         <div className="funnel-card">
           <h3 className="card-heading">新客裝置分佈 (Device Distribution)</h3>
-          <p className="card-subheading">第一位孩子 acquisition 流程中的裝置事件分佈。</p>
+          <p className="card-subheading">第一位孩子 acquisition 流程中的裝置事件分佈，不含後續 Magic Link 帳號綁定。</p>
           <div className="device-metric-list">
             {devices.map((dev) => <div key={dev.device} className="device-item"><div className="device-info"><span className="device-label">{dev.label}</span><span className="device-count"><strong>{dev.count.toLocaleString()}</strong> 次 ({dev.percent}%)</span></div><div className="device-bar-bg"><div className="device-bar-fill" style={{ width: `${dev.percent}%` }} /></div></div>)}
           </div>
@@ -247,8 +255,8 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
           <h3 className="card-heading">新客轉換漏斗時間趨勢 ({rangeDays === 1 ? '每小時' : '每日'}紀錄)</h3>
           <div className="funnel-steps-table-wrapper">
             <table className="funnel-table">
-              <thead><tr><th>時間 ({rangeDays === 1 ? '時' : '日'})</th><th>首頁瀏覽</th><th>範例點擊</th><th>點擊體驗</th><th>開始填表</th><th>送出 Email</th><th>登入成功</th><th>建立孩子</th><th>完成設定</th></tr></thead>
-              <tbody>{trends.slice().reverse().map((t) => <tr key={t.date}><td><code>{t.date}</code></td><td>{t.landing_view}</td><td>{t.sample_click}</td><td>{t.free_trial_click}</td><td>{t.child_form_start}</td><td>{t.email_submit}</td><td>{t.auth_complete}</td><td>{t.child_created}</td><td><strong className="text-emerald">{t.onboarding_complete}</strong></td></tr>)}</tbody>
+              <thead><tr><th>時間 ({rangeDays === 1 ? '時' : '日'})</th><th>首頁瀏覽</th><th>範例點擊</th><th>點擊體驗</th><th>開始填表</th><th>送出 Email</th><th>建立孩子</th><th>完成設定</th><th>帳號綁定</th></tr></thead>
+              <tbody>{trends.slice().reverse().map((t) => <tr key={t.date}><td><code>{t.date}</code></td><td>{t.landing_view}</td><td>{t.sample_click}</td><td>{t.free_trial_click}</td><td>{t.child_form_start}</td><td>{t.email_submit}</td><td>{t.child_created}</td><td><strong className="text-emerald">{t.onboarding_complete}</strong></td><td>{t.auth_complete}</td></tr>)}</tbody>
             </table>
           </div>
         </div>
