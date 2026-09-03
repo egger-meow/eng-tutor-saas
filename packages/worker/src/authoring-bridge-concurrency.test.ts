@@ -6,10 +6,10 @@ describe('Production Authoring Shared Concurrency & Serialization Invariants', (
   const root = resolve(import.meta.dirname, '../../..')
 
   it('proves worker_start_authoring_batch acquires transaction-scoped advisory lock before lease check or claim', async () => {
-    const migration = await readFile(
+    const migration = (await readFile(
       resolve(root, 'supabase/migrations/20260901090000_serialized_production_authoring_start.sql'),
       'utf8'
-    )
+    )).replace(/\r\n/g, '\n')
 
     // Must define authoring_lock_id constant
     expect(migration).toContain('authoring_lock_id constant bigint')
