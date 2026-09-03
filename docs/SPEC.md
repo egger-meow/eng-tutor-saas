@@ -601,7 +601,9 @@ Do not use a single subscription with `quantity = number of children` for MVP.
 Founder 30 is a monthly-only lifetime price attached to the first 30 qualifying children.
 
 ```text
-First week free (across 100 service capacity)
+Free Pilot Phase (across 100 operational capacity)
+↓
+Optional early subscription during Free Pilot (or required subscription after pilot ends)
 ↓
 30-minute checkout hold at qualifying monthly Paddle checkout
 ↓
@@ -612,7 +614,9 @@ NT$349/month while that same monthly subscription remains continuously active
 
 The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring flat TWD 150 Paddle discount (amount 15000), not by changing the catalog price.
 
-Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Creating a child or profile does not allocate or reserve a Founder seat; all admitted children have equal access to the free Week 1 personalized trial.
+Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Admitting a child into the Free Pilot does NOT allocate or consume a Founder seat. All admitted children have equal access to the free weekly service while the Free Pilot is active without needing to subscribe.
+
+However, a parent may voluntarily subscribe early during the Free Pilot to lock the continuous NT$349/month Founder price before all 30 seats are taken. An early subscription is a REAL paid Paddle subscription that begins charging immediately; clicking subscribe is never free or $0.
 
 Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. At monthly checkout preparation, if `founding_seat_count() < 30`, a 30-minute checkout hold is atomically acquired. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
 
@@ -632,14 +636,33 @@ Scheduling cancellation does not immediately remove Founder status. If the custo
 Referral codes and rewards are out of scope.
 
 ---
-# 24. Free Week 1
+# 24. Free Pilot Phase & Weekly Personalization
 
-For the founding cohort, the ideal first-time entry flow is:
+Paper English operates under a **FREE PILOT** phase.
+
+Until the service has historically admitted 100 real children:
+
+> all admitted children continue receiving their personalized weekly materials for free, every week, without requiring a Paddle subscription.
+
+This is NOT merely “Week 1 free”. During the Free Pilot, Week 1, Week 2, Week 3, etc. remain service-entitled while the pilot is active.
+
+When the 100th real child has historically been admitted:
+
+> the free pilot ends permanently.
+
+From that point onward, normal paid-subscription entitlement governs future weekly service.
+
+The transition is strictly monotonic:
+once the historical 100-child threshold has been reached, deleting, archiving, canceling, expiring, or otherwise removing children must NEVER reactivate the free pilot.
+Internal/test children must never advance the historical pilot counter.
+Pilot authority is derived from a durable authoritative transactional representation (`private_generation.historical_pilot_admissions` and `enrollment_settings.free_pilot_ended_at`), never from a volatile active-subscription or service-occupancy count.
+
+For a new family joining during the Free Pilot, the entry flow is:
 
 ```text
 Landing
 ↓
-Free Week 1 CTA
+Free Pilot CTA (免綁卡・每週專屬教材免費)
 ↓
 Complete child learning profile on the public landing surface
 ↓
@@ -651,7 +674,7 @@ Service-only first-time activation
 ↓
 Create the canonical child + profile exactly once
 ↓
-Apply capacity / beta / waitlist authority and, when eligible, create the explicit Week 1 generation job through the existing triggers
+Apply capacity / waitlist / pilot authority and, when eligible, create the explicit Week 1 generation job
 ↓
 Parent may leave the site while Week 1 is prepared
 ↓
@@ -659,16 +682,16 @@ Magic Link authentication / account access
 ↓
 Child management / Dashboard
 ↓
-Download when released
+Download Week 1 when released
 ↓
 Use at home
 ↓
-Provide feedback
+Provide weekly feedback
 ↓
-Decide whether to subscribe
+Week 2 scheduled and generated for free while pilot remains active
 ```
 
-For a genuinely new Email, successful trusted Magic Link dispatch is sufficient to begin first-child provisioning before the parent clicks the Magic Link. Supabase Auth may create or resolve the Auth identity as part of that trusted dispatch, and the service-only activation path may then create the canonical child + profile and reuse the existing child-insert capacity/beta and subscription-triggered explicit Week 1 generation job path. The browser is not trusted to claim that dispatch succeeded.
+For a genuinely new Email, successful trusted Magic Link dispatch is sufficient to begin first-child provisioning before the parent clicks the Magic Link. Supabase Auth may create or resolve the Auth identity as part of that trusted dispatch, and the service-only activation path may then create the canonical child + profile and reuse the existing child-insert capacity/pilot and explicit initial generation job path. The browser is not trusted to claim that dispatch succeeded.
 
 This pre-auth activation exception applies only when the Email did not exist in Auth before the onboarding request. A pre-existing Auth account receives no pre-auth child mutation. It remains auth-first: after Magic Link authentication, the pending draft may be finalized for a first child or may require explicit additional-child confirmation when the account already has an active child. The anonymous response must not reveal whether the Email already existed.
 
@@ -680,11 +703,11 @@ Existing parents may bypass the first-time questionnaire and use the direct Emai
 
 The goal is to allow a parent to evaluate:
 
-> the actual personalized product.
+> the actual personalized product and its weekly adaptive loop.
 
 Not merely screenshots or demo copy.
 
-## Week 1 Delivery Timing
+## Week 1 Delivery Timing & Rolling Free Cadence
 
 Week 1 content is not authored synchronously during onboarding. The trusted activation creates the explicit initial generation job when the new child is eligible, while the sole curriculum author (the repository-owned local Windows Codex CLI runner) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
 
@@ -693,12 +716,17 @@ Therefore:
 * the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
 * Week 1 is the sole early-release exception: when the deterministic Finisher successfully completes both PDFs before that timestamp, completion immediately becomes the actual `release_at` and the parent may download both files at once;
 * Week 2 is scheduled from Week 1's actual release anchor plus seven days. If Week 1 completes today, Week 2 is due today + 7 days; if Week 1 completes tomorrow, Week 2 is due tomorrow + 7 days;
-* Week 1 is a standalone evaluation and calibration packet. If the parent does not immediately subscribe, Week 2 sits pending but unentitled. When the parent subsequently activates a paid subscription, the pending Week 2 job is re-anchored to the activation moment (next calendar day delivery), preventing overdue calendar catch-up;
+* While the Free Pilot is active, Week 2 is fully entitled without requiring a Paddle subscription. Once the parent submits feedback (or the feedback cutoff passes), Week 2 is claimed and authored. Subsequent weeks (Week 3, Week 4, etc.) continue on this rolling seven-day cadence for free;
+* If a parent voluntarily subscribes early during the Free Pilot, the paid Paddle subscription activates and continuous active service proceeds smoothly. If they later cancel that voluntary Paddle subscription while the Free Pilot is still active, they do not lose the globally free service solely because the Paddle subscription ended;
+* When the Free Pilot ends:
+  - Any generation job legitimately created before `free_pilot_ended_at` survives cutover and completes safely without destructive cancellation;
+  - Subsequent new weekly jobs created after pilot end require normal paid Paddle entitlement;
+  - Unpaid children pause their generation cadence until a paid subscription is activated, at which point the clean candidate re-anchoring mechanism activates;
 * for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
 * the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
 * expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
 * if the first delivery date passes without successful material completion (e.g. past-due unmaterialized job under retry), the UI falls back to a neutral `第一份教材準備中` state with detail `教材正在完成最後檢查，準備完成後即可下載。` instead of showing a stale date or false delivery claim;
-* when capacity is full, the authoritative waitlist state must be shown and the UI must not claim that Week 1 is being prepared when no generation job exists;
+* when operational capacity is full, the authoritative waitlist state must be shown and the UI must not claim that Week 1 is being prepared when no generation job exists;
 * `generation_jobs.release_at` remains the canonical parent-facing delivery timestamp.
 
 The initial job's `scheduled_for` is set to the trusted activation moment so it is immediately eligible for the next 00:15 local authoring run.
@@ -730,61 +758,58 @@ It is not an MVP blocker.
 
 ---
 
-# 26. Maximum Initial Capacity
+# 26. Maximum Initial Capacity & Free Pilot Threshold
 
-The system should intentionally cap early service at:
+The system operates with two related but distinct 100-child product boundaries:
 
-> **100 active service children**
+1. **Operational Service Capacity (100 active service children)**:
+   The concurrent active service occupancy (`locked_capacity_count()`) is capped at 100. When active occupancy reaches 100, new applicants enter the waitlist. Capacity is not silently auto-raised.
 
-This is a real operational cap.
+2. **Free Pilot Threshold (100 historical real-child admissions)**:
+   Until 100 real children have historically been admitted into the service, all admitted children receive their personalized weekly materials for free every week. When the 100th real child has historically been admitted, the Free Pilot phase ends permanently and monotonically.
 
-It is not fake scarcity.
+These are real operational and business model boundaries, not fake scarcity.
 
 ---
 
-# 27. Why the 100-Child Cap Exists
+# 27. Why the 100-Child Cap and Free Pilot Exist
 
-The first 100 children are a controlled production phase.
+The first 100 children are a controlled production and validation phase.
 
-During this stage the team needs to observe:
+During this stage the team observes:
 
-* generation quality;
-* PDF quality;
-* personalization quality;
-* feedback rates;
-* model failures;
-* repeated content;
-* subscription behavior;
-* parent confusion;
+* generation quality across sequential weeks;
+* PDF rendering and layout quality;
+* personalization adaptation across consecutive feedback cycles;
+* feedback rates and parent expectations;
+* model failures and edge cases;
+* repeated content prevention;
+* voluntary paid subscription behavior during the free pilot;
 * operational workload;
-* retention.
+* learner retention.
 
-If the product reaches 100 active children:
+If the product reaches 100 historical real-child admissions:
 
-> that is evidence strong enough to justify upgrading the system before opening further enrollment.
+> that is evidence strong enough to conclude the free pilot phase, transition to normal paid subscriptions, and review system upgrades before expanding capacity.
 
 ---
 
 # 28. Capacity Counter
 
-The landing page may display:
+The landing page and public interface display authentic system state:
 
 ```text
 目前服務名額
 37 / 100
 ```
 
-The counter must reflect real system state.
-
-Never generate random scarcity numbers.
+The counter reflects real system state. Never generate random scarcity numbers or artificial countdowns.
 
 ---
 
 # 29. Capacity Definition
 
-Capacity is counted by child.
-
-Not by parent.
+Capacity is counted by child, not by parent.
 
 Example:
 
@@ -796,9 +821,13 @@ Example:
 100 active child slots
 ```
 
-Children currently eligible for active service may count toward capacity, including qualifying founding trial children when they occupy generation capacity.
+Active service occupancy (`locked_capacity_count()`) counts:
+1. Active Paddle subscriptions (`trialing`, `active`, `past_due`);
+2. Free Pilot active children (admitted real children receiving weekly service while pilot is active or holding in-flight generation jobs);
+3. Released waitlist entries holding reserved capacity;
+4. Unresolved capacity checkout claims.
 
-Archived or expired children do not count.
+Archived children and waitlisted children in `waiting` status do not count. Internal test children never count.
 
 ---
 
@@ -811,13 +840,13 @@ Suggested enrollment states:
 * `waitlist`
 * `closed`
 
-When under capacity:
+When under operational capacity:
 
-> new eligible children may acquire service capacity.
+> new eligible children may acquire service capacity and be admitted into the Free Pilot (if active).
 
-When capacity reaches 100:
+When active occupancy reaches 100:
 
-> new service capacity acquisition is disabled (new profiles enter waitlist; expired beta trials without held seats enter waitlist).
+> new service capacity acquisition is disabled (new profiles enter waitlist).
 
 Existing paid customers, paused customers, and returning canceled customers are never rejected solely because occupancy is >= capacity. Revenue and customer continuity take priority over a hard ceiling. Small over-cap occupancy triggers operational review rather than billing failure.
 
@@ -2547,22 +2576,25 @@ The system should distribute generation workload rather than accidentally schedu
 
 For the first packet only, successful Finisher completion may advance the actual Week 1 `release_at`. The Week 2 release and generation deadlines must then be derived from that actual Week 1 release anchor plus seven days, rather than from the superseded next-day expectation.
 
-### Subscription Pause Clock & Service Time Cadence
+### Free Pilot Rolling Cadence & Subscription Pause Clock
 
 Material delivery cadence operates strictly on **service time**, not wall-clock calendar time:
 
-> **訂多久，就往前走多久。沒訂的日子不存在。**
+> **訂多久（或公測免費用多久），就往前走多久。沒權益的日子不存在。**
 
-Calendar days without active entitlement (free Week 1 post-release evaluation window, paused, canceled, past-due, or unpaid lapse) completely pause the generation clock and do NOT advance curriculum weeks or accumulate overdue releases.
+During the **Free Pilot** phase, all historically admitted real children hold continuous active service entitlement. The rolling weekly cadence advances week after week (Week 1 → Week 2 → Week 3, etc.) as long as the Free Pilot remains active. Voluntary early subscribers also advance continuously.
 
-When a paid subscription is first activated or resumed after an entitlement gap (**entitlement transitions** such as `beta` → `active/trialing`, `paused`/`past_due`/`canceled` → `active`, or `none` → `active`):
+When the Free Pilot ends, or during periods without entitlement (unpaid lapse post-pilot, paused, canceled, past-due):
+the generation clock is paused and does NOT advance curriculum weeks or accumulate overdue releases.
+
+When a paid subscription is first activated or resumed after an entitlement gap (**entitlement transitions** such as `beta` / unpaid post-pilot → `active/trialing`, `paused`/`past_due`/`canceled` → `active`, or `none` → `active`):
 1. **Clean Candidate Re-anchoring**: An unmaterialized candidate job with ZERO submission history is re-anchored in place to the activation date (delivery on the next calendar day 00:00 in the child's configured timezone), updating its `generation_due_at = release_at - 24 hours`, `material_week`, and `idempotency_key`, resetting `attempt_count` to 0, and synchronizing `source_material_id` to the canonical sequence authority;
 2. **Active Claim and Active Submission Protection**: Re-anchoring strictly excludes jobs with an active worker lease (`status = 'claimed'` with `lease_expires_at >= now()`) or ANY in-flight submission (`curriculum_submissions` with `status in ('pending', 'processing')`) across any job status. Active claims and active submissions are never touched, canceled, or reset mid-flight;
 3. **Terminal Submission and Failed Status Immutability**: Once a generation job has generated ANY `curriculum_submission` or has reached terminal `failed` status (`status = 'failed'` upon reaching max attempts), its target identity and attempt sequence are strictly immutable. If an unmaterialized job has terminal submission history (such as `quality_rejected` or `technical_failed`) or is in `failed` status, that job is marked `canceled` (preserving its job and submission audit history), and its `idempotency_key` is suffixed to free the slot. A fresh generation job with a brand new job ID is created with tomorrow's anchor, `status = 'pending'`, and clean `attempt_count = 0`, preventing immutable `(job_id, authoring_attempt)` submission primary key collisions on retry and ensuring old failed jobs do not block future calendar slots or pollute parent views;
 4. If no pending job exists and the child already has past materials, resumption links `source_material_id` strictly according to the canonical sequence authority (`child_weekly_learning_snapshots.sequence_number` desc);
 5. The deterministic Finisher ensures that subsequent weekly jobs are scheduled strictly in the future (`greatest(effective_release_at + interval '7 days', tomorrow)`);
 6. Missed calendar weeks are NEVER backfilled or generated retroactively;
-7. **Continuous Active Service**: Subscribers already holding continuous active entitlement (e.g. `active` → `active` or `trialing` → `active`) maintain rolling weekly cadence without re-anchoring. Routine billing events must never wash away overdue generation deadlines or reset attempt counts; continuous-active overdue jobs remain mandatory and must continue to be pursued.
+7. **Continuous Active Service**: Subscribers and Free Pilot children holding continuous active entitlement maintain rolling weekly cadence without re-anchoring. Routine billing events must never wash away overdue generation deadlines or reset attempt counts; continuous-active overdue jobs remain mandatory and must continue to be pursued.
 
 
 ---
@@ -3000,17 +3032,17 @@ The verified Paddle event transaction also records the normalized subscription l
 ---
 # 138. Entitlement
 
-Generation eligibility should use an explicit entitlement decision.
+Generation eligibility uses an explicit, authoritative entitlement decision.
 
-Examples:
+Canonical entitlement forms:
 
-* founding free Week 1;
-* first-month active subscription;
-* standard active subscription.
+* **Free Pilot Entitlement**: While the global Free Pilot phase is active (fewer than 100 historical real-child admissions and `free_pilot_ended_at is null`), all historically admitted real children have service entitlement week after week without requiring a Paddle subscription;
+* **Cutover Protection**: When the Free Pilot ends, any generation job legitimately created prior to `free_pilot_ended_at` remains entitled to finish through the normal Finisher pipeline;
+* **Voluntary Paid Subscription During Pilot**: A family may voluntarily subscribe during the Free Pilot (locking Founder 30 if available). If canceled while the Free Pilot is still active, the child does not lose the globally free service solely because the Paddle subscription ended;
+* **Standard Active Paid Subscription**: After the Free Pilot ends, newly created future weekly jobs require an active Paddle subscription (`standard_monthly`, `standard_annual`, or `founder_monthly`);
+* **Operator Internal Test Entitlement**: An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, public waitlist demand, public capacity accounting, and the historical pilot admissions counter. Enabling or disabling it must not overwrite, cancel, or otherwise mutate a real subscription. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics, founding quota, and historical pilot counts.
 
-The generator should not infer entitlement merely from the existence of a `students` row.
-
-An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, public waitlist demand, and public capacity accounting only. Enabling or disabling it must not overwrite, cancel, or otherwise mutate a real subscription. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics and founding quota.
+The generator must never infer entitlement merely from the existence of a child profile row.
 
 ---
 
@@ -4118,7 +4150,9 @@ For either monthly or annual checkout, the browser chooses only a semantic plan.
 For a qualifying child:
 
 ```text
-Free Week 1 trial (across 100 capacity)
+Free Pilot phase (across 100 operational capacity)
+↓
+Optional early subscription during pilot (or required subscription after pilot ends)
 ↓
 30-minute checkout hold at qualifying monthly checkout
 ↓
@@ -4133,19 +4167,30 @@ Expired checkout holds release their temporary hold. Redeemed and forfeited seat
 
 An in-flight discounted checkout claim is a server-held seat for 30 minutes. Allocation, checkout preparation, claim expiry, claim completion, and verified abandoned-transaction release share the enrollment-settings-first lock order. No allocator may reuse that seat until Paddle can no longer complete the old transaction with the Founder discount.
 
-The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters.
+The transition must be locked, idempotent, stale-event-safe, discount-verified, traceable, and exclude internal-test children from public counters. Admitting a child into the Free Pilot does NOT consume a Founder seat.
 
 ---
-# 197. Definition of Done: Capacity
+# 197. Definition of Done: Capacity & Free Pilot
  
-When capacity is below 100:
+When operational capacity is below 100:
  
-> new service capacity acquisition can proceed.
+> new service capacity acquisition can proceed, and new real children are admitted into the Free Pilot (while active).
+
+While the Free Pilot is active (under 100 historical real-child admissions):
+* admitted children receive personalized weekly materials for free, week after week (Week 1, Week 2, Week 3, etc.), without needing a Paddle subscription;
+* parents may voluntarily subscribe early via Paddle to lock the Founder NT$349/month price; early subscription begins charging immediately;
+* voluntary paid subscribers who cancel while the Free Pilot is still active do not lose free service during the active pilot.
+
+When the 100th real child is historically admitted:
+* the Free Pilot ends permanently and monotonically (deleting/archiving children never reopens the pilot);
+* already legitimately created or in-progress generation jobs survive cutover and complete safely;
+* future weekly service requires an active paid Paddle subscription;
+* unpaid children pause their generation cadence until a paid subscription is activated.
  
-When active service reaches 100:
+When active operational service reaches 100:
  
-* new service capacity acquisition stops (new profiles and expired beta trials enter waitlist);
-* existing paid subscribers and paused customers continue normally;
+* new service capacity acquisition stops (new profiles enter waitlist);
+* existing paid subscribers, active pilot users, and paused customers continue normally;
 * returning canceled customers can reactivate without billing friction (small over-cap occupancy is accepted and tracked for operational review);
 * landing shows full state for new applicants;
 * visitors can join waitlist.
@@ -4206,28 +4251,28 @@ A new parent can find a clear guide explaining:
 
 ---
 
-# 201. Post-100 Review
+# 201. Post-100 Review & Pilot Conclusion
 
-Reaching 100 active children triggers an intentional product and infrastructure review.
+Reaching 100 historical real-child admissions concludes the Free Pilot phase permanently and triggers an intentional product, commercial, and infrastructure review before considering any raise to operational service capacity.
 
 Review areas:
 
-* worker architecture;
+* worker architecture and Finisher performance;
 * model/API costs;
-* scheduled ChatGPT reliability;
+* scheduled authoring and finisher reliability;
 * generation latency;
-* PDF rendering capacity;
+* PDF rendering capacity and storage;
 * support workload;
-* material QA;
-* subscription economics;
-* Paddle cost;
+* material QA and pass rates;
+* conversion from free pilot to paid subscriptions;
+* voluntary early Founder subscription adoption;
+* Paddle costs and charge success;
 * Taiwan local payment alternatives;
 * Supabase plan;
-* logging / observability;
-* automation;
-* retention.
+* logging and telemetry;
+* learner progression and retention.
 
-Only after review should the service cap be raised.
+Only after comprehensive review should the operational service cap be raised.
 
 ---
 
@@ -4374,8 +4419,26 @@ Parent account
 ↓
 one or more children
 ↓
-each child has independent subscription
+each child has independent entitlement & learning history
+```
+
+Free Pilot phase:
+
+```text
+First 100 historically admitted real children
 ↓
+Personalized materials free week after week while pilot active
+↓
+Optional early subscription locks Founder 30 if seats remain (charges immediately)
+↓
+100th real child admitted -> Free Pilot ends permanently & monotonically
+↓
+Post-pilot future weekly service requires active paid subscription
+```
+
+Pricing & Plans:
+
+```text
 499 TWD / month / child
 or 4,999 TWD / year / child
 ```
@@ -4395,11 +4458,11 @@ Actual cancellation permanently forfeits pricing; consumed seat never returns
 Early service capacity:
 
 ```text
-100 active children maximum
+100 active children maximum (operational occupancy)
 ↓
 Capacity reached
 ↓
-Pause new enrollment
+Pause new enrollment (applicants enter waitlist)
 ↓
 Upgrade system
 ↓
