@@ -395,7 +395,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 登記候補
               </a>
             ) : (
-              <AuthPanel />
+              <AuthPanel isPublicLanding />
             )}
           </FadeInUp>
         </section>

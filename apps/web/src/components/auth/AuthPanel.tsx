@@ -1,8 +1,7 @@
 import { EmailAuthPanel } from './EmailAuthPanel'
 import { LandingOnboardingPanel } from './LandingOnboardingPanel'
 
-export function AuthPanel() {
-  const isPublicLanding = typeof window === 'undefined' || window.location.pathname === '/'
+export function AuthPanel({ isPublicLanding = false }: { isPublicLanding?: boolean } = {}) {
   if (!isPublicLanding) {
     return <EmailAuthPanel />
   }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage, faqItems } from './LandingPage'
 import { PricingSection } from '../components/public/PricingSection'
@@ -249,6 +249,31 @@ describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
 })
 
 describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it.each(['/', '/dashboard', '/children/new', '/unknown-page'])(
+    'renders both real auth panels when the public LandingPage is shown at %s',
+    (pathname) => {
+      // App also shows LandingPage on signed-out protected routes and unknown URLs.
+      vi.stubGlobal('window', { location: { pathname }, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+      const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+
+      expect(html).toContain('landing-auth-grid')
+      const onboardingIndex = html.indexOf('id="onboarding"')
+      const loginIndex = html.indexOf('id="login"')
+      expect(onboardingIndex).toBeGreaterThan(-1)
+      expect(loginIndex).toBeGreaterThan(onboardingIndex)
+      const onboarding = html.slice(onboardingIndex, loginIndex)
+      expect(onboarding).toContain('landing-onboarding-panel')
+      expect(onboarding).toContain('孩子怎麼稱呼？')
+      expect(onboarding).not.toContain('type="email"')
+      const login = html.slice(loginIndex)
+      expect(login).toContain('已有帳號？直接登入')
+      expect(login).toContain('id="login-email"')
+      expect(login).toContain('type="email"')
+    },
+  )
+
   it('renders both the 3-step child onboarding card and the direct-login card side by side', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
 
