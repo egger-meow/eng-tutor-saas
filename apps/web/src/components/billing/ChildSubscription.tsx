@@ -27,6 +27,7 @@ type Props = {
   activationPending?: boolean
   foundingAvailable?: boolean
   foundingRemaining?: number | null
+  freePilotActive?: boolean
   onSubscribe: (childId: string, plan: BillingPlan) => void
   onCancel: (childId: string, reason: string) => void
   onResume: (childId: string) => void
@@ -40,6 +41,7 @@ export function ChildSubscription({
   activationPending,
   foundingAvailable,
   foundingRemaining,
+  freePilotActive,
   onSubscribe,
   onCancel,
   onResume,
@@ -122,6 +124,16 @@ export function ChildSubscription({
             </span>
           </label>
         </fieldset>
+        {freePilotActive && (
+          <div className="free-pilot-voluntary-notice" style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '0.875rem', marginBottom: '1rem' }}>
+            <p style={{ margin: 0, fontWeight: 700, color: '#14532d', fontSize: '0.875rem' }}>
+              🎉 公測期間每週專屬教材完全免費，現在不訂閱也能正常使用。
+            </p>
+            <p style={{ margin: '0.375rem 0 0', color: '#166534', fontSize: '0.8125rem' }}>
+              若您希望在創始 30 名額用完前永久鎖定 NT$349/月席次，可提前自願訂閱。<strong>請注意：自願訂閱會立即開始扣款計費</strong>，並為孩子保留創始資格。
+            </p>
+          </div>
+        )}
         <p className="muted">方案會自動續訂；可隨時取消下一期續訂，已付款期間的權益會保留到期末。</p>
         <button
           className="button"
@@ -131,9 +143,13 @@ export function ChildSubscription({
         >
           {busy
             ? '正在準備安全付款…'
-            : selectedPlan === 'monthly' && isFounderEligible
-              ? '鎖定 NT$349 創始價'
-              : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
+            : freePilotActive
+              ? selectedPlan === 'monthly' && isFounderEligible
+                ? '自願訂閱並鎖定 NT$349 創始價（立即扣款）'
+                : `自願${selectedPlan === 'annual' ? '年繳' : '月繳'}訂閱（立即扣款）`
+              : selectedPlan === 'monthly' && isFounderEligible
+                ? '鎖定 NT$349 創始價'
+                : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
         </button>
       </div>
     )
@@ -200,7 +216,11 @@ export function ChildSubscription({
       <article className="subscription-card">
         <div className="subscription-card-body">
           <h2>{child.display_name}</h2>
-          <p>尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。</p>
+          <p>
+            {freePilotActive
+              ? '公測階段已開通。完成孩子資料後，每週填寫回饋即可持續免費生成專屬教材。'
+              : '尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。'}
+          </p>
         </div>
       </article>
     )
@@ -208,10 +228,13 @@ export function ChildSubscription({
 
   const periodEnd = formatDate(subscription.currentPeriodEnd)
   const isCanceledAutoRenew = Boolean(subscription.cancelAtPeriodEnd && ['active', 'past_due', 'paused'].includes(subscription.status))
+  const isFreePilotActiveChild = Boolean(freePilotActive && subscription.status === 'trialing')
 
   const [title, description] = isCanceledAutoRenew
     ? ['已取消自動續訂', `目前方案仍可使用至 ${periodEnd ?? '本期結束'}。到期後可以重新選擇月繳或年繳方案。`]
-    : labels[subscription.status]
+    : isFreePilotActiveChild
+      ? ['公測免費服務中', '目前為 100 位學員以前的免費公測階段。孩子每週只要填寫回饋，系統便會免費生成下一週專屬新教材。現在不訂閱也能持續免費使用。']
+      : labels[subscription.status]
 
   const canSubscribe = subscription.status === 'trialing' || subscription.status === 'canceled'
   const canCancel = ['active', 'past_due', 'paused'].includes(subscription.status) && !subscription.cancelAtPeriodEnd
@@ -228,7 +251,10 @@ export function ChildSubscription({
           <h2>{child.display_name}</h2>
         </div>
         <p>
-          <span className={`status-label status-${isCanceledAutoRenew ? 'paused' : subscription.status}`}>
+          <span
+            className={`status-label status-${isFreePilotActiveChild ? 'free-pilot' : isCanceledAutoRenew ? 'paused' : subscription.status}`}
+            style={isFreePilotActiveChild ? { background: '#16a34a', color: '#fff' } : undefined}
+          >
             {title}
           </span>
         </p>

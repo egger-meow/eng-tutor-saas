@@ -419,6 +419,50 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(overview.systemHealth).toBe('critical') // due to concurrent stuck job and quality rejection anomalies
   })
 
+  it('reports Free Pilot status, admissions counter, and free vs paid subscriber breakdown in Operations Overview', async () => {
+    const mockClient = createMockSupabaseClient({
+      children: [
+        { id: 'c-free-1', display_name: '公測學生1', is_active: true, is_internal_test: false },
+        { id: 'c-free-2', display_name: '公測學生2', is_active: true, is_internal_test: false },
+        { id: 'c-paid-1', display_name: '自願付費學生', is_active: true, is_internal_test: false },
+        { id: 'c-internal', display_name: '內部測試生', is_active: true, is_internal_test: true },
+      ],
+      subscriptions: [
+        { id: 'sub-f1', child_id: 'c-free-1', provider: 'beta', status: 'trialing', founding_status: 'none' },
+        { id: 'sub-f2', child_id: 'c-free-2', provider: 'beta', status: 'trialing', founding_status: 'none' },
+        { id: 'sub-p1', child_id: 'c-paid-1', provider: 'paddle', status: 'active', billing_interval: 'month', plan_code: 'standard_monthly', founding_status: 'redeemed' },
+        { id: 'sub-int', child_id: 'c-internal', provider: 'beta', status: 'trialing', founding_status: 'none' },
+      ],
+      generation_jobs: [],
+      materials: [],
+      enrollment_settings: [
+        {
+          capacity: 100,
+          status: 'open',
+          active_count: 3,
+          waiting_count: 0,
+          released_count: 0,
+          total_demand: 3,
+          founding_limit: 30,
+          free_pilot_active: true,
+          free_pilot_admissions: 12,
+          free_pilot_limit: 100,
+        },
+      ],
+      curriculum_submissions: [],
+    })
+
+    const service = new AdminService({ client: mockClient })
+    const overview = await service.getOperationsOverview()
+
+    expect(overview.capacity.freePilotActive).toBe(true)
+    expect(overview.capacity.freePilotAdmissions).toBe(12)
+    expect(overview.capacity.freePilotLimit).toBe(100)
+    expect(overview.subscriptionBreakdown.freePilotActiveCount).toBe(2)
+    expect(overview.subscriptionBreakdown.voluntarilyPaidCount).toBe(1)
+    expect(overview.subscriptionBreakdown.paidActiveCount).toBe(1)
+  })
+
   it('captures database query errors into dataSources and marks systemHealth as degraded', async () => {
     const mockClient = createMockSupabaseClient(
       {

@@ -529,7 +529,7 @@ export const SubscriptionRevenueView: React.FC<Props> = ({ data, rangeDays, onRa
   if (!data) return <div className="pipeline-empty">載入訂閱與營運資料中…</div>
 
   const cards: Array<[string, number, string]> = [
-    ['體驗中', data.current.trialing, 'trialing'],
+    ['公測免費中', data.current.trialing, 'trialing'],
     ['付費訂閱中', data.current.activePaid, 'active'],
     ['已排定取消', data.current.cancelScheduled, 'cancel_scheduled'],
     ['扣款異常', data.current.pastDue, 'past_due'],

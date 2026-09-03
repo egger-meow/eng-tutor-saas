@@ -1228,7 +1228,7 @@ export class AdminService {
       feedbackData,
     ] = await Promise.all([
       this.safeQuery<any[]>('children', () => client.from('children').select('id, display_name, is_active, is_internal_test'), dataSources),
-      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, status, plan_code, billing_interval, founding_status'), dataSources),
+      this.safeQuery<any[]>('subscriptions', () => client.from('subscriptions').select('id, child_id, provider, status, plan_code, billing_interval, founding_status'), dataSources),
       this.safeQuery<any[]>('generation_jobs', () => client.from('generation_jobs').select('*').order('created_at', { ascending: false }).limit(200), dataSources),
       this.safeQuery<any[]>('materials', () => client.from('materials').select(OPERATIONS_MATERIALS_SELECT).order('created_at', { ascending: false }).limit(200), dataSources),
       this.safeQuery<any>('enrollment_state', () => client.rpc('get_enrollment_state').then((result: any) => ({
@@ -1252,9 +1252,17 @@ export class AdminService {
     let canceledCount = 0
     let foundingRedeemedCount = 0
     let foundingEligibleCount = 0
+    let freePilotActiveCount = 0
+    let voluntarilyPaidCount = 0
 
     for (const sub of subscriptions) {
       if (internalTestChildIds.has(sub.child_id)) continue
+      if (sub.provider === 'paddle' && (sub.status === 'active' || sub.status === 'trialing')) {
+        voluntarilyPaidCount++
+      } else if (sub.provider === 'beta' && sub.status === 'trialing') {
+        freePilotActiveCount++
+      }
+
       if (sub.status === 'active') {
         paidActiveCount++
         if (sub.billing_interval === 'year' || (sub.plan_code && sub.plan_code.includes('annual'))) {
@@ -1424,6 +1432,9 @@ export class AdminService {
       releasedCount: enrollment?.released_count ?? 0,
       totalDemand: enrollment?.total_demand
         ?? ((enrollment?.active_count ?? activeChildren.length) + (enrollment?.waiting_count ?? 0) + (enrollment?.released_count ?? 0)),
+      freePilotActive: enrollment?.free_pilot_active ?? false,
+      freePilotAdmissions: enrollment?.free_pilot_admissions ?? 0,
+      freePilotLimit: enrollment?.free_pilot_limit ?? 100,
     }
 
     const latestSubmissionByJob = new Map<string, any>()
@@ -1463,6 +1474,8 @@ export class AdminService {
         canceledCount,
         foundingRedeemedCount,
         foundingEligibleCount,
+        freePilotActiveCount,
+        voluntarilyPaidCount,
       },
       capacity,
       queueStats: {
