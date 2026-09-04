@@ -3,53 +3,83 @@ import {
   type CurriculumAuditFinding,
   type CurriculumAuditReport,
 } from './audit-curriculum.js'
-import { classifyBareLexicalLookupPrompt } from './lexical-retrieval-audit.js'
 
-function isExplicitLexicalOrGrammarRecall(pkgInput: unknown, message: string): boolean {
-  const id = /^CAP_RECALL_EXEMPTION_INVALID:([^:]+):/u.exec(message)?.[1]
-  if (!id || !pkgInput || typeof pkgInput !== 'object') return false
+const OBJECTIVE_CAP_PREFIXES = [
+  'CAP_AUTHORITY_UNAVAILABLE:',
+  'CAP_PROVENANCE_MISMATCH:',
+  'CAP_ITEM_PLAN_MISSING:',
+  'CAP_ITEM_PLAN_INCOMPLETE:',
+  'CAP_PRECEDENT_MISSING:',
+  'CAP_PRECEDENT_UNKNOWN:',
+  'CAP_EVIDENCE_BOUNDARY_VIOLATION:',
+  'CAP_EVIDENCE_ANCHORS_MISSING:',
+  'CAP_EVIDENCE_LOCATION_INVALID:',
+  'CAP_EVIDENCE_LOCATION_NOT_FOUND:',
+  'CAP_EVIDENCE_ANCHOR_TEXT_MISSING:',
+  'CAP_QUOTE_EVIDENCE_MISMATCH:',
+  'CAP_PROVENANCE_INCONSISTENT:',
+] as const
 
-  const pkg = pkgInput as any
-  const section = (pkg.studentLesson?.practice ?? []).find((candidate: any) =>
-    candidate?.stage !== 'cap-transfer' && (candidate?.questions ?? []).some((question: any) => question?.id === id),
-  )
-  if (!section) return false
+const OBJECTIVE_EVIDENCE_PREFIXES = [
+  'EVIDENCE_PLAN_MISSING:',
+  'EVIDENCE_SCOPE_MISSING:',
+  'EVIDENCE_BOUNDARY_VIOLATION:',
+  'EVIDENCE_ANCHORS_MISSING:',
+  'EVIDENCE_LOCATION_INVALID:',
+  'EVIDENCE_LOCATION_NOT_FOUND:',
+  'EVIDENCE_ANCHOR_TEXT_MISSING:',
+  'EVIDENCE_BOUNDARY_LEAKAGE:',
+  'EVIDENCE_QUOTE_MISMATCH:',
+] as const
 
-  const question = section.questions.find((candidate: any) => candidate?.id === id)
-  if (typeof question?.prompt !== 'string' || classifyBareLexicalLookupPrompt(question.prompt)) return false
-
-  const check = (pkg.qualityEvidence?.criticalChecks ?? []).find((candidate: any) =>
-    candidate?.id === `cap-plan:${id}` && candidate?.passed === true && typeof candidate?.evidence === 'string',
-  )
-  if (!check) return false
-
-  try {
-    const plan = JSON.parse(check.evidence) as Record<string, unknown>
-    const skill = typeof plan.primarySkill === 'string' ? plan.primarySkill : ''
-    const objective = typeof plan.learningObjective === 'string' ? plan.learningObjective.toLocaleLowerCase() : ''
-    const depth = typeof plan.targetCognitiveDepth === 'string' ? plan.targetCognitiveDepth : ''
-    const explicitDomain = skill === 'vocabulary_in_context' || skill === 'grammar_in_context'
-    const explicitRetrieval = depth === 'D1_verbatim_retrieval' || /retrieve|recover|meaning|form/u.test(objective)
-    return plan.intentionalRecall === true && explicitDomain && explicitRetrieval
-  } catch {
-    return false
-  }
+function startsWithAny(message: string, prefixes: readonly string[]): boolean {
+  return prefixes.some((prefix) => message.startsWith(prefix))
 }
 
 /**
- * The strict audit remains useful as diagnostic evidence for Author/Critic repair.
- * The deterministic Finisher only hard-fails objective integrity. Critic dimension
- * naming/coverage is bookkeeping, while a recall exemption remains hard unless the
- * package itself proves it is explicit lexical/grammar retrieval outside CAP transfer.
+ * Finisher is an integrity gate, not a second semantic Critic.
+ *
+ * Strict audit intentionally reports rich semantic/pedagogical findings so Author/Critic
+ * can repair them. Publication is blocked here only when the finding is machine-provable
+ * from canonical package/runtime state. Unknown future critical findings therefore default
+ * to advisory instead of silently gaining production-blocking authority.
  */
-export function applyFinisherAuditPolicy(report: CurriculumAuditReport, pkgInput?: unknown): CurriculumAuditReport {
-  const findings = report.findings.map((finding): CurriculumAuditFinding => {
-    const criticBookkeeping = finding.dimension === 'critic-coverage' || finding.dimension === 'critic-acceptance'
-    const supportedRecallClassification = finding.dimension === 'cap-precedent-floor'
-      && finding.message.startsWith('CAP_RECALL_EXEMPTION_INVALID:')
-      && isExplicitLexicalOrGrammarRecall(pkgInput, finding.message)
+function isObjectiveFinisherFinding(finding: CurriculumAuditFinding): boolean {
+  if (finding.tier === 'structural-critical') return true
 
-    if (finding.severity === 'critical' && (criticBookkeeping || supportedRecallClassification)) {
+  if (finding.dimension === 'lexical-retrieval-quality') {
+    return finding.message.startsWith('BARE_BILINGUAL_LOOKUP:')
+      || finding.message.startsWith('BARE_DICTIONARY_DEFINITION:')
+  }
+
+  if (finding.dimension === 'cap-precedent-floor') {
+    return startsWithAny(finding.message, OBJECTIVE_CAP_PREFIXES)
+  }
+
+  if (finding.dimension === 'evidence-boundary') {
+    return startsWithAny(finding.message, OBJECTIVE_EVIDENCE_PREFIXES)
+  }
+
+  if (finding.dimension === 'grounding-freshness') {
+    return finding.message.startsWith('Current grounding cannot cite a publication timestamp later than researchedAt.')
+  }
+
+  if (finding.dimension === 'alignment') {
+    return finding.message.startsWith('閱讀體裁標示為對話 (dialogue)')
+      || finding.message.startsWith('閱讀體裁標示為時刻表/日程 (schedule)')
+      || finding.message.startsWith('閱讀體裁標示為公告 (notice)')
+  }
+
+  if (finding.dimension === 'provenance') {
+    return finding.message.includes('input fingerprint')
+  }
+
+  return false
+}
+
+export function applyFinisherAuditPolicy(report: CurriculumAuditReport, _pkgInput?: unknown): CurriculumAuditReport {
+  const findings = report.findings.map((finding): CurriculumAuditFinding => {
+    if (finding.severity === 'critical' && !isObjectiveFinisherFinding(finding)) {
       return { ...finding, severity: 'warning' }
     }
     return finding
