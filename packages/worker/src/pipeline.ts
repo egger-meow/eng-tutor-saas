@@ -1,12 +1,12 @@
 import {
-  auditCurriculumPackage,
+  auditCurriculumPackageForFinisher,
   buildCapCoverageCapsule,
   buildDiversityCapsule,
   createEmptyStudentCurriculumStore,
   findForbiddenPersonalizationJargon,
   parseWeeklyLesson,
   recordExposureFromTrackingDelta,
-  validateCurriculumPackage,
+  validateCurriculumPackageForFinisher,
   CURRENT_PDF_RENDERER_VERSION,
   CURRENT_WORKER_VERSION,
   CURRENT_RELEASE_ID,
@@ -540,7 +540,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
         workerVersion: CURRENT_WORKER_VERSION,
       },
     }
-    const parsed = validateCurriculumPackage(preparedPackage)
+    const parsed = validateCurriculumPackageForFinisher(preparedPackage)
     if (!parsed.success) throw new CurriculumQualityError({
       failureType: 'QUALITY_REJECTED',
       findings: parsed.issues.map((issue) => ({
@@ -561,7 +561,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       failureType: 'QUALITY_REJECTED',
       findings: progressionFindings,
     })
-    const audit = auditCurriculumPackage(pkg, { targetMinutes: input.context.profile?.weekly_minutes ?? undefined })
+    const audit = auditCurriculumPackageForFinisher(pkg, { targetMinutes: input.context.profile?.weekly_minutes ?? undefined })
     if (!audit.passed) {
       const findings = audit.findings.filter((finding) => finding.severity === 'critical')
       const qualityError = new CurriculumQualityError({
