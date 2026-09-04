@@ -4,7 +4,6 @@ import {
   buildDiversityCapsule,
   createEmptyStudentCurriculumStore,
   findForbiddenPersonalizationJargon,
-  getGrammarUnit,
   parseWeeklyLesson,
   recordExposureFromTrackingDelta,
   validateCurriculumPackage,
@@ -82,64 +81,7 @@ function progressionSet(capsule: Record<string, unknown> | undefined, keys: stri
   return new Set(keys.flatMap((key) => stringArray(capsule?.[key])))
 }
 
-function feedbackOrLearningStateSupportsGrammarReview(primaryGrammar: string, context: GenerationContext): boolean {
-  const grammarCapsule = context.grammarCapsule as Record<string, unknown> | undefined
-  const reviewDueGrammar = progressionSet(grammarCapsule, ['dueForReview', 'weakRecent', 'uncertain'])
-  if (reviewDueGrammar.has(primaryGrammar)) return true
-
-  const unit = getGrammarUnit(primaryGrammar)
-  const unitTokens: string[] = [primaryGrammar.toLocaleLowerCase()]
-  if (unit) {
-    unitTokens.push(unit.unitId.replace(/^g\d+-/u, '').toLocaleLowerCase())
-    const titleKeywords = unit.titleZh.match(/[\u4e00-\u9fa5A-Za-z0-9]+/gu) || []
-    unitTokens.push(...titleKeywords.map((k) => k.toLocaleLowerCase()))
-  }
-
-  const matchesGrammarUnit = (text: string): boolean => {
-    const lower = text.toLocaleLowerCase()
-    return unitTokens.some((tok) => tok.length >= 2 && lower.includes(tok))
-  }
-
-  const snapshot = context.learnerSnapshot as Record<string, unknown> | undefined
-  if (snapshot) {
-    const mistakes = stringArray(snapshot.recurringMistakes)
-    if (mistakes.some(matchesGrammarUnit)) return true
-    const reviewDue = stringArray(snapshot.reviewDue)
-    if (reviewDue.some(matchesGrammarUnit)) return true
-    if (typeof snapshot.feedbackSummary === 'string' && matchesGrammarUnit(snapshot.feedbackSummary)) return true
-  }
-
-  const feedback = context.feedback
-  if (feedback && typeof feedback === 'object') {
-    const fbRecord = feedback as Record<string, unknown>
-    // Structured grammar feedback indicators
-    if (fbRecord.focusArea === 'grammar' || fbRecord.focusArea === primaryGrammar) return true
-    if (fbRecord.grammarDifficulty === 'too-hard' || fbRecord.grammarDifficulty === 'hard') return true
-    if (typeof fbRecord.specificGrammarIssue === 'string' && fbRecord.specificGrammarIssue.trim().length > 0) return true
-
-    // Check observed mistakes array for this grammar unit
-    const observedMistakes = stringArray(fbRecord.observedMistakes)
-    if (observedMistakes.some(matchesGrammarUnit)) return true
-
-    // Free text fields: check if they specifically reference this grammar unit or explicitly request grammar review
-    const textSources = [
-      typeof fbRecord.parentObservation === 'string' ? fbRecord.parentObservation : '',
-      typeof fbRecord.notes === 'string' ? fbRecord.notes : '',
-      typeof fbRecord.childVoice === 'string' ? fbRecord.childVoice : '',
-    ].filter(Boolean)
-
-    for (const text of textSources) {
-      if (matchesGrammarUnit(text)) return true
-      if (/文法|時態|句型|助動詞|動詞還原|現在式|過去式|未來式|被動語態|關係代名詞/u.test(text)) {
-        return true
-      }
-    }
-  }
-
-  return false
-}
-
-/** Context-aware publish gate: package-only schema validation cannot detect week-over-week regressions. */
+/** Context-aware publish gate: keep only machine-provable week-over-week integrity here. */
 export function forwardProgressionIssues(pkg: CurriculumPackage, context: GenerationContext): CurriculumFailureEvidence['findings'] {
   const findings: CurriculumFailureEvidence['findings'] = []
   const vocabCapsule = context.vocabularyCapsule as Record<string, unknown> | undefined
@@ -158,9 +100,7 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
     if ((item.status === 'review' || item.status === 'repeated-miss') && !reviewed.has(item.id)) {
       findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.reviewedVocabularyIds', message: `Review vocabulary card "${item.word}" is missing from reviewedVocabularyIds.` })
     }
-    // Review timing is advisory to the Finisher: recent source-material feedback and the semantic Author/Critic
-    // may legitimately pull any previously exposed word back into review even when the scheduling capsule
-    // has not yet projected it into dueForReview/weakRecent. Keep only the objective exposure invariant hard.
+    // Review timing is semantic Author/Critic work; exposure/status consistency is objective.
     if ((item.status === 'review' || item.status === 'repeated-miss') && knownVocabulary.size > 0 && !wasExposed) {
       findings.push({ source: 'validation', dimension: 'forward-progression', path: `studentLesson.vocabulary.${item.id}`, message: `Review vocabulary "${item.word}" must have been previously exposed before it can be labeled review.` })
     }
@@ -171,19 +111,9 @@ export function forwardProgressionIssues(pkg: CurriculumPackage, context: Genera
     }
   }
 
-  const grammarCapsule = context.grammarCapsule as Record<string, unknown> | undefined
-  const knownGrammar = progressionSet(grammarCapsule, ['dueForReview', 'weakRecent', 'uncertain', 'recentlyMastered'])
-  const weakGrammar = progressionSet(grammarCapsule, ['weakRecent'])
-  const primaryGrammar = pkg.trackingDelta.exposedGrammarTargetIds[0]
-  if (primaryGrammar && knownGrammar.has(primaryGrammar) && !weakGrammar.has(primaryGrammar) && !feedbackOrLearningStateSupportsGrammarReview(primaryGrammar, context)) {
-    const recommended = stringArray((context.capCoverageCapsule as Record<string, unknown> | undefined)?.recommendedGrammar)
-    const prerequisiteRepair = recommended.some((id) => getGrammarUnit(id)?.prerequisites.includes(primaryGrammar))
-      && !progressionSet(grammarCapsule, ['recentlyMastered']).has(primaryGrammar)
-    if (!prerequisiteRepair) {
-      findings.push({ source: 'validation', dimension: 'forward-progression', path: 'trackingDelta.exposedGrammarTargetIds.0', message: `Previously exposed grammar "${primaryGrammar}" cannot be primary again without explicit feedback, actual failure evidence, or prerequisite repair.` })
-    }
-  }
-
+  // Whether previously exposed grammar deserves to become primary again depends on feedback,
+  // failure evidence, prerequisites, and learner fit. Those are semantic judgments owned by
+  // Author/Critic, not deterministic Finisher rejection rules.
   return findings
 }
 
