@@ -81,14 +81,15 @@ export { makeGroundedCurriculumPackage } from './fixtures/grounded-curriculum-pa
 export type { GroundedFixtureTheme } from './fixtures/grounded-curriculum-packages.js'
 export { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 export { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
-export { validateCurriculumPackageForFinisher as validateCurriculumPackage } from './finisher-validate-curriculum-package.js'
 export {
-  validateCurriculumPackage as validateCurriculumPackageStrict,
+  validateCurriculumPackage,
   findForbiddenPersonalizationJargon,
   FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS,
 } from './validate-curriculum-package.js'
+export { validateCurriculumPackageForFinisher } from './finisher-validate-curriculum-package.js'
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
-export { auditCurriculumPackage, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
+export { auditCurriculumPackage } from './audit-curriculum.js'
+export { auditCurriculumPackageForFinisher, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
 export * from './lexical-retrieval-audit.js'
 export { auditCapPrecedentFloor, auditCapPrecedentPackage, auditReadingEvidenceBoundary, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'
