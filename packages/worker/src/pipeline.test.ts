@@ -563,7 +563,7 @@ describe('forwardProgressionIssues grammar progression', () => {
     },
   }
 
-  it('rejects repeating previously exposed grammar when feedback is unrelated (e.g. topic preference or reading length)', () => {
+  it('does not hard-reject repeating previously exposed grammar when deterministic evidence is inconclusive', () => {
     const context: GenerationContext = {
       job: { id: 'job-1', childId: 'child-1', materialWeek: '2026-W35', ruleVersion: 'weekly-material/2.0.0' },
       grammarCapsule: {
@@ -581,7 +581,7 @@ describe('forwardProgressionIssues grammar progression', () => {
     }
 
     const issues = forwardProgressionIssues(basePkg, context)
-    expect(issues.some((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toBe(true)
+    expect(issues.some((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toBe(false)
   })
 
   it('accepts repeating previously exposed grammar when grammarCapsule marks it dueForReview or weakRecent', () => {
@@ -658,4 +658,3 @@ describe('forwardProgressionIssues grammar progression', () => {
     expect(issues.filter((i) => i.dimension === 'forward-progression' && i.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
   })
 })
-
