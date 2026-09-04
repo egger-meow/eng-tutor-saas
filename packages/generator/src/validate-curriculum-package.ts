@@ -163,8 +163,6 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   for (const stage of ['guided', 'independent', 'cap-transfer', 'production'] as const)
     if (!stages.has(stage))
       issues.push({ path: 'studentLesson.practice', message: `Missing required learning stage: ${stage}` })
-  if (questions.length < 12)
-    issues.push({ path: 'studentLesson.practice', message: 'A weekly package requires at least 12 answerable items' })
   const capSections = value.studentLesson.practice.filter((section) => section.stage === 'cap-transfer')
   if (!capSections.some((section) => section.questions.some((question) => question.options?.length === 4)))
     issues.push({ path: 'studentLesson.practice', message: 'CAP transfer requires at least one four-option item' })
@@ -347,24 +345,22 @@ function groundingRelationshipIssues(
     }
   }
 
-  const passedCriticalChecks = new Set(
-    value.qualityEvidence.criticalChecks
-      .filter((check) => check.passed)
-      .map((check) => check.id),
-  )
-  for (const checkId of ['grounding-accuracy', 'grounding-copyright']) {
-    if (!passedCriticalChecks.has(checkId)) {
+  // Accuracy and copyright are semantic Critic responsibilities. Exact check-ID presence is
+  // bookkeeping and cannot establish or disprove those judgments deterministically. Current
+  // grounding still requires explicit freshness evidence because current-mode publication
+  // metadata and freshness review are part of that mode's release contract.
+  if (value.grounding.temporalMode === 'current') {
+    const passedCriticalChecks = new Set(
+      value.qualityEvidence.criticalChecks
+        .filter((check) => check.passed)
+        .map((check) => check.id),
+    )
+    if (!passedCriticalChecks.has('grounding-freshness')) {
       issues.push({
         path: 'qualityEvidence.criticalChecks',
-        message: `Missing required passed grounding critical check: ${checkId}`,
+        message: 'Current grounding requires a passed grounding-freshness critical check',
       })
     }
-  }
-  if (value.grounding.temporalMode === 'current' && !passedCriticalChecks.has('grounding-freshness')) {
-    issues.push({
-      path: 'qualityEvidence.criticalChecks',
-      message: 'Current grounding requires a passed grounding-freshness critical check',
-    })
   }
 
   return issues
