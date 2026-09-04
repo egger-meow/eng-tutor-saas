@@ -13,11 +13,12 @@ function groundedV24Package(): any {
   return upgradeV23ToV24(makeGroundedCurriculumPackage(v22, 'technology'))
 }
 
-function keepOneQuestionPerStage(pkg: any): void {
+function reduceToStructurallyValidEightQuestionPackage(pkg: any): void {
   for (const section of pkg.studentLesson.practice) {
     section.questions = section.questions.slice(0, 1)
   }
-  pkg.studentLesson.homework.questions = pkg.studentLesson.homework.questions.slice(0, 1)
+  // Schema 2.4 requires at least three homework questions. Keep that real structural floor.
+  pkg.studentLesson.homework.questions = pkg.studentLesson.homework.questions.slice(0, 3)
 
   const keptQuestionIds = new Set([
     ...pkg.studentLesson.practice.flatMap((section: any) => section.questions.map((question: any) => question.id)),
@@ -27,18 +28,19 @@ function keepOneQuestionPerStage(pkg: any): void {
 }
 
 describe('Finisher deterministic validation boundary regressions', () => {
-  it('does not hard-fail a structurally complete package solely for having fewer than 12 answerable items', () => {
+  it('does not hard-fail a structurally complete 60-minute package solely for having fewer than 12 answerable items', () => {
     const pkg = groundedV24Package()
-    keepOneQuestionPerStage(pkg)
+    pkg.learningPlan.estimatedMinutes = 60
+    reduceToStructurallyValidEightQuestionPackage(pkg)
 
     const answerableItems = [
       ...pkg.studentLesson.practice.flatMap((section: any) => section.questions),
       ...pkg.studentLesson.homework.questions,
     ]
-    expect(answerableItems.length).toBeLessThan(12)
+    expect(answerableItems).toHaveLength(8)
 
     const result = validateCurriculumPackage(pkg)
-    expect(result.success).toBe(true)
+    expect(result.success ? [] : result.issues).toEqual([])
   })
 
   it('does not hard-fail solely because the semantic Critic omitted the grounding-copyright bookkeeping label', () => {
