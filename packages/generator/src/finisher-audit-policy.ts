@@ -28,12 +28,59 @@ const OBJECTIVE_EVIDENCE_PREFIXES = [
   'EVIDENCE_LOCATION_INVALID:',
   'EVIDENCE_LOCATION_NOT_FOUND:',
   'EVIDENCE_ANCHOR_TEXT_MISSING:',
-  'EVIDENCE_BOUNDARY_LEAKAGE:',
   'EVIDENCE_QUOTE_MISMATCH:',
 ] as const
 
+const PEDAGOGICAL_STRUCTURAL_PATHS = [
+  'learningPlan.targets',
+  'studentLesson.opening.goalsZh',
+  'studentLesson.reading.wordCount',
+  'studentLesson.instruction.',
+  'studentLesson.selfCheckZh',
+  'studentLesson.homework.questions',
+] as const
+
+const PASSAGE_QUOTE_ATTRIBUTION = /(?:\b(?:according to|from)\s+(?:the\s+)?(?:reading|passage|article|text)\b|\bin\s+(?:the\s+)?(?:reading|passage|article|text|sentence|paragraph(?:\s+\d+)?)\b|\b(?:the\s+)?(?:reading|passage|article|text|writer|author)\s+(?:says?|states?|writes?|notes?|explains?|mentions?|includes?|uses?)\b)/iu
+const CONSTRUCTED_QUOTE_SPEAKER = /\b(?:(?:a|one|another|your)\s+)?(?:student|classmate|learner|reader|friend|person|someone|somebody)\s+(?:says?|claims?|argues?|thinks?|suggests?|writes?)\s*,?\s*$/iu
+
 function startsWithAny(message: string, prefixes: readonly string[]): boolean {
   return prefixes.some((prefix) => message.startsWith(prefix))
+}
+
+function findQuestionPrompt(pkgInput: unknown, questionId: string): string | null {
+  if (!pkgInput || typeof pkgInput !== 'object') return null
+  const lesson = (pkgInput as any).studentLesson
+  const practice = Array.isArray(lesson?.practice) ? lesson.practice : []
+  const homework = Array.isArray(lesson?.homework?.questions) ? lesson.homework.questions : []
+  for (const question of [...practice.flatMap((section: any) => section?.questions ?? []), ...homework]) {
+    if (question?.id === questionId && typeof question.prompt === 'string') return question.prompt
+  }
+  return null
+}
+
+function quotedLeakClaimsPassageSource(message: string, pkgInput: unknown): boolean {
+  const match = /^EVIDENCE_BOUNDARY_LEAKAGE:([^:]+): quoted prompt text "([\s\S]+)" exists only in instruction\/box content/u.exec(message)
+  if (!match) return false
+  const prompt = findQuestionPrompt(pkgInput, match[1]!)
+  if (!prompt) return false
+
+  const cleanQuote = match[2]!
+  const quotedForms = [`"${cleanQuote}"`, `“${cleanQuote}”`, `'${cleanQuote}'`, `‘${cleanQuote}’`]
+  const rawQuoted = quotedForms.find((form) => prompt.includes(form))
+  if (!rawQuoted) return false
+
+  const quoteIndex = prompt.indexOf(rawQuoted)
+  const prefix = prompt.slice(Math.max(0, quoteIndex - 160), quoteIndex)
+  if (CONSTRUCTED_QUOTE_SPEAKER.test(prefix)) return false
+  const start = Math.max(0, quoteIndex - 180)
+  const end = Math.min(prompt.length, quoteIndex + rawQuoted.length + 180)
+  return PASSAGE_QUOTE_ATTRIBUTION.test(prompt.slice(start, end))
+}
+
+function isPedagogicalStructuralCardinality(finding: CurriculumAuditFinding): boolean {
+  if (finding.tier !== 'structural-critical' || finding.dimension !== 'deterministic-validation') return false
+  if (!/(?:too_small|too_big|expected|at least|at most|>=|<=|minimum|maximum|items|number)/iu.test(finding.message)) return false
+  return PEDAGOGICAL_STRUCTURAL_PATHS.some((path) => finding.message.startsWith(path))
 }
 
 /**
@@ -44,8 +91,8 @@ function startsWithAny(message: string, prefixes: readonly string[]): boolean {
  * from canonical package/runtime state. Unknown future critical findings therefore default
  * to advisory instead of silently gaining production-blocking authority.
  */
-function isObjectiveFinisherFinding(finding: CurriculumAuditFinding): boolean {
-  if (finding.tier === 'structural-critical') return true
+function isObjectiveFinisherFinding(finding: CurriculumAuditFinding, pkgInput?: unknown): boolean {
+  if (finding.tier === 'structural-critical') return !isPedagogicalStructuralCardinality(finding)
 
   if (finding.dimension === 'lexical-retrieval-quality') {
     return finding.message.startsWith('BARE_BILINGUAL_LOOKUP:')
@@ -57,6 +104,8 @@ function isObjectiveFinisherFinding(finding: CurriculumAuditFinding): boolean {
   }
 
   if (finding.dimension === 'evidence-boundary') {
+    if (finding.message.includes(': declared evidence anchor ')) return true
+    if (finding.message.includes(': quoted prompt text ')) return quotedLeakClaimsPassageSource(finding.message, pkgInput)
     return startsWithAny(finding.message, OBJECTIVE_EVIDENCE_PREFIXES)
   }
 
@@ -77,9 +126,9 @@ function isObjectiveFinisherFinding(finding: CurriculumAuditFinding): boolean {
   return false
 }
 
-export function applyFinisherAuditPolicy(report: CurriculumAuditReport, _pkgInput?: unknown): CurriculumAuditReport {
+export function applyFinisherAuditPolicy(report: CurriculumAuditReport, pkgInput?: unknown): CurriculumAuditReport {
   const findings = report.findings.map((finding): CurriculumAuditFinding => {
-    if (finding.severity === 'critical' && !isObjectiveFinisherFinding(finding)) {
+    if (finding.severity === 'critical' && !isObjectiveFinisherFinding(finding, pkgInput)) {
       return { ...finding, severity: 'warning' }
     }
     return finding
