@@ -149,6 +149,6 @@ export function applyFinisherAuditPolicy(report: CurriculumAuditReport, pkgInput
   }
 }
 
-export function auditCurriculumPackage(...args: Parameters<typeof auditCurriculumPackageStrict>): CurriculumAuditReport {
+export function auditCurriculumPackageForFinisher(...args: Parameters<typeof auditCurriculumPackageStrict>): CurriculumAuditReport {
   return applyFinisherAuditPolicy(auditCurriculumPackageStrict(...args), args[0])
 }
