@@ -86,8 +86,10 @@ export {
   findForbiddenPersonalizationJargon,
   FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS,
 } from './validate-curriculum-package.js'
+export { validateCurriculumPackageForFinisher } from './finisher-validate-curriculum-package.js'
 export type { CurriculumValidationResult } from './validate-curriculum-package.js'
-export { auditCurriculumPackage, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
+export { auditCurriculumPackage } from './audit-curriculum.js'
+export { auditCurriculumPackageForFinisher, applyFinisherAuditPolicy } from './finisher-audit-policy.js'
 export type { CurriculumAuditFinding, CurriculumAuditReport, CurriculumAuditTier } from './audit-curriculum.js'
 export * from './lexical-retrieval-audit.js'
 export { auditCapPrecedentFloor, auditCapPrecedentPackage, auditReadingEvidenceBoundary, retrieveCapPrecedents, capRuntimeMetadata } from './cap-precedent-audit.js'

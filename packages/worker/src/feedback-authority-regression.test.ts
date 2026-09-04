@@ -3,7 +3,7 @@ import { type CurriculumPackage } from '@paper-english/generator'
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { forwardProgressionIssues, type GenerationContext } from './pipeline.js'
 
-describe('feedback authority over vocabulary review scheduling', () => {
+describe('feedback authority over progression scheduling', () => {
   it('does not hard-reject a previously exposed review word selected from explicit source-material feedback', () => {
     const pkg = structuredClone(curriculumSample) as CurriculumPackage
     const item = pkg.studentLesson.vocabulary[0]!
@@ -58,5 +58,34 @@ describe('feedback authority over vocabulary review scheduling', () => {
 
     const issues = forwardProgressionIssues(pkg, context)
     expect(issues.some((issue) => issue.path === 'studentLesson.vocabulary.v-never-seen')).toBe(true)
+  })
+
+  it('does not hard-reject primary grammar selection merely because deterministic heuristics cannot prove the pedagogical reason', () => {
+    const pkg = structuredClone(curriculumSample) as CurriculumPackage
+    const primaryGrammar = pkg.trackingDelta.exposedGrammarTargetIds[0]!
+    expect(primaryGrammar).toBeTruthy()
+
+    const context: GenerationContext = {
+      job: { id: 'job-3', childId: 'child-1', materialWeek: '2026-W37', ruleVersion: 'weekly-material/2.0.0' },
+      grammarCapsule: {
+        dueForReview: [],
+        weakRecent: [],
+        uncertain: [],
+        recentlyMastered: [primaryGrammar],
+        historicalCount: 1,
+      },
+      capCoverageCapsule: {
+        dueReviewVocabulary: [],
+        dueReviewGrammar: [],
+        dueReviewCommunication: [],
+        recommendedVocabulary: [],
+        recommendedGrammar: [],
+        recommendedCommunicationFunctions: [],
+        coverage: {},
+      },
+    }
+
+    const issues = forwardProgressionIssues(pkg, context)
+    expect(issues.filter((issue) => issue.path === 'trackingDelta.exposedGrammarTargetIds.0')).toEqual([])
   })
 })
