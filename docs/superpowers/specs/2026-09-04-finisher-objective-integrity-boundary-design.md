@@ -15,7 +15,7 @@ This design implements the current `docs/curriculum-quality-rubric.md` release b
 
 ### 1. Default-deny blocking authority
 
-`audit-curriculum.ts` remains the rich strict diagnostic audit used by Author/Critic and tests. `finisher-audit-policy.ts` becomes the single blocking-policy boundary for audit findings.
+`audit-curriculum.ts` remains the rich strict diagnostic audit used by Author/Critic and tests. `finisher-audit-policy.ts` becomes the blocking-policy boundary for audit findings.
 
 The policy changes from exception-based downgrading to an explicit blocking allowlist. Any new strict-audit critical finding is advisory by default until its prefix/dimension is deliberately classified as objective.
 
@@ -35,40 +35,48 @@ The Finisher may keep critical severity for:
 
 CAP relevance, cognitive-depth calibration, distractor quality, decorative-context judgments, copy-overlap heuristics, arbitrary fallback-reason lengths, task scheduling, MCQ answer-position percentages, self-study wording, workload heuristics, and Critic bookkeeping remain diagnostic/advisory in Finisher.
 
-### 3. Validation boundary cleanup
+### 3. Dedicated Finisher validator
 
-`validateCurriculumPackage()` remains the canonical type/reference validator, but must not bypass Finisher policy with semantic bookkeeping rules.
+The original `validateCurriculumPackage()` remains available as the strict diagnostic validator. Production package exports route `validateCurriculumPackage` to a dedicated Finisher validator instead, while exposing the original as `validateCurriculumPackageStrict`.
 
-Remove deterministic rejection for:
+For newly authored Schema 2.4 packages, Finisher validation owns only objective structure/reference integrity. It rejects:
 
-- blanket `criticalChecks.every(check.passed)`;
-- exact `grounding-freshness` label presence.
-
-Keep deterministic rejection for:
-
-- Zod/type/shape failures;
-- duplicate/missing question-answer IDs;
-- unknown learning-target IDs;
-- required canonical target/reference IDs;
+- invalid required types/fields;
+- duplicate learning-target/question/answer IDs;
+- missing or orphan answers;
+- question target IDs that do not exist in `learningPlan.targets`;
+- missing required core learning stages;
 - unresolved explicit critical Critic findings;
-- grounding Source -> Fact -> Claim -> exact reading binding integrity;
-- canonical tracking IDs.
+- grounding Source -> Fact -> Claim reference/timestamp/exact-reading binding failures;
+- unknown canonical grammar/communication tracking IDs.
 
-### 4. Quote boundary regression
+It does not reject solely for semantic Critic bookkeeping such as a `criticalChecks` entry with `passed: false` or a missing exact `grounding-freshness` label.
 
-Quoted strings in a question are not reading evidence merely because the same string also appears in an instruction box. `EVIDENCE_BOUNDARY_LEAKAGE` for a quoted prompt string is emitted only when that quote is explicitly attributed to the reading/passage/article/text. Declared evidence anchors remain strict regardless of quote wording.
+### 4. Pedagogical cardinality boundary
+
+Schema 2.4 authoring may still recommend richer counts, but Finisher does not treat those recommendations as release integrity. Its validation view permits a non-empty minimum for:
+
+- one learning target rather than an arbitrary minimum of three;
+- one opening goal rather than two;
+- one worked example per instruction section rather than two;
+- zero common-mistake examples rather than requiring one;
+- one self-check item rather than two;
+- one homework question rather than three;
+- any non-empty primary reading rather than hard-rejecting solely below 120 words.
+
+The core stage structure, response-space requirements, answer/reference integrity, and grounding bindings remain hard. The already-removed global 12-answerable-item minimum stays removed. Fixed counts/percentages must not regain blocking authority unless downstream integrity literally requires them.
+
+### 5. Quote boundary regression
+
+Quoted strings in a question are not reading evidence merely because the same string also appears in an instruction box. Strict audit may retain this as diagnostic evidence, but Finisher hard-blocks the quoted-overlap finding only when that specific quote is explicitly attributed to the reading/passage/article/text. Declared evidence anchors remain strict regardless of quote wording.
 
 This prevents grammar/production prompts such as `Use "I am" ...` from being rejected while preserving `According to the reading, "I am" ...` mismatch detection.
 
-### 5. Progression boundary cleanup
+### 6. Progression boundary cleanup
 
 Cross-week vocabulary exposure/state consistency remains deterministic because it compares canonical IDs/statuses with stored history.
 
 The rule deciding whether previously exposed grammar is pedagogically justified as the week's primary grammar is not deterministic. It depends on feedback interpretation, learner need, prerequisite repair, and Author/Critic judgment, so it must not produce a Finisher hard rejection.
-
-### 6. Cardinality policy
-
-Existing schema cardinalities that are necessary for canonical shape/rendering remain structural. Pedagogical fixed-count gates must not be reintroduced in Finisher. The already-removed global 12-answerable-item minimum stays removed. Any future fixed count/percentage must be advisory unless downstream integrity literally requires that cardinality.
 
 ### 7. Failure safety
 
@@ -80,12 +88,14 @@ No production job state is mutated by this code-change task. Existing rejected s
 
 Tests must prove:
 
-1. constructed `"I am"` grammar/production text overlapping instruction content does not fail evidence boundary;
-2. explicit reading attribution of absent `"I am"` still fails;
+1. constructed `"I am"` grammar/production text overlapping instruction content does not hard-fail Finisher;
+2. explicit reading attribution of absent `"I am"` still hard-fails;
 3. a new unknown semantic critical finding defaults to warning in Finisher;
 4. CAP provenance/evidence binding and bare bilingual lookup remain hard failures;
-5. Critic bookkeeping and exact grounding-freshness label presence do not hard-fail validation;
+5. Critic bookkeeping and exact grounding-freshness label presence do not hard-fail Finisher validation;
 6. unresolved explicit critical Critic findings still hard-fail;
-7. previously exposed grammar-primary selection no longer hard-fails merely because deterministic heuristics cannot prove the pedagogical reason;
-8. vocabulary exposure/status integrity still hard-fails;
-9. full repository lint/test/typecheck/build pass before merge.
+7. pedagogical Schema 2.4 count floors above the non-empty structural minimum do not hard-fail;
+8. previously exposed grammar-primary selection no longer hard-fails merely because deterministic heuristics cannot prove the pedagogical reason;
+9. vocabulary exposure/status integrity still hard-fails;
+10. unknown learning-target references such as `v-movement` still hard-fail;
+11. full repository lint/test/typecheck/build pass before merge.
