@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { upgradeV23ToV24 } from './curriculum-package-schema.js'
 import { validPackage } from './curriculum-package.test.js'
+import { validateCurriculumPackageForFinisher as validateCurriculumPackage } from './finisher-validate-curriculum-package.js'
 import { makeGroundedCurriculumPackage } from './fixtures/grounded-curriculum-packages.js'
 import { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 import { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
-import { validateCurriculumPackage } from './validate-curriculum-package.js'
 
 function groundedV24Package(): any {
   const v21 = upgradeV20ToV21(validPackage())
