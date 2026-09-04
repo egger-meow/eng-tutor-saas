@@ -38,6 +38,7 @@ const PEDAGOGICAL_STRUCTURAL_PATHS = [
   'studentLesson.instruction.',
   'studentLesson.selfCheckZh',
   'studentLesson.homework.questions',
+  'grounding.claims.',
 ] as const
 
 const PASSAGE_QUOTE_ATTRIBUTION = /(?:\b(?:according to|from)\s+(?:the\s+)?(?:reading|passage|article|text)\b|\bin\s+(?:the\s+)?(?:reading|passage|article|text|sentence|paragraph(?:\s+\d+)?)\b|\b(?:the\s+)?(?:reading|passage|article|text|writer|author)\s+(?:says?|states?|writes?|notes?|explains?|mentions?|includes?|uses?)\b)/iu
@@ -79,8 +80,14 @@ function quotedLeakClaimsPassageSource(message: string, pkgInput: unknown): bool
 
 function isPedagogicalStructuralCardinality(finding: CurriculumAuditFinding): boolean {
   if (finding.tier !== 'structural-critical' || finding.dimension !== 'deterministic-validation') return false
-  if (!/(?:too_small|too_big|expected|at least|at most|>=|<=|minimum|maximum|items|number)/iu.test(finding.message)) return false
+  if (!/(?:too_small|too_big|expected|at least|at most|>=|<=|minimum|maximum|items|number|characters|tokens)/iu.test(finding.message)) return false
   return PEDAGOGICAL_STRUCTURAL_PATHS.some((path) => finding.message.startsWith(path))
+}
+
+function isSemanticBookkeepingValidation(finding: CurriculumAuditFinding): boolean {
+  if (finding.tier !== 'structural-critical' || finding.dimension !== 'deterministic-validation') return false
+  return finding.message === 'qualityEvidence.criticalChecks: Every critical quality check must pass before publication'
+    || finding.message === 'qualityEvidence.criticalChecks: Current grounding requires a passed grounding-freshness critical check'
 }
 
 /**
@@ -92,7 +99,8 @@ function isPedagogicalStructuralCardinality(finding: CurriculumAuditFinding): bo
  * to advisory instead of silently gaining production-blocking authority.
  */
 function isObjectiveFinisherFinding(finding: CurriculumAuditFinding, pkgInput?: unknown): boolean {
-  if (finding.tier === 'structural-critical') return !isPedagogicalStructuralCardinality(finding)
+  if (isSemanticBookkeepingValidation(finding) || isPedagogicalStructuralCardinality(finding)) return false
+  if (finding.tier === 'structural-critical') return true
 
   if (finding.dimension === 'lexical-retrieval-quality') {
     return finding.message.startsWith('BARE_BILINGUAL_LOOKUP:')
