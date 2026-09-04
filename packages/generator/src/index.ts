@@ -81,8 +81,9 @@ export { makeGroundedCurriculumPackage } from './fixtures/grounded-curriculum-pa
 export type { GroundedFixtureTheme } from './fixtures/grounded-curriculum-packages.js'
 export { upgradeV20ToV21 } from './upgrade-v20-to-v21.js'
 export { upgradeV21ToV22 } from './upgrade-v21-to-v22.js'
+export { validateCurriculumPackageForFinisher as validateCurriculumPackage } from './finisher-validate-curriculum-package.js'
 export {
-  validateCurriculumPackage,
+  validateCurriculumPackage as validateCurriculumPackageStrict,
   findForbiddenPersonalizationJargon,
   FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS,
 } from './validate-curriculum-package.js'
