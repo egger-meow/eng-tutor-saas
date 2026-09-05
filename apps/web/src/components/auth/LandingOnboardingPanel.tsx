@@ -5,7 +5,7 @@ import { SchoolStep } from '../onboarding/steps/SchoolStep'
 import { RoutineStep } from '../onboarding/steps/RoutineStep'
 import { EmailAuthPanel } from './EmailAuthPanel'
 import { getAnonymousId, trackChildFormStart } from '../../lib/analytics'
-import { startLandingOnboarding } from '../../lib/landing-onboarding-start'
+import { startLandingOnboarding, type LandingOnboardingStartStatus } from '../../lib/landing-onboarding-start'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
 import { useEnrollmentState } from '../../lib/enrollment'
 import '../../styles/onboarding-refinement.css'
@@ -19,7 +19,7 @@ const stepMeta = [
   ['最後，設定每週節奏', '選一個做得到的時間，再告訴我們最希望先加強什麼。'],
 ] as const
 
-type PanelMode = 'profile' | 'email' | 'existing'
+type PanelMode = 'profile' | 'email' | 'existing' | 'submitted'
 
 export function LandingOnboardingPanel() {
   const { state: enrollment } = useEnrollmentState()
@@ -29,6 +29,7 @@ export function LandingOnboardingPanel() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
+  const [submissionStatus, setSubmissionStatus] = useState<LandingOnboardingStartStatus | null>(null)
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null)
   const started = useRef(false)
 
@@ -86,6 +87,7 @@ export function LandingOnboardingPanel() {
 
   async function submitEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (busy || mode === 'submitted') return
     setBusy(true)
     setNotice(null)
     try {
@@ -96,19 +98,11 @@ export function LandingOnboardingPanel() {
         redirectOrigin: window.location.origin,
       })
 
-      if (result.status === 'waitlisted') {
-        setNotice({
-          kind: 'success',
-          text: '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。',
-        })
-      } else {
-        setNotice({
-          kind: 'success',
-          text: '完成了，第一週教材已開始準備。教材完成後會直接寄到你的 Email，不需要一直留在網站上。',
-        })
-      }
+      setSubmissionStatus(result.status)
+      setMode('submitted')
     } catch (caught) {
-      setNotice({ kind: 'error', text: caught instanceof Error ? caught.message : '無法開始第一週教材，請稍後再試。' })
+      console.error('Landing onboarding request failed', caught)
+      setNotice({ kind: 'error', text: '目前無法送出登入信，請稍後再試。若剛剛已收到 Email，請直接使用最新一封登入信。' })
     } finally {
       setBusy(false)
     }
@@ -123,11 +117,38 @@ export function LandingOnboardingPanel() {
     )
   }
 
+  if (mode === 'submitted') {
+    const waitlisted = submissionStatus === 'waitlisted'
+    return (
+      <div className="onboarding-container landing-onboarding-panel">
+        <section className="onboarding-success-card" role="status" aria-live="polite">
+          <div className="onboarding-badge">🧪 Paper English Beta</div>
+          <p className="overline">{waitlisted ? '候補已完成' : '資料已安全送出'}</p>
+          <h2>{waitlisted ? '候補已登記，登入信已寄出' : '登入信已寄出'}</h2>
+          <p>
+            {waitlisted
+              ? '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。'
+              : '第一週教材已進入準備流程。教材完成後會直接寄到你的 Email，安全登入信則讓你之後查看進度與管理孩子。'}
+          </p>
+          <div className="onboarding-progress-list" aria-label={waitlisted ? '候補處理進度' : '第一週教材準備進度'}>
+            <div><span className="progress-check">✓</span><strong>孩子資料已收到</strong></div>
+            <div><span className="progress-check">✓</span><strong>安全登入信已寄出</strong></div>
+            {!waitlisted && <div className="progress-active"><span className="mini-spinner" aria-hidden="true" /><strong>第一週教材正在準備</strong></div>}
+          </div>
+          <p className="muted">不用再按一次，也不用留在這頁。若收件匣沒看到，請先檢查垃圾郵件或促銷分類。</p>
+          <div className="onboarding-actions">
+            <button className="button button-secondary" type="button" onClick={() => setMode('existing')}>已有信？前往登入</button>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
   if (mode === 'email') {
     return (
       <div className="onboarding-container landing-onboarding-panel">
         <header className="onboarding-welcome-header">
-          <div className="onboarding-badge">{enrollment?.freePilotActive ? '前 100 位每週免費' : '第一週免費'}</div>
+          <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
           <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始準備第一週。</p>
         </header>
@@ -148,6 +169,7 @@ export function LandingOnboardingPanel() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="parent@example.com"
+              disabled={busy}
             />
             <p className="auth-legal-consent">
               點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
@@ -181,7 +203,7 @@ export function LandingOnboardingPanel() {
   return (
     <div className="onboarding-container landing-onboarding-panel">
       <header className="onboarding-welcome-header">
-        <div className="onboarding-badge">{enrollment?.freePilotActive ? '前 100 位每週免費' : '第一週免費'}</div>
+        <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
         <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會開始準備第一週教材。</p>
       </header>

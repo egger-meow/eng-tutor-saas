@@ -44,11 +44,24 @@ describe('landing onboarding start client', () => {
     await expect(startLandingOnboarding(input)).resolves.toEqual({ status: 'waitlisted' })
   })
 
-  it('rejects transport errors and unexpected public response shapes', async () => {
-    invoke.mockResolvedValueOnce({ data: null, error: { message: 'edge unavailable' } })
-    await expect(startLandingOnboarding(input)).rejects.toThrow('edge unavailable')
+  it('never leaks transport or Edge Function implementation errors to parents', async () => {
+    invoke.mockResolvedValueOnce({ data: null, error: { message: 'Edge Function returned a non-2xx status code' } })
 
+    let message = ''
+    try {
+      await startLandingOnboarding(input)
+    } catch (caught) {
+      message = caught instanceof Error ? caught.message : String(caught)
+    }
+
+    expect(message).toContain('目前無法送出登入信')
+    expect(message).not.toContain('Edge Function')
+    expect(message).not.toContain('non-2xx')
+  })
+
+  it('uses the same human-safe message for unexpected public response shapes', async () => {
     invoke.mockResolvedValueOnce({ data: { accepted: true }, error: null })
-    await expect(startLandingOnboarding(input)).rejects.toThrow('無法開始第一週教材')
+
+    await expect(startLandingOnboarding(input)).rejects.toThrow('目前無法送出登入信')
   })
 })

@@ -32,7 +32,8 @@ export function ProductFeedbackForm() {
       setWantsPrintedDelivery(false)
       setStatus('謝謝你！你的回饋已送出。')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '回饋暫時無法送出，請稍後再試。')
+      console.error('Product feedback save failed', caught)
+      setError('目前無法送出回饋，請稍後再試。')
     } finally {
       setBusy(false)
     }

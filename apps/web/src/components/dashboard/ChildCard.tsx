@@ -28,7 +28,6 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [historyOpen, setHistoryOpen] = useState(false)
   const { latestMaterial, pastMaterials, futureMaterials, historyCount } = buildMaterialHistoryView(materials, releasedMaterialCount)
-  // The immediate next prepared material is the earliest unreleased one
   const nextPreparedMaterial = futureMaterials[futureMaterials.length - 1] ?? null
   const delivery = getDeliveryViewModel(
     child,
@@ -73,7 +72,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
               >
                 {!child.subscription.currentPeriodEnd
                   ? enrollment?.freePilotActive
-                    ? '每週免費中'
+                    ? 'Beta 免費中'
                     : '免費階段已結束'
                   : '體驗期'}
               </span>
@@ -187,10 +186,31 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
                   </a>
                 </div>
               </section>
+            ) : nextPreparedMaterial ? (
+              <section className="empty-state generation-progress generation-progress-ready">
+                <div className="generation-progress-heading">
+                  <span className="progress-check progress-check-large">✓</span>
+                  <div>
+                    <h2>第一份教材已準備完成</h2>
+                    <p>內容已完成準備，到了開放日期即可下載；我們也會同步寄 Email 通知。</p>
+                  </div>
+                </div>
+              </section>
             ) : (
-              <section className="empty-state">
-                <h2>{nextPreparedMaterial ? '第一份教材已準備完成' : child.has_active_generation_failure ? '第一份教材品質複檢中' : '第一份教材準備中'}</h2>
-                <p>{nextPreparedMaterial ? '內容已先完成準備，到了開放日期即可下載。' : child.has_active_generation_failure ? '第一份教材正在進行教學團隊人工品質審核與微調，確認符合孩子程度後即可下載。' : '完成學習資料後，每週教材會在此自動產出並提供下載。'}</p>
+              <section className="empty-state generation-progress">
+                <div className="generation-progress-heading">
+                  <span className="mini-spinner" aria-hidden="true" />
+                  <div>
+                    <h2>{child.has_active_generation_failure ? '第一份教材品質複檢中' : '第一份教材準備中'}</h2>
+                    <p>{child.has_active_generation_failure ? '系統已收到孩子資料，目前正在做額外品質複檢與微調；確認符合程度後就會開放下載。' : '系統已收到孩子資料，正在依孩子的程度、興趣與學習目標準備第一份教材。'}</p>
+                  </div>
+                </div>
+                <div className="generation-progress-steps" aria-label="第一份教材處理進度">
+                  <div className="done"><span>✓</span><strong>孩子資料已收到</strong></div>
+                  <div className="active"><span className="mini-spinner" aria-hidden="true" /><strong>{child.has_active_generation_failure ? '品質複檢與微調' : '教材生成與品質檢查'}</strong></div>
+                  <div><span>3</span><span>完成後開放下載並寄 Email</span></div>
+                </div>
+                <p className="muted">不需要停在這一頁。準備完成後會主動通知你。</p>
               </section>
             )}
             {!child.waitlist || child.waitlist.status === 'converted' ? (

@@ -32,7 +32,7 @@ describe('LandingOnboardingPanel', () => {
     expect(html).toContain('第一週免費')
   })
 
-  it('renders free pilot badge when freePilotActive is true in enrollment state', () => {
+  it('renders the Beta + NT$0 badge when freePilotActive is true in enrollment state', () => {
     mockEnrollmentState = {
       status: 'open',
       capacity: 100,
@@ -46,7 +46,8 @@ describe('LandingOnboardingPanel', () => {
     }
 
     const html = renderToStaticMarkup(<LandingOnboardingPanel />)
-    expect(html).toContain('前 100 位每週免費')
+    expect(html).toContain('🧪 Paper English Beta · 目前 NT$0')
+    expect(html).not.toContain('前 100 位每週免費')
     expect(html).not.toContain('第一週免費')
   })
 })

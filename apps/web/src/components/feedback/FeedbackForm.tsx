@@ -26,7 +26,8 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
       await saveFeedback(material.child_id, material.id, input)
       onSaved()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '回饋儲存失敗，請稍後再試。')
+      console.error('Weekly feedback save failed', caught)
+      setError('目前無法儲存回饋，請稍後再試。')
     } finally {
       setBusy(false)
     }

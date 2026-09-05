@@ -59,7 +59,7 @@ describe('public enrollment boundary matrix', () => {
 
     expect(cta.label).toBe('確認目前名額…')
     expect(cta.isWaitlist).toBe(false)
-    expect(landing).toContain('正在確認目前名額與優惠…')
+    expect(landing).toContain('正在確認目前名額與方案…')
     expect(landing).not.toContain('<p class="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>')
     expect(landing).not.toContain('<li>第一份專屬教材預計隔天開放下載</li>')
     expect(pricing).not.toContain('<p class="pricing-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>')

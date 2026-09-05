@@ -25,10 +25,11 @@ describe('pre-auth Week 1 Magic Link bind contract', () => {
     expect(app).toContain("trackOnboardingComplete(childId, { flow: 'landing_onboarding', finalized_after_auth: true, additional_child: true })")
   })
 
-  it('keeps the Magic Link positioned as login and child-management binding, not the trigger that starts Week 1', () => {
-    expect(magicLink).toContain('接到家長帳號')
-    expect(magicLink).toContain('孩子管理畫面')
-    expect(magicLink).not.toContain('開始準備第一週')
+  it('keeps the Magic Link positioned as login and child-management access, not the trigger that starts Week 1', () => {
+    expect(magicLink).toContain('第一週教材已經開始準備')
+    expect(magicLink).toContain('安全登入、查看進度與管理孩子')
+    expect(magicLink).toContain('這封信只是讓你安全登入')
     expect(magicLink).not.toContain('點擊後開始產生')
+    expect(magicLink).not.toContain('按下按鈕後開始準備第一週')
   })
 })

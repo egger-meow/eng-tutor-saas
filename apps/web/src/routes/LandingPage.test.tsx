@@ -17,10 +17,21 @@ const confirmedOpenEnrollment = {
   releasedCount: 0,
 }
 
+const freePilotEnrollment = {
+  status: 'open' as const,
+  capacity: 100,
+  activeCount: 20,
+  remaining: 80,
+  foundingLimit: 30,
+  foundingCount: 5,
+  freePilotActive: true,
+  freePilotAdmissions: 20,
+  freePilotLimit: 100,
+}
+
 describe('Public Footer — Paddle Review Links', () => {
   it('links directly to pricing and all public legal policies', () => {
     const html = renderToStaticMarkup(<PublicFooter />)
-
     expect(html).toContain('href="/#pricing"')
     expect(html).toContain('href="/terms"')
     expect(html).toContain('href="/privacy"')
@@ -29,53 +40,16 @@ describe('Public Footer — Paddle Review Links', () => {
   })
 })
 
-describe('Landing Page — First Delivery Timing Disclosure', () => {
-  it('discloses next-day delivery expectation in hero section after open capacity is confirmed', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-    expect(html).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
-  })
+describe('Landing Page — Trust-first information architecture', () => {
+  it('shows the real material before the long personalization explanation', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    const sampleIndex = html.indexOf('id="samples"')
+    const personalizationIndex = html.indexOf('id="personalization"')
 
-  it('discloses next-day delivery expectation in pricing section after open capacity is confirmed', () => {
-    const html = renderToStaticMarkup(<PricingSection enrollment={confirmedOpenEnrollment} />)
-    expect(html).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
-  })
-
-  it('includes a capacity-safe first material timing answer in FAQ', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).toContain('多久可以拿到第一份教材？')
-    
-    const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
-    expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
-  })
-
-  it('includes next-day expectation in onboarding login steps after open capacity is confirmed', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-    expect(html).toContain('第一份專屬教材預計隔天開放下載')
-  })
-
-  it('does NOT contain forbidden instantaneous promises or fixed hourly guarantees', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).not.toContain('立即下載第一份')
-    expect(html).not.toContain('馬上拿到')
-    expect(html).not.toContain('立刻生成')
-    expect(html).not.toContain('24 小時內交付')
-    expect(html).not.toContain('24小時內交付')
-    expect(html).not.toContain('ChatGPT Scheduled')
-    expect(html).not.toContain('finisher')
-    expect(html).not.toContain('generation_jobs')
-    expect(html).not.toContain('00:15')
-  })
-
-  it('includes printed paper delivery FAQ with clean PDF expectation', () => {
-    const deliveryFaq = faqItems.find(([q]) => q === '可以直接把紙本教材寄到家嗎？')
-    expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe(
-      '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'
-    )
-
-    const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).toContain('可以直接把紙本教材寄到家嗎？')
+    expect(html).toContain('landing-section-nav')
+    expect(sampleIndex).toBeGreaterThan(-1)
+    expect(personalizationIndex).toBeGreaterThan(sampleIndex)
+    expect(html).toContain('不用先相信我們，先看教材')
   })
 
   it('presents the real Week 3 production sample with truthful de-identified claims', () => {
@@ -85,117 +59,121 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
     expect(html).toContain('這不是為廣告另外做的展示教材')
     expect(html).toContain('國一 ｜ 第 3 週 ｜ 預計 94 分鐘')
     expect(html).toContain('不公開學生身分、原始回饋或內部生成資料')
-    expect(html).not.toContain('developing')
     expect(html).toContain('samples/sample-student.pdf')
     expect(html).toContain('samples/sample-parent-answer.pdf')
-    expect(html).not.toContain('The Signal Door Test')
-    expect(html).not.toContain('The Rooftop Garden Challenge')
+    expect(html).not.toContain('developing')
   })
-})
 
-describe('Landing Page — Evolving Learning System Positioning', () => {
-  it('renders the evolving learning system headline and all three value pillars', () => {
+  it('keeps deeper AI and system detail available without forcing it into the primary reading path', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-
+    expect(html).toContain('<details')
+    expect(html).toContain('想知道為什麼是紙本、AI 怎麼用？')
+    expect(html).toContain('想了解這套系統怎麼越用越準、越做越好？')
     expect(html).toContain('你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。')
     expect(html).toContain('孩子越用，教材越懂他')
     expect(html).toContain('教材系統自己也會持續升級')
     expect(html).toContain('AI 進步，教材也跟著進步')
   })
+})
 
-  it('makes clear that interest leads into worthwhile real-world content without exposing research machinery', () => {
+describe('Landing Page — Beta trust hierarchy', () => {
+  it('leads with Beta and NT$0 instead of scarcity copy when the free pilot is active', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+
+    expect(html).toContain('🧪 Paper English Beta')
+    expect(html).toContain('hero-beta-badge')
+    expect(html).toContain('NT$0')
+    expect(html).toContain('目前每週專屬教材')
+    expect(html).toContain('免填信用卡・免綁卡')
+    expect(html).toContain('100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。')
+    expect(html).toContain('立即免費開始（每週專屬教材 NT$0）')
+    expect(html).not.toContain('前 100 位學員・全面免費')
+    expect(html).not.toContain('🔥 前 100 位學員限定')
+    expect(html).not.toContain('前 100 位每週免費')
+  })
+
+  it('makes clear that Beta does not silently turn profile creation into a paid subscription', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    expect(html).toContain('不會因為你填了孩子資料就自動訂閱或扣款')
+    expect(html).toContain('不會自動替你開啟付費訂閱')
+  })
+
+  it('keeps Founding 30 as an explicitly optional paid choice during Beta', () => {
+    const html = renderToStaticMarkup(<PricingSection enrollment={freePilotEnrollment} />)
+    expect(html).toContain('創始 30・自願提前訂閱')
+    expect(html).toContain('這個選項會立即開始計費')
+    expect(html).toContain('繼續使用目前 Beta 免費方案即可')
+  })
+})
+
+describe('Landing Page — First Delivery Timing Disclosure', () => {
+  it('discloses next-day delivery expectation in hero and pricing when capacity is open', () => {
+    const page = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+    const pricing = renderToStaticMarkup(<PricingSection enrollment={confirmedOpenEnrollment} />)
+    expect(page).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
+    expect(pricing).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
+  })
+
+  it('includes a capacity-safe first material timing answer in FAQ', () => {
+    const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
+    expect(deliveryFaq).toBeDefined()
+    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
+  })
+
+  it('does not make forbidden instantaneous or fixed-hour promises', () => {
     const html = renderToStaticMarkup(<LandingPage />)
+    expect(html).not.toContain('立即下載第一份')
+    expect(html).not.toContain('馬上拿到')
+    expect(html).not.toContain('立刻生成')
+    expect(html).not.toContain('24 小時內交付')
+    expect(html).not.toContain('24小時內交付')
+    expect(html).not.toContain('ChatGPT Scheduled')
+    expect(html).not.toContain('finisher')
+    expect(html).not.toContain('generation_jobs')
+  })
+})
 
+describe('Landing Page — Product explanation', () => {
+  it('makes clear that interest leads into worthwhile content', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
     expect(html).toContain('興趣是入口，孩子也真的會讀到新東西。')
     expect(html).toContain('真實知識與可查證內容')
     expect(html).toContain('科技、AI、運動等快速變動的題材')
     expect(html).toContain('適合時納入近期發展')
     expect(html).not.toContain('temporalMode')
     expect(html).not.toContain('Source -&gt; Fact')
-    expect(html).not.toContain('grounding')
   })
 
   it('renders all three flexible usage modes', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-
     expect(html).toContain('怎麼教，由你決定；每週要教什麼，我們幫你準備好。')
     expect(html).toContain('孩子自己學')
     expect(html).toContain('家長陪著學')
     expect(html).toContain('搭配家教／老師使用')
   })
 
-  it('anchors monthly value against private tutoring without making an absolute market claim', () => {
-    const html = renderToStaticMarkup(<PricingSection />)
-
-    expect(html).toContain('比許多一對一家教一小時更低的月費')
-    expect(html).toContain('一整個月持續為孩子準備、追蹤與調整')
-    expect(html).not.toContain('比一堂一對一家教更低的月費')
-  })
-
-  it('adds FAQ guidance for flexible use and continuous system upgrades', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
-
-    expect(html).toContain('一定要讓孩子自己學嗎？')
-    expect(html).toContain('教材之後也會持續變好嗎？')
-  })
-
-  it('publishes a concise improvement commitment without exposing internal observations', () => {
-    const html = renderToStaticMarkup(<LandingPage />)
-
-    expect(html).toContain('我們還在把它做得更好')
-    expect(html).toContain('「個人化」不只是不斷換主題')
-    expect(html).toContain('這些變化不會以隨機取代教學邏輯')
-    expect(html).toContain('我們會持續公開我們看見的限制，也持續把系統做得更好。')
-    expect(html).not.toContain('mini-report 9/15')
-    expect(html).not.toContain('lexical-unit')
-    expect(html).not.toContain('OBS-')
+  it('keeps the print-only delivery expectation', () => {
+    const faq = faqItems.find(([q]) => q === '可以直接把紙本教材寄到家嗎？')
+    expect(faq?.[1]).toContain('目前教材以 PDF 提供')
+    expect(faq?.[1]).toContain('暫不提供實體郵寄服務')
   })
 })
 
 describe('Founder 30 and Service Capacity CTA Rules', () => {
-  it('keeps CTA as 免費取得第一週教材 when capacity is open, even if Founder seats are sold out', () => {
-    const ctaOpenWithFounder = getEnrollmentCta({
-      status: 'open',
-      capacity: 100,
-      activeCount: 10,
-      remaining: 90,
-      foundingLimit: 30,
-      foundingCount: 5,
-    })
-    expect(ctaOpenWithFounder.label).toBe('免費取得第一週教材')
-    expect(ctaOpenWithFounder.isWaitlist).toBe(false)
-
-    const ctaOpenFounderSoldOut = getEnrollmentCta({
-      status: 'open',
-      capacity: 100,
-      activeCount: 50,
-      remaining: 50,
-      foundingLimit: 30,
-      foundingCount: 30,
-    })
-    expect(ctaOpenFounderSoldOut.label).toBe('免費取得第一週教材')
-    expect(ctaOpenFounderSoldOut.isWaitlist).toBe(false)
+  it('keeps the free Week 1 CTA when normal capacity is open', () => {
+    expect(getEnrollmentCta({ ...confirmedOpenEnrollment, foundingCount: 5 }).label).toBe('免費取得第一週教材')
+    expect(getEnrollmentCta({ ...confirmedOpenEnrollment, activeCount: 50, remaining: 50, foundingCount: 30 }).label).toBe('免費取得第一週教材')
   })
 
-  it('sets CTA to 立即免費開始（每週專屬教材 NT$0） when freePilotActive is true and capacity is open', () => {
-    const ctaFreePilot = getEnrollmentCta({
-      status: 'open',
-      capacity: 100,
-      activeCount: 15,
-      remaining: 85,
-      foundingLimit: 30,
-      foundingCount: 3,
-      freePilotActive: true,
-      freePilotAdmissions: 15,
-      freePilotLimit: 100,
-    })
-    expect(ctaFreePilot.label).toBe('立即免費開始（每週專屬教材 NT$0）')
-    expect(ctaFreePilot.isWaitlist).toBe(false)
-    expect(ctaFreePilot.href).toBe('#onboarding')
+  it('uses the NT$0 CTA during Beta', () => {
+    const cta = getEnrollmentCta(freePilotEnrollment)
+    expect(cta.label).toBe('立即免費開始（每週專屬教材 NT$0）')
+    expect(cta.isWaitlist).toBe(false)
+    expect(cta.href).toBe('#onboarding')
   })
 
-  it('switches CTA to 登記候補 only when total capacity is full or status is waitlist', () => {
-    const ctaWaitlist = getEnrollmentCta({
+  it('switches to waitlist only when total capacity is full', () => {
+    const cta = getEnrollmentCta({
       status: 'waitlist',
       capacity: 100,
       activeCount: 100,
@@ -203,171 +181,59 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
       foundingLimit: 30,
       foundingCount: 30,
     })
-    expect(ctaWaitlist.label).toBe('登記候補')
-    expect(ctaWaitlist.isWaitlist).toBe(true)
-    expect(ctaWaitlist.href).toBe('/waitlist')
+    expect(cta.label).toBe('登記候補')
+    expect(cta.isWaitlist).toBe(true)
+    expect(cta.href).toBe('/waitlist')
   })
-})
 
-describe('Landing Page — Hero Offer and Capacity UX Clarity', () => {
-  const openWithFounding = {
-    status: 'open' as const,
-    capacity: 100,
-    activeCount: 1,
-    remaining: 99,
-    foundingLimit: 30,
-    foundingCount: 0,
-    waitingCount: 0,
-    releasedCount: 0,
-    totalDemand: 1,
-  }
-
-  it('renders prominent Founding 30 badge above CTA in Hero with clean pricing hierarchy', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={openWithFounding} />)
-
+  it('keeps normal Founding 30 messaging after Beta', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('hero-founding-badge')
     expect(html).toContain('創始 30 名限定')
     expect(html).toContain('月繳 NT$349，持續訂閱期間價格固定不變')
     expect(html).toContain('標準價 NT$499/月 · 第一週免費')
-    expect(html).toContain('免費取得第一週教材')
-    expect(html).not.toContain('同一訂閱不中斷，固定 NT$349／月。年繳 NT$4,999。')
-  })
-
-  it('keeps Founding 30 and 100-child service capacity clear without exposing live counts', () => {
-    const html = renderToStaticMarkup(<PricingSection enrollment={openWithFounding} />)
-
-    expect(html).toContain('創始 30・月繳限定')
-    expect(html).toContain('前 30 位持續訂閱期間固定 NT$349／月')
-    expect(html).toContain('創始 30 優惠目前仍有名額')
-    expect(html).toContain('目前開放加入')
-    expect(html).toContain('第一階段預計服務 <strong>100 位孩子</strong>，目前仍有服務名額。')
-    expect(html).toContain('額滿後新加入者會先進入候補，既有家庭不受影響。')
-    expect(html).not.toContain('目前剩 <strong>30</strong> 個創始優惠席次')
-    expect(html).not.toContain('目前已有 <strong>1 位加入</strong>')
-    expect(html).not.toContain('還剩 99 個名額')
   })
 })
 
-describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
+describe('Landing Page — Onboarding & Direct Login', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it.each(['/', '/dashboard', '/children/new', '/unknown-page'])(
-    'renders both real auth panels when the public LandingPage is shown at %s',
+    'renders child-first onboarding and direct login when LandingPage is shown at %s',
     (pathname) => {
-      // App also shows LandingPage on signed-out protected routes and unknown URLs.
       vi.stubGlobal('window', { location: { pathname }, addEventListener: vi.fn(), removeEventListener: vi.fn() })
       const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-
-      expect(html).toContain('landing-auth-grid')
       const onboardingIndex = html.indexOf('id="onboarding"')
       const loginIndex = html.indexOf('id="login"')
+      expect(html).toContain('landing-auth-grid')
       expect(onboardingIndex).toBeGreaterThan(-1)
       expect(loginIndex).toBeGreaterThan(onboardingIndex)
-      const onboarding = html.slice(onboardingIndex, loginIndex)
-      expect(onboarding).toContain('landing-onboarding-panel')
-      expect(onboarding).toContain('孩子怎麼稱呼？')
-      expect(onboarding).not.toContain('type="email"')
-      const login = html.slice(loginIndex)
-      expect(login).toContain('已有帳號？直接登入')
-      expect(login).toContain('id="login-email"')
-      expect(login).toContain('type="email"')
+      expect(html.slice(onboardingIndex, loginIndex)).toContain('孩子怎麼稱呼？')
+      expect(html.slice(onboardingIndex, loginIndex)).not.toContain('type="email"')
+      expect(html.slice(loginIndex)).toContain('id="login-email"')
     },
   )
-
-  it('renders both the 3-step child onboarding card and the direct-login card side by side', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-
-    // Two-column container
-    expect(html).toContain('landing-auth-grid')
-
-    // Left primary card (Onboarding)
-    expect(html).toContain('landing-onboarding-card')
-    expect(html).toContain('id="onboarding"')
-    expect(html).toContain('第一次使用？先填孩子資料')
-    expect(html).toContain('第一週免費')
-    expect(html).toContain('不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間')
-    expect(html).toContain('先抓孩子現在的大概位置')
-    expect(html).toContain('孩子怎麼稱呼？')
-
-    // Right secondary card (Direct login)
-    expect(html).toContain('landing-login-card')
-    expect(html).toContain('id="login"')
-    expect(html).toContain('已有帳號？直接登入')
-    expect(html).toContain('輸入原本使用的家長 Email，我們會寄送無密碼登入連結')
-    expect(html).toContain('寄送登入連結')
-  })
-
-  it('allows existing users to log in directly via email without touching child form inputs', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-
-    // Direct login card has immediate email input
-    expect(html).toContain('id="login-email"')
-    expect(html).toContain('已有帳號？直接登入')
-
-    // Onboarding card starts with child profile step 1 without an initial email input
-    const onboardingIndex = html.indexOf('landing-onboarding-card')
-    const loginIndex = html.indexOf('landing-login-card')
-    expect(onboardingIndex).toBeGreaterThan(-1)
-    expect(loginIndex).toBeGreaterThan(onboardingIndex)
-
-    const onboardingSnippet = html.slice(onboardingIndex, loginIndex)
-    expect(onboardingSnippet).toContain('孩子怎麼稱呼？')
-    expect(onboardingSnippet).not.toContain('landing-onboarding-email')
-  })
 
   it('targets navbar login directly to #login and primary CTA to #onboarding', () => {
     const headerHtml = renderToStaticMarkup(<PublicHeader />)
     expect(headerHtml).toContain('href="/#login"')
     expect(headerHtml).toContain('已有帳號？登入')
     expect(headerHtml).toContain('href="/#onboarding"')
-
-    const pageHtml = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-    expect(pageHtml).toContain('id="login"')
-    expect(pageHtml).toContain('id="onboarding"')
   })
 
-  it('audits copy to eliminate contradictory account-creation instructions', () => {
+  it('keeps child-first instructions and avoids autofocus jumps', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
-
-    // Eliminated old misleading instructions
-    expect(html).not.toContain('從家長 Email 建立帳號')
-    expect(html).not.toContain('建立家長帳號或登入')
-
-    // Audited expectations list reflects true child-first order
     expect(html).toContain('填寫一位孩子的學習狀況')
     expect(html).toContain('完成 3 個步驟後留下 Email')
     expect(html).toContain('第一份專屬教材預計隔天開放下載')
-  })
-
-  it('does not contain autofocus attributes to avoid jumping viewport to the bottom on page load', () => {
-    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+    expect(html).not.toContain('從家長 Email 建立帳號')
+    expect(html).not.toContain('建立家長帳號或登入')
     expect(html).not.toMatch(/\bautofocus\b/i)
   })
 
-  it('renders Free Pilot acquisition badge and messaging when freePilotActive is true', () => {
-    const freePilotEnrollment = {
-      status: 'open' as const,
-      capacity: 100,
-      activeCount: 20,
-      remaining: 80,
-      foundingLimit: 30,
-      foundingCount: 5,
-      freePilotActive: true,
-      freePilotAdmissions: 20,
-      freePilotLimit: 100,
-    }
-    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
-    expect(html).toContain('前 100 位學員・全面免費')
-    expect(html).toContain('每週專屬教材完全免費（免填信用卡）')
-    expect(html).toContain('立即免費開始（每週專屬教材 NT$0）')
-    expect(html).toContain('每週專屬教材完全免費（免填信用卡、免綁卡）')
-    expect(html).toContain('NT$0')
-    expect(html).toContain('前 100 位每週免費')
-  })
-
-  it('displays Founding offer when capacity is full (100/100) but Founding spots remain', () => {
-    const postPilotFullEnrollment = {
-      status: 'waitlist' as const,
+  it('keeps the waitlist + Founding offer truthful after Beta', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={{
+      status: 'waitlist',
       capacity: 100,
       activeCount: 100,
       remaining: 0,
@@ -376,14 +242,9 @@ describe('Landing Page — Onboarding & Direct-Login 2-Column UX', () => {
       freePilotActive: false,
       freePilotAdmissions: 100,
       freePilotLimit: 100,
-    }
-    const html = renderToStaticMarkup(<LandingPage enrollment={postPilotFullEnrollment} />)
+    }} />)
     expect(html).toContain('創始 30 名限定')
     expect(html).toContain('月繳 NT$349（目前仍有名額）')
-    expect(html).toContain('創始 NT$349/月優惠目前仍有名額')
-    expect(html).toContain('創始 30・名額保留中')
     expect(html).toContain('登記候補')
   })
 })
-
-

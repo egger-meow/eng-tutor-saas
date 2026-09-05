@@ -2,6 +2,9 @@ import { getSupabaseClient } from './supabase'
 
 const MAX_HANDOFF_TOKEN_LENGTH = 256
 const ADDITIONAL_CHILD_CONFIRMATION_REQUIRED = 'ADDITIONAL_CHILD_CONFIRMATION_REQUIRED'
+const FINALIZE_ERROR = '孩子資料還在，帳號連結目前尚未完成。請重新整理再試一次。'
+const CONFIRM_ADDITIONAL_CHILD_ERROR = '目前無法新增孩子，請稍後再試。'
+const DISCARD_PENDING_ERROR = '目前無法返回原本孩子資料，請稍後再試。'
 
 export type FinalizePendingOnboardingResult =
   | { status: 'created'; childId: string }
@@ -25,23 +28,23 @@ export async function finalizePendingOnboarding(token: string): Promise<Finalize
   if (isAdditionalChildConfirmationRequired(error)) {
     return { status: 'additional_child_confirmation_required' }
   }
-  if (error) throw error
-  if (typeof data !== 'string' || !data.trim()) throw new Error('無法完成孩子設定，請稍後再試。')
+  if (error) throw new Error(FINALIZE_ERROR)
+  if (typeof data !== 'string' || !data.trim()) throw new Error(FINALIZE_ERROR)
   return { status: 'created', childId: data }
 }
 
 export async function confirmAdditionalChildOnboarding(token: string): Promise<string> {
   const cleanToken = cleanOnboardingToken(token)
   const { data, error } = await getSupabaseClient().rpc('confirm_additional_child_onboarding', { p_token: cleanToken })
-  if (error) throw error
-  if (typeof data !== 'string' || !data.trim()) throw new Error('無法新增孩子，請稍後再試。')
+  if (error) throw new Error(CONFIRM_ADDITIONAL_CHILD_ERROR)
+  if (typeof data !== 'string' || !data.trim()) throw new Error(CONFIRM_ADDITIONAL_CHILD_ERROR)
   return data
 }
 
 export async function discardPendingOnboarding(token: string): Promise<void> {
   const cleanToken = cleanOnboardingToken(token)
   const { error } = await getSupabaseClient().rpc('discard_pending_onboarding', { p_token: cleanToken })
-  if (error) throw error
+  if (error) throw new Error(DISCARD_PENDING_ERROR)
 }
 
 export function readOnboardingToken(search?: string): string | null {
