@@ -23,8 +23,8 @@
 
 .system-evolution-heading h2,
 .usage-heading h2 {
-  max-width: 18ch;
-  font-size: clamp(2.15rem, 4.6vw, 4.15rem);
+  max-width: min(100%, 44rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
   line-height: 1.24;
   text-wrap: balance;
 }
@@ -282,7 +282,7 @@
   border-top-color: var(--color-rule-strong);
 }
 
-.improvement-note::before {
+.improvement-note:not(.landing-more-details)::before {
   content: '';
   position: absolute;
   inset: clamp(2rem, 5vw, 4rem) 0;
@@ -292,8 +292,8 @@
 
 .improvement-note-inner {
   display: grid;
-  grid-template-columns: minmax(15rem, .72fr) minmax(0, 1.28fr);
-  gap: 0 clamp(3rem, 8vw, 8rem);
+  grid-template-columns: minmax(14rem, .72fr) minmax(0, 1.28fr);
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
   align-items: start;
 }
 
@@ -303,9 +303,10 @@
 }
 
 .improvement-note-inner h2 {
-  max-width: 12ch;
-  font-size: clamp(2.2rem, 4.6vw, 4.25rem);
-  line-height: 1.12;
+  max-width: min(100%, 28rem);
+  font-size: clamp(1.85rem, 3.5vw, 2.75rem);
+  line-height: 1.22;
+  text-wrap: balance;
 }
 
 .improvement-note-copy {

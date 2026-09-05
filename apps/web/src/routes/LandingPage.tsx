@@ -11,6 +11,7 @@ import { PageTransition } from '../components/motion/PageTransition'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
+import '../styles/landing-details.css'
 
 const abilityBenefits = [
   ['願意開始讀', '先用孩子有興趣、也有內容的題材降低抗拒，再把注意力帶進真正的英文閱讀。'],
@@ -258,35 +259,78 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <details className="public-section landing-more-details">
           <summary>想知道為什麼是紙本、AI 怎麼用？</summary>
-          <section className="philosophy-section">
-            <p className="overline">為什麼選紙本？</p>
-            <h2>讓科技做它擅長的事，讓孩子完成不能外包的思考。</h2>
-            <p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p>
-          </section>
-          <section className="ai-section" id="method">
-            <p className="overline">AI 是教材背後的機制，不是替孩子作答的人</p>
-            <h2>先自己讀、自己答；真的不懂，再請 AI 解釋為什麼。</h2>
-            <div className="why-not-gpt" id="chatgpt-difference">
-              <h3>那直接用 ChatGPT 不就好了？</h3>
-              <p>差別不是 AI 會不會出題，而是紙屬英文把孩子的長期學習記憶、內容搜尋、會考能力方向與每週品質檢查接成固定流程。</p>
-            </div>
-          </section>
+          <div className="landing-details-body">
+            <section className="philosophy-section philosophy-card">
+              <div className="philosophy-copy">
+                <p className="overline">為什麼選紙本？</p>
+                <h2>讓科技做它擅長的事，<br className="heading-break" />讓孩子完成不能外包的思考。</h2>
+              </div>
+              <div className="philosophy-detail">
+                <p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p>
+              </div>
+            </section>
+
+            <section className="ai-section" id="method">
+              <div className="ai-heading">
+                <p className="overline">AI 是教材背後的機制，不是替孩子作答的人</p>
+                <h2>先自己讀、自己答；<br className="heading-break" />真的不懂，再請 AI 解釋為什麼。</h2>
+                <p>每週學習仍從孩子的閱讀與作答開始。AI 可以在卡住時當解釋與延伸練習工具，但不是完成作業的捷徑。</p>
+              </div>
+
+              <ol className="learning-sequence" aria-label="紙屬英文五步驟自主學習法">
+                <li><span>01</span><strong>先完整讀過文章</strong></li>
+                <li><span>02</span><strong>圈出不懂的字句</strong></li>
+                <li><span>03</span><strong>自己完成作答</strong></li>
+                <li><span>04</span><strong>對答案、找出錯因</strong></li>
+                <li><span>05</span><strong>需要時請 AI 解釋，再做一題</strong></li>
+              </ol>
+
+              <div className="why-not-gpt" id="chatgpt-difference">
+                <div className="why-not-gpt-header">
+                  <p className="overline">常見疑問</p>
+                  <h3>那直接用 ChatGPT 不就好了？</h3>
+                  <p className="why-not-gpt-subtitle">ChatGPT 本身很強；差別不是它會不會，而是誰把這些能力變成一套持續運作的教材系統。</p>
+                </div>
+                <div className="comparison-compact">
+                  <div className="comparison-col">
+                    <div className="comparison-badge">通用對話 AI</div>
+                    <h4>直接使用 ChatGPT</h4>
+                    <p>可以搜尋網路、解釋英文、產生文章與題目；但通常仍要自己交代孩子程度、進度、錯誤、來源與難度，並在每次使用時維持這些教育規則。關掉視窗後，學習記憶就斷了。</p>
+                  </div>
+                  <div className="comparison-col highlighted">
+                    <div className="comparison-badge accent">專屬教材系統</div>
+                    <h4>紙屬英文</h4>
+                    <p>把孩子的長期學習記憶、全網知識搜尋與可靠資訊篩選、會考命題大腦和每週品質檢查接成固定流程，持續每週交付可直接列印的完整教材。</p>
+                  </div>
+                </div>
+                <p className="comparison-conclusion">差別不是我們用了另一個 AI，而是把 AI 變成一套專門替孩子持續做教材的系統。</p>
+              </div>
+
+              <div className="parent-role">
+                <p className="overline">家長每週要做什麼？</p>
+                <h2>列印、觀察、點幾下回饋。<br className="heading-break" />不用自己當英文老師。</h2>
+                <p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p>
+              </div>
+            </section>
+          </div>
         </details>
 
         <details className="public-section landing-more-details">
           <summary>想了解這套系統怎麼越用越準、越做越好？</summary>
-          <section className="system-evolution-section" id="system-evolution">
-            <div className="system-evolution-heading">
-              <p className="overline">訂閱的是一個會變好的系統</p>
-              <h2>你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。</h2>
-            </div>
-            <div className="evolution-grid">
-              {evolutionPillars.map(([step, title, description]) => (
-                <article className="evolution-card" key={step}><span className="evolution-step">{step}</span><h3>{title}</h3><p>{description}</p></article>
-              ))}
-            </div>
-          </section>
-          <CoreBrainsSection />
+          <div className="landing-details-body">
+            <section className="system-evolution-section" id="system-evolution">
+              <div className="system-evolution-heading">
+                <p className="overline">訂閱的是一個會變好的系統</p>
+                <h2>你訂閱的不是一份教材，而是一套會陪孩子一起進步的教材系統。</h2>
+              </div>
+              <div className="evolution-grid">
+                {evolutionPillars.map(([step, title, description]) => (
+                  <article className="evolution-card" key={step}><span className="evolution-step">{step}</span><h3>{title}</h3><p>{description}</p></article>
+                ))}
+              </div>
+            </section>
+            <CoreBrainsSection />
+          </div>
         </details>
 
         <FounderSummary />
@@ -311,11 +355,19 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <details className="public-section landing-more-details improvement-note">
           <summary>Beta 期間我們還在改善什麼？</summary>
-          <div className="improvement-note-inner">
-            <p className="overline">持續改善，也保持透明</p>
-            <h2>我們還在把它做得更好</h2>
-            <p>目前已能依孩子的程度、興趣與學習紀錄調整教材；Beta 期間會繼續改善不同週次的文本形式、題型組合與任務變化。</p>
-            <p><strong>不會因為你填了孩子資料就自動訂閱或扣款，也不會自動替你開啟付費訂閱。</strong></p>
+          <div className="landing-details-body">
+            <div className="improvement-note-inner">
+              <p className="overline">持續改善，也保持透明</p>
+              <h2>我們還在把它做得更好</h2>
+              <div className="improvement-note-copy">
+                <p>紙屬英文目前已能依孩子的程度、興趣與學習紀錄調整教材內容，但我們知道「個人化」不只是不斷換主題。</p>
+                <p>我們正在持續改善不同週次之間的文本形式、題型組合與學習任務變化，讓長期使用不會逐漸形成固定套路。</p>
+                <p>這些變化不會以隨機取代教學邏輯。孩子該學什麼、難度怎麼走、哪些內容需要複習，仍會由學習狀態與證據決定。</p>
+              </div>
+              <p className="improvement-note-commitment">
+                <strong>我們會持續公開我們看見的限制，也持續把系統做得更好。不會因為你填了孩子資料就自動訂閱或扣款，也不會自動替你開啟付費訂閱。</strong>
+              </p>
+            </div>
           </div>
         </details>
 
