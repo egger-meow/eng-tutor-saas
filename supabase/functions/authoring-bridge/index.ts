@@ -1,5 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
+import { dispatchWeek1PublishDoorbells } from '../_shared/week1-fast-dispatch.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -8,6 +9,7 @@ const corsHeaders = {
 
 export const PINNED_ONLINE_MANUAL_WORKER_ID = 'chatgpt-online-manual'
 export const PINNED_SCHEDULED_WORKER_ID = 'chatgpt-work-daily'
+export const PINNED_WEEK1_FAST_WORKER_ID = 'chatgpt-week1-fast'
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -26,9 +28,8 @@ async function resolveJobWorkerId(
     .eq('id', jobId)
     .maybeSingle()
 
-  if (data?.claimed_by === PINNED_SCHEDULED_WORKER_ID) {
-    return PINNED_SCHEDULED_WORKER_ID
-  }
+  if (data?.claimed_by === PINNED_WEEK1_FAST_WORKER_ID) return PINNED_WEEK1_FAST_WORKER_ID
+  if (data?.claimed_by === PINNED_SCHEDULED_WORKER_ID) return PINNED_SCHEDULED_WORKER_ID
   return PINNED_ONLINE_MANUAL_WORKER_ID
 }
 
@@ -39,7 +40,6 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const bridgeSecret = Deno.env.get('AUTHORING_BRIDGE_SECRET')
 
-  // Requirement 2: If AUTHORING_BRIDGE_SECRET is absent, fail closed with 503
   if (!supabaseUrl || !serviceRoleKey || !bridgeSecret) {
     return json(503, {
       error: 'server_not_configured',
@@ -47,32 +47,19 @@ Deno.serve(async (request) => {
     })
   }
 
-  // Requirement 2: SUPABASE_SERVICE_ROLE_KEY must NEVER be accepted as an incoming Bearer credential.
   const authHeader = request.headers.get('authorization') ?? ''
   const token = authHeader.replace(/^Bearer\s+/i, '').trim()
 
   if (!token) {
-    return json(401, {
-      error: 'unauthorized',
-      message: 'Missing Authorization Bearer header.',
-    })
+    return json(401, { error: 'unauthorized', message: 'Missing Authorization Bearer header.' })
   }
-
   if (token === serviceRoleKey) {
-    return json(401, {
-      error: 'unauthorized',
-      message: 'Service role key is forbidden as external incoming credential.',
-    })
+    return json(401, { error: 'unauthorized', message: 'Service role key is forbidden as external incoming credential.' })
   }
-
   if (token !== bridgeSecret) {
-    return json(401, {
-      error: 'unauthorized',
-      message: 'Invalid authoring bridge authorization token.',
-    })
+    return json(401, { error: 'unauthorized', message: 'Invalid authoring bridge authorization token.' })
   }
 
-  // Service role is used strictly internally within the Edge Function
   const client = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
@@ -81,10 +68,7 @@ Deno.serve(async (request) => {
   const path = url.pathname.replace(/^\/(?:functions\/v1\/)?authoring-bridge/, '').replace(/\/$/, '')
 
   try {
-    // 1. Start Authoring Batch: POST /start
-    // Requirement 1-3: Shared transaction-scoped advisory lock serializes start across all executors.
-    // Atomically verifies zero conflicting active authoring leases,
-    // then performs exactly one authoritative production batch claim under pinned online manual identity.
+    // Normal production authoring start remains unchanged.
     if (request.method === 'POST' && path === '/start') {
       const { data, error } = await client.rpc('worker_start_authoring_batch', {
         worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
@@ -101,8 +85,29 @@ Deno.serve(async (request) => {
       return json(200, data ?? { claimed: [], claimedCount: 0 })
     }
 
-    // 2. Recover Active Batch: GET /batch
-    // Recovers an already-claimed active batch without triggering a new claim.
+    // Week 1 Fast Lane has a separate, pinned, Week-1-only claim boundary.
+    if (request.method === 'POST' && path === '/week1/start') {
+      const { data, error } = await client.rpc('worker_start_week1_fast_batch', {
+        worker_id: PINNED_WEEK1_FAST_WORKER_ID,
+      })
+      if (error) {
+        const isConflict = error.message?.includes('ACTIVE_AUTHORING_LEASE_CONFLICT') ?? false
+        return json(isConflict ? 409 : 500, {
+          error: isConflict ? 'lease_conflict' : 'database_error',
+          message: error.message,
+        })
+      }
+      return json(200, data ?? { claimed: [], claimedCount: 0 })
+    }
+
+    if (request.method === 'GET' && path === '/week1/batch') {
+      const { data, error } = await client.rpc('worker_recover_week1_fast_batch', {
+        worker_id: PINNED_WEEK1_FAST_WORKER_ID,
+      })
+      if (error) return json(500, { error: error.message })
+      return json(200, data ?? { claimed: [], claimedCount: 0 })
+    }
+
     if (request.method === 'GET' && (path === '/batch' || path === '')) {
       let { data, error } = await client.rpc('worker_recover_active_authoring_batch', {
         worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
@@ -111,18 +116,12 @@ Deno.serve(async (request) => {
         const scheduled = await client.rpc('worker_recover_active_authoring_batch', {
           worker_id: PINNED_SCHEDULED_WORKER_ID,
         })
-        if (!scheduled.error && scheduled.data && scheduled.data.claimedCount > 0) {
-          data = scheduled.data
-        }
+        if (!scheduled.error && scheduled.data && scheduled.data.claimedCount > 0) data = scheduled.data
       }
-      if (error) {
-        return json(500, { error: error.message })
-      }
+      if (error) return json(500, { error: error.message })
       return json(200, data ?? { claimed: [], claimedCount: 0 })
     }
 
-    // 3. Submit Package: POST /submit
-    // Worker identity is pinned server-side to the reviewed online author identities.
     if (request.method === 'POST' && path === '/submit') {
       const body = (await request.json()) as {
         jobId?: string
@@ -133,12 +132,8 @@ Deno.serve(async (request) => {
       }
       const jobId = body.jobId ?? body.job_id
       const rawPackage = body.package ?? body.curriculumPackage ?? body.payload
-
       if (!jobId || !rawPackage) {
-        return json(400, {
-          error: 'missing_fields',
-          message: 'jobId and package are required',
-        })
+        return json(400, { error: 'missing_fields', message: 'jobId and package are required' })
       }
 
       const workerId = await resolveJobWorkerId(client, jobId)
@@ -148,32 +143,40 @@ Deno.serve(async (request) => {
         p_generation_worker_id: workerId,
         p_payload_text: payloadText,
       })
+      if (error) return json(500, { error: error.message })
 
-      if (error) {
-        return json(500, { error: error.message })
+      // Submission durability is authoritative. GitHub dispatch is best-effort and never changes
+      // submit success; the DB outbox remains available for retry if this immediate doorbell fails.
+      if (workerId === PINNED_WEEK1_FAST_WORKER_ID) {
+        const githubToken = Deno.env.get('GITHUB_WEEK1_TOKEN')
+        const wakePrNumber = Deno.env.get('GITHUB_WEEK1_WAKE_PR_NUMBER')
+        if (githubToken && wakePrNumber) {
+          try {
+            await dispatchWeek1PublishDoorbells(client, {
+              token: githubToken,
+              repo: Deno.env.get('GITHUB_WEEK1_REPO') ?? 'egger-meow/eng-tutor-saas',
+              wakePrNumber,
+            })
+          } catch {
+            console.warn('[week1-fast] immediate publish doorbell failed; outbox retained')
+          }
+        }
       }
       return json(200, data)
     }
 
-    // 4. Get Status: GET /status?job_id=...
     if (request.method === 'GET' && path === '/status') {
       const jobId = url.searchParams.get('job_id') ?? url.searchParams.get('jobId')
-      if (!jobId) {
-        return json(400, { error: 'missing_parameter', message: 'job_id is required' })
-      }
+      if (!jobId) return json(400, { error: 'missing_parameter', message: 'job_id is required' })
       const workerId = await resolveJobWorkerId(client, jobId)
       const { data, error } = await client.rpc('worker_local_curriculum_submission_status', {
         job_id: jobId,
         worker_id: workerId,
       })
-      if (error) {
-        return json(500, { error: error.message })
-      }
+      if (error) return json(500, { error: error.message })
       return json(200, data)
     }
 
-    // 5. Release Unsubmitted Claim: POST /release
-    // Narrow release operation that verifies no submission exists before releasing
     if (request.method === 'POST' && path === '/release') {
       const body = (await request.json()) as {
         jobId?: string
@@ -184,25 +187,17 @@ Deno.serve(async (request) => {
         error_message?: string
       }
       const jobId = body.jobId ?? body.job_id
-      if (!jobId) {
-        return json(400, { error: 'missing_parameter', message: 'jobId is required' })
-      }
-
+      if (!jobId) return json(400, { error: 'missing_parameter', message: 'jobId is required' })
       const errorCode = body.errorCode ?? body.error_code ?? 'SUBMIT_TRANSPORT_FAILED'
-      const errorMessage =
-        body.errorMessage ?? body.error_message ?? 'Unsubmitted claim released via authoring bridge'
+      const errorMessage = body.errorMessage ?? body.error_message ?? 'Unsubmitted claim released via authoring bridge'
       const workerId = await resolveJobWorkerId(client, jobId)
-
       const { data, error } = await client.rpc('worker_release_local_unsubmitted_claim', {
         job_id: jobId,
         worker_id: workerId,
         error_code: errorCode,
         error_message: errorMessage,
       })
-
-      if (error) {
-        return json(500, { error: error.message })
-      }
+      if (error) return json(500, { error: error.message })
       return json(200, data)
     }
 
