@@ -13,3 +13,5 @@ week1-wake:v1:<opaque-event-id>
 The comment is only a doorbell. It must never contain learner names, Email addresses, child IDs, job IDs, profile data, interests, feedback, curriculum payloads, prompts, or other private data.
 
 Supabase remains the authoritative job queue. The receiving ChatGPT Work task must ignore the comment as curriculum input, read current `main`, and use the dedicated `chatgpt-week1-fast` authoring path.
+
+Operational commit-wake smoke marker: 2026-09-06T00:45+08:00
