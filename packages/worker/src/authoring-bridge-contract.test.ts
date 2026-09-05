@@ -18,8 +18,10 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(agents).not.toContain('future ChatGPT Work schedule remains responsible')
     expect(agents).not.toContain('ChatGPT Work schedule remains responsible for queue claiming')
     expect(agents).toContain('Production curriculum authoring follows `docs/production-authoring.md`')
-    expect(agents).toContain('The active executor may be local or online according to scheduler mode')
-    expect(agents).toContain('the deterministic Finisher alone renders/uploads PDFs and completes materials')
+    expect(agents).toContain('The active normal executor may be local or online according to scheduler mode')
+    expect(agents).toContain('Week 1 is the sole publication exception')
+    expect(agents).toContain('Week 2+ continues through the deterministic Finisher')
+    expect(agents).not.toContain('the deterministic Finisher alone renders/uploads PDFs and completes materials')
   })
 
   it('proves /start performs one authoritative claim under pinned online manual worker identity', async () => {
@@ -63,14 +65,11 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
 
   it('exposes only narrow business operations and zero SQL/table/database capability', async () => {
     const openapi = await readFile(resolve(root, 'docs/authoring-bridge-openapi.yaml'), 'utf8')
-    // Must contain exactly the narrow business endpoints
     expect(openapi).toContain('/start:')
     expect(openapi).toContain('/batch:')
     expect(openapi).toContain('/submit:')
     expect(openapi).toContain('/status:')
     expect(openapi).toContain('/release:')
-
-    // Must NOT expose arbitrary SQL or database operations
     expect(openapi).not.toContain('execute_sql')
     expect(openapi).not.toContain('sql')
     expect(openapi).not.toContain('postgres')
@@ -78,29 +77,18 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
 
   it('proves /start -> /submit -> /status semantics match the canonical production authoring protocol', async () => {
     const openapi = await readFile(resolve(root, 'docs/authoring-bridge-openapi.yaml'), 'utf8')
-    // /start returns authoritative context including inputFingerprint
     expect(openapi).toContain('inputFingerprint:')
     expect(openapi).toContain('retryContext:')
-
-    // /submit requires jobId, package, and metadata with inputFingerprint
     expect(openapi).toContain('inputFingerprint')
-
-    // /status checks submissionFound
     expect(openapi).toContain('submissionFound:')
   })
 
   it('enforces service role key rejection and missing secret fail-closed in Edge Function logic', async () => {
     const edgeFunctionSource = await readFile(resolve(root, 'supabase/functions/authoring-bridge/index.ts'), 'utf8')
-
-    // Missing AUTHORING_BRIDGE_SECRET must return 503
     expect(edgeFunctionSource).toContain('if (!supabaseUrl || !serviceRoleKey || !bridgeSecret)')
     expect(edgeFunctionSource).toContain('return json(503,')
-
-    // Service role key passed as incoming Bearer token must return 401
     expect(edgeFunctionSource).toContain('if (token === serviceRoleKey)')
     expect(edgeFunctionSource).toContain('Service role key is forbidden as external incoming credential')
-
-    // Dedicated secret must match
     expect(edgeFunctionSource).toContain('if (token !== bridgeSecret)')
   })
 
