@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage } from './LandingPage'
 
 describe('Landing Page — Two Core Brains', () => {
-  it('explains the two strongest technical systems in parent-readable language before the sample PDFs', () => {
+  it('keeps the technical systems available in parent-readable language after the real sample', () => {
     const html = renderToStaticMarkup(<LandingPage />)
 
     expect(html).toContain('紙屬英文的兩顆核心大腦')
@@ -16,7 +16,8 @@ describe('Landing Page — Two Core Brains', () => {
     expect(html).toContain('這一週，只屬於他的教材')
 
     expect(html.indexOf('紙屬英文的兩顆核心大腦')).toBeGreaterThan(html.indexOf('訂閱的是一個會變好的系統'))
-    expect(html.indexOf('紙屬英文的兩顆核心大腦')).toBeLessThan(html.indexOf('先看每週實際拿到什麼'))
+    expect(html.indexOf('紙屬英文的兩顆核心大腦')).toBeGreaterThan(html.indexOf('不用先相信我們，先看教材'))
+    expect(html).toContain('想了解這套系統怎麼越用越準、越做越好？')
 
     expect(html).not.toContain('Prompt 2.9.1')
     expect(html).not.toContain('non-holdout')
