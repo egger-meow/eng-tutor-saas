@@ -709,27 +709,43 @@ Not merely screenshots or demo copy.
 
 ## Week 1 Delivery Timing & Rolling Free Cadence
 
-Week 1 content is not authored synchronously during onboarding. The trusted activation creates the explicit initial generation job when the new child is eligible, while the sole curriculum author (the repository-owned local Windows Codex CLI runner) runs approximately once per day at 00:15 Asia/Taipei. The deterministic finisher (GitHub Actions) runs separately approximately hourly.
+Week 1 content is not authored synchronously inside the onboarding HTTP request. Trusted first-time activation creates the explicit initial generation job immediately when the child is eligible. That job enters the dedicated Week 1 Fast Lane, while Supabase remains the sole authority for job, claim, submission, publication, and progress state.
+
+Week 1 follows this permanent path:
+
+```text
+trusted activation
+→ explicit Week 1 generation job
+→ transactional wake outbox
+→ dedicated `chatgpt-week1-fast` author when available
+   (normal production author may act only as fallback if it acquires the job first)
+→ current production bundle + research + plan + Author/Critic + targeted repair
+→ immutable curriculum submission
+→ Week 1 Fast Publisher
+→ objective integrity validation + deterministic PDF render/inspection
+→ private Storage upload + atomic completion
+→ immediate release
+```
+
+The normal deterministic Finisher must not claim or publish Week 1 submissions. The Week 1 Fast Publisher is the only publication path for a first canonical packet, including a Week 1 package authored by a normal fallback author. This avoids a second semantic/pedagogical gate after Author/Critic while preserving non-bypassable structural, identity, rendering, storage, and atomic-completion integrity.
 
 Therefore:
 
-* the initial generation job sets `release_at` to the **next calendar day 00:00** in the child's configured timezone as a local date anchor;
-* Week 1 is the sole early-release exception: when the deterministic Finisher successfully completes both PDFs before that timestamp, completion immediately becomes the actual `release_at` and the parent may download both files at once;
-* Week 2 is scheduled from Week 1's actual release anchor plus seven days. If Week 1 completes today, Week 2 is due today + 7 days; if Week 1 completes tomorrow, Week 2 is due tomorrow + 7 days;
-* While the Free Pilot is active, Week 2 is fully entitled without requiring a Paddle subscription. Once the parent submits feedback (or the feedback cutoff passes), Week 2 is claimed and authored. Subsequent weeks (Week 3, Week 4, etc.) continue on this rolling seven-day cadence for free;
-* If a parent voluntarily subscribes early during the Free Pilot, the paid Paddle subscription activates and continuous active service proceeds smoothly. If they later cancel that voluntary Paddle subscription while the Free Pilot is still active, they do not lose the globally free service solely because the Paddle subscription ended;
-* When the Free Pilot ends:
-  - Any generation job legitimately created before `free_pilot_ended_at` survives cutover and completes safely without destructive cancellation;
-  - Subsequent new weekly jobs created after pilot end require normal paid Paddle entitlement;
-  - Unpaid children pause their generation cadence until a paid subscription is activated, at which point the clean candidate re-anchoring mechanism activates;
-* for Week 1, `feedback_cutoff_at` is an invariant-derived placeholder (`release_at - 48 hours`) and does not represent an actionable parent feedback deadline because no prior material exists;
-* the parent sees an honest expectation such as `預計 8月17日 交付第一份教材` (or `第一份教材預計隔天開放下載`);
-* expectation language uses `預計` because the quality gate can legitimately reject the first attempt;
-* if the first delivery date passes without successful material completion (e.g. past-due unmaterialized job under retry), the UI falls back to a neutral `第一份教材準備中` state with detail `教材正在完成最後檢查，準備完成後即可下載。` instead of showing a stale date or false delivery claim;
-* when operational capacity is full, the authoritative waitlist state must be shown and the UI must not claim that Week 1 is being prepared when no generation job exists;
-* `generation_jobs.release_at` remains the canonical parent-facing delivery timestamp.
+* the initial generation job is eligible immediately after trusted activation (`scheduled_for` is the activation time);
+* the dedicated Week 1 author uses an independent serialized claim boundary and never steals another worker's live lease;
+* if the fast author does not acquire the job, a normal production author may remain the fallback, but its Week 1 immutable submission is still routed exclusively to the Fast Publisher;
+* the old initial `release_at` scheduling value is an internal fallback/invariant anchor only and must never be rendered as a parent-facing next-day promise;
+* parent-facing Week 1 state is the authoritative five-stage projection `received → queued → authoring → publishing → ready`;
+* the parent is told that production starts immediately and that the PDFs become available when complete; no fabricated percentage, countdown, `明天`, `隔天`, or fixed completion date is shown;
+* successful Fast Publisher completion sets actual Week 1 release to the successful publication time and opens the material immediately;
+* Week 2 is scheduled from the actual Week 1 release anchor plus seven days and then returns to the normal Week 2+ Submission → deterministic Finisher lifecycle;
+* while the Free Pilot is active, Week 2 and later remain fully entitled without requiring Paddle; after the pilot ends, normal paid entitlement governs future new weekly jobs;
+* for Week 1, `feedback_cutoff_at` remains an invariant-derived placeholder and is not an actionable parent feedback deadline because no prior material exists;
+* a short-lived, hashed, single-purpose progress token may expose only sanitized Week 1 progress before authentication; authenticated parents use owner-scoped progress access;
+* dispatch loss must not lose work: private wake/publish outboxes remain retryable and duplicate doorbells are harmless because claims and completion are idempotent and authoritative in Supabase;
+* when operational capacity is full, the authoritative waitlist state is shown and the UI must not claim Week 1 is being produced when no generation job exists.
 
-The initial job's `scheduled_for` is set to the trusted activation moment so it is immediately eligible for the next 00:15 local authoring run.
+Subsequent weeks continue on the child's rolling seven-day service cadence. `generation_jobs.release_at` remains authoritative for normal Week 2+ parent delivery scheduling; Week 1 is the explicit immediate-release exception described above.
 
 ---
 
@@ -2574,7 +2590,7 @@ The system should distribute generation workload rather than accidentally schedu
 
 `next_generation_at` is an operational state representing an internal generation deadline. It is not automatically a parent-facing delivery date; its meaning must be interpreted according to the current material and job state. If an unreleased prepared material already exists, that material's `release_at` is the authoritative parent-visible delivery date rather than an advanced generation deadline for a subsequent cycle.
 
-For the first packet only, successful Finisher completion may advance the actual Week 1 `release_at`. The Week 2 release and generation deadlines must then be derived from that actual Week 1 release anchor plus seven days, rather than from the superseded next-day expectation.
+For the first packet only, successful Week 1 Fast Publisher completion sets the actual Week 1 `release_at` to publication time. The Week 2 release and generation deadlines are then derived from that actual Week 1 release anchor plus seven days. The normal Finisher is not a Week 1 publication path.
 
 ### Free Pilot Rolling Cadence & Subscription Pause Clock
 
@@ -4091,23 +4107,28 @@ A pre-existing Auth account receives no pre-auth child mutation. An existing par
 
 For an eligible child, first-time Email submission can create the canonical child and initial generation job before browser authentication after trusted Auth dispatch succeeds. Magic Link click is not a prerequisite for Week 1 authoring eligibility. Capacity-full children instead enter the authoritative waitlist and must not receive an initial job until legitimately released.
 
-For an eligible child:
+For an eligible child, Week 1 is complete only when:
 
-1. profile exists;
-2. explicit generation job exists and is idempotent;
-3. worker claims job;
-4. production rules are read;
-5. child state is read;
-6. canonical packet source is generated;
-7. Student PDF renders;
-8. Parent Answer PDF renders;
-9. both are stored privately;
-10. parent can download them after release/account access;
-11. metadata records generation version;
-12. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance;
-13. fast-moving interests actively inspect recent developments and prefer a strong current angle when it improves the target, while preserving a defensible evergreen fallback;
-14. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, semantic lexical review, or workload gates;
-15. the truthful deterministic workload estimate is within 85%-115% of the learner's weekly target, or an evidence-backed exception remains within the non-bypassable 75%-125% hard bound.
+1. the profile exists;
+2. one explicit, idempotent Week 1 generation job exists;
+3. the transactional Week 1 wake outbox exists without exposing learner data to GitHub;
+4. the job is claimed by the dedicated Week 1 author or, if that path did not acquire it, by an allowed normal production author fallback without stealing a live lease;
+5. the current production-authoring bundle and immutable child/context snapshot are read;
+6. research, planning, authoring, Critic review, targeted repair, and pre-submit validation complete under the current production contract;
+7. one immutable curriculum submission is durably stored and read-after-write verified;
+8. that first-packet submission is routed exclusively to the Week 1 Fast Publisher and cannot be claimed by the normal Finisher;
+9. the Fast Publisher performs objective package/identity integrity validation, deterministic Student and Parent PDF rendering, and PDF-pair inspection without running a second semantic Finisher audit;
+10. both PDFs are stored privately at canonical job-bound paths;
+11. material, job, submission, and publication state complete atomically and idempotently, with actual Week 1 release set to successful publication time;
+12. the parent can see only truthful sanitized progress (`received`, `queued`, `authoring`, `publishing`, `ready`) and can download after release/account authorization;
+13. Week 2 is scheduled from actual Week 1 release plus seven days and returns to the normal Week 2+ Finisher lifecycle;
+14. metadata records generation, prompt, renderer, worker, and publication-path versions;
+15. canonical grounding records source-to-fact-to-claim-to-reading-prose provenance;
+16. fast-moving interests actively inspect recent developments and prefer a strong current angle when it improves the target, while preserving a defensible evergreen fallback;
+17. current grounding has valid publication metadata and independent topic-aware freshness evidence without relaxing pedagogy, privacy, provenance, copyright, semantic lexical review, or workload requirements;
+18. the truthful deterministic workload estimate remains within the current authoring quality contract or has an allowed evidence-backed exception.
+
+Week 1 speed must come from wake-up and publication routing, never from skipping Author/Critic work, fabricating progress, weakening privacy, or publishing structurally corrupt artifacts.
 
 ---
 
@@ -4224,17 +4245,20 @@ The beta is not ready until:
 
 The operator can:
 
-* see pending work;
-* see failures;
+* see pending work and failures;
 * identify child/job by opaque ID;
-* retry safely;
-* avoid duplicate material;
-* inspect version metadata.
+* retry safely without duplicate material;
+* inspect version metadata and immutable attempt history;
+* distinguish Week 1 Fast Lane authoring/publication from the normal Week 2+ pipeline;
+* verify that normal Finisher claims exclude first-packet submissions and Fast Publisher claims include only eligible first packets;
+* inspect wake/publish outbox state without exposing private learner payloads in GitHub events;
 * distinguish the current pipeline stage from historical attempts;
-* inspect exact Finisher rejection rules and immutable evidence;
+* inspect exact objective publication-integrity failures for Week 1 and exact normal Finisher rejection rules for Week 2+;
 * identify any production engine-version drift;
 * identify `delivered_with_quality_override` without treating it as a quality pass;
 * explain from immutable planning/quality evidence why a fast-moving interest selected a current development or a principled evergreen fallback, without exposing that machinery in Student or Parent PDFs.
+
+Week 1 dispatch failure is recoverable because the durable job/submission and retryable outboxes remain authoritative. Duplicate wake or repository-dispatch events must not duplicate claims, artifacts, materials, or Week 2 scheduling.
 
 ---
 
@@ -4345,6 +4369,8 @@ Any coding agent entering the repository must:
 
 For weekly-material work specifically:
 
+**Week 1 publication exception:** every first canonical packet preserves the full Author/Critic/targeted-repair authoring contract, but after immutable submission it is published only by the Week 1 Fast Publisher. The Fast Publisher owns objective structure/identity/render/storage/completion integrity and must not run the normal independent Finisher semantic audit. References below to the deterministic Finisher describe the normal Week 2+ publication lifecycle unless a rule explicitly states that the same objective integrity check is shared by the Week 1 Fast Publisher.
+
 1. Do not generate a generic worksheet.
 2. Read production curriculum rules.
 3. Read child level and state.
@@ -4368,7 +4394,7 @@ For weekly-material work specifically:
 21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
 22. Prefer a strong, reliable, age-appropriate, lexically feasible current angle only when it serves the learning target equally well or better. Do not force current; preserve an explainable evergreen fallback when recent candidates are weak, unsafe, too complex, factually thin, copyright-dependent, or pedagogically inferior.
 23. Current selection never relaxes source quality, factual density, original synthesis, semantic lexical appropriateness, grammar, CAP relevance, answer entailment, workload, copyright, or personalization review.
-24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and Claim/Submit/Finisher boundaries.
+24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and the applicable Claim/Submit/publication boundary (Week 1 Fast Publisher for the first packet; normal Finisher for Week 2+).
 25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
 26. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP references before writing the item, then anchor, blend, or calibrate a novel design that meets or exceeds the CAP quality floor without requiring structural imitation.
 27. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
@@ -4403,12 +4429,20 @@ Static Assets frontend    (Local Codex / Desktop / Agent / ChatGPT)
                    ▼
                 Supabase
      Auth / child memory / feedback
-     jobs / subscriptions / materials
+     jobs / submissions / materials
                    │
-                   ▼
-       Deterministic Finisher (GHA)
-       Storage / Private weekly PDFs
+         ┌─────────┴─────────┐
+         │                   │
+       Week 1              Week 2+
+         │                   │
+         ▼                   ▼
+ Week 1 Fast Publisher   Deterministic Finisher
+ objective integrity     normal publication lifecycle
+ render / inspect        render / inspect
+ Storage / completion    Storage / completion
 ```
+
+Week 1 and Week 2+ share the same explicit-job, immutable-submission, private-storage, and deterministic-artifact principles. Their publication paths differ intentionally: Week 1 removes the second semantic Finisher gate after Author/Critic to minimize time-to-first-material, while Week 2+ retains the normal deterministic Finisher lifecycle.
 
 ---
 
