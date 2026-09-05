@@ -32,13 +32,7 @@ describe('ChildSubscription Component', () => {
     }
 
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
 
     expect(html).toContain('訂閱中')
@@ -55,27 +49,12 @@ describe('ChildSubscription Component', () => {
 
   it('2. active + cancelAtPeriodEnd: shows canceled renewal status, resume button, and explanation that plan can be re-selected upon expiry', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-1',
-      childId: 'child-123',
-      status: 'active',
-      planCode: 'standard_monthly',
-      billingInterval: 'month',
-      priceTwd: 499,
-      currentPeriodEnd: '2026-09-16T00:00:00Z',
-      cancelAtPeriodEnd: true,
-      foundingStatus: 'none',
+      id: 'sub-1', childId: 'child-123', status: 'active', planCode: 'standard_monthly', billingInterval: 'month',
+      priceTwd: 499, currentPeriodEnd: '2026-09-16T00:00:00Z', cancelAtPeriodEnd: true, foundingStatus: 'none',
     }
-
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-
     expect(html).toContain('已取消自動續訂')
     expect(html).toContain('目前方案仍可使用至')
     expect(html).toContain('到期後可以重新選擇月繳或年繳方案。')
@@ -87,27 +66,12 @@ describe('ChildSubscription Component', () => {
 
   it('3. canceled status: re-displays the billing interval selector (monthly / annual)', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-1',
-      childId: 'child-123',
-      status: 'canceled',
-      planCode: 'standard_monthly',
-      billingInterval: 'month',
-      priceTwd: 499,
-      currentPeriodEnd: '2026-08-16T00:00:00Z',
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'none',
+      id: 'sub-1', childId: 'child-123', status: 'canceled', planCode: 'standard_monthly', billingInterval: 'month',
+      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'none',
     }
-
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-
     expect(html).toContain('訂閱已到期')
     expect(html).toContain('選擇付款週期')
     expect(html).toContain('年繳 NT$4,999')
@@ -118,29 +82,12 @@ describe('ChildSubscription Component', () => {
 
   it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation and lock CTA without exposing live seat count', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-1',
-      childId: 'child-123',
-      status: 'trialing',
-      planCode: 'standard_monthly',
-      billingInterval: 'month',
-      priceTwd: 499,
-      currentPeriodEnd: '2026-08-16T00:00:00Z',
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'eligible',
+      id: 'sub-1', childId: 'child-123', status: 'trialing', planCode: 'standard_monthly', billingInterval: 'month',
+      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'eligible',
     }
-
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        foundingAvailable={true}
-        foundingRemaining={7}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} foundingAvailable={true} foundingRemaining={7} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-
     expect(html).toContain('strike-price')
     expect(html).toContain('NT$499')
     expect(html).toContain('NT$349')
@@ -154,28 +101,12 @@ describe('ChildSubscription Component', () => {
 
   it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$349 discount again', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-1',
-      childId: 'child-123',
-      status: 'canceled',
-      planCode: 'standard_monthly',
-      billingInterval: 'month',
-      priceTwd: 499,
-      currentPeriodEnd: '2026-08-16T00:00:00Z',
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'forfeited',
+      id: 'sub-1', childId: 'child-123', status: 'canceled', planCode: 'standard_monthly', billingInterval: 'month',
+      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'forfeited',
     }
-
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        foundingAvailable={true}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} foundingAvailable={true} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-
     expect(html).toContain('月繳 NT$499')
     expect(html).not.toContain('strike-price')
     expect(html).not.toContain('NT$349')
@@ -185,27 +116,12 @@ describe('ChildSubscription Component', () => {
 
   it('6. trialing status: shows billing interval selector', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-1',
-      childId: 'child-123',
-      status: 'trialing',
-      planCode: 'standard_monthly',
-      billingInterval: 'month',
-      priceTwd: null,
-      currentPeriodEnd: '2026-08-20T00:00:00Z',
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'none',
+      id: 'sub-1', childId: 'child-123', status: 'trialing', planCode: 'standard_monthly', billingInterval: 'month',
+      priceTwd: null, currentPeriodEnd: '2026-08-20T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'none',
     }
-
     const html = renderToStaticMarkup(
-      <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
-      />
+      <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-
     expect(html).toContain('體驗期')
     expect(html).toContain('選擇付款週期')
   })
@@ -214,21 +130,10 @@ describe('ChildSubscription Component', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
         child={mockChild}
-        waitlist={{
-          id: 'w-1',
-          childId: 'child-123',
-          status: 'waiting',
-          createdAt: '2026-08-20T00:00:00Z',
-          releasedAt: null,
-          convertedAt: null,
-          notes: null,
-        }}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
+        waitlist={{ id: 'w-1', childId: 'child-123', status: 'waiting', createdAt: '2026-08-20T00:00:00Z', releasedAt: null, convertedAt: null, notes: null }}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
-
     expect(html).toContain('等候名單中')
     expect(html).toContain('目前學習名額等候中。我們會在名額開放時以 Email 通知您，屆時再啟用訂閱，目前不會產生任何費用。')
     expect(html).not.toContain('選擇付款週期')
@@ -239,21 +144,10 @@ describe('ChildSubscription Component', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
         child={mockChild}
-        waitlist={{
-          id: 'w-1',
-          childId: 'child-123',
-          status: 'released',
-          createdAt: '2026-08-20T00:00:00Z',
-          releasedAt: '2026-08-20T02:00:00Z',
-          convertedAt: null,
-          notes: null,
-        }}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
+        waitlist={{ id: 'w-1', childId: 'child-123', status: 'released', createdAt: '2026-08-20T00:00:00Z', releasedAt: '2026-08-20T02:00:00Z', convertedAt: null, notes: null }}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
-
     expect(html).toContain('名額已開放')
     expect(html).toContain('🎉 學習名額已為孩子開放！請選擇訂閱方案以啟用每週教材生成。')
     expect(html).toContain('選擇付款週期')
@@ -266,22 +160,11 @@ describe('ChildSubscription Component', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
         child={mockChild}
-        waitlist={{
-          id: 'w-1',
-          childId: 'child-123',
-          status: 'released',
-          createdAt: '2026-08-20T00:00:00Z',
-          releasedAt: '2026-08-20T02:00:00Z',
-          convertedAt: null,
-          notes: null,
-        }}
+        waitlist={{ id: 'w-1', childId: 'child-123', status: 'released', createdAt: '2026-08-20T00:00:00Z', releasedAt: '2026-08-20T02:00:00Z', convertedAt: null, notes: null }}
         foundingAvailable={true}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
-
     expect(html).toContain('名額已開放')
     expect(html).toContain('月繳 NT$349')
     expect(html).toContain('創始 30 限定')
@@ -310,66 +193,40 @@ describe('ChildSubscription Component', () => {
     expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。')
   })
 
-  it('11. trialing with freePilotActive=true: displays 每週專屬教材全面免費中, free weekly reassurance, and voluntary early subscription distinction', () => {
+  it('11. trialing with freePilotActive=true: uses calm Beta/NT$0 copy and keeps voluntary paid Founder choice explicit', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-beta-1',
-      childId: 'child-123',
-      status: 'trialing',
-      planCode: 'beta_monthly',
-      billingInterval: 'month',
-      priceTwd: null,
-      currentPeriodEnd: '2026-09-16T00:00:00Z',
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'eligible',
+      id: 'sub-beta-1', childId: 'child-123', status: 'trialing', planCode: 'beta_monthly', billingInterval: 'month',
+      priceTwd: null, currentPeriodEnd: '2026-09-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'eligible',
     }
-
     const html = renderToStaticMarkup(
       <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        freePilotActive={true}
-        foundingAvailable={true}
-        foundingRemaining={28}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
+        child={mockChild} subscription={subscription} freePilotActive={true} foundingAvailable={true} foundingRemaining={28}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
 
-    expect(html).toContain('每週專屬教材全面免費中')
-    expect(html).toContain('現在不訂閱也能持續免費使用')
-    expect(html).toContain('🔥 前 100 位學員每週專屬教材完全免費，現在不訂閱也能正常使用！')
-    expect(html).toContain('若您希望在創始 30 名額用完前永久鎖定 NT$349/月席次，可自願提前訂閱')
+    expect(html).toContain('Paper English Beta · 每週教材 NT$0')
+    expect(html).toContain('目前免填信用卡、免綁卡')
+    expect(html).toContain('現在不訂閱也能持續使用')
+    expect(html).toContain('🧪 Paper English Beta · 目前每週教材 NT$0')
+    expect(html).toContain('100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷')
+    expect(html).not.toContain('前 100 位學員')
+    expect(html).not.toContain('🔥')
     expect(html).toContain('自願訂閱會立即開始扣款計費')
     expect(html).toContain('自願訂閱並鎖定 NT$349 創始價（立即扣款）')
   })
 
   it('12. post-pilot with freePilotActive=false and currentPeriodEnd=null: displays 初期免費階段已結束 and guides to paid plans', () => {
     const subscription: SubscriptionView = {
-      id: 'sub-beta-1',
-      childId: 'child-123',
-      status: 'trialing',
-      planCode: 'beta_monthly',
-      billingInterval: null,
-      priceTwd: null,
-      currentPeriodEnd: null,
-      cancelAtPeriodEnd: false,
-      foundingStatus: 'eligible',
+      id: 'sub-beta-1', childId: 'child-123', status: 'trialing', planCode: 'beta_monthly', billingInterval: null,
+      priceTwd: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, foundingStatus: 'eligible',
     }
-
     const html = renderToStaticMarkup(
       <ChildSubscription
-        child={mockChild}
-        subscription={subscription}
-        freePilotActive={false}
-        foundingAvailable={true}
-        foundingRemaining={19}
-        onSubscribe={vi.fn()}
-        onCancel={vi.fn()}
-        onResume={vi.fn()}
+        child={mockChild} subscription={subscription} freePilotActive={false} foundingAvailable={true} foundingRemaining={19}
+        onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
-
     expect(html).toContain('初期免費階段已結束')
     expect(html).toContain('已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。')
     expect(html).toContain('月繳 NT$349')
