@@ -45,6 +45,16 @@ describe('branded Supabase auth email templates', () => {
     expect(html).not.toContain('Click me')
   })
 
+  it('keeps the Magic Link behind a single branded button instead of printing a phishing-looking raw URL', () => {
+    const html = readFileSync(resolve(import.meta.dirname, 'magic-link.html'), 'utf8')
+    const confirmationUrlOccurrences = html.match(/{{ \.ConfirmationURL }}/g) ?? []
+
+    expect(confirmationUrlOccurrences).toHaveLength(1)
+    expect(html).toContain('若按鈕沒有反應，請回到紙屬英文重新寄送一封登入信。')
+    expect(html).not.toContain('請複製以下連結到瀏覽器')
+    expect(html).not.toContain('word-break:break-all')
+  })
+
   it('brands the waitlist release notification email', () => {
     const html = readFileSync(resolve(import.meta.dirname, 'waitlist-release.html'), 'utf8')
     expect(html).toContain('lang="zh-Hant"')
