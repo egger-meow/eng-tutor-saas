@@ -1,0 +1,244 @@
+.landing-section-nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin: 1.25rem auto 0;
+  padding: 0.8rem 1rem;
+  max-width: 980px;
+  border: 1px solid rgba(36, 56, 47, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 253, 247, 0.92);
+  box-shadow: 0 10px 30px rgba(36, 56, 47, 0.06);
+}
+
+.landing-section-nav a {
+  color: #335549;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+}
+
+.landing-section-nav a:hover,
+.landing-section-nav a:focus-visible {
+  background: #edf5ef;
+  color: #173f35;
+}
+
+.hero-beta-badge {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid #b8d5c4;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f5fbf7 0%, #fffdf7 100%);
+}
+
+.hero-beta-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #245c49;
+}
+
+.hero-beta-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.hero-beta-price strong {
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  line-height: 1;
+  color: #173f35;
+}
+
+.hero-beta-price span {
+  font-weight: 700;
+  color: #365d50;
+}
+
+.hero-beta-meta {
+  margin: 0;
+  color: #5f7068;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.hero-beta-capacity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  margin-top: 0.15rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  background: #f4f0e6;
+  color: #617068;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.early-sample-section {
+  scroll-margin-top: 90px;
+}
+
+.early-sample-intro {
+  max-width: 760px;
+  margin-bottom: 1.5rem;
+}
+
+.early-sample-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1rem 0 0;
+}
+
+.early-sample-proof span {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: #f4f0e6;
+  color: #4f645a;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.onboarding-success-card,
+.onboarding-progress-card {
+  width: min(100%, 680px);
+  margin: 0 auto;
+  padding: clamp(1.4rem, 4vw, 2.2rem);
+  border: 1px solid rgba(36, 56, 47, 0.14);
+  border-radius: 20px;
+  background: #fffdf7;
+  box-shadow: 0 18px 50px rgba(36, 56, 47, 0.09);
+}
+
+.onboarding-success-card h2,
+.onboarding-progress-card h1 {
+  margin: 0.35rem 0 0.75rem;
+  color: #173f35;
+}
+
+.onboarding-progress-list,
+.generation-progress-steps {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.15rem 0;
+}
+
+.onboarding-progress-list > div,
+.generation-progress-steps > div {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.6rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 12px;
+  background: #f6f3ea;
+  color: #51655b;
+}
+
+.onboarding-progress-list .progress-active,
+.generation-progress-steps .active {
+  background: #edf5ef;
+  color: #173f35;
+}
+
+.progress-check,
+.progress-dot,
+.generation-progress-steps > div > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: #dcefe3;
+  color: #1e6a4d;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.progress-check-large {
+  width: 2.3rem;
+  height: 2.3rem;
+  font-size: 1rem;
+}
+
+.mini-spinner {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(36, 92, 73, 0.2);
+  border-top-color: #245c49;
+  border-radius: 50%;
+  animation: paper-spin 0.8s linear infinite;
+}
+
+.onboarding-progress-shell {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.onboarding-progress-error {
+  border-color: #e6c9bf;
+}
+
+.generation-progress {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.generation-progress-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.generation-progress-heading h2,
+.generation-progress-heading p {
+  margin-top: 0;
+}
+
+.generation-progress-ready {
+  border-color: #b8d5c4;
+  background: #f7fbf8;
+}
+
+@keyframes paper-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .landing-section-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    border-radius: 14px;
+    scrollbar-width: none;
+  }
+
+  .landing-section-nav::-webkit-scrollbar { display: none; }
+
+  .landing-section-nav a { white-space: nowrap; }
+
+  .hero-beta-price { align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-spinner { animation-duration: 1.8s; }
+}
