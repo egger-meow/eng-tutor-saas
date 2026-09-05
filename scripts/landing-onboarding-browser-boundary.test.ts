@@ -9,7 +9,8 @@ const childCard = readFileSync(resolve(root, 'apps/web/src/components/dashboard/
 
 describe('landing onboarding browser boundary', () => {
   it('delegates Email onboarding to the trusted Edge Function helper instead of browser-side pending/Auth orchestration', () => {
-    expect(source).toContain("import { startLandingOnboarding } from '../../lib/landing-onboarding-start'")
+    expect(source).toContain("from '../../lib/landing-onboarding-start'")
+    expect(source).toContain('startLandingOnboarding')
     expect(source).toContain('const result = await startLandingOnboarding({')
     expect(source).not.toContain('createPendingOnboarding')
     expect(source).not.toContain('buildAuthRedirectUrl')
