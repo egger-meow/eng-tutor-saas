@@ -56,9 +56,12 @@ export function ChildOnboardingPage({
     if (!childId || initialDraft || readDraft(storageKey)) return
     void Promise.all([listChildren(), listChildProfiles([childId])]).then(([children, profiles]) => {
       const child = children.find((item) => item.id === childId)
-      if (!child) throw new Error('找不到這位孩子，或你沒有存取權限。')
+      if (!child) throw new Error('child_not_found')
       setDraft(profileDraftFromChild({ ...child, profile: profiles.find((profile) => profile.child_id === childId) ?? null }))
-    }).catch((caught) => setError(caught instanceof Error ? caught.message : '無法載入孩子資料。')).finally(() => setLoading(false))
+    }).catch((caught) => {
+      console.error('Child profile load failed', caught)
+      setError('目前無法載入孩子資料，請稍後再試。')
+    }).finally(() => setLoading(false))
   }, [childId, initialDraft, storageKey])
 
   function update(patch: Partial<ProfileDraft>) {
@@ -94,7 +97,8 @@ export function ChildOnboardingPage({
       window.sessionStorage.removeItem(storageKey)
       navigate(`/children/${id}`)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '無法儲存學習資料，請稍後再試。')
+      console.error('Child profile save failed', caught)
+      setError('目前無法儲存學習資料，請稍後再試。')
     } finally { setBusy(false) }
   }
 
