@@ -1,6 +1,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 import { startLandingOnboarding } from '../_shared/landing-onboarding-start.ts'
+import { dispatchWeek1WakeDoorbells } from '../_shared/week1-fast-dispatch.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -93,8 +94,33 @@ Deno.serve(async (request) => {
         if (error) throw error
         return data
       },
+      issueProgressToken: async (token) => {
+        const { data, error } = await client.rpc('worker_issue_week1_progress_token_for_onboarding', {
+          p_onboarding_token: token,
+        })
+        if (error) throw error
+        return typeof data === 'string' && data ? data : null
+      },
       sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
     })
+
+    // Admission is already committed. GitHub is only a best-effort doorbell; any failure here
+    // must never turn a successful onboarding into a red error screen.
+    if (result.status === 'accepted') {
+      const githubToken = Deno.env.get('GITHUB_WEEK1_TOKEN')
+      const wakePrNumber = Deno.env.get('GITHUB_WEEK1_WAKE_PR_NUMBER')
+      if (githubToken && wakePrNumber) {
+        try {
+          await dispatchWeek1WakeDoorbells(client, {
+            token: githubToken,
+            repo: Deno.env.get('GITHUB_WEEK1_REPO') ?? 'egger-meow/eng-tutor-saas',
+            wakePrNumber,
+          })
+        } catch {
+          console.warn('[week1-fast] immediate wake doorbell failed; outbox retained')
+        }
+      }
+    }
 
     return json(200, result)
   } catch (error) {
