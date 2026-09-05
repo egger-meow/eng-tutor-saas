@@ -47,12 +47,34 @@ export function LandingOnboardingPanel() {
     const token = readWeek1ProgressToken()
     if (!token) return
 
+    const startedAt = Date.now()
     let cancelled = false
     let inFlight = false
     let timer: number | null = null
 
+    const nextDelay = () => {
+      const elapsed = Date.now() - startedAt
+      if (elapsed < 30_000) return 2_000
+      if (elapsed < 180_000) return 5_000
+      return 10_000
+    }
+
+    const schedule = () => {
+      if (cancelled) return
+      timer = window.setTimeout(() => {
+        timer = null
+        void poll()
+      }, nextDelay())
+    }
+
     const poll = async () => {
-      if (cancelled || inFlight || document.hidden) return
+      if (cancelled || inFlight) return
+      if (Date.now() - startedAt >= 2 * 60 * 60 * 1000) {
+        clearWeek1ProgressToken()
+        return
+      }
+      if (document.hidden) return
+
       inFlight = true
       try {
         const progress = await readAnonymousWeek1Progress(token)
@@ -66,12 +88,12 @@ export function LandingOnboardingPanel() {
       } finally {
         inFlight = false
       }
-      if (!cancelled) timer = window.setTimeout(poll, 2500)
+      schedule()
     }
 
     void poll()
     const onVisibility = () => {
-      if (!document.hidden && !cancelled && !timer) void poll()
+      if (!document.hidden && !cancelled && timer === null && !inFlight) void poll()
     }
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
