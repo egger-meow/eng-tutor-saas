@@ -101,7 +101,8 @@ export function LandingOnboardingPanel() {
       setSubmissionStatus(result.status)
       setMode('submitted')
     } catch (caught) {
-      setNotice({ kind: 'error', text: caught instanceof Error ? caught.message : '目前無法送出登入信，請稍後再試。' })
+      console.error('Landing onboarding request failed', caught)
+      setNotice({ kind: 'error', text: '目前無法送出登入信，請稍後再試。若剛剛已收到 Email，請直接使用最新一封登入信。' })
     } finally {
       setBusy(false)
     }
