@@ -219,8 +219,9 @@ describe('getDeliveryViewModel — Week 1 Fast Lane', () => {
 describe('subscription gating after Week 1', () => {
   it('requires a subscription for the next packet when Week 1 has completed and no paid subscription exists', () => {
     const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-14', releaseAt: '2026-08-14T01:00:00Z' })
+    const unsubscribedChild = { ...baseChild, subscription: null }
     const view = getDeliveryViewModel(
-      { ...baseChild, subscription: null },
+      unsubscribedChild,
       currentWeek1,
       null,
       '2026-08-21T01:00:00Z',
