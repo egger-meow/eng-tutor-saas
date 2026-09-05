@@ -1,17 +1,17 @@
 # Week 1 Fast Lane Design
 
-Date: 2026-09-05
-Status: Proposed, user-approved in chat; implementation must not begin until this written design is reviewed.
-Scope: First-material authoring latency, fast publication, parent-visible live progress, and truthful Week 1 messaging.
+Date: 2026-09-05  
+Status: Proposed, user-approved in chat; implementation begins only after this written design is reviewed.  
+Scope: First-material authoring latency, event wake-up, fast publication, parent-visible live progress, and truthful Week 1 messaging.  
 Production repo: `egger-meow/eng-tutor-saas`
 
 ## 1. Goal
 
 A newly admitted child should feel as if Paper English starts making the first personalized packet immediately after the parent finishes onboarding.
 
-Week 1 is the acquisition-critical packet. The product should optimize it for **time-to-first-material** without weakening privacy, ownership, artifact integrity, or the quality of the authoring process itself.
+Week 1 is acquisition-critical. Optimize **time-to-first-material** without weakening privacy, ownership, artifact integrity, idempotency, or the Author/Critic quality process.
 
-The intended parent experience is:
+The parent-facing progression is:
 
 ```text
 ✓ 資料已收到
@@ -21,140 +21,141 @@ The intended parent experience is:
 ✓ 教材可以下載
 ```
 
-The active step is animated and visibly alive. The progression is backed by authoritative database state. The UI must not fabricate percentages or fake progress.
+The active step is animated and visibly alive. Progress is backed by authoritative database state. Never fabricate percentages, countdowns, or fake completion estimates.
 
-Week 2 and later remain on the existing rolling weekly authoring pipeline.
+Week 2 and later stay on the existing rolling weekly pipeline.
 
-## 2. Product Decision
-
-Week 1 gets a dedicated **Fast Lane**.
+## 2. Permanent Architectural Split
 
 ```text
-eligible Week 1 job
-↓
-near-real-time wake signal
-↓
-ChatGPT Work / compatible authoring executor
-↓
-research → plan → author → critic → targeted repair
-↓
-immutable curriculum submission
-↓
-Week 1 Fast Publisher
-↓
-render → inspect → private upload → atomic material completion
-↓
-immediate release
+Week 1
+explicit job
+→ near-real-time wake
+→ Author/Critic/repair
+→ immutable submission
+→ Week 1 Fast Publisher
+→ render/inspect/upload/complete
+→ immediate release
+
+Week 2+
+explicit job
+→ normal authoring
+→ immutable submission
+→ deterministic Finisher
+→ normal release lifecycle
 ```
 
 The Week 1 Fast Publisher is **not the normal Finisher**.
 
-The independent Finisher semantic/audit publication gate is skipped for Week 1. The authoring stage remains responsible for producing a valid, high-quality package and keeps its current research, Author, Critic, targeted-repair, and pre-submit validation contract.
+For Week 1, skip the independent Finisher semantic/audit publication gate after Author/Critic. The authoring stage remains responsible for real production quality and keeps:
 
-The Fast Publisher keeps only non-negotiable publication integrity work required to produce a real downloadable artifact safely:
+- current production-authoring bundle;
+- public research;
+- planning;
+- authoring;
+- Critic review;
+- targeted repair;
+- pre-submit validation;
+- immutable submission;
+- read-after-write verification.
 
-- canonical package structure can be parsed;
+The Fast Publisher keeps only non-bypassable publication integrity needed to safely create a real artifact:
+
+- canonical structure parses;
 - job/package/child/release identities agree;
 - required question/answer relationships are not corrupt;
-- private PDF artifacts render successfully;
-- the Student and Parent PDFs are internally consistent and inspectable;
-- artifact paths belong to the claimed Week 1 job;
-- uploads succeed to private Storage;
+- deterministic Student and Parent PDFs render;
+- PDF pair inspection succeeds;
+- artifact paths belong to the correct job;
+- private Storage upload/recovery succeeds;
 - material/job/submission completion is atomic and idempotent;
-- Week 2 is scheduled from the actual Week 1 release anchor.
+- Week 2 is scheduled from actual Week 1 release.
 
-The Fast Publisher must **not** run `auditCurriculumPackageForFinisher()` or introduce another semantic/pedagogical quality review after the Author/Critic stage.
+The Fast Publisher must **not** call `auditCurriculumPackageForFinisher()` or introduce another semantic/pedagogical Critic after Author/Critic.
 
-This distinction is deliberate: if Week 1 authoring quality is poor, the authoring pipeline must be fixed. A second delayed semantic gate should not hide that defect by holding the first customer experience hostage.
+If Week 1 teaching quality is poor, fix the authoring pipeline. Do not hide authoring defects behind a slow second semantic gate.
 
 ## 3. Non-Goals
 
-This project does not:
+This change does not:
 
 - change Week 2+ authoring cadence;
-- add an LLM API integration;
-- call OpenAI Responses API, Gemini API, or another paid model API;
-- generate materials from arbitrary database row changes;
+- add OpenAI Responses API, Gemini API, or any paid model API;
+- generate because arbitrary rows changed;
 - make profile edits trigger immediate regeneration;
-- expose internal prompts, model reasoning, raw job records, private child state, or technical errors to parents;
-- replace the canonical explicit `generation_jobs` queue;
-- invent fake progress percentages;
-- make GitHub the source of truth for jobs or child data.
+- expose prompts, reasoning, raw jobs, raw submissions, or technical errors to parents;
+- replace explicit `generation_jobs`;
+- make GitHub the source of truth;
+- add fake progress percentages.
 
-## 4. Existing Architecture to Preserve
+## 4. Existing Invariants to Preserve
 
-The following existing invariants remain authoritative:
-
-1. Every material starts from an explicit `generation_jobs` row.
+1. Every packet starts from an explicit `generation_jobs` row.
 2. A worker claims before authoring.
-3. Production authoring reads the current compiled production authoring bundle.
+3. Production authoring reads the current Git SHA and compiled production-authoring bundle.
 4. Child/private data stays in Supabase and never enters GitHub comments.
-5. Public web research uses generalized topic queries only.
+5. Public research uses generalized topic queries only.
 6. Canonical package source is immutable per authoring attempt.
-7. Released materials are immutable historical artifacts.
-8. Week 2+ continues through the normal submission/Finisher path.
-9. Completed Week 1 may release earlier than its original fallback release anchor, and Week 2 cadence follows the actual Week 1 release.
+7. Released materials remain immutable historical artifacts.
+8. Week 2+ continues through normal Submission → Finisher.
+9. Completed Week 1 may release early, and Week 2 cadence follows actual Week 1 release.
+10. Existing historical migrations are immutable audit history. Do not edit old migrations merely because their comments describe the former next-day design; add forward-only migrations and update current SPEC/code/tests instead.
 
 ## 5. Fast-Lane Eligibility
 
-A fast-lane job must satisfy all of the following:
+A fast-lane job must:
 
-- it is an active, entitled generation job;
-- it is the child’s first canonical packet;
-- `source_material_id IS NULL`;
-- no completed material already exists for that child/job;
-- the job is not canceled or terminally failed;
-- it has not already been successfully completed through either the fast or normal path.
+- be entitled and active;
+- represent the child’s first canonical packet;
+- have `source_material_id IS NULL`;
+- have no completed material already attached;
+- not be canceled or terminally failed;
+- not already be completed through the fast or normal path.
 
-The dedicated worker identity is:
+Dedicated authoring identity:
 
 ```text
 chatgpt-week1-fast
 ```
 
-A new server-owned claim RPC must claim **only** eligible Week 1 fast-lane jobs. It must never claim Week 2+ work.
-
-Suggested public bridge surface:
+Add a server-owned atomic claim/start path that claims **only** eligible Week 1 jobs, conceptually:
 
 ```text
 public.worker_start_week1_fast_batch('chatgpt-week1-fast')
 ```
 
-The implementation may use an internal/private helper, but browser roles must never receive execution privilege.
+Browser roles have no execution privilege.
 
-Claiming must stay atomic and collision-safe with all existing workers. If a normal worker already holds a live lease, the fast worker does not steal it. If the fast worker already owns a live lease, recovery resumes that batch rather than creating a second attempt.
+The claim path must coexist safely with normal workers:
+
+- never steal a live lease;
+- resume a live lease already owned by `chatgpt-week1-fast` rather than claiming twice;
+- allow a later normal daily worker to act as fallback if the fast path never acquires the job;
+- never fast-claim Week 2+.
 
 ## 6. Wake Architecture Without Model API
 
-The Fast Lane uses GitHub only as a **doorbell**, never as the job payload.
+GitHub acts only as a **doorbell**. Supabase remains the sole job truth.
 
 ### 6.1 Permanent Wake PR
 
-Create one permanent draft pull request dedicated to Week 1 wake events. It must be clearly marked operational and not intended for merge.
+Create one permanent draft PR dedicated to Week 1 wake activity. Mark it clearly as operational and never intended for merge.
 
-A wake comment contains only an opaque, non-private event identifier, for example:
+Wake comments contain only an opaque event ID:
 
 ```text
 week1-wake:v1:<wake_event_uuid>
 ```
 
-It must never contain:
+Never include Email, child name, school, grade, interests, feedback, profile prose, generation context, or other private data. Avoid job ID because the agent does not need it.
 
-- Email;
-- child name;
-- school;
-- grade;
-- interests;
-- job ID if avoidable;
-- profile text;
-- feedback;
-- generation context.
+ChatGPT Work is configured externally to run an event-triggered task for comment activity on this PR. On wake, Work ignores the comment as generation input, reads current main + production Supabase, and invokes the dedicated Week 1 claim path.
 
-ChatGPT Work is configured separately to react to comment activity on this PR. On wake, the agent reads the authoritative production repo and Supabase queue, then invokes the dedicated Week 1 claim path. GitHub comment content is never trusted as generation input.
+Operational prerequisite as of 2026-09-05: eligible ChatGPT Work users can create webhook-triggered tasks for supported GitHub pull-request activity, including comments depending on trigger configuration. Re-verify this external capability before enablement because product capabilities can change.
 
 ### 6.2 Transactional Wake Outbox
 
-A Week 1 job creation must create an opaque wake-outbox record transactionally or idempotently. Suggested private table:
+Creating an eligible Week 1 job also creates one idempotent private wake-outbox row:
 
 ```text
 private_generation.week1_wake_outbox
@@ -162,77 +163,83 @@ private_generation.week1_wake_outbox
 id uuid primary key
 job_id uuid unique not null
 status pending | sent | failed
-attempt_count integer
+attempt_count integer not null
 last_error_code text null
-created_at timestamptz
+created_at timestamptz not null
 sent_at timestamptz null
-updated_at timestamptz
+updated_at timestamptz not null
 ```
 
-No browser role may read this table.
+No browser role can read it.
 
-The outbox gives the wake mechanism retryability without coupling enrollment success to GitHub availability.
+For landing first-child onboarding, after trusted activation succeeds, the server attempts the GitHub wake immediately. Failure must not roll back child/job activation. The outbox remains retryable, parent UI stays calm, and the normal daily worker remains the final fallback.
 
-### 6.3 Fast Path + Recovery
+A cheap retry mechanism handles unsent wake rows. Repeated dispatch is safe because authoring claim is authoritative and atomic.
 
-For the landing first-child flow, after trusted activation succeeds and the Week 1 job exists, the server should attempt to dispatch the wake immediately.
+## 7. Week 1 Authoring Contract
 
-If the GitHub wake call fails:
-
-- onboarding still succeeds;
-- the parent sees a calm queued state, not a technical error;
-- the outbox remains pending/failed for retry;
-- an inexpensive retry mechanism re-attempts unsent wake records;
-- the existing daily worker remains a final fallback, so the job cannot disappear.
-
-A dispatch failure must never roll back the admitted child or initial generation job.
-
-## 7. Authoring Contract
-
-The Week 1 authoring executor still performs the real production authoring sequence:
+The fast author still performs:
 
 ```text
 claim exactly once
-↓
-read current Git SHA + current production bundle
-↓
-load claimed Week 1 generation context
-↓
-public research with generalized queries only
-↓
-plan
-↓
-author
-↓
-critic
-↓
-targeted repair when needed
-↓
-pre-submit validation
-↓
-immutable submission
-↓
-read-after-write verification
+→ record current main SHA + bundle metadata
+→ load claimed Week 1 context
+→ public research with generalized queries
+→ plan
+→ author
+→ critic
+→ targeted repair if needed
+→ pre-submit validation
+→ immutable submission
+→ read-after-write verify
 ```
 
-Speed does not mean omitting Author/Critic or knowingly emitting a generic worksheet.
+Speed does not mean omitting Critic work or knowingly producing a generic worksheet.
 
-The authoring executor stops after a confirmed immutable submission. It does not render or upload PDFs itself.
+The author stops after confirmed immutable submission. It never renders/uploads PDFs itself.
 
-## 8. Immediate Fast Publisher Trigger
+## 8. Immediate Publisher Dispatch
 
-A confirmed Week 1 submission should trigger publication immediately rather than wait for the hourly Finisher schedule.
+A confirmed Week 1 submission must wake publication immediately instead of waiting for the hourly Finisher schedule.
 
-Recommended implementation:
+### 8.1 Publish Outbox
 
-1. The authoritative authoring bridge accepts the immutable Week 1 submission.
-2. After the submission is durably confirmed, the server emits a GitHub `repository_dispatch` event for the Week 1 Fast Publisher.
-3. The dispatch payload contains only an opaque submission/job identity required by the trusted workflow, never child profile data.
-4. Dispatch failure does not invalidate the submission; a retry/recovery path can dispatch it again idempotently.
+Add a second private outbox keyed by immutable authoring attempt:
 
-The GitHub dispatch credential must be a repository-scoped GitHub App token or fine-grained token with the minimum permission required. It is stored server-side only, never in frontend configuration.
+```text
+private_generation.week1_publish_outbox
 
-## 9. Fast Publisher
+id uuid primary key
+job_id uuid not null
+authoring_attempt integer not null
+status pending | sent | failed
+attempt_count integer not null
+last_error_code text null
+created_at timestamptz not null
+sent_at timestamptz null
+updated_at timestamptz not null
+unique(job_id, authoring_attempt)
+```
+
+The outbox row is created only after the curriculum submission is durably stored. Dispatch loss can therefore never lose the submission.
+
+### 8.2 Repository Dispatch
+
+After durable submission, the server sends a GitHub `repository_dispatch` event such as:
+
+```text
+week1-fast-publish
+```
+
+The event carries **no child/job/package payload**. It is only a bell saying "claim pending Week 1 fast submissions now".
+
+The GitHub workflow claims authoritative pending work from Supabase. Duplicate repository-dispatch events are harmless.
+
+If dispatch fails, the publish outbox remains retryable and the immutable submission remains intact.
+
+The server-side GitHub credential must be a repository-scoped GitHub App token or minimum-scope fine-grained token. It must never enter frontend configuration.
+
+## 9. Week 1 Fast Publisher
 
 Add a dedicated workflow, conceptually:
 
@@ -240,76 +247,76 @@ Add a dedicated workflow, conceptually:
 .github/workflows/publish-week1-fast.yml
 ```
 
-Trigger:
+Triggers:
 
 ```text
 repository_dispatch: week1-fast-publish
 workflow_dispatch: operator recovery only
 ```
 
-Concurrency must prevent duplicate processing of the same Week 1 submission while allowing different children to publish independently.
+Use a concurrency policy that prevents overlapping fast-publisher batches from processing the same submissions. The workflow may claim a small batch of pending Week 1 submissions; it does not need an identity in the dispatch payload.
 
-The Fast Publisher:
+Fast Publisher flow:
 
-1. checks out the exact/current production release expected by the submission;
-2. installs deterministic PDF dependencies;
-3. claims only eligible Week 1 fast submissions through a dedicated server-owned RPC;
-4. loads the immutable canonical package;
-5. performs objective package integrity validation only;
-6. stamps deterministic renderer/worker version metadata;
-7. renders Student and Parent Answer PDFs;
-8. runs deterministic PDF pair inspection;
-9. uploads/reuses artifacts idempotently under the canonical private paths;
-10. atomically completes the material, job, and submission;
-11. schedules Week 2 from the actual Week 1 release timestamp;
-12. exits successfully if the same submission was already published.
+1. checkout current/required production release;
+2. install deterministic PDF dependencies;
+3. claim only eligible Week 1 fast submissions through a dedicated server-owned RPC;
+4. load immutable canonical source;
+5. run objective package integrity validation only;
+6. stamp deterministic renderer/worker metadata;
+7. render Student and Parent Answer PDFs;
+8. run deterministic PDF pair inspection;
+9. upload/recover canonical private artifacts idempotently;
+10. atomically complete material + job + submission;
+11. immediately release Week 1;
+12. schedule Week 2 from actual Week 1 release;
+13. succeed idempotently if work was already completed.
 
-### 9.1 What Fast Publisher Must Not Do
+### 9.1 Explicitly Forbidden in Fast Publisher
 
-It must not:
+Fast Publisher must not:
 
 - call `auditCurriculumPackageForFinisher()`;
-- run a second semantic Critic;
+- run another semantic Critic;
 - reject on warning-only pedagogical heuristics;
-- retry authoring by itself;
-- mutate canonical source;
-- silently substitute another package;
-- publish a structurally corrupt, misbound, unrenderable, wrong-child, or unsafe artifact.
+- author or repair curriculum itself;
+- mutate the immutable package;
+- substitute another package;
+- act on Week 2+;
+- publish structurally corrupt, misbound, unrenderable, wrong-child, or unsafe artifacts.
 
 ### 9.2 Dedicated Atomic Completion RPC
 
-Do not reuse the normal Finisher completion semantics by pretending the fast publisher is the authoring worker.
+Do not pretend the publisher is the original authoring worker just to reuse the existing completion lease.
 
-Prefer a dedicated atomic RPC similar to:
+Prefer an explicit RPC such as:
 
 ```text
 public.worker_complete_week1_fast_submission(...)
 ```
 
-It must verify:
+It verifies:
 
-- the submission is the current immutable attempt;
-- the fast-publisher processor lease is valid;
-- the job is a first-packet job (`source_material_id IS NULL`);
-- the job does not already have a different material;
-- artifact paths match `child_id/job_id`;
-- package/job identities match;
-- completion is idempotent.
+- current immutable submission attempt;
+- valid fast-publisher processor lease;
+- `source_material_id IS NULL`;
+- no conflicting completed material;
+- canonical artifact paths;
+- package/job identities;
+- idempotency.
 
-In one transaction it must:
+One transaction must:
 
-- insert or recover the material identity;
-- mark the generation job completed;
-- set Week 1 `release_at` to the effective immediate completion/release time;
-- mark the curriculum submission completed with an explicit `week1_fast` publication path/outcome;
-- create/re-anchor Week 2 exactly seven days after actual Week 1 release, subject to the existing future guard and entitlement rules;
-- update the child’s next generation time.
+- insert/recover material identity;
+- mark generation job `completed`;
+- set actual Week 1 release to successful publication time;
+- mark curriculum submission completed with an explicit Week 1 fast publication outcome/path;
+- schedule/re-anchor Week 2 exactly seven days after actual Week 1 release, honoring existing entitlement and defensive future rules;
+- update child next-generation time.
 
-## 10. Progress Model
+## 10. Parent Progress Projection
 
-Parent progress is a projection of authoritative state, not a new competing workflow state machine.
-
-Canonical public stages:
+Public stages are a **projection** of existing authoritative rows, not a second competing workflow machine:
 
 ```text
 received
@@ -319,12 +326,15 @@ publishing
 ready
 ```
 
-Recommended mapping:
+Use authoritative timestamps for `stage_updated_at` where possible:
+
+- `received`: trusted activation/admission timestamp;
+- `queued`: Week 1 job creation timestamp;
+- `authoring`: active job claim/start timestamp;
+- `publishing`: immutable submission creation / publisher processing timestamp;
+- `ready`: job completion/material timestamp.
 
 ### `received`
-Trusted onboarding activation has succeeded and an eligible child is admitted. The first generation job may be in the same transaction or immediately discoverable.
-
-Parent copy:
 
 ```text
 ✓ 資料已收到
@@ -332,9 +342,8 @@ Parent copy:
 ```
 
 ### `queued`
-Week 1 generation job exists and remains `pending`, regardless of whether the wake event has already been sent.
 
-Parent copy:
+`generation_jobs.status = pending` and no later state exists.
 
 ```text
 ● 已排入教材製作
@@ -342,124 +351,106 @@ Parent copy:
 ```
 
 ### `authoring`
-The Week 1 job has an active claim/authoring attempt and no confirmed submission has yet advanced it to publication.
 
-Parent copy:
+An active Week 1 claim exists and no immutable submission has advanced the job to publication.
 
 ```text
 ● 正在製作內容
 正在依孩子的程度、興趣與學習目標編寫第一週教材。
 ```
 
-### `publishing`
-A current immutable curriculum submission exists in `pending` or `processing`, or the dedicated fast publisher owns the active publication lease.
+This mapping also works if the normal daily worker becomes the fallback author.
 
-Parent copy:
+### `publishing`
+
+Current immutable submission exists in `pending`/`processing`, or Fast Publisher holds the active publication lease.
 
 ```text
 ● 品質檢查與排版
 內容已經成形，正在整理學生教材與家長解答。
 ```
 
-The wording intentionally says quality check because Author/Critic quality work has already happened and deterministic artifact checks are happening now; it must not imply a second semantic Finisher gate.
+The copy may say quality check because Author/Critic has already run and deterministic artifact checks are in progress. It must not imply a second semantic Finisher gate.
 
 ### `ready`
-The generation job is completed and has a material ID accessible to the owning parent after normal authorization.
 
-Parent copy:
+Job is completed with a material ID.
 
 ```text
 ✓ 教材可以下載
 第一週教材已完成，可以開始使用了。
 ```
 
-### Waitlist
-Waitlisted children do not show fake production progress. They show the authoritative waitlist state instead.
+Waitlisted children never show fake production progress.
 
-## 11. Parent-Safe Progress API
+## 11. Parent-Safe Progress Access
 
-### 11.1 Authenticated Path
+### 11.1 Authenticated
 
-Add a parent-owned RPC/view that exposes only safe progress fields for owned children, for example:
+Add an owner-scoped RPC/view exposing only:
 
 ```text
 stage
 stage_updated_at
 ready
-material_id when authorized
+material_id when normally authorized
 ```
 
-It must not expose:
+Never expose raw error fields, worker/processor IDs, canonical source, submission payload, prompts, reasoning, or new private profile data.
 
-- raw `generation_jobs` error fields;
-- claimed worker IDs;
-- processor IDs;
-- prompt/model reasoning;
-- canonical source;
-- submission payload;
-- private child/profile fields not already part of the parent surface.
+### 11.2 Pre-Auth Landing
 
-### 11.2 Pre-Auth Landing Path
+Anonymous browser roles must not gain general read access to `generation_jobs` or private submissions.
 
-The anonymous browser must not receive general read access to `generation_jobs` or private submissions.
+After trusted first-time activation, issue a separate short-lived opaque **progress token**. Store only its hash server-side. Suggested expiry: 2 hours.
 
-When trusted first-time activation succeeds, create a separate short-lived opaque **progress token**. Store only its hash server-side. Suggested expiry: 2 hours, extendable only by normal authenticated access rather than token refresh.
+Return the raw token only to that browser after successful activation; store it in `sessionStorage`, never analytics metadata or public URL.
 
-The start-onboarding response may return the raw progress token to the same browser after activation. Store it in session storage, not analytics metadata and not a public URL.
+A public Edge Function accepts the token and returns the single sanitized Week 1 projection only.
 
-A public Edge Function accepts only this token and returns a sanitized progress projection for the single associated Week 1 job.
+The token:
 
-The progress token:
-
-- is random and unguessable;
-- is stored hashed at rest;
+- is random/unguessable;
+- is hashed at rest;
 - is single-purpose;
 - is short-lived;
-- does not authenticate the parent account;
-- cannot download PDFs;
-- cannot reveal Email or child profile;
-- can be revoked/scrubbed after successful authenticated binding or expiry.
+- cannot authenticate an account;
+- cannot download a PDF;
+- cannot reveal Email or profile;
+- is scrubbed/revoked after authenticated binding or expiry.
 
-The existing onboarding handoff token must not be repurposed as the progress token unless a security review proves the scopes remain independent. Separate tokens are preferred.
+Do not reuse the onboarding handoff token unless a security review proves scope independence. Separate token is the default.
 
 ## 12. Live Progress UI
 
-The progress component appears immediately after successful first-time onboarding and on the authenticated child/dashboard surface until Week 1 becomes ready.
+Show the live progress component immediately after successful first-time onboarding and on authenticated child/dashboard surfaces until Week 1 is ready.
 
-### 12.1 Visual Behavior
+### Visual behavior
 
-The component uses a vertical or compact horizontal five-step timeline depending on viewport width.
-
-Completed steps:
+Completed step:
 
 - solid check icon;
-- calm completed styling;
-- connector line filled through the completed step.
+- filled connector through that step;
+- calm completed state.
 
 Active step:
 
-- rotating ring around the step icon;
-- subtle breathing/pulse on the active card;
-- gentle shimmer or moving highlight in the connector toward the next step;
-- copy such as `正在製作中…` that makes current work legible.
+- rotating ring around the icon;
+- subtle breathing/pulse;
+- gentle connector shimmer toward the next step;
+- short active copy such as `正在製作中…`.
 
-Future steps:
+Future steps remain visible but subdued.
 
-- visible but subdued;
-- no fake countdown;
-- no percentage.
+When a stage advances, transition the previous active circle into a checkmark and advance the connector. The visual should feel like the packet is actively taking shape, not like a fake game progress bar.
 
-When a stage advances, use a short transition so the checkmark and connector visibly settle into place.
+Honor `prefers-reduced-motion`: static active emphasis and text replace rotation/shimmer.
 
-### 12.2 Motion Safety
+Prefer existing UI/CSS capabilities; do not add a heavy animation dependency solely for this component.
 
-Honor `prefers-reduced-motion`. With reduced motion, replace rotation/shimmer with static active styling and text.
+### Refresh cadence
 
-Do not add a heavy animation dependency solely for this component. Prefer existing project animation tools or CSS.
-
-### 12.3 Polling / Refresh
-
-Pre-auth progress may poll the sanitized progress endpoint aggressively at first and back off while waiting, for example:
+Pre-auth polling may start fast and back off:
 
 ```text
 0–30 sec: every 2 sec
@@ -467,15 +458,15 @@ Pre-auth progress may poll the sanitized progress endpoint aggressively at first
 thereafter: every 10 sec
 ```
 
-Stop polling immediately on `ready`, `waitlisted`, token expiry, or page teardown.
+Stop on `ready`, `waitlisted`, token expiry, or page teardown.
 
-Authenticated pages should use the simplest existing refresh mechanism compatible with Supabase. Realtime may be used only if it materially reduces complexity; a short polling interval is acceptable for this single transient Week 1 state.
+Authenticated pages may use simple polling or existing Supabase refresh patterns. Realtime is optional, not required.
 
-## 13. Truthful Timing and Copy Changes
+## 13. Remove Next-Day Parent Promise
 
-Public product copy must stop promising that the first packet arrives "tomorrow" or "the next day".
+All **current parent-facing Week 1** copy must stop promising `隔天` / `明天` / a next-day date.
 
-Replace parent-facing Week 1 timing language with truthful immediate-start wording such as:
+Preferred truth:
 
 ```text
 完成孩子資料後，系統會立即開始製作第一份專屬教材；完成後直接開放下載。
@@ -487,53 +478,51 @@ or:
 第一份教材會在資料完成後立即進入製作，你可以在畫面上看到目前進度。
 ```
 
-This applies to:
+Apply to:
 
 - landing FAQ;
-- onboarding success copy;
-- dashboard/child pre-Week-1 delivery state;
-- help text;
-- any other parent-facing Week 1 surface.
+- onboarding success;
+- pre-Week-1 dashboard/child state;
+- help/instruction copy;
+- current SPEC and tests describing parent expectation.
 
-Do not mechanically replace unrelated uses of `預計`, such as a sample packet’s estimated study duration.
+Do not mechanically replace unrelated `預計`, such as estimated study duration.
 
-### 13.1 Internal Fallback Release Anchor
+Historical migration files remain untouched.
 
-The existing next-day `release_at` may remain internally as a recovery/fallback anchor if keeping it materially simplifies compatibility with the normal daily worker. Parent-facing Week 1 UI must not interpret that fallback timestamp as a promised date while the Fast Lane is active.
+### Internal fallback release anchor
 
-If the fast wake path fails, the existing normal worker may still complete the packet. The parent continues to see truthful production state rather than a stale date.
+The legacy next-day `release_at` may remain as an internal fallback anchor if it materially simplifies compatibility with the normal daily worker. While Fast Lane is active, parent Week 1 UI must ignore that fallback timestamp as a promised delivery date.
+
+Successful fast publication immediately advances actual Week 1 release and Week 2 cadence from that real timestamp.
 
 ## 14. Failure and Recovery
 
-### Wake dispatch failure
+### Wake dispatch fails
+Parent remains `queued`; no GitHub/provider error is shown. Wake outbox retries. Normal daily worker remains fallback.
 
-Parent stage stays `queued` with calm copy. No GitHub/API/provider error is shown. Outbox retry continues. Daily authoring remains fallback.
+### Authoring fails before submission
+Use existing retry semantics. Parent stays in an authoring/recovery presentation such as `正在重新整理教材內容`, never raw error codes.
 
-### Authoring failure before submission
-
-Normal job retry semantics remain authoritative. Parent progress stays in `authoring` or a calm recovery variant such as `正在重新整理教材內容`, without exposing error codes.
+### Publisher dispatch fails
+Immutable submission and publish outbox remain. Redispatch idempotently.
 
 ### Fast Publisher technical failure
+Keep submission recoverable and parent in `publishing` with calm copy such as `正在重新整理教材檔案`.
 
-The immutable submission remains recoverable. The publisher may be redispatched idempotently. Parent stays in `publishing` with calm copy such as `正在重新整理教材檔案`.
+### Structural/integrity failure
+Fail closed. Do not publish corruption for speed. Return the submission to established repair/retry/operator recovery with sanitized evidence.
 
-### Structurally invalid submission
-
-The Fast Publisher must fail closed. It must not publish corrupted content merely for speed. The submission is returned to the established repair/retry path with sanitized failure evidence for the authoring worker/operator.
-
-### Long-running fallback
-
-If progress exceeds an operational threshold, the UI may soften the active copy but must not invent a completion time. Example:
+### Long-running packet
+After a presentation-only threshold, soften the copy without inventing time:
 
 ```text
 這份教材比平常多需要一點整理，我們仍在處理中；完成後會直接出現在這裡。
 ```
 
-The threshold is presentation-only and must not mutate job state.
-
 ## 15. Analytics
 
-Add or reuse first-party events that measure the new acquisition-critical latency without child data:
+Add/reuse first-party events without child data:
 
 ```text
 week1_fast_queued
@@ -543,192 +532,187 @@ week1_fast_publish_started
 week1_fast_ready
 ```
 
-Recommended derived metrics:
+Measure:
 
-- onboarding activation → authoring claim;
+- activation → claim;
 - activation → immutable submission;
-- submission → PDF/material completion;
-- activation → first material ready;
-- percentage completed by fast path vs daily fallback;
-- wake dispatch failure rate;
-- fast publisher technical failure rate.
+- submission → material completion;
+- activation → ready;
+- fast-path completion rate vs daily fallback;
+- wake dispatch failures;
+- publisher dispatch/technical failures.
 
-Never place Email, child name, school, interest text, job context, or canonical source in analytics payloads.
+Never put Email, child name, school, interests, job context, or canonical source in analytics payloads.
 
 ## 16. Security Requirements
 
-- No real child data in GitHub comments, workflow payloads, logs, or repo files.
+- No real child data in GitHub comments, dispatch payloads, workflow logs, or repo files.
 - Wake IDs are opaque.
-- GitHub dispatch credential is server-only and minimally scoped.
-- Browser cannot invoke Week 1 claim/publish RPCs.
-- Browser cannot read private wake/submission tables.
-- Pre-auth progress tokens are hashed, short-lived, narrow-scope, and non-downloadable.
+- Repository dispatch carries no job payload.
+- GitHub credential is server-only and minimally scoped.
+- Browser cannot invoke claim/publish RPCs.
+- Browser cannot read wake/publish outbox or submissions.
+- Pre-auth progress token is hashed, narrow, short-lived, and non-downloadable.
 - Parent RLS remains authoritative after login.
 - Signed PDF download rules remain unchanged.
-- Technical errors stay in server/operator logs, never parent UI.
-- Fast Publisher can publish only `source_material_id IS NULL` jobs.
-- Fast Publisher cannot be used as a generic bypass for Week 2+ quality gates.
+- Technical errors stay operator-side.
+- Fast Publisher is hard-scoped to first packets and cannot become a Week 2+ bypass.
 
-## 17. Required SPEC Contract Changes
+## 17. Required SPEC Changes
 
-Implementation must intentionally update the existing product contract rather than silently violate it.
+Implementation must intentionally change the product contract rather than silently violate it.
 
-At minimum review and update the relevant text in:
+At minimum review/update:
 
-- Section 25 — Week 1 as Calibration;
-- Section 116 — Next Generation Time;
-- Section 117 — Executor-Agnostic Generation Worker;
-- Section 120 — Scheduled Worker and GitHub Actions;
-- Section 121 — Future Worker Migration;
-- Section 126 — Quality Failure vs Technical Failure;
-- Section 158 — PDF Rendering Architecture;
-- Section 160 — Parent Dashboard;
-- Section 168 — Analytics and Early Funnel;
-- Section 172 — Operational Admin Needs;
-- Section 178 — CI / Deployment;
-- Section 179 — Testing Requirements;
-- Section 193 — Definition of Done: First Material;
-- Section 199 — Definition of Done: Generation Reliability;
-- Section 204 — Agent Instructions if needed for the exception;
-- Section 205 — Curriculum Agent Instructions;
-- Section 206 — Core Architectural Summary.
+- 25 — Week 1 as Calibration;
+- 116 — Next Generation Time;
+- 117 — Executor-Agnostic Generation Worker;
+- 120 — Scheduled Worker and GitHub Actions;
+- 121 — Future Worker Migration;
+- 126 — Quality Failure vs Technical Failure;
+- 158 — PDF Rendering Architecture;
+- 160 — Parent Dashboard;
+- 168 — Analytics and Early Funnel;
+- 172 — Operational Admin Needs;
+- 178 — CI / Deployment;
+- 179 — Testing Requirements;
+- 193 — Definition of Done: First Material;
+- 199 — Definition of Done: Generation Reliability;
+- 204 — Agent Instructions if needed;
+- 205 — Curriculum Agent Instructions;
+- 206 — Core Architectural Summary.
 
-The SPEC must explicitly state the only exception:
+Canonical exception to encode:
 
-> Week 1 Fast Lane skips the independent normal Finisher semantic publication gate and publishes through the dedicated Fast Publisher after successful Author/Critic/pre-submit validation. Week 2+ retains the normal immutable Submission → deterministic Finisher path.
-
-The wording must also make clear that structural integrity, privacy, rendering correctness, and wrong-child/artifact protections are never bypassable.
+> Week 1 Fast Lane skips the independent normal Finisher semantic publication gate and publishes through the dedicated Fast Publisher after successful Author/Critic/pre-submit validation. Week 2+ retains immutable Submission → deterministic Finisher. Structural integrity, privacy, rendering correctness, and wrong-child/artifact protections are never bypassable.
 
 ## 18. Testing Strategy
 
-Implementation must be test-driven.
+Implementation is test-driven.
 
-### Database tests
+### Database
 
 Prove:
 
-- only first-packet jobs enter the fast claim path;
-- Week 2+ cannot be fast-claimed or fast-published;
-- wake outbox is idempotent per job;
-- concurrent fast claims cannot duplicate work;
-- pre-auth progress token reveals only its single safe projection;
+- only first-packet jobs enter fast claim;
+- Week 2+ cannot fast-claim or fast-publish;
+- wake outbox is unique/idempotent per job;
+- publish outbox is unique/idempotent per authoring attempt;
+- concurrent claims cannot duplicate work;
+- progress token reveals only one safe projection;
 - another token/account cannot read another child’s progress;
-- fast completion is atomic and idempotent;
-- Week 2 is scheduled exactly once from actual Week 1 release;
-- normal Finisher cannot double-complete a fast-published Week 1;
-- normal daily fallback can still complete a Week 1 if the fast path never claims it.
+- fast completion is atomic/idempotent;
+- Week 2 schedules exactly once from actual Week 1 release;
+- normal Finisher cannot double-complete fast-published Week 1;
+- normal daily fallback can still complete Week 1 when fast path never claims.
 
-### Worker tests
-
-Prove Fast Publisher:
-
-- does not call the Finisher semantic audit;
-- still fails on structural/package identity corruption;
-- renders both PDFs;
-- inspects both PDFs;
-- uses canonical private artifact paths;
-- recovers existing identical artifacts safely;
-- records publication atomically through the dedicated RPC;
-- is idempotent when redispatched.
-
-### Web tests
+### Worker / publisher
 
 Prove:
 
-- successful landing onboarding immediately renders Week 1 live progress;
-- progress is derived from server stage rather than timers;
+- Fast Publisher never calls Finisher semantic audit;
+- structural/package identity corruption still fails;
+- both PDFs render and inspect;
+- canonical private paths are used;
+- existing identical artifacts recover safely;
+- dedicated completion RPC is used atomically;
+- redispatch is idempotent.
+
+### Web
+
+Prove:
+
+- onboarding success immediately renders live Week 1 progress;
+- stage comes from server state, not timers;
 - active step animates and completed steps settle;
-- reduced-motion mode is supported;
-- `ready` exposes the normal download/account route, not a token-based download bypass;
-- waitlist never shows fake generation progress;
-- no Week 1 parent-facing copy promises `隔天`/`明天`;
-- unrelated estimated-duration copy remains intact;
-- raw backend errors cannot appear in the progress component.
+- reduced-motion works;
+- ready returns to normal authorized material access;
+- waitlist never shows fake progress;
+- current parent-facing Week 1 copy does not promise next-day delivery;
+- estimated study-duration copy remains intact;
+- raw backend errors cannot appear.
 
 ### End-to-end smoke
 
-One synthetic/internal-test child should prove:
+With internal/synthetic data only:
 
 ```text
 onboarding
 → Week 1 job
 → wake outbox
+→ GitHub wake
 → fast claim
-→ submission
-→ fast publisher
+→ immutable submission
+→ publish outbox
+→ repository dispatch
+→ Fast Publisher
 → material ready
-→ Week 2 scheduled
+→ Week 2 scheduled normally
 ```
-
-No real child data is used in CI.
 
 ## 19. Deployment Order
 
-Because this change spans DB, Edge Function/server dispatch, GitHub Actions, and web UI, deploy in a fail-safe order:
+1. Add forward-only DB schema/RPCs with Fast Lane disabled.
+2. Add Fast Publisher code/workflow and prove operator/manual synthetic dispatch.
+3. Add parent-safe progress projection/token endpoint.
+4. Add wake + publish outboxes and server-side GitHub dispatch.
+5. Create permanent Wake PR and configure ChatGPT Work event task.
+6. Add web live-progress UI and truthful Week 1 copy.
+7. Enable Fast Lane for new Week 1 jobs.
+8. Run one internal-test production smoke.
+9. Verify Week 2+ still uses normal Finisher.
+10. Observe latency/failure telemetry.
 
-1. Add DB schema/RPCs with fast path disabled by default.
-2. Add Fast Publisher worker/workflow and prove manual synthetic dispatch.
-3. Add parent-safe progress endpoints/projection.
-4. Add wake outbox and server-side GitHub dispatch support.
-5. Configure the permanent Wake PR and ChatGPT Work event task.
-6. Add web live-progress UI and new truthful copy.
-7. Enable fast-lane admission for new Week 1 jobs.
-8. Run a single internal-test production smoke.
-9. Verify Week 2+ still uses the normal Finisher path.
-10. Observe latency/failure telemetry before broadening operational limits.
-
-Every migration is forward-only. Changed Edge Functions must be deployed to the linked production project and verified. GitHub workflow changes must be merged before enabling server dispatch toward them.
+Changed migrations are applied forward-only to linked production and verified. Changed Edge Functions are deployed and verified. GitHub workflow must exist before publisher dispatch is enabled.
 
 ## 20. Operational Kill Switch
 
-Add a server-owned/configurable kill switch for the fast lane.
+Add a server-owned Fast Lane kill switch.
 
 When disabled:
 
 - new Week 1 jobs remain normal explicit jobs;
-- no wake dispatch is attempted;
-- existing normal scheduled authoring/Finisher path continues unchanged;
-- parent UI falls back to a truthful generic preparation state rather than promising instant generation.
+- no fast wake dispatch is required;
+- existing scheduled authoring/Finisher path remains available;
+- parent UI shows truthful generic preparation state rather than instant-generation claims.
 
-The kill switch is operational protection, not a public product setting.
+No schema rollback is required.
 
 ## 21. Definition of Done
 
-The feature is done only when all of the following are true:
+Done means:
 
-1. A newly admitted eligible child creates exactly one Week 1 job.
-2. A wake event is emitted without private data.
-3. ChatGPT Work can wake and claim only Week 1 fast jobs without model API usage.
-4. Authoring still follows the current production bundle, research, Author, Critic, targeted repair, and pre-submit validation.
-5. The confirmed Week 1 submission triggers the Fast Publisher immediately.
-6. Week 1 does not wait for or pass through the normal independent Finisher semantic quality gate.
-7. Structural/package/identity/render/storage integrity remains fail-closed.
-8. Student and Parent PDFs are privately stored and downloadable through normal ownership rules.
-9. Week 1 releases immediately on successful publication.
-10. Week 2 is scheduled from the actual Week 1 release and returns to the normal weekly Finisher pipeline.
-11. The landing success screen and authenticated child/dashboard show the same parent-safe five-stage live progress.
-12. The active stage visibly animates, and reduced-motion users receive a clear static equivalent.
+1. Exactly one initial job exists for an admitted eligible child.
+2. Wake event contains no private data.
+3. ChatGPT Work can wake and claim only Week 1 without model API usage.
+4. Week 1 authoring still follows current bundle + research + Author + Critic + repair + pre-submit validation.
+5. Confirmed submission creates durable publish intent and triggers Fast Publisher immediately.
+6. Week 1 does not wait for or pass the normal independent Finisher semantic gate.
+7. Structural/package/identity/render/storage integrity stays fail-closed.
+8. Student/Parent PDFs are privately stored and accessible through normal ownership rules.
+9. Week 1 releases immediately after successful publication.
+10. Week 2 schedules from actual Week 1 release and returns to normal Finisher path.
+11. Landing success and authenticated surfaces show the same safe five-stage live progress.
+12. Active stage visibly animates; reduced-motion has a clear static equivalent.
 13. No fake percentage or false completion estimate exists.
-14. No parent-facing Week 1 surface promises next-day delivery.
-15. Wake/publish failures fall back safely without losing the child/job.
-16. A kill switch can return Week 1 to the old normal path without schema rollback.
+14. No current parent-facing Week 1 surface promises next-day delivery.
+15. Wake/publish failure cannot lose the child/job/submission.
+16. Kill switch restores old operational path without rollback.
 17. `pnpm lint`, `pnpm test`, relevant DB tests, `pnpm typecheck`, and `pnpm build` pass.
-18. A production internal-test smoke proves the full Week 1 fast path and confirms Week 2 remains normal.
+18. One internal-test production smoke proves the full Fast Lane and confirms Week 2 remains normal.
 
-## 22. Final Architectural Rule
+## 22. Final Rule
 
 The Fast Lane optimizes **latency, not truth**.
 
-It is acceptable to remove duplicated semantic gatekeeping from Week 1. It is not acceptable to remove the integrity necessary to know that the correct child received a valid, private, renderable pair of PDFs.
-
-The permanent split is:
+Removing duplicated Week 1 semantic gatekeeping is intentional. Removing the integrity needed to know that the correct child received a valid, private, renderable PDF pair is not.
 
 ```text
 Week 1
 Author/Critic → immutable submission → Fast Publisher → immediate release
 
 Week 2+
-Author/Critic → immutable submission → deterministic Finisher → scheduled release
+Author/Critic → immutable submission → deterministic Finisher → normal release
 ```
 
-If Week 1 quality is repeatedly poor, fix the Author/Critic/prompt/curriculum pipeline. Do not reintroduce a slow hidden second quality gate as a substitute for fixing authoring quality.
+If Week 1 quality is repeatedly poor, fix Author/Critic/prompt/curriculum. Do not reintroduce a hidden slow second quality gate as a substitute for fixing authoring quality.
