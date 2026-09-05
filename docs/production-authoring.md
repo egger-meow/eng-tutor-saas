@@ -11,8 +11,11 @@ The canonical protocol is designed so that multiple executors can fulfill the au
 3. **Repository local helper/runner** (CLI batch authoring)
 4. **ChatGPT online / manual execution** (staged claims, browser prompt execution)
 5. **ChatGPT Scheduled Work** (daily server-side scheduled claims via pg_cron)
+6. **ChatGPT Week 1 Fast Lane** (`chatgpt-week1-fast`, event-triggered first-packet authoring)
 
-Local Windows execution is a primary local environment, but it is **one client of the protocol, not the protocol itself**. The database state, claim leases, immutable submission bridge, and the GitHub Actions Finisher are the single source of truth.
+Local Windows execution is a primary local environment, but it is **one client of the protocol, not the protocol itself**. Database state, claim leases, immutable submissions, and server-owned publication state are the source of truth.
+
+Week 1 has one deliberate publication-path exception: it skips the independent normal Finisher semantic/audit pass and goes from an already Author/Critic-approved immutable submission into the objective-integrity-only **Week 1 Fast Publisher**. Week 2+ continues through the normal deterministic Finisher.
 
 ```text
                Authoritative Queue & Claim
@@ -20,23 +23,28 @@ Local Windows execution is a primary local environment, but it is **one client o
                           │
          ┌────────────────┴────────────────┐
          ▼                                 ▼
-   [Local Mode]                      [Online Mode]
-• Local interactive Codex        • ChatGPT Scheduled Work (pg_cron)
-• Antigravity agent              • ChatGPT Web / Custom GPT manual
-• Codex Desktop Scheduler
-• Local worker CLI
+   [Normal Authors]                 [Week 1 Fast Author]
+Local / Scheduled / Manual             chatgpt-week1-fast
          │                                 │
          └────────────────┬────────────────┘
                           ▼
-            Targeted Repair & Pre-submit Validation
+            Author / Critic / Targeted Repair
                           │
                           ▼
             Immutable Submission Bridge
        (private_generation.curriculum_submissions)
                           │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+       Week 1 submission          Week 2+ submission
+              │                       │
+              ▼                       ▼
+       Fast Publisher            Deterministic Finisher
+  objective integrity only       normal quality/integrity path
+              │                       │
+              └───────────┬───────────┘
                           ▼
-             Deterministic Finisher
-          (PDF rendering, Storage, Materials)
+             Storage / Private weekly PDFs
 ```
 
 ---
@@ -52,22 +60,28 @@ Before performing any curriculum generation or repair work, every authoring exec
 
 ## 3. Queue & Lease Protocol (Collision Prevention)
 
-Before claiming any production work, an executor must never blindly claim. It must check for active authoritative leases.
+Normal production authoring must check active authoritative leases before claiming. The dedicated Week 1 Fast Lane is intentionally allowed to start while a normal batch is already in flight; its own advisory lock serializes fast-lane starts and row leases / `FOR UPDATE SKIP LOCKED` prevent duplicate job ownership.
 
-### Lease Checking
+### Normal Lease Checking
 - **Helper CLI**: `pnpm worker production-authoring status [--worker <worker_id>]`
 - **Database RPC**: `public.worker_get_active_generation_leases()`
 - **Rules**:
-  - If an active lease is held by *another* worker (`canClaim: false`, `isOwnedByCaller: false`), the executor MUST halt to avoid dual-executor collisions in production.
-  - If an active lease is already held by *this* worker (`isOwnedByCaller: true`), the executor resumes the active batch rather than claiming a duplicate lease.
-  - If no active leases exist (`hasActiveClaim: false`), the executor proceeds to claim.
+  - If an active normal lease is held by *another* normal worker (`canClaim: false`, `isOwnedByCaller: false`), the normal executor halts.
+  - If an active lease is already held by *this* worker, resume rather than claiming again.
+  - If no active normal leases exist, proceed to claim.
 
-### Authoritative Batch Claim
+### Normal Authoritative Batch Claim
 - **Helper CLI**: `pnpm worker production-authoring claim --worker <worker_id>`
 - **Database RPC**: `public.worker_claim_local_authoring_batch(worker_id)` (or `private_generation.chatgpt_claim_generation_batch(worker_id)`)
-- Claims up to capacity (default normal limit: 15 jobs).
+- Claims up to normal capacity.
 - Generates and records an immutable `inputFingerprint` in the claim snapshot.
-- Returns each job's `GenerationContext` including `jobId`, `childId`, `profile`, `curriculumCapsules`, and any `retryContext`.
+
+### Week 1 Fast Claim
+- **Authoring Bridge**: `POST /week1/start`
+- **Recovery**: `GET /week1/batch`
+- **Pinned worker**: `chatgpt-week1-fast`
+- **Scope**: only jobs with `source_material_id IS NULL`.
+- The fast worker may coexist with an already-running normal authoring batch. It must never claim Week 2+.
 
 ---
 
@@ -79,31 +93,27 @@ When a claimed job has an existing authoring attempt that failed validation or q
 1. **Authoritative Curriculum Bundle**: Authoring executors MUST read `packages/generator/bundles/production-authoring-bundle.md` and treat the current compiled production-authoring bundle as the authoritative curriculum authoring contract.
 2. **Evidence-Driven**: Targeted repair MUST be guided strictly by `retryContext.findings` and `retryContext.failureEvidence`.
 3. **Immutability & Preservation**: Preserve all valid package content, stable IDs, stage ordering, learning objectives, and `inputFingerprint`.
-4. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass quality checks.
+4. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass author/critic quality requirements.
 5. **Writing Space & Schema 2.4.0**:
    - Non-MCQ questions (`translation`, `sentence-production`, `short-response`) require `writingLines >= 1` or a valid `responseLayout` (`lines`, `table`, or `organizer`).
    - Assessment items in `cap-transfer`, `independent` (4 options), and `homework` (4 options) require corresponding internal `cap-plan:<questionId>` checks in `qualityEvidence.criticalChecks`. Intentional grammar/vocabulary recall items outside `cap-transfer` must explicitly declare `"intentionalRecall": true`.
    - Reading-dependent items require an internal `evidence-plan:<questionId>` with canonical `evidenceAnchors` resolving to `studentLesson.reading.blocks`.
 
+Week 1 speed does **not** mean skipping Author, Critic, research, or targeted repair. It removes only the second independent publication-time semantic Finisher gate.
+
 ---
 
 ## 5. Pre-Submit Validation
 
-Every package must be validated locally before submitting over the wire.
+Every package must be validated before submitting over the wire.
 
 - **Helper CLI**:
   ```powershell
   pnpm worker production-authoring validate --package <path-to-package.json> --context <path-to-context.json>
   ```
-- **Checks performed**:
-  - `CurriculumPackageSchema` (Schema 2.4.0) strict validation.
-  - `inputFingerprint` exact match against claimed context.
-  - `jobId` and `childId` exact match.
-  - `model` metadata (must indicate `gpt-5.6-sol`).
-  - `promptVersion` (matches active production prompt, e.g. `prompt/2.11.1`).
-  - Finisher audit policy (`auditCurriculumPackage` with `applyFinisherAuditPolicy`).
+- **Checks performed** include strict Curriculum Package schema, `inputFingerprint`, job/child identity, model/prompt metadata, and current production authoring quality contract.
 
-Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true`.
+Submission is blocked unless pre-submit validation succeeds. Week 1 Fast Publisher relies on this already-approved immutable source and performs only objective publication integrity checks afterward.
 
 ---
 
@@ -116,9 +126,10 @@ Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true
   ```
 - **Database RPC**:
   `public.worker_submit_local_curriculum_package(p_job_id, p_generation_worker_id, p_payload_text)`
-  (internally maps to `private_generation.chatgpt_submit_curriculum_package_v2`).
 - Stores the canonical package into `private_generation.curriculum_submissions` at `authoring_attempt = job.attempt_count`.
 - Idempotent: re-submitting the exact same package for the same attempt returns `deduplicated: true`.
+
+Every Week 1 submission is server-routed to `publication_path = 'week1_fast'` regardless of which approved production author created it. Every Week 2+ submission remains on the normal Finisher path.
 
 ### Read-After-Write Status Verification
 - **Helper CLI**:
@@ -127,55 +138,69 @@ Submission is blocked unless `validatePreSubmitPackage` passes with `valid: true
   ```
 - **Database RPC**:
   `public.worker_local_curriculum_submission_status(job_id, worker_id)`
-- Verifies that `submissionFound: true` and `status` is `'pending'` (ready for Finisher).
+- Verifies that the immutable submission exists before the author stops.
 
 ---
 
-## 7. Deterministic Finisher Execution
+## 7. Publication Paths
 
-PDF rendering and Supabase storage uploads are **never performed by the authoring executor**. They belong exclusively to the deterministic Finisher.
+### 7.1 Week 1 Fast Publisher
+
+Week 1 is defined by `generation_jobs.source_material_id IS NULL`.
+
+The Fast Publisher:
+1. claims only Week 1 immutable submissions;
+2. performs strict schema / identity / release / artifact-path integrity checks;
+3. **does not call `auditCurriculumPackageForFinisher()` and does not re-author or repair content**;
+4. renders deterministic Student and Parent Answer PDFs;
+5. inspects the PDF pair and rejects broken/non-matching artifacts;
+6. uploads to private Supabase Storage;
+7. atomically creates `public.materials`, completes the job/submission, and releases Week 1 immediately;
+8. reanchors Week 2 to the actual Week 1 release plus seven days.
+
+GitHub `repository_dispatch` is only a wake signal. Supabase is the authoritative queue. A five-minute workflow schedule is a publication fallback if the immediate publish doorbell is lost.
+
+### 7.2 Normal Deterministic Finisher (Week 2+)
+
+The normal Finisher must not claim Week 1 submissions. `public.worker_claim_curriculum_submissions` is Week 2+ only.
 
 - **Finisher Processor Command**:
   ```powershell
   pnpm worker process-submissions --processor github-actions-finisher --limit 15
   ```
-- **Responsibilities of Finisher**:
-  1. Claims pending submissions via `worker_claim_curriculum_submissions`.
-  2. Runs canonical schema and audit validation.
-  3. Uses Playwright to render deterministic Student and Parent Answer PDFs.
-  4. Uploads PDFs to private Supabase storage (`materials/<child_id>/<job_id>/...`).
-  5. Inserts the completed material into `public.materials`.
-  6. Marks `public.generation_jobs` as `status: 'completed'` with `completed_at` and `material_id`.
-  7. Updates `private_generation.curriculum_submissions` to `status: 'completed'`.
+- It runs the current deterministic validation/audit contract, renders/uploads PDFs, creates materials, and completes normal submissions.
 
 ---
 
 ## 8. Scheduler Modes: Local vs. Online
 
-Paper English supports switching between local authoring and server-side online authoring without schema or codebase changes.
+Paper English supports switching between local authoring and server-side online authoring without changing the normal Week 2+ schema or product behavior.
 
 ### Mode Inspection & Switching
 - **View current mode**:
   ```powershell
   pnpm worker production-authoring mode
   ```
-- **Set local mode** (disables pg_cron online claim):
+- **Set local mode**:
   ```powershell
   pnpm worker production-authoring mode --set local
   ```
-- **Set online mode** (enables 16:10 UTC / 00:10 Taipei Time pg_cron claim for ChatGPT Scheduled Work):
+- **Set online mode**:
   ```powershell
   pnpm worker production-authoring mode --set online
   ```
+
+The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change the selected normal scheduler mode.
 
 ---
 
 ## 9. Supported Executor Adapters
 
-| Executor | Documentation / Guide | Claim / Ingestion Path | Submission Path | Status / Release |
+| Executor | Documentation / Guide | Claim / Ingestion Path | Submission Path | Publication / Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` | `submission-status` / `release` |
-| **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` | Helper CLI status |
-| **Local Batch Runner** | `docs/local-codex-production-authoring.md` | `pnpm worker generate-claimed` | `worker_submit_local_curriculum_package` | Finisher / Status RPC |
-| **ChatGPT Online Manual (Custom GPT)** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `POST /start` (or `GET /batch` recovery) | Authoring Bridge `POST /submit` | `GET /status`, `POST /release` |
-| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | Server-staged snapshot (16:10 UTC cron) | Connected app bridge submission | Connected app bridge status |
+| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` | Week 2+ Finisher; Week 1 Fast Publisher |
+| **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` | Server-routed by week |
+| **Local Batch Runner** | `docs/local-codex-production-authoring.md` | normal queue claim | bridge submission | Server-routed by week |
+| **ChatGPT Online Manual** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `POST /start` / `GET /batch` | `POST /submit` | Server-routed by week |
+| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | scheduled normal batch | bridge submission | Week 2+ Finisher; Week 1 fallback Fast Publisher |
+| **ChatGPT Week 1 Fast Lane** | `docs/superpowers/specs/2026-09-05-week1-fast-lane-design.md` | `POST /week1/start` / `GET /week1/batch` | existing immutable bridge | Fast Publisher only |
