@@ -18,19 +18,41 @@ function json(status: number, body: Record<string, unknown>) {
   })
 }
 
-async function resolveJobWorkerId(
+async function resolveJobRoute(
   client: ReturnType<typeof createClient>,
-  jobId: string
-): Promise<string> {
+  jobId: string,
+): Promise<{ workerId: string; isWeek1: boolean }> {
   const { data } = await client
     .from('generation_jobs')
-    .select('claimed_by')
+    .select('claimed_by, source_material_id')
     .eq('id', jobId)
     .maybeSingle()
 
-  if (data?.claimed_by === PINNED_WEEK1_FAST_WORKER_ID) return PINNED_WEEK1_FAST_WORKER_ID
-  if (data?.claimed_by === PINNED_SCHEDULED_WORKER_ID) return PINNED_SCHEDULED_WORKER_ID
-  return PINNED_ONLINE_MANUAL_WORKER_ID
+  const workerId = data?.claimed_by === PINNED_WEEK1_FAST_WORKER_ID
+    ? PINNED_WEEK1_FAST_WORKER_ID
+    : data?.claimed_by === PINNED_SCHEDULED_WORKER_ID
+      ? PINNED_SCHEDULED_WORKER_ID
+      : PINNED_ONLINE_MANUAL_WORKER_ID
+
+  return { workerId, isWeek1: data?.source_material_id == null }
+}
+
+async function ringImmediateWeek1Publish(
+  client: ReturnType<typeof createClient>,
+): Promise<void> {
+  const githubToken = Deno.env.get('GITHUB_WEEK1_TOKEN')
+  const wakePrNumber = Deno.env.get('GITHUB_WEEK1_WAKE_PR_NUMBER')
+  if (!githubToken || !wakePrNumber) return
+
+  try {
+    await dispatchWeek1PublishDoorbells(client, {
+      token: githubToken,
+      repo: Deno.env.get('GITHUB_WEEK1_REPO') ?? 'egger-meow/eng-tutor-saas',
+      wakePrNumber,
+    })
+  } catch {
+    console.warn('[week1-fast] immediate publish doorbell failed; outbox retained')
+  }
 }
 
 Deno.serve(async (request) => {
@@ -68,7 +90,6 @@ Deno.serve(async (request) => {
   const path = url.pathname.replace(/^\/(?:functions\/v1\/)?authoring-bridge/, '').replace(/\/$/, '')
 
   try {
-    // Normal production authoring start remains unchanged.
     if (request.method === 'POST' && path === '/start') {
       const { data, error } = await client.rpc('worker_start_authoring_batch', {
         worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
@@ -85,7 +106,6 @@ Deno.serve(async (request) => {
       return json(200, data ?? { claimed: [], claimedCount: 0 })
     }
 
-    // Week 1 Fast Lane has a separate, pinned, Week-1-only claim boundary.
     if (request.method === 'POST' && path === '/week1/start') {
       const { data, error } = await client.rpc('worker_start_week1_fast_batch', {
         worker_id: PINNED_WEEK1_FAST_WORKER_ID,
@@ -136,42 +156,28 @@ Deno.serve(async (request) => {
         return json(400, { error: 'missing_fields', message: 'jobId and package are required' })
       }
 
-      const workerId = await resolveJobWorkerId(client, jobId)
+      const route = await resolveJobRoute(client, jobId)
       const payloadText = typeof rawPackage === 'string' ? rawPackage : JSON.stringify(rawPackage)
       const { data, error } = await client.rpc('worker_submit_local_curriculum_package', {
         p_job_id: jobId,
-        p_generation_worker_id: workerId,
+        p_generation_worker_id: route.workerId,
         p_payload_text: payloadText,
       })
       if (error) return json(500, { error: error.message })
 
-      // Submission durability is authoritative. GitHub dispatch is best-effort and never changes
-      // submit success; the DB outbox remains available for retry if this immediate doorbell fails.
-      if (workerId === PINNED_WEEK1_FAST_WORKER_ID) {
-        const githubToken = Deno.env.get('GITHUB_WEEK1_TOKEN')
-        const wakePrNumber = Deno.env.get('GITHUB_WEEK1_WAKE_PR_NUMBER')
-        if (githubToken && wakePrNumber) {
-          try {
-            await dispatchWeek1PublishDoorbells(client, {
-              token: githubToken,
-              repo: Deno.env.get('GITHUB_WEEK1_REPO') ?? 'egger-meow/eng-tutor-saas',
-              wakePrNumber,
-            })
-          } catch {
-            console.warn('[week1-fast] immediate publish doorbell failed; outbox retained')
-          }
-        }
-      }
+      // Any Week 1 submission goes straight toward Fast Publisher, even if a normal production
+      // author had to act as the fallback. Submission success never depends on GitHub transport.
+      if (route.isWeek1) await ringImmediateWeek1Publish(client)
       return json(200, data)
     }
 
     if (request.method === 'GET' && path === '/status') {
       const jobId = url.searchParams.get('job_id') ?? url.searchParams.get('jobId')
       if (!jobId) return json(400, { error: 'missing_parameter', message: 'job_id is required' })
-      const workerId = await resolveJobWorkerId(client, jobId)
+      const route = await resolveJobRoute(client, jobId)
       const { data, error } = await client.rpc('worker_local_curriculum_submission_status', {
         job_id: jobId,
-        worker_id: workerId,
+        worker_id: route.workerId,
       })
       if (error) return json(500, { error: error.message })
       return json(200, data)
@@ -190,10 +196,10 @@ Deno.serve(async (request) => {
       if (!jobId) return json(400, { error: 'missing_parameter', message: 'jobId is required' })
       const errorCode = body.errorCode ?? body.error_code ?? 'SUBMIT_TRANSPORT_FAILED'
       const errorMessage = body.errorMessage ?? body.error_message ?? 'Unsubmitted claim released via authoring bridge'
-      const workerId = await resolveJobWorkerId(client, jobId)
+      const route = await resolveJobRoute(client, jobId)
       const { data, error } = await client.rpc('worker_release_local_unsubmitted_claim', {
         job_id: jobId,
-        worker_id: workerId,
+        worker_id: route.workerId,
         error_code: errorCode,
         error_message: errorMessage,
       })
