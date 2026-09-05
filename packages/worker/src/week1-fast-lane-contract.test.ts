@@ -23,10 +23,12 @@ describe('Week 1 Fast Lane production contract', () => {
 
   it('pins a dedicated Week 1-only authoring worker and recovery path', async () => {
     const migration = await source('supabase/migrations/20260905220000_week1_fast_lane.sql')
+    const isolation = await source('supabase/migrations/20260905222000_week1_fast_lane_finisher_isolation.sql')
     const bridge = await source('supabase/functions/authoring-bridge/index.ts')
 
     expect(migration).toContain("worker_id <> 'chatgpt-week1-fast'")
-    expect(migration).toContain('public.worker_start_week1_fast_batch')
+    expect(isolation).toContain('week1_fast_lock_id')
+    expect(isolation).toContain('public.worker_start_week1_fast_batch')
     expect(migration).toContain('public.worker_recover_week1_fast_batch')
     expect(migration).toContain('source_material_id is null')
     expect(bridge).toContain("PINNED_WEEK1_FAST_WORKER_ID = 'chatgpt-week1-fast'")
@@ -35,13 +37,21 @@ describe('Week 1 Fast Lane production contract', () => {
   })
 
   it('uses GitHub only as a payload-free doorbell', async () => {
-    const dispatcher = await source('supabase/functions/week1-fast-dispatch/index.ts')
+    const dispatcher = await source('supabase/functions/_shared/week1-fast-dispatch.ts')
     expect(dispatcher).toContain("event_type: 'week1-fast-publish'")
     expect(dispatcher).toContain('client_payload: {}')
     expect(dispatcher).toContain('week1-wake:v1:')
     expect(dispatcher).not.toMatch(/client_payload:\s*\{[^}]*job/iu)
     expect(dispatcher).not.toMatch(/client_payload:\s*\{[^}]*child/iu)
     expect(dispatcher).not.toMatch(/client_payload:\s*\{[^}]*package/iu)
+  })
+
+  it('routes every Week 1 submission away from the normal Finisher', async () => {
+    const isolation = await source('supabase/migrations/20260905222000_week1_fast_lane_finisher_isolation.sql')
+    expect(isolation).toContain('job.source_material_id is not null')
+    expect(isolation).toContain("publication_path = 'week1_fast'")
+    expect(isolation).toContain('job.claimed_by = submission.generation_worker_id')
+    expect(isolation).toContain('Normal deterministic Finisher claim. Week 1 is explicitly excluded')
   })
 
   it('publishes Week 1 without the normal Finisher semantic audit', async () => {
@@ -53,6 +63,7 @@ describe('Week 1 Fast Lane production contract', () => {
     expect(publisher).toContain('renderCurriculumPackageBytes')
     expect(publisher).toContain('inspectCurriculumPdfPair')
     expect(publisher).toContain("rpc('worker_complete_week1_fast_submission'")
+    expect(publisher).not.toContain("submission.generation_worker_id !== 'chatgpt-week1-fast'")
     expect(workflow).toContain('week1-fast-publish')
     expect(workflow).toContain('publish-week1-fast')
   })
