@@ -35,7 +35,8 @@ describe('landing onboarding browser boundary', () => {
   it('promises immediate Week 1 preparation only for accepted activation and tells waitlisted parents the truth', () => {
     expect(source).toContain('最後留下 Email，第一週做好直接寄給你')
     expect(source).toContain('開始準備第一週教材')
-    expect(source).toContain("if (result.status === 'waitlisted')")
+    expect(source).toContain('setSubmissionStatus(result.status)')
+    expect(source).toContain("submissionStatus === 'waitlisted'")
     expect(source).toContain('第一週教材已進入準備流程')
     expect(source).toContain('教材完成後會直接寄到你的 Email')
     expect(source).toContain('目前名額已滿，已幫你登記候補。')
