@@ -1,5 +1,7 @@
 import {
+  CURRENT_PDF_RENDERER_VERSION,
   CURRENT_RELEASE_ID,
+  CURRENT_WORKER_VERSION,
   validateCurriculumPackageForFinisher,
   type CurriculumPackage,
 } from '@paper-english/generator'
@@ -67,7 +69,7 @@ function assertMatchingPdfPair(expected: CurriculumPdfPairInspection, actual: Cu
   }
 }
 
-function buildSummary(pkg: CurriculumPackage): Record<string, unknown> {
+function buildSummary(pkg: CurriculumPackage, targetReleaseId: string): Record<string, unknown> {
   const personalizationReasons = Array.isArray(pkg.parentSummary?.personalizationZh)
     ? pkg.parentSummary.personalizationZh.filter((item): item is string => typeof item === 'string' && Boolean(item.trim()))
     : []
@@ -85,6 +87,9 @@ function buildSummary(pkg: CurriculumPackage): Record<string, unknown> {
     learningAdjustmentSummary: fallback.join('；'),
     personalizationReasons: fallback,
     publicationPath: 'week1_fast',
+    releaseId: targetReleaseId,
+    rendererVersion: CURRENT_PDF_RENDERER_VERSION,
+    workerVersion: CURRENT_WORKER_VERSION,
   }
 }
 
@@ -152,9 +157,9 @@ export async function processWeek1FastSubmissions(
         throw new Error('Week 1 immutable submission releaseId does not match claimed release')
       }
 
-      // Fast Publisher validates and renders the immutable canonical submission exactly as stored.
-      // It never authors, repairs, or substitutes curriculum content.
-      const parsed = validateCurriculumPackageForFinisher(raw)
+      // Validate and render from the immutable submission. The parsed package is an in-memory
+      // normalized view only; the completion RPC receives the original canonical source.
+      const parsed = validateCurriculumPackageForFinisher(submission.canonical_source)
       if (!parsed.success) {
         throw new Error(`Week 1 package integrity invalid: ${parsed.issues.map((issue) => `${issue.path}:${issue.message}`).join(' | ')}`)
       }
@@ -186,8 +191,8 @@ export async function processWeek1FastSubmissions(
         p_processor_id: processorId,
         p_student_pdf_path: paths.student,
         p_parent_answer_pdf_path: paths.parent,
-        p_canonical_source: pkg,
-        p_generation_summary: buildSummary(pkg),
+        p_canonical_source: submission.canonical_source,
+        p_generation_summary: buildSummary(pkg, targetReleaseId),
         p_prompt_version: pkg.metadata.promptVersion,
         p_generator_version: pkg.metadata.curriculumVersion,
         p_model_name: pkg.metadata.model,
