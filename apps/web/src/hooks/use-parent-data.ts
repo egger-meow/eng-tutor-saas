@@ -33,6 +33,14 @@ const emptySnapshot: ParentDataSnapshot = {
   releasedMaterialCounts: {},
 }
 
+export function invalidateParentDataCache(parentUserId?: string): void {
+  if (parentUserId) {
+    parentDataCache.delete(parentUserId)
+    return
+  }
+  parentDataCache.clear()
+}
+
 export function chooseOwnedChild(children: ChildWithProfile[], requestedId: string | null): ChildWithProfile | null {
   return children.find((child) => child.id === requestedId) ?? children[0] ?? null
 }
