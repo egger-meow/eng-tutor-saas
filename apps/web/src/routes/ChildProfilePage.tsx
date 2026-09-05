@@ -30,7 +30,8 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
       await data.refresh()
       if (childId === targetChildId) navigate('/')
     } catch (caught) {
-      setArchiveError(caught instanceof Error ? caught.message : '無法移除孩子，請稍後再試。')
+      console.error('Child archive failed', caught)
+      setArchiveError('目前無法移除孩子，請稍後再試。')
     } finally {
       setArchiveBusyId(null)
     }
