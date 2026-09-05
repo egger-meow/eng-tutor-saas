@@ -49,9 +49,7 @@ export function ChildOnboardingPage({
   const capacityFull = Boolean(enrollment && (enrollment.status !== 'open' || enrollment.remaining <= 0))
 
   useEffect(() => {
-    if (isNewChild) {
-      trackChildFormStart()
-    }
+    if (isNewChild) trackChildFormStart()
   }, [isNewChild])
 
   useEffect(() => {
@@ -89,14 +87,10 @@ export function ChildOnboardingPage({
     try {
       const childInput = { display_name: draft.displayName, grade: draft.grade, grade_stage: draft.gradeStage, textbook_version: draft.textbookVersion }
       const id = childId ?? await createChild(childInput)
-      if (!childId) {
-        trackChildCreated(id)
-      }
+      if (!childId) trackChildCreated(id)
       if (childId) await updateChild(childId, childInput)
       await saveChildProfile(id, toChildProfileInput(draft))
-      if (!childId) {
-        trackOnboardingComplete(id)
-      }
+      if (!childId) trackOnboardingComplete(id)
       window.sessionStorage.removeItem(storageKey)
       navigate(`/children/${id}`)
     } catch (caught) {
@@ -114,17 +108,17 @@ export function ChildOnboardingPage({
           {isNewChild && (
             <header className="onboarding-welcome-header">
               <div className="onboarding-badge">
-                {capacityFull ? '保留候補資格' : enrollment?.freePilotActive ? '前 100 位每週免費' : '第一週免費'}
+                {capacityFull ? '保留候補資格' : enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}
               </div>
               <h1 className="onboarding-main-title">
-                {capacityFull
-                  ? '三步就好，先留下孩子的學習資料'
-                  : '三步就好，先讓我們認識孩子'}
+                {capacityFull ? '三步就好，先留下孩子的學習資料' : '三步就好，先讓我們認識孩子'}
               </h1>
               <p className="onboarding-main-desc">
                 {capacityFull
                   ? '不用考試、不綁卡，大概填就可以。完成後先保留候補資格，有名額時再通知您。'
-                  : '不用考試、不綁卡，大概填就可以；之後每週都還會依實際使用狀況繼續調整。'}
+                  : enrollment?.freePilotActive
+                    ? '不用考試、不綁卡。Beta 期間目前每週專屬教材 NT$0；大概填就可以，之後每週都還會依實際使用狀況繼續調整。'
+                    : '不用考試、不綁卡，大概填就可以；之後每週都還會依實際使用狀況繼續調整。'}
               </p>
             </header>
           )}
@@ -135,19 +129,10 @@ export function ChildOnboardingPage({
             description={description}
             actions={
               <>
-                <button
-                  className="button button-secondary"
-                  type="button"
-                  onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}
-                >
+                <button className="button button-secondary" type="button" onClick={() => step === 1 ? navigate(childId ? `/children/${childId}` : '/dashboard') : setStep((current) => current - 1)}>
                   {step === 1 ? (isNewChild ? '稍後再填' : '取消') : '上一步'}
                 </button>
-                <button
-                  className="button"
-                  type="button"
-                  disabled={busy}
-                  onClick={() => step === profileStepCount ? void save() : next()}
-                >
+                <button className="button" type="button" disabled={busy} onClick={() => step === profileStepCount ? void save() : next()}>
                   {busy ? '儲存中…' : step === profileStepCount ? (isNewChild ? '完成，開始準備第一週教材' : '儲存學習資料') : '繼續'}
                 </button>
               </>
