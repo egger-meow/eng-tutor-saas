@@ -20,7 +20,7 @@ Your first specification read MUST be:
 SPEC-TOC.md
 ```
 
-Read the complete 210-section index.
+Read the complete numbered index.
 
 Use it to understand:
 
@@ -443,7 +443,7 @@ pnpm --filter @paper-english/pdf pdf:install
 pnpm generate:synthetic
 ```
 
-Source lives under `apps/web/src/`, `packages/generator/src/`, and `packages/pdf/src/`; Supabase migrations and tests live under `supabase/`. Web route pages belong in `apps/web/src/routes/`, reusable components in `apps/web/src/components/`, and browser-safe data access in `apps/web/src/lib/`. Preserve the root-based Cloudflare Workers Static Assets SPA at `https://paperbond.jjmowlab.com`; do not restore `VITE_BASE_PATH`, repository-prefixed routes, or a built `404.html` fallback. Generated PDFs belong only in the git-ignored `output/pdf/` directory. The synthetic command proves canonical validation and deterministic PDF rendering locally. Production curriculum authoring follows `docs/production-authoring.md`. The active executor may be local or online according to scheduler mode. Authoring executors claim and submit through the reviewed bridge; the deterministic Finisher alone renders/uploads PDFs and completes materials.
+Source lives under `apps/web/src/`, `packages/generator/src/`, and `packages/pdf/src/`; Supabase migrations and tests live under `supabase/`. Web route pages belong in `apps/web/src/routes/`, reusable components in `apps/web/src/components/`, and browser-safe data access in `apps/web/src/lib/`. Preserve the root-based Cloudflare Workers Static Assets SPA at `https://paperbond.jjmowlab.com`; do not restore `VITE_BASE_PATH`, repository-prefixed routes, or a built `404.html` fallback. Generated PDFs belong only in the git-ignored `output/pdf/` directory. The synthetic command proves canonical validation and deterministic PDF rendering locally. Production curriculum authoring follows `docs/production-authoring.md`. The active normal executor may be local or online according to scheduler mode. Authoring executors claim and submit through the reviewed bridge. Week 1 is the sole publication exception: every first-packet submission goes to the objective-integrity-only Week 1 Fast Publisher and does not enter the normal Finisher semantic gate. Week 2+ continues through the deterministic Finisher for rendering, storage, and material completion.
 
 # Supabase Production Delivery
 
