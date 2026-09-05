@@ -60,31 +60,6 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
 
-  sync-week1-spec:
-    if: github.event_name == 'pull_request' && github.head_ref == 'feat/week1-fast-lane-impl-2'
-    needs: verify
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feat/week1-fast-lane-impl-2
-          fetch-depth: 1
-      - run: python scripts/sync-week1-spec.py
-      - name: Commit synchronized SPEC to PR branch
-        shell: bash
-        run: |
-          if git diff --quiet -- docs/SPEC.md; then
-            echo "SPEC already synchronized"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/SPEC.md
-          git commit -m "[spec-sync] align Week 1 Fast Lane product contract"
-          git push origin HEAD:"$GITHUB_HEAD_REF"
-
   deploy-production:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: verify
