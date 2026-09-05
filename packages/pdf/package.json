@@ -17,7 +17,8 @@
     "generate:synthetic": "tsx src/generate-synthetic.ts",
     "generate:curriculum-sample": "tsx src/generate-curriculum-sample.ts",
     "generate:curriculum-samples": "tsx src/generate-curriculum-samples.ts",
-    "generate:public-sample": "tsx src/generate-public-sample.ts"
+    "generate:public-sample": "tsx src/generate-public-sample.ts",
+    "generate:sample-previews": "tsx src/generate-sample-previews.ts"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

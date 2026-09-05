@@ -173,7 +173,13 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <p className="document-label">Student PDF</p>
               <h3>答案不會先出現，留給孩子真正思考</h3>
               <a className="pdf-preview" href="/samples/sample-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF" onClick={() => trackSampleClick('student_pdf')}>
-                <iframe title="Student PDF 教材預覽" src="/samples/sample-student.pdf#page=1&view=FitH&toolbar=0" />
+                <img
+                  src="/samples/sample-student-preview.png"
+                  alt="Student PDF 學生教材第 1 頁預覽"
+                  width={595}
+                  height={842}
+                  loading="lazy"
+                />
                 <span>放大查看真實教材 ↗</span>
               </a>
             </article>
@@ -181,7 +187,13 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <p className="document-label">Parent Answer PDF</p>
               <h3>完整答案分開放，家長不用先備課</h3>
               <a className="pdf-preview" href="/samples/sample-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF" onClick={() => trackSampleClick('parent_pdf')}>
-                <iframe title="Parent Answer PDF 教材預覽" src="/samples/sample-parent-answer.pdf#page=1&view=FitH&toolbar=0" />
+                <img
+                  src="/samples/sample-parent-answer-preview.png"
+                  alt="Parent Answer PDF 家長解答第 1 頁預覽"
+                  width={595}
+                  height={842}
+                  loading="lazy"
+                />
                 <span>放大查看真實解答 ↗</span>
               </a>
             </article>
