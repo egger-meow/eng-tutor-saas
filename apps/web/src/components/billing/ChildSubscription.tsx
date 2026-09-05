@@ -127,10 +127,10 @@ export function ChildSubscription({
         {freePilotActive && (
           <div className="free-pilot-voluntary-notice" style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '8px', padding: '0.875rem', marginBottom: '1rem' }}>
             <p style={{ margin: 0, fontWeight: 700, color: '#14532d', fontSize: '0.875rem' }}>
-              🔥 前 100 位學員每週專屬教材完全免費，現在不訂閱也能正常使用！
+              🧪 Paper English Beta · 目前每週教材 NT$0
             </p>
             <p style={{ margin: '0.375rem 0 0', color: '#166534', fontSize: '0.8125rem' }}>
-              若您希望在創始 30 名額用完前永久鎖定 NT$349/月席次，可自願提前訂閱。<strong>請注意：自願訂閱會立即開始扣款計費</strong>，並為孩子保留創始資格。
+              Beta 期間現在不訂閱也能正常使用，免填信用卡、免綁卡。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。若希望鎖定創始 NT$349/月，可自願提前訂閱；<strong>自願訂閱會立即開始扣款計費</strong>。
             </p>
           </div>
         )}
@@ -218,7 +218,7 @@ export function ChildSubscription({
           <h2>{child.display_name}</h2>
           <p>
             {freePilotActive
-              ? '前 100 位學員每週教材全面免費！完成孩子資料後，每週填寫回饋即可持續免費生成專屬教材（NT$0）。'
+              ? 'Paper English Beta 目前每週教材 NT$0。完成孩子資料後，每週填寫回饋即可持續準備下一週；不需要先訂閱或綁卡。'
               : '尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。'}
           </p>
         </div>
@@ -234,7 +234,7 @@ export function ChildSubscription({
   const [title, description] = isCanceledAutoRenew
     ? ['已取消自動續訂', `目前方案仍可使用至 ${periodEnd ?? '本期結束'}。到期後可以重新選擇月繳或年繳方案。`]
     : isFreePilotActiveChild
-      ? ['每週專屬教材全面免費中', '前 100 位學員期間，每週專屬教材完全免費（免填信用卡、免綁卡）。孩子每週只要填寫回饋，系統持續每週為他準備專屬新教材！現在不訂閱也能持續免費使用。']
+      ? ['Paper English Beta · 每週教材 NT$0', '目前免填信用卡、免綁卡，現在不訂閱也能持續使用。每週完成孩子回饋後，系統會繼續準備下一週教材；100 位只是目前服務容量與 Beta 階段邊界。']
       : isPilotEndedChild
         ? ['初期免費階段已結束', '已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。']
         : labels[subscription.status]
