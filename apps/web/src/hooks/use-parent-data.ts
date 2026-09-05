@@ -95,8 +95,8 @@ export function useParentData(parentUserId: string) {
       parentDataCache.set(parentUserId, { snapshot: nextSnapshot, cachedAt: Date.now() })
       setSnapshot(nextSnapshot)
       setHasSnapshot(true)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '無法讀取家長資料，請稍後再試。')
+    } catch {
+      setError('目前無法更新孩子的學習資料，請稍後再試。')
     } finally {
       setLoading(false)
     }
