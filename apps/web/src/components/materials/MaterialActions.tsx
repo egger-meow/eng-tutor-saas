@@ -12,9 +12,14 @@ export function MaterialActions({ material, childName }: MaterialActionsProps) {
     setBusy(kind)
     setError('')
     const path = kind === 'student' ? material.student_pdf_path : material.parent_answer_pdf_path
-    try { await openMaterialDownload(path, materialDownloadFilename(childName, material.material_week, kind, material.week_number ?? null)) }
-    catch (caught) { setError(caught instanceof Error ? caught.message : '下載失敗，請稍後再試。') }
-    finally { setBusy(null) }
+    try {
+      await openMaterialDownload(path, materialDownloadFilename(childName, material.material_week, kind, material.week_number ?? null))
+    } catch (caught) {
+      console.error('Material download failed', caught)
+      setError('目前無法下載教材，請稍後再試。')
+    } finally {
+      setBusy(null)
+    }
   }
 
   return (
