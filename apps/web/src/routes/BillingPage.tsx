@@ -132,8 +132,9 @@ export function BillingPage({
         })
       })
     } catch (caught) {
+      console.error('Checkout start failed', caught)
       setActiveCheckout(null)
-      setError(caught instanceof Error ? caught.message : '目前無法開啟安全付款，請稍後再試。')
+      setError('目前無法開啟安全付款，請稍後再試。')
     } finally {
       setCheckoutChildId(null)
     }
@@ -187,7 +188,8 @@ export function BillingPage({
         await refreshSubscriptions()
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '取消訂閱時發生問題，請稍後再試。')
+      console.error('Subscription cancellation failed', caught)
+      setError('目前無法取消續訂，請稍後再試。')
     } finally {
       setCancelingChildId(null)
     }
@@ -207,7 +209,8 @@ export function BillingPage({
         await refreshSubscriptions()
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '恢復續訂時發生問題，請稍後再試。')
+      console.error('Subscription resume failed', caught)
+      setError('目前無法恢復續訂，請稍後再試。')
     } finally {
       setResumingChildId(null)
     }
