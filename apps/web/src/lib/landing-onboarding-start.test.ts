@@ -47,8 +47,16 @@ describe('landing onboarding start client', () => {
   it('never leaks transport or Edge Function implementation errors to parents', async () => {
     invoke.mockResolvedValueOnce({ data: null, error: { message: 'Edge Function returned a non-2xx status code' } })
 
-    await expect(startLandingOnboarding(input)).rejects.toThrow('目前無法送出登入信')
-    await expect(startLandingOnboarding(input)).rejects.not.toThrow('Edge Function')
+    let message = ''
+    try {
+      await startLandingOnboarding(input)
+    } catch (caught) {
+      message = caught instanceof Error ? caught.message : String(caught)
+    }
+
+    expect(message).toContain('目前無法送出登入信')
+    expect(message).not.toContain('Edge Function')
+    expect(message).not.toContain('non-2xx')
   })
 
   it('uses the same human-safe message for unexpected public response shapes', async () => {
