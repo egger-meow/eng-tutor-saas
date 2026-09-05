@@ -1,0 +1,22 @@
+name: Week 1 Fast Lane bot wake smoke
+
+on:
+  push:
+    branches:
+      - ops/week1-fast-wake
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  ring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post bot-authored wake comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/issues/34/comments" \
+            -f body="week1-wake:v1:bot-smoke-${GITHUB_RUN_ID}"
