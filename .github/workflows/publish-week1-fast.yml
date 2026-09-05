@@ -1,0 +1,76 @@
+name: Publish Week 1 fast
+
+on:
+  repository_dispatch:
+    types: [week1-fast-publish]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: week1-fast-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish-week1-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Cache Traditional Chinese PDF fonts
+        id: cache-fonts
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/fonts-noto-cjk
+          key: fonts-noto-cjk-v1-${{ runner.os }}
+
+      - name: Install or restore Traditional Chinese PDF fonts
+        run: |
+          if [ "${{ steps.cache-fonts.outputs.cache-hit }}" = "true" ]; then
+            sudo mkdir -p /usr/share/fonts/opentype/noto
+            sudo cp -r ~/.cache/fonts-noto-cjk/* /usr/share/fonts/opentype/noto/
+            sudo fc-cache -f
+          else
+            sudo apt-get update
+            sudo apt-get install -y fonts-noto-cjk
+            mkdir -p ~/.cache/fonts-noto-cjk
+            cp -r /usr/share/fonts/opentype/noto/* ~/.cache/fonts-noto-cjk/ 2>/dev/null || true
+          fi
+
+      - name: Cache Playwright Chromium
+        id: cache-playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: pnpm --filter @paper-english/pdf pdf:install
+
+      - name: Validate publisher secrets
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_SECRET_KEY"
+
+      - name: Fast publish eligible Week 1 submissions
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: pnpm --filter @paper-english/worker publish-week1-fast -- --processor github-actions-week1-fast --limit 10
