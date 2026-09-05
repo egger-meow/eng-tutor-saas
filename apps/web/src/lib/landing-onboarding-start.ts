@@ -16,6 +16,8 @@ export type StartLandingOnboardingResult = {
   status: LandingOnboardingStartStatus
 }
 
+const LANDING_ONBOARDING_SEND_ERROR = '目前無法送出登入信。請稍後再試；如果你剛剛已收到紙屬英文的 Email，請直接使用最新一封登入信，不用再次送出。'
+
 export async function startLandingOnboarding(
   input: StartLandingOnboardingInput,
 ): Promise<StartLandingOnboardingResult> {
@@ -34,14 +36,14 @@ export async function startLandingOnboarding(
     },
   })
 
-  if (error) throw error
+  if (error) throw new Error(LANDING_ONBOARDING_SEND_ERROR)
 
   const status = data && typeof data === 'object' && 'status' in data
     ? (data as { status?: unknown }).status
     : null
 
   if (status !== 'accepted' && status !== 'waitlisted') {
-    throw new Error('無法開始第一週教材，請稍後再試。')
+    throw new Error(LANDING_ONBOARDING_SEND_ERROR)
   }
 
   return { status }
