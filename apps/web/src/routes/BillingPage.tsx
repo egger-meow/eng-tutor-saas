@@ -299,7 +299,7 @@ export function BillingPage({
         {checkoutNotice && <p className="notice" role="status">{checkoutNotice}</p>}
         {enrollment?.freePilotActive && (
           <aside className="notice free-pilot-notice" style={{ background: '#f0fdf4', borderColor: '#86efac', color: '#14532d', marginBottom: '1.5rem', padding: '1rem 1.25rem', borderRadius: '8px' }}>
-            <strong style={{ fontSize: '1rem' }}>🧪 Paper English Beta · 目前每週專屬教材 NT$0</strong>
+            <strong style={{ fontSize: '1rem' }}>🧪 紙屬英文 Beta · 目前每週專屬教材 NT$0</strong>
             <p style={{ margin: '0.35rem 0 0', fontSize: '0.875rem', color: '#166534', lineHeight: '1.6' }}>
               免填信用卡、免綁卡，現在不訂閱也能正常使用。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。<br />
               若希望鎖定未來的創始 NT$349/月優惠，可自願提前訂閱；這個選項會立即開始計費。

@@ -15,7 +15,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
     <div className="pricing-heading">
       <div>
         <p className="overline">
-          {enrollment?.freePilotActive ? '🧪 Paper English Beta' : '清楚知道每週得到什麼'}
+          {enrollment?.freePilotActive ? '🧪 紙屬英文 Beta' : '清楚知道每週得到什麼'}
         </p>
         <h2 id="pricing-title">
           {enrollment?.freePilotActive
@@ -56,7 +56,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
     {enrollment?.freePilotActive && (
       <div className="free-pilot-banner" style={{ background: '#f0fdf4', border: '2px solid #86efac', borderRadius: '12px', padding: '1.25rem 1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
         <span style={{ display: 'inline-block', background: '#245c49', color: '#fff', fontSize: '0.8125rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: '9999px', marginBottom: '0.5rem' }}>
-          🧪 Paper English Beta
+          🧪 紙屬英文 Beta
         </span>
         <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#14532d', margin: '0.25rem 0' }}>
           目前每週專屬教材 NT$0

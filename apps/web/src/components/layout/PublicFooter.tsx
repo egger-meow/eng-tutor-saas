@@ -63,7 +63,7 @@ export function PublicFooter() {
           <span>通訊地址：{legalConfig.companyAddress}</span>
         </div>
         <p className="copyright-line">
-          © 2026 紙屬英文 Paper English. All rights reserved.
+          © 2026 紙屬英文. All rights reserved.
         </p>
       </div>
     </footer>

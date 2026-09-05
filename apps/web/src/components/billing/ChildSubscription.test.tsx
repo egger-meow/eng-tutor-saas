@@ -205,10 +205,10 @@ describe('ChildSubscription Component', () => {
       />
     )
 
-    expect(html).toContain('Paper English Beta · 每週教材 NT$0')
+    expect(html).toContain('紙屬英文 Beta · 每週教材 NT$0')
     expect(html).toContain('目前免填信用卡、免綁卡')
     expect(html).toContain('現在不訂閱也能持續使用')
-    expect(html).toContain('🧪 Paper English Beta · 目前每週教材 NT$0')
+    expect(html).toContain('🧪 紙屬英文 Beta · 目前每週教材 NT$0')
     expect(html).toContain('100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷')
     expect(html).not.toContain('前 100 位學員')
     expect(html).not.toContain('🔥')

@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ health, overview, isRefreshing, 
       <div className="header-brand">
         <span className="brand-badge">營運後台</span>
         <h1 className="brand-title">
-          <span className="brand-title-full">Paper English 生產營運台</span>
+          <span className="brand-title-full">紙屬英文 生產營運台</span>
           <span className="brand-title-short">營運台</span>
         </h1>
         <span className={'connection-state ' + (connected ? 'connected' : 'disconnected')}>

@@ -125,7 +125,7 @@ export function TermsPage() {
             <section>
               <h2>第十條（企業經營者法定資訊）</h2>
               <div className="operator-card">
-                <p><strong>服務名稱：</strong>紙屬英文（Paper English）</p>
+                <p><strong>服務名稱：</strong>紙屬英文</p>
                 <p><strong>營運團隊：</strong>{legalConfig.companyName || 'jjmow (侯均頲)'}</p>
                 <p><strong>負責人：</strong>{legalConfig.representative || 'jjmow (侯均頲)'}</p>
                 <p><strong>客服與個資專用 Email：</strong><a href={`mailto:${legalConfig.contactEmail}`}>{legalConfig.contactEmail}</a></p>

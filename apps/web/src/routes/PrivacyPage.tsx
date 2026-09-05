@@ -123,7 +123,7 @@ export function PrivacyPage() {
                 若您對本隱私權政策有任何疑問、或欲行使個人資料當事人權利，請隨時與我們聯繫：
               </p>
               <div className="operator-card">
-                <p><strong>服務名稱：</strong>紙屬英文（Paper English）</p>
+                <p><strong>服務名稱：</strong>紙屬英文</p>
                 <p><strong>營運團隊：</strong>{legalConfig.companyName || 'jjmow (侯均頲)'}</p>
                 <p><strong>客服與個資專用 Email：</strong><a href={`mailto:${legalConfig.contactEmail}`}>{legalConfig.contactEmail}</a></p>
                 <p><strong>通訊地址：</strong>{legalConfig.companyAddress || '台灣新竹市'}</p>

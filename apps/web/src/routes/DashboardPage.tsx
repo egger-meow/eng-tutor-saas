@@ -44,7 +44,7 @@ export function DashboardPage({ session }: { session: Session }) {
               {capacityFull
                 ? '名額候補'
                 : enrollment?.freePilotActive
-                  ? '🧪 Paper English Beta · 目前 NT$0'
+                  ? '🧪 紙屬英文 Beta · 目前 NT$0'
                   : '免費體驗第一週'}
             </div>
             <h1>

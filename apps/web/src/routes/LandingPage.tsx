@@ -38,7 +38,7 @@ export const faqItems = [
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
-  ['目前需要付費嗎？', 'Paper English Beta 期間，目前每週專屬教材為 NT$0，免填信用卡、免綁卡。Beta 階段以歷史錄取 100 位學員為目前邊界；之後恢復標準方案（月繳 NT$499 或年繳 NT$4,999），不會因為你填了孩子資料就自動訂閱或扣款。'],
+  ['目前需要付費嗎？', '紙屬英文 Beta 期間，目前每週專屬教材為 NT$0，免填信用卡、免綁卡。Beta 階段以歷史錄取 100 位學員為目前邊界；之後恢復標準方案（月繳 NT$499 或年繳 NT$4,999），不會因為你填了孩子資料就自動訂閱或扣款。'],
   ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。Beta 期間目前每週教材雖為 NT$0，但若希望在 30 席額滿前鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
   ['100 位是什麼意思？', '100 位是目前服務容量與 Beta 階段的邊界，不是倒數促銷。服務達容量時，新加入者會先進入候補；Beta 免費階段結束後，後續每週服務依當時方案繼續，已完成與正在準備中的教材不受影響。'],
 ] as const
@@ -83,7 +83,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
       <PageTransition>
         <section className="landing-hero">
           <FadeInUp duration={0.4} className="hero-copy">
-            <p className="eyebrow">🧪 Paper English Beta · 給國小高年級到國中生</p>
+            <p className="eyebrow">🧪 紙屬英文 Beta · 給國小高年級到國中生</p>
             <h1 className="hero-title">
               <span>每週一份，</span><span><em>照孩子現在的狀況</em></span><span>重新做的英文教材。</span>
             </h1>
@@ -95,8 +95,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </ul>
 
             {isFreePilot ? (
-              <div className="hero-beta-badge" aria-label="Paper English Beta 免費說明">
-                <span className="hero-beta-kicker">🧪 Paper English Beta</span>
+              <div className="hero-beta-badge" aria-label="紙屬英文 Beta 免費說明">
+                <span className="hero-beta-kicker">🧪 紙屬英文 Beta</span>
                 <div className="hero-beta-price"><strong>NT$0</strong><span>目前每週專屬教材</span></div>
                 <p className="hero-beta-meta">免填信用卡・免綁卡。每週完成孩子作答回饋後，系統會繼續準備下一週。</p>
                 <span className="hero-beta-capacity">Beta 目前以 100 位孩子作為服務容量與階段邊界</span>

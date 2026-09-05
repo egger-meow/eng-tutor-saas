@@ -169,7 +169,7 @@ function App() {
       <main className="loading-state onboarding-progress-shell" role="status">
         <section className="onboarding-progress-card">
           <div className="loading-spinner" aria-hidden="true" />
-          <p className="overline">Paper English</p>
+          <p className="overline">紙屬英文</p>
           <h1>{finalizingOnboarding ? '正在把孩子資料接到帳號' : '正在確認登入狀態'}</h1>
           <p>{finalizingOnboarding ? '剛剛填的資料已經收到，不需要重填。這一步完成後會直接帶你到孩子的學習頁。' : '正在確認安全登入連結，馬上就會進入。'}</p>
           {finalizingOnboarding && (

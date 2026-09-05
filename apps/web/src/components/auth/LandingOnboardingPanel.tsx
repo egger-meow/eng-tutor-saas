@@ -198,7 +198,7 @@ export function LandingOnboardingPanel() {
     return (
       <div className="onboarding-container landing-onboarding-panel">
         <section className="onboarding-success-card" role="status" aria-live="polite">
-          <div className="onboarding-badge">🧪 Paper English Beta</div>
+          <div className="onboarding-badge">🧪 紙屬英文 Beta</div>
           <p className="overline">{waitlisted ? '候補已完成' : '資料已安全送出'}</p>
           <h2>{waitlisted ? '候補已登記，登入信已寄出' : '第一週教材已排入製作'}</h2>
           <p>
@@ -227,7 +227,7 @@ export function LandingOnboardingPanel() {
     return (
       <div className="onboarding-container landing-onboarding-panel">
         <header className="onboarding-welcome-header">
-          <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
+          <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 紙屬英文 Beta · 目前 NT$0' : '第一週免費'}</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
           <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會排入第一週教材製作。</p>
         </header>
@@ -282,7 +282,7 @@ export function LandingOnboardingPanel() {
   return (
     <div className="onboarding-container landing-onboarding-panel">
       <header className="onboarding-welcome-header">
-        <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
+        <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 紙屬英文 Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
         <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會排入第一週教材製作。</p>
       </header>

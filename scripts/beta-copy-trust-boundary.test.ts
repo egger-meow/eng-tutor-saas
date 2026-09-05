@@ -11,7 +11,7 @@ const paths = [
 describe('Beta account copy trust boundary', () => {
   it.each(paths)('%s uses Beta/NT$0 language instead of scarcity marketing', (path) => {
     const source = readFileSync(resolve(root, path), 'utf8')
-    expect(source).toContain('Paper English Beta')
+    expect(source).toContain('紙屬英文 Beta')
     expect(source).toContain('NT$0')
     expect(source).not.toContain('🔥 前 100 位')
     expect(source).not.toContain('前 100 位學員')

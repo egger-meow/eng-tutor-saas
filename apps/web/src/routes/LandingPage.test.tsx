@@ -80,7 +80,7 @@ describe('Landing Page — Beta trust hierarchy', () => {
   it('leads with Beta and NT$0 instead of scarcity copy when the free pilot is active', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
 
-    expect(html).toContain('🧪 Paper English Beta')
+    expect(html).toContain('🧪 紙屬英文 Beta')
     expect(html).toContain('hero-beta-badge')
     expect(html).toContain('NT$0')
     expect(html).toContain('目前每週專屬教材')
