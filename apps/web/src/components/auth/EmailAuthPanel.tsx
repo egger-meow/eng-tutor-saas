@@ -43,7 +43,8 @@ export function EmailAuthPanel({
     setBusy(false)
     if (error) {
       clearPendingLegalAcceptance()
-      setNotice({ kind: 'error', text: error.message })
+      console.error('Magic-link login request failed', error)
+      setNotice({ kind: 'error', text: '目前無法寄送登入信，請稍後再試。' })
     } else {
       trackEmailSubmit({ flow: 'direct_login' })
       setNotice({ kind: 'success', text: '登入連結已寄出，請回到 Email 信箱完成登入。' })
