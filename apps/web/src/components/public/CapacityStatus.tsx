@@ -11,10 +11,18 @@ export function CapacityStatus({ enrollment: propEnrollment }: { enrollment?: En
       <div className="capacity-status status-open">
         <div className="capacity-status-content">
           <div className="capacity-status-headline">
-            <strong>目前開放加入</strong>
-            <span>第一階段預計服務 <strong>{state.capacity} 位孩子</strong>，目前仍有服務名額。</span>
+            <strong>{state.freePilotActive ? 'Beta 目前開放加入' : '目前開放加入'}</strong>
+            <span>
+              {state.freePilotActive
+                ? <>目前每週專屬教材 NT$0；不用綁卡，也不會因為你填了孩子資料就自動訂閱或扣款。</>
+                : <>第一階段預計服務 <strong>{state.capacity} 位孩子</strong>，目前仍有服務名額。</>}
+            </span>
           </div>
-          <span className="capacity-status-note">額滿後新加入者會先進入候補，既有家庭不受影響。</span>
+          <span className="capacity-status-note">
+            {state.freePilotActive
+              ? `${state.capacity} 位是目前服務容量與 Beta 階段邊界；額滿後新加入者會先進入候補。`
+              : '額滿後新加入者會先進入候補，既有家庭不受影響。'}
+          </span>
         </div>
       </div>
     )
