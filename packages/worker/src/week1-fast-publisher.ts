@@ -1,7 +1,5 @@
 import {
-  CURRENT_PDF_RENDERER_VERSION,
   CURRENT_RELEASE_ID,
-  CURRENT_WORKER_VERSION,
   validateCurriculumPackageForFinisher,
   type CurriculumPackage,
 } from '@paper-english/generator'
@@ -133,8 +131,8 @@ export async function processWeek1FastSubmissions(
   for (const submission of submissions) {
     const createdPaths: string[] = []
     try {
-      if (submission.generation_worker_id !== 'chatgpt-week1-fast') {
-        throw new Error('non-fast authoring submission reached Week 1 publisher')
+      if (!submission.generation_worker_id || submission.generation_worker_id.length < 3) {
+        throw new Error('Week 1 submission is missing its authoring worker identity')
       }
 
       const context = await loadGenerationContext(client, submission.job_id, submission.generation_worker_id)
@@ -150,17 +148,13 @@ export async function processWeek1FastSubmissions(
       if (targetReleaseId !== CURRENT_RELEASE_ID) {
         throw new Error(`Week 1 release mismatch: ${targetReleaseId} != ${CURRENT_RELEASE_ID}`)
       }
-
-      const prepared = {
-        ...raw,
-        metadata: {
-          ...rawMetadata,
-          releaseId: targetReleaseId,
-          rendererVersion: CURRENT_PDF_RENDERER_VERSION,
-          workerVersion: CURRENT_WORKER_VERSION,
-        },
+      if (rawMetadata.releaseId && rawMetadata.releaseId !== targetReleaseId) {
+        throw new Error('Week 1 immutable submission releaseId does not match claimed release')
       }
-      const parsed = validateCurriculumPackageForFinisher(prepared)
+
+      // Fast Publisher validates and renders the immutable canonical submission exactly as stored.
+      // It never authors, repairs, or substitutes curriculum content.
+      const parsed = validateCurriculumPackageForFinisher(raw)
       if (!parsed.success) {
         throw new Error(`Week 1 package integrity invalid: ${parsed.issues.map((issue) => `${issue.path}:${issue.message}`).join(' | ')}`)
       }
