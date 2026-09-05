@@ -14,6 +14,7 @@ export interface StartLandingOnboardingInput {
 
 export type StartLandingOnboardingResult = {
   status: LandingOnboardingStartStatus
+  progressToken?: string
 }
 
 const LANDING_ONBOARDING_SEND_ERROR = '目前無法送出登入信。請稍後再試；如果你剛剛已收到紙屬英文的 Email，請直接使用最新一封登入信，不用再次送出。'
@@ -46,5 +47,12 @@ export async function startLandingOnboarding(
     throw new Error(LANDING_ONBOARDING_SEND_ERROR)
   }
 
-  return { status }
+  const rawToken = data && typeof data === 'object' && 'progressToken' in data
+    ? (data as { progressToken?: unknown }).progressToken
+    : undefined
+  const progressToken = typeof rawToken === 'string' && /^[0-9a-f]{64}$/u.test(rawToken)
+    ? rawToken
+    : undefined
+
+  return progressToken ? { status, progressToken } : { status }
 }
