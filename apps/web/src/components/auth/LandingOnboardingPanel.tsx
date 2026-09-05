@@ -200,11 +200,11 @@ export function LandingOnboardingPanel() {
         <section className="onboarding-success-card" role="status" aria-live="polite">
           <div className="onboarding-badge">🧪 Paper English Beta</div>
           <p className="overline">{waitlisted ? '候補已完成' : '資料已安全送出'}</p>
-          <h2>{waitlisted ? '候補已登記，登入信已寄出' : '第一週已開始製作'}</h2>
+          <h2>{waitlisted ? '候補已登記，登入信已寄出' : '第一週教材已排入製作'}</h2>
           <p>
             {waitlisted
               ? '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。'
-              : '系統已經開始替孩子製作第一週教材。你可以留在這裡看即時進度，也可以先離開；安全登入信讓你之後回來查看與下載。'}
+              : '孩子資料已收到，我們會盡快幫你把第一週教材做好。你不用留在這頁等；完成後也會寄 Email 通知你，再回來下載就好。'}
           </p>
           {waitlisted ? (
             <div className="onboarding-progress-list" aria-label="候補處理進度">
@@ -229,13 +229,13 @@ export function LandingOnboardingPanel() {
         <header className="onboarding-welcome-header">
           <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始製作第一週。</p>
+          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會排入第一週教材製作。</p>
         </header>
         <section className="onboarding-layout" aria-labelledby="landing-email-title">
           <div className="onboarding-heading">
             <p className="overline">孩子資料完成（第 3/3 步已完成）</p>
-            <h2 id="landing-email-title">最後留下 Email，第一週現在就開始做</h2>
-            <p className="muted">剛剛填的資料不需要重填。送出後就會立即進入第一週加速製作；安全連結則用來登入與管理孩子。</p>
+            <h2 id="landing-email-title">最後留下 Email，我們就開始準備第一週</h2>
+            <p className="muted">剛剛填的資料不需要重填。送出後會排入第一週教材製作；完成後也會寄 Email 通知你。安全連結則用來登入與管理孩子。</p>
           </div>
           <form onSubmit={submitEmail} className="onboarding-fields">
             <label htmlFor="landing-onboarding-email">家長 Email</label>
@@ -266,7 +266,7 @@ export function LandingOnboardingPanel() {
                 上一步
               </button>
               <button className="button" type="submit" disabled={busy}>
-                {busy ? '啟動中…' : '立即開始製作第一週教材'}
+                {busy ? '送出中…' : '開始準備第一週教材'}
               </button>
             </div>
           </form>
@@ -284,7 +284,7 @@ export function LandingOnboardingPanel() {
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會立即開始製作第一週教材。</p>
+        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會排入第一週教材製作。</p>
       </header>
       <OnboardingLayout
         step={step}
