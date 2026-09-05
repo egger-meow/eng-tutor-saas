@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "worker": "tsx src/cli.ts"
+    "worker": "tsx src/cli.ts",
+    "publish-week1-fast": "tsx src/week1-fast-cli.ts"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

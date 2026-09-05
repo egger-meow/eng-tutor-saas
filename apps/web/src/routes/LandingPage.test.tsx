@@ -107,20 +107,22 @@ describe('Landing Page — Beta trust hierarchy', () => {
 })
 
 describe('Landing Page — First Delivery Timing Disclosure', () => {
-  it('discloses next-day delivery expectation in hero and pricing when capacity is open', () => {
+  it('states immediate production start without promising an instant finished PDF', () => {
     const page = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     const pricing = renderToStaticMarkup(<PricingSection enrollment={confirmedOpenEnrollment} />)
-    expect(page).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
-    expect(pricing).toContain('完成孩子資料後，第一份專屬教材預計隔天開放下載。')
+    expect(page).toContain('完成孩子資料後立即開始製作；第一週完成後直接開放下載。')
+    expect(pricing).toContain('完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。')
+    expect(page).not.toContain('第一份專屬教材預計隔天開放下載')
+    expect(pricing).not.toContain('第一份專屬教材預計隔天開放下載')
   })
 
   it('includes a capacity-safe first material timing answer in FAQ', () => {
     const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
     expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後，第一份專屬教材預計於隔天開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
+    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
   })
 
-  it('does not make forbidden instantaneous or fixed-hour promises', () => {
+  it('does not make forbidden instantaneous-finish or fixed-hour promises', () => {
     const html = renderToStaticMarkup(<LandingPage />)
     expect(html).not.toContain('立即下載第一份')
     expect(html).not.toContain('馬上拿到')
@@ -225,7 +227,8 @@ describe('Landing Page — Onboarding & Direct Login', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('填寫一位孩子的學習狀況')
     expect(html).toContain('完成 3 個步驟後留下 Email')
-    expect(html).toContain('第一份專屬教材預計隔天開放下載')
+    expect(html).toContain('送出後立即開始製作，完成後直接開放下載')
+    expect(html).not.toContain('第一份專屬教材預計隔天開放下載')
     expect(html).not.toContain('從家長 Email 建立帳號')
     expect(html).not.toContain('建立家長帳號或登入')
     expect(html).not.toMatch(/\bautofocus\b/i)

@@ -340,7 +340,7 @@ export function BillingPage({
             <h2>{capacityFull ? '目前名額已滿，先建立孩子學習資料' : '先新增孩子'}</h2>
             <p>{capacityFull
               ? '先把孩子的學習資料準備好即可，不會收費，也不會先開始訂閱或產生教材。有名額時我們會寄 Email 通知你。'
-              : '方案以每位孩子為單位。完成孩子資料後，第一份專屬教材預計隔天開放下載。'}</p>
+              : '方案以每位孩子為單位。完成孩子資料後，第一份專屬教材會立即開始製作；完成後直接開放下載。'}</p>
             <button className="button" type="button" onClick={() => navigate('/children/new')}>
               ＋ {capacityFull ? '建立孩子學習資料' : '新增孩子'}
             </button>

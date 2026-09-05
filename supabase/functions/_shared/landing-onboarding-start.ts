@@ -23,8 +23,14 @@ export interface LandingOnboardingStartDeps {
   prepare: (input: LandingOnboardingPrepareInput) => Promise<string>
   sendMagicLink: (input: { email: string; redirectTo: string }) => Promise<void>
   activate: (token: string) => Promise<unknown>
+  issueProgressToken: (onboardingToken: string) => Promise<string | null>
   sleep: (ms: number) => Promise<void>
   allowedRedirectOrigins: string[]
+}
+
+export type LandingOnboardingStartResult = {
+  status: LandingOnboardingStartStatus
+  progressToken?: string
 }
 
 const ACTIVATION_ATTEMPTS = 3
@@ -55,7 +61,7 @@ function readActivationStatus(value: unknown): LandingOnboardingStartStatus {
 export async function startLandingOnboarding(
   input: LandingOnboardingStartInput,
   deps: LandingOnboardingStartDeps,
-): Promise<{ status: LandingOnboardingStartStatus }> {
+): Promise<LandingOnboardingStartResult> {
   const redirectOrigin = normalizeOrigin(input.redirectOrigin)
   const allowedOrigins = deps.allowedRedirectOrigins.map(normalizeOrigin)
   if (!allowedOrigins.includes(redirectOrigin)) {
@@ -90,7 +96,18 @@ export async function startLandingOnboarding(
       continue
     }
 
-    return { status: readActivationStatus(activation) }
+    const status = readActivationStatus(activation)
+    if (status !== 'accepted') return { status }
+
+    // Progress is an enhancement, not part of the admission transaction. If token issuance
+    // is temporarily unavailable, onboarding still succeeds and the dashboard can recover it
+    // after authentication from the parent-owned progress RPC.
+    try {
+      const progressToken = await deps.issueProgressToken(token)
+      return progressToken ? { status, progressToken } : { status }
+    } catch {
+      return { status }
+    }
   }
 
   throw lastError instanceof Error ? lastError : new Error('activation_failed')

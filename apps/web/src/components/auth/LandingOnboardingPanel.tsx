@@ -1,13 +1,21 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { OnboardingLayout } from '../onboarding/OnboardingLayout'
 import { AboutStep } from '../onboarding/steps/AboutStep'
 import { SchoolStep } from '../onboarding/steps/SchoolStep'
 import { RoutineStep } from '../onboarding/steps/RoutineStep'
 import { EmailAuthPanel } from './EmailAuthPanel'
+import { Week1FastProgress } from '../materials/Week1FastProgress'
 import { getAnonymousId, trackChildFormStart } from '../../lib/analytics'
 import { startLandingOnboarding, type LandingOnboardingStartStatus } from '../../lib/landing-onboarding-start'
 import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
 import { useEnrollmentState } from '../../lib/enrollment'
+import {
+  clearWeek1ProgressToken,
+  readAnonymousWeek1Progress,
+  readWeek1ProgressToken,
+  saveWeek1ProgressToken,
+  type Week1Progress,
+} from '../../lib/week1-progress'
 import '../../styles/onboarding-refinement.css'
 import '../../styles/landing-onboarding.css'
 
@@ -30,8 +38,70 @@ export function LandingOnboardingPanel() {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [submissionStatus, setSubmissionStatus] = useState<LandingOnboardingStartStatus | null>(null)
+  const [week1Progress, setWeek1Progress] = useState<Week1Progress | null>(null)
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null)
   const started = useRef(false)
+
+  useEffect(() => {
+    if (mode !== 'submitted' || submissionStatus !== 'accepted') return
+    const token = readWeek1ProgressToken()
+    if (!token) return
+
+    const startedAt = Date.now()
+    let cancelled = false
+    let inFlight = false
+    let timer: number | null = null
+
+    const nextDelay = () => {
+      const elapsed = Date.now() - startedAt
+      if (elapsed < 30_000) return 2_000
+      if (elapsed < 180_000) return 5_000
+      return 10_000
+    }
+
+    const schedule = () => {
+      if (cancelled) return
+      timer = window.setTimeout(() => {
+        timer = null
+        void poll()
+      }, nextDelay())
+    }
+
+    const poll = async () => {
+      if (cancelled || inFlight) return
+      if (Date.now() - startedAt >= 2 * 60 * 60 * 1000) {
+        clearWeek1ProgressToken()
+        return
+      }
+      if (document.hidden) return
+
+      inFlight = true
+      try {
+        const progress = await readAnonymousWeek1Progress(token)
+        if (!cancelled && progress) {
+          setWeek1Progress(progress)
+          if (progress.ready) {
+            clearWeek1ProgressToken()
+            return
+          }
+        }
+      } finally {
+        inFlight = false
+      }
+      schedule()
+    }
+
+    void poll()
+    const onVisibility = () => {
+      if (!document.hidden && !cancelled && timer === null && !inFlight) void poll()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      cancelled = true
+      if (timer !== null) window.clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [mode, submissionStatus])
 
   function markStarted() {
     if (started.current) return
@@ -99,6 +169,12 @@ export function LandingOnboardingPanel() {
       })
 
       setSubmissionStatus(result.status)
+      if (result.status === 'accepted') {
+        setWeek1Progress({ stage: 'received', stageUpdatedAt: new Date().toISOString(), ready: false })
+        saveWeek1ProgressToken(result.progressToken)
+      } else {
+        clearWeek1ProgressToken()
+      }
       setMode('submitted')
     } catch (caught) {
       console.error('Landing onboarding request failed', caught)
@@ -124,18 +200,21 @@ export function LandingOnboardingPanel() {
         <section className="onboarding-success-card" role="status" aria-live="polite">
           <div className="onboarding-badge">🧪 Paper English Beta</div>
           <p className="overline">{waitlisted ? '候補已完成' : '資料已安全送出'}</p>
-          <h2>{waitlisted ? '候補已登記，登入信已寄出' : '登入信已寄出'}</h2>
+          <h2>{waitlisted ? '候補已登記，登入信已寄出' : '第一週已開始製作'}</h2>
           <p>
             {waitlisted
               ? '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。'
-              : '第一週教材已進入準備流程。教材完成後會直接寄到你的 Email，安全登入信則讓你之後查看進度與管理孩子。'}
+              : '系統已經開始替孩子製作第一週教材。你可以留在這裡看即時進度，也可以先離開；安全登入信讓你之後回來查看與下載。'}
           </p>
-          <div className="onboarding-progress-list" aria-label={waitlisted ? '候補處理進度' : '第一週教材準備進度'}>
-            <div><span className="progress-check">✓</span><strong>孩子資料已收到</strong></div>
-            <div><span className="progress-check">✓</span><strong>安全登入信已寄出</strong></div>
-            {!waitlisted && <div className="progress-active"><span className="mini-spinner" aria-hidden="true" /><strong>第一週教材正在準備</strong></div>}
-          </div>
-          <p className="muted">不用再按一次，也不用留在這頁。若收件匣沒看到，請先檢查垃圾郵件或促銷分類。</p>
+          {waitlisted ? (
+            <div className="onboarding-progress-list" aria-label="候補處理進度">
+              <div><span className="progress-check">✓</span><strong>孩子資料已收到</strong></div>
+              <div><span className="progress-check">✓</span><strong>安全登入信已寄出</strong></div>
+            </div>
+          ) : (
+            <Week1FastProgress progress={week1Progress} />
+          )}
+          <p className="muted">登入信只用來安全登入，不需要重複送出。若收件匣沒看到，請先檢查垃圾郵件或促銷分類。</p>
           <div className="onboarding-actions">
             <button className="button button-secondary" type="button" onClick={() => setMode('existing')}>已有信？前往登入</button>
           </div>
@@ -150,13 +229,13 @@ export function LandingOnboardingPanel() {
         <header className="onboarding-welcome-header">
           <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
           <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始準備第一週。</p>
+          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會立即開始製作第一週。</p>
         </header>
         <section className="onboarding-layout" aria-labelledby="landing-email-title">
           <div className="onboarding-heading">
             <p className="overline">孩子資料完成（第 3/3 步已完成）</p>
-            <h2 id="landing-email-title">最後留下 Email，第一週做好直接寄給你</h2>
-            <p className="muted">剛剛填的資料不需要重填。送出後就會開始準備第一週教材；安全連結則用來登入與管理孩子。</p>
+            <h2 id="landing-email-title">最後留下 Email，第一週現在就開始做</h2>
+            <p className="muted">剛剛填的資料不需要重填。送出後就會立即進入第一週加速製作；安全連結則用來登入與管理孩子。</p>
           </div>
           <form onSubmit={submitEmail} className="onboarding-fields">
             <label htmlFor="landing-onboarding-email">家長 Email</label>
@@ -187,7 +266,7 @@ export function LandingOnboardingPanel() {
                 上一步
               </button>
               <button className="button" type="submit" disabled={busy}>
-                {busy ? '啟動中…' : '開始準備第一週教材'}
+                {busy ? '啟動中…' : '立即開始製作第一週教材'}
               </button>
             </div>
           </form>
@@ -205,7 +284,7 @@ export function LandingOnboardingPanel() {
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 Paper English Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會開始準備第一週教材。</p>
+        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會立即開始製作第一週教材。</p>
       </header>
       <OnboardingLayout
         step={step}

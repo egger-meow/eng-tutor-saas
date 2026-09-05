@@ -39,10 +39,10 @@ export function getDeliveryViewModel(
   let nextPrepared: Material | null = null
   let nextJobReleaseAt: string | null = null
   let now = new Date()
-  let hasPastDueJob = typeof hasPastDueJobInput === 'boolean'
+  const hasPastDueJob = typeof hasPastDueJobInput === 'boolean'
     ? hasPastDueJobInput
     : Boolean((child as { has_past_due_job?: boolean } | null)?.has_past_due_job)
-  let hasActiveGenerationFailure = typeof hasActiveGenerationFailureInput === 'boolean'
+  const hasActiveGenerationFailure = typeof hasActiveGenerationFailureInput === 'boolean'
     ? hasActiveGenerationFailureInput
     : Boolean((child as { has_active_generation_failure?: boolean } | null)?.has_active_generation_failure)
 
@@ -59,14 +59,10 @@ export function getDeliveryViewModel(
     nextJobReleaseAt = nextJobReleaseAtOrNow
   }
 
-  if (nowInput instanceof Date) {
-    now = nowInput
-  }
+  if (nowInput instanceof Date) now = nowInput
 
   const subscription = (child as { subscription?: SubscriptionView | null } | null)?.subscription
 
-  // If a child has completed Week 1 (or has existing released materials) and is not actively subscribed,
-  // subsequent generation requires an active subscription.
   if (currentMaterial && subscription !== undefined) {
     const isUnsubscribed = !subscription || subscription.status === 'trialing'
     const isCanceled = subscription?.status === 'canceled'
@@ -95,10 +91,7 @@ export function getDeliveryViewModel(
           : (effectiveNextDeliveryAt
               ? `第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋於 ${formatTaipeiDate(effectiveNextDeliveryAt)} 繼續為孩子準備專屬教材。`
               : '第 1 週體驗教材已開放下載。完成訂閱後，系統將依回饋為孩子準備下一份專屬教材。'),
-        action: {
-          label: '前往選擇方案訂閱',
-          href: '/billing',
-        },
+        action: { label: '前往選擇方案訂閱', href: '/billing' },
       }
     }
 
@@ -109,10 +102,7 @@ export function getDeliveryViewModel(
         feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
         headline: '訂閱已到期',
         detail: '已完成的教材仍可隨時下載複習。若想繼續接收每週個人化教材，請重新啟用訂閱。',
-        action: {
-          label: '重新啟用訂閱',
-          href: '/billing',
-        },
+        action: { label: '重新啟用訂閱', href: '/billing' },
       }
     }
 
@@ -123,10 +113,7 @@ export function getDeliveryViewModel(
         feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
         headline: '付款需要處理',
         detail: '請至帳戶設定確認付款方式，避免後續每週教材服務中斷。',
-        action: {
-          label: '處理付款方式',
-          href: '/billing',
-        },
+        action: { label: '處理付款方式', href: '/billing' },
       }
     }
 
@@ -137,10 +124,7 @@ export function getDeliveryViewModel(
         feedbackState: currentMaterial.feedback ? 'received' : 'waiting',
         headline: '訂閱暫停中',
         detail: '訂閱目前暫停中，處理完成後每週教材會繼續交付。',
-        action: {
-          label: '管理訂閱',
-          href: '/billing',
-        },
+        action: { label: '管理訂閱', href: '/billing' },
       }
     }
 
@@ -151,8 +135,6 @@ export function getDeliveryViewModel(
         : nextJobReleaseAt
           ? new Date(nextJobReleaseAt)
           : null
-
-      // If the candidate delivery falls strictly after the current period end, we cannot promise delivery.
       if (!candidateReleaseAt || !periodEnd || candidateReleaseAt.getTime() > periodEnd.getTime()) {
         return {
           nextDeliveryAt: null,
@@ -162,53 +144,51 @@ export function getDeliveryViewModel(
           detail: periodEnd
             ? `目前方案仍可使用至 ${formatTaipeiDate(periodEnd)}。到期後將停止準備新的每週教材；隨時歡迎恢復自動續訂。`
             : '已取消自動續訂。本期結束後將停止準備新的每週教材；隨時歡迎恢復自動續訂。',
-          action: {
-            label: '恢復自動續訂',
-            href: '/billing',
-          },
+          action: { label: '恢復自動續訂', href: '/billing' },
         }
       }
     }
   }
 
-  // Precedence 1: An unreleased prepared material has an authoritative release_at timestamp
+  // Before the first release, live Fast Lane state is authoritative. Do not turn the old
+  // fallback release_at into a parent promise while the first packet is actively being made.
+  const isPreWeek1 = !currentMaterial
+
   if (nextPrepared?.release_at) {
     const releaseAt = new Date(nextPrepared.release_at)
     if (!Number.isNaN(releaseAt.getTime())) {
-      const isPreWeek1 = !currentMaterial
+      if (isPreWeek1) {
+        return {
+          nextDeliveryAt: null,
+          feedbackCutoffAt: null,
+          feedbackState: 'waiting',
+          headline: '第一份教材已完成',
+          detail: '學生教材與家長解答已完成，正在同步到孩子的教材區。',
+        }
+      }
       const feedbackReceived = Boolean(currentMaterial?.feedback)
       return {
         nextDeliveryAt: releaseAt,
         feedbackCutoffAt: null,
         feedbackState: feedbackReceived ? 'received' : 'waiting',
-        headline: isPreWeek1
-          ? `第一份教材將於 ${formatTaipeiDate(releaseAt)} 開放下載`
-          : `預計 ${formatTaipeiDate(releaseAt)} 開放下一份教材`,
-        detail: feedbackReceived
-          ? '本週回饋已收到。'
-          : isPreWeek1
-            ? '內容已先完成準備，到了開放日期即可下載。'
-            : '隨時填寫本週回饋，我們會接續安排在後續教材。',
+        headline: `預計 ${formatTaipeiDate(releaseAt)} 開放下一份教材`,
+        detail: feedbackReceived ? '本週回饋已收到。' : '隨時填寫本週回饋，我們會接續安排在後續教材。',
       }
     }
   }
 
-  // Precedence 2: The canonical next release timestamp from the owned generation_job record
   if (nextJobReleaseAt) {
     const releaseAt = new Date(nextJobReleaseAt)
     if (!Number.isNaN(releaseAt.getTime())) {
-      const isPreWeek1 = !currentMaterial
-
-      // Stale-date fallback: if the expected delivery has already passed
-      // but no material exists (quality rejection or delayed authoring),
-      // show a truthful preparation state instead of a stale promise.
-      if (releaseAt <= now && !currentMaterial && !nextPrepared) {
+      if (isPreWeek1) {
         return {
           nextDeliveryAt: null,
           feedbackCutoffAt: null,
           feedbackState: 'waiting',
-          headline: '第一份教材準備中',
-          detail: '教材正在完成最後檢查，準備完成後即可下載。',
+          headline: hasActiveGenerationFailure ? '第一份教材正在重新整理' : '第一份教材正在加速製作',
+          detail: hasActiveGenerationFailure
+            ? '製作過程遇到需要調整的地方，系統正在重新處理；完成後會直接開放下載。'
+            : '完成孩子資料後就會立即開始製作；完成後直接開放下載，你可以在這裡看即時進度。',
         }
       }
 
@@ -223,9 +203,7 @@ export function getDeliveryViewModel(
         nextDeliveryAt: releaseAt,
         feedbackCutoffAt,
         feedbackState,
-        headline: isPreWeek1
-          ? `預計 ${formatTaipeiDate(releaseAt)} 交付第一份教材`
-          : `預計 ${formatTaipeiDate(releaseAt)} 交付下一週教材`,
+        headline: `預計 ${formatTaipeiDate(releaseAt)} 交付下一週教材`,
         detail: feedbackState === 'received'
           ? '本週回饋已收到。'
           : feedbackState === 'open'
@@ -235,18 +213,15 @@ export function getDeliveryViewModel(
     }
   }
 
-  // Precedence 3: If neither a prepared material release_at nor an owned future generation_jobs.release_at
-  // is available, distinguish whether an active generation failure exists vs a past-due unmaterialized job
-  // (under retry/preparation) vs normal fallback.
   if (hasActiveGenerationFailure) {
     return {
       nextDeliveryAt: null,
       feedbackCutoffAt: null,
       feedbackState: currentMaterial?.feedback ? 'received' : 'waiting',
-      headline: currentMaterial ? '教材正在進行品質複檢' : '第一份教材品質複檢中',
+      headline: currentMaterial ? '教材正在進行品質複檢' : '第一份教材正在重新整理',
       detail: currentMaterial
-        ? '本週教材在自動生成品質檢查時未達嚴格標準，教學團隊已接手進行人工微調與確認，完成後將儘速開放下載。'
-        : '第一份教材正在進行教學團隊人工品質審核與微調，確認符合孩子程度後即可下載。',
+        ? '本週教材在品質檢查時遇到需要調整的地方，正在重新處理，完成後將儘速開放下載。'
+        : '第一份教材製作過程遇到需要調整的地方，正在重新處理；完成後會直接開放下載。',
     }
   }
 
@@ -258,7 +233,7 @@ export function getDeliveryViewModel(
     detail: currentMaterial
       ? '排程確認後會在這裡顯示下一次交付日期。'
       : hasPastDueJob
-        ? '教材正在完成最後檢查，準備完成後即可下載。'
-        : '完成孩子資料後，我們會開始準備第一份教材。',
+        ? '第一份教材仍在製作中；完成後會直接開放下載。'
+        : '完成孩子資料後就會立即開始製作第一份教材。',
   }
 }

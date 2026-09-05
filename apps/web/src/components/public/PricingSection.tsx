@@ -139,8 +139,8 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
       {capacityOpen && (
         <p className="pricing-delivery-note">
           {enrollment?.freePilotActive
-            ? '完成孩子資料後，第一份專屬教材預計隔天開放下載。Beta 期間目前每週教材 NT$0；每週填寫回饋後會繼續準備下一週。'
-            : '完成孩子資料後，第一份專屬教材預計隔天開放下載。'}
+            ? '完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。Beta 期間目前每週教材 NT$0；每週填寫回饋後會繼續準備下一週。'
+            : '完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。'}
         </p>
       )}
     </article>
