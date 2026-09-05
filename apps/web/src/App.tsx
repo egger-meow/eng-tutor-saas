@@ -85,7 +85,7 @@ function App() {
           trackExistingParentDetected({ flow: 'landing_onboarding' })
           const existingChildren = await listChildren()
           const existingChild = existingChildren[0]
-          if (!existingChild) throw new Error('找不到原本的孩子資料，請重新整理後再試。')
+          if (!existingChild) throw new Error('existing_child_missing')
           setAdditionalChildConfirmation({
             token,
             existingChildId: existingChild.id,
@@ -98,8 +98,9 @@ function App() {
         clearLandingHandoffClientState()
         navigate(`/children/${result.childId}`)
       }).catch((caught) => {
+        console.error('Landing onboarding finalization failed', caught)
         onboardingFinalizeRef.current = null
-        setOnboardingError(caught instanceof Error ? caught.message : '孩子資料還在，帳號連結目前尚未完成。請重新整理再試一次。')
+        setOnboardingError('孩子資料還在，帳號連結目前尚未完成。請重新整理再試一次。')
       }).finally(() => setFinalizingOnboarding(false))
     }
 
@@ -133,7 +134,8 @@ function App() {
       trackOnboardingComplete(childId, { flow: 'landing_onboarding', finalized_after_auth: true, additional_child: true })
       navigate(`/children/${childId}`)
     } catch (caught) {
-      setAdditionalChildError(caught instanceof Error ? caught.message : '目前無法新增孩子，請稍後再試。')
+      console.error('Additional child confirmation failed', caught)
+      setAdditionalChildError('目前無法新增孩子，請稍後再試。')
     } finally {
       setAdditionalChildBusy(false)
     }
@@ -152,7 +154,8 @@ function App() {
       trackPendingOnboardingDiscarded({ flow: 'landing_onboarding' })
       navigate(`/children/${existingChildId}`)
     } catch (caught) {
-      setAdditionalChildError(caught instanceof Error ? caught.message : '目前無法返回原本孩子資料，請稍後再試。')
+      console.error('Discard pending onboarding failed', caught)
+      setAdditionalChildError('目前無法返回原本孩子資料，請稍後再試。')
     } finally {
       setAdditionalChildBusy(false)
     }
