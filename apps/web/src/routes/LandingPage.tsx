@@ -8,6 +8,9 @@ import { PricingSection } from '../components/public/PricingSection'
 import { CoreBrainsSection } from '../components/public/CoreBrainsSection'
 import { FadeInUp } from '../components/motion/FadeInUp'
 import { PageTransition } from '../components/motion/PageTransition'
+import { DisclosureItem } from '../components/motion/Disclosure'
+import { AnimatedDetails } from '../components/motion/AnimatedDetails'
+import { PersonalizationStory } from '../components/public/PersonalizationStory'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
@@ -83,7 +86,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
     <AppShell className="landing-page" header={<PublicHeader />}>
       <PageTransition>
         <section className="landing-hero">
-          <FadeInUp duration={0.4} className="hero-copy">
+          <FadeInUp duration={0.44} reveal="text" className="hero-copy">
             <p className="eyebrow">🧪 紙屬英文 Beta · 給國小高年級到國中生</p>
             <h1 className="hero-title">
               <span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>
@@ -126,7 +129,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
           </FadeInUp>
 
-          <FadeInUp delay={0.12} duration={0.4} className="hero-editorial" aria-label="每週教材內容示意">
+          <FadeInUp delay={0.14} duration={0.48} reveal="paper" className="hero-editorial" aria-label="每週教材內容示意">
             <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
             <p>不是買一份固定教材。</p>
             <strong><span>孩子這週的狀況，</span><span>會真的改變</span><span>下週拿到的內容。</span></strong>
@@ -233,6 +236,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <h2>個人化不是換個故事主題。<br />是孩子下一步練什麼，真的會變。</h2>
             <p>家長只要回報難度、完成度與卡住的地方，系統就把這些訊號放進下一週的教材設計。</p>
           </div>
+          <PersonalizationStory />
           <div className="week-flow">
             <div className="week-sheet"><span>這週觀察</span><ul><li>閱讀明顯太簡單</li><li>do / does 再次答錯</li><li>學校開始現在進行式</li><li>最近開始喜歡籃球</li></ul></div>
             <div className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></div>
@@ -257,8 +261,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </div>
         </section>
 
-        <details className="public-section landing-more-details">
-          <summary>想知道為什麼是紙本、AI 怎麼用？</summary>
+        <AnimatedDetails summary="想知道為什麼是紙本、AI 怎麼用？">
           <div className="landing-details-body">
             <section className="philosophy-section philosophy-card">
               <div className="philosophy-copy">
@@ -313,10 +316,9 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               </div>
             </section>
           </div>
-        </details>
+        </AnimatedDetails>
 
-        <details className="public-section landing-more-details">
-          <summary>想了解這套系統怎麼越用越準、越做越好？</summary>
+        <AnimatedDetails summary="想了解這套系統怎麼越用越準、越做越好？">
           <div className="landing-details-body">
             <section className="system-evolution-section" id="system-evolution">
               <div className="system-evolution-heading">
@@ -331,7 +333,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </section>
             <CoreBrainsSection />
           </div>
-        </details>
+        </AnimatedDetails>
 
         <FounderSummary />
         <PricingSection enrollment={enrollment} />
@@ -339,22 +341,25 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
         <section className="public-section faq" id="faq">
           <div className="section-heading"><p className="overline">FAQ</p><h2>決定之前，你可能還想確認。</h2></div>
           <div>
-            {faqItems.map(([question, answer], index) => {
-              const open = openFaqIndex === index
-              return (
-                <article className="faq-item" key={question}>
-                  <button type="button" className="faq-trigger" aria-expanded={open} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaqIndex(open ? null : index)}>
-                    <span>{question}</span><span className="faq-icon" aria-hidden="true">{open ? '−' : '+'}</span>
-                  </button>
-                  {open && <div className="faq-answer" id={`faq-answer-${index}`}><p>{answer}</p></div>}
-                </article>
-              )
-            })}
+            {faqItems.map(([question, answer], index) => (
+              <DisclosureItem
+                key={question}
+                id={`faq-${index}`}
+                title={question}
+                open={openFaqIndex === index}
+                onToggle={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                className="faq-item"
+                triggerClassName="faq-trigger"
+                panelClassName="faq-answer"
+                panelId={`faq-answer-${index}`}
+              >
+                <p>{answer}</p>
+              </DisclosureItem>
+            ))}
           </div>
         </section>
 
-        <details className="public-section landing-more-details improvement-note">
-          <summary>Beta 期間我們還在改善什麼？</summary>
+        <AnimatedDetails className="improvement-note" summary="Beta 期間我們還在改善什麼？">
           <div className="landing-details-body">
             <div className="improvement-note-inner">
               <p className="overline">持續改善，也保持透明</p>
@@ -369,7 +374,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               </p>
             </div>
           </div>
-        </details>
+        </AnimatedDetails>
 
         <PublicFooter />
       </PageTransition>

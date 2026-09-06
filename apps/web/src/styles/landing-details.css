@@ -76,6 +76,79 @@
   transform: rotate(180deg);
 }
 
+/* Custom morph icon support for AnimatedDetails */
+.landing-more-details > summary:has(.summary-morph-icon)::before {
+  display: none !important;
+}
+
+.summary-morph-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.summary-svg {
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.summary-circle {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  fill: var(--color-paper);
+  transition: fill 200ms ease, stroke 200ms ease;
+}
+
+.summary-bar-h,
+.summary-bar-v {
+  stroke: var(--color-accent);
+  transition: transform 260ms cubic-bezier(0.2, 0.9, 0.3, 1), opacity 200ms ease, stroke 200ms ease;
+  transform-origin: 10px 10px;
+}
+
+.summary-morph-icon.is-open .summary-bar-v {
+  transform: rotate(90deg);
+  opacity: 0;
+}
+
+.summary-morph-icon.is-open .summary-circle {
+  fill: var(--color-accent);
+}
+
+.summary-morph-icon.is-open .summary-bar-h {
+  stroke: #fffdf8;
+}
+
+.landing-more-details.is-expanded > summary {
+  border-bottom: 1px solid var(--color-rule);
+  background: rgb(246 242 233 / 65%);
+}
+
+.animated-details-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.animated-details-wrapper.is-open {
+  grid-template-rows: 1fr;
+}
+
+.animated-details-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-details-wrapper {
+    transition: none !important;
+  }
+}
+
 /* Unified Interior Body Container */
 .landing-details-body {
   padding: clamp(1.75rem, 4vw, 3.25rem) clamp(1.25rem, 3.5vw, 2.5rem);

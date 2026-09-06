@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { easings, durations } from '../motion/motion-tokens'
 import type { ChildWithProfile } from '../../hooks/use-parent-data'
 import { buildMaterialHistoryView, type Material } from '../../lib/materials'
 import { handleInternalLink } from '../../app/use-route'
@@ -40,11 +41,13 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
     child.has_active_generation_failure,
   )
 
+  const reduceMotion = useReducedMotion()
+
   return (
     <motion.article
-      initial={{ opacity: 0, y: 16 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: durations.cardExpansion, ease: easings.paperSettle }}
       className="child-dashboard-card"
     >
       <header className="child-card-header">
@@ -118,10 +121,10 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
           <motion.div
             id={`child-card-content-${child.id}`}
             className="child-card-body"
-            initial={{ opacity: 0, height: 0 }}
+            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            exit={reduceMotion ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: durations.cardExpansion, ease: easings.disclosure }}
           >
           <WeeklyLearningPanel material={latestMaterial} childName={child.display_name} onFeedbackSaved={onRefresh} />
           <p className="muted">每週新教材完成後，會同步更新在這裡，並寄送通知至你的登入 Email。</p>
@@ -150,10 +153,10 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             <AnimatePresence>
               {historyOpen && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
+                  initial={reduceMotion ? false : { opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                  exit={reduceMotion ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+                  transition={{ duration: durations.cardExpansion, ease: easings.disclosure }}
                   className="history-content-wrapper"
                 >
                   <MaterialHistory materials={pastMaterials} childName={child.display_name} onFeedbackSaved={onRefresh} hasMore={hasMoreMaterials} loadingMore={loadingMoreMaterials} onLoadMore={onLoadMoreMaterials} />
@@ -166,10 +169,10 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
           <motion.div
             id={`child-card-content-${child.id}`}
             className="child-card-body empty-child-body"
-            initial={{ opacity: 0, height: 0 }}
+            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            exit={reduceMotion ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: durations.cardExpansion, ease: easings.disclosure }}
           >
           <div className="dashboard-support">
             {child.waitlist?.status === 'waiting' ? (

@@ -1,13 +1,14 @@
 import { motion, useReducedMotion, type HTMLMotionProps } from 'framer-motion'
 import { useState, type ReactNode } from 'react'
+import { easings } from './motion-tokens'
+import type { RevealStyle } from './FadeInUp'
 
-type RevealStyle = 'rise' | 'pop' | 'left' | 'right'
 const revealFrom = (reveal: RevealStyle) => ({
-    opacity: 0,
-    y: reveal === 'rise' ? 30 : reveal === 'pop' ? 38 : 8,
-    x: reveal === 'left' ? -42 : reveal === 'right' ? 42 : 0,
-    scale: reveal === 'pop' ? 0.88 : 0.96,
-    rotate: reveal === 'left' ? -0.8 : reveal === 'right' ? 0.8 : reveal === 'pop' ? -0.6 : 0,
+  opacity: 0,
+  y: reveal === 'rise' ? 18 : reveal === 'pop' ? 16 : reveal === 'text' ? 10 : reveal === 'paper' ? 16 : 6,
+  x: reveal === 'left' ? -20 : reveal === 'right' ? 20 : 0,
+  scale: reveal === 'pop' || reveal === 'paper' ? 0.985 : 0.99,
+  rotate: reveal === 'left' ? -0.4 : reveal === 'right' ? 0.4 : reveal === 'paper' ? 0.35 : 0,
 })
 
 type TagName = 'div' | 'ol' | 'ul' | 'li' | 'article' | 'section'
@@ -29,7 +30,7 @@ interface StaggerContainerProps extends HTMLMotionProps<'div'> {
 
 export function StaggerContainer({
   children,
-  staggerDelay: _staggerDelay = 0.08,
+  staggerDelay: _staggerDelay = 0.06,
   className = '',
   tag = 'div',
   ...props
@@ -50,24 +51,41 @@ interface StaggerItemProps extends HTMLMotionProps<'div'> {
   tag?: TagName
   reveal?: RevealStyle
   delay?: number
+  'data-revealed'?: string
 }
 
-export function StaggerItem({ children, className = '', tag = 'div', reveal = 'pop', delay = 0, onViewportEnter, ...props }: StaggerItemProps) {
+export function StaggerItem({
+  children,
+  className = '',
+  tag = 'div',
+  reveal = 'pop',
+  delay = 0,
+  initial,
+  'data-revealed': dataRevealedProp,
+  onViewportEnter,
+  ...props
+}: StaggerItemProps) {
   const reduceMotion = useReducedMotion()
   const [revealed, setRevealed] = useState(false)
   const Component = motionMap[tag] as typeof motion.div
+  const defaultInitial = reduceMotion ? false : revealFrom(reveal)
+
   return (
     <Component
-      initial={reduceMotion ? false : revealFrom(reveal)}
+      initial={initial !== undefined ? initial : defaultInitial}
       whileInView={reduceMotion ? undefined : { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
-      viewport={{ once: true, amount: 0.22, margin: '0px 0px -6% 0px' }}
-      transition={{ type: 'spring', duration: 0.42, bounce: reveal === 'pop' ? 0.38 : 0.22, delay }}
+      viewport={{ once: true, amount: 0.15, margin: '0px 0px -5% 0px' }}
+      transition={{
+        duration: 0.38,
+        ease: easings.paperSettle,
+        delay,
+      }}
       onViewportEnter={(entry) => {
         setRevealed(true)
         onViewportEnter?.(entry)
       }}
       className={`motion-cascade ${className}`.trim()}
-      data-revealed={reduceMotion || revealed ? 'true' : 'false'}
+      data-revealed={reduceMotion || revealed || dataRevealedProp === 'true' ? 'true' : 'false'}
       data-reveal={reveal}
       {...props}
     >
