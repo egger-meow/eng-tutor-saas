@@ -25,7 +25,7 @@ The bridge test uses a verified nonexistent synthetic job UUID. Supported schema
 
 - Focused Vitest: 8 files / 50 tests passed (response contracts, memory, CAP/history retrieval, lexical-fusion experiment, authoring helpers, submission processor, legacy multi-genre PDF).
 - Independent synthetic probes reproduced future evidence inclusion, unchanged hash after evidence mutation, invalid grid width acceptance and contradictory unit-answer acceptance.
-- Read deployed function definitions and migration history. Deployment verification is recorded after the migration is applied.
+- Read deployed function definitions and migration history. Production migration 20260906093312_accept_curriculum_schema_250 applied successfully to ykzszjrqynrhgdhoeovo. All nine synthetic SQL gate cases passed in a rolled-back transaction. Fresh function readback retained SECURITY DEFINER, empty search_path and postgres-only execute ACL; only the reviewed gate changed.
 - No claim that new-format PDFs, all-entry parity, all-stage token reduction or a true semantic-vector benchmark passed.
 
 ## Executor handoff
