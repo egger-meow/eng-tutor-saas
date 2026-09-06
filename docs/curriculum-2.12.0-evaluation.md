@@ -37,6 +37,6 @@ Retry presentation preserves the sole prior candidate, distinct findings, repair
 - Full workspace typecheck and build passed.
 - Synthetic Student and Parent PDFs generated successfully.
 - New privacy regressions preserve public titles/numbers and short artist names while rejecting private learner names, proficiency labels, URLs and feedback.
-- Local DB smoke tests were unavailable because Docker did not become responsive. Production migration preflight confirmed exactly one release literal in each of the three affected functions; post-deployment verification must compare full definition hashes and ACLs.
+- Local DB smoke tests were unavailable because Docker did not become responsive. Production migration preflight confirmed exactly one release literal in each of the three affected functions. After deployment, all three full definition hashes matched the predicted release-only replacement, and security-definer settings, search paths and ACLs were unchanged.
 
-The migration changes only new-claim release defaults and the missing-target fallback. Existing snapshots retain their target release. Historical remote/local migration timestamp drift predates this change and must not cause old functions to be reapplied.
+The migration changes only new-claim release defaults and the missing-target fallback. Existing snapshots retain their target release. Historical remote/local migration timestamp drift predates this change. The new migration was applied once through the Supabase migration API without replaying historical files, and its local filename now matches remote history version `20260906044828`.
