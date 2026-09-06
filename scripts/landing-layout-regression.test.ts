@@ -21,4 +21,21 @@ describe('Landing Page Onboarding/Login Layout Regression', () => {
     expect(css).toContain('min-height: clamp(34rem, 60vh, 46rem)')
     expect(css).toContain('scroll-margin-top: clamp(4rem, 8vw, 6rem)')
   })
+
+  it('ensures why-not-gpt and parent-role cards match 100% width and landing-section-nav is centered', () => {
+    const landingDetailsCss = readFileSync(new URL('../apps/web/src/styles/landing-details.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+    const betaUxCss = readFileSync(new URL('../apps/web/src/styles/beta-trust-ux.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+    const appCss = readFileSync(new URL('../apps/web/src/App.css', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+
+    // why-not-gpt and parent-role have full width
+    expect(landingDetailsCss).toContain('.why-not-gpt {\n  position: relative;\n  overflow: hidden;\n  width: 100%;\n  max-width: none !important;\n  box-sizing: border-box;')
+    expect(landingDetailsCss).toContain('.parent-role {\n  position: relative;\n  overflow: hidden;\n  width: 100%;\n  max-width: none !important;\n  box-sizing: border-box;')
+
+    // App.css does not constrain why-not-gpt with max-width
+    expect(appCss).toContain('.why-not-gpt { width: 100%; }')
+    expect(appCss).toContain('.parent-role { width: 100%; }')
+
+    // landing-section-nav is fit-content
+    expect(betaUxCss).toContain('.landing-section-nav {\n  display: flex;\n  gap: 0.5rem;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: center;\n  width: fit-content;')
+  })
 })

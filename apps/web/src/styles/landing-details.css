@@ -100,6 +100,8 @@
   grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
   gap: clamp(1.5rem, 3.5vw, 3rem);
   align-items: center;
+  width: 100%;
+  box-sizing: border-box;
   background: #173229;
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 16px;
@@ -137,6 +139,8 @@
 .ai-section {
   display: grid;
   gap: clamp(1.75rem, 3.5vw, 2.75rem);
+  width: 100%;
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
@@ -226,6 +230,9 @@
 .why-not-gpt {
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: none !important;
+  box-sizing: border-box;
   padding: clamp(1.75rem, 3.8vw, 2.75rem);
   border: 1px solid var(--color-rule);
   border-radius: 18px;
@@ -244,6 +251,10 @@
   border-top: 1.5px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
   border-right: 1.5px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
   pointer-events: none;
+}
+
+.why-not-gpt-header {
+  width: 100%;
 }
 
 .why-not-gpt-header .overline {
@@ -275,6 +286,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   margin-top: 1.75rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .comparison-col {
@@ -285,6 +298,8 @@
   border: 1px solid var(--color-rule);
   border-radius: 14px;
   background: var(--color-paper);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .comparison-badge {
@@ -313,6 +328,10 @@
 }
 
 .comparison-col p {
+  display: block !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
   margin: 0;
   color: var(--color-text);
   font-size: 0.95rem;
@@ -337,6 +356,8 @@
   font-size: 0.98rem;
   font-weight: 750;
   line-height: 1.65;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Parent Role Section */
