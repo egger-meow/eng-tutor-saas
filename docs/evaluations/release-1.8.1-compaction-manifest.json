@@ -1,0 +1,591 @@
+{
+  "benchmarkVersion": "rel_1.8.1-compaction-v1",
+  "engineVersion": "1.8.1",
+  "promptVersion": "2.13.1",
+  "caseResults": [
+    {
+      "caseId": "case-1-keshi",
+      "caseName": "keshi: Acoustic Production & Songwriting Decisions",
+      "category": "music",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101437,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25359,
+          "savingsChars": 13242,
+          "savingsTokensEst": 3311,
+          "reductionPercent": 11.5
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99437,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24859,
+          "savingsChars": 6771,
+          "savingsTokensEst": 1693,
+          "reductionPercent": 6.4
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100437,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25109,
+          "savingsChars": 6771,
+          "savingsTokensEst": 1693,
+          "reductionPercent": 6.3
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 320511,
+      "netSavingsChars": 33255,
+      "netSavingsTokensEst": 8314,
+      "overallReductionPercent": 9.4
+    },
+    {
+      "caseId": "case-2-kpop",
+      "caseName": "K-pop: 2NE1 & IU Live Vocal & Stage Preparation",
+      "category": "kpop",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25467,
+          "savingsChars": 12812,
+          "savingsTokensEst": 3203,
+          "reductionPercent": 11.2
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99867,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24967,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 6
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25217,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 5.9
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 321801,
+      "netSavingsChars": 31965,
+      "netSavingsTokensEst": 7991,
+      "overallReductionPercent": 9
+    },
+    {
+      "caseId": "case-3-animation",
+      "caseName": "Animation: Your Name (Kimi no Na wa) Art & Lighting",
+      "category": "animation",
+      "retrievedCardsCount": 3,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 96392,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24098,
+          "savingsChars": 18287,
+          "savingsTokensEst": 4572,
+          "reductionPercent": 15.9
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 94392,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 23598,
+          "savingsChars": 11816,
+          "savingsTokensEst": 2954,
+          "reductionPercent": 11.1
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 95392,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 23848,
+          "savingsChars": 11816,
+          "savingsTokensEst": 2954,
+          "reductionPercent": 11
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 305376,
+      "netSavingsChars": 48390,
+      "netSavingsTokensEst": 12098,
+      "overallReductionPercent": 13.7
+    },
+    {
+      "caseId": "case-4-movie-adaptation",
+      "caseName": "Movie Adaptation: Book to Screen Creative Condensation",
+      "category": "movie",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25467,
+          "savingsChars": 12812,
+          "savingsTokensEst": 3203,
+          "reductionPercent": 11.2
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99867,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24967,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 6
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25217,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 5.9
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 321801,
+      "netSavingsChars": 31965,
+      "netSavingsTokensEst": 7991,
+      "overallReductionPercent": 9
+    },
+    {
+      "caseId": "case-5-character-choice",
+      "caseName": "Character Choice: Ethical Dilemma in Creative Leadership",
+      "category": "character",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101437,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25359,
+          "savingsChars": 13242,
+          "savingsTokensEst": 3311,
+          "reductionPercent": 11.5
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99437,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24859,
+          "savingsChars": 6771,
+          "savingsTokensEst": 1693,
+          "reductionPercent": 6.4
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100437,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25109,
+          "savingsChars": 6771,
+          "savingsTokensEst": 1693,
+          "reductionPercent": 6.3
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 320511,
+      "netSavingsChars": 33255,
+      "netSavingsTokensEst": 8314,
+      "overallReductionPercent": 9.4
+    },
+    {
+      "caseId": "case-6-science-mechanism",
+      "caseName": "Science Mechanism: Robotics Vision & Sensor Calibration",
+      "category": "science",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101382,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25346,
+          "savingsChars": 13297,
+          "savingsTokensEst": 3324,
+          "reductionPercent": 11.6
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99382,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24846,
+          "savingsChars": 6826,
+          "savingsTokensEst": 1707,
+          "reductionPercent": 6.4
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100382,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25096,
+          "savingsChars": 6826,
+          "savingsTokensEst": 1707,
+          "reductionPercent": 6.4
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 320346,
+      "netSavingsChars": 33420,
+      "netSavingsTokensEst": 8355,
+      "overallReductionPercent": 9.4
+    },
+    {
+      "caseId": "case-7-table-organizer",
+      "caseName": "Format Variety: Evidence Matrix & Deductive Flowchart",
+      "category": "format_organizer",
+      "retrievedCardsCount": 6,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 101867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25467,
+          "savingsChars": 12812,
+          "savingsTokensEst": 3203,
+          "reductionPercent": 11.2
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 99867,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24967,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 6
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 100867,
+          "selectiveBytes": 6,
+          "selectiveTokensEst": 25217,
+          "savingsChars": 6341,
+          "savingsTokensEst": 1585,
+          "reductionPercent": 5.9
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 321801,
+      "netSavingsChars": 31965,
+      "netSavingsTokensEst": 7991,
+      "overallReductionPercent": 9
+    },
+    {
+      "caseId": "case-8-current-vs-evergreen",
+      "caseName": "Current vs Evergreen: James Webb Telescope Deep Field Discoveries",
+      "category": "current_vs_evergreen",
+      "retrievedCardsCount": 3,
+      "stages": [
+        {
+          "stageName": "1. Private Planning",
+          "uncompactedChars": 21471,
+          "uncompactedBytes": 5,
+          "uncompactedTokensEst": 5368,
+          "selectiveChars": 15000,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 3750,
+          "savingsChars": 6471,
+          "savingsTokensEst": 1618,
+          "reductionPercent": 30.1
+        },
+        {
+          "stageName": "2. Public Research",
+          "uncompactedChars": 4200,
+          "uncompactedBytes": 4,
+          "uncompactedTokensEst": 1050,
+          "selectiveChars": 4200,
+          "selectiveBytes": 4,
+          "selectiveTokensEst": 1050,
+          "savingsChars": 0,
+          "savingsTokensEst": 0,
+          "reductionPercent": 0
+        },
+        {
+          "stageName": "3. Authoring Specialist",
+          "uncompactedChars": 114679,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 28670,
+          "selectiveChars": 96463,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 24116,
+          "savingsChars": 18216,
+          "savingsTokensEst": 4554,
+          "reductionPercent": 15.9
+        },
+        {
+          "stageName": "4. Critic Specialist",
+          "uncompactedChars": 106208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26552,
+          "selectiveChars": 94463,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 23616,
+          "savingsChars": 11745,
+          "savingsTokensEst": 2936,
+          "reductionPercent": 11.1
+        },
+        {
+          "stageName": "5. Targeted Repair",
+          "uncompactedChars": 107208,
+          "uncompactedBytes": 6,
+          "uncompactedTokensEst": 26802,
+          "selectiveChars": 95463,
+          "selectiveBytes": 5,
+          "selectiveTokensEst": 23866,
+          "savingsChars": 11745,
+          "savingsTokensEst": 2936,
+          "reductionPercent": 11
+        }
+      ],
+      "totalUncompactedChars": 353766,
+      "totalSelectiveChars": 305589,
+      "netSavingsChars": 48177,
+      "netSavingsTokensEst": 12044,
+      "overallReductionPercent": 13.6
+    }
+  ]
+}

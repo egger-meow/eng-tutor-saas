@@ -101,7 +101,16 @@ export function buildFormatPlanningCapsule(
   recentDeliveryMemory: DeliveryMemoryProjection[] = [],
   lookbackWeeks: number = 4,
 ): FormatPlanningCapsule {
-  const recentSlice = recentDeliveryMemory.slice(-lookbackWeeks)
+  // Sort newest first by sequence_number / weekNumber / materialWeek
+  const sortedMemory = [...recentDeliveryMemory].sort((a: any, b: any) => {
+    const seqA = a.sequence_number ?? a.weekNumber ?? 0
+    const seqB = b.sequence_number ?? b.weekNumber ?? 0
+    if (seqA !== seqB) {
+      return seqB - seqA
+    }
+    return (b.materialWeek ?? '').localeCompare(a.materialWeek ?? '')
+  })
+  const recentSlice = sortedMemory.slice(0, lookbackWeeks)
 
   const recentFormatUse: Record<string, number> = {}
   const recentReasoningSet = new Set<string>()

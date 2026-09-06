@@ -430,18 +430,32 @@ begin
     raise exception 'daily generation limit mismatch';
   end if;
 
+  insert into public.materials (
+    id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path
+  ) values (
+    '00000000-0000-0000-0000-000000000099',
+    '00000000-0000-0000-0000-000000000002',
+    current_date,
+    1,
+    'test-v1',
+    '{}'::jsonb,
+    'materials/test/week-1.pdf',
+    'materials/test/week-1-answers.pdf'
+  );
+
   insert into public.generation_jobs (
     child_id, material_week, rule_version, idempotency_key, scheduled_for,
-    release_at, feedback_cutoff_at, generation_due_at
+    source_material_id, release_at, feedback_cutoff_at, generation_due_at
   ) values (
     '00000000-0000-0000-0000-000000000002',
     current_date + 250,
     'test-v1',
     'bridge-fingerprint-test',
     now() - interval '1 minute',
-    now() + interval '12 hours',
-    now() - interval '36 hours',
-    now() - interval '12 hours'
+    '00000000-0000-0000-0000-000000000099',
+    now() - interval '1 minute',
+    now() - interval '1 minute' - interval '48 hours',
+    now() - interval '1 minute' - interval '24 hours'
   );
 
   select private_generation.chatgpt_claim_generation_batch('bridge-smoke')
@@ -455,8 +469,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.0' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.8.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.8.1: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -682,8 +696,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.0' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.8.0: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.8.1: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -750,11 +764,13 @@ begin
 
   insert into public.generation_jobs (
     id, child_id, material_week, rule_version, idempotency_key, status,
-    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at
+    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+    source_material_id
   ) values (
     '00000000-0000-0000-0000-000000000071', bridge_child_id, current_date + 300,
     'test-v1', 'max-authoring-attempts', 'pending', now() - interval '1 minute', 2, 3,
-    now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+    now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+    completed_material_id
   );
   select private_generation.chatgpt_claim_generation_batch('max-attempt-smoke') into bridge_claim_result;
   select item into bridge_context
@@ -807,9 +823,25 @@ begin
 
   update public.subscriptions set status = 'active' where child_id = recovery_child_id;
 
+  insert into public.materials (
+    id, child_id, material_week, revision, rule_version, input_snapshot,
+    student_pdf_path, parent_answer_pdf_path, observations_recorded_at
+  ) values (
+    '00000000-0000-0000-0000-000000000080',
+    recovery_child_id,
+    current_date + 343,
+    1,
+    '2.2.0',
+    '{}'::jsonb,
+    'path/student.pdf',
+    'path/parent.pdf',
+    now()
+  );
+
   insert into public.generation_jobs (
     id, child_id, material_week, rule_version, idempotency_key, status,
-    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at
+    scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+    source_material_id
   ) values (
     recovery_job_id,
     recovery_child_id,
@@ -822,7 +854,8 @@ begin
     3,
     now() + interval '12 hours',
     now() - interval '36 hours',
-    now() - interval '12 hours'
+    now() - interval '12 hours',
+    '00000000-0000-0000-0000-000000000080'
   );
 
   -- 1. Initial claim for Attempt 1
@@ -1017,12 +1050,30 @@ begin
     insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
     values (mismatch_child_id, '00000000-0000-0000-0000-000000000001', 'Release Mismatch Test Child', 7, 'grade_7', true);
 
+    delete from public.generation_jobs where child_id = mismatch_child_id;
+
+    insert into public.materials (
+      id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path
+    ) values (
+      '00000000-0000-0000-0000-000000000097',
+      mismatch_child_id,
+      current_date - 7,
+      1,
+      'test-v1',
+      '{}'::jsonb,
+      'materials/test/week-0.pdf',
+      'materials/test/week-0-answers.pdf'
+    );
+
+    insert into public.feedback (child_id, material_id, difficulty, minutes_spent)
+    values (mismatch_child_id, '00000000-0000-0000-0000-000000000097', 3, 30);
+
     insert into public.generation_jobs (
       id, child_id, material_week, rule_version, idempotency_key, status,
-      scheduled_for, release_at, feedback_cutoff_at, generation_due_at, max_attempts
+      source_material_id, scheduled_for, release_at, feedback_cutoff_at, generation_due_at, max_attempts
     ) values (
       mismatch_job_id, mismatch_child_id, current_date, '1.0.0', 'idemp:rel-mismatch-1', 'pending',
-      now() - interval '1 hour', now() + interval '12 hours', now() + interval '12 hours' - interval '48 hours', now() + interval '12 hours' - interval '24 hours', 5
+      '00000000-0000-0000-0000-000000000097', now() - interval '1 hour', now() + interval '12 hours', now() + interval '12 hours' - interval '48 hours', now() + interval '12 hours' - interval '24 hours', 5
     );
 
     -- 1. Claim job for Attempt 1
@@ -1030,7 +1081,7 @@ begin
     select item into mismatch_context
     from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
     where item #>> '{job,id}' = mismatch_job_id::text;
-    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.0' then
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
       raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
     end if;
 
@@ -1046,7 +1097,7 @@ begin
     perform public.worker_claim_curriculum_submissions('mismatch-finisher', 5);
     if not public.worker_finish_curriculum_submission(
       mismatch_job_id, 1, 'mismatch-finisher', 'technical_failed', 'RELEASE_MISMATCH',
-      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.8.0'
+      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.8.1'
     ) then
       raise exception 'failed to record RELEASE_MISMATCH technical failure';
     end if;
@@ -1078,8 +1129,8 @@ begin
       raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
     end if;
 
-    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.8.0 and NO retryContext (fresh authoring, not quality repair)
-    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.0'
+    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.8.1 and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.1'
       or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
       or mismatch_context ? 'retryContext' then
       raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;
@@ -1422,6 +1473,7 @@ declare
   test_claim_id uuid;
   founder_lifetime_claim_id uuid;
   blocked boolean := false;
+  test_package jsonb;
 begin
   if not has_column_privilege('authenticated', 'public.generation_jobs', 'material_id', 'select')
     or not has_column_privilege('authenticated', 'public.generation_jobs', 'child_id', 'select')
@@ -1744,61 +1796,60 @@ begin
     if sqlerrm = 'legacy curriculum schema was accepted for new production submission' then
       raise;
     end if;
-    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.4.0 object%' then
+    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.4.0 or 2.5.0 object%' then
       raise exception 'unexpected legacy schema rejection: %', sqlerrm;
     end if;
   end;
 
-  perform private_generation.chatgpt_submit_curriculum_package(
-    test_job_id,
-    'chatgpt-test-worker',
-    jsonb_build_object(
-      'metadata', jsonb_build_object(
-        'schemaVersion', '2.4.0',
-        'jobId', test_job_id::text,
-        'childId', '00000000-0000-0000-0000-000000000099',
-        'inputFingerprint', bridge_fingerprint
-      ),
-      'studentMaterial', jsonb_build_object(
-        'warmup', jsonb_build_object('activity', 'Vocab brainstorm', 'estimatedMinutes', 5),
-        'reading', jsonb_build_object('passage', 'Space is vast and mysterious...', 'lexile', '750L'),
-        'practice', jsonb_build_array(jsonb_build_object('type', 'multiple-choice', 'question', 'What is vast?'))
-      ),
-      'parentGuide', jsonb_build_object('tips', jsonb_build_array('Encourage asking questions')),
-      'learningObservations', jsonb_build_object(
-        'observedStrengths', jsonb_build_array('Astronomy vocabulary'),
-        'observedGaps', jsonb_build_array('Past participle irregular forms'),
-        'recommendedFocusNextWeek', 'Verbs in context'
-      )
+  test_package := jsonb_build_object(
+    'metadata', jsonb_build_object(
+      'schemaVersion', '2.4.0',
+      'jobId', test_job_id::text,
+      'childId', '00000000-0000-0000-0000-000000000099',
+      'inputFingerprint', bridge_fingerprint,
+      'promptVersion', 'test-prompt',
+      'curriculumVersion', 'test-generator',
+      'model', 'test-model'
+    ),
+    'studentMaterial', jsonb_build_object(
+      'warmup', jsonb_build_object('activity', 'Vocab brainstorm', 'estimatedMinutes', 5),
+      'reading', jsonb_build_object('passage', 'Space is vast and mysterious...', 'lexile', '750L'),
+      'practice', jsonb_build_array(jsonb_build_object('type', 'multiple-choice', 'question', 'What is vast?'))
+    ),
+    'parentGuide', jsonb_build_object('tips', jsonb_build_array('Encourage asking questions')),
+    'learningObservations', jsonb_build_object(
+      'observedStrengths', jsonb_build_array('Astronomy vocabulary'),
+      'observedGaps', jsonb_build_array('Past participle irregular forms'),
+      'recommendedFocusNextWeek', 'Verbs in context'
     )
   );
 
-  -- Claim and complete the curriculum submission via Finisher
-  perform public.worker_claim_curriculum_submissions('chatgpt-test-finisher', 5);
-  perform public.worker_finish_curriculum_submission(
-    test_job_id, 1, 'chatgpt-test-finisher', 'completed', null, null, null
+  perform private_generation.chatgpt_submit_curriculum_package(
+    test_job_id,
+    'chatgpt-test-worker',
+    test_package
   );
 
-  test_mat_id := '00000000-0000-0000-0000-000000000088'::uuid;
-  insert into public.materials (
-    id, child_id, material_week, revision, rule_version,
-    input_snapshot, student_pdf_path, parent_answer_pdf_path,
-    observations_recorded_at
-  ) values (
-    test_mat_id,
-    '00000000-0000-0000-0000-000000000099',
-    '2026-08-17',
-    1,
-    '2.2.0',
+  -- Claim and complete the curriculum submission via Week 1 Fast Publisher
+  perform public.worker_claim_week1_fast_submissions('chatgpt-test-finisher', 5);
+  select canonical_source into test_package
+  from private_generation.curriculum_submissions
+  where job_id = test_job_id and authoring_attempt = 1;
+
+  test_mat_id := public.worker_complete_week1_fast_submission(
+    test_job_id, 1, 'chatgpt-test-finisher',
+    '00000000-0000-0000-0000-000000000099/' || test_job_id::text || '/student.pdf',
+    '00000000-0000-0000-0000-000000000099/' || test_job_id::text || '/parent-answer.pdf',
+    test_package,
     '{}'::jsonb,
-    '00000000-0000-0000-0000-000000000099/2026-08-17_student.pdf',
-    '00000000-0000-0000-0000-000000000099/2026-08-17_parent.pdf',
-    now()
+    'test-prompt',
+    'test-generator',
+    'test-model'
   );
 
-  update public.generation_jobs
-  set status = 'completed', material_id = test_mat_id
-  where id = test_job_id;
+  update public.materials
+  set observations_recorded_at = now()
+  where id = test_mat_id;
 
   -- 8. Record test feedback
   test_feedback_res := public.admin_record_test_feedback(
@@ -1817,24 +1868,7 @@ begin
     raise exception 'failed to record test feedback: %', test_feedback_res;
   end if;
 
-  -- 9. Create next pending job for Week 2
-  insert into public.generation_jobs (
-    child_id, source_material_id, material_week, rule_version, idempotency_key, scheduled_for,
-    feedback_cutoff_at, generation_due_at, release_at, status
-  ) values (
-    '00000000-0000-0000-0000-000000000099',
-    test_mat_id,
-    '2026-08-24',
-    '2.2.0',
-    'test-child-week-2',
-    now() + interval '5 days',
-    now() + interval '5 days',
-    now() + interval '6 days',
-    now() + interval '7 days',
-    'pending'
-  );
-
-  -- 10. Advance Week 2
+  -- 10. Advance Week 2 (advances pending job created by completion)
   test_advance_res := public.admin_advance_test_week('00000000-0000-0000-0000-000000000099');
   if (test_advance_res->>'success')::boolean is not true then
     raise exception 'failed to advance week 2: %', test_advance_res;
@@ -4499,6 +4533,145 @@ begin
         raise exception 'FP Test: post-cutoff job was claimed by unpaid child';
       end if;
     end;
+  end;
+
+  -- Release 1.8.1 and Tightened Targeted History RPC Invariants Test
+  declare
+    rel_job_id uuid := '00000000-0000-0000-0000-000000000881';
+    rel_child_id uuid := '00000000-0000-0000-0000-000000000002';
+    rel_worker_id text := 'worker-targeted-history-test';
+    rel_snapshot_context jsonb;
+    rel_history_result jsonb;
+    rel_manifest_count integer;
+  begin
+    -- 1. Create child and a claimed job with valid claim snapshot
+    insert into public.children (id, parent_id, display_name, grade, grade_stage)
+    values (rel_child_id, '00000000-0000-0000-0000-000000000001', 'Rel 1.8.1 Test Child', 7, 'grade_7');
+    delete from public.generation_jobs where child_id = rel_child_id;
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, claimed_by, lease_expires_at, release_at, feedback_cutoff_at, generation_due_at
+    ) values (
+      rel_job_id, rel_child_id, current_date + 7, 'curriculum-rules/1.0.0',
+      'job:rel_1_8_1:smoke', 'claimed', now() - interval '25 hours', rel_worker_id, now() + interval '30 minutes',
+      now() + interval '24 hours', now() + interval '24 hours' - interval '48 hours', now() + interval '24 hours' - interval '24 hours'
+    );
+
+    rel_snapshot_context := jsonb_build_object(
+      'job', jsonb_build_object('id', rel_job_id, 'childId', rel_child_id),
+      'cutoffTimestamp', now() - interval '1 hour',
+      'targetReleaseId', 'rel_1.8.1'
+    );
+
+    insert into private_generation.generation_claim_snapshots (
+      job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+    ) values (
+      rel_job_id, rel_worker_id, rel_snapshot_context, 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', now() - interval '1 hour'
+    );
+
+    -- 2. Insert material and some learning evidence for the child
+    insert into public.materials (
+      id, child_id, material_week, revision, rule_version, input_snapshot,
+      student_pdf_path, parent_answer_pdf_path, observations_recorded_at
+    ) values (
+      '00000000-0000-0000-0000-000000000880',
+      rel_child_id,
+      current_date,
+      1,
+      '2.2.0',
+      '{}'::jsonb,
+      'path/student.pdf',
+      'path/parent.pdf',
+      now()
+    );
+
+    insert into public.child_learning_evidence (
+      child_id, material_id, target_type, target_id, evidence_type, result, assessed, source, evidence_strength, observed_at, processor_version, idempotency_key
+    ) values
+      (rel_child_id, '00000000-0000-0000-0000-000000000880', 'vocabulary', 'target-vocab-alpha', 'learner_assessment', 'incorrect', true, 'practice', 'high', now() - interval '2 hours', 'v1', 'idemp-rel-1'),
+      (rel_child_id, '00000000-0000-0000-0000-000000000880', 'vocabulary', 'target-vocab-alpha', 'learner_assessment', 'correct', true, 'practice', 'high', now() - interval '30 minutes', 'v1', 'idemp-rel-2'),
+      (rel_child_id, '00000000-0000-0000-0000-000000000880', 'grammar', 'target-grammar-beta', 'learner_assessment', 'partial', true, 'practice', 'high', now() - interval '3 hours', 'v1', 'idemp-rel-3');
+
+    -- Test A: Rejects non-existent job
+    begin
+      perform private_generation.fetch_targeted_student_history(
+        p_job_id := gen_random_uuid(),
+        p_worker_id := rel_worker_id
+      );
+      raise exception 'Expected failure for non-existent job';
+    exception when others then
+      if sqlerrm not like '%JOB_NOT_FOUND%' then raise; end if;
+    end;
+
+    -- Test B: Rejects wrong worker ID
+    begin
+      perform private_generation.fetch_targeted_student_history(
+        p_job_id := rel_job_id,
+        p_worker_id := 'wrong-worker'
+      );
+      raise exception 'Expected failure for wrong worker';
+    exception when others then
+      if sqlerrm not like '%WORKER_MISMATCH%' then raise; end if;
+    end;
+
+    -- Test C: Rejects wrong snapshot ID
+    begin
+      perform private_generation.fetch_targeted_student_history(
+        p_job_id := rel_job_id,
+        p_worker_id := rel_worker_id,
+        p_claim_snapshot_id := gen_random_uuid()
+      );
+      raise exception 'Expected failure for mismatched snapshot id';
+    exception when others then
+      if sqlerrm not like '%CLAIM_SNAPSHOT_MISMATCH%' then raise; end if;
+    end;
+
+    -- Test D: Rejects caller cutoff that exceeds snapshot cutoff
+    begin
+      perform private_generation.fetch_targeted_student_history(
+        p_job_id := rel_job_id,
+        p_worker_id := rel_worker_id,
+        p_cutoff_timestamp := now() + interval '1 hour'
+      );
+      raise exception 'Expected failure for cutoff exceeding snapshot';
+    exception when others then
+      if sqlerrm not like '%CUTOFF_TIMESTAMP_EXCEEDS_SNAPSHOT%' then raise; end if;
+    end;
+
+    -- Test E: Successful targeted query - bounded by snapshot cutoff
+    rel_history_result := public.worker_fetch_targeted_student_history(
+      p_job_id := rel_job_id,
+      p_worker_id := rel_worker_id,
+      p_claim_snapshot_id := rel_job_id,
+      p_cutoff_timestamp := now() - interval '1 hour',
+      p_target_ids := array['target-vocab-alpha', 'target-grammar-beta'],
+      p_evidence_limit := 10
+    );
+
+    if (rel_history_result->>'evidenceCount')::int <> 2 then
+      raise exception 'Expected 2 evidence rows before cutoff, got %', rel_history_result->>'evidenceCount';
+    end if;
+
+    if rel_history_result->>'manifestHash' is null or rel_history_result->>'manifestHash' not like 'sha256:%' then
+      raise exception 'Invalid manifestHash in result: %', rel_history_result->>'manifestHash';
+    end if;
+
+    -- Verify manifest was persisted in audit table
+    select count(*) into rel_manifest_count
+    from private_generation.targeted_history_manifests
+    where job_id = rel_job_id and manifest_hash = rel_history_result->>'manifestHash';
+
+    if rel_manifest_count <> 1 then
+      raise exception 'Expected 1 persisted manifest row, got %', rel_manifest_count;
+    end if;
+
+    -- Clean up test records
+    delete from private_generation.targeted_history_manifests where job_id = rel_job_id;
+    delete from private_generation.generation_claim_snapshots where job_id = rel_job_id;
+    delete from public.child_learning_evidence where child_id = rel_child_id;
+    delete from public.generation_jobs where id = rel_job_id;
+    delete from public.children where id = rel_child_id;
   end;
 
   -- Clean up

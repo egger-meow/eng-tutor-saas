@@ -16,13 +16,13 @@ describe('Two-Stage History Retrieval and Context Compaction', () => {
       cutoffTimestamp: '2026-09-06T12:00:00.000Z',
       claimSnapshotId: '01234567-89ab-cdef-0123-456789abcdef',
       memoryPolicyVersion: 'two-stage-v1',
-      targetReleaseId: 'rel_1.8.0',
+      targetReleaseId: 'rel_1.8.1',
     }
 
     // Stage 1 context must NOT have bulk older evidence rows
     expect(stage1Context.targetedOlderEvidence).toEqual([])
     expect(stage1Context.memoryPolicyVersion).toBe('two-stage-v1')
-    expect(stage1Context.targetReleaseId).toBe('rel_1.8.0')
+    expect(stage1Context.targetReleaseId).toBe('rel_1.8.1')
     expect(stage1Context.cutoffTimestamp).toBeDefined()
     expect(stage1Context.claimSnapshotId).toBeDefined()
   })

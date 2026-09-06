@@ -1,5 +1,7 @@
 # Release 1.8.0 Comprehensive Release Evaluation
 
+> **Review correction (2026-09-06): this evaluation report recorded modeled estimates and premature release acceptance prior to the commander review.** The context reduction percentages relied on modeled baseline sizes rather than measured token counts, and runtime RPC integration was incomplete. Release 1.8.0 claims are superseded by the verified Release 1.8.1 implementation. See the [commander review and correction plan](../plans/release-1.8.0-commander-review-and-context-compaction.md) and [Release 1.8.1 Evaluation](./release-1.8.1-evaluation.md).
+
 > **Release**: `rel_1.8.0`  
 > **Engine Version**: `1.8.0`  
 > **Prompt Version**: `2.13.0`  
@@ -8,7 +10,7 @@
 > **Curriculum Schema**: `2.5.0` (preserved without bump)  
 > **PDF Renderer**: `1.5.0` (preserved without bump)  
 > **Date**: `2026-09-06`  
-> **Evaluation Status**: **PASSED** (100% test pass rate, verified context compaction, verified two-stage retrieval)
+> **Evaluation Status**: **SUPERSEDED** by Release 1.8.1
 
 ---
 

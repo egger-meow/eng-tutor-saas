@@ -13,3 +13,17 @@ it('retains distinct failure evidence', () => {
   const context = { retryContext: { findings: ['a'], failureEvidence: { findings: ['b'] } } }
   expect(compactAuthoringContext(context)).toEqual(context)
 })
+
+it('injects formatPlanningCapsule into diversityCapsule when missing', () => {
+  const context = {
+    diversityCapsule: {
+      recentGenres: ['article'],
+      recentContextKeys: ['science'],
+      recentItemFamilies: ['reading'],
+    },
+  }
+  const result = compactAuthoringContext(context)
+  expect((result.diversityCapsule as any)?.formatPlanningCapsule).toBeDefined()
+  expect((result.diversityCapsule as any)?.formatPlanningCapsule?.availableButRecentlyUnused?.length).toBeGreaterThan(0)
+})
+

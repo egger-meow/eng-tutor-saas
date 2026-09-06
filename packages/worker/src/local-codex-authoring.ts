@@ -433,7 +433,6 @@ async function authorOne(
       jobId,
       workerId: workerId ?? LOCAL_AUTHORING_WORKER_PREFIX,
       claimSnapshotId: (context.claimSnapshotId as string) || jobId,
-      childId,
       targetIds,
       cutoffTimestamp: context.cutoffTimestamp as string | undefined,
       evidenceLimit: 20,
@@ -475,7 +474,7 @@ async function authorOne(
       '-',
     ], { cwd: packetPlanningDir, input: buildPacketPlanningPrompt(context, grounding) })
     const rawPlan = parseCodexJson(await readFile(planOutputPath, 'utf8'))
-    packetPlan = validatePacketPlan(rawPlan)
+    packetPlan = validatePacketPlan(rawPlan, context)
   } catch {
     packetPlan = createDefaultPacketPlan(context)
   } finally {
@@ -486,7 +485,7 @@ async function authorOne(
   const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
   const { bundle: activeBundle, itemResults } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, {
     repoRoot,
-    assessmentPlans: packetPlan.items,
+    assessmentPlans: packetPlan.assessmentPlans,
   })
   if (itemResults && itemResults.length > 0) {
     context.perItemPrecedents = itemResults

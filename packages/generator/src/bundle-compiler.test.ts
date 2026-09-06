@@ -16,23 +16,24 @@ import {
   computeFrozen2101Hashes,
   computeFrozen2110Hashes,
   computeFrozen2120Hashes,
+  computeFrozen2130Hashes,
   REPO_ROOT,
 } from './bundle-compiler.js'
 
 describe('bundle-compiler', () => {
-  it('generates a compact deterministic 2.13.0 production bundle with no historical overlay sediment', async () => {
+  it('generates a compact deterministic 2.13.1 production bundle with no historical overlay sediment', async () => {
   const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
   const existingBundle = await readFile(bundlePath, 'utf8')
   const freshBundle = await compileProductionBundle(REPO_ROOT)
 
   expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
   expect(freshBundle.metadata.schemaVersion).toBe('2.5.0')
-  expect(freshBundle.metadata.promptVersion).toBe('2.13.0')
-  expect(freshBundle.metadata.bundleVersion).toBe('2.13.0-prod')
-  expect(freshBundle.metadata.engineVersion).toBe('1.8.0')
+  expect(freshBundle.metadata.promptVersion).toBe('2.13.1')
+  expect(freshBundle.metadata.bundleVersion).toBe('2.13.1-prod')
+  expect(freshBundle.metadata.engineVersion).toBe('1.8.1')
   expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(15)
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.13.0/01-plan.md')
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.13.0/03-critic.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.13.1/01-plan.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.13.1/03-critic.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.4.0/01-plan.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.10.1/03-critic.md')
   expect(freshBundle.content).toContain('Source -> Fact -> Claim')
@@ -206,6 +207,15 @@ it('verifies that prompts/2.12.0 consolidated baseline remains byte-for-byte fro
     'packages/generator/prompts/2.12.0/02-author.md': 'bf38249f383a11438c8812f31739f4f1a638949ed6e93d09b98bd1be461f33e1',
     'packages/generator/prompts/2.12.0/03-critic.md': 'ff6f59636bce31a44923fdd0d939c58d83a6adbf9c27a80ce3c9ec27a9b32c82',
     'packages/generator/prompts/2.12.0/04-repair.md': 'c8dae311dadf0a83de64fa7b26d47afde66c796698aecd9f67f5f609e321ee30',
+  })
+})
+
+it('verifies that prompts/2.13.0 consolidated baseline remains byte-for-byte frozen after the 2.13.1 bump', async () => {
+  expect(await computeFrozen2130Hashes(REPO_ROOT)).toEqual({
+    'packages/generator/prompts/2.13.0/01-plan.md': 'd8a4b566b44b69a75e704779cf82dcc53b9444d9e1c37f6dc6274b7516a7afdb',
+    'packages/generator/prompts/2.13.0/02-author.md': '4e7fb84a0dbbd7ad26d13aee0b1b93cd4b08095a0f9d79d8d80edfc7dcafe07f',
+    'packages/generator/prompts/2.13.0/03-critic.md': 'bed86ec5d8db1ea4a27952b6c463a2effe8a6e2dc3f84168866403ee9f979f07',
+    'packages/generator/prompts/2.13.0/04-repair.md': 'c47a2b0e7246765798ae7def1bd2a52cacc993655436eac0f969c249e0805294',
   })
 })
 
