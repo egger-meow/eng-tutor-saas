@@ -358,3 +358,58 @@ describe('submitProductionPackage & release safety', () => {
     ).rejects.toThrow('CANNOT_RELEASE_SUBMITTED_CLAIM')
   })
 })
+
+describe('CAP & History retrieval authoring contract', () => {
+  it('retrieves bounded history and verifies provenance hash for claimed context', async () => {
+    const { retrieveTargetedStudentHistory } = await import('@paper-english/generator')
+    const context = {
+      grade: 7 as const,
+      preferences: ['science'],
+      priorFeedback: [],
+      lifetimeLearningMemory: {
+        vocabulary: {
+          total: 5,
+          verifiedWeakTargetIds: ['v-gravity'],
+          dueTargetIds: ['v-orbit'],
+          uncertainTargetIds: [],
+          masteredTargetIds: [],
+          regressionTargetIds: [],
+        },
+        grammar: {
+          total: 0,
+          verifiedWeakTargetIds: [],
+          dueTargetIds: [],
+          uncertainTargetIds: [],
+          masteredTargetIds: [],
+          regressionTargetIds: [],
+        },
+        communication: {
+          total: 0,
+          verifiedWeakTargetIds: [],
+          dueTargetIds: [],
+          uncertainTargetIds: [],
+          masteredTargetIds: [],
+          regressionTargetIds: [],
+        },
+      },
+    }
+
+    const res = retrieveTargetedStudentHistory(context, { limit: 2 })
+    expect(res.isBounded).toBe(true)
+    expect(res.retrievedTargets[0]!.targetId).toBe('v-gravity')
+    expect(res.provenanceHash).toMatch(/^sha256:[a-f0-9]{64}$/)
+  })
+
+  it('filters and ranks CAP candidates without loading unneeded shards', async () => {
+    const { filterAndRankCapPrecedents } = await import('@paper-english/generator')
+    const intent = {
+      primarySkill: 'vocabulary_in_context',
+      targetCognitiveDepth: 'D2_single_step_inference',
+    }
+    const result = filterAndRankCapPrecedents(intent, { limit: 2 })
+    expect(result.authorityStatus).toBe('authoritative')
+    expect(result.candidates.length).toBeGreaterThanOrEqual(1)
+    expect(result.candidates[0]!.primarySkill).toBe('vocabulary_in_context')
+  })
+})
+

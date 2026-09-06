@@ -172,6 +172,31 @@ export type {
   DeliveryMemoryProjection,
 } from './curriculum-maps/diversity-capsule.js'
 
+// CAP & History Selective Retrieval
+export {
+  filterAndRankCapPrecedents,
+  batchRetrieveCapCandidates,
+  expandCapPrecedents,
+  scoreRoutingCard,
+} from './cap-retrieval.js'
+export type {
+  CapCandidateSummary,
+  CapRetrievalIntent,
+  CapRetrievalOptions,
+  CapRetrievalResult,
+  CapRoutingCard,
+  CapRoutingIndex,
+} from './cap-retrieval.js'
+export {
+  retrieveTargetedStudentHistory,
+} from './history-retrieval.js'
+export type {
+  HistoryRetrievalQuery,
+  RetrievedTargetHistory,
+  MissingTargetIndicator,
+  StudentHistoryRetrievalResult,
+} from './history-retrieval.js'
+
 // Model-Specific Pre-Submit Quality Profiles & Critic Layer
 export {
   DEFAULT_QUALITY_PROFILES_DIR,

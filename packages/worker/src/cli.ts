@@ -16,6 +16,11 @@ import {
   submitProductionPackage,
   validatePreSubmitPackage,
 } from './authoring-helpers.js'
+import {
+  filterAndRankCapPrecedents,
+  expandCapPrecedents,
+  retrieveTargetedStudentHistory,
+} from '@paper-english/generator'
 
 function option(name: string, required = true): string | undefined {
   const index = process.argv.indexOf(`--${name}`)
@@ -100,6 +105,37 @@ async function main(): Promise<void> {
       }
       const current = await getSchedulerMode(client)
       process.stdout.write(`${JSON.stringify({ mode: current }, null, 2)}\n`)
+      return
+    }
+
+    if (action === 'retrieve-cap') {
+      const intentPath = option('intent')!
+      const limitStr = option('limit', false)
+      const shouldExpand = process.argv.includes('--expand')
+      const rawIntent = JSON.parse(await readFile(intentPath, 'utf8')) as unknown
+      const result = filterAndRankCapPrecedents(rawIntent as any, { limit: limitStr ? Number(limitStr) : 5 })
+      if (shouldExpand && result.candidates.length > 0) {
+        const expanded = await expandCapPrecedents(result.candidates.map((c) => c.ref))
+        process.stdout.write(`${JSON.stringify({ ...result, expandedCards: expanded }, null, 2)}\n`)
+      } else {
+        process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+      }
+      return
+    }
+
+    if (action === 'retrieve-history') {
+      const ctxPath = option('context')!
+      const targetIdsArg = option('targets', false)
+      const targetTypeArg = option('type', false) as any
+      const limitStr = option('limit', false)
+      const rawContext = JSON.parse(await readFile(ctxPath, 'utf8')) as any
+      const targetIds = targetIdsArg ? targetIdsArg.split(',').map((s) => s.trim()) : undefined
+      const result = retrieveTargetedStudentHistory(rawContext, {
+        targetIds,
+        targetType: targetTypeArg,
+        limit: limitStr ? Number(limitStr) : 3,
+      })
+      process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
       return
     }
 
