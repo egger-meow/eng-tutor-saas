@@ -58,6 +58,14 @@ Before performing any curriculum generation or repair work, every authoring exec
 
 ---
 
+### Shared interest exploration and compact context (Prompt 2.12.0)
+
+Every entry point uses the bundle's shared `interest-exploration.md` policy. Privately extract public artists, groups, works, characters and specific questions; screen out learner identity and learning records before research. Choose the evidence-supported angle and information structure together after setting the learning target. A creative process or fictional decision can supply substantive knowledge; neither news nor science is mandatory. Preserve good science explanations when they fit.
+
+Choose response formats for the thinking required: timelines, evidence-to-inference organizers, comparisons, sorting and partial worked examples can use existing Schema 2.4.0 tables/organizers. Keep useful cues, blank answer spaces, and matching parent answers. There is no table frequency quota. Critic and repair preserve useful formats and judge their educational function.
+
+The bundle routing index uses a lossless dictionary table with explicit decoding instructions; selected CAP shards still come from the same recorded Git SHA. Immutable claim snapshots and fingerprints are unchanged. For repairs, retain the latest complete candidate once, all distinct findings and repair instructions; omit an older candidate only when a newer local candidate is actually present. Fixed schema and quality requirements remain available. This reduces serialization duplication, not the required validation or evidence.
+
 ## 3. Queue & Lease Protocol (Collision Prevention)
 
 Normal production authoring must check active authoritative leases before claiming. The dedicated Week 1 Fast Lane is intentionally allowed to start while a normal batch is already in flight; its own advisory lock serializes fast-lane starts and row leases / `FOR UPDATE SKIP LOCKED` prevent duplicate job ownership.

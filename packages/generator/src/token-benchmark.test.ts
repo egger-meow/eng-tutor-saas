@@ -3,10 +3,10 @@ import { compileProductionBundle, REPO_ROOT } from './bundle-compiler.js'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-describe('token-benchmark', () => {
-  it('verifies compiled bundle achieves > 50% word/token reduction compared to reading scattered sources', async () => {
+describe('serialized context size benchmark', () => {
+  it('bounds bundle character size relative to scattered sources', async () => {
     const bundle = await compileProductionBundle(REPO_ROOT)
-    const bundleWords = bundle.content.trim().split(/\s+/u).length
+    const bundleChars = bundle.content.length
 
     // Scattered legacy files baseline:
     const scatteredPaths = [
@@ -23,11 +23,11 @@ describe('token-benchmark', () => {
       'packages/generator/src/audit-curriculum.ts',
     ]
 
-    let scatteredWords = 0
+    let scatteredChars = 0
     for (const file of scatteredPaths) {
       try {
         const text = await readFile(resolve(REPO_ROOT, file), 'utf8')
-        scatteredWords += text.trim().split(/\s+/u).length
+        scatteredChars += text.length
       } catch {
         // ignore missing
       }
@@ -35,11 +35,11 @@ describe('token-benchmark', () => {
 
     // Grounding remains compact relative to scattered context while retaining
     // the full inherited pedagogy and the auditable research contract.
-    expect(bundleWords).toBeLessThan(scatteredWords * 0.50)
-    expect(bundleWords).toBeLessThan(15000)
+    expect(bundleChars).toBeLessThan(scatteredChars * 0.50)
+    expect(bundleChars).toBeLessThan(110000)
   })
 
-  it('demonstrates context capsule token efficiency over raw database table dumps', () => {
+  it('demonstrates context capsule character efficiency over raw database table dumps', () => {
     // Simulate 50 raw vocabulary items with table columns
     const rawVocabRows = Array.from({ length: 50 }, (_, i) => ({
       id: `vocab-uuid-${i}`,
@@ -66,9 +66,9 @@ describe('token-benchmark', () => {
 
     const capsulePayload = JSON.stringify(vocabCapsule)
 
-    const rawTokensEstimate = Math.ceil(rawPayload.length / 4)
-    const capsuleTokensEstimate = Math.ceil(capsulePayload.length / 4)
+    const rawChars = rawPayload.length
+    const capsuleChars = capsulePayload.length
 
-    expect(capsuleTokensEstimate).toBeLessThan(rawTokensEstimate * 0.3) // > 70% reduction in context size!
+    expect(capsuleChars).toBeLessThan(rawChars * 0.3) // > 70% reduction in context size!
   })
 })

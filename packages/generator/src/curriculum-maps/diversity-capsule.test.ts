@@ -109,3 +109,14 @@ describe('Diversity Capsule (Multi-Week Diversity Memory)', () => {
     expect(summary.itemFamilies).toEqual(['inference', 'short-response', 'multiple-choice'])
   })
 })
+
+
+it('includes reading tables and retains only recent response forms', () => {
+  const summary = extractHistoricalPackageSummary({ studentLesson: {
+    reading: { genre: 'article', title: 'Creative choices', questions: [{ itemType: 'short-response', responseLayout: { type: 'table' } }] },
+    practice: [{ questions: [{ options: ['A', 'B'] }] }],
+    homework: { questions: [{ writingLines: 2 }] },
+  } }, '2026-W34')
+  expect(summary.responseForms).toEqual(['table', 'choice', 'lines'])
+  expect(buildDiversityCapsule([{ materialWeek: 'old', responseForms: ['organizer'] }, summary], 1).recentResponseForms).toEqual(['table', 'choice', 'lines'])
+})

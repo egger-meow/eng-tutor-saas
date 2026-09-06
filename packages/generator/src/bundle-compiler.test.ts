@@ -19,19 +19,19 @@ import {
 } from './bundle-compiler.js'
 
 describe('bundle-compiler', () => {
-  it('generates a compact deterministic 2.11.1 production bundle with no historical overlay sediment', async () => {
+  it('generates a compact deterministic 2.12.0 production bundle with no historical overlay sediment', async () => {
   const bundlePath = resolve(REPO_ROOT, 'packages/generator/bundles/production-authoring-bundle.md')
   const existingBundle = await readFile(bundlePath, 'utf8')
   const freshBundle = await compileProductionBundle(REPO_ROOT)
 
   expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
   expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
-  expect(freshBundle.metadata.promptVersion).toBe('2.11.1')
-  expect(freshBundle.metadata.bundleVersion).toBe('2.11.1-prod')
-  expect(freshBundle.metadata.engineVersion).toBe('1.6.0')
-  expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(13)
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.1/01-plan.md')
-  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.11.1/03-critic.md')
+  expect(freshBundle.metadata.promptVersion).toBe('2.12.0')
+  expect(freshBundle.metadata.bundleVersion).toBe('2.12.0-prod')
+  expect(freshBundle.metadata.engineVersion).toBe('1.7.0')
+  expect(Object.keys(freshBundle.metadata.sourceHashes).length).toBe(15)
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.12.0/01-plan.md')
+  expect(freshBundle.metadata.sourceHashes).toHaveProperty('packages/generator/prompts/2.12.0/03-critic.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.4.0/01-plan.md')
   expect(freshBundle.metadata.sourceHashes).not.toHaveProperty('packages/generator/prompts/2.10.1/03-critic.md')
   expect(freshBundle.content).toContain('Source -> Fact -> Claim')

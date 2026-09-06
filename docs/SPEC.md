@@ -1580,7 +1580,7 @@ The implementation format may differ from the original CSV/Markdown format.
 
 The content model should preserve the same purpose.
 
-Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable. Research planning treats time-sensitivity as an internal signal: durable interests may use evergreen discovery, while fast-moving interests actively inspect recent developments and compare them with durable angles when useful. A strong, reliable, age-appropriate, lexically feasible recent development is preferred only when it serves the learning target equally well or better; otherwise the package preserves an evidence-backed evergreen fallback. This signal is not a canonical learner-profile field.
+Production curriculum sources also include per-package public-web research metadata. Every new schema 2.3.0 package records real sources, facts, and claims bound to actual canonical reading prose; grounding is never null or not-applicable. Research planning treats time-sensitivity as an internal signal of the selected question: durable creative histories may use evergreen evidence, while time-sensitive questions inspect recent developments and compare durable angles when useful. A strong, reliable, age-appropriate, lexically feasible recent development is preferred only when it serves the learning target equally well or better; otherwise the package preserves an evidence-backed evergreen fallback. This signal is not a canonical learner-profile field.
 
 Historical CAP English exam design knowledge (taxonomy, question recipes, distractor patterns, cognitive depth framework, and benchmark foundation) lives independently under `history_exams/` and `docs/history-exams/` as an assessment-design reference.
 
@@ -1820,7 +1820,7 @@ Interest is a hook.
 
 It is not permission to turn every week into repetitive fan fiction.
 
-It is also not permission for generic noun-skinning. Every new production primary reading, including grammar-heavy weeks, should teach specific real-world knowledge researched through an explore, select, drill-down, and verify funnel. Planning order remains learning need, target, information structure/genre, then researched interest angle.
+It is also not permission for generic noun-skinning. Every new production primary reading, including grammar-heavy weeks, should teach specific real-world knowledge researched through an explore, select, drill-down, and verify funnel. Planning order is learning need, target, evidence-led interest exploration, then joint selection of researched angle and information structure/genre. Specific public people, groups, works, and fictional characters are legitimate interest anchors; supported stories and creative processes are substantive knowledge. Apply the shared interest-exploration contract across all authoring executors, without mandatory topic or format quotas.
 
 ---
 
@@ -2897,7 +2897,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.6.0, Schema 2.4.0, and Prompt 2.11.1. Prompt 2.11.1 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+New production authoring uses Engine 1.7.0, Schema 2.4.0, and Prompt 2.12.0. Prompt 2.12.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
 
 ---
 
@@ -4385,7 +4385,7 @@ For weekly-material work specifically:
 12. Include retrieval practice.
 13. Produce Student and Parent outputs separately.
 14. Record why this week differs from the previous week.
-15. Research one real-world interest angle after the single batch claim using generalized public topic queries only. Classify its time-sensitivity as an internal planning signal; for fast-moving interests, actively discover recent developments and compare durable candidates when useful.
+15. After the single batch claim, explore evidence-backed questions tied to specific public interests, including artists, groups, works, and fictional characters; use screened public entities and questions without private learner data. Follow the shared interest-exploration policy. Choose angle and information structure together after setting the learning target, and classify time sensitivity by question.
 16. Require real grounding for every new production 2.3.0 primary reading; never use null or N/A.
 17. Bind every factual claim to exact canonical lesson prose. For current material, require valid publication dates, distinguish event and publication timing, and independently verify topic-aware freshness; reject stale evidence, unsupported recency, rumor, prediction, speculation, and social-media hearsay.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
@@ -4402,7 +4402,7 @@ For weekly-material work specifically:
 29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, or cognitive-depth/shallow-assessment failures. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition and targeted repair.
 30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation.
 31. Grounding review for named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, and similar scoped entities must verify the exact relationship `entity/version/mode -> capability/behavior -> control flow/condition/limit/qualifier`. Reject semantic feature fusion or compositional attribution; do not implement product-specific deterministic keyword rules as a substitute for Critic judgment.
-32. Prompt 2.11.1 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
+32. Prompt 2.12.0 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
 
 
 ---

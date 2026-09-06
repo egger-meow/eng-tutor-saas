@@ -1,3 +1,4 @@
+import { compactAuthoringContext } from './authoring-context.js'
 import { spawn } from 'node:child_process'
 import { hostname, tmpdir } from 'node:os'
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
@@ -152,21 +153,22 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   return pkg
 }
 
-function planningPrompt(capsule: Record<string, unknown>): string {
+function planningPrompt(capsule: Record<string, unknown>, policy: string): string {
   return [
     'You are a privacy boundary inside a local curriculum runner. Web access is disabled.',
     `Use this bounded private topic capsule: ${JSON.stringify(capsule)}`,
-    'Produce a generalized public-research brief containing only impersonal English-learning topics and factual concepts useful for the material.',
-    'Never include or paraphrase names, UUIDs, email addresses, school, age, grade/level, textbook state, feedback, mistakes, learning history, profile prose, private notes, or quotations from the context.',
-    'Use no digits. Return only JSON shaped exactly as {"queries":["..."],"topicSummary":"..."}, with 1-4 short queries.',
+    policy,
+    'Extract only public interest entities and research questions. Preserve exact public artists, groups, works, characters and meaningful title numbers; do not flatten them into broad school topics.',
+    'Never include or paraphrase learner/private names, UUIDs, email addresses, school, age, grade/level, textbook state, feedback, mistakes, learning history, profile prose, private notes, or quotations from the context.',
+    'Public title numbers are allowed. Return only JSON shaped exactly as {"queries":["..."],"topicSummary":"..."}, with 1-4 short queries.',
   ].join('\n')
 }
 
 function collectTopicStrings(value: unknown, output: string[], key = ''): void {
   if (output.length >= 20) return
-  if (typeof value === 'string' && /(interest|topic|theme|genre|subject|hobby)/iu.test(key)) {
+  if (typeof value === 'string' && /^(interests?|topics?|themes?|genres?|subjects?|hobb(?:y|ies)|favorite_?(?:music|games|stories|anime|movies|sports|topics|artists|characters|groups)|activities|current_?fascinations)$/iu.test(key)) {
     const normalized = value.trim().replace(/\s+/gu, ' ')
-    if (normalized.length >= 3) output.push(normalized.slice(0, 120))
+    if (normalized.length >= 1) output.push(normalized.slice(0, 120))
     return
   }
   if (Array.isArray(value)) {
@@ -180,7 +182,9 @@ function collectTopicStrings(value: unknown, output: string[], key = ''): void {
 
 export function buildPrivatePlanningCapsule(context: Record<string, unknown>): Record<string, unknown> {
   const topics: string[] = []
-  collectTopicStrings(context, topics)
+  // Only known preference containers; never mine retry packages or private notes.
+  collectTopicStrings(context.preferences, topics)
+  collectTopicStrings(context.profile, topics)
   return {
     purpose: 'generalized English-learning public research',
     topics: [...new Set(topics)].slice(0, 20),
@@ -191,7 +195,7 @@ export function buildPrivatePlanningCapsule(context: Record<string, unknown>): R
 function collectPrivateStrings(value: unknown, output: Set<string>, key = ''): void {
   if (typeof value === 'string' && /(id|name|email|school|grade|level|textbook|feedback|mistake|history|note|prose)/iu.test(key)) {
     const normalized = value.trim().toLowerCase()
-    if (normalized.length >= 3) output.add(normalized)
+    if (normalized.length >= 2) output.add(normalized)
     return
   }
   if (Array.isArray(value)) {
@@ -213,7 +217,7 @@ export function validatePublicResearchBrief(raw: unknown, context: Record<string
   }
   const serialized = JSON.stringify({ queries: record.queries, topicSummary: record.topicSummary })
   const normalized = serialized.toLowerCase()
-  if (/\d|[\w.+-]+@[\w.-]+|https?:\/\/|\b(name|school|grade|level|textbook|feedback|mistake|history|profile|child|student|uuid|note)s?\b/iu.test(normalized)) {
+  if (/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|[\w.+-]+@[\w.-]+|https?:\/\/|\b(grade|level|textbook|feedback|mistake|profile|child|student|uuid)s?\b/iu.test(normalized)) {
     throw new Error('PUBLIC_RESEARCH_BRIEF_PRIVATE_DATA')
   }
   const privateStrings = new Set<string>()
@@ -224,12 +228,13 @@ export function validatePublicResearchBrief(raw: unknown, context: Record<string
   return serialized
 }
 
-function researchPrompt(brief: string): string {
+function researchPrompt(brief: string, policy: string): string {
   return [
-    'Research the following privacy-screened, generalized English-learning brief using first-party live web search.',
+    'Research the following privacy-screened public-interest research brief using first-party live web search.',
     'Do not inspect local files. Do not infer or request learner identity or personal context.',
+    policy,
     `Brief: ${brief}`,
-    'Return concise factual grounding with source URLs. Do not write curriculum JSON.',
+    'Compare distinct promising angles, then drill into the strongest evidence. Return a concise candidate comparison plus source URLs, titles, dates when relevant, supported propositions and uncertainties. Do not write curriculum JSON or infer a learner profile.',
   ].join('\n')
 }
 
@@ -240,7 +245,7 @@ function authoringPrompt(bundle: string, context: Record<string, unknown>, groun
   return [
     'You are the private curriculum author inside a reviewed local runner. Do not access Supabase or mutate repository files.',
     `AUTHORITATIVE PRODUCTION BUNDLE:\n${bundle}`,
-    `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(context)}`,
+    `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(compactAuthoringContext(context, Boolean(previousOutput)))}`,
     `PUBLIC FACTUAL GROUNDING (web access is disabled in this private stage):\n${grounding}`,
     retry,
     `Set metadata.model exactly to ${LOCAL_CODEX_MODEL}, schemaVersion to ${CURRENT_SCHEMA_VERSION}, promptVersion to prompt/${CURRENT_PROMPT_VERSION}, engineVersion to ${CURRENT_ENGINE_VERSION}, and copy the server inputFingerprint exactly.`,
@@ -267,6 +272,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   await mkdir(jobDir, { recursive: true })
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
+  const interestPolicy = await readFile(resolve(repoRoot, 'packages/generator/curriculum/interest-exploration.md'), 'utf8')
   const planningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-private-plan-'))
   let brief: string
   try {
@@ -278,7 +284,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', briefPath,
       '-',
-    ], { cwd: planningDir, input: planningPrompt(buildPrivatePlanningCapsule(context)) })
+    ], { cwd: planningDir, input: planningPrompt(buildPrivatePlanningCapsule(context), interestPolicy) })
     brief = validatePublicResearchBrief(parseCodexJson(await readFile(briefPath, 'utf8')), context)
   } finally {
     await rm(planningDir, { recursive: true, force: true })
@@ -294,7 +300,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check', '--color', 'never',
       '--output-last-message', publicGroundingPath,
       '-',
-    ], { cwd: publicDir, input: researchPrompt(brief) })
+    ], { cwd: publicDir, input: researchPrompt(brief, interestPolicy) })
     await writeFile(groundingPath, await readFile(publicGroundingPath, 'utf8'), { encoding: 'utf8', mode: 0o600 })
   } finally {
     await rm(publicDir, { recursive: true, force: true })

@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { compactRoutingIndex } from './compact-routing-index.js'
 import { CURRENT_ENGINE_VERSION } from './engine-version.js'
 import { serializedCapAssessmentPlanContract } from './cap-assessment-plan-contract.js'
 
@@ -109,10 +110,12 @@ export const FROZEN_2110_FILES = [
 ] as const
 
 export const SOURCE_FILES = [
-  'packages/generator/prompts/2.11.1/01-plan.md',
-  'packages/generator/prompts/2.11.1/02-author.md',
-  'packages/generator/prompts/2.11.1/03-critic.md',
-  'packages/generator/prompts/2.11.1/04-repair.md',
+  'packages/generator/curriculum/interest-exploration.md',
+  'packages/generator/src/compact-routing-index.ts',
+  'packages/generator/prompts/2.12.0/01-plan.md',
+  'packages/generator/prompts/2.12.0/02-author.md',
+  'packages/generator/prompts/2.12.0/03-critic.md',
+  'packages/generator/prompts/2.12.0/04-repair.md',
   'packages/generator/src/curriculum-package-schema.ts',
   'packages/generator/quality-profiles/default.md',
   'packages/generator/quality-profiles/gemini-3.7-flash.md',
@@ -268,7 +271,7 @@ export async function compileProductionBundle(
 ): Promise<CompiledBundle> {
   const hashes = await computeSourceHashes(repoRoot)
   const readPromptStage = async (fileName: string) => {
-    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.11.1/${fileName}`), 'utf8')
+    const stage = await readFile(resolve(repoRoot, `packages/generator/prompts/2.12.0/${fileName}`), 'utf8')
     return `${stage.trim()}\n`
   }
   const plan = await readPromptStage('01-plan.md')
@@ -281,14 +284,15 @@ export async function compileProductionBundle(
   const rubric = await readFile(resolve(repoRoot, 'docs/curriculum-quality-rubric.md'), 'utf8')
   const rules = await readFile(resolve(repoRoot, 'docs/product-rules.md'), 'utf8')
   const precedentContract = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-contract.md'), 'utf8')
+  const interestPolicy = await readFile(resolve(repoRoot, 'packages/generator/curriculum/interest-exploration.md'), 'utf8')
   const precedentRoutingIndex = await readFile(resolve(repoRoot, 'packages/generator/curriculum/cap-precedent-routing-index.json'), 'utf8')
 
   const generatedAt = fixedDate ?? '2026-08-18T15:45:00.000Z'
 
   const metadata: BundleMetadata = {
-    bundleVersion: '2.11.1-prod',
+    bundleVersion: '2.12.0-prod',
     schemaVersion: '2.4.0',
-    promptVersion: '2.11.1',
+    promptVersion: '2.12.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,
     generatedAt,
@@ -346,8 +350,9 @@ export async function compileProductionBundle(
     '```',
     '',
     '## 2B. Compact CAP Precedent Routing Index',
+    'Lossless dictionary table: each row is a card; columns name its fields; each cell is an explicit dictionary key (zero-based); -1 means absent. Resolve row values to select relevant cards, then read the referenced same-SHA shards. No references or routing attributes are removed.',
     '```json',
-    precedentRoutingIndex.trim(),
+    compactRoutingIndex(JSON.parse(precedentRoutingIndex)),
     '```',
     '',
     profileResolutionContract,
@@ -356,6 +361,8 @@ export async function compileProductionBundle(
     '```typescript',
     schema.trim().replace(/\r\n/g, '\n'),
     '```',
+    '',
+    interestPolicy.trim(),
     '',
     '## 5. Prompt 01: Planning Engine',
     plan.trim().replace(/\r\n/g, '\n'),

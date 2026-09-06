@@ -88,7 +88,7 @@ describe('public research privacy boundary', () => {
     expect(serialized).not.toContain('Needs more writing space')
   })
 
-  it('allows only generalized, digit-free public topics', () => {
+  it('allows screened public topics', () => {
     expect(validatePublicResearchBrief({
       queries: ['ocean animal adaptations for young English learners'],
       topicSummary: 'Accessible facts about ocean animal adaptations and habitats',
@@ -108,10 +108,17 @@ describe('public research privacy boundary', () => {
     const source = await readFile(new URL('./local-codex-authoring.ts', import.meta.url), 'utf8')
     expect(source).toContain("const PRIVATE_CODEX_CONFIG = 'web_search=\"disabled\"'")
     expect(source).toContain("const PUBLIC_RESEARCH_CODEX_CONFIG = 'web_search=\"live\"'")
-    expect(source).toContain('researchPrompt(brief)')
+    expect(source).toContain('researchPrompt(brief, interestPolicy)')
     expect(source).not.toContain('researchPrompt(context')
     expect(source).toContain("LOCAL_CODEX_MODEL = 'gpt-5.6-sol'")
     expect(source).toContain("LOCAL_CODEX_REASONING = 'low'")
     expect(source).toContain("'--skip-git-repo-check'")
   })
+})
+
+
+it('retains public works, artists, and numbered titles without importing retry topics', () => {
+  const context = { profile: { preferences: { favoriteMusic: ['keshi', '2NE1', 'IU'], favoriteAnime: ['Your Name'] } }, retryContext: { topics: ['private repair'] } }
+  expect(buildPrivatePlanningCapsule(context).topics).toEqual(['keshi', '2NE1', 'IU', 'Your Name'])
+  expect(validatePublicResearchBrief({ queries: ['2NE1 debut recording process', 'Your Name animation production'], topicSummary: 'Creative decisions behind public works' }, context)).toContain('2NE1')
 })

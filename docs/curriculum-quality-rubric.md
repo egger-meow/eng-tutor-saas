@@ -8,7 +8,7 @@ This is the semantic review contract for every newly authored weekly package. It
 - Grounding provenance is closed and auditable: `Source -> Fact -> Claim -> Actual lesson prose`. Every claim binds supported fact IDs to exact canonical reading text.
 - For a named product, organization, model, version, mode, feature, API, policy, mechanism, or similarly scoped entity, `grounding-accuracy` verifies the complete proposition at the same scope: `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`. Broad topical relevance is insufficient. Reject mode swaps, feature fusion, dropped qualifiers, unsupported composites, and marketing overstatement.
 - `current` grounding has appropriate publication metadata, distinguishes event timing from publication timing, and passes topic-aware freshness review. Do not force current when an evergreen angle is more reliable or teachable.
-- Research queries use privacy-safe generalized public topics only. Authored prose is original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported embellishment.
+- Research queries use screened public entities and questions, without private learner information. Authored prose is original educational synthesis; reject source-shaped copying, protected dialogue/scripts/subtitles/manga text, excessive plot retelling, and unsupported embellishment.
 - The packet teaches before it tests. Chinese scaffolding, worked examples, guided work, independent evidence, CAP-style transfer, production/retrieval, and homework are used when they serve the learning plan. Do not satisfy pedagogy by mechanically counting task types.
 - Reading uses the learner's actual level and interests as a meaningful context. Interest never replaces the learning need, and repeated themes require a reason.
 - Reading blocks are clean text; the PDF renderer owns deterministic visual emphasis.
@@ -27,7 +27,7 @@ This is the semantic review contract for every newly authored weekly package. It
 
 1. **Observe:** use school progress, learning memory, completion/difficulty, explicit parent/student feedback, and previous quality evidence.
 2. **Plan:** choose evidence-backed targets, protect prerequisites, advance by default, and use review when feedback or real learning evidence justifies it.
-3. **Research:** preserve `learning need -> target -> genre/information structure -> topic`; for fast-moving interests inspect recent developments and compare durable angles when useful.
+3. **Research:** preserve `learning need -> target -> evidence-led interest exploration -> joint angle and information structure selection`; classify time sensitivity by question and follow the shared interest-exploration policy.
 4. **Teach:** author a breathable, self-study packet with natural English, useful Chinese scaffolding, and truthful workload.
 5. **Attack:** run objective deterministic validation plus independent adversarial semantic criticism.
 6. **Repair:** change only failed content and its true dependencies; update prose, grounding, questions, answers, layouts, and tracking together when dependency closure requires it.
@@ -37,7 +37,7 @@ This is the semantic review contract for every newly authored weekly package. It
 
 Relevant explicit learner/parent feedback is first-class curriculum evidence and may override default progression or review scheduling heuristics. A quality failure discovered in one packet should first become a **general principle only if the principle truly generalizes**. Do not add product-specific prompt exceptions or deterministic pseudo-semantic rules merely because one example failed.
 
-Prompt 2.11.1 is a consolidated active baseline. Historical prompt suites remain frozen for provenance, but production model context must not grow indefinitely by concatenating obsolete overlays. Future permanent improvements should edit/replace concise active sections or create a new consolidated baseline.
+Prompt 2.12.0 is a consolidated active baseline. Historical prompt suites remain frozen for provenance, but production model context must not grow indefinitely by concatenating obsolete overlays. Future permanent improvements should edit/replace concise active sections or create a new consolidated baseline.
 
 ## Release bar
 

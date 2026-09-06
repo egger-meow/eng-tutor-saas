@@ -4,12 +4,14 @@ export interface HistoricalPackageSummary {
   genre?: string
   contextKey?: string
   itemFamilies?: string[]
+  responseForms?: string[]
 }
 
 export interface DiversityCapsule {
   recentGenres: string[]
   recentContextKeys: string[]
   recentItemFamilies: string[]
+  recentResponseForms?: string[]
 }
 
 /**
@@ -61,6 +63,7 @@ export function buildDiversityCapsule(
     recentGenres,
     recentContextKeys,
     recentItemFamilies,
+    ...(recentSlice.some(item => item.responseForms?.length) ? { recentResponseForms: [...new Set(recentSlice.flatMap(item => item.responseForms ?? []))] } : {}),
   }
 }
 
@@ -68,14 +71,14 @@ export function buildDiversityCapsule(
  * Extracts a deterministic historical summary from a completed CurriculumPackage:
  * - genre: reading genre (article, dialogue, interview, announcement, schedule)
  * - contextKey: reading scenario title / context identifier
- * - itemFamilies: unique question itemTypes (e.g. inference, short-response) across practice and homework
+ * - itemFamilies: unique question itemTypes (e.g. inference, short-response) across reading, practice and homework
  */
 export function extractHistoricalPackageSummary(
   pkg: {
     studentLesson?: {
-      reading?: { genre?: string; title?: string }
-      practice?: Array<{ questions?: Array<{ itemType?: string }> }>
-      homework?: { questions?: Array<{ itemType?: string }> }
+      reading?: { genre?: string; title?: string; questions?: ResponseQuestion[] }
+      practice?: Array<{ questions?: ResponseQuestion[] }>
+      homework?: { questions?: ResponseQuestion[] }
     }
     metadata?: { generatedAt?: string }
   },
@@ -85,7 +88,7 @@ export function extractHistoricalPackageSummary(
   const contextKey = pkg.studentLesson?.reading?.title ?? 'general-scenario'
   const practiceQuestions = pkg.studentLesson?.practice?.flatMap((s) => s.questions ?? []) ?? []
   const homeworkQuestions = pkg.studentLesson?.homework?.questions ?? []
-  const allQuestions = [...practiceQuestions, ...homeworkQuestions]
+  const allQuestions = [...(pkg.studentLesson?.reading?.questions ?? []), ...practiceQuestions, ...homeworkQuestions]
   const itemFamilies = Array.from(
     new Set(allQuestions.map((q) => q?.itemType).filter((t): t is string => Boolean(t))),
   )
@@ -95,5 +98,13 @@ export function extractHistoricalPackageSummary(
     genre,
     contextKey,
     itemFamilies,
+    responseForms: [...new Set(allQuestions.map(q => q.responseLayout?.type ?? (q.options?.length ? "choice" : "lines")))],
   }
+}
+
+interface ResponseQuestion {
+  itemType?: string
+  options?: string[]
+  writingLines?: number
+  responseLayout?: { type?: string }
 }

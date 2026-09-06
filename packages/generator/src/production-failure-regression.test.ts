@@ -65,7 +65,7 @@ describe('production failure regressions', () => {
     expect(audit.findings.find((f) => f.dimension === 'lexical-anchor')?.severity).toBe('warning')
   })
 
-  it('rejects bare CURRENT_PROMPT_VERSION (2.11.1) packages missing mandatory critic dimensions', () => {
+  it('rejects bare CURRENT_PROMPT_VERSION (2.12.0) packages missing mandatory critic dimensions', () => {
     const pkg = canonicalPackage()
     pkg.metadata.promptVersion = CURRENT_PROMPT_VERSION
     pkg.qualityEvidence.criticalChecks = [
@@ -241,7 +241,7 @@ describe('production failure regressions', () => {
     expect(boundaryFindings).toEqual([])
   })
 
-  describe('Prompt 2.11.1 cross-stage lexical retrieval quality', () => {
+  describe('Prompt 2.12.0 cross-stage lexical retrieval quality', () => {
     const lexicalOnlyPackage = (retrievalPrompts: string[], homeworkPrompts: string[] = []) => ({
       studentLesson: {
         practice: [{
@@ -396,10 +396,10 @@ describe('production failure regressions', () => {
     expect(audit.findings.some((f) => f.message.includes('critical quality check must pass') || f.message.includes('Unresolved critical critic finding'))).toBe(true)
   })
 
-  describe('Prompt 2.11.1 generalized behavioral contracts', () => {
+  describe('Prompt 2.12.0 generalized behavioral contracts', () => {
     it('author and critic preserve exact attribution and decisive qualifiers without feature fusion', async () => {
       const bundle = await compileProductionBundle()
-      expect(bundle.metadata.promptVersion).toBe('2.11.1')
+      expect(bundle.metadata.promptVersion).toBe('2.12.0')
       expect(bundle.metadata.schemaVersion).toBe('2.4.0')
 
       expect(bundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
