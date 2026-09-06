@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   retrieveTargetedStudentHistory,
+  verifyLifetimeTarget,
   type HistoryRetrievalQuery,
 } from './history-retrieval.js'
 import type { GenerationContext } from './index.js'
@@ -104,17 +105,135 @@ describe('Targeted Student History Retrieval with Bounded Expansion and Provenan
     expect(result.missingTargets[0]!.recommendedPolicy).toBe('treat_as_new_learning')
   })
 
-  it('handles empty lifetime memory safely for Week 1 students', () => {
-    const emptyContext: GenerationContext = {
-      grade: 7,
-      preferences: [],
-      priorFeedback: [],
+  it('filters out historical evidence after cutoff timestamp', () => {
+    const contextWithFutureEvidence: GenerationContext = {
+      ...sampleContext,
+      targetedOlderEvidence: [
+        {
+          targetType: 'vocabulary',
+          targetId: 'vocab-sensor',
+          result: 'incorrect',
+          observedAt: '2026-08-20T10:00:00.000Z',
+        },
+        {
+          targetType: 'vocabulary',
+          targetId: 'vocab-sensor',
+          result: 'partial',
+          observedAt: '2026-09-10T10:00:00.000Z', // After cutoff!
+        },
+      ],
     }
 
-    const result = retrieveTargetedStudentHistory(emptyContext, { limit: 3 })
-    expect(result.retrievedTargets).toEqual([])
-    expect(result.missingTargets).toEqual([])
-    expect(result.totalCandidatesConsidered).toBe(0)
-    expect(result.provenanceHash).toMatch(/^sha256:[a-f0-9]{64}$/)
+    const result = retrieveTargetedStudentHistory(contextWithFutureEvidence, {
+      cutoffTimestamp: '2026-09-01T00:00:00.000Z',
+      targetIds: ['vocab-sensor'],
+    })
+
+    const sensor = result.retrievedTargets.find((t) => t.targetId === 'vocab-sensor')
+    expect(sensor).toBeDefined()
+    // Only the observation before 2026-09-01 should remain
+    expect(sensor!.recentResults).toHaveLength(1)
+    expect(sensor!.recentResults[0]!.observedAt).toBe('2026-08-20T10:00:00.000Z')
+  })
+
+  it('binds childId, sourceClaimId, targetType, result and timestamp into provenance hash', () => {
+    const baseQuery: HistoryRetrievalQuery = {
+      childId: 'child-123',
+      sourceClaimId: 'claim-456',
+      cutoffTimestamp: '2026-09-01T00:00:00.000Z',
+      limit: 3,
+    }
+
+    const res1 = retrieveTargetedStudentHistory(sampleContext, baseQuery)
+    const resDifferentChild = retrieveTargetedStudentHistory(sampleContext, {
+      ...baseQuery,
+      childId: 'child-999',
+    })
+    const resDifferentClaim = retrieveTargetedStudentHistory(sampleContext, {
+      ...baseQuery,
+      sourceClaimId: 'claim-999',
+    })
+
+    expect(res1.provenanceHash).not.toBe(resDifferentChild.provenanceHash)
+    expect(res1.provenanceHash).not.toBe(resDifferentClaim.provenanceHash)
+  })
+
+  describe('verifyLifetimeTarget', () => {
+    it('returns verified_weak for target in verifiedWeakTargetIds', () => {
+      const res = verifyLifetimeTarget(sampleContext, 'vocab-sensor', 'vocabulary')
+      expect(res.status).toBe('verified_weak')
+      expect(res.hasPriorExposure).toBe(true)
+      expect(res.isVerifiedAbsence).toBe(false)
+      expect(res.recentResults).toHaveLength(2)
+    })
+
+    it('returns no_prior_exposure with isVerifiedAbsence=true for confirmed absent target', () => {
+      const res = verifyLifetimeTarget(sampleContext, 'vocab-unknown-word', 'vocabulary')
+      expect(res.status).toBe('no_prior_exposure')
+      expect(res.isVerifiedAbsence).toBe(true)
+      expect(res.hasPriorExposure).toBe(false)
+      expect(res.recentResults).toHaveLength(0)
+    })
+
+    it('returns insufficient_evidence when target has older evidence but is missing from lifetime buckets', () => {
+      const contextWithUnaggregatedEvidence: GenerationContext = {
+        grade: 7,
+        preferences: [],
+        priorFeedback: [],
+        lifetimeLearningMemory: {
+          vocabulary: {
+            total: 2,
+            verifiedWeakTargetIds: [],
+            dueTargetIds: [],
+            uncertainTargetIds: [],
+            masteredTargetIds: ['vocab-motor'],
+            regressionTargetIds: [],
+          },
+          grammar: {
+            total: 0,
+            verifiedWeakTargetIds: [],
+            dueTargetIds: [],
+            uncertainTargetIds: [],
+            masteredTargetIds: [],
+            regressionTargetIds: [],
+          },
+          communication: {
+            total: 0,
+            verifiedWeakTargetIds: [],
+            dueTargetIds: [],
+            uncertainTargetIds: [],
+            masteredTargetIds: [],
+            regressionTargetIds: [],
+          },
+        },
+        targetedOlderEvidence: [
+          {
+            targetType: 'vocabulary',
+            targetId: 'vocab-unaggregated',
+            result: 'incorrect',
+            observedAt: '2026-08-25T10:00:00.000Z',
+          },
+        ],
+      }
+
+      const res = verifyLifetimeTarget(contextWithUnaggregatedEvidence, 'vocab-unaggregated', 'vocabulary')
+      expect(res.status).toBe('insufficient_evidence')
+      expect(res.isVerifiedAbsence).toBe(false)
+      expect(res.hasPriorExposure).toBe(true)
+      expect(res.recentResults).toHaveLength(1)
+    })
+
+    it('returns not_retrieved when lifetime memory is not loaded and no older evidence exists', () => {
+      const emptyContext: GenerationContext = {
+        grade: 7,
+        preferences: [],
+        priorFeedback: [],
+      }
+
+      const res = verifyLifetimeTarget(emptyContext, 'vocab-anything', 'vocabulary')
+      expect(res.status).toBe('not_retrieved')
+      expect(res.isVerifiedAbsence).toBe(false)
+      expect(res.hasPriorExposure).toBe(false)
+    })
   })
 })

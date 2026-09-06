@@ -169,5 +169,53 @@ describe('Delivery Memory Projection and Shared Cross-Week Memory', () => {
     expect(recentForms).toContain('format-5')
     expect(recentForms).toContain('format-6')
   })
+
+  it('conforms DB aggregate_format_memory output structure to TypeScript adapter input', () => {
+    // Exact schema emitted by public.aggregate_format_memory in PostgreSQL
+    const simulatedDbResult = {
+      recentDeliveryMemory: [
+        {
+          snapshotId: '550e8400-e29b-41d4-a716-446655440000',
+          materialId: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+          weekNumber: 3,
+          materialWeek: '2026-W35',
+          readingGenre: 'article',
+          readingTitle: 'Calibrating the Optical Sensor',
+          readingHook: 'How sensors perceive light.',
+          readingEntities: ['optical sensor', 'photodiode'],
+          introducedVocabulary: ['vocab-sensor', 'vocab-calibrate'],
+          grammarTargets: ['g7-past-simple-irregular'],
+          communicationFunctions: ['cf-asking-clarification'],
+          responseLayoutTypes: ['organizer', 'sequence'] as Array<'lines' | 'table' | 'organizer' | 'sequence'>,
+          pedagogicalFormats: ['table:organizer', 'sequence:horizontal', 'written:lines', 'mcq:4-option', 'itemType:short-response'],
+          scaffoldLevels: ['supported', 'standard'],
+          reasoningOperations: ['short-response', 'D2_single_step_inference'],
+        },
+      ],
+      recentResponseForms: [
+        'organizer',
+        'sequence',
+        'table:organizer',
+        'sequence:horizontal',
+        'written:lines',
+        'mcq:4-option',
+        'itemType:short-response',
+      ],
+    }
+
+    const capsule = buildDiversityCapsule(simulatedDbResult.recentDeliveryMemory, 4)
+
+    expect(capsule.recentGenres).toEqual(['article'])
+    expect(capsule.recentContextKeys).toEqual(['Calibrating the Optical Sensor'])
+    expect(capsule.recentResponseForms).toContain('organizer')
+    expect(capsule.recentResponseForms).toContain('table:organizer')
+    expect(capsule.recentResponseForms).toContain('sequence:horizontal')
+    expect(capsule.recentDeliveryMemory).toHaveLength(1)
+    expect(capsule.recentDeliveryMemory![0]?.snapshotId).toBe('550e8400-e29b-41d4-a716-446655440000')
+    expect(capsule.recentDeliveryMemory![0]?.weekNumber).toBe(3)
+    expect(capsule.recentDeliveryMemory![0]?.readingHook).toBe('How sensors perceive light.')
+    expect(capsule.recentDeliveryMemory![0]?.readingEntities).toEqual(['optical sensor', 'photodiode'])
+    expect(capsule.recentDeliveryMemory![0]?.grammarTargets).toEqual(['g7-past-simple-irregular'])
+  })
 })
 

@@ -5,9 +5,17 @@ export interface DeliveryMemoryProjection {
   materialWeek: string
   readingGenre: string
   readingTitle: string
+  readingHook?: string
+  readingEntities?: string[]
   introducedVocabulary: string[]
+  grammarTargets?: string[]
+  communicationFunctions?: string[]
   responseLayoutTypes: Array<'lines' | 'table' | 'organizer' | 'sequence'>
   pedagogicalFormats: string[]
+  scaffoldLevels?: string[]
+  reasoningOperations?: string[]
+  snapshotId?: string
+  materialId?: string
 }
 
 /**
@@ -25,6 +33,12 @@ export function extractDeliveryMemory(
   const reading = (pkg as any).studentLesson?.reading ?? {}
   const readingGenre = reading.genre ?? 'article'
   const readingTitle = reading.title ?? ''
+  const readingHook = reading.hook ?? ''
+  const readingEntities: string[] = Array.isArray(reading.entities)
+    ? reading.entities
+    : Array.isArray((pkg as any).grounding?.entities)
+      ? (pkg as any).grounding.entities
+      : []
 
   const trackingDelta = (pkg as any).trackingDelta ?? {}
   let introducedVocabulary: string[] = []
@@ -33,6 +47,16 @@ export function extractDeliveryMemory(
   } else if (Array.isArray((pkg as any).studentLesson?.vocabulary)) {
     introducedVocabulary = (pkg as any).studentLesson.vocabulary.map((v: any) => v.word ?? v.id).filter(Boolean)
   }
+
+  const grammarTargets: string[] = Array.isArray(trackingDelta.exposedGrammarTargetIds)
+    ? trackingDelta.exposedGrammarTargetIds
+    : Array.isArray((pkg as any).studentLesson?.grammar?.targets)
+      ? (pkg as any).studentLesson.grammar.targets
+      : []
+
+  const communicationFunctions: string[] = Array.isArray(trackingDelta.exposedCommunicationFunctionIds)
+    ? trackingDelta.exposedCommunicationFunctionIds
+    : []
 
   const practiceStages = (pkg as any).studentLesson?.practice ?? []
   const practiceQuestions = Array.isArray(practiceStages)
@@ -47,6 +71,8 @@ export function extractDeliveryMemory(
 
   const responseLayoutTypesSet = new Set<'lines' | 'table' | 'organizer' | 'sequence'>()
   const pedagogicalFormatsSet = new Set<string>()
+  const scaffoldLevelsSet = new Set<string>()
+  const reasoningOperationsSet = new Set<string>()
 
   for (const q of allQuestions) {
     if (!q || typeof q !== 'object') continue
@@ -75,6 +101,16 @@ export function extractDeliveryMemory(
     }
     if (q.itemType && typeof q.itemType === 'string') {
       pedagogicalFormatsSet.add(`itemType:${q.itemType}`)
+      reasoningOperationsSet.add(q.itemType)
+    }
+    if (q.difficulty && typeof q.difficulty === 'string') {
+      scaffoldLevelsSet.add(q.difficulty)
+    }
+    if (q.reasoningOperation && typeof q.reasoningOperation === 'string') {
+      reasoningOperationsSet.add(q.reasoningOperation)
+    }
+    if (q.cognitiveDepth && typeof q.cognitiveDepth === 'string') {
+      reasoningOperationsSet.add(q.cognitiveDepth)
     }
   }
 
@@ -83,9 +119,17 @@ export function extractDeliveryMemory(
     materialWeek: effectiveWeek,
     readingGenre,
     readingTitle,
+    readingHook,
+    readingEntities,
     introducedVocabulary,
+    grammarTargets,
+    communicationFunctions,
     responseLayoutTypes: Array.from(responseLayoutTypesSet),
     pedagogicalFormats: Array.from(pedagogicalFormatsSet),
+    scaffoldLevels: Array.from(scaffoldLevelsSet),
+    reasoningOperations: Array.from(reasoningOperationsSet),
+    snapshotId: (pkg as any).snapshotId ?? meta.snapshotId,
+    materialId: (pkg as any).materialId ?? meta.materialId,
   }
 }
 

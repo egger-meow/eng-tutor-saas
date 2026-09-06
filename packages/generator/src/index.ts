@@ -7,6 +7,7 @@ export type GenerationJob = {
 }
 
 export type GenerationContext = {
+  childId?: string
   grade: 7 | 8 | 9
   preferences: ReadonlyArray<string>
   priorFeedback: ReadonlyArray<string>
@@ -189,12 +190,15 @@ export type {
 } from './cap-retrieval.js'
 export {
   retrieveTargetedStudentHistory,
+  verifyLifetimeTarget,
 } from './history-retrieval.js'
 export type {
   HistoryRetrievalQuery,
   RetrievedTargetHistory,
   MissingTargetIndicator,
   StudentHistoryRetrievalResult,
+  LifetimeTargetVerificationResult,
+  LifetimeTargetVerificationStatus,
 } from './history-retrieval.js'
 
 // Retrieval Evaluation & Hybrid Search Benchmark

@@ -6,12 +6,14 @@ export interface HistoryRetrievalQuery {
   targetType?: 'vocabulary' | 'grammar' | 'communication' | 'reading'
   limit?: number
   cutoffTimestamp?: string
+  childId?: string
+  sourceClaimId?: string
 }
 
 export interface RetrievedTargetHistory {
   targetId: string
   targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading'
-  status: 'verified_weak' | 'review_due' | 'regression' | 'uncertain' | 'mastered' | 'unseen'
+  status: 'verified_weak' | 'review_due' | 'regression' | 'uncertain' | 'mastered' | 'unseen' | 'insufficient_evidence'
   priorityRank: number
   recentResults: Array<{
     result: 'correct' | 'incorrect' | 'partial' | 'unknown'
@@ -23,8 +25,8 @@ export interface RetrievedTargetHistory {
 export interface MissingTargetIndicator {
   targetId: string
   targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading'
-  reason: 'no_prior_learning_evidence'
-  recommendedPolicy: 'treat_as_new_learning'
+  reason: 'no_prior_learning_evidence' | 'insufficient_evidence' | 'not_retrieved'
+  recommendedPolicy: 'treat_as_new_learning' | 'defer_until_evidence_loaded'
 }
 
 export interface StudentHistoryRetrievalResult {
@@ -36,8 +38,176 @@ export interface StudentHistoryRetrievalResult {
   totalCandidatesConsidered: number
 }
 
+export type LifetimeTargetVerificationStatus =
+  | 'verified_weak'
+  | 'review_due'
+  | 'regression'
+  | 'uncertain'
+  | 'mastered'
+  | 'no_prior_exposure'
+  | 'insufficient_evidence'
+  | 'not_retrieved'
+
+export interface LifetimeTargetVerificationResult {
+  targetId: string
+  targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading'
+  status: LifetimeTargetVerificationStatus
+  hasPriorExposure: boolean
+  isVerifiedAbsence: boolean
+  recentResults: Array<{
+    result: 'correct' | 'incorrect' | 'partial' | 'unknown'
+    observedAt: string
+  }>
+  reason?: string
+}
+
 function computeHash(content: string): string {
   return 'sha256:' + createHash('sha256').update(content).digest('hex')
+}
+
+/**
+ * Distinguishes verified absence from unretrieved data or insufficient evidence for a target.
+ */
+export function verifyLifetimeTarget(
+  context: GenerationContext,
+  targetId: string,
+  targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading',
+  options?: { cutoffTimestamp?: string },
+): LifetimeTargetVerificationResult {
+  const cutoffTimestamp = options?.cutoffTimestamp
+  const cutoffTime = cutoffTimestamp ? Date.parse(cutoffTimestamp) : NaN
+
+  const olderEvidence = (context.targetedOlderEvidence ?? []).filter((e) => {
+    if (e.targetId !== targetId || e.targetType !== targetType) return false
+    if (!cutoffTimestamp || isNaN(cutoffTime)) return true
+    const t = Date.parse(e.observedAt)
+    return isNaN(t) || t <= cutoffTime
+  })
+
+  const recentResults = olderEvidence.map((e) => ({
+    result: e.result,
+    observedAt: e.observedAt,
+  }))
+
+  const lifetime = context.lifetimeLearningMemory
+  if (targetType === 'reading') {
+    if (recentResults.length > 0) {
+      return {
+        targetId,
+        targetType,
+        status: 'insufficient_evidence',
+        hasPriorExposure: true,
+        isVerifiedAbsence: false,
+        recentResults,
+        reason: 'reading_target_in_older_evidence_without_lifetime_summary',
+      }
+    }
+    return {
+      targetId,
+      targetType,
+      status: 'not_retrieved',
+      hasPriorExposure: false,
+      isVerifiedAbsence: false,
+      recentResults: [],
+      reason: 'reading_lifetime_memory_not_modeled',
+    }
+  }
+
+  const memoryBucket = lifetime ? lifetime[targetType] : undefined
+  if (!memoryBucket) {
+    if (recentResults.length > 0) {
+      return {
+        targetId,
+        targetType,
+        status: 'insufficient_evidence',
+        hasPriorExposure: true,
+        isVerifiedAbsence: false,
+        recentResults,
+        reason: 'evidence_exists_in_older_evidence_but_lifetime_memory_not_loaded',
+      }
+    }
+    return {
+      targetId,
+      targetType,
+      status: 'not_retrieved',
+      hasPriorExposure: false,
+      isVerifiedAbsence: false,
+      recentResults: [],
+      reason: 'lifetime_memory_not_loaded',
+    }
+  }
+
+  if (memoryBucket.verifiedWeakTargetIds.includes(targetId)) {
+    return {
+      targetId,
+      targetType,
+      status: 'verified_weak',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+    }
+  }
+  if (memoryBucket.dueTargetIds.includes(targetId)) {
+    return {
+      targetId,
+      targetType,
+      status: 'review_due',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+    }
+  }
+  if (memoryBucket.regressionTargetIds.includes(targetId)) {
+    return {
+      targetId,
+      targetType,
+      status: 'regression',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+    }
+  }
+  if (memoryBucket.uncertainTargetIds.includes(targetId)) {
+    return {
+      targetId,
+      targetType,
+      status: 'uncertain',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+    }
+  }
+  if (memoryBucket.masteredTargetIds.includes(targetId)) {
+    return {
+      targetId,
+      targetType,
+      status: 'mastered',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+    }
+  }
+
+  if (recentResults.length > 0) {
+    return {
+      targetId,
+      targetType,
+      status: 'insufficient_evidence',
+      hasPriorExposure: true,
+      isVerifiedAbsence: false,
+      recentResults,
+      reason: 'evidence_exists_in_older_evidence_but_missing_from_lifetime_buckets',
+    }
+  }
+
+  return {
+    targetId,
+    targetType,
+    status: 'no_prior_exposure',
+    hasPriorExposure: false,
+    isVerifiedAbsence: true,
+    recentResults: [],
+  }
 }
 
 /**
@@ -49,8 +219,15 @@ export function retrieveTargetedStudentHistory(
 ): StudentHistoryRetrievalResult {
   const limit = Math.max(1, Math.min(5, query.limit ?? 3))
   const cutoffTimestamp = query.cutoffTimestamp ?? new Date().toISOString()
+  const cutoffTime = Date.parse(cutoffTimestamp)
   const lifetime = context.lifetimeLearningMemory
-  const olderEvidence = context.targetedOlderEvidence ?? []
+
+  // Filter older evidence strictly by cutoffTimestamp (exclude observations after cutoff)
+  const olderEvidence = (context.targetedOlderEvidence ?? []).filter((e) => {
+    if (isNaN(cutoffTime)) return true
+    const t = Date.parse(e.observedAt)
+    return isNaN(t) || t <= cutoffTime
+  })
 
   const targetTypes: Array<'vocabulary' | 'grammar' | 'communication'> = query.targetType
     ? [query.targetType as 'vocabulary' | 'grammar' | 'communication']
@@ -59,7 +236,7 @@ export function retrieveTargetedStudentHistory(
   const candidateMap = new Map<string, {
     targetId: string
     targetType: 'vocabulary' | 'grammar' | 'communication' | 'reading'
-    status: 'verified_weak' | 'review_due' | 'regression' | 'uncertain' | 'mastered' | 'unseen'
+    status: 'verified_weak' | 'review_due' | 'regression' | 'uncertain' | 'mastered' | 'unseen' | 'insufficient_evidence'
     priorityRank: number
   }>()
 
@@ -139,18 +316,41 @@ export function retrieveTargetedStudentHistory(
     }
   }
 
-  // Identify any specific queried targets that had NO lifetime memory records (unseen targets)
+  // Identify any specific queried targets that were not found in candidateMap
   const missingTargets: MissingTargetIndicator[] = []
   if (specificTargets) {
     for (const targetId of specificTargets) {
       const foundInCandidates = Array.from(candidateMap.values()).some((c) => c.targetId === targetId)
       if (!foundInCandidates) {
-        missingTargets.push({
+        const verification = verifyLifetimeTarget(
+          context,
           targetId,
-          targetType: query.targetType ?? 'vocabulary',
-          reason: 'no_prior_learning_evidence',
-          recommendedPolicy: 'treat_as_new_learning',
-        })
+          query.targetType ?? 'vocabulary',
+          { cutoffTimestamp },
+        )
+
+        if (verification.status === 'insufficient_evidence') {
+          missingTargets.push({
+            targetId,
+            targetType: query.targetType ?? 'vocabulary',
+            reason: 'insufficient_evidence',
+            recommendedPolicy: 'defer_until_evidence_loaded',
+          })
+        } else if (verification.status === 'not_retrieved') {
+          missingTargets.push({
+            targetId,
+            targetType: query.targetType ?? 'vocabulary',
+            reason: 'not_retrieved',
+            recommendedPolicy: 'defer_until_evidence_loaded',
+          })
+        } else {
+          missingTargets.push({
+            targetId,
+            targetType: query.targetType ?? 'vocabulary',
+            reason: 'no_prior_learning_evidence',
+            recommendedPolicy: 'treat_as_new_learning',
+          })
+        }
       }
     }
   }
@@ -181,11 +381,26 @@ export function retrieveTargetedStudentHistory(
     }
   })
 
-  // Compute immutable provenance hash pinning this exact retrieved slice
+  // Compute immutable provenance hash pinning this exact retrieved slice, results, timestamps, and claim/source identity
   const provenancePayload = JSON.stringify({
+    childId: query.childId ?? context.childId ?? 'anonymous-child',
+    sourceClaimId: query.sourceClaimId ?? 'unspecified-claim',
     cutoffTimestamp,
-    retrieved: retrievedTargets.map((r) => ({ id: r.targetId, status: r.status, rank: r.priorityRank })),
-    missing: missingTargets.map((m) => m.targetId),
+    retrieved: retrievedTargets.map((r) => ({
+      targetType: r.targetType,
+      targetId: r.targetId,
+      status: r.status,
+      priorityRank: r.priorityRank,
+      results: r.recentResults.map((res) => ({
+        result: res.result,
+        observedAt: res.observedAt,
+      })),
+    })),
+    missing: missingTargets.map((m) => ({
+      targetType: m.targetType,
+      targetId: m.targetId,
+      reason: m.reason,
+    })),
   })
   const provenanceHash = computeHash(provenancePayload)
 
