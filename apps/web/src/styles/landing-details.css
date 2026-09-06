@@ -96,7 +96,8 @@
   height: 1.85rem;
 }
 
-.summary-circle {
+.summary-circle,
+.summary-icon-circle {
   stroke: var(--color-accent);
   stroke-width: 1.5;
   fill: var(--color-paper);
@@ -115,7 +116,8 @@
   opacity: 0;
 }
 
-.summary-morph-icon.is-open .summary-circle {
+.summary-morph-icon.is-open .summary-circle,
+.summary-morph-icon.is-open .summary-icon-circle {
   fill: var(--color-accent);
 }
 

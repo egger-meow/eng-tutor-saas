@@ -237,11 +237,6 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <p>家長只要回報難度、完成度與卡住的地方，系統就把這些訊號放進下一週的教材設計。</p>
           </div>
           <PersonalizationStory />
-          <div className="week-flow">
-            <div className="week-sheet"><span>這週觀察</span><ul><li>閱讀明顯太簡單</li><li>do / does 再次答錯</li><li>學校開始現在進行式</li><li>最近開始喜歡籃球</li></ul></div>
-            <div className="flow-line" aria-label="因此產生下一週">下一週真的跟著改 <b>→</b></div>
-            <div className="week-sheet next-week"><span>下週調整</span><ul><li>閱讀難度提高一級</li><li>安排 do / does 間隔複習</li><li>銜接現在進行式</li><li>用籃球情境承載適合程度的閱讀</li></ul></div>
-          </div>
           <div className="inline-objection">
             <p className="overline">不只是換一個有趣主題</p>
             <h3>興趣是入口，孩子也真的會讀到新東西。</h3>
