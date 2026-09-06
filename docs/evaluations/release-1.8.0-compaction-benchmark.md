@@ -1,5 +1,7 @@
 # Release 1.8.0 Context Compaction Benchmark Report
 
+> **Review correction (2026-09-06): this is a modeled estimate, not a measured lifecycle benchmark or release acceptance.** The script assumes a 98,000-character routing block; the actual previous routing section is 17,452 characters. Stage sizes are partly constants and tokens are estimated as characters/4. The measured fixed bundle changed from 98,050 to 83,259 normalized characters (15.09%), before dynamic cards/context. Runtime CAP/history integration and generated-quality claims remain unverified or incomplete. The original report below is retained for auditability; do not use its 55.1% or token totals as observed savings. See the [commander review and correction plan](../plans/release-1.8.0-commander-review-and-context-compaction.md).
+
 > **Benchmark Version**: `rel_1.8.0-compaction-v1`  
 > **Evaluated Baseline**: Prompt 2.13.0, Engine 1.8.0, Schema 2.5.0  
 > **Average Context Reduction**: **55.1%** across full generation lifecycle  
