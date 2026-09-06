@@ -12,7 +12,7 @@ Windows Task Scheduler / Interactive Agent / Codex CLI
 → claimProductionBatch / worker_claim_local_authoring_batch
 → privacy-screened generalized live-web research
 → authoritative authoring (GPT-5.6 Sol)
-→ validatePreSubmitPackage (Schema 2.4.0, audit floor, inputFingerprint)
+→ validatePreSubmitPackage (Schema 2.5.0, audit floor, inputFingerprint)
 → submitProductionPackage (immutable curriculum submission)
 → read-after-write verification (getSubmissionStatus)
 → GitHub Actions Finisher (deterministic PDFs, storage, materials)

@@ -58,11 +58,11 @@ Before performing any curriculum generation or repair work, every authoring exec
 
 ---
 
-### Shared interest exploration and compact context (Prompt 2.12.0)
+### Shared interest exploration and compact context (Prompt 2.13.0)
 
 Every entry point uses the bundle's shared `interest-exploration.md` policy. Privately extract public artists, groups, works, characters and specific questions; screen out learner identity and learning records before research. Choose the evidence-supported angle and information structure together after setting the learning target. A creative process or fictional decision can supply substantive knowledge; neither news nor science is mandatory. Preserve good science explanations when they fit.
 
-Choose response formats for the thinking required: timelines, evidence-to-inference organizers, comparisons, sorting and partial worked examples can use existing Schema 2.4.0 tables/organizers. Keep useful cues, blank answer spaces, and matching parent answers. There is no table frequency quota. Critic and repair preserve useful formats and judge their educational function.
+Choose response formats for the thinking required: timelines, evidence-to-inference organizers, comparisons, sorting and partial worked examples can use existing Schema 2.5.0 tables/organizers/sequences. Keep useful cues, blank answer spaces, and matching parent answers. There is no table frequency quota. Critic and repair preserve useful formats and judge their educational function.
 
 The bundle routing index uses a lossless dictionary table with explicit decoding instructions; selected CAP shards still come from the same recorded Git SHA. Immutable claim snapshots and fingerprints are unchanged. For repairs, retain the latest complete candidate once, all distinct findings and repair instructions; omit an older candidate only when a newer local candidate is actually present. Fixed schema and quality requirements remain available. This reduces serialization duplication, not the required validation or evidence.
 
@@ -102,8 +102,8 @@ When a claimed job has an existing authoring attempt that failed validation or q
 2. **Evidence-Driven**: Targeted repair MUST be guided strictly by `retryContext.findings` and `retryContext.failureEvidence`.
 3. **Immutability & Preservation**: Preserve all valid package content, stable IDs, stage ordering, learning objectives, and `inputFingerprint`.
 4. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass author/critic quality requirements.
-5. **Writing Space & Schema 2.4.0**:
-   - Non-MCQ questions (`translation`, `sentence-production`, `short-response`) require `writingLines >= 1` or a valid `responseLayout` (`lines`, `table`, or `organizer`).
+5. **Writing Space & Schema 2.5.0**:
+   - Non-MCQ questions (`translation`, `sentence-production`, `short-response`) require `writingLines >= 1` or a valid `responseLayout` (`lines`, `table`, `organizer`, or `sequence`).
    - Assessment items in `cap-transfer`, `independent` (4 options), and `homework` (4 options) require corresponding internal `cap-plan:<questionId>` checks in `qualityEvidence.criticalChecks`. Intentional grammar/vocabulary recall items outside `cap-transfer` must explicitly declare `"intentionalRecall": true`.
    - Reading-dependent items require an internal `evidence-plan:<questionId>` with canonical `evidenceAnchors` resolving to `studentLesson.reading.blocks`.
 

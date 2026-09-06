@@ -1,6 +1,7 @@
 # Commander brief: formats, weekly memory, and selective retrieval
 
-Status: proposal only, 2026-09-06. No implementation is authorized by this file alone. Follow the user's next dispatch and current AGENTS.md. Baseline delivered in ca9b308 / 0d25cf1: Engine 1.7.0, Prompt 2.12.0, Schema 2.4.0. Inspect current HEAD before work.
+> **Status**: Implemented and superseded by Release `rel_1.8.0` (Engine 1.8.0, Prompt 2.13.0, Schema 2.5.0, Bundle 2.13.0-prod, Worker 1.7.0).  
+> All core capabilities (format planning capsule, post-plan selective CAP retrieval, two-stage history retrieval RPC, context compaction benchmark) have been implemented and verified in `rel_1.8.0`.
 
 ## Verified starting points
 

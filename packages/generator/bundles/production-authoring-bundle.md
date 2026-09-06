@@ -14,8 +14,8 @@ sourceHashes:
   "packages/generator/src/curriculum-package-schema.ts": "77b45b47d7cdd483648098831430baf2f0fa31243737918f731bf26d2065b63b"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
-  "docs/curriculum-quality-rubric.md": "4b12f3de96cf2fde5b8e27e3f55bbbb63e043f54962cf7866e58441dea8e827e"
-  "docs/product-rules.md": "08ad0b00a80a8659993d06d9f425e962c2bdad0d47d7cad14a2d58b9590298f1"
+  "docs/curriculum-quality-rubric.md": "4c8481256dbd6da8cd7c4aafb85abdc73e39c2738b6d6828e22bded1d517a518"
+  "docs/product-rules.md": "681565306d36ffa2f33eafc6ba9d76dff96a16110e9a067983fabfa70ba55e16"
   "packages/generator/curriculum/cap-precedent-contract.md": "036ad256be8d16ab98776a1d5e30770154265247535c6b1b3e5315da6bf27e6b"
   "packages/generator/src/cap-assessment-plan-contract.ts": "5ed552ce3254b6b3eefe4c0b66861ba125b0ef76d372d7e4f10073676c30bcec"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
@@ -55,7 +55,7 @@ Week 2 and later must demonstrate continuity through selected vocabulary recurre
 
 ## Real-world grounding
 
-Every newly authored production CurriculumPackage 2.4.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
+Every newly authored production CurriculumPackage 2.5.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
 
 The production research funnel preserves learning need and target, explores specific public-interest questions with evidence, then jointly chooses angle and genre/information structure. Follow `packages/generator/curriculum/interest-exploration.md` across entry points. Classify time sensitivity by question: creative histories may be durable even in fast-moving domains. Compare credible recent developments when the question is time-sensitive. Factual density is a semantic quality judgment, not a deterministic proposition-count publication gate.
 
@@ -94,7 +94,7 @@ This is the semantic review contract for every newly authored weekly package. It
 
 ## Non-negotiable learning contract
 
-- Every new production Schema 2.4.0 primary reading is real-world grounded, including grammar-heavy weeks. Grounding is never null or N/A.
+- Every new production Schema 2.5.0 primary reading is real-world grounded, including grammar-heavy weeks. Grounding is never null or N/A.
 - Grounding provenance is closed and auditable: `Source -> Fact -> Claim -> Actual lesson prose`. Every claim binds supported fact IDs to exact canonical reading text.
 - For a named product, organization, model, version, mode, feature, API, policy, mechanism, or similarly scoped entity, `grounding-accuracy` verifies the complete proposition at the same scope: `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`. Broad topical relevance is insufficient. Reject mode swaps, feature fusion, dropped qualifiers, unsupported composites, and marketing overstatement.
 - `current` grounding has appropriate publication metadata, distinguishes event timing from publication timing, and passes topic-aware freshness review. Do not force current when an evergreen angle is more reliable or teachable.
@@ -111,7 +111,7 @@ This is the semantic review contract for every newly authored weekly package. It
 - Critic performs substantive review across `evidence-boundary`, `answer-entailment`, `lexical-integrity`, `task-topology`, and `level-calibration`, plus grounding accuracy/copyright/freshness where relevant. These are semantic review responsibilities, not label-bookkeeping gates in Finisher.
 - MCQ answers should be non-predictable and distractors diagnostically meaningful. Do not distort sound questions to chase artificial answer-position percentages.
 - `weekly_minutes` is the learner's target capacity; `estimatedMinutes` is represented-work truth and must not simply copy the target. Add useful work or remove redundancy when workload is off; never pad with filler or falsify duration metadata.
-- Every student question has a stable ID, target, usable response space/layout, and a parent-readable answer. A task asking for a table/organizer provides the corresponding Schema 2.4.0 `responseLayout`.
+- Every student question has a stable ID, target, usable response space/layout, and a parent-readable answer. A task asking for a table/organizer/sequence provides the corresponding Schema 2.5.0 `responseLayout`.
 
 ## Weekly improvement loop
 

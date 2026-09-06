@@ -166,16 +166,20 @@ export {
   extractDeliveryMemory,
   aggregateRecentResponseForms,
   aggregateRecentDeliveryMemory,
+} from './curriculum-maps/diversity-capsule.js'
+export {
   buildFormatPlanningCapsule,
   FORMAT_SELECTION_RULES,
   CANONICAL_PEDAGOGICAL_FORMAT_CANDIDATES,
-} from './curriculum-maps/diversity-capsule.js'
+} from './curriculum-maps/format-planning-capsule.js'
 export type {
   DiversityCapsule,
   HistoricalPackageSummary,
   DeliveryMemoryProjection,
-  FormatPlanningCapsule,
 } from './curriculum-maps/diversity-capsule.js'
+export type {
+  FormatPlanningCapsule,
+} from './curriculum-maps/format-planning-capsule.js'
 
 // CAP & History Selective Retrieval
 export {

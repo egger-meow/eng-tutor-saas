@@ -4,7 +4,7 @@ This is the semantic review contract for every newly authored weekly package. It
 
 ## Non-negotiable learning contract
 
-- Every new production Schema 2.4.0 primary reading is real-world grounded, including grammar-heavy weeks. Grounding is never null or N/A.
+- Every new production Schema 2.5.0 primary reading is real-world grounded, including grammar-heavy weeks. Grounding is never null or N/A.
 - Grounding provenance is closed and auditable: `Source -> Fact -> Claim -> Actual lesson prose`. Every claim binds supported fact IDs to exact canonical reading text.
 - For a named product, organization, model, version, mode, feature, API, policy, mechanism, or similarly scoped entity, `grounding-accuracy` verifies the complete proposition at the same scope: `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`. Broad topical relevance is insufficient. Reject mode swaps, feature fusion, dropped qualifiers, unsupported composites, and marketing overstatement.
 - `current` grounding has appropriate publication metadata, distinguishes event timing from publication timing, and passes topic-aware freshness review. Do not force current when an evergreen angle is more reliable or teachable.
@@ -21,7 +21,7 @@ This is the semantic review contract for every newly authored weekly package. It
 - Critic performs substantive review across `evidence-boundary`, `answer-entailment`, `lexical-integrity`, `task-topology`, and `level-calibration`, plus grounding accuracy/copyright/freshness where relevant. These are semantic review responsibilities, not label-bookkeeping gates in Finisher.
 - MCQ answers should be non-predictable and distractors diagnostically meaningful. Do not distort sound questions to chase artificial answer-position percentages.
 - `weekly_minutes` is the learner's target capacity; `estimatedMinutes` is represented-work truth and must not simply copy the target. Add useful work or remove redundancy when workload is off; never pad with filler or falsify duration metadata.
-- Every student question has a stable ID, target, usable response space/layout, and a parent-readable answer. A task asking for a table/organizer provides the corresponding Schema 2.4.0 `responseLayout`.
+- Every student question has a stable ID, target, usable response space/layout, and a parent-readable answer. A task asking for a table/organizer/sequence provides the corresponding Schema 2.5.0 `responseLayout`.
 
 ## Weekly improvement loop
 

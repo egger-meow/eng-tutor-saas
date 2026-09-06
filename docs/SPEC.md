@@ -2636,7 +2636,7 @@ Its job is to:
 3. read production generation rules;
 4. load permitted child state from Supabase;
 5. generate canonical material source;
-6. validate and repair the canonical source locally against Schema 2.4.0 and the CAP quality floor;
+6. validate and repair the canonical source locally against Schema 2.5.0 and the CAP quality floor;
 7. submit it through the immutable curriculum submission bridge;
 8. leave deterministic PDF rendering and private Storage writes to the GitHub Actions Finisher;
 9. recover uncertain submissions by read-after-write status;
@@ -2897,7 +2897,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.7.0, Schema 2.5.0, and Prompt 2.12.0. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.12.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.10.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+New production authoring uses Engine 1.8.0, Schema 2.5.0, and Prompt 2.13.0. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.13.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.12.0 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
 
 ---
 

@@ -5,16 +5,25 @@ import type { CapDesignAnchor } from './cap-precedent-audit.js'
 describe('selective-bundle-assembler', () => {
   const sampleCard: CapDesignAnchor = {
     ref: 'cap-sample-01',
-    shard: 'local_inference--D2',
     genre: 'article',
     primarySkill: 'local_inference',
     secondarySkills: ['detail'],
     cognitiveDepth: 'D2_single_step_inference',
     languageDifficulty: 'A2_basic',
     evidenceMode: 'text_only',
+    evidenceNecessity: 'mandatory',
     evidenceSpan: 'cross_sentence_local',
-    designPrinciples: ['Connect clue A and clue B'],
-    distractorRationales: ['Partial detail without inference'],
+    reasoningOperations: ['connect_clues'],
+    questionMechanism: 'infer_from_evidence',
+    whyTheQuestionWorks: 'requires dual evidence lookup',
+    correctAnswerConstructionPrinciple: 'direct synthesis of clues',
+    distractorStrategies: ['partial_detail'],
+    reusableDesignPrinciple: 'Connect clue A and clue B',
+    difficultyAdjustment: {
+      simplificationConstraints: [],
+      depthAdjustmentStrategies: [],
+    },
+    copyGuardHashes: [],
   }
 
   it('replaces compact routing index marker when present', () => {

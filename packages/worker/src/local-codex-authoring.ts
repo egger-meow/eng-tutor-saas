@@ -286,7 +286,7 @@ export async function prepareAuthoringBundleWithPrecedents(
       difficulty?: 'A1_elementary' | 'A2_basic' | 'B1_intermediate' | 'B2_independent'
     }>
   } = {},
-): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number; noPrecedentReason?: string }> {
+): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number; noPrecedentReason?: string | null }> {
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? {}) as Record<string, unknown>
   const targetDifficulty = typeof profile.grade_level === 'string'
@@ -297,7 +297,7 @@ export async function prepareAuthoringBundleWithPrecedents(
 
   let candidateRefs: string[] = []
   let expandedCards: any[] = []
-  let noPrecedentReason: string | undefined
+  let noPrecedentReason: string | null | undefined
 
   if (plans && plans.length > 0) {
     const assessmentIntents: CapRetrievalIntent[] = plans.map((p) => {

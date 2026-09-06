@@ -25,7 +25,7 @@ Week 2 and later must demonstrate continuity through selected vocabulary recurre
 
 ## Real-world grounding
 
-Every newly authored production CurriculumPackage 2.4.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
+Every newly authored production CurriculumPackage 2.5.0 includes real, non-null grounding. The primary reading teaches specific, checkable knowledge through the learner's interest; grammar-heavy practice does not exempt the reading from research. Grounding has no N/A mode.
 
 The production research funnel preserves learning need and target, explores specific public-interest questions with evidence, then jointly chooses angle and genre/information structure. Follow `packages/generator/curriculum/interest-exploration.md` across entry points. Classify time sensitivity by question: creative histories may be durable even in fast-moving domains. Compare credible recent developments when the question is time-sensitive. Factual density is a semantic quality judgment, not a deterministic proposition-count publication gate.
 
