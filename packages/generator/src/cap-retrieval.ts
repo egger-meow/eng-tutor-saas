@@ -42,6 +42,7 @@ export interface CapCandidateSummary {
 }
 
 export interface CapRetrievalIntent {
+  itemId?: string
   learningObjective?: string
   primarySkill: string
   secondarySkills?: string[]
@@ -51,6 +52,7 @@ export interface CapRetrievalIntent {
   evidenceMode?: string
   evidenceSpan?: string
   keywords?: string[]
+  isRetrievalExempt?: boolean
 }
 
 export interface CapRetrievalOptions {
@@ -238,8 +240,125 @@ export function filterAndRankCapPrecedents(
   }
 }
 
+export interface RawAssessmentPlan {
+  itemId?: string
+  targetSkill?: string
+  primarySkill?: string
+  secondarySkills?: string[]
+  targetLanguageDifficulty?: string
+  difficulty?: string
+  targetCognitiveDepth?: string
+  cognitiveDepth?: string
+  genre?: string
+  keywords?: string[]
+  learningFunction?: string
+  reasoningOperation?: string
+  responseFormat?: string
+  formatRationale?: string
+  scaffoldLevel?: 'supported' | 'on-level' | 'stretch'
+  intentionalRecall?: boolean
+  isRetrievalExempt?: boolean
+  [key: string]: unknown
+}
+
+/**
+ * Resolves standard targetLanguageDifficulty from a learner profile or school grade,
+ * strictly avoiding defaulting ordinary junior-high grades (7, 8, 9) to A1_elementary.
+ */
+export function resolveDifficultyFromProfileOrGrade(profileOrGrade?: unknown): string {
+  if (!profileOrGrade) return 'A2_basic' // Standard Taiwan junior high baseline
+
+  if (typeof profileOrGrade === 'number') {
+    if (profileOrGrade >= 9) return 'B1_intermediate'
+    if (profileOrGrade >= 7) return 'A2_basic'
+    return 'A1_elementary'
+  }
+
+  if (typeof profileOrGrade === 'string') {
+    const s = profileOrGrade.trim().toLowerCase()
+    if (s.includes('b2')) return 'B2_independent'
+    if (s.includes('b1')) return 'B1_intermediate'
+    if (s.includes('a2')) return 'A2_basic'
+    if (s.includes('a1')) return 'A1_elementary'
+    if (s.includes('grade_9') || s.includes('grade 9') || s.includes('國三') || s.includes('9th') || s === '9') return 'B1_intermediate'
+    if (s.includes('grade_8') || s.includes('grade 8') || s.includes('國二') || s.includes('8th') || s === '8') return 'A2_basic'
+    if (s.includes('grade_7') || s.includes('grade 7') || s.includes('國一') || s.includes('7th') || s === '7') return 'A2_basic'
+    if (s.includes('incoming_grade_7') || s.includes('grade_6') || s.includes('grade 6') || s.includes('小六') || s === '6') return 'A1_elementary'
+    return 'A2_basic'
+  }
+
+  if (typeof profileOrGrade === 'object') {
+    const profile = profileOrGrade as Record<string, unknown>
+    const gradeLevel = typeof profile.grade_level === 'string' ? profile.grade_level : ''
+    const gradeStage = typeof profile.gradeStage === 'string' ? profile.gradeStage : ''
+    const gradeNum = typeof profile.grade === 'number' ? profile.grade : (typeof profile.grade === 'string' ? parseInt(profile.grade, 10) : undefined)
+
+    if (gradeLevel.includes('B2')) return 'B2_independent'
+    if (gradeLevel.includes('B1') || gradeStage.includes('9') || gradeNum === 9) return 'B1_intermediate'
+    if (gradeLevel.includes('A2') || gradeStage.includes('8') || gradeNum === 8 || gradeStage.includes('7') || gradeNum === 7) return 'A2_basic'
+    if (gradeLevel.includes('A1') || gradeStage.includes('incoming_grade_7') || gradeStage.includes('6') || gradeNum === 6) return 'A1_elementary'
+  }
+
+  return 'A2_basic'
+}
+
+/**
+ * Shared adapter that converts raw assessment plan items from the planner prompt
+ * into canonical CapRetrievalIntent objects.
+ */
+export function adaptAssessmentIntent(
+  raw: RawAssessmentPlan,
+  profileOrGrade?: unknown,
+  preferences?: Record<string, unknown>,
+): CapRetrievalIntent {
+  // 1. Language difficulty mapping
+  let difficulty = raw.targetLanguageDifficulty ?? raw.difficulty
+  if (typeof difficulty === 'string' && difficulty.trim().length > 0) {
+    const d = difficulty.trim().toUpperCase()
+    if (d.includes('B2')) difficulty = 'B2_independent'
+    else if (d.includes('B1')) difficulty = 'B1_intermediate'
+    else if (d.includes('A2')) difficulty = 'A2_basic'
+    else if (d.includes('A1')) difficulty = 'A1_elementary'
+  } else {
+    difficulty = resolveDifficultyFromProfileOrGrade(profileOrGrade)
+  }
+
+  // 2. Cognitive depth mapping
+  let depth = raw.targetCognitiveDepth ?? raw.cognitiveDepth
+  if (typeof depth === 'string' && depth.trim().length > 0) {
+    const lower = depth.trim().toLowerCase()
+    if (lower.includes('literal') || lower === 'd1' || lower.includes('recall')) {
+      depth = 'D1_recall_locate'
+    } else if (lower.includes('inferential') || lower === 'd2' || lower.includes('inference')) {
+      depth = 'D2_single_step_inference'
+    } else if (lower.includes('synthesis') || lower === 'd3' || lower.includes('multi')) {
+      depth = 'D3_multi_step_synthesis'
+    } else if (lower.includes('evaluative') || lower.includes('applied') || lower === 'd4' || lower.includes('evaluation')) {
+      depth = 'D4_applied_evaluation'
+    }
+  } else {
+    depth = 'D2_single_step_inference'
+  }
+
+  const primarySkill = (raw.primarySkill ?? raw.targetSkill ?? '').trim()
+  const genre = raw.genre
+  const keywords = raw.keywords ?? (Array.isArray(preferences?.topics) ? (preferences.topics as string[]) : undefined)
+
+  return {
+    itemId: raw.itemId,
+    primarySkill,
+    secondarySkills: raw.secondarySkills,
+    targetLanguageDifficulty: difficulty,
+    targetCognitiveDepth: depth,
+    genre,
+    keywords,
+    isRetrievalExempt: raw.isRetrievalExempt ?? raw.intentionalRecall,
+  }
+}
+
 export interface ItemPrecedentRetrievalResult {
   itemIndex: number
+  itemId?: string
   intent: CapRetrievalIntent
   precedentRefs: string[]
   noPrecedentReason: string | null
@@ -273,11 +392,22 @@ export async function retrievePrecedentsForAssessmentPlans(
     for (const r of refs) {
       uniqueRefsSet.add(r)
     }
+
+    let reason: string | null = null
+    if (intent.isRetrievalExempt) {
+      reason = 'exempt_retrieval'
+    } else if (!intent.primarySkill || intent.primarySkill.trim() === '') {
+      reason = 'missing_primary_skill'
+    } else if (refs.length === 0) {
+      reason = res.noPrecedentReason ?? 'no_matching_precedents'
+    }
+
     itemResults.push({
       itemIndex: idx,
+      itemId: intent.itemId,
       intent,
       precedentRefs: refs,
-      noPrecedentReason: res.noPrecedentReason ?? (refs.length === 0 ? 'no_precedents_found' : null),
+      noPrecedentReason: reason,
       pedagogicalScore: res.candidates[0]?.pedagogicalScore,
     })
   }
@@ -361,7 +491,11 @@ export async function expandCapPrecedents(
   }
 
   const reader = options.shardReader ?? (async (shardPath: string) => {
-    const fullPath = resolve(repoRoot, shardPath)
+    const normalizedRoot = repoRoot.replace(/\\/g, '/')
+    let fullPath = resolve(repoRoot, shardPath)
+    if (normalizedRoot.endsWith('/packages/generator') && shardPath.startsWith('packages/generator/')) {
+      fullPath = resolve(repoRoot, '..', '..', shardPath)
+    }
     return readFile(fullPath, 'utf8')
   })
 

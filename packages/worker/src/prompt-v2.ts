@@ -6,6 +6,7 @@ import {
   expandCapPrecedents,
   retrievePrecedentsForAssessmentPlans,
   filterAndRankCapPrecedents,
+  adaptAssessmentIntent,
   type CapRetrievalIntent,
 } from '@paper-english/generator'
 
@@ -20,34 +21,13 @@ export async function buildCurriculumPromptBundle(context: GenerationContext): P
     ? record.primarySkill.trim()
     : undefined
 
+  const profile = (record.profile ?? {}) as Record<string, unknown>
+  const preferences = (record.preferences ?? {}) as Record<string, unknown>
+
   if (plans && plans.length > 0) {
-    const profile = (record.profile ?? {}) as Record<string, unknown>
-    const preferences = (record.preferences ?? {}) as Record<string, unknown>
-    const targetDifficulty = typeof profile.grade_level === 'string'
-      ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
-      : undefined
-
-    const assessmentIntents: CapRetrievalIntent[] = plans.map((p) => {
-      let depth = p.cognitiveDepth as any
-      if (depth === 'literal') depth = 'D1_recall_locate'
-      else if (depth === 'inferential') depth = 'D2_single_step_inference'
-      else if (depth === 'evaluative') depth = 'D4_applied_evaluation'
-      else if (depth === 'applied') depth = 'D4_applied_evaluation'
-
-      let diff = (p.difficulty ?? targetDifficulty) as any
-      if (diff === 'A1') diff = 'A1_elementary'
-      else if (diff === 'A2') diff = 'A2_basic'
-      else if (diff === 'B1') diff = 'B1_intermediate'
-      else if (diff === 'B2') diff = 'B2_independent'
-
-      return {
-        primarySkill: (p.targetSkill ?? p.primarySkill ?? '').trim(),
-        targetLanguageDifficulty: diff,
-        targetCognitiveDepth: depth,
-        genre: p.genre,
-        keywords: p.keywords ?? (Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined),
-      }
-    })
+    const assessmentIntents: CapRetrievalIntent[] = plans.map((p) =>
+      adaptAssessmentIntent(p, profile, preferences),
+    )
 
     const multi = await retrievePrecedentsForAssessmentPlans(assessmentIntents, {
       limit: 3,
@@ -59,18 +39,15 @@ export async function buildCurriculumPromptBundle(context: GenerationContext): P
       assembledBundle = assembleSelectiveAuthoringBundle(bundle, multi.expandedCards)
     }
   } else if (primarySkill) {
-    const profile = (record.profile ?? {}) as Record<string, unknown>
-    const preferences = (record.preferences ?? {}) as Record<string, unknown>
-    const targetDifficulty = typeof profile.grade_level === 'string'
-      ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
-      : undefined
-    const intent: CapRetrievalIntent = {
-      primarySkill,
-      targetLanguageDifficulty: targetDifficulty,
-      targetCognitiveDepth: typeof record.cognitiveDepth === 'string' ? (record.cognitiveDepth as any) : undefined,
-      genre: typeof record.genre === 'string' ? record.genre : undefined,
-      keywords: Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined,
-    }
+    const intent = adaptAssessmentIntent(
+      {
+        primarySkill,
+        targetCognitiveDepth: typeof record.cognitiveDepth === 'string' ? record.cognitiveDepth : undefined,
+        genre: typeof record.genre === 'string' ? record.genre : undefined,
+      },
+      profile,
+      preferences,
+    )
     const result = filterAndRankCapPrecedents(intent, {
       limit: 5,
       preferences: {

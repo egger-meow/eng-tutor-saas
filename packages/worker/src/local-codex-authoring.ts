@@ -12,13 +12,22 @@ import {
   prepareSelectiveAuthoringBundle,
   assembleSelectiveAuthoringBundle,
   retrievePrecedentsForAssessmentPlans,
+  adaptAssessmentIntent,
   type CapRetrievalIntent,
+  type ItemPrecedentRetrievalResult,
   CURRENT_ENGINE_VERSION,
   CURRENT_PROMPT_VERSION,
   CURRENT_SCHEMA_VERSION,
   type CurriculumPackage,
 } from '@paper-english/generator'
 import type { WorkerClient } from './pipeline.js'
+import { fetchTargetedStudentHistory } from './history-client.js'
+import {
+  buildPacketPlanningPrompt,
+  validatePacketPlan,
+  createDefaultPacketPlan,
+  type PacketPlan,
+} from './packet-planning.js'
 
 export const LOCAL_CODEX_MODEL = 'gpt-5.6-sol'
 export const LOCAL_CODEX_REASONING = 'low'
@@ -286,41 +295,26 @@ export async function prepareAuthoringBundleWithPrecedents(
       difficulty?: 'A1_elementary' | 'A2_basic' | 'B1_intermediate' | 'B2_independent'
     }>
   } = {},
-): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number; noPrecedentReason?: string | null }> {
+): Promise<{
+  bundle: string
+  candidateRefs: string[]
+  expandedCount: number
+  noPrecedentReason?: string | null
+  itemResults?: ItemPrecedentRetrievalResult[]
+}> {
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? {}) as Record<string, unknown>
-  const targetDifficulty = typeof profile.grade_level === 'string'
-    ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
-    : undefined
-
   const plans = options.assessmentPlans ?? (Array.isArray(context.assessmentPlans) ? (context.assessmentPlans as any[]) : undefined)
 
   let candidateRefs: string[] = []
   let expandedCards: any[] = []
   let noPrecedentReason: string | null | undefined
+  let itemResults: ItemPrecedentRetrievalResult[] | undefined
 
   if (plans && plans.length > 0) {
-    const assessmentIntents: CapRetrievalIntent[] = plans.map((p) => {
-      let depth = p.cognitiveDepth as any
-      if (depth === 'literal') depth = 'D1_recall_locate'
-      else if (depth === 'inferential') depth = 'D2_single_step_inference'
-      else if (depth === 'evaluative') depth = 'D4_applied_evaluation'
-      else if (depth === 'applied') depth = 'D4_applied_evaluation'
-
-      let diff = (p.difficulty ?? targetDifficulty) as any
-      if (diff === 'A1') diff = 'A1_elementary'
-      else if (diff === 'A2') diff = 'A2_basic'
-      else if (diff === 'B1') diff = 'B1_intermediate'
-      else if (diff === 'B2') diff = 'B2_independent'
-
-      return {
-        primarySkill: (p.targetSkill ?? p.primarySkill ?? '').trim(),
-        targetLanguageDifficulty: diff,
-        targetCognitiveDepth: depth,
-        genre: p.genre,
-        keywords: p.keywords ?? (Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined),
-      }
-    })
+    const assessmentIntents: CapRetrievalIntent[] = plans.map((p) =>
+      adaptAssessmentIntent(p, profile, preferences),
+    )
 
     const multi = await retrievePrecedentsForAssessmentPlans(assessmentIntents, {
       limit: 3,
@@ -331,10 +325,14 @@ export async function prepareAuthoringBundleWithPrecedents(
     })
     candidateRefs = multi.uniqueCandidateRefs
     expandedCards = multi.expandedCards
+    itemResults = multi.itemResults
     if (candidateRefs.length === 0) {
       noPrecedentReason = 'no_matching_precedents'
     }
   } else if (typeof context.primarySkill === 'string' && context.primarySkill.trim().length > 0) {
+    const targetDifficulty = typeof profile.grade_level === 'string'
+      ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
+      : undefined
     const retrievalIntent: CapRetrievalIntent = {
       primarySkill: context.primarySkill.trim(),
       targetLanguageDifficulty: targetDifficulty,
@@ -366,16 +364,51 @@ export async function prepareAuthoringBundleWithPrecedents(
     candidateRefs,
     expandedCount: expandedCards.length,
     noPrecedentReason,
+    itemResults,
   }
 }
 
-async function authorOne(repoRoot: string, context: Record<string, unknown>, codexExecutable: string, run: ProcessRunner): Promise<CurriculumPackage> {
-  const { jobId } = contextIdentity(context)
+export function extractTargetIdsForHistory(context: Record<string, unknown>): string[] {
+  const ids = new Set<string>()
+  if (Array.isArray(context.targetIds)) {
+    for (const id of context.targetIds) {
+      if (typeof id === 'string' && id.trim().length > 0) ids.add(id.trim())
+    }
+  }
+  const lifetime = context.lifetimeLearningMemory as Record<string, Record<string, unknown>> | undefined
+  if (lifetime && typeof lifetime === 'object') {
+    for (const category of Object.values(lifetime)) {
+      if (category && typeof category === 'object') {
+        for (const key of ['dueTargetIds', 'verifiedWeakTargetIds', 'regressionTargetIds']) {
+          const arr = category[key]
+          if (Array.isArray(arr)) {
+            for (const id of arr) {
+              if (typeof id === 'string' && id.trim().length > 0) ids.add(id.trim())
+            }
+          }
+        }
+      }
+    }
+  }
+  return [...ids].slice(0, 20)
+}
+
+async function authorOne(
+  repoRoot: string,
+  context: Record<string, unknown>,
+  codexExecutable: string,
+  run: ProcessRunner,
+  client?: WorkerClient,
+  workerId?: string,
+): Promise<CurriculumPackage> {
+  const { jobId, childId } = contextIdentity(context)
   const jobDir = resolve(repoRoot, '.runtime/private-generation', jobId)
   await mkdir(jobDir, { recursive: true })
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
   const interestPolicy = await readFile(resolve(repoRoot, 'packages/generator/curriculum/interest-exploration.md'), 'utf8')
+
+  // STAGE 1: Private Topic Planning
   const planningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-private-plan-'))
   let brief: string
   try {
@@ -392,6 +425,24 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   } finally {
     await rm(planningDir, { recursive: true, force: true })
   }
+
+  // STAGE 2: Targeted Student History (Production Bridge)
+  if (client) {
+    const targetIds = extractTargetIdsForHistory(context)
+    const historyResult = await fetchTargetedStudentHistory(client, {
+      jobId,
+      workerId: workerId ?? LOCAL_AUTHORING_WORKER_PREFIX,
+      claimSnapshotId: (context.claimSnapshotId as string) || jobId,
+      childId,
+      targetIds,
+      cutoffTimestamp: context.cutoffTimestamp as string | undefined,
+      evidenceLimit: 20,
+    })
+    context.targetedOlderEvidence = historyResult.evidence
+    context.targetedHistoryManifestHash = historyResult.manifestHash
+  }
+
+  // STAGE 3: Public Factual Grounding
   const publicDir = await mkdtemp(resolve(tmpdir(), 'paper-english-public-research-'))
   const groundingPath = resolve(jobDir, 'grounding.md')
   const publicGroundingPath = resolve(publicDir, 'grounding.md')
@@ -408,11 +459,42 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   } finally {
     await rm(publicDir, { recursive: true, force: true })
   }
+  const grounding = await readFile(groundingPath, 'utf8')
+
+  // STAGE 4: Private Packet Planning
+  const packetPlanningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-packet-plan-'))
+  let packetPlan: PacketPlan
+  try {
+    const planOutputPath = resolve(packetPlanningDir, 'packet-plan.json')
+    await run(codexExecutable, [
+      'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
+      '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
+      '--config', PRIVATE_CODEX_CONFIG,
+      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
+      '--output-last-message', planOutputPath,
+      '-',
+    ], { cwd: packetPlanningDir, input: buildPacketPlanningPrompt(context, grounding) })
+    const rawPlan = parseCodexJson(await readFile(planOutputPath, 'utf8'))
+    packetPlan = validatePacketPlan(rawPlan)
+  } catch {
+    packetPlan = createDefaultPacketPlan(context)
+  } finally {
+    await rm(packetPlanningDir, { recursive: true, force: true })
+  }
+
+  context.packetPlan = packetPlan
+  const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+  const { bundle: activeBundle, itemResults } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, {
+    repoRoot,
+    assessmentPlans: packetPlan.items,
+  })
+  if (itemResults && itemResults.length > 0) {
+    context.perItemPrecedents = itemResults
+  }
+
+  // STAGE 5: Private Authoring & Repair
   let previousPath: string | undefined
   let issue: string | undefined
-  const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
-  const { bundle: activeBundle } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, { repoRoot })
-  const grounding = await readFile(groundingPath, 'utf8')
   for (let round = 0; round <= MAX_REPAIR_ROUNDS; round += 1) {
     const outputPath = resolve(jobDir, `package-${round}.json`)
     await run(codexExecutable, [
@@ -478,7 +560,7 @@ export async function runLocalCodexAuthoringBatch(
     const { jobId } = contextIdentity(context)
     const jobDir = resolve(runtimeRoot, jobId)
     try {
-      const pkg = await authorOne(repoRoot, context, preflight.executable, run)
+      const pkg = await authorOne(repoRoot, context, preflight.executable, run, client, workerId)
       const payload = JSON.stringify(pkg)
       const submitted = await client.rpc('worker_submit_local_curriculum_package', {
         p_job_id: jobId, p_generation_worker_id: workerId, p_payload_text: payload,

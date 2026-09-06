@@ -3,12 +3,14 @@ import { readFile } from 'node:fs/promises'
 import {
   buildPrivatePlanningCapsule,
   defaultRepoRoot,
+  extractTargetIdsForHistory,
   prepareAuthoringBundleWithPrecedents,
   runLocalCodexAuthoringBatch,
   stableCodexExecutable,
   validatePublicResearchBrief,
   verifyCodexCli,
 } from './local-codex-authoring.js'
+import { adaptAssessmentIntent } from '@paper-english/generator'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -69,7 +71,7 @@ describe('one invocation owns one authoritative claim', () => {
       if (args[0] === 'exec') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
       return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
     }
-    const summary = await runLocalCodexAuthoringBatch(client, process.cwd(), run)
+    const summary = await runLocalCodexAuthoringBatch(client, defaultRepoRoot(), run)
     expect(summary.claimed).toBe(0)
     expect(rpcCalls).toEqual(['worker_claim_local_authoring_batch'])
   })
@@ -205,6 +207,51 @@ describe('selective CAP precedent authoring bundle compaction', () => {
     const uniqueRefs = new Set(result.candidateRefs)
     expect(uniqueRefs.size).toBe(result.candidateRefs.length)
     expect(result.bundle).toContain(result.candidateRefs[0])
+    expect(result.itemResults).toBeDefined()
+    expect(result.itemResults?.length).toBe(3)
+    expect(result.itemResults?.[0].itemId).toBe('C1')
+    expect(result.itemResults?.[1].itemId).toBe('C2')
+    expect(result.itemResults?.[2].itemId).toBe('C3')
+  })
+
+  it('extracts targeted older evidence query IDs deterministically up to limit', () => {
+    const context = {
+      targetIds: ['direct-1', 'direct-2'],
+      lifetimeLearningMemory: {
+        vocabulary: {
+          dueTargetIds: ['vocab-due-1'],
+          verifiedWeakTargetIds: ['vocab-weak-1'],
+          regressionTargetIds: ['vocab-reg-1'],
+        },
+        grammar: {
+          dueTargetIds: ['grammar-due-1'],
+        },
+      },
+    }
+    const extracted = extractTargetIdsForHistory(context)
+    expect(extracted).toEqual([
+      'direct-1',
+      'direct-2',
+      'vocab-due-1',
+      'vocab-weak-1',
+      'vocab-reg-1',
+      'grammar-due-1',
+    ])
+  })
+
+  it('adapts grade numbers and difficulty strings without defaulting junior high to A1', () => {
+    const p9 = adaptAssessmentIntent({ targetSkill: 'detail_extraction' }, 9)
+    expect(p9.targetLanguageDifficulty).toBe('B1_intermediate')
+
+    const p8 = adaptAssessmentIntent({ targetSkill: 'detail_extraction' }, { grade: 8 })
+    expect(p8.targetLanguageDifficulty).toBe('A2_basic')
+
+    const p7 = adaptAssessmentIntent({ targetSkill: 'detail_extraction' }, { grade_level: 'Grade 7' })
+    expect(p7.targetLanguageDifficulty).toBe('A2_basic')
+
+    const p6 = adaptAssessmentIntent({ targetSkill: 'detail_extraction' }, 6)
+    expect(p6.targetLanguageDifficulty).toBe('A1_elementary')
   })
 })
+
 

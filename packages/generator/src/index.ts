@@ -189,6 +189,8 @@ export {
   prepareSelectiveAuthoringBundle,
   scoreRoutingCard,
   retrievePrecedentsForAssessmentPlans,
+  adaptAssessmentIntent,
+  resolveDifficultyFromProfileOrGrade,
 } from './cap-retrieval.js'
 export {
   assembleSelectiveAuthoringBundle,
@@ -202,6 +204,7 @@ export type {
   CapRoutingIndex,
   ItemPrecedentRetrievalResult,
   MultiItemPrecedentRetrievalResult,
+  RawAssessmentPlan,
 } from './cap-retrieval.js'
 export {
   retrieveTargetedStudentHistory,
