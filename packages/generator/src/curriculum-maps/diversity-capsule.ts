@@ -1,3 +1,17 @@
+import {
+  type DeliveryMemoryProjection,
+  extractDeliveryMemory,
+  aggregateRecentResponseForms,
+  aggregateRecentDeliveryMemory,
+} from './delivery-memory.js'
+
+export {
+  type DeliveryMemoryProjection,
+  extractDeliveryMemory,
+  aggregateRecentResponseForms,
+  aggregateRecentDeliveryMemory,
+}
+
 export interface HistoricalPackageSummary {
   materialWeek: string
   completedAt?: string
@@ -12,6 +26,7 @@ export interface DiversityCapsule {
   recentContextKeys: string[]
   recentItemFamilies: string[]
   recentResponseForms?: string[]
+  recentDeliveryMemory?: DeliveryMemoryProjection[]
 }
 
 /**
@@ -21,11 +36,13 @@ export interface DiversityCapsule {
  * - recentGenres: list of unique genres encountered recently
  * - recentContextKeys: list of unique scenario / context keys encountered recently
  * - recentItemFamilies: list of unique communication / thematic item families encountered recently
+ * - recentResponseForms: list of unique question/response formats encountered recently
+ * - recentDeliveryMemory: list of structured delivery memory projections
  *
  * No heavy algorithms, no UI impact, zero extra state pollution.
  */
 export function buildDiversityCapsule(
-  history: HistoricalPackageSummary[],
+  history: Array<HistoricalPackageSummary | DeliveryMemoryProjection>,
   lookbackWeeks: number = 4,
 ): DiversityCapsule {
   if (!Array.isArray(history) || history.length === 0) {
@@ -42,18 +59,42 @@ export function buildDiversityCapsule(
   const recentGenres: string[] = []
   const recentContextKeys: string[] = []
   const recentItemFamilies: string[] = []
+  const recentResponseForms: string[] = []
+  const recentDeliveryMemory: DeliveryMemoryProjection[] = []
 
   for (const item of recentSlice) {
-    if (item.genre && typeof item.genre === 'string' && !recentGenres.includes(item.genre)) {
-      recentGenres.push(item.genre)
-    }
-    if (item.contextKey && typeof item.contextKey === 'string' && !recentContextKeys.includes(item.contextKey)) {
-      recentContextKeys.push(item.contextKey)
-    }
-    if (Array.isArray(item.itemFamilies)) {
-      for (const fam of item.itemFamilies) {
-        if (fam && typeof fam === 'string' && !recentItemFamilies.includes(fam)) {
-          recentItemFamilies.push(fam)
+    if ('readingGenre' in item) {
+      if (item.readingGenre && !recentGenres.includes(item.readingGenre)) {
+        recentGenres.push(item.readingGenre)
+      }
+      if (item.readingTitle && !recentContextKeys.includes(item.readingTitle)) {
+        recentContextKeys.push(item.readingTitle)
+      }
+      for (const form of [...item.responseLayoutTypes, ...item.pedagogicalFormats]) {
+        if (form && !recentResponseForms.includes(form)) {
+          recentResponseForms.push(form)
+        }
+      }
+      recentDeliveryMemory.push(item)
+    } else {
+      if (item.genre && typeof item.genre === 'string' && !recentGenres.includes(item.genre)) {
+        recentGenres.push(item.genre)
+      }
+      if (item.contextKey && typeof item.contextKey === 'string' && !recentContextKeys.includes(item.contextKey)) {
+        recentContextKeys.push(item.contextKey)
+      }
+      if (Array.isArray(item.itemFamilies)) {
+        for (const fam of item.itemFamilies) {
+          if (fam && typeof fam === 'string' && !recentItemFamilies.includes(fam)) {
+            recentItemFamilies.push(fam)
+          }
+        }
+      }
+      if (Array.isArray(item.responseForms)) {
+        for (const form of item.responseForms) {
+          if (form && typeof form === 'string' && !recentResponseForms.includes(form)) {
+            recentResponseForms.push(form)
+          }
         }
       }
     }
@@ -63,7 +104,8 @@ export function buildDiversityCapsule(
     recentGenres,
     recentContextKeys,
     recentItemFamilies,
-    ...(recentSlice.some(item => item.responseForms?.length) ? { recentResponseForms: [...new Set(recentSlice.flatMap(item => item.responseForms ?? []))] } : {}),
+    ...(recentResponseForms.length > 0 ? { recentResponseForms } : {}),
+    ...(recentDeliveryMemory.length > 0 ? { recentDeliveryMemory } : {}),
   }
 }
 

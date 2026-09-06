@@ -159,9 +159,18 @@ export {
 export type { CommunicationFamily } from './curriculum-maps/derived/communication-families.js'
 export { grammarProgressionUnits, getGrammarUnit, getUnitsByGradeStage } from './curriculum-maps/derived/grammar-progression.js'
 export type { GrammarProgressionUnit } from './curriculum-maps/derived/grammar-progression.js'
-export { getSuggestedGradeForWord, getThemeForWord } from './curriculum-maps/derived/vocabulary-annotations.js'
-export { buildDiversityCapsule, extractHistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'
-export type { DiversityCapsule, HistoricalPackageSummary } from './curriculum-maps/diversity-capsule.js'
+export {
+  buildDiversityCapsule,
+  extractHistoricalPackageSummary,
+  extractDeliveryMemory,
+  aggregateRecentResponseForms,
+  aggregateRecentDeliveryMemory,
+} from './curriculum-maps/diversity-capsule.js'
+export type {
+  DiversityCapsule,
+  HistoricalPackageSummary,
+  DeliveryMemoryProjection,
+} from './curriculum-maps/diversity-capsule.js'
 
 // Model-Specific Pre-Submit Quality Profiles & Critic Layer
 export {
