@@ -104,6 +104,16 @@ describe('Landing Page — Beta trust hierarchy', () => {
     expect(html).toContain('這個選項會立即開始計費')
     expect(html).toContain('繼續使用目前 Beta 免費方案即可')
   })
+
+  it('preserves the core brand double-entendre pun in the hero title', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    expect(html).toContain('<span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>')
+  })
+
+  it('clarifies that ChatGPT lacks systemization and content review, leading to unfocused output', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    expect(html).toContain('沒有系統化規劃，也沒有內容審核機制，容易無邊無際地發散亂想')
+  })
 })
 
 describe('Landing Page — First Delivery Timing Disclosure', () => {

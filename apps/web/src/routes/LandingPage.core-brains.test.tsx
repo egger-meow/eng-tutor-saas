@@ -14,6 +14,8 @@ describe('Landing Page — Two Core Brains', () => {
     expect(html).toContain('近五年國中會考英文 215 題')
     expect(html).toContain('孩子現在的位置')
     expect(html).toContain('這一週，只屬於他的教材')
+    expect(html).toContain('arrow-horizontal')
+    expect(html).toContain('arrow-vertical')
 
     expect(html.indexOf('紙屬英文的兩顆核心大腦')).toBeGreaterThan(html.indexOf('訂閱的是一個會變好的系統'))
     expect(html.indexOf('紙屬英文的兩顆核心大腦')).toBeGreaterThan(html.indexOf('不用先相信我們，先看教材'))

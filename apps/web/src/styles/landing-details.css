@@ -493,7 +493,7 @@
   }
 
   .landing-more-details .core-brains-arrow {
-    transform: rotate(90deg);
+    transform: none;
   }
 }
 

@@ -178,6 +178,21 @@
   font-size: 1.35rem;
 }
 
+.core-brains-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+}
+
+.core-brains-arrow .arrow-vertical {
+  display: none;
+}
+
+.core-brains-arrow .arrow-horizontal {
+  display: inline;
+}
+
 .core-brains-result {
   border-left: 3px solid var(--color-accent);
   background: rgb(246 242 233 / 58%);
@@ -207,13 +222,18 @@
     font-size: 1rem;
   }
 
-  .core-brains-equation > .core-brains-arrow {
-    font-size: 0;
+  .core-brains-arrow .arrow-horizontal {
+    display: none;
   }
 
-  .core-brains-arrow::before {
-    content: '\2193';
+  .core-brains-arrow .arrow-vertical {
+    display: inline;
+  }
+
+  .core-brains-equation > .core-brains-arrow {
+    justify-self: center;
     font-size: 1.15rem;
+    transform: none !important;
   }
 
   .core-brains-result {

@@ -86,7 +86,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <FadeInUp duration={0.4} className="hero-copy">
             <p className="eyebrow">🧪 紙屬英文 Beta · 給國小高年級到國中生</p>
             <h1 className="hero-title">
-              <span>每週一份，</span><span><em>照孩子現在的狀況</em></span><span>重新做的英文教材。</span>
+              <span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>
             </h1>
             <p className="lede"><strong>從孩子真的有興趣的內容開始，但一路對齊學校進度、國中英文與會考能力。</strong>每週的程度、錯題與回饋會接到下一週，不是每次重新抽一篇文章。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
@@ -295,7 +295,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                   <div className="comparison-col">
                     <div className="comparison-badge">通用對話 AI</div>
                     <h4>直接使用 ChatGPT</h4>
-                    <p>可以搜尋網路、解釋英文、產生文章與題目；但通常仍要自己交代孩子程度、進度、錯誤、來源與難度，並在每次使用時維持這些教育規則。關掉視窗後，學習記憶就斷了。</p>
+                    <p>可以搜尋網路、解釋英文、產生文章與題目；但沒有系統化規劃，也沒有內容審核機制，容易無邊無際地發散亂想。通常仍要自己交代孩子程度、進度、錯誤、來源與難度，並在每次使用時維持這些教育規則。關掉視窗後，學習記憶就斷了。</p>
                   </div>
                   <div className="comparison-col highlighted">
                     <div className="comparison-badge accent">專屬教材系統</div>

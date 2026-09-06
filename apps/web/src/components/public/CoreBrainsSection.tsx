@@ -58,7 +58,10 @@ export function CoreBrainsSection() {
         <div><span>全網知識大腦</span><small>把值得學的新知帶進來</small></div>
         <b aria-hidden="true">＋</b>
         <div><span>會考命題大腦</span><small>守住閱讀與推理品質</small></div>
-        <b className="core-brains-arrow" aria-hidden="true">→</b>
+        <b className="core-brains-arrow" aria-hidden="true">
+          <span className="arrow-horizontal">→</span>
+          <span className="arrow-vertical">↓</span>
+        </b>
         <div className="core-brains-result"><span>這一週，只屬於他的教材</span><small>內容有料，也練得到能力</small></div>
       </FadeInUp>
     </section>
