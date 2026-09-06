@@ -178,6 +178,7 @@ export {
   filterAndRankCapPrecedents,
   batchRetrieveCapCandidates,
   expandCapPrecedents,
+  prepareSelectiveAuthoringBundle,
   scoreRoutingCard,
 } from './cap-retrieval.js'
 export type {
@@ -201,18 +202,21 @@ export type {
   LifetimeTargetVerificationStatus,
 } from './history-retrieval.js'
 
-// Retrieval Evaluation & Hybrid Search Benchmark
+// Lexical Term-Matching Benchmark & Deferred Vector Infrastructure
 export {
+  runLexicalTermBenchmark,
   runRetrievalBenchmark,
   assertChildIsolation,
   buildContextualHeader,
   CANONICAL_BENCHMARK_CASES,
-} from './retrieval-experiment/hybrid-search-eval.js'
+} from './retrieval-experiment/lexical-term-benchmark.js'
 export type {
   RetrievalBenchmarkCase,
+  LexicalTermMethodResult,
   RetrievalMethodResult,
+  LexicalTermBenchmarkReport,
   HybridSearchEvaluationReport,
-} from './retrieval-experiment/hybrid-search-eval.js'
+} from './retrieval-experiment/lexical-term-benchmark.js'
 
 // Model-Specific Pre-Submit Quality Profiles & Critic Layer
 export {

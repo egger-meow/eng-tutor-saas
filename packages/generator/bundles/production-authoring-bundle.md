@@ -11,7 +11,7 @@ sourceHashes:
   "packages/generator/prompts/2.12.0/02-author.md": "bf38249f383a11438c8812f31739f4f1a638949ed6e93d09b98bd1be461f33e1"
   "packages/generator/prompts/2.12.0/03-critic.md": "ff6f59636bce31a44923fdd0d939c58d83a6adbf9c27a80ce3c9ec27a9b32c82"
   "packages/generator/prompts/2.12.0/04-repair.md": "c8dae311dadf0a83de64fa7b26d47afde66c796698aecd9f67f5f609e321ee30"
-  "packages/generator/src/curriculum-package-schema.ts": "28b00107018adc5d59abcbe810612176b86be8221a537ea998285dbf4955eb5c"
+  "packages/generator/src/curriculum-package-schema.ts": "77b45b47d7cdd483648098831430baf2f0fa31243737918f731bf26d2065b63b"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "4b12f3de96cf2fde5b8e27e3f55bbbb63e043f54962cf7866e58441dea8e827e"
@@ -315,9 +315,41 @@ export const ResponseLayoutRowSchema = z.strictObject({
   label: Text.optional(),
   values: z.array(Text).optional(),
   cells: z.array(ResponseGridCellSchema).optional(),
+}).refine((row) => !(row.values !== undefined && row.cells !== undefined), {
+  message: 'Row cannot define both values and cells simultaneously',
 })
 
 export type ResponseLayoutRow = z.infer<typeof ResponseLayoutRowSchema>
+
+function refineGridRowHeaderShape(
+  layout: { headers: string[]; rows: Array<{ label?: string; values?: string[]; cells?: any[] }> },
+  ctx: z.RefinementCtx,
+): void {
+  const headerCount = layout.headers.length
+  for (let i = 0; i < layout.rows.length; i++) {
+    const row = layout.rows[i]!
+    const labelCount = row.label !== undefined ? 1 : 0
+    if (row.cells !== undefined) {
+      const colCount = labelCount + row.cells.length
+      if (colCount !== headerCount) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['rows', i, 'cells'],
+          message: `Row column count (${colCount}: ${labelCount ? '1 label + ' : ''}${row.cells.length} cells) does not match header count (${headerCount})`,
+        })
+      }
+    } else if (row.values !== undefined && row.values.length > 0) {
+      const colCount = labelCount + row.values.length
+      if (colCount !== headerCount) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['rows', i, 'values'],
+          message: `Row column count (${colCount}: ${labelCount ? '1 label + ' : ''}${row.values.length} values) does not match header count (${headerCount})`,
+        })
+      }
+    }
+  }
+}
 
 export const ResponseLayoutSchema = z.discriminatedUnion('type', [
   z.strictObject({
@@ -328,12 +360,12 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
     type: z.literal('table'),
     headers: z.array(Text).min(2).max(6),
     rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
-  }),
+  }).superRefine(refineGridRowHeaderShape),
   z.strictObject({
     type: z.literal('organizer'),
     headers: z.array(Text).min(2).max(6),
     rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
-  }),
+  }).superRefine(refineGridRowHeaderShape),
   z.strictObject({
     type: z.literal('sequence'),
     layoutDirection: z.enum(['vertical', 'horizontal']).optional().default('vertical'),
@@ -611,6 +643,21 @@ export const AnswerItemV25Schema = z.strictObject({
   likelyMisconceptionZh: Text.nullable(),
   followUpZh: Text.nullable(),
   unitAnswers: z.array(UnitAnswerSchema).optional(),
+}).superRefine((item, ctx) => {
+  if (item.unitAnswers && item.unitAnswers.length > 0) {
+    const seen = new Set<string>()
+    for (let i = 0; i < item.unitAnswers.length; i++) {
+      const u = item.unitAnswers[i]!
+      if (seen.has(u.unitId)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['unitAnswers', i, 'unitId'],
+          message: `Duplicate unitAnswer for unitId "${u.unitId}" in question "${item.questionId}"`,
+        })
+      }
+      seen.add(u.unitId)
+    }
+  }
 })
 
 export type AnswerItemV25 = z.infer<typeof AnswerItemV25Schema>

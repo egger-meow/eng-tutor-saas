@@ -244,6 +244,7 @@ export function batchRetrieveCapCandidates(
 /**
  * Stage 2: Deduplicated shard expansion.
  * Expands full CapDesignAnchor cards from disk shards, reading each shard file only once.
+ * Fails closed with explicit errors if any requested ref is unknown or missing in shards.
  */
 export async function expandCapPrecedents(
   refs: string[],
@@ -264,11 +265,23 @@ export async function expandCapPrecedents(
     cardMap.set(card.ref, card)
   }
 
+  // 1. Fail closed on any unknown references in the routing index
+  const unknownRefs: string[] = []
+  for (const ref of refs) {
+    if (!cardMap.has(ref)) {
+      unknownRefs.push(ref)
+    }
+  }
+  if (unknownRefs.length > 0) {
+    throw new Error(
+      `UNKNOWN_CAP_PRECEDENT_REFS: The following requested precedent references are unknown in routing index: ${unknownRefs.join(', ')}`,
+    )
+  }
+
   // Group unique refs by shard path
   const shardToRefs = new Map<string, Set<string>>()
   for (const ref of refs) {
-    const card = cardMap.get(ref)
-    if (!card) continue
+    const card = cardMap.get(ref)!
     let set = shardToRefs.get(card.shard)
     if (!set) {
       set = new Set<string>()
@@ -282,26 +295,50 @@ export async function expandCapPrecedents(
     return readFile(fullPath, 'utf8')
   })
 
-  // Load each shard once in parallel
+  // Load each shard once in parallel - fail closed on read or parse failure
   const expandedCardsMap = new Map<string, CapDesignAnchor>()
 
   await Promise.all(
     Array.from(shardToRefs.entries()).map(async ([shardPath, targetRefs]) => {
+      let content: string
       try {
-        const content = await reader(shardPath)
-        const parsed = JSON.parse(content)
-        if (parsed?.authorityStatus === 'authoritative' && Array.isArray(parsed.cards)) {
-          for (const rawCard of parsed.cards) {
-            if (rawCard?.ref && targetRefs.has(rawCard.ref)) {
-              expandedCardsMap.set(rawCard.ref, rawCard as CapDesignAnchor)
-            }
-          }
-        }
+        content = await reader(shardPath)
       } catch (err) {
-        console.warn(`Failed to read shard ${shardPath}:`, err)
+        throw new Error(
+          `FAILED_TO_READ_CAP_SHARD: Failed to read shard '${shardPath}': ${err instanceof Error ? err.message : String(err)}`,
+        )
+      }
+
+      let parsed: any
+      try {
+        parsed = JSON.parse(content)
+      } catch (err) {
+        throw new Error(
+          `INVALID_CAP_SHARD_JSON: Shard '${shardPath}' contains invalid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        )
+      }
+
+      if (parsed?.authorityStatus !== 'authoritative' || !Array.isArray(parsed.cards)) {
+        throw new Error(
+          `UNAUTHORITATIVE_CAP_SHARD: Shard '${shardPath}' authorityStatus is not 'authoritative' or missing cards array`,
+        )
+      }
+
+      for (const rawCard of parsed.cards) {
+        if (rawCard?.ref && targetRefs.has(rawCard.ref)) {
+          expandedCardsMap.set(rawCard.ref, rawCard as CapDesignAnchor)
+        }
       }
     }),
   )
+
+  // 2. Fail closed if any requested card was not found in the loaded shards
+  const missingCards = refs.filter((ref) => !expandedCardsMap.has(ref))
+  if (missingCards.length > 0) {
+    throw new Error(
+      `MISSING_CAP_PRECEDENT_CARDS: The following requested precedent references were not found in shards: ${missingCards.join(', ')}`,
+    )
+  }
 
   // Return full cards in the exact requested order
   const results: CapDesignAnchor[] = []
@@ -314,3 +351,35 @@ export async function expandCapPrecedents(
 
   return results
 }
+
+/**
+ * Injects selectively retrieved, authoritative CAP precedent cards into the authoring bundle,
+ * replacing the full 195-card routing index table to achieve prompt context compaction.
+ */
+export function prepareSelectiveAuthoringBundle(
+  bundle: string,
+  expandedPrecedents: CapDesignAnchor[],
+): string {
+  const marker = '## 2B. Compact CAP Precedent Routing Index'
+  const nextSection = '## 3. Model Quality Profile Resolution'
+  const startIndex = bundle.indexOf(marker)
+  const endIndex = bundle.indexOf(nextSection)
+
+  if (startIndex === -1 || endIndex === -1) {
+    return bundle
+  }
+
+  const boundedSection = [
+    '## 2B. Retrieved Authoritative CAP Precedent Cards (Selective)',
+    'The following bounded authoritative CAP precedent cards have been selectively retrieved for this claimed lesson context from verified shards.',
+    'Anchor, blend, or calibrate against these relevant design principles without structural imitation.',
+    '```json',
+    JSON.stringify(expandedPrecedents, null, 2),
+    '```',
+    '',
+    '',
+  ].join('\n')
+
+  return bundle.slice(0, startIndex) + boundedSection + bundle.slice(endIndex)
+}
+

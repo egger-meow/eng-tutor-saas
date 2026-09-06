@@ -7,6 +7,10 @@ import { fileURLToPath } from 'node:url'
 import {
   auditCurriculumPackage,
   validateCurriculumPackage,
+  filterAndRankCapPrecedents,
+  expandCapPrecedents,
+  prepareSelectiveAuthoringBundle,
+  type CapRetrievalIntent,
   CURRENT_ENGINE_VERSION,
   CURRENT_PROMPT_VERSION,
   CURRENT_SCHEMA_VERSION,
@@ -266,6 +270,45 @@ async function cleanupRuntime(runtimeRoot: string): Promise<void> {
   }
 }
 
+export async function prepareAuthoringBundleWithPrecedents(
+  bundle: string,
+  context: Record<string, unknown>,
+  options: { repoRoot?: string } = {},
+): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number }> {
+  const profile = (context.profile ?? {}) as Record<string, unknown>
+  const preferences = (context.preferences ?? {}) as Record<string, unknown>
+  const targetDifficulty = typeof profile.grade_level === 'string'
+    ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
+    : undefined
+
+  const retrievalIntent: CapRetrievalIntent = {
+    primarySkill: typeof context.primarySkill === 'string' ? context.primarySkill : 'discourse_relationship',
+    targetLanguageDifficulty: targetDifficulty,
+    targetCognitiveDepth: typeof context.cognitiveDepth === 'string' ? context.cognitiveDepth : undefined,
+    genre: typeof context.genre === 'string' ? context.genre : undefined,
+    keywords: Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined,
+  }
+
+  const retrievalResult = filterAndRankCapPrecedents(retrievalIntent, {
+    limit: 5,
+    preferences: {
+      recentPrecedentRefs: Array.isArray(context.recentPrecedentRefs) ? (context.recentPrecedentRefs as string[]) : undefined,
+    },
+  })
+
+  const candidateRefs = retrievalResult.candidates.map((c) => c.ref)
+  const expandedCards = candidateRefs.length > 0
+    ? await expandCapPrecedents(candidateRefs, { repoRoot: options.repoRoot })
+    : []
+
+  const activeBundle = prepareSelectiveAuthoringBundle(bundle, expandedCards)
+  return {
+    bundle: activeBundle,
+    candidateRefs,
+    expandedCount: expandedCards.length,
+  }
+}
+
 async function authorOne(repoRoot: string, context: Record<string, unknown>, codexExecutable: string, run: ProcessRunner): Promise<CurriculumPackage> {
   const { jobId } = contextIdentity(context)
   const jobDir = resolve(repoRoot, '.runtime/private-generation', jobId)
@@ -307,7 +350,8 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
   }
   let previousPath: string | undefined
   let issue: string | undefined
-  const bundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+  const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+  const { bundle: activeBundle } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, { repoRoot })
   const grounding = await readFile(groundingPath, 'utf8')
   for (let round = 0; round <= MAX_REPAIR_ROUNDS; round += 1) {
     const outputPath = resolve(jobDir, `package-${round}.json`)
@@ -320,7 +364,7 @@ async function authorOne(repoRoot: string, context: Record<string, unknown>, cod
       '-',
     ], {
       cwd: repoRoot,
-      input: authoringPrompt(bundle, context, grounding, previousPath ? await readFile(previousPath, 'utf8') : undefined, issue),
+      input: authoringPrompt(activeBundle, context, grounding, previousPath ? await readFile(previousPath, 'utf8') : undefined, issue),
     })
     const raw = parseCodexJson(await readFile(outputPath, 'utf8'))
     try {

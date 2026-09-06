@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
-import { buildPrivatePlanningCapsule, defaultRepoRoot, runLocalCodexAuthoringBatch, stableCodexExecutable, validatePublicResearchBrief, verifyCodexCli } from './local-codex-authoring.js'
+import {
+  buildPrivatePlanningCapsule,
+  defaultRepoRoot,
+  prepareAuthoringBundleWithPrecedents,
+  runLocalCodexAuthoringBatch,
+  stableCodexExecutable,
+  validatePublicResearchBrief,
+  verifyCodexCli,
+} from './local-codex-authoring.js'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -122,3 +130,33 @@ it('retains public works, artists, and numbered titles without importing retry t
   expect(buildPrivatePlanningCapsule(context).topics).toEqual(['keshi', '2NE1', 'IU', 'Your Name'])
   expect(validatePublicResearchBrief({ queries: ['2NE1 debut recording process', 'Your Name animation production'], topicSummary: 'Creative decisions behind public works' }, context)).toContain('2NE1')
 })
+
+describe('selective CAP precedent authoring bundle compaction', () => {
+  it('replaces 195-card routing index with bounded retrieved cards and verifies context reduction', async () => {
+    const rawBundlePath = new URL('../../generator/bundles/production-authoring-bundle.md', import.meta.url)
+    const rawBundle = await readFile(rawBundlePath, 'utf8')
+
+    const context = {
+      profile: { grade_level: 'A2_basic', interests: ['biology', 'science'] },
+      primarySkill: 'information_integration',
+      cognitiveDepth: 'D3_multi_step_synthesis',
+    }
+
+    const { bundle: activeBundle, candidateRefs, expandedCount } = await prepareAuthoringBundleWithPrecedents(
+      rawBundle,
+      context,
+      { repoRoot: defaultRepoRoot() },
+    )
+
+    expect(candidateRefs.length).toBeGreaterThanOrEqual(1)
+    expect(expandedCount).toBe(candidateRefs.length)
+    expect(activeBundle).toContain('## 2B. Retrieved Authoritative CAP Precedent Cards (Selective)')
+    expect(activeBundle).not.toContain('## 2B. Compact CAP Precedent Routing Index')
+    expect(activeBundle).toContain('## 3. Model Quality Profile Resolution')
+
+    // Verify significant context compaction: saves > 7,000 characters (~2,000 tokens)
+    const charSavings = rawBundle.length - activeBundle.length
+    expect(charSavings).toBeGreaterThan(7000)
+  })
+})
+

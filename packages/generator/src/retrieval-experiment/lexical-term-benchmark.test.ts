@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  runLexicalTermBenchmark,
   runRetrievalBenchmark,
   assertChildIsolation,
   buildContextualHeader,
   CANONICAL_BENCHMARK_CASES,
-} from './hybrid-search-eval.js'
-import { filterAndRankCapPrecedents } from '../cap-retrieval.js'
+} from './lexical-term-benchmark.js'
 
-describe('Hybrid Search Evaluation and Child Isolation Benchmark', () => {
-  it('enforces strict server-side child isolation without cross-tenant leakage', () => {
+describe('Lexical Term-Matching Benchmark and Deferred Vector Isolation', () => {
+  it('enforces multi-tenant isolation helper check without cross-tenant leakage', () => {
     const childA = '00000000-0000-0000-0000-000000000001'
     const childB = '00000000-0000-0000-0000-000000000002'
 
@@ -40,18 +40,20 @@ describe('Hybrid Search Evaluation and Child Isolation Benchmark', () => {
     expect(header).toContain('[Diff: A2_basic]')
   })
 
-  it('executes retrieval benchmark comparing exact metadata vs hybrid fusion', () => {
-    const report = runRetrievalBenchmark(CANONICAL_BENCHMARK_CASES)
+  it('executes lexical term benchmark comparing exact metadata vs term-vector fusion', () => {
+    const report = runLexicalTermBenchmark(CANONICAL_BENCHMARK_CASES)
 
     expect(report.totalCases).toBe(CANONICAL_BENCHMARK_CASES.length)
+    expect(report.baseline.hitRateAt5).toBeGreaterThanOrEqual(0.75)
     expect(report.baseline.recallAt5).toBeGreaterThanOrEqual(0.75)
-    expect(report.baseline.childIsolationEnforced).toBe(true)
-    expect(report.hybridFusion.childIsolationEnforced).toBe(true)
     expect(typeof report.baseline.avgLatencyMs).toBe('number')
-    expect(typeof report.hybridFusion.avgLatencyMs).toBe('number')
+    expect(typeof report.lexicalFusion.avgLatencyMs).toBe('number')
+    expect(report.infrastructureStatus).toBe('vector_infrastructure_deferred')
 
-    // Documented recommendation
+    // Documented recommendation: keep exact metadata baseline; vector infrastructure deferred
     expect(report.recommendation).toBe('keep_exact_metadata_baseline')
-    expect(report.rationale).toContain('Exact metadata/keyword filtering provides high Recall@5')
+    expect(report.rationale).toContain('Exact metadata/keyword filtering provides high HitRate@5')
+    expect(report.rationale).toContain('deferred per SPEC #183/184')
   })
 })
+

@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import capRoutingIndexJson from '../../curriculum/cap-precedent-routing-index.json' with { type: 'json' }
 import {
   filterAndRankCapPrecedents,
@@ -15,26 +14,39 @@ export interface RetrievalBenchmarkCase {
   description: string
 }
 
-export interface RetrievalMethodResult {
+export interface LexicalTermMethodResult {
   methodName: string
-  recallAt1: number
-  recallAt3: number
-  recallAt5: number
+  hitRateAt1: number
+  hitRateAt3: number
+  hitRateAt5: number
+  // Backward-compatibility aliases
+  recallAt1?: number
+  recallAt3?: number
+  recallAt5?: number
   avgLatencyMs: number
   contextOverheadTokens: number
-  childIsolationEnforced: boolean
+  childIsolationEnforced?: boolean
 }
 
-export interface HybridSearchEvaluationReport {
+// Backward compatibility type alias
+export type RetrievalMethodResult = LexicalTermMethodResult
+
+export interface LexicalTermBenchmarkReport {
   timestamp: string
   totalCases: number
-  baseline: RetrievalMethodResult
-  hybridFusion: RetrievalMethodResult
-  recallLiftPercentage: number
+  baseline: LexicalTermMethodResult
+  lexicalFusion: LexicalTermMethodResult
+  hitRateLiftPercentage: number
+  // Backward-compatibility alias
+  recallLiftPercentage?: number
   latencyOverheadFactor: number
   recommendation: 'keep_exact_metadata_baseline' | 'adopt_hybrid_vector_fusion'
   rationale: string
+  infrastructureStatus: 'vector_infrastructure_deferred'
 }
+
+// Backward compatibility type alias
+export type HybridSearchEvaluationReport = LexicalTermBenchmarkReport
 
 const index = capRoutingIndexJson as unknown as CapRoutingIndex
 
@@ -137,8 +149,10 @@ function cosineSimilarity(a: Float32Array, b: Float32Array): number {
 }
 
 /**
- * Enforces server-side child isolation:
- * Guarantees that query execution never mixes private learner histories across child boundaries.
+ * Application-level child isolation assertion helper:
+ * Verifies that a context request does not attempt cross-tenant learner access.
+ * Note: Real child isolation is enforced by PostgreSQL RLS and server-side tenancy queries,
+ * not by this in-memory lexical benchmark.
  */
 export function assertChildIsolation(
   requestChildId: string,
@@ -151,11 +165,17 @@ export function assertChildIsolation(
 }
 
 /**
- * Runs the hybrid search evaluation comparing exact metadata/keyword baseline against keyword+vector fusion.
+ * Runs the lexical term-matching benchmark comparing exact metadata/keyword scoring
+ * against lexical term-vector fusion (RRF with bag-of-words TF cosine similarity).
+ *
+ * NOTE ON INFRASTRUCTURE:
+ * Semantic vector embedding models and pgvector database infrastructure are explicitly DEFERRED
+ * per SPEC #183 (MVP Non-Goals) and SPEC #184 (Simplicity Rule). The exact metadata and keyword
+ * filtering mechanism achieves high hit rates with sub-millisecond execution and zero external operational dependencies.
  */
-export function runRetrievalBenchmark(
+export function runLexicalTermBenchmark(
   cases: RetrievalBenchmarkCase[] = CANONICAL_BENCHMARK_CASES,
-): HybridSearchEvaluationReport {
+): LexicalTermBenchmarkReport {
   // 1. Build vocabulary across all contextual card headers and keywords
   const allVocabTokens = new Set<string>()
   for (const card of index.cards) {
@@ -188,9 +208,9 @@ export function runRetrievalBenchmark(
   }
 
   // Evaluate Method 1: Metadata / Keyword Baseline
-  let baselineR1 = 0
-  let baselineR3 = 0
-  let baselineR5 = 0
+  let baselineH1 = 0
+  let baselineH3 = 0
+  let baselineH5 = 0
   const baselineStart = performance.now()
 
   for (const testCase of cases) {
@@ -198,17 +218,17 @@ export function runRetrievalBenchmark(
     const topRefs = result.candidates.map((c) => c.ref)
     const expected = new Set(testCase.expectedRefs)
 
-    if (topRefs.slice(0, 1).some((r) => expected.has(r))) baselineR1 += 1
-    if (topRefs.slice(0, 3).some((r) => expected.has(r))) baselineR3 += 1
-    if (topRefs.slice(0, 5).some((r) => expected.has(r))) baselineR5 += 1
+    if (topRefs.slice(0, 1).some((r) => expected.has(r))) baselineH1 += 1
+    if (topRefs.slice(0, 3).some((r) => expected.has(r))) baselineH3 += 1
+    if (topRefs.slice(0, 5).some((r) => expected.has(r))) baselineH5 += 1
   }
   const baselineDuration = performance.now() - baselineStart
 
-  // Evaluate Method 2: Hybrid RRF Fusion (Lexical Metadata + Contextual Vector Similarity)
-  let hybridR1 = 0
-  let hybridR3 = 0
-  let hybridR5 = 0
-  const hybridStart = performance.now()
+  // Evaluate Method 2: Lexical RRF Fusion (Exact Metadata + Bag-of-Words TF Cosine Similarity)
+  let fusionH1 = 0
+  let fusionH3 = 0
+  let fusionH5 = 0
+  const fusionStart = performance.now()
 
   for (const testCase of cases) {
     // Stage A: Lexical / Metadata rank
@@ -222,7 +242,7 @@ export function runRetrievalBenchmark(
     const lexicalRankMap = new Map<string, number>()
     lexicalScored.forEach((item, idx) => lexicalRankMap.set(item.ref, idx + 1))
 
-    // Stage B: Contextual Vector similarity
+    // Stage B: Bag-of-words term vector similarity
     const queryTokens = tokenize(
       `${testCase.intent.primarySkill} ${testCase.intent.targetCognitiveDepth ?? ''} ${testCase.intent.genre ?? ''} ${(testCase.intent.keywords ?? []).join(' ')}`,
     )
@@ -249,56 +269,68 @@ export function runRetrievalBenchmark(
     const topRefs = rrfScored.slice(0, 5).map((item) => item.ref)
     const expected = new Set(testCase.expectedRefs)
 
-    if (topRefs.slice(0, 1).some((r) => expected.has(r))) hybridR1 += 1
-    if (topRefs.slice(0, 3).some((r) => expected.has(r))) hybridR3 += 1
-    if (topRefs.slice(0, 5).some((r) => expected.has(r))) hybridR5 += 1
+    if (topRefs.slice(0, 1).some((r) => expected.has(r))) fusionH1 += 1
+    if (topRefs.slice(0, 3).some((r) => expected.has(r))) fusionH3 += 1
+    if (topRefs.slice(0, 5).some((r) => expected.has(r))) fusionH5 += 1
   }
-  const hybridDuration = performance.now() - hybridStart
+  const fusionDuration = performance.now() - fusionStart
 
   const total = cases.length
-  const baselineRecallAt5 = baselineR5 / total
-  const hybridRecallAt5 = hybridR5 / total
-  const recallLift = baselineRecallAt5 > 0
-    ? ((hybridRecallAt5 - baselineRecallAt5) / baselineRecallAt5) * 100
+  const baselineHitRateAt5 = baselineH5 / total
+  const fusionHitRateAt5 = fusionH5 / total
+  const hitRateLift = baselineHitRateAt5 > 0
+    ? ((fusionHitRateAt5 - baselineHitRateAt5) / baselineHitRateAt5) * 100
     : 0
 
   const baselineLatency = baselineDuration / total
-  const hybridLatency = hybridDuration / total
-  const latencyFactor = hybridLatency / Math.max(0.001, baselineLatency)
+  const fusionLatency = fusionDuration / total
+  const latencyFactor = fusionLatency / Math.max(0.001, baselineLatency)
 
-  // Recommendation logic adhering to SPEC Section 183/184 and proposal:
-  // For 195 richly tagged cards, if baseline Recall@5 is already >= 75% and lift is < 15%,
-  // keep the exact metadata baseline to avoid vector database/embedding operational overhead.
-  const adoptHybrid = recallLift >= 15 && baselineRecallAt5 < 0.75
-  const recommendation = adoptHybrid ? 'adopt_hybrid_vector_fusion' : 'keep_exact_metadata_baseline'
-  const rationale = adoptHybrid
-    ? `Hybrid fusion provides significant recall lift (${recallLift.toFixed(1)}%) justifying the additional latency factor (${latencyFactor.toFixed(1)}x).`
-    : `Exact metadata/keyword filtering provides high Recall@5 (${(baselineRecallAt5 * 100).toFixed(1)}%) with near-zero latency (${baselineLatency.toFixed(2)}ms vs ${hybridLatency.toFixed(2)}ms). Adding vector database infrastructure is an unjustified MVP complexity per SPEC #183/184.`
+  // Decision rule adhering to SPEC Section 183/184:
+  // Exact metadata/keyword filtering provides >= 75% HitRate@5 with near-zero latency.
+  // Adding vector database infrastructure is an unjustified complexity for the 195-card canonical index.
+  const adoptVector = hitRateLift >= 15 && baselineHitRateAt5 < 0.75
+  const recommendation = adoptVector ? 'adopt_hybrid_vector_fusion' : 'keep_exact_metadata_baseline'
+  const rationale = adoptVector
+    ? `Lexical vector fusion provides significant hit-rate lift (${hitRateLift.toFixed(1)}%) justifying latency overhead (${latencyFactor.toFixed(1)}x).`
+    : `Exact metadata/keyword filtering provides high HitRate@5 (${(baselineHitRateAt5 * 100).toFixed(1)}%) with near-zero latency (${baselineLatency.toFixed(2)}ms vs ${fusionLatency.toFixed(2)}ms). Adding vector database infrastructure is deferred per SPEC #183/184.`
 
   return {
     timestamp: new Date().toISOString(),
     totalCases: total,
     baseline: {
       methodName: 'Metadata + Keyword Scoring (Exact Filter)',
-      recallAt1: baselineR1 / total,
-      recallAt3: baselineR3 / total,
-      recallAt5: baselineRecallAt5,
+      hitRateAt1: baselineH1 / total,
+      hitRateAt3: baselineH3 / total,
+      hitRateAt5: baselineHitRateAt5,
+      recallAt1: baselineH1 / total,
+      recallAt3: baselineH3 / total,
+      recallAt5: baselineHitRateAt5,
       avgLatencyMs: baselineLatency,
       contextOverheadTokens: 0,
       childIsolationEnforced: true,
     },
-    hybridFusion: {
-      methodName: 'Contextual RRF Fusion (Lexical + Vector Similarity)',
-      recallAt1: hybridR1 / total,
-      recallAt3: hybridR3 / total,
-      recallAt5: hybridRecallAt5,
-      avgLatencyMs: hybridLatency,
+    lexicalFusion: {
+      methodName: 'Lexical RRF Fusion (Exact Metadata + Bag-of-Words Term Vectors)',
+      hitRateAt1: fusionH1 / total,
+      hitRateAt3: fusionH3 / total,
+      hitRateAt5: fusionHitRateAt5,
+      recallAt1: fusionH1 / total,
+      recallAt3: fusionH3 / total,
+      recallAt5: fusionHitRateAt5,
+      avgLatencyMs: fusionLatency,
       contextOverheadTokens: 128,
       childIsolationEnforced: true,
     },
-    recallLiftPercentage: recallLift,
+    hitRateLiftPercentage: hitRateLift,
+    recallLiftPercentage: hitRateLift,
     latencyOverheadFactor: latencyFactor,
     recommendation,
     rationale,
+    infrastructureStatus: 'vector_infrastructure_deferred',
   }
 }
+
+// Backward-compatibility alias
+export const runRetrievalBenchmark = runLexicalTermBenchmark
+
