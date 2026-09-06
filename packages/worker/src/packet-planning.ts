@@ -1,9 +1,9 @@
 import {
   adaptAssessmentIntent,
-  type CapRetrievalIntent,
   type RawAssessmentPlan,
   type FormatPlanningCapsule,
   buildFormatPlanningCapsule,
+  CURRENT_PROMPT_VERSION,
 } from '@paper-english/generator'
 
 export interface PacketPlanItem {
@@ -48,7 +48,8 @@ export function buildPacketPlanningPrompt(
   repairIssue?: string,
 ): string {
   const profile = (context.profile ?? {}) as Record<string, unknown>
-  const preferences = (context.preferences ?? {}) as Record<string, unknown>
+  const child = (context.child ?? {}) as Record<string, unknown>
+  const preferences = (context.preferences ?? child.preferences ?? {}) as Record<string, unknown>
   const lifetime = (context.lifetimeLearningMemory ?? {}) as Record<string, unknown>
   const targetedEvidence = Array.isArray(context.targetedOlderEvidence) ? context.targetedOlderEvidence : []
   let diversityCapsule = (context.diversityCapsule ?? {}) as Record<string, unknown>
@@ -57,27 +58,43 @@ export function buildPacketPlanningPrompt(
     const memory = (context.recentDeliveryMemory ?? diversityCapsule.recentDeliveryMemory ?? []) as any[]
     formatCapsule = buildFormatPlanningCapsule(memory, 4)
     diversityCapsule = { ...diversityCapsule, formatPlanningCapsule: formatCapsule }
-    context.diversityCapsule = diversityCapsule
   }
 
   const planningContext = {
     profile: {
-      grade: profile.grade,
+      grade: profile.grade ?? child.grade,
       grade_level: profile.grade_level,
-      gradeStage: profile.gradeStage,
+      gradeStage: profile.gradeStage ?? child.gradeStage,
+      textbookVersion: child.textbookVersion,
+      baseline_level: profile.baseline_level,
+      reading_level: profile.reading_level,
+      vocabulary_level: profile.vocabulary_level,
+      grammar_level: profile.grammar_level,
+      learning_goals: profile.learning_goals,
+      parent_expectations: profile.parent_expectations,
+      school_progress: profile.school_progress,
       weekly_minutes: profile.weekly_minutes,
     },
     preferences: {
-      topics: preferences.topics,
-      interests: preferences.interests,
+      ...preferences,
     },
+    learningState: context.learningState,
+    recentFeedback: context.recentFeedback ?? context.feedback,
+    capCoverageCapsule: context.capCoverageCapsule,
+    communicationCapsule: context.communicationCapsule,
+    vocabularyCapsule: context.vocabularyCapsule,
+    grammarCapsule: context.grammarCapsule,
+    sourceMaterial: context.sourceMaterial,
+    schoolProgress: context.schoolProgress,
+    learningMemory: context.learningMemory,
+    recentHistory: context.recentHistory,
     lifetimeLearningTargets: {
       dueVocabulary: (lifetime.vocabulary as any)?.dueTargetIds ?? [],
       weakVocabulary: (lifetime.vocabulary as any)?.verifiedWeakTargetIds ?? [],
       dueGrammar: (lifetime.grammar as any)?.dueTargetIds ?? [],
       weakGrammar: (lifetime.grammar as any)?.verifiedWeakTargetIds ?? [],
     },
-    targetedOlderEvidence: targetedEvidence.slice(0, 10),
+    targetedOlderEvidence: targetedEvidence,
     formatPlanningGuidance: {
       recentFormatUse: formatCapsule.recentFormatUse ?? {},
       avoidMechanicalRepeat: formatCapsule.avoidMechanicalRepeat ?? [],
@@ -86,12 +103,12 @@ export function buildPacketPlanningPrompt(
   }
 
   return [
-    'You are the Private Packet Planner for 紙屬英文 (Schema 2.5.0 / Prompt 2.13.1).',
+    `You are the Private Packet Planner for 紙屬英文 (Schema 2.5.0 / Prompt ${CURRENT_PROMPT_VERSION}).`,
     'Your task is to plan this week\'s personalized English packet based on the learner\'s memory and public research grounding.',
     'Do not write full student lesson prose or parent answers yet. Output only a structured JSON packet plan.',
     '',
     '## 1. Learner Context & Pedagogical Constraints',
-    JSON.stringify(planningContext, null, 2),
+    JSON.stringify(planningContext),
     '',
     '## 2. Public Research Grounding',
     grounding,
@@ -99,8 +116,10 @@ export function buildPacketPlanningPrompt(
     '## 3. Planning Requirements',
     '1. Selected Angle: Choose a specific, age-appropriate angle connecting the learner\'s interests with curriculum goals.',
     '2. Evidence Rationale: Explain why the factual evidence supports this angle and serves the learning target.',
-    '3. Selected Learning Targets: Pick 3–5 vocabulary words and 1–2 grammar targets from due/weak targets or the passage burden.',
-    '4. Assessment Items: Plan at least 3 distinct assessment items (e.g. reading comprehension, guided practice, homework).',
+    '3. Select meaningful vocabulary and grammar from demonstrated needs and passage burden within weekly_minutes; no fixed vocabulary quota. Explicit feedback takes precedence. Exposure alone is not weakness.',
+    '4. Plan all intended assessment items across reading, practice and homework with distinct IDs. Preserve cognitive depth when simplifying language.',
+    'Choose exact artists, groups, works or characters and an evidence-supported origin, turning point, creative process, choice or mechanism when relevant. Do not flatten specific interests into generic useful knowledge.',
+    'Formats are recommendations, not quotas. Timeline/process/cause chain -> sequence; comparison/classification/before-after -> table; evidence-inference -> organizer. Reuse when pedagogically useful. Preserve answer-cell IDs, Student/Parent answer coverage and truthful workload.',
     '   For each item, specify:',
     '   - itemId: stable identifier (e.g. "q1_reading", "q2_practice", "q3_homework")',
     '   - targetSkill / primarySkill: canonical CAP skill (e.g. "main_idea", "detail", "local_inference", "vocabulary_in_context", "author_purpose")',
@@ -167,27 +186,55 @@ export function validatePacketPlan(raw: unknown, context: Record<string, unknown
     throw new Error('PACKET_PLAN_INVALID: evidenceRationale is required')
   }
 
-  const targets = (obj.selectedLearningTargets ?? {}) as Record<string, unknown>
-  const vocab = Array.isArray(targets.vocabulary) ? targets.vocabulary.map((v) => String(v).trim()).filter(Boolean) : []
-  const grammar = Array.isArray(targets.grammar) ? targets.grammar.map((g) => String(g).trim()).filter(Boolean) : []
-
   const rawPlans = Array.isArray(obj.assessmentPlans) ? obj.assessmentPlans : []
   if (rawPlans.length < 1) {
     throw new Error('PACKET_PLAN_INVALID: assessmentPlans must contain at least 1 item')
   }
 
+  const targets = (obj.selectedLearningTargets ?? {}) as Record<string, unknown>
+  const strings = (value: unknown, field: string): string[] => {
+    if (!Array.isArray(value) || value.some(v => typeof v !== 'string' || !v.trim())) {
+      throw new Error(`PACKET_PLAN_INVALID: ${field} must be an array of non-empty strings`)
+    }
+    return [...new Set(value.map(v => v.trim()))]
+  }
+  const vocab = strings(targets.vocabulary, 'selectedLearningTargets.vocabulary')
+  const grammar = strings(targets.grammar, 'selectedLearningTargets.grammar')
+
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? {}) as Record<string, unknown>
 
+  const itemIds = new Set<string>()
   const assessmentPlans: PacketPlanItem[] = rawPlans.map((rawItem, idx) => {
     if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
       throw new Error(`PACKET_PLAN_INVALID: assessmentPlans[${idx}] is not an object`)
     }
     const item = rawItem as RawAssessmentPlan
+    for (const field of ['itemId', 'learningFunction', 'reasoningOperation', 'responseFormat', 'formatRationale']) {
+      if (typeof item[field] !== 'string' || !(item[field] as string).trim()) {
+        throw new Error(`PACKET_PLAN_INVALID: assessmentPlans[${idx}].${field} is required`)
+      }
+    }
+    for (const [field, value] of Object.entries({
+      primarySkill: item.primarySkill ?? item.targetSkill,
+      targetLanguageDifficulty: item.targetLanguageDifficulty ?? item.difficulty,
+      targetCognitiveDepth: item.targetCognitiveDepth ?? item.cognitiveDepth,
+    })) {
+      if (typeof value !== 'string' || !value.trim()) throw new Error(`PACKET_PLAN_INVALID: assessmentPlans[${idx}].${field} is required`)
+    }
+    if (!['supported', 'on-level', 'stretch'].includes(item.scaffoldLevel ?? '')) {
+      throw new Error(`PACKET_PLAN_INVALID: assessmentPlans[${idx}].scaffoldLevel is invalid`)
+    }
     const adapted = adaptAssessmentIntent(item, profile, preferences)
+    if (!['A1_elementary', 'A2_basic', 'B1_intermediate', 'B2_independent'].includes(adapted.targetLanguageDifficulty ?? '')
+      || !['D1_recall_locate', 'D2_single_step_inference', 'D3_multi_step_synthesis', 'D4_applied_evaluation'].includes(adapted.targetCognitiveDepth ?? '')) {
+      throw new Error(`PACKET_PLAN_INVALID: assessmentPlans[${idx}] has invalid difficulty or depth`)
+    }
 
-    const skill = adapted.primarySkill || 'local_inference'
-    const itemId = String(item.itemId || `q_${idx + 1}`)
+    const skill = adapted.primarySkill
+    const itemId = item.itemId!.trim()
+    if (itemIds.has(itemId)) throw new Error(`PACKET_PLAN_INVALID: duplicate itemId ${itemId}`)
+    itemIds.add(itemId)
 
     return {
       itemId,
@@ -197,10 +244,10 @@ export function validatePacketPlan(raw: unknown, context: Record<string, unknown
       targetCognitiveDepth: adapted.targetCognitiveDepth || 'D2_single_step_inference',
       genre: adapted.genre || 'article',
       keywords: adapted.keywords,
-      learningFunction: typeof item.learningFunction === 'string' ? item.learningFunction : 'comprehension',
-      reasoningOperation: typeof item.reasoningOperation === 'string' ? item.reasoningOperation : 'inference',
-      responseFormat: typeof item.responseFormat === 'string' ? item.responseFormat : 'written:lines',
-      formatRationale: typeof item.formatRationale === 'string' ? item.formatRationale : 'Appropriate response format for task',
+      learningFunction: item.learningFunction!.trim(),
+      reasoningOperation: item.reasoningOperation!.trim(),
+      responseFormat: item.responseFormat!.trim(),
+      formatRationale: item.formatRationale!.trim(),
       scaffoldLevel: (['supported', 'on-level', 'stretch'].includes(item.scaffoldLevel as string) ? item.scaffoldLevel : 'on-level') as any,
       intentionalRecall: item.intentionalRecall === true,
       isRetrievalExempt: adapted.isRetrievalExempt,
@@ -218,91 +265,3 @@ export function validatePacketPlan(raw: unknown, context: Record<string, unknown
   }
 }
 
-/**
- * Creates a deterministic default packet plan when planner is bootstrapped or in test mode.
- */
-export function createDefaultPacketPlan(
-  context: Record<string, unknown>,
-  grounding?: string,
-): PacketPlan {
-  const profile = (context.profile ?? {}) as Record<string, unknown>
-  const preferences = (context.preferences ?? {}) as Record<string, unknown>
-  const lifetime = (context.lifetimeLearningMemory ?? {}) as Record<string, unknown>
-  const diversity = (context.diversityCapsule ?? {}) as Record<string, unknown>
-  const formatCapsule = (diversity.formatPlanningCapsule ?? {}) as FormatPlanningCapsule
-
-  const targetDifficulty = adaptAssessmentIntent({}, profile).targetLanguageDifficulty || 'A2_basic'
-
-  const dueVocab = (lifetime.vocabulary as any)?.dueTargetIds ?? []
-  const weakVocab = (lifetime.vocabulary as any)?.verifiedWeakTargetIds ?? []
-  const dueGrammar = (lifetime.grammar as any)?.dueTargetIds ?? []
-  const weakGrammar = (lifetime.grammar as any)?.verifiedWeakTargetIds ?? []
-
-  const selectedVocab = [...dueVocab, ...weakVocab].slice(0, 4)
-  if (selectedVocab.length === 0) selectedVocab.push('journey', 'discover', 'challenge')
-
-  const selectedGrammar = [...dueGrammar, ...weakGrammar].slice(0, 2)
-  if (selectedGrammar.length === 0) selectedGrammar.push('past_simple_vs_continuous')
-
-  const recommended = formatCapsule.availableButRecentlyUnused ?? [
-    'sequence:horizontal',
-    'table:grid',
-    'table:organizer',
-    'written:lines',
-  ]
-
-  const format1 = recommended[0] || 'table:organizer'
-  const format2 = recommended[1] || 'sequence:horizontal'
-
-  const assessmentPlans: PacketPlanItem[] = [
-    {
-      itemId: 'q1_reading_clues',
-      targetSkill: 'local_inference',
-      primarySkill: 'local_inference',
-      targetLanguageDifficulty: targetDifficulty,
-      targetCognitiveDepth: 'D2_single_step_inference',
-      genre: 'article',
-      learningFunction: 'evidence_extraction',
-      reasoningOperation: 'inference',
-      responseFormat: format1,
-      formatRationale: `Selected ${format1} to systematically organize textual clues and inferences`,
-      scaffoldLevel: 'supported',
-    },
-    {
-      itemId: 'q2_reading_synthesis',
-      targetSkill: 'information_integration',
-      primarySkill: 'information_integration',
-      targetLanguageDifficulty: targetDifficulty,
-      targetCognitiveDepth: 'D3_multi_step_synthesis',
-      genre: 'article',
-      learningFunction: 'chronology_and_turning_points',
-      reasoningOperation: 'sequence',
-      responseFormat: format2,
-      formatRationale: `Selected ${format2} to track developmental milestones or turning points`,
-      scaffoldLevel: 'on-level',
-    },
-    {
-      itemId: 'q3_practice_application',
-      targetSkill: 'detail',
-      primarySkill: 'detail',
-      targetLanguageDifficulty: targetDifficulty,
-      targetCognitiveDepth: 'D2_single_step_inference',
-      genre: 'article',
-      learningFunction: 'application_and_reflection',
-      reasoningOperation: 'application',
-      responseFormat: 'written:lines',
-      formatRationale: 'Structured lines provide student space for personal expression and synthesis',
-      scaffoldLevel: 'on-level',
-    },
-  ]
-
-  return {
-    selectedAngle: 'Evidence-based exploration of learner interest domain with focused skill progression',
-    evidenceRationale: 'Grounding facts provide authentic context for target vocabulary and reading comprehension',
-    selectedLearningTargets: {
-      vocabulary: selectedVocab,
-      grammar: selectedGrammar,
-    },
-    assessmentPlans,
-  }
-}

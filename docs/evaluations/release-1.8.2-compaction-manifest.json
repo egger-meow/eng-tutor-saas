@@ -1,0 +1,390 @@
+{
+  "engineVersion": "1.8.2",
+  "promptVersion": "2.13.2",
+  "measurement": "controlled-prompt-builder-sizing",
+  "baseline": "same release and inputs before presentation compaction",
+  "includesOptionalRepair": true,
+  "providerTokensMeasured": false,
+  "qualityEvaluated": false,
+  "beforeChars": 1542245,
+  "afterChars": 1490327,
+  "reductionPercent": 3.37,
+  "caseResults": [
+    {
+      "caseId": "case-1-keshi",
+      "scenario": "keshi: Acoustic Production & Songwriting Decisions",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3868,
+          "afterChars": 3868,
+          "beforeBytes": 3868,
+          "afterBytes": 3868,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3678,
+          "afterChars": 3678,
+          "beforeBytes": 3678,
+          "afterBytes": 3678,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3920,
+          "afterChars": 3920,
+          "beforeBytes": 3928,
+          "afterBytes": 3928,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 91734,
+          "afterChars": 88336,
+          "beforeBytes": 92056,
+          "afterBytes": 88658,
+          "savedChars": 3398
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 91881,
+          "afterChars": 88483,
+          "beforeBytes": 92203,
+          "afterBytes": 88805,
+          "savedChars": 3398
+        }
+      ]
+    },
+    {
+      "caseId": "case-2-kpop",
+      "scenario": "K-pop: 2NE1 & IU Live Vocal & Stage Preparation",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3861,
+          "afterChars": 3861,
+          "beforeBytes": 3861,
+          "afterBytes": 3861,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3669,
+          "afterChars": 3669,
+          "beforeBytes": 3669,
+          "afterBytes": 3669,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3920,
+          "afterChars": 3920,
+          "beforeBytes": 3928,
+          "afterBytes": 3928,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 92111,
+          "afterChars": 88713,
+          "beforeBytes": 92465,
+          "afterBytes": 89067,
+          "savedChars": 3398
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 92258,
+          "afterChars": 88860,
+          "beforeBytes": 92612,
+          "afterBytes": 89214,
+          "savedChars": 3398
+        }
+      ]
+    },
+    {
+      "caseId": "case-3-animation",
+      "scenario": "Animation: Your Name (Kimi no Na wa) Art & Lighting",
+      "retrievedCards": 0,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3873,
+          "afterChars": 3873,
+          "beforeBytes": 3873,
+          "afterBytes": 3873,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3686,
+          "afterChars": 3686,
+          "beforeBytes": 3686,
+          "afterBytes": 3686,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3928,
+          "afterChars": 3928,
+          "beforeBytes": 3936,
+          "afterBytes": 3936,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 86596,
+          "afterChars": 83821,
+          "beforeBytes": 86896,
+          "afterBytes": 84121,
+          "savedChars": 2775
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 86743,
+          "afterChars": 83968,
+          "beforeBytes": 87043,
+          "afterBytes": 84268,
+          "savedChars": 2775
+        }
+      ]
+    },
+    {
+      "caseId": "case-4-movie-adaptation",
+      "scenario": "Movie Adaptation: Book to Screen Creative Condensation",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3870,
+          "afterChars": 3870,
+          "beforeBytes": 3870,
+          "afterBytes": 3870,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3677,
+          "afterChars": 3677,
+          "beforeBytes": 3677,
+          "afterBytes": 3677,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3926,
+          "afterChars": 3926,
+          "beforeBytes": 3934,
+          "afterBytes": 3934,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 92116,
+          "afterChars": 88718,
+          "beforeBytes": 92470,
+          "afterBytes": 89072,
+          "savedChars": 3398
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 92263,
+          "afterChars": 88865,
+          "beforeBytes": 92617,
+          "afterBytes": 89219,
+          "savedChars": 3398
+        }
+      ]
+    },
+    {
+      "caseId": "case-5-character-choice",
+      "scenario": "Character Choice: Chihiro in Spirited Away",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3859,
+          "afterChars": 3859,
+          "beforeBytes": 3859,
+          "afterBytes": 3859,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3664,
+          "afterChars": 3664,
+          "beforeBytes": 3664,
+          "afterBytes": 3664,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3906,
+          "afterChars": 3906,
+          "beforeBytes": 3914,
+          "afterBytes": 3914,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 91708,
+          "afterChars": 88310,
+          "beforeBytes": 92030,
+          "afterBytes": 88632,
+          "savedChars": 3398
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 91855,
+          "afterChars": 88457,
+          "beforeBytes": 92177,
+          "afterBytes": 88779,
+          "savedChars": 3398
+        }
+      ]
+    },
+    {
+      "caseId": "case-6-science-mechanism",
+      "scenario": "Science Mechanism: Robotics Vision & Sensor Calibration",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3873,
+          "afterChars": 3873,
+          "beforeBytes": 3873,
+          "afterBytes": 3873,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3681,
+          "afterChars": 3681,
+          "beforeBytes": 3681,
+          "afterBytes": 3681,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3923,
+          "afterChars": 3923,
+          "beforeBytes": 3931,
+          "afterBytes": 3931,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 91621,
+          "afterChars": 88202,
+          "beforeBytes": 91947,
+          "afterBytes": 88528,
+          "savedChars": 3419
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 91768,
+          "afterChars": 88349,
+          "beforeBytes": 92094,
+          "afterBytes": 88675,
+          "savedChars": 3419
+        }
+      ]
+    },
+    {
+      "caseId": "case-7-table-organizer",
+      "scenario": "Format Variety: Evidence Matrix & Deductive Flowchart",
+      "retrievedCards": 3,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3864,
+          "afterChars": 3864,
+          "beforeBytes": 3864,
+          "afterBytes": 3864,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3682,
+          "afterChars": 3682,
+          "beforeBytes": 3682,
+          "afterBytes": 3682,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3933,
+          "afterChars": 3933,
+          "beforeBytes": 3941,
+          "afterBytes": 3941,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 92132,
+          "afterChars": 88734,
+          "beforeBytes": 92486,
+          "afterBytes": 89088,
+          "savedChars": 3398
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 92279,
+          "afterChars": 88881,
+          "beforeBytes": 92633,
+          "afterBytes": 89235,
+          "savedChars": 3398
+        }
+      ]
+    },
+    {
+      "caseId": "case-8-current-vs-evergreen",
+      "scenario": "Current vs Evergreen: James Webb Telescope Deep Field Discoveries",
+      "retrievedCards": 0,
+      "stages": [
+        {
+          "stage": "topic-screen",
+          "beforeChars": 3883,
+          "afterChars": 3883,
+          "beforeBytes": 3883,
+          "afterBytes": 3883,
+          "savedChars": 0
+        },
+        {
+          "stage": "public-research",
+          "beforeChars": 3704,
+          "afterChars": 3704,
+          "beforeBytes": 3704,
+          "afterBytes": 3704,
+          "savedChars": 0
+        },
+        {
+          "stage": "packet-plan",
+          "beforeChars": 3953,
+          "afterChars": 3953,
+          "beforeBytes": 3961,
+          "afterBytes": 3961,
+          "savedChars": 0
+        },
+        {
+          "stage": "author",
+          "beforeChars": 86616,
+          "afterChars": 83841,
+          "beforeBytes": 86916,
+          "afterBytes": 84141,
+          "savedChars": 2775
+        },
+        {
+          "stage": "optional-author-repair",
+          "beforeChars": 86763,
+          "afterChars": 83988,
+          "beforeBytes": 87063,
+          "afterBytes": 84288,
+          "savedChars": 2775
+        }
+      ]
+    }
+  ]
+}

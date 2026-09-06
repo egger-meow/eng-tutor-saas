@@ -56,6 +56,25 @@ export async function fetchTargetedStudentHistory(
   }
 
   const data = res.data as Record<string, unknown>
+  const limit = Math.max(1, Math.min(options.evidenceLimit ?? 10, 40))
+  const targets = [...new Set((options.targetIds ?? []).map(id => id.trim()).filter(Boolean))].sort()
+  if (data.jobId !== options.jobId || typeof data.childId !== 'string' || !data.childId
+    || typeof data.cutoffTimestamp !== 'string' || !Number.isFinite(Date.parse(data.cutoffTimestamp))
+    || typeof data.manifestHash !== 'string' || !data.manifestHash.startsWith('sha256:')
+    || !Array.isArray(data.targetIds) || JSON.stringify([...data.targetIds].sort()) !== JSON.stringify(targets)
+    || !Array.isArray(data.evidence) || data.evidenceCount !== data.evidence.length || data.evidence.length > limit) {
+    throw new Error('FETCH_TARGETED_HISTORY_FAILED: Invalid or mismatched history manifest')
+  }
+  if (options.cutoffTimestamp && Date.parse(data.cutoffTimestamp) !== Date.parse(options.cutoffTimestamp)) {
+    throw new Error('FETCH_TARGETED_HISTORY_FAILED: Cutoff mismatch')
+  }
+  for (const row of data.evidence) {
+    if (!row || typeof row !== 'object' || typeof row.targetType !== 'string' || typeof row.result !== 'string'
+      || !targets.includes(row.targetId) || !Number.isFinite(Date.parse(row.observedAt))
+      || Date.parse(row.observedAt) > Date.parse(data.cutoffTimestamp)) {
+      throw new Error('FETCH_TARGETED_HISTORY_FAILED: Evidence outside requested boundary')
+    }
+  }
   return {
     jobId: String(data.jobId ?? options.jobId),
     childId: String(data.childId ?? ''),

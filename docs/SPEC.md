@@ -2897,7 +2897,7 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.8.0, Schema 2.5.0, and Prompt 2.13.0. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.13.0 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.12.0 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+New production authoring uses Engine 1.8.2, Schema 2.5.0, Prompt 2.13.2, and Worker 1.7.2. Renderer remains 1.5.0. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.13.2 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.12.0 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
 
 ---
 

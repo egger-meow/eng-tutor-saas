@@ -22,8 +22,20 @@ export function compactAuthoringContext(context: Record<string, unknown>, hasNew
       const memory = (context.recentDeliveryMemory ?? diversity.recentDeliveryMemory ?? []) as any[]
       diversity.formatPlanningCapsule = buildFormatPlanningCapsule(memory, 4)
     }
+    if (JSON.stringify(diversity.recentDeliveryMemory) === JSON.stringify(context.recentDeliveryMemory)) {
+      delete diversity.recentDeliveryMemory
+    }
     result.diversityCapsule = diversity
   }
 
+  return result
+}
+
+/** Model presentation only. The compiled bundle and its audit hashes remain intact on disk. */
+export function compactAuthoringBundle(bundle: string): string {
+  // Build provenance is consumed by the executor, not a teaching instruction.
+  let result = bundle.replace(/(\nsourceHashes:\n)[\s\S]*?(?=\n---)/u, '\n')
+  // Legacy conversion implementations are not part of the current schema definition.
+  result = result.replace(/export function upgradeV23ToV24[\s\S]*?(?=\n```)/u, '')
   return result
 }

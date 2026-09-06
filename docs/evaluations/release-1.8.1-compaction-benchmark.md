@@ -1,3 +1,5 @@
+> Correction (1.8.2 review): the earlier 23.5% result used constructed history, unsourced factual text and reconstructed baselines. It is not a measured production saving or evidence of teaching quality. See release-1.8.2-compaction-benchmark.md for the controlled replacement and its limits.
+
 # Release 1.8.1 Context Compaction Benchmark Report
 
 > **Benchmark Version**: `rel_1.8.1-compaction-v2`  

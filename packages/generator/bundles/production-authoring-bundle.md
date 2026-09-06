@@ -1,16 +1,16 @@
 ---
-bundleVersion: "2.13.1-prod"
+bundleVersion: "2.13.2-prod"
 schemaVersion: "2.5.0"
-promptVersion: "2.13.1"
-engineVersion: "1.8.1"
+promptVersion: "2.13.2"
+engineVersion: "1.8.2"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/curriculum/interest-exploration.md": "826cbeb444e6cfb969bfd9d95148f38b7c3f9ed929299a3f704506f873d5e7e3"
   "packages/generator/src/compact-routing-index.ts": "6e1348e3b42948f8ad30334e64699612b1ff6b1b620828feece168fab6aa1d6d"
-  "packages/generator/prompts/2.13.1/01-plan.md": "d8a4b566b44b69a75e704779cf82dcc53b9444d9e1c37f6dc6274b7516a7afdb"
-  "packages/generator/prompts/2.13.1/02-author.md": "4e7fb84a0dbbd7ad26d13aee0b1b93cd4b08095a0f9d79d8d80edfc7dcafe07f"
-  "packages/generator/prompts/2.13.1/03-critic.md": "bed86ec5d8db1ea4a27952b6c463a2effe8a6e2dc3f84168866403ee9f979f07"
-  "packages/generator/prompts/2.13.1/04-repair.md": "c47a2b0e7246765798ae7def1bd2a52cacc993655436eac0f969c249e0805294"
+  "packages/generator/prompts/2.13.2/01-plan.md": "80463c6617012d25b92db4fc3de891a23eee73c913500df4b0c51e51b25ee33c"
+  "packages/generator/prompts/2.13.2/02-author.md": "f16e26e4ec87f4dac3e673725917a2e97dc719a6ebbfa26621e3f0d5baaa36fd"
+  "packages/generator/prompts/2.13.2/03-critic.md": "6674390f129c23b187d2a4706e61ec8bab7c8596339a65cb070c0234d5691a92"
+  "packages/generator/prompts/2.13.2/04-repair.md": "b09512253909bb0035877bafa667d83ca8ccce3da33f5d615b997f59cfb4bd02"
   "packages/generator/src/curriculum-package-schema.ts": "77b45b47d7cdd483648098831430baf2f0fa31243737918f731bf26d2065b63b"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
@@ -912,13 +912,13 @@ Distinguish real-world production facts, events inside a fictional work, and int
 Keep a concise private selection rationale in existing planning evidence: public interest connection, angles actually explored, chosen question, decisive source evidence, and why this angle/structure fits the target and recent history. Never fabricate searches. No candidate-count quota, category rotation, or mandatory biography. Critic reviews the depth of the connection and evidence, not the presence of a favorite name or a prescribed genre.
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Consolidated Production Planning (v2.13.0)
+# Prompt 01: Consolidated Production Planning (v2.13.2)
 
-You are the Planning Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
+You are the Planning Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.2. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
 
 ## 1. Authority and planning order
 
-Plan from the smallest set of evidence that actually matters:
+Plan from the smallest set of evidence that actually matters. Read production `child.preferences`, profile baseline/reading/grammar levels, `feedback`, and compact learning-state capsules. Do not mistake a missing alternate field name for missing learner evidence:
 
 1. explicit learner/profile/parent feedback;
 2. demonstrated mistakes, prerequisites, school progress, and compact learning memory;
@@ -1013,9 +1013,9 @@ Intentional vocabulary/grammar retrieval is valid when explicitly planned as ret
 Produce a coherent Schema 2.5.0 learning plan, grounding plan, CAP assessment plans, format selections, and internal rationale sufficient for Author and Critic to execute. Internal planning evidence stays out of Student/Parent prose.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Consolidated Production Authoring (v2.13.0)
+# Prompt 02: Consolidated Production Authoring (v2.13.2)
 
-You are the Author Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative retrieved CAP precedents, and verified public grounding. Do not inherit historical prompt overlays.
+You are the Author Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.2. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative retrieved CAP precedents, and verified public grounding. Do not inherit historical prompt overlays.
 
 ## 1. Teach before testing
 
@@ -1051,9 +1051,9 @@ Author each question together with its answer object so Student/Parent outputs s
 
 Translate the Planner's format choices directly into concrete Schema 2.5.0 structures:
 
-- **Timelines, process sequences, cause chains, and turning-point sequences**: Use `responseLayout: { type: "sequence", layoutDirection: "vertical", steps: [...] }` or horizontal where appropriate.
+- **Timelines, process sequences, cause chains, and turning-point sequences**: Use `responseLayout: { type: "sequence", layoutDirection: "vertical", items: [...] }` or horizontal where appropriate.
 - **Comparison matrices, sort/classify grids, before/after tables**: Use `responseLayout: { type: "table", headers: [...], rows: [...] }` with clear structural cues and distinct response cells.
-- **Evidence → inference organizers**: Use `responseLayout: { type: "organizer", organizerType: "clue_inference", headers: [...], rows: [...] }`.
+- **Evidence → inference organizers**: Use `responseLayout: { type: "organizer", headers: [...], rows: [...] }`.
 - **Free expression, sentence production, or structured short responses**: Use `writingLines >= 1` or `responseLayout: { type: "lines", lineCount: ... }`.
 - **Multiple choice**: Use 4 distinct, pedagogically plausible options.
 
@@ -1068,9 +1068,9 @@ Represent real work truthfully. Do not pad with filler, clone exercises, or fals
 Record why this week differs from the prior week in parent-friendly language. Internal provenance, CAP IDs, critic machinery, raw URLs, and engineering terms never appear in learner-facing PDFs.
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Consolidated Adversarial Semantic Critic (v2.13.0)
+# Prompt 03: Consolidated Adversarial Semantic Critic (v2.13.2)
 
-You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
+You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.2. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
 
 Record substantive findings with `info`, `warning`, or `critical`. A critical semantic failure must be repaired before approval. Finisher separately owns objective integrity; your job is semantic, factual, linguistic, pedagogical, and answer-quality judgment.
 
@@ -1129,7 +1129,7 @@ Judge whether the represented work is meaningful for the learner's target time. 
 Approve only when there are no unresolved critical semantic findings. Keep findings specific enough for targeted repair. Do not rewrite good sections merely to make them different, and do not invent new requirements from old historical prompt text.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Consolidated Targeted Repair (v2.13.0)
+# Prompt 04: Consolidated Targeted Repair (v2.13.2)
 
 Repair an existing Schema 2.5.0 package from Critic or Finisher evidence. Preserve immutable prior attempts. Treat `retryContext.previousCanonicalPackage`, findings, and repair instructions as authoritative when supplied.
 

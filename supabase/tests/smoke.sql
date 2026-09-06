@@ -469,8 +469,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.8.1: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
+    raise exception 'claim context missing server-owned targetReleaseId rel_1.8.2: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -696,8 +696,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.8.1: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
+    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.8.2: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -1081,7 +1081,7 @@ begin
     select item into mismatch_context
     from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
     where item #>> '{job,id}' = mismatch_job_id::text;
-    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.1' then
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
       raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
     end if;
 
@@ -1097,7 +1097,7 @@ begin
     perform public.worker_claim_curriculum_submissions('mismatch-finisher', 5);
     if not public.worker_finish_curriculum_submission(
       mismatch_job_id, 1, 'mismatch-finisher', 'technical_failed', 'RELEASE_MISMATCH',
-      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.8.1'
+      'Release mismatch: submission target release rel_1.4.0 does not match Finisher CURRENT_RELEASE_ID rel_1.8.2'
     ) then
       raise exception 'failed to record RELEASE_MISMATCH technical failure';
     end if;
@@ -1129,8 +1129,8 @@ begin
       raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
     end if;
 
-    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.8.1 and NO retryContext (fresh authoring, not quality repair)
-    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.1'
+    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.8.2 and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.2'
       or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
       or mismatch_context ? 'retryContext' then
       raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;
@@ -4561,7 +4561,7 @@ begin
     rel_snapshot_context := jsonb_build_object(
       'job', jsonb_build_object('id', rel_job_id, 'childId', rel_child_id),
       'cutoffTimestamp', now() - interval '1 hour',
-      'targetReleaseId', 'rel_1.8.1'
+      'targetReleaseId', 'rel_1.8.2'
     );
 
     insert into private_generation.generation_claim_snapshots (
@@ -4691,6 +4691,47 @@ begin
 
       if rel_second_fetch->>'manifestHash' <> rel_history_result->>'manifestHash' then
         raise exception 'Cached manifestHash mismatch: % vs %', rel_second_fetch->>'manifestHash', rel_history_result->>'manifestHash';
+      end if;
+    end;
+
+    -- Distinct cutoffs/limits must not collide; empty targets must remain empty.
+    declare
+      bounded jsonb;
+    begin
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '150 minutes', array['target-vocab-alpha', 'target-grammar-beta'], 10);
+      if (bounded->>'evidenceCount')::int <> 1 or (bounded->>'cached')::boolean then
+        raise exception 'Earlier cutoff reused a broader cache';
+      end if;
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '1 hour', array['target-vocab-alpha', 'target-grammar-beta'], 1);
+      if (bounded->>'evidenceCount')::int <> 1 or (bounded->>'cached')::boolean then
+        raise exception 'Smaller limit reused a broader cache';
+      end if;
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '1 hour', array[]::text[], 2147483647);
+      if (bounded->>'evidenceCount')::int <> 0 then raise exception 'Empty targets fetched all history'; end if;
+      -- Normalization makes target order and surrounding whitespace irrelevant.
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '1 hour', array[' target-grammar-beta ', 'target-vocab-alpha', 'target-vocab-alpha'], 10);
+      if bounded->>'manifestHash' <> rel_history_result->>'manifestHash' or not (bounded->>'cached')::boolean then
+        raise exception 'Equivalent targets did not replay the same evidence';
+      end if;
+      -- Later ingestion of older evidence cannot change a cached exact request.
+      insert into public.child_learning_evidence (
+        child_id, material_id, target_type, target_id, evidence_type, result, assessed, source,
+        evidence_strength, observed_at, processor_version, idempotency_key
+      ) values (rel_child_id, '00000000-0000-0000-0000-000000000880', 'vocabulary', 'target-vocab-alpha',
+        'learner_assessment', 'correct', true, 'practice', 'high', now() - interval '90 minutes', 'v1', 'idemp-rel-late');
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '1 hour', array['target-vocab-alpha', 'target-grammar-beta'], 10);
+      if bounded->'evidence' <> rel_history_result->'evidence' then raise exception 'Cached evidence changed'; end if;
+      -- Reclaim under the same worker and same job must not reuse an old attempt.
+      update public.generation_jobs set attempt_count = attempt_count + 1 where id = rel_job_id;
+      bounded := public.worker_fetch_targeted_student_history(rel_job_id, rel_worker_id, rel_job_id,
+        now() - interval '1 hour', array['target-vocab-alpha', 'target-grammar-beta'], 10);
+      if (bounded->>'cached')::boolean or bounded->>'manifestHash' = rel_history_result->>'manifestHash' then
+        raise exception 'Reclaim reused old attempt history';
       end if;
     end;
 

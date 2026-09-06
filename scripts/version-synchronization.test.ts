@@ -29,7 +29,7 @@ describe('Canonical Version Synchronization Guardrails', () => {
   it('ensures the latest advance release migration in Supabase emits CURRENT_RELEASE_ID', () => {
     const migrationsDir = resolve(REPO_ROOT, 'supabase/migrations')
     const migrationFiles = readdirSync(migrationsDir).sort()
-    const releaseMigrations = migrationFiles.filter((f) => f.includes('advance_generation_release_to_') || f.includes('harden_chatgpt_submission_bridge'))
+    const releaseMigrations = migrationFiles.filter((f) => f.includes('advance_generation_release_to_') || f.includes('harden_chatgpt_submission_bridge') || f.includes('release_'))
     expect(releaseMigrations.length).toBeGreaterThan(0)
     const latestReleaseMigration = releaseMigrations[releaseMigrations.length - 1]!
     const content = readFileSync(resolve(migrationsDir, latestReleaseMigration), 'utf8')

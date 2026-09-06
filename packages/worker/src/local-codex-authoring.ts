@@ -1,4 +1,5 @@
-import { compactAuthoringContext } from './authoring-context.js'
+import { compactAuthoringContext, compactAuthoringBundle } from './authoring-context.js'
+import { createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { hostname, tmpdir } from 'node:os'
 import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
@@ -197,6 +198,7 @@ function collectTopicStrings(value: unknown, output: string[], key = ''): void {
 export function buildPrivatePlanningCapsule(context: Record<string, unknown>): Record<string, unknown> {
   const topics: string[] = []
   // Only known preference containers; never mine retry packages or private notes.
+  collectTopicStrings((context.child as Record<string, unknown> | undefined)?.preferences, topics)
   collectTopicStrings(context.preferences, topics)
   collectTopicStrings(context.profile, topics)
   return {
@@ -258,7 +260,7 @@ export function authoringPrompt(bundle: string, context: Record<string, unknown>
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
   return [
     'You are the private curriculum author inside a reviewed local runner. Do not access Supabase or mutate repository files.',
-    `AUTHORITATIVE PRODUCTION BUNDLE:\n${bundle}`,
+    `AUTHORITATIVE PRODUCTION BUNDLE:\n${compactAuthoringBundle(bundle)}`,
     `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(compactAuthoringContext(context, Boolean(previousOutput)))}`,
     `PUBLIC FACTUAL GROUNDING (web access is disabled in this private stage):\n${grounding}`,
     retry,
@@ -266,6 +268,16 @@ export function authoringPrompt(bundle: string, context: Record<string, unknown>
     'Every translation, sentence-production, or short-response item without options must provide writingLines >= 1 or a valid non-empty responseLayout.',
     'Return only the complete canonical Curriculum Package JSON object. Do not use Markdown fences or commentary.',
   ].join('\n')
+}
+
+/** Count exact inputs; a byte/character count is not a provider token count. */
+export function measurePromptInput(input: string) {
+  const stage = input.includes('Private Packet Planner') ? 'packet-plan'
+    : input.includes('bounded private topic capsule') ? 'topic-screen'
+    : input.includes('privacy-screened public-interest research brief') ? 'public-research'
+    : input.includes('PREVIOUS PACKAGE:') ? 'author-repair' : 'author'
+  return { stage, chars: input.length, bytes: Buffer.byteLength(input, 'utf8'),
+    sha256: createHash('sha256').update(input).digest('hex') }
 }
 
 async function cleanupRuntime(runtimeRoot: string): Promise<void> {
@@ -396,13 +408,32 @@ async function authorOne(
   repoRoot: string,
   context: Record<string, unknown>,
   codexExecutable: string,
-  run: ProcessRunner,
+  execute: ProcessRunner,
   client?: WorkerClient,
   workerId?: string,
 ): Promise<CurriculumPackage> {
   const { jobId, childId } = contextIdentity(context)
   const jobDir = resolve(repoRoot, '.runtime/private-generation', jobId)
   await mkdir(jobDir, { recursive: true })
+  const promptMetrics: Array<ReturnType<typeof measurePromptInput> & { status: string }> = []
+  const run: ProcessRunner = async (file, args, options) => {
+    const metric = measurePromptInput(options?.input ?? '')
+    let status = 'failed'
+    try {
+      const result = await execute(file, args, options)
+      status = 'completed'
+      return result
+    } finally {
+      promptMetrics.push({ ...metric, status })
+      await writeFile(resolve(jobDir, 'prompt-metrics.json'), JSON.stringify({
+        measurement: 'actual-runner-inputs', engineVersion: CURRENT_ENGINE_VERSION,
+        promptVersion: CURRENT_PROMPT_VERSION, calls: promptMetrics,
+        totalChars: promptMetrics.reduce((sum, row) => sum + row.chars, 0),
+        totalBytes: promptMetrics.reduce((sum, row) => sum + row.bytes, 0),
+        scope: 'stdin prompts only; excludes provider tool responses, hidden/system input and billed tokens',
+      }), { encoding: 'utf8', mode: 0o600 })
+    }
+  }
   const contextPath = resolve(jobDir, 'context.json')
   await writeFile(contextPath, JSON.stringify(context), { encoding: 'utf8', mode: 0o600 })
   const interestPolicy = await readFile(resolve(repoRoot, 'packages/generator/curriculum/interest-exploration.md'), 'utf8')

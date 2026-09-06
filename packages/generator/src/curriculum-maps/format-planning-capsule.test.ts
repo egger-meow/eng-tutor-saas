@@ -77,3 +77,9 @@ describe('format-planning-capsule', () => {
     }
   })
 })
+
+it('uses numeric legacy week order and canonical delivery ordinals before labels', () => {
+  const row = (materialWeek: string, format: string, weekNumber?: number): DeliveryMemoryProjection => ({ materialWeek, weekNumber, readingGenre: 'article', readingTitle: '', introducedVocabulary: [], responseLayoutTypes: [], pedagogicalFormats: [format] })
+  expect(buildFormatPlanningCapsule([row('Week 9', 'written:lines'), row('Week 10', 'table:grid')], 1).recentFormatUse).toEqual({ 'table:grid': 1 })
+  expect(buildFormatPlanningCapsule([row('2099-W20', 'written:lines', 1), row('2026-W01', 'table:grid', 2)], 1).recentFormatUse).toEqual({ 'table:grid': 1 })
+})

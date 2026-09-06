@@ -1,6 +1,7 @@
 import {
   type DeliveryMemoryProjection,
   extractDeliveryMemory,
+  compareDeliveryRecency,
   aggregateRecentResponseForms,
   aggregateRecentDeliveryMemory,
 } from './delivery-memory.js'
@@ -23,6 +24,8 @@ export {
 }
 
 export interface HistoricalPackageSummary {
+  sequence_number?: number
+  weekNumber?: number
   materialWeek: string
   completedAt?: string
   genre?: string
@@ -65,6 +68,8 @@ export function buildDiversityCapsule(
   }
 
   const parseWeek = (item: HistoricalPackageSummary | DeliveryMemoryProjection): number => {
+    const seq = (item as any).sequence_number ?? (item as any).weekNumber
+    if (typeof seq === 'number' && Number.isFinite(seq)) return seq
     if ('materialWeek' in item) {
       const val = item.materialWeek
       if (typeof val === 'number') return val
@@ -74,9 +79,8 @@ export function buildDiversityCapsule(
     return 0
   }
 
-  // Sort chronologically ascending so slice(-lookbackWeeks) reliably takes the newest weeks regardless of input order
   const sorted = [...history].sort((a, b) => parseWeek(a) - parseWeek(b))
-  const recentSlice = sorted.slice(-lookbackWeeks)
+  const recentSlice = lookbackWeeks > 0 ? sorted.slice(-lookbackWeeks) : []
 
   const recentGenres: string[] = []
   const recentContextKeys: string[] = []

@@ -144,9 +144,9 @@ describe('Prompt 2.12.0 consolidated active invariant contract with frozen histo
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.13.1-prod"')
+    expect(bundle).toContain('bundleVersion: "2.13.2-prod"')
     expect(bundle).toContain('schemaVersion: "2.5.0"')
-    expect(bundle).toContain('engineVersion: "1.8.1"')
+    expect(bundle).toContain('engineVersion: "1.8.2"')
 
     // Assert adaptiveExtension is optional in Schema 2.4 studentLesson
     const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape

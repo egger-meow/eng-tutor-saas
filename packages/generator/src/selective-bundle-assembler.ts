@@ -22,7 +22,7 @@ export function assembleSelectiveAuthoringBundle(
     'The following bounded authoritative CAP precedent cards have been selectively retrieved for this claimed lesson context from verified shards.',
     'Anchor, blend, or calibrate against these relevant design principles without structural imitation.',
     '```json',
-    JSON.stringify(expandedPrecedents, null, 2),
+    JSON.stringify(expandedPrecedents),
     '```',
     '',
     '',

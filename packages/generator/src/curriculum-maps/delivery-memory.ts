@@ -1,6 +1,7 @@
 import type { CurriculumPackage } from '../curriculum-package-schema.js'
 
 export interface DeliveryMemoryProjection {
+  sequence_number?: number
   weekNumber?: number
   materialWeek: string
   readingGenre: string
@@ -163,4 +164,15 @@ export function aggregateRecentDeliveryMemory(
 ): DeliveryMemoryProjection[] {
   if (!Array.isArray(history) || history.length === 0) return []
   return history.slice(-lookbackWeeks)
+}
+
+/** Newest first. Canonical delivery ordinals win over source week labels. */
+export function compareDeliveryRecency(
+  a: { sequence_number?: number; weekNumber?: number; materialWeek: string },
+  b: { sequence_number?: number; weekNumber?: number; materialWeek: string },
+): number {
+  const left = a.sequence_number ?? a.weekNumber
+  const right = b.sequence_number ?? b.weekNumber
+  if (left !== undefined && right !== undefined && left !== right) return right - left
+  return String(b.materialWeek ?? '').localeCompare(String(a.materialWeek ?? ''), 'en', { numeric: true })
 }
