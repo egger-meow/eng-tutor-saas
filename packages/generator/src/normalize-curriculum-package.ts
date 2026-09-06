@@ -45,6 +45,10 @@ export function countActiveResponseSlots(question: any): number {
     let count = 0
     if (Array.isArray(layout.rows)) {
       for (const row of layout.rows) {
+        // Exclude demonstration / worked example rows from assessed response slots
+        if (row && typeof row.label === 'string' && /^(?:example|示範|範例)/i.test(row.label.trim())) {
+          continue
+        }
         if (Array.isArray(row.cells)) {
           for (const cell of row.cells) {
             if (cell && cell.responseUnitId) count++
@@ -58,6 +62,13 @@ export function countActiveResponseSlots(question: any): number {
     let count = 0
     if (Array.isArray(layout.items)) {
       for (const item of layout.items) {
+        // Exclude demonstration / worked example sequence items
+        if (item && (
+          (typeof item.stepNumber === 'string' && /^(?:example|示範|範例)/i.test(item.stepNumber.trim())) ||
+          (typeof item.label === 'string' && /^(?:example|示範|範例)/i.test(item.label.trim()))
+        )) {
+          continue
+        }
         if (item && item.responseUnitId) count++
       }
     }
@@ -70,12 +81,19 @@ export function computeQuestionDuration(question: any): number {
   if (!question || typeof question !== 'object') return 2
 
   const activeSlots = countActiveResponseSlots(question)
-  if (activeSlots > 0) {
-    return Math.max(3, Math.min(8, 2 + activeSlots * 0.75))
-  }
-
   const itemType = question.itemType
   const writingLines = typeof question.writingLines === 'number' ? question.writingLines : 0
+
+  if (activeSlots > 0) {
+    // Bounded demand calibration: distinguish sentence explanations from short word/token classifications
+    const isSentenceDemand = itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || writingLines >= 2
+    if (isSentenceDemand) {
+      // Sentence-level production requires clause drafting and synthesis: 1.5m per slot with 2.0m setup buffer
+      return Math.max(3.5, Math.min(14, 2.0 + activeSlots * 1.5))
+    }
+    // Token / single-word classification or reordering: 0.75m per slot with 1.5m setup buffer
+    return Math.max(2.5, Math.min(10, 1.5 + activeSlots * 0.75))
+  }
 
   if (itemType === 'sentence-production' || itemType === 'short-response' || itemType === 'translation' || writingLines >= 2) {
     return Math.max(3.5, Math.min(7, 2.5 + writingLines * 0.5))

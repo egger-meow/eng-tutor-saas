@@ -34,7 +34,16 @@ function renderWritingLines(count: number): string {
 </div>`
 }
 
-function renderOrganizerTable(layout: Extract<ResponseLayout, { type: 'table' | 'organizer' }>): string {
+export type RenderedUnitAnswer = {
+  answer: string
+  acceptedAnswers?: readonly string[]
+  explanationZh?: string
+}
+
+export function renderOrganizerTable(
+  layout: Extract<ResponseLayout, { type: 'table' | 'organizer' }>,
+  unitAnswersMap?: Map<string, RenderedUnitAnswer>,
+): string {
   const headerCells = layout.headers.map((hText: string) => `<th>${h(hText)}</th>`).join('')
   const rowsHtml = layout.rows.map((row) => {
     const labelCell = row.label ? `<td class="organizer-row-label">${h(row.label)}</td>` : ''
@@ -43,6 +52,18 @@ function renderOrganizerTable(layout: Extract<ResponseLayout, { type: 'table' | 
     if (Array.isArray(row.cells) && row.cells.length > 0) {
       cells = row.cells.map((cell) => {
         if (cell.responseUnitId) {
+          if (unitAnswersMap && unitAnswersMap.has(cell.responseUnitId)) {
+            const ua = unitAnswersMap.get(cell.responseUnitId)!
+            const badge = `<span class="unit-badge">[${h(cell.responseUnitId)}]</span>`
+            const ansText = `<span class="unit-filled-answer"><strong>${h(ua.answer)}</strong></span>`
+            const variants = ua.acceptedAnswers && ua.acceptedAnswers.length > 0
+              ? `<div class="unit-accepted-variants small muted">也可：${h(ua.acceptedAnswers.join(' / '))}</div>`
+              : ''
+            const expl = ua.explanationZh
+              ? `<div class="unit-explanation small muted">${h(ua.explanationZh)}</div>`
+              : ''
+            return `<td class="organizer-cell organizer-filled-slot">${badge} ${ansText}${variants}${expl}</td>`
+          }
           const badge = `<span class="unit-badge">[${h(cell.responseUnitId)}]</span>`
           const placeholder = cell.placeholder ? `<span class="unit-placeholder">${h(cell.placeholder)}</span>` : ''
           return `<td class="organizer-cell organizer-response-slot">${badge} ${placeholder}</td>`
@@ -72,7 +93,10 @@ function renderOrganizerTable(layout: Extract<ResponseLayout, { type: 'table' | 
 </div>`
 }
 
-function renderSequenceLayout(layout: Extract<ResponseLayout, { type: 'sequence' }>): string {
+export function renderSequenceLayout(
+  layout: Extract<ResponseLayout, { type: 'sequence' }>,
+  unitAnswersMap?: Map<string, RenderedUnitAnswer>,
+): string {
   const isHorizontal = layout.layoutDirection === 'horizontal'
   const itemsHtml = layout.items.map((item, idx) => {
     const stepNumHtml = item.stepNumber !== undefined
@@ -82,9 +106,22 @@ function renderSequenceLayout(layout: Extract<ResponseLayout, { type: 'sequence'
 
     let contentHtml = ''
     if (item.responseUnitId) {
-      const badge = `<span class="unit-badge">(${h(item.responseUnitId)})</span>`
-      const placeholder = item.placeholder ? `<span class="unit-placeholder">${h(item.placeholder)}</span>` : ''
-      contentHtml = `<div class="sequence-response-slot">${badge} ${placeholder}</div>`
+      if (unitAnswersMap && unitAnswersMap.has(item.responseUnitId)) {
+        const ua = unitAnswersMap.get(item.responseUnitId)!
+        const badge = `<span class="unit-badge">(${h(item.responseUnitId)})</span>`
+        const ansText = `<span class="sequence-filled-answer"><strong>${h(ua.answer)}</strong></span>`
+        const variants = ua.acceptedAnswers && ua.acceptedAnswers.length > 0
+          ? `<div class="sequence-accepted-variants small muted">也可：${h(ua.acceptedAnswers.join(' / '))}</div>`
+          : ''
+        const expl = ua.explanationZh
+          ? `<div class="sequence-explanation small muted">${h(ua.explanationZh)}</div>`
+          : ''
+        contentHtml = `<div class="sequence-filled-slot">${badge} ${ansText}${variants}${expl}</div>`
+      } else {
+        const badge = `<span class="unit-badge">(${h(item.responseUnitId)})</span>`
+        const placeholder = item.placeholder ? `<span class="unit-placeholder">${h(item.placeholder)}</span>` : ''
+        contentHtml = `<div class="sequence-response-slot">${badge} ${placeholder}</div>`
+      }
     } else if (item.content) {
       contentHtml = `<div class="sequence-content">${h(item.content)}</div>`
     }

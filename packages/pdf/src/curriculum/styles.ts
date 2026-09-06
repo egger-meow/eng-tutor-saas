@@ -919,7 +919,71 @@ export const curriculumStyles = `
     font-weight: 700;
   }
 
-  /* Unit Answers in Parent Answer Key */
+  /* Unit Answers & Structured Layout in Parent Answer Key */
+  .parent-structured-answer-wrapper {
+    margin: 2.5mm 0;
+  }
+
+  .parent-structured-title {
+    font-size: 8.5pt;
+    color: #4a433c;
+    margin-bottom: 1.5mm;
+  }
+
+  .response-organizer-table td.organizer-filled-slot {
+    background: #fdfcf9;
+    min-height: 10mm;
+    vertical-align: top;
+    padding: 2mm;
+    border-left: 2px solid #765d42;
+  }
+
+  .unit-filled-answer {
+    font-size: 9.5pt;
+    color: #173e37;
+    font-weight: 700;
+  }
+
+  .unit-accepted-variants {
+    font-size: 8pt;
+    color: #6b6256;
+    margin-top: 0.8mm;
+  }
+
+  .unit-explanation {
+    font-size: 8pt;
+    color: #555047;
+    margin-top: 0.8mm;
+    font-style: italic;
+  }
+
+  .sequence-filled-slot {
+    border: 1px solid #765d42;
+    background: #fdfcf9;
+    min-height: 9mm;
+    padding: 2mm;
+    border-radius: 2px;
+  }
+
+  .sequence-filled-answer {
+    font-size: 9.5pt;
+    color: #173e37;
+    font-weight: 700;
+  }
+
+  .sequence-accepted-variants {
+    font-size: 8pt;
+    color: #6b6256;
+    margin-top: 0.8mm;
+  }
+
+  .sequence-explanation {
+    font-size: 8pt;
+    color: #555047;
+    margin-top: 0.8mm;
+    font-style: italic;
+  }
+
   .unit-answers-card {
     margin-top: 2mm;
     margin-bottom: 2mm;

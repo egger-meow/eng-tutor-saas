@@ -2,6 +2,11 @@ import type { CurriculumPackage, CurriculumQuestion } from '@paper-english/gener
 import { escapeHtml as h } from '../escape-html.js'
 import { renderCurriculumHeader } from './header.js'
 import { renderCurriculumShell } from './shell.js'
+import {
+  renderOrganizerTable,
+  renderSequenceLayout,
+  type RenderedUnitAnswer,
+} from './question-renderer.js'
 
 type AnswerItem = CurriculumPackage['answers'][number]
 
@@ -48,17 +53,43 @@ function renderAnswerCard(answer: AnswerItem, question?: CurriculumQuestion): st
     : ''
 
   const unitAnswers = 'unitAnswers' in answer && Array.isArray(answer.unitAnswers) ? answer.unitAnswers : undefined
-  const unitAnswersHtml = unitAnswers && unitAnswers.length > 0
+
+  let structuredDisplayHtml = ''
+  if (question?.responseLayout) {
+    const unitAnswersMap = new Map<string, RenderedUnitAnswer>()
+    if (unitAnswers) {
+      for (const ua of unitAnswers) {
+        unitAnswersMap.set(ua.unitId, ua)
+      }
+    }
+
+    if (question.responseLayout.type === 'table' || question.responseLayout.type === 'organizer') {
+      structuredDisplayHtml = `<div class="parent-structured-answer-wrapper">
+        <div class="parent-structured-title small"><strong>完成對照表：</strong></div>
+        ${renderOrganizerTable(question.responseLayout, unitAnswersMap)}
+      </div>`
+    } else if (question.responseLayout.type === 'sequence') {
+      structuredDisplayHtml = `<div class="parent-structured-answer-wrapper">
+        <div class="parent-structured-title small"><strong>完成流程：</strong></div>
+        ${renderSequenceLayout(question.responseLayout, unitAnswersMap)}
+      </div>`
+    }
+  }
+
+  const unitAnswersHtml = structuredDisplayHtml || (unitAnswers && unitAnswers.length > 0
     ? `<div class="unit-answers-card">
         <div class="unit-answers-title"><strong>分格答案：</strong></div>
         <ul class="unit-answers-list">
           ${unitAnswers.map((u) => {
             const expl = u.explanationZh ? ` <span class="small muted">(${h(u.explanationZh)})</span>` : ''
-            return `<li><strong>[${h(u.unitId)}]</strong> ${h(u.answer)}${expl}</li>`
+            const variants = u.acceptedAnswers && u.acceptedAnswers.length > 0
+              ? ` <span class="small muted">[也可：${h(u.acceptedAnswers.join('；'))}]</span>`
+              : ''
+            return `<li><strong>[${h(u.unitId)}]</strong> ${h(u.answer)}${variants}${expl}</li>`
           }).join('')}
         </ul>
       </div>`
-    : ''
+    : '')
 
   return `<article class="answer-card">
   <div class="answer-header">

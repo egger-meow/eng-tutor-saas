@@ -129,7 +129,7 @@ describe('parent-renderer', () => {
     expect(html).not.toContain('這份教材為什麼這樣安排')
   })
 
-  it('renders slot-aligned unit answers when unitAnswers are present', () => {
+  it('renders slot-aligned unit answers when unitAnswers are present without layout', () => {
     const pkgWithUnits = {
       ...samplePkg,
       answers: [
@@ -157,5 +157,143 @@ describe('parent-renderer', () => {
     expect(html).toContain('[Q1.slot2]')
     expect(html).toContain('Second deduction')
     expect(html).toContain('(見第二段)')
+  })
+
+  it('renders completed table structure with filled slot answers and per-unit accepted variants', () => {
+    const pkgWithTable = {
+      ...samplePkg,
+      studentLesson: {
+        ...samplePkg.studentLesson,
+        practice: [
+          {
+            id: 'practice-table',
+            titleZh: '變因分析',
+            questions: [
+              {
+                id: 'P2',
+                itemType: 'short-response',
+                prompt: 'Complete the table below to compare the three guitar string variables.',
+                writingLines: 0,
+                responseLayout: {
+                  type: 'organizer',
+                  headers: ['Feature', 'What changes?', 'What stays the same?', 'Pitch result'],
+                  rows: [
+                    {
+                      label: 'String Thickness',
+                      cells: [
+                        { responseUnitId: 'P2.thickness.changes', placeholder: 'thickness' },
+                        { text: 'tension and length' },
+                        { responseUnitId: 'P2.thickness.pitch', placeholder: 'pitch' },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
+      answers: [
+        {
+          questionId: 'P2',
+          answer: 'Completed table comparing guitar string physics.',
+          acceptedAnswers: [],
+          explanationZh: '控制變因時僅能改變一項條件。',
+          likelyMisconceptionZh: null,
+          followUpZh: null,
+          unitAnswers: [
+            {
+              unitId: 'P2.thickness.changes',
+              answer: 'thickness increases',
+              acceptedAnswers: ['thicker string', 'using a heavy gauge'],
+              explanationZh: '弦變粗',
+            },
+            {
+              unitId: 'P2.thickness.pitch',
+              answer: 'lower pitch',
+              acceptedAnswers: ['pitch decreases', 'frequency drops'],
+              explanationZh: '振動頻率降低',
+            },
+          ],
+        },
+      ],
+    } as unknown as CurriculumPackage
+
+    const html = renderCurriculumParentAnswerHtml(pkgWithTable)
+    expect(html).toContain('class="parent-structured-answer-wrapper"')
+    expect(html).toContain('完成對照表：')
+    expect(html).toContain('class="response-organizer-table"')
+    expect(html).toContain('<th>Feature</th>')
+    expect(html).toContain('<th>What changes?</th>')
+    expect(html).toContain('<th>What stays the same?</th>')
+    expect(html).toContain('<th>Pitch result</th>')
+    expect(html).toContain('class="organizer-row-label">String Thickness</td>')
+    expect(html).toContain('class="organizer-cell organizer-filled-slot"')
+    expect(html).toContain('[P2.thickness.changes]')
+    expect(html).toContain('thickness increases')
+    expect(html).toContain('也可：thicker string / using a heavy gauge')
+    expect(html).toContain('弦變粗')
+    expect(html).toContain('tension and length')
+    expect(html).toContain('[P2.thickness.pitch]')
+    expect(html).toContain('lower pitch')
+  })
+
+  it('renders completed sequence structure with filled slot answers in Parent view', () => {
+    const pkgWithSequence = {
+      ...samplePkg,
+      studentLesson: {
+        ...samplePkg.studentLesson,
+        practice: [
+          {
+            id: 'practice-seq',
+            titleZh: '實驗流程',
+            questions: [
+              {
+                id: 'S1',
+                itemType: 'sequence',
+                prompt: 'Trace the testing sequence.',
+                writingLines: 0,
+                responseLayout: {
+                  type: 'sequence',
+                  layoutDirection: 'horizontal',
+                  items: [
+                    { stepNumber: 1, label: 'Preparation', content: 'Calibrate sensors' },
+                    { stepNumber: 2, label: 'Execution', responseUnitId: 'S1.step2', placeholder: 'Run test' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
+      answers: [
+        {
+          questionId: 'S1',
+          answer: 'Run test sequence.',
+          acceptedAnswers: [],
+          explanationZh: '流程步驟',
+          likelyMisconceptionZh: null,
+          followUpZh: null,
+          unitAnswers: [
+            {
+              unitId: 'S1.step2',
+              answer: 'Measure sorting accuracy under low light',
+              acceptedAnswers: ['Record lighting error'],
+              explanationZh: '測試記錄步驟',
+            },
+          ],
+        },
+      ],
+    } as unknown as CurriculumPackage
+
+    const html = renderCurriculumParentAnswerHtml(pkgWithSequence)
+    expect(html).toContain('class="parent-structured-answer-wrapper"')
+    expect(html).toContain('完成流程：')
+    expect(html).toContain('class="response-sequence-container')
+    expect(html).toContain('class="sequence-filled-slot"')
+    expect(html).toContain('(S1.step2)')
+    expect(html).toContain('Measure sorting accuracy under low light')
+    expect(html).toContain('也可：Record lighting error')
+    expect(html).toContain('測試記錄步驟')
   })
 })

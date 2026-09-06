@@ -27,9 +27,41 @@ export const ResponseLayoutRowSchema = z.strictObject({
   label: Text.optional(),
   values: z.array(Text).optional(),
   cells: z.array(ResponseGridCellSchema).optional(),
+}).refine((row) => !(row.values !== undefined && row.cells !== undefined), {
+  message: 'Row cannot define both values and cells simultaneously',
 })
 
 export type ResponseLayoutRow = z.infer<typeof ResponseLayoutRowSchema>
+
+function refineGridRowHeaderShape(
+  layout: { headers: string[]; rows: Array<{ label?: string; values?: string[]; cells?: any[] }> },
+  ctx: z.RefinementCtx,
+): void {
+  const headerCount = layout.headers.length
+  for (let i = 0; i < layout.rows.length; i++) {
+    const row = layout.rows[i]!
+    const labelCount = row.label !== undefined ? 1 : 0
+    if (row.cells !== undefined) {
+      const colCount = labelCount + row.cells.length
+      if (colCount !== headerCount) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['rows', i, 'cells'],
+          message: `Row column count (${colCount}: ${labelCount ? '1 label + ' : ''}${row.cells.length} cells) does not match header count (${headerCount})`,
+        })
+      }
+    } else if (row.values !== undefined && row.values.length > 0) {
+      const colCount = labelCount + row.values.length
+      if (colCount !== headerCount) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['rows', i, 'values'],
+          message: `Row column count (${colCount}: ${labelCount ? '1 label + ' : ''}${row.values.length} values) does not match header count (${headerCount})`,
+        })
+      }
+    }
+  }
+}
 
 export const ResponseLayoutSchema = z.discriminatedUnion('type', [
   z.strictObject({
@@ -40,12 +72,12 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
     type: z.literal('table'),
     headers: z.array(Text).min(2).max(6),
     rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
-  }),
+  }).superRefine(refineGridRowHeaderShape),
   z.strictObject({
     type: z.literal('organizer'),
     headers: z.array(Text).min(2).max(6),
     rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
-  }),
+  }).superRefine(refineGridRowHeaderShape),
   z.strictObject({
     type: z.literal('sequence'),
     layoutDirection: z.enum(['vertical', 'horizontal']).optional().default('vertical'),
@@ -323,6 +355,21 @@ export const AnswerItemV25Schema = z.strictObject({
   likelyMisconceptionZh: Text.nullable(),
   followUpZh: Text.nullable(),
   unitAnswers: z.array(UnitAnswerSchema).optional(),
+}).superRefine((item, ctx) => {
+  if (item.unitAnswers && item.unitAnswers.length > 0) {
+    const seen = new Set<string>()
+    for (let i = 0; i < item.unitAnswers.length; i++) {
+      const u = item.unitAnswers[i]!
+      if (seen.has(u.unitId)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['unitAnswers', i, 'unitId'],
+          message: `Duplicate unitAnswer for unitId "${u.unitId}" in question "${item.questionId}"`,
+        })
+      }
+      seen.add(u.unitId)
+    }
+  }
 })
 
 export type AnswerItemV25 = z.infer<typeof AnswerItemV25Schema>

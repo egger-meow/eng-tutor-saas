@@ -138,41 +138,64 @@ export function responseUnitRelationshipIssues(value: CurriculumPackage): Lesson
   }
 
   const globalUnitIds = new Set<string>()
+  const questionUnitsMap = new Map<string, string[]>()
 
   for (const question of questions) {
     const layout = (question as any).responseLayout
-    if (!layout) continue
-
     const responseUnitIds: string[] = []
 
-    if (layout.type === 'table' || layout.type === 'organizer') {
-      if (Array.isArray(layout.rows)) {
-        for (const row of layout.rows) {
-          if (Array.isArray(row.cells)) {
-            for (const cell of row.cells) {
-              if (cell.responseUnitId) {
-                responseUnitIds.push(cell.responseUnitId)
-                if (cell.text && typeof cell.text === 'string' && cell.text.trim()) {
-                  issues.push({
-                    path: `questions.${question.id}.responseLayout`,
-                    message: `Accidental answer exposure: response slot "${cell.responseUnitId}" contains student-facing text "${cell.text}"`,
-                  })
+    if (layout) {
+      if (layout.type === 'table' || layout.type === 'organizer') {
+        const headerCount = Array.isArray(layout.headers) ? layout.headers.length : 0
+        if (Array.isArray(layout.rows)) {
+          for (let rIdx = 0; rIdx < layout.rows.length; rIdx++) {
+            const row = layout.rows[rIdx]
+            if (row.values !== undefined && row.cells !== undefined) {
+              issues.push({
+                path: `questions.${question.id}.responseLayout.rows.${rIdx}`,
+                message: 'Row cannot define both values and cells simultaneously',
+              })
+            }
+            const labelCount = row.label ? 1 : 0
+            if (Array.isArray(row.cells)) {
+              if (headerCount > 0 && labelCount + row.cells.length !== headerCount) {
+                issues.push({
+                  path: `questions.${question.id}.responseLayout.rows.${rIdx}.cells`,
+                  message: `Row column count (${labelCount + row.cells.length}) does not match header count (${headerCount})`,
+                })
+              }
+              for (const cell of row.cells) {
+                if (cell.responseUnitId) {
+                  responseUnitIds.push(cell.responseUnitId)
+                  if (cell.text && typeof cell.text === 'string' && cell.text.trim()) {
+                    issues.push({
+                      path: `questions.${question.id}.responseLayout`,
+                      message: `Accidental answer exposure: response slot "${cell.responseUnitId}" contains student-facing text "${cell.text}"`,
+                    })
+                  }
                 }
+              }
+            } else if (Array.isArray(row.values) && row.values.length > 0) {
+              if (headerCount > 0 && labelCount + row.values.length !== headerCount) {
+                issues.push({
+                  path: `questions.${question.id}.responseLayout.rows.${rIdx}.values`,
+                  message: `Row column count (${labelCount + row.values.length}) does not match header count (${headerCount})`,
+                })
               }
             }
           }
         }
-      }
-    } else if (layout.type === 'sequence') {
-      if (Array.isArray(layout.items)) {
-        for (const item of layout.items) {
-          if (item.responseUnitId) {
-            responseUnitIds.push(item.responseUnitId)
-            if (item.content && typeof item.content === 'string' && item.content.trim()) {
-              issues.push({
-                path: `questions.${question.id}.responseLayout`,
-                message: `Accidental answer exposure: sequence response slot "${item.responseUnitId}" contains student-facing content "${item.content}"`,
-              })
+      } else if (layout.type === 'sequence') {
+        if (Array.isArray(layout.items)) {
+          for (const item of layout.items) {
+            if (item.responseUnitId) {
+              responseUnitIds.push(item.responseUnitId)
+              if (item.content && typeof item.content === 'string' && item.content.trim()) {
+                issues.push({
+                  path: `questions.${question.id}.responseLayout`,
+                  message: `Accidental answer exposure: sequence response slot "${item.responseUnitId}" contains student-facing content "${item.content}"`,
+                })
+              }
             }
           }
         }
@@ -197,32 +220,47 @@ export function responseUnitRelationshipIssues(value: CurriculumPackage): Lesson
       globalUnitIds.add(uid)
     }
 
-    if (responseUnitIds.length > 0) {
-      const answer = answerMap.get(question.id)
-      if (answer && Array.isArray(answer.unitAnswers)) {
-        const mappedUnitIds = new Set(answer.unitAnswers.map((ua: any) => ua.unitId))
-        for (const uid of responseUnitIds) {
-          if (!mappedUnitIds.has(uid)) {
-            issues.push({
-              path: `answers.${question.id}.unitAnswers`,
-              message: `Missing unitAnswer for response unit "${uid}" in question "${question.id}"`,
-            })
-          }
+    questionUnitsMap.set(question.id, responseUnitIds)
+  }
+
+  for (const answer of value.answers) {
+    const qid = answer.questionId
+    const declaredUnits = questionUnitsMap.get(qid) ?? []
+    const declaredUnitsSet = new Set(declaredUnits)
+
+    const unitAnswers = (answer as any).unitAnswers
+    if (Array.isArray(unitAnswers) && unitAnswers.length > 0) {
+      const seenAnsUnits = new Set<string>()
+      for (const ua of unitAnswers) {
+        if (seenAnsUnits.has(ua.unitId)) {
+          issues.push({
+            path: `answers.${qid}.unitAnswers`,
+            message: `Duplicate unitAnswer for unit "${ua.unitId}" in question "${qid}"`,
+          })
         }
-        for (const ua of answer.unitAnswers) {
-          if (!seenUnits.has(ua.unitId)) {
-            issues.push({
-              path: `answers.${question.id}.unitAnswers`,
-              message: `Orphan unitAnswer "${ua.unitId}" does not match any declared response unit in question "${question.id}"`,
-            })
-          }
+        seenAnsUnits.add(ua.unitId)
+
+        if (!declaredUnitsSet.has(ua.unitId)) {
+          issues.push({
+            path: `answers.${qid}.unitAnswers`,
+            message: `Orphan unitAnswer "${ua.unitId}" does not match any declared response unit in question "${qid}"`,
+          })
         }
-      } else if (responseUnitIds.length > 1) {
-        issues.push({
-          path: `answers.${question.id}`,
-          message: `Question "${question.id}" has ${responseUnitIds.length} response units (${responseUnitIds.join(', ')}) but missing unitAnswers in answer key`,
-        })
       }
+
+      for (const uid of declaredUnits) {
+        if (!seenAnsUnits.has(uid)) {
+          issues.push({
+            path: `answers.${qid}.unitAnswers`,
+            message: `Missing unitAnswer for response unit "${uid}" in question "${qid}"`,
+          })
+        }
+      }
+    } else if (declaredUnits.length > 0) {
+      issues.push({
+        path: `answers.${qid}`,
+        message: `Question "${qid}" has ${declaredUnits.length} response unit(s) (${declaredUnits.join(', ')}) but missing unitAnswers in answer key`,
+      })
     }
   }
 
@@ -259,8 +297,23 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
     for (const targetId of question.targetIds)
       if (!targets.has(targetId))
         issues.push({ path: `questions.${question.id}.targetIds`, message: `Unknown learning target: ${targetId}` })
-    if (question.itemType === 'short-response' && question.writingLines === 0)
+
+    const q = question as {
+      writingLines?: number
+      responseLayout?: {
+        type: string
+        lineCount?: number
+      }
+    }
+    const hasWritingSpace = (q.writingLines ?? 0) >= 1
+      || (q.responseLayout?.type === 'lines' && (q.responseLayout.lineCount ?? 0) >= 1)
+      || q.responseLayout?.type === 'table'
+      || q.responseLayout?.type === 'organizer'
+      || q.responseLayout?.type === 'sequence'
+
+    if (['translation', 'sentence-production', 'short-response'].includes(question.itemType) && !question.options && !hasWritingSpace) {
       issues.push({ path: `questions.${question.id}.writingLines`, message: 'Written responses require writing space' })
+    }
   }
 
   const stages = new Set(value.studentLesson.practice.map((section) => section.stage))
