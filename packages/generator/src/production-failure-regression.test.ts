@@ -400,7 +400,7 @@ describe('production failure regressions', () => {
     it('author and critic preserve exact attribution and decisive qualifiers without feature fusion', async () => {
       const bundle = await compileProductionBundle()
       expect(bundle.metadata.promptVersion).toBe('2.12.0')
-      expect(bundle.metadata.schemaVersion).toBe('2.4.0')
+      expect(bundle.metadata.schemaVersion).toBe('2.5.0')
 
       expect(bundle.content).toContain('exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier')
       expect(bundle.content).toContain("Do not fuse mode A's limit, mode B's workflow, or separately true fragments into one unsupported composite claim")

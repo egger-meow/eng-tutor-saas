@@ -25,7 +25,7 @@ describe('bundle-compiler', () => {
   const freshBundle = await compileProductionBundle(REPO_ROOT)
 
   expect(freshBundle.content.replace(/\r\n/g, '\n')).toBe(existingBundle.replace(/\r\n/g, '\n'))
-  expect(freshBundle.metadata.schemaVersion).toBe('2.4.0')
+  expect(freshBundle.metadata.schemaVersion).toBe('2.5.0')
   expect(freshBundle.metadata.promptVersion).toBe('2.12.0')
   expect(freshBundle.metadata.bundleVersion).toBe('2.12.0-prod')
   expect(freshBundle.metadata.engineVersion).toBe('1.7.0')

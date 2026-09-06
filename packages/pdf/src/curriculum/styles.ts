@@ -785,6 +785,167 @@ export const curriculumStyles = `
     height: 10mm;
   }
 
+  .response-organizer-table td.organizer-response-slot {
+    background: #fdfdfd;
+    min-height: 12mm;
+    height: 12mm;
+    position: relative;
+    vertical-align: top;
+    padding: 2mm;
+  }
+
+  .unit-badge {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 700;
+    font-size: 7.5pt;
+    color: #765d42;
+    background: #f4eee6;
+    padding: 0.2mm 1.5mm;
+    border-radius: 2px;
+    margin-right: 1.5mm;
+    display: inline-block;
+  }
+
+  .unit-placeholder {
+    font-size: 8pt;
+    font-style: italic;
+    color: #9c9489;
+  }
+
+  /* Sequence Layout */
+  .response-sequence-container {
+    margin-top: 3mm;
+    margin-bottom: 2mm;
+    display: flex;
+    gap: 2mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .sequence-horizontal {
+    flex-direction: row;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .sequence-vertical {
+    flex-direction: column;
+  }
+
+  .sequence-node-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sequence-vertical .sequence-node-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sequence-node {
+    flex: 1;
+    border: 1px solid #b8aea1;
+    background: #ffffff;
+    padding: 2.5mm 3mm;
+    border-radius: 3px;
+    min-width: 0;
+  }
+
+  .sequence-node-header {
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+    margin-bottom: 1.5mm;
+  }
+
+  .sequence-step-num {
+    background: #765d42;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 7.5pt;
+    width: 4.5mm;
+    height: 4.5mm;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .sequence-label {
+    font-weight: 600;
+    font-size: 8.5pt;
+    color: #282420;
+  }
+
+  .sequence-content {
+    font-size: 9pt;
+    color: #3d3730;
+    line-height: 1.4;
+  }
+
+  .sequence-response-slot {
+    border: 1px dashed #b8aea1;
+    background: #fdfdfd;
+    min-height: 10mm;
+    padding: 2mm;
+    border-radius: 2px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .sequence-relation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .relation-badge {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #5c564e;
+    background: #eee8de;
+    padding: 0.5mm 2mm;
+    border-radius: 3px;
+  }
+
+  .relation-arrow {
+    font-size: 11pt;
+    color: #765d42;
+    font-weight: 700;
+  }
+
+  /* Unit Answers in Parent Answer Key */
+  .unit-answers-card {
+    margin-top: 2mm;
+    margin-bottom: 2mm;
+    padding: 2mm 3mm;
+    background: #f9f7f4;
+    border: 1px solid #e0d8cc;
+    border-radius: 2px;
+  }
+
+  .unit-answers-title {
+    font-size: 8.5pt;
+    color: #173e37;
+    margin-bottom: 1mm;
+  }
+
+  .unit-answers-list {
+    margin: 0;
+    padding-left: 4mm;
+    font-size: 9pt;
+    line-height: 1.5;
+  }
+
+  .unit-answers-list li {
+    margin-bottom: 0.5mm;
+  }
+
   /* Self-Check Checklist */
   .selfcheck-section {
     margin: 6mm 0 5mm;

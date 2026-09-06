@@ -1,6 +1,6 @@
 ---
 bundleVersion: "2.12.0-prod"
-schemaVersion: "2.4.0"
+schemaVersion: "2.5.0"
 promptVersion: "2.12.0"
 engineVersion: "1.7.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
@@ -11,7 +11,7 @@ sourceHashes:
   "packages/generator/prompts/2.12.0/02-author.md": "bf38249f383a11438c8812f31739f4f1a638949ed6e93d09b98bd1be461f33e1"
   "packages/generator/prompts/2.12.0/03-critic.md": "ff6f59636bce31a44923fdd0d939c58d83a6adbf9c27a80ce3c9ec27a9b32c82"
   "packages/generator/prompts/2.12.0/04-repair.md": "c8dae311dadf0a83de64fa7b26d47afde66c796698aecd9f67f5f609e321ee30"
-  "packages/generator/src/curriculum-package-schema.ts": "3b86d1d2966c8f914ab2700ee6fbe9927c78fca848383bde7fb2123a2fe654cf"
+  "packages/generator/src/curriculum-package-schema.ts": "28b00107018adc5d59abcbe810612176b86be8221a537ea998285dbf4955eb5c"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "4b12f3de96cf2fde5b8e27e3f55bbbb63e043f54962cf7866e58441dea8e827e"
@@ -292,9 +292,29 @@ const Text = z.string().trim().min(1)
 const StableId = Text.regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/, 'Must be a stable identifier')
 const Evidence = z.strictObject({ source: z.enum(['profile', 'school', 'learning-state', 'vocabulary', 'grammar', 'weekly-history', 'feedback', 'curriculum']), detail: Text })
 
+export const ResponseGridCellSchema = z.strictObject({
+  text: Text.optional(),
+  responseUnitId: StableId.optional(),
+  placeholder: Text.optional(),
+})
+
+export type ResponseGridCell = z.infer<typeof ResponseGridCellSchema>
+
+export const SequenceItemSchema = z.strictObject({
+  stepNumber: z.union([z.number().int(), Text]).optional(),
+  label: Text.optional(),
+  content: Text.optional(),
+  placeholder: Text.optional(),
+  responseUnitId: StableId.optional(),
+  relationToNext: Text.optional(),
+})
+
+export type SequenceItem = z.infer<typeof SequenceItemSchema>
+
 export const ResponseLayoutRowSchema = z.strictObject({
   label: Text.optional(),
   values: z.array(Text).optional(),
+  cells: z.array(ResponseGridCellSchema).optional(),
 })
 
 export type ResponseLayoutRow = z.infer<typeof ResponseLayoutRowSchema>
@@ -314,6 +334,11 @@ export const ResponseLayoutSchema = z.discriminatedUnion('type', [
     headers: z.array(Text).min(2).max(6),
     rows: z.array(ResponseLayoutRowSchema).min(1).max(8),
   }),
+  z.strictObject({
+    type: z.literal('sequence'),
+    layoutDirection: z.enum(['vertical', 'horizontal']).optional().default('vertical'),
+    items: z.array(SequenceItemSchema).min(2).max(8),
+  }),
 ])
 
 export type ResponseLayout = z.infer<typeof ResponseLayoutSchema>
@@ -324,6 +349,7 @@ function requireWritingSpace(question: { itemType: string; options?: string[]; w
     || (question.responseLayout?.type === 'lines' && (question.responseLayout.lineCount ?? 0) >= 1)
     || question.responseLayout?.type === 'table'
     || question.responseLayout?.type === 'organizer'
+    || question.responseLayout?.type === 'sequence'
   if (writtenResponse && !hasWritingSpace) {
     ctx.addIssue({ code: 'custom', path: ['writingLines'], message: 'Written responses require writing space' })
   }
@@ -353,8 +379,11 @@ export const QuestionV24Schema = z.strictObject({
 }).superRefine(requireWritingSpace)
 
 export type QuestionV24 = z.infer<typeof QuestionV24Schema>
-export const QuestionSchema = QuestionV24Schema
-export type Question = QuestionV24
+
+export const QuestionV25Schema = QuestionV24Schema
+export type QuestionV25 = QuestionV24
+export const QuestionSchema = QuestionV25Schema
+export type Question = QuestionV25
 
 export const ReadingBlockSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('paragraph'), text: Text }),
@@ -565,8 +594,52 @@ export const CurriculumPackageV24Schema = CurriculumPackageV23Schema.extend({
   }),
 })
 
+export const UnitAnswerSchema = z.strictObject({
+  unitId: StableId,
+  answer: Text,
+  acceptedAnswers: z.array(Text).default([]),
+  explanationZh: Text.optional(),
+})
+
+export type UnitAnswer = z.infer<typeof UnitAnswerSchema>
+
+export const AnswerItemV25Schema = z.strictObject({
+  questionId: StableId,
+  answer: Text,
+  acceptedAnswers: z.array(Text),
+  explanationZh: Text,
+  likelyMisconceptionZh: Text.nullable(),
+  followUpZh: Text.nullable(),
+  unitAnswers: z.array(UnitAnswerSchema).optional(),
+})
+
+export type AnswerItemV25 = z.infer<typeof AnswerItemV25Schema>
+
+// Canonical 2.5.0 Production Schema
+export const CurriculumPackageV25Schema = CurriculumPackageV24Schema.extend({
+  metadata: CurriculumPackageV24Schema.shape.metadata.extend({
+    schemaVersion: z.literal('2.5.0'),
+  }),
+  studentLesson: CurriculumPackageV24Schema.shape.studentLesson.extend({
+    practice: z.array(z.strictObject({
+      id: StableId,
+      stage: z.enum(['guided', 'independent', 'cap-transfer', 'production', 'retrieval']),
+      titleZh: Text,
+      instructionsZh: Text,
+      hintZh: Text.nullable(),
+      questions: z.array(QuestionV25Schema).min(1).max(20),
+    })).min(4).max(10),
+    homework: z.strictObject({
+      purposeZh: Text,
+      estimatedMinutes: z.number().int().min(5).max(90),
+      questions: z.array(QuestionV25Schema).min(3).max(20),
+    }),
+  }),
+  answers: z.array(AnswerItemV25Schema).min(1),
+})
+
 /** The one canonical schema used for all newly authored production packages. */
-export const CurriculumPackageSchema = CurriculumPackageV24Schema
+export const CurriculumPackageSchema = CurriculumPackageV25Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -720,15 +793,17 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
+export type CurriculumPackageV25 = z.infer<typeof CurriculumPackageV25Schema>
 export type CurriculumPackageV24 = z.infer<typeof CurriculumPackageV24Schema>
 export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
 export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
-export type CurriculumPackage = CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
+export type CurriculumPackage = CurriculumPackageV25 | CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
+export type CurriculumQuestionV25 = z.infer<typeof QuestionV25Schema>
 export type CurriculumQuestionV24 = z.infer<typeof QuestionV24Schema>
 export type CurriculumQuestionLegacy = z.infer<typeof QuestionLegacySchema>
-export type CurriculumQuestion = CurriculumQuestionV24 | (CurriculumQuestionLegacy & { responseLayout?: undefined })
+export type CurriculumQuestion = CurriculumQuestionV25 | CurriculumQuestionV24 | (CurriculumQuestionLegacy & { responseLayout?: undefined })
 
 export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24 {
   return {
@@ -748,6 +823,28 @@ export function upgradeV23ToV24(pkg: CurriculumPackageV23): CurriculumPackageV24
         questions: pkg.studentLesson.homework.questions.map((q) => ({ ...q })),
       },
     },
+  }
+}
+
+export function upgradeV24ToV25(pkg: CurriculumPackageV24): CurriculumPackageV25 {
+  return {
+    ...pkg,
+    metadata: {
+      ...pkg.metadata,
+      schemaVersion: '2.5.0',
+    },
+    studentLesson: {
+      ...pkg.studentLesson,
+      practice: pkg.studentLesson.practice.map((sec) => ({
+        ...sec,
+        questions: sec.questions.map((q) => ({ ...q })),
+      })),
+      homework: {
+        ...pkg.studentLesson.homework,
+        questions: pkg.studentLesson.homework.questions.map((q) => ({ ...q })),
+      },
+    },
+    answers: pkg.answers.map((ans) => ({ ...ans })),
   }
 }
 ```

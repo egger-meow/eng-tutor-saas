@@ -291,7 +291,7 @@ export async function compileProductionBundle(
 
   const metadata: BundleMetadata = {
     bundleVersion: '2.12.0-prod',
-    schemaVersion: '2.4.0',
+    schemaVersion: '2.5.0',
     promptVersion: '2.12.0',
     engineVersion: CURRENT_ENGINE_VERSION,
     sourceHashes: hashes,

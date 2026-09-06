@@ -34,19 +34,29 @@ function renderWritingLines(count: number): string {
 </div>`
 }
 
-function renderOrganizerTable(layout: ResponseLayout): string {
-  if (layout.type === 'lines') {
-    return renderWritingLines(layout.lineCount ?? 0)
-  }
-
+function renderOrganizerTable(layout: Extract<ResponseLayout, { type: 'table' | 'organizer' }>): string {
   const headerCells = layout.headers.map((hText: string) => `<th>${h(hText)}</th>`).join('')
   const rowsHtml = layout.rows.map((row) => {
     const labelCell = row.label ? `<td class="organizer-row-label">${h(row.label)}</td>` : ''
-    const valueCellsCount = row.label ? Math.max(1, layout.headers.length - 1) : layout.headers.length
-    const cells = Array.from({ length: valueCellsCount }, (_, idx) => {
-      const val = row.values && row.values[idx] ? h(row.values[idx]!) : ''
-      return `<td class="organizer-cell">${val}</td>`
-    }).join('')
+
+    let cells = ''
+    if (Array.isArray(row.cells) && row.cells.length > 0) {
+      cells = row.cells.map((cell) => {
+        if (cell.responseUnitId) {
+          const badge = `<span class="unit-badge">[${h(cell.responseUnitId)}]</span>`
+          const placeholder = cell.placeholder ? `<span class="unit-placeholder">${h(cell.placeholder)}</span>` : ''
+          return `<td class="organizer-cell organizer-response-slot">${badge} ${placeholder}</td>`
+        }
+        return `<td class="organizer-cell">${cell.text ? h(cell.text) : ''}</td>`
+      }).join('')
+    } else {
+      const valueCellsCount = row.label ? Math.max(1, layout.headers.length - 1) : layout.headers.length
+      cells = Array.from({ length: valueCellsCount }, (_, idx) => {
+        const val = row.values && row.values[idx] ? h(row.values[idx]!) : ''
+        return `<td class="organizer-cell">${val}</td>`
+      }).join('')
+    }
+
     return `<tr>${labelCell}${cells}</tr>`
   }).join('\n')
 
@@ -62,16 +72,55 @@ function renderOrganizerTable(layout: ResponseLayout): string {
 </div>`
 }
 
+function renderSequenceLayout(layout: Extract<ResponseLayout, { type: 'sequence' }>): string {
+  const isHorizontal = layout.layoutDirection === 'horizontal'
+  const itemsHtml = layout.items.map((item, idx) => {
+    const stepNumHtml = item.stepNumber !== undefined
+      ? `<span class="sequence-step-num">${h(String(item.stepNumber))}</span>`
+      : `<span class="sequence-step-num">${idx + 1}</span>`
+    const labelHtml = item.label ? `<div class="sequence-label">${h(item.label)}</div>` : ''
+
+    let contentHtml = ''
+    if (item.responseUnitId) {
+      const badge = `<span class="unit-badge">(${h(item.responseUnitId)})</span>`
+      const placeholder = item.placeholder ? `<span class="unit-placeholder">${h(item.placeholder)}</span>` : ''
+      contentHtml = `<div class="sequence-response-slot">${badge} ${placeholder}</div>`
+    } else if (item.content) {
+      contentHtml = `<div class="sequence-content">${h(item.content)}</div>`
+    }
+
+    const relationHtml = item.relationToNext
+      ? `<div class="sequence-relation"><span class="relation-badge">${h(item.relationToNext)}</span></div>`
+      : (idx < layout.items.length - 1 ? `<div class="sequence-relation"><span class="relation-arrow">${isHorizontal ? '→' : '↓'}</span></div>` : '')
+
+    return `<div class="sequence-node-wrapper">
+      <div class="sequence-node">
+        <div class="sequence-node-header">${stepNumHtml}${labelHtml}</div>
+        ${contentHtml}
+      </div>
+      ${relationHtml}
+    </div>`
+  }).join('\n')
+
+  return `<div class="response-sequence-container ${isHorizontal ? 'sequence-horizontal' : 'sequence-vertical'}">
+    ${itemsHtml}
+  </div>`
+}
+
 export function renderQuestionCard(question: CurriculumQuestion): string {
   const optionsHtml = question.options && question.options.length > 0
     ? renderOptions(question.options)
     : ''
 
   let responseHtml = ''
-  if (question.responseLayout && (question.responseLayout.type === 'table' || question.responseLayout.type === 'organizer')) {
-    responseHtml = renderOrganizerTable(question.responseLayout)
-  } else if (question.responseLayout && question.responseLayout.type === 'lines') {
-    responseHtml = renderWritingLines(question.responseLayout.lineCount ?? question.writingLines)
+  if (question.responseLayout) {
+    if (question.responseLayout.type === 'table' || question.responseLayout.type === 'organizer') {
+      responseHtml = renderOrganizerTable(question.responseLayout)
+    } else if (question.responseLayout.type === 'sequence') {
+      responseHtml = renderSequenceLayout(question.responseLayout)
+    } else if (question.responseLayout.type === 'lines') {
+      responseHtml = renderWritingLines(question.responseLayout.lineCount ?? question.writingLines)
+    }
   } else {
     responseHtml = renderWritingLines(question.writingLines)
   }

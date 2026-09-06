@@ -128,4 +128,34 @@ describe('parent-renderer', () => {
     expect(html).not.toContain('能否獨立完成')
     expect(html).not.toContain('這份教材為什麼這樣安排')
   })
+
+  it('renders slot-aligned unit answers when unitAnswers are present', () => {
+    const pkgWithUnits = {
+      ...samplePkg,
+      answers: [
+        {
+          questionId: 'Q1',
+          answer: 'Summary Answer',
+          acceptedAnswers: [],
+          explanationZh: '完整解說',
+          likelyMisconceptionZh: null,
+          followUpZh: null,
+          unitAnswers: [
+            { unitId: 'Q1.slot1', answer: 'First observation', explanationZh: '見第一段' },
+            { unitId: 'Q1.slot2', answer: 'Second deduction', explanationZh: '見第二段' },
+          ],
+        },
+      ],
+    } as unknown as CurriculumPackage
+
+    const html = renderCurriculumParentAnswerHtml(pkgWithUnits)
+    expect(html).toContain('class="unit-answers-card"')
+    expect(html).toContain('分格答案：')
+    expect(html).toContain('[Q1.slot1]')
+    expect(html).toContain('First observation')
+    expect(html).toContain('(見第一段)')
+    expect(html).toContain('[Q1.slot2]')
+    expect(html).toContain('Second deduction')
+    expect(html).toContain('(見第二段)')
+  })
 })

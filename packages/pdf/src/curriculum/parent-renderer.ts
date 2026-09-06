@@ -47,6 +47,19 @@ function renderAnswerCard(answer: AnswerItem, question?: CurriculumQuestion): st
     ? `<span class="answer-question-context">— ${h(formatQuestionContextPrompt(question.prompt))}</span>`
     : ''
 
+  const unitAnswers = 'unitAnswers' in answer && Array.isArray(answer.unitAnswers) ? answer.unitAnswers : undefined
+  const unitAnswersHtml = unitAnswers && unitAnswers.length > 0
+    ? `<div class="unit-answers-card">
+        <div class="unit-answers-title"><strong>分格答案：</strong></div>
+        <ul class="unit-answers-list">
+          ${unitAnswers.map((u) => {
+            const expl = u.explanationZh ? ` <span class="small muted">(${h(u.explanationZh)})</span>` : ''
+            return `<li><strong>[${h(u.unitId)}]</strong> ${h(u.answer)}${expl}</li>`
+          }).join('')}
+        </ul>
+      </div>`
+    : ''
+
   return `<article class="answer-card">
   <div class="answer-header">
     <div class="answer-qid-row">
@@ -55,6 +68,7 @@ function renderAnswerCard(answer: AnswerItem, question?: CurriculumQuestion): st
     </div>
   </div>
   <div class="answer-key"><strong>答案：</strong>${h(answer.answer)}</div>
+  ${unitAnswersHtml}
   ${alternativesHtml}
   <div class="answer-reason"><strong>簡短理由：</strong>${h(answer.explanationZh)}</div>
   ${misconceptionHtml}

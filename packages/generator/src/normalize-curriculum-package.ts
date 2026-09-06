@@ -38,8 +38,41 @@ export function stripTrailingTotalDuration(text: string): string {
   return text.replace(TRAILING_TOTAL_DURATION_REGEX, '').trim()
 }
 
+export function countActiveResponseSlots(question: any): number {
+  if (!question || typeof question !== 'object' || !question.responseLayout) return 0
+  const layout = question.responseLayout
+  if (layout.type === 'table' || layout.type === 'organizer') {
+    let count = 0
+    if (Array.isArray(layout.rows)) {
+      for (const row of layout.rows) {
+        if (Array.isArray(row.cells)) {
+          for (const cell of row.cells) {
+            if (cell && cell.responseUnitId) count++
+          }
+        }
+      }
+    }
+    return count
+  }
+  if (layout.type === 'sequence') {
+    let count = 0
+    if (Array.isArray(layout.items)) {
+      for (const item of layout.items) {
+        if (item && item.responseUnitId) count++
+      }
+    }
+    return count
+  }
+  return 0
+}
+
 export function computeQuestionDuration(question: any): number {
   if (!question || typeof question !== 'object') return 2
+
+  const activeSlots = countActiveResponseSlots(question)
+  if (activeSlots > 0) {
+    return Math.max(3, Math.min(8, 2 + activeSlots * 0.75))
+  }
 
   const itemType = question.itemType
   const writingLines = typeof question.writingLines === 'number' ? question.writingLines : 0

@@ -174,6 +174,7 @@ import {
   upgradeV20ToV21,
   upgradeV21ToV22,
   upgradeV23ToV24,
+  upgradeV24ToV25,
   makeGroundedCurriculumPackage,
   capRuntimeMetadata,
   type CurriculumPackageV20,
@@ -278,7 +279,7 @@ function makeValidV24Package(jobId: string, childId: string, fingerprint: string
       }),
     })
   }
-  return v24
+  return upgradeV24ToV25(v24)
 }
 
 describe('validatePreSubmitPackage', () => {

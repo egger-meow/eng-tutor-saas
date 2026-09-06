@@ -1,6 +1,7 @@
 import { ZodError } from 'zod'
 import {
   CurriculumPackageSchema,
+  CurriculumPackageV24Schema,
   CurriculumPackageV23Schema,
   CurriculumPackageV22Schema,
   CurriculumPackageV21Schema,
@@ -125,6 +126,109 @@ export function findForbiddenPersonalizationJargon(text: string): string | null 
   return null
 }
 
+export function responseUnitRelationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
+  const issues: LessonValidationIssue[] = []
+  const questions = [
+    ...value.studentLesson.practice.flatMap((section) => section.questions),
+    ...value.studentLesson.homework.questions,
+  ]
+  const answerMap = new Map<string, any>()
+  for (const ans of value.answers) {
+    if (ans.questionId) answerMap.set(ans.questionId, ans)
+  }
+
+  const globalUnitIds = new Set<string>()
+
+  for (const question of questions) {
+    const layout = (question as any).responseLayout
+    if (!layout) continue
+
+    const responseUnitIds: string[] = []
+
+    if (layout.type === 'table' || layout.type === 'organizer') {
+      if (Array.isArray(layout.rows)) {
+        for (const row of layout.rows) {
+          if (Array.isArray(row.cells)) {
+            for (const cell of row.cells) {
+              if (cell.responseUnitId) {
+                responseUnitIds.push(cell.responseUnitId)
+                if (cell.text && typeof cell.text === 'string' && cell.text.trim()) {
+                  issues.push({
+                    path: `questions.${question.id}.responseLayout`,
+                    message: `Accidental answer exposure: response slot "${cell.responseUnitId}" contains student-facing text "${cell.text}"`,
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
+    } else if (layout.type === 'sequence') {
+      if (Array.isArray(layout.items)) {
+        for (const item of layout.items) {
+          if (item.responseUnitId) {
+            responseUnitIds.push(item.responseUnitId)
+            if (item.content && typeof item.content === 'string' && item.content.trim()) {
+              issues.push({
+                path: `questions.${question.id}.responseLayout`,
+                message: `Accidental answer exposure: sequence response slot "${item.responseUnitId}" contains student-facing content "${item.content}"`,
+              })
+            }
+          }
+        }
+      }
+    }
+
+    const seenUnits = new Set<string>()
+    for (const uid of responseUnitIds) {
+      if (seenUnits.has(uid)) {
+        issues.push({
+          path: `questions.${question.id}.responseLayout`,
+          message: `Duplicate responseUnitId "${uid}" in question "${question.id}"`,
+        })
+      }
+      seenUnits.add(uid)
+      if (globalUnitIds.has(uid)) {
+        issues.push({
+          path: `questions.${question.id}.responseLayout`,
+          message: `Duplicate responseUnitId "${uid}" across package in question "${question.id}"`,
+        })
+      }
+      globalUnitIds.add(uid)
+    }
+
+    if (responseUnitIds.length > 0) {
+      const answer = answerMap.get(question.id)
+      if (answer && Array.isArray(answer.unitAnswers)) {
+        const mappedUnitIds = new Set(answer.unitAnswers.map((ua: any) => ua.unitId))
+        for (const uid of responseUnitIds) {
+          if (!mappedUnitIds.has(uid)) {
+            issues.push({
+              path: `answers.${question.id}.unitAnswers`,
+              message: `Missing unitAnswer for response unit "${uid}" in question "${question.id}"`,
+            })
+          }
+        }
+        for (const ua of answer.unitAnswers) {
+          if (!seenUnits.has(ua.unitId)) {
+            issues.push({
+              path: `answers.${question.id}.unitAnswers`,
+              message: `Orphan unitAnswer "${ua.unitId}" does not match any declared response unit in question "${question.id}"`,
+            })
+          }
+        }
+      } else if (responseUnitIds.length > 1) {
+        issues.push({
+          path: `answers.${question.id}`,
+          message: `Question "${question.id}" has ${responseUnitIds.length} response units (${responseUnitIds.join(', ')}) but missing unitAnswers in answer key`,
+        })
+      }
+    }
+  }
+
+  return issues
+}
+
 function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   const issues: LessonValidationIssue[] = []
   const targets = new Set(value.learningPlan.targets.map((target) => target.id))
@@ -174,6 +278,8 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
   if (value.qualityEvidence.criticFindings.some((finding) => finding.severity === 'critical' && !finding.resolution))
     issues.push({ path: 'qualityEvidence.criticFindings', message: 'Unresolved critical critic finding' })
 
+  issues.push(...responseUnitRelationshipIssues(value))
+
   if ('grounding' in value) {
     issues.push(...groundingRelationshipIssues(value))
   }
@@ -208,7 +314,7 @@ function relationshipIssues(value: CurriculumPackage): LessonValidationIssue[] {
 const GROUNDED_READING_LOCATION = /^studentLesson\.reading\.blocks\.(\d+)\.(text|heading|timeOrStep|event|detail)$/u
 
 function groundingRelationshipIssues(
-  value: Extract<CurriculumPackage, { metadata: { schemaVersion: '2.3.0' | '2.4.0' } }>,
+  value: Extract<CurriculumPackage, { metadata: { schemaVersion: '2.3.0' | '2.4.0' | '2.5.0' } }>,
 ): LessonValidationIssue[] {
   const issues: LessonValidationIssue[] = []
   const sourceIds = new Set<string>()
@@ -404,8 +510,10 @@ export function validateCurriculumPackage(input: unknown): CurriculumValidationR
     ? CurriculumPackageV22Schema.safeParse(normalized)
     : normalizedVersion === '2.3.0'
       ? CurriculumPackageV23Schema.safeParse(normalized)
-      : CurriculumPackageSchema.safeParse(normalized)
+      : normalizedVersion === '2.4.0'
+        ? CurriculumPackageV24Schema.safeParse(normalized)
+        : CurriculumPackageSchema.safeParse(normalized)
   if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
-  const issues = relationshipIssues(parsed.data)
-  return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage: parsed.data }
+  const issues = relationshipIssues(parsed.data as CurriculumPackage)
+  return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage: parsed.data as CurriculumPackage }
 }

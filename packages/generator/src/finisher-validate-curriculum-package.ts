@@ -1,6 +1,7 @@
 import { z, type ZodError } from 'zod'
 
 import {
+  CurriculumPackageV25Schema,
   CurriculumPackageV24Schema,
   type CurriculumPackage,
 } from './curriculum-package-schema.js'
@@ -11,6 +12,7 @@ import {
 import { normalizeCurriculumPackage } from './normalize-curriculum-package.js'
 import {
   validateCurriculumPackage as validateCurriculumPackageStrict,
+  responseUnitRelationshipIssues,
   type CurriculumValidationResult,
 } from './validate-curriculum-package.js'
 import type { LessonValidationIssue } from './validate-lesson.js'
@@ -44,6 +46,34 @@ const FinisherCurriculumPackageV24Schema = CurriculumPackageV24Schema.extend({
     selfCheckZh: z.array(CurriculumPackageV24Schema.shape.studentLesson.shape.selfCheckZh.element).min(1).max(8),
     homework: homeworkSchema.extend({
       questions: z.array(homeworkSchema.shape.questions.element).min(1).max(20),
+    }),
+  }),
+})
+
+const targetV25Schema = CurriculumPackageV25Schema.shape.learningPlan.shape.targets.element
+const openingV25Schema = CurriculumPackageV25Schema.shape.studentLesson.shape.opening
+const readingV25Schema = CurriculumPackageV25Schema.shape.studentLesson.shape.reading
+const instructionV25Schema = CurriculumPackageV25Schema.shape.studentLesson.shape.instruction.element
+const homeworkV25Schema = CurriculumPackageV25Schema.shape.studentLesson.shape.homework
+
+export const FinisherCurriculumPackageV25Schema = CurriculumPackageV25Schema.extend({
+  learningPlan: CurriculumPackageV25Schema.shape.learningPlan.extend({
+    targets: z.array(targetV25Schema).min(1).max(10),
+  }),
+  studentLesson: CurriculumPackageV25Schema.shape.studentLesson.extend({
+    opening: openingV25Schema.extend({
+      goalsZh: z.array(openingV25Schema.shape.goalsZh.element).min(1).max(6),
+    }),
+    reading: readingV25Schema.extend({
+      wordCount: z.number().int().min(1).max(900),
+    }),
+    instruction: z.array(instructionV25Schema.extend({
+      workedExamples: z.array(instructionV25Schema.shape.workedExamples.element).min(1).max(8),
+      commonMistakes: z.array(instructionV25Schema.shape.commonMistakes.element).max(6),
+    })).min(1).max(4),
+    selfCheckZh: z.array(CurriculumPackageV25Schema.shape.studentLesson.shape.selfCheckZh.element).min(1).max(8),
+    homework: homeworkV25Schema.extend({
+      questions: z.array(homeworkV25Schema.shape.questions.element).min(1).max(20),
     }),
   }),
 })
@@ -101,6 +131,7 @@ function objectiveRelationshipIssues(value: CurriculumPackage): LessonValidation
     issues.push({ path: 'qualityEvidence.criticFindings', message: 'Unresolved critical critic finding' })
   }
 
+  issues.push(...responseUnitRelationshipIssues(value))
   issues.push(...groundingIntegrityIssues(value))
 
   for (const id of value.trackingDelta.exposedGrammarTargetIds) {
@@ -231,14 +262,21 @@ export function validateCurriculumPackageForFinisher(input: unknown): Curriculum
     ? (normalized as Record<string, any>).metadata?.schemaVersion
     : undefined
 
-  if (version !== '2.4.0') return validateCurriculumPackageStrict(normalized)
+  if (version === '2.4.0') {
+    const parsed = FinisherCurriculumPackageV24Schema.safeParse(normalized)
+    if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
+    const curriculumPackage = parsed.data as CurriculumPackage
+    const issues = objectiveRelationshipIssues(curriculumPackage)
+    return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage }
+  }
 
-  const parsed = FinisherCurriculumPackageV24Schema.safeParse(normalized)
-  if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
+  if (version === '2.5.0') {
+    const parsed = FinisherCurriculumPackageV25Schema.safeParse(normalized)
+    if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
+    const curriculumPackage = parsed.data as CurriculumPackage
+    const issues = objectiveRelationshipIssues(curriculumPackage)
+    return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage }
+  }
 
-  const curriculumPackage = parsed.data as CurriculumPackage
-  const issues = objectiveRelationshipIssues(curriculumPackage)
-  return issues.length > 0
-    ? { success: false, issues }
-    : { success: true, curriculumPackage }
+  return validateCurriculumPackageStrict(normalized)
 }

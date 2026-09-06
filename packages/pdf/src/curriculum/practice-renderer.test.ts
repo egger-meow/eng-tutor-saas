@@ -80,6 +80,71 @@ describe('question-renderer', () => {
     expect(html).toContain('class="organizer-row-label">Vibrating Length</td>')
     expect(html).toContain('class="organizer-cell"')
   })
+
+  it('renders organizer grid with ResponseGridCell slots and zero answer leakage', () => {
+    const q = {
+      id: 'P3',
+      targetIds: ['target-grid'],
+      itemType: 'short-response' as const,
+      prompt: 'Fill in the blanks in the table.',
+      writingLines: 0,
+      difficulty: 'on-level' as const,
+      responseLayout: {
+        type: 'organizer' as const,
+        headers: ['Given Observation', 'Student Deduction'],
+        rows: [
+          {
+            label: 'Evidence 1',
+            cells: [
+              { text: 'Leaves turn brown in dry soil' },
+              { responseUnitId: 'P3.1', placeholder: 'Deduce plant health' },
+            ],
+          },
+        ],
+      },
+    }
+
+    const html = renderQuestionCard(q)
+    expect(html).toContain('class="organizer-row-label">Evidence 1</td>')
+    expect(html).toContain('Leaves turn brown in dry soil')
+    expect(html).toContain('class="organizer-cell organizer-response-slot"')
+    expect(html).toContain('class="unit-badge">[P3.1]</span>')
+    expect(html).toContain('class="unit-placeholder">Deduce plant health</span>')
+    // Verify zero answer leakage
+    expect(html).not.toContain('Dehydration')
+  })
+
+  it('renders sequence layout with flow items and step badges', () => {
+    const q = {
+      id: 'S1',
+      targetIds: ['target-seq'],
+      itemType: 'short-response' as const,
+      prompt: 'Complete the scientific sequence.',
+      writingLines: 0,
+      difficulty: 'on-level' as const,
+      responseLayout: {
+        type: 'sequence' as const,
+        layoutDirection: 'horizontal' as const,
+        items: [
+          { stepNumber: 1, label: 'Form Hypothesis', content: 'Observe natural phenomena' },
+          { stepNumber: 2, label: 'Experiment', responseUnitId: 'S1.slot1', placeholder: 'Describe test procedure', relationToNext: 'leads to' },
+          { stepNumber: 3, label: 'Conclusion', content: 'Analyze gathered data' },
+        ],
+      },
+    }
+
+    const html = renderQuestionCard(q)
+    expect(html).toContain('class="response-sequence-container sequence-horizontal"')
+    expect(html).toContain('class="sequence-step-num">1</span>')
+    expect(html).toContain('class="sequence-step-num">2</span>')
+    expect(html).toContain('class="sequence-step-num">3</span>')
+    expect(html).toContain('class="sequence-label">Form Hypothesis</div>')
+    expect(html).toContain('Observe natural phenomena')
+    expect(html).toContain('class="sequence-response-slot"')
+    expect(html).toContain('class="unit-badge">(S1.slot1)</span>')
+    expect(html).toContain('class="unit-placeholder">Describe test procedure</span>')
+    expect(html).toContain('class="relation-badge">leads to</span>')
+  })
 })
 
 describe('practice-renderer', () => {
