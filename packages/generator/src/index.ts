@@ -166,11 +166,15 @@ export {
   extractDeliveryMemory,
   aggregateRecentResponseForms,
   aggregateRecentDeliveryMemory,
+  buildFormatPlanningCapsule,
+  FORMAT_SELECTION_RULES,
+  CANONICAL_PEDAGOGICAL_FORMAT_CANDIDATES,
 } from './curriculum-maps/diversity-capsule.js'
 export type {
   DiversityCapsule,
   HistoricalPackageSummary,
   DeliveryMemoryProjection,
+  FormatPlanningCapsule,
 } from './curriculum-maps/diversity-capsule.js'
 
 // CAP & History Selective Retrieval
@@ -180,7 +184,11 @@ export {
   expandCapPrecedents,
   prepareSelectiveAuthoringBundle,
   scoreRoutingCard,
+  retrievePrecedentsForAssessmentPlans,
 } from './cap-retrieval.js'
+export {
+  assembleSelectiveAuthoringBundle,
+} from './selective-bundle-assembler.js'
 export type {
   CapCandidateSummary,
   CapRetrievalIntent,
@@ -188,6 +196,8 @@ export type {
   CapRetrievalResult,
   CapRoutingCard,
   CapRoutingIndex,
+  ItemPrecedentRetrievalResult,
+  MultiItemPrecedentRetrievalResult,
 } from './cap-retrieval.js'
 export {
   retrieveTargetedStudentHistory,

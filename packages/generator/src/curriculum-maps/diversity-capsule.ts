@@ -12,6 +12,16 @@ export {
   aggregateRecentDeliveryMemory,
 }
 
+import {
+  type FormatPlanningCapsule,
+  buildFormatPlanningCapsule,
+} from './format-planning-capsule.js'
+
+export {
+  type FormatPlanningCapsule,
+  buildFormatPlanningCapsule,
+}
+
 export interface HistoricalPackageSummary {
   materialWeek: string
   completedAt?: string
@@ -27,6 +37,7 @@ export interface DiversityCapsule {
   recentItemFamilies: string[]
   recentResponseForms?: string[]
   recentDeliveryMemory?: DeliveryMemoryProjection[]
+  formatPlanningCapsule?: FormatPlanningCapsule
 }
 
 /**
@@ -105,7 +116,12 @@ export function buildDiversityCapsule(
     recentContextKeys,
     recentItemFamilies,
     ...(recentResponseForms.length > 0 ? { recentResponseForms } : {}),
-    ...(recentDeliveryMemory.length > 0 ? { recentDeliveryMemory } : {}),
+    ...(recentDeliveryMemory.length > 0
+      ? {
+          recentDeliveryMemory,
+          formatPlanningCapsule: buildFormatPlanningCapsule(recentDeliveryMemory, lookbackWeeks),
+        }
+      : {}),
   }
 }
 

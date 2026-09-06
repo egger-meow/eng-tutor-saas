@@ -236,5 +236,49 @@ describe('Two-Stage CAP Precedent Candidate Retrieval and Shard Expansion', () =
     expect(selectiveBundle).not.toContain('Lossless dictionary table with 195 cards')
     expect(selectiveBundle).toContain('## 3. Model Quality Profile Resolution')
   })
+
+  it('leaves explicit noPrecedentReason on missing primarySkill without fallback to discourse_relationship', () => {
+    const missingSkillResult = filterAndRankCapPrecedents({
+      primarySkill: '',
+      targetCognitiveDepth: 'D2_single_step_inference',
+    })
+    expect(missingSkillResult.candidates).toHaveLength(0)
+    expect(missingSkillResult.noPrecedentReason).toBe('missing_primary_skill')
+
+    const unknownSkillResult = filterAndRankCapPrecedents({
+      primarySkill: 'completely_nonexistent_skill_xyz',
+    })
+    expect(unknownSkillResult.candidates).toHaveLength(0)
+    expect(unknownSkillResult.noPrecedentReason).toBe('no_matching_authoritative_precedent_for_intent')
+  })
+
+  it('retrieves precedents per item intent, deduplicating across items and expanding shards', async () => {
+    const { retrievePrecedentsForAssessmentPlans } = await import('./cap-retrieval.js')
+    const intents = [
+      {
+        primarySkill: 'local_inference',
+        targetCognitiveDepth: 'D2_single_step_inference',
+      },
+      {
+        primarySkill: 'information_integration',
+        targetCognitiveDepth: 'D3_multi_step_synthesis',
+      },
+      {
+        primarySkill: 'local_inference', // shares skill with item 0
+        targetCognitiveDepth: 'D2_single_step_inference',
+      },
+    ]
+
+    const result = await retrievePrecedentsForAssessmentPlans(intents)
+    expect(result.itemResults).toHaveLength(3)
+    expect(result.itemResults[0]!.precedentRefs.length).toBeGreaterThanOrEqual(1)
+    expect(result.itemResults[1]!.precedentRefs.length).toBeGreaterThanOrEqual(1)
+    expect(result.itemResults[0]!.noPrecedentReason).toBeNull()
+
+    // Deduplication check: uniqueCandidateRefs should have no duplicates
+    const uniqueRefs = new Set(result.uniqueCandidateRefs)
+    expect(uniqueRefs.size).toBe(result.uniqueCandidateRefs.length)
+    expect(result.expandedCards.length).toBe(result.uniqueCandidateRefs.length)
+  })
 })
 

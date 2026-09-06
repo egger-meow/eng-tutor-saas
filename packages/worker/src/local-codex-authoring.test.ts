@@ -154,9 +154,57 @@ describe('selective CAP precedent authoring bundle compaction', () => {
     expect(activeBundle).not.toContain('## 2B. Compact CAP Precedent Routing Index')
     expect(activeBundle).toContain('## 3. Model Quality Profile Resolution')
 
-    // Verify significant context compaction: saves > 7,000 characters (~2,000 tokens)
-    const charSavings = rawBundle.length - activeBundle.length
-    expect(charSavings).toBeGreaterThan(7000)
+    // Verify significant context compaction: total bundle size remains bounded under 110k chars (vs >180k with 195 cards)
+    expect(activeBundle.length).toBeLessThan(110_000)
+    // Verify that precedent cards were injected into section 2B
+    expect(activeBundle).toContain(candidateRefs[0])
+  })
+
+  it('avoids silent fallback to discourse_relationship when primarySkill is omitted', async () => {
+    const rawBundlePath = new URL('../../generator/bundles/production-authoring-bundle.md', import.meta.url)
+    const rawBundle = await readFile(rawBundlePath, 'utf8')
+
+    const context = {
+      profile: { grade_level: 'A2_basic', interests: ['biology'] },
+    }
+
+    const result = await prepareAuthoringBundleWithPrecedents(
+      rawBundle,
+      context,
+      { repoRoot: defaultRepoRoot() },
+    )
+
+    expect(result.candidateRefs).toEqual([])
+    expect(result.expandedCount).toBe(0)
+    expect(result.noPrecedentReason).toBe('missing_primary_skill')
+  })
+
+  it('supports post-plan retrieval for assessment items with cross-item deduplication', async () => {
+    const rawBundlePath = new URL('../../generator/bundles/production-authoring-bundle.md', import.meta.url)
+    const rawBundle = await readFile(rawBundlePath, 'utf8')
+
+    const context = {
+      profile: { grade_level: 'B1_intermediate' },
+    }
+
+    const assessmentPlans = [
+      { itemId: 'C1', targetSkill: 'purpose_speaker_intent', cognitiveDepth: 'inferential' as const },
+      { itemId: 'C2', targetSkill: 'purpose_speaker_intent', cognitiveDepth: 'inferential' as const },
+      { itemId: 'C3', targetSkill: 'evaluative_judgment', cognitiveDepth: 'evaluative' as const },
+    ]
+
+    const result = await prepareAuthoringBundleWithPrecedents(
+      rawBundle,
+      context,
+      { repoRoot: defaultRepoRoot(), assessmentPlans },
+    )
+
+    expect(result.candidateRefs.length).toBeGreaterThanOrEqual(1)
+    expect(result.expandedCount).toBe(result.candidateRefs.length)
+    // Cross-item deduplication: candidateRefs contains unique entries
+    const uniqueRefs = new Set(result.candidateRefs)
+    expect(uniqueRefs.size).toBe(result.candidateRefs.length)
+    expect(result.bundle).toContain(result.candidateRefs[0])
   })
 })
 

@@ -178,6 +178,8 @@ import {
   makeGroundedCurriculumPackage,
   capRuntimeMetadata,
   type CurriculumPackageV20,
+  CURRENT_PROMPT_VERSION,
+  CURRENT_ENGINE_VERSION,
 } from '@paper-english/generator'
 
 function makeValidV24Package(jobId: string, childId: string, fingerprint: string) {
@@ -232,8 +234,8 @@ function makeValidV24Package(jobId: string, childId: string, fingerprint: string
   v24.metadata.childId = childId
   v24.metadata.inputFingerprint = fingerprint
   v24.metadata.model = 'gpt-5.6-sol'
-  v24.metadata.promptVersion = 'prompt/2.12.0'
-  v24.metadata.engineVersion = '1.7.0'
+  v24.metadata.promptVersion = `prompt/${CURRENT_PROMPT_VERSION}`
+  v24.metadata.engineVersion = CURRENT_ENGINE_VERSION
 
   const precedent = 'cap-ea8d068eb1d8'
   ;(v24.qualityEvidence as any).precedentRefs = [precedent]

@@ -10,6 +10,8 @@ import {
   filterAndRankCapPrecedents,
   expandCapPrecedents,
   prepareSelectiveAuthoringBundle,
+  assembleSelectiveAuthoringBundle,
+  retrievePrecedentsForAssessmentPlans,
   type CapRetrievalIntent,
   CURRENT_ENGINE_VERSION,
   CURRENT_PROMPT_VERSION,
@@ -273,39 +275,97 @@ async function cleanupRuntime(runtimeRoot: string): Promise<void> {
 export async function prepareAuthoringBundleWithPrecedents(
   bundle: string,
   context: Record<string, unknown>,
-  options: { repoRoot?: string } = {},
-): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number }> {
+  options: {
+    repoRoot?: string
+    assessmentPlans?: Array<{
+      itemId?: string
+      targetSkill?: string
+      cognitiveDepth?: 'literal' | 'inferential' | 'evaluative' | 'applied'
+      genre?: string
+      keywords?: string[]
+      difficulty?: 'A1_elementary' | 'A2_basic' | 'B1_intermediate' | 'B2_independent'
+    }>
+  } = {},
+): Promise<{ bundle: string; candidateRefs: string[]; expandedCount: number; noPrecedentReason?: string }> {
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? {}) as Record<string, unknown>
   const targetDifficulty = typeof profile.grade_level === 'string'
     ? (profile.grade_level.includes('A2') ? 'A2_basic' : profile.grade_level.includes('B1') ? 'B1_intermediate' : 'A1_elementary')
     : undefined
 
-  const retrievalIntent: CapRetrievalIntent = {
-    primarySkill: typeof context.primarySkill === 'string' ? context.primarySkill : 'discourse_relationship',
-    targetLanguageDifficulty: targetDifficulty,
-    targetCognitiveDepth: typeof context.cognitiveDepth === 'string' ? context.cognitiveDepth : undefined,
-    genre: typeof context.genre === 'string' ? context.genre : undefined,
-    keywords: Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined,
+  const plans = options.assessmentPlans ?? (Array.isArray(context.assessmentPlans) ? (context.assessmentPlans as any[]) : undefined)
+
+  let candidateRefs: string[] = []
+  let expandedCards: any[] = []
+  let noPrecedentReason: string | undefined
+
+  if (plans && plans.length > 0) {
+    const assessmentIntents: CapRetrievalIntent[] = plans.map((p) => {
+      let depth = p.cognitiveDepth as any
+      if (depth === 'literal') depth = 'D1_recall_locate'
+      else if (depth === 'inferential') depth = 'D2_single_step_inference'
+      else if (depth === 'evaluative') depth = 'D4_applied_evaluation'
+      else if (depth === 'applied') depth = 'D4_applied_evaluation'
+
+      let diff = (p.difficulty ?? targetDifficulty) as any
+      if (diff === 'A1') diff = 'A1_elementary'
+      else if (diff === 'A2') diff = 'A2_basic'
+      else if (diff === 'B1') diff = 'B1_intermediate'
+      else if (diff === 'B2') diff = 'B2_independent'
+
+      return {
+        primarySkill: (p.targetSkill ?? p.primarySkill ?? '').trim(),
+        targetLanguageDifficulty: diff,
+        targetCognitiveDepth: depth,
+        genre: p.genre,
+        keywords: p.keywords ?? (Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined),
+      }
+    })
+
+    const multi = await retrievePrecedentsForAssessmentPlans(assessmentIntents, {
+      limit: 3,
+      repoRoot: options.repoRoot,
+      preferences: {
+        recentPrecedentRefs: Array.isArray(context.recentPrecedentRefs) ? (context.recentPrecedentRefs as string[]) : undefined,
+      },
+    })
+    candidateRefs = multi.uniqueCandidateRefs
+    expandedCards = multi.expandedCards
+    if (candidateRefs.length === 0) {
+      noPrecedentReason = 'no_matching_precedents'
+    }
+  } else if (typeof context.primarySkill === 'string' && context.primarySkill.trim().length > 0) {
+    const retrievalIntent: CapRetrievalIntent = {
+      primarySkill: context.primarySkill.trim(),
+      targetLanguageDifficulty: targetDifficulty,
+      targetCognitiveDepth: typeof context.cognitiveDepth === 'string' ? (context.cognitiveDepth as any) : undefined,
+      genre: typeof context.genre === 'string' ? context.genre : undefined,
+      keywords: Array.isArray(preferences.topics) ? (preferences.topics as string[]) : undefined,
+    }
+
+    const retrievalResult = filterAndRankCapPrecedents(retrievalIntent, {
+      limit: 5,
+      preferences: {
+        recentPrecedentRefs: Array.isArray(context.recentPrecedentRefs) ? (context.recentPrecedentRefs as string[]) : undefined,
+      },
+    })
+
+    candidateRefs = retrievalResult.candidates.map((c) => c.ref)
+    noPrecedentReason = retrievalResult.noPrecedentReason
+    if (candidateRefs.length > 0) {
+      expandedCards = await expandCapPrecedents(candidateRefs, { repoRoot: options.repoRoot })
+    }
+  } else {
+    candidateRefs = []
+    noPrecedentReason = 'missing_primary_skill'
   }
 
-  const retrievalResult = filterAndRankCapPrecedents(retrievalIntent, {
-    limit: 5,
-    preferences: {
-      recentPrecedentRefs: Array.isArray(context.recentPrecedentRefs) ? (context.recentPrecedentRefs as string[]) : undefined,
-    },
-  })
-
-  const candidateRefs = retrievalResult.candidates.map((c) => c.ref)
-  const expandedCards = candidateRefs.length > 0
-    ? await expandCapPrecedents(candidateRefs, { repoRoot: options.repoRoot })
-    : []
-
-  const activeBundle = prepareSelectiveAuthoringBundle(bundle, expandedCards)
+  const activeBundle = assembleSelectiveAuthoringBundle(bundle, expandedCards)
   return {
     bundle: activeBundle,
     candidateRefs,
     expandedCount: expandedCards.length,
+    noPrecedentReason,
   }
 }
 

@@ -67,6 +67,7 @@ export interface CapRetrievalResult {
   authorityStatus: 'authoritative'
   totalCandidatesAvailable: number
   shardsCovered: string[]
+  noPrecedentReason?: string | null
 }
 
 const defaultIndex = capRoutingIndexJson as unknown as CapRoutingIndex
@@ -164,6 +165,17 @@ export function filterAndRankCapPrecedents(
   const limit = Math.max(1, Math.min(10, options.limit ?? 5))
   const preferences = options.preferences
 
+  if (!intent || !intent.primarySkill || typeof intent.primarySkill !== 'string' || intent.primarySkill.trim() === '') {
+    return {
+      candidates: [],
+      corpusHash: index.capCorpusHash ?? '',
+      authorityStatus: 'authoritative',
+      totalCandidatesAvailable: 0,
+      shardsCovered: [],
+      noPrecedentReason: 'missing_primary_skill',
+    }
+  }
+
   if (index.authorityStatus !== 'authoritative') {
     return {
       candidates: [],
@@ -171,6 +183,7 @@ export function filterAndRankCapPrecedents(
       authorityStatus: 'authoritative',
       totalCandidatesAvailable: 0,
       shardsCovered: [],
+      noPrecedentReason: 'routing_index_not_authoritative',
     }
   }
 
@@ -221,6 +234,63 @@ export function filterAndRankCapPrecedents(
     authorityStatus: index.authorityStatus,
     totalCandidatesAvailable: chosen.length,
     shardsCovered: Array.from(shardsSet),
+    noPrecedentReason: candidates.length === 0 ? 'no_matching_authoritative_precedent_for_intent' : null,
+  }
+}
+
+export interface ItemPrecedentRetrievalResult {
+  itemIndex: number
+  intent: CapRetrievalIntent
+  precedentRefs: string[]
+  noPrecedentReason: string | null
+  pedagogicalScore?: number
+}
+
+export interface MultiItemPrecedentRetrievalResult {
+  itemResults: ItemPrecedentRetrievalResult[]
+  uniqueCandidateRefs: string[]
+  expandedCards: CapDesignAnchor[]
+}
+
+/**
+ * Executes deliberate precedent retrieval across planned assessment item intents:
+ * 1. Retrieves 1–5 candidate precedents per item intent.
+ * 2. Leaves explicit noPrecedentReason if no precedent matches the pedagogical intent.
+ * 3. Deduplicates unique precedent refs across items.
+ * 4. Expands unique precedent cards from disk shards in a single pass.
+ */
+export async function retrievePrecedentsForAssessmentPlans(
+  intents: CapRetrievalIntent[],
+  options: CapRetrievalOptions & { repoRoot?: string } = {},
+): Promise<MultiItemPrecedentRetrievalResult> {
+  const itemResults: ItemPrecedentRetrievalResult[] = []
+  const uniqueRefsSet = new Set<string>()
+
+  for (let idx = 0; idx < intents.length; idx += 1) {
+    const intent = intents[idx]!
+    const res = filterAndRankCapPrecedents(intent, options)
+    const refs = res.candidates.map((c) => c.ref)
+    for (const r of refs) {
+      uniqueRefsSet.add(r)
+    }
+    itemResults.push({
+      itemIndex: idx,
+      intent,
+      precedentRefs: refs,
+      noPrecedentReason: res.noPrecedentReason ?? (refs.length === 0 ? 'no_precedents_found' : null),
+      pedagogicalScore: res.candidates[0]?.pedagogicalScore,
+    })
+  }
+
+  const uniqueCandidateRefs = Array.from(uniqueRefsSet)
+  const expandedCards = uniqueCandidateRefs.length > 0
+    ? await expandCapPrecedents(uniqueCandidateRefs, { repoRoot: options.repoRoot })
+    : []
+
+  return {
+    itemResults,
+    uniqueCandidateRefs,
+    expandedCards,
   }
 }
 

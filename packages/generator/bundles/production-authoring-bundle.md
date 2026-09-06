@@ -1,16 +1,16 @@
 ---
-bundleVersion: "2.12.0-prod"
+bundleVersion: "2.13.0-prod"
 schemaVersion: "2.5.0"
-promptVersion: "2.12.0"
-engineVersion: "1.7.0"
+promptVersion: "2.13.0"
+engineVersion: "1.8.0"
 generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/curriculum/interest-exploration.md": "826cbeb444e6cfb969bfd9d95148f38b7c3f9ed929299a3f704506f873d5e7e3"
   "packages/generator/src/compact-routing-index.ts": "6e1348e3b42948f8ad30334e64699612b1ff6b1b620828feece168fab6aa1d6d"
-  "packages/generator/prompts/2.12.0/01-plan.md": "ba6172299aa64932a5ab306fcf6b28298793e532dcd407fbae81275ce317bccb"
-  "packages/generator/prompts/2.12.0/02-author.md": "bf38249f383a11438c8812f31739f4f1a638949ed6e93d09b98bd1be461f33e1"
-  "packages/generator/prompts/2.12.0/03-critic.md": "ff6f59636bce31a44923fdd0d939c58d83a6adbf9c27a80ce3c9ec27a9b32c82"
-  "packages/generator/prompts/2.12.0/04-repair.md": "c8dae311dadf0a83de64fa7b26d47afde66c796698aecd9f67f5f609e321ee30"
+  "packages/generator/prompts/2.13.0/01-plan.md": "d8a4b566b44b69a75e704779cf82dcc53b9444d9e1c37f6dc6274b7516a7afdb"
+  "packages/generator/prompts/2.13.0/02-author.md": "4e7fb84a0dbbd7ad26d13aee0b1b93cd4b08095a0f9d79d8d80edfc7dcafe07f"
+  "packages/generator/prompts/2.13.0/03-critic.md": "bed86ec5d8db1ea4a27952b6c463a2effe8a6e2dc3f84168866403ee9f979f07"
+  "packages/generator/prompts/2.13.0/04-repair.md": "c47a2b0e7246765798ae7def1bd2a52cacc993655436eac0f969c249e0805294"
   "packages/generator/src/curriculum-package-schema.ts": "77b45b47d7cdd483648098831430baf2f0fa31243737918f731bf26d2065b63b"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
@@ -161,10 +161,11 @@ Critic rejects mechanically repetitive work but permits pedagogically justified 
 {"contractVersion":"1.1.0","additionalProperties":false,"required":["learningObjective","primarySkill","secondarySkills","genre","targetLanguageDifficulty","targetCognitiveDepth","evidenceMode","evidenceSpan","evidenceScope","evidenceAnchors","reasoningOperations","distractorStrategies","precedentRefs","precedentMode","intentionalRecall","noPrecedentReason"],"forbiddenAliases":["objective","languageDifficulty","cognitiveDepth","isRecall"],"modes":{"anchor":["borrowedDesignPrinciples"],"blend":["synthesizedDesignPrinciples"],"calibration":["benchmarkQualities","noveltyRationale"]},"serializedExamples":{"anchor":{"learningObjective":"Infer a result by combining two clues.","primarySkill":"local_inference","secondarySkills":["information_integration"],"genre":"article_informational","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D2_single_step_inference","evidenceMode":"text_only","evidenceSpan":"cross_sentence_local","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"Mia saw wet streets.","isExplicit":true}],"reasoningOperations":["connect two clues"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"anchor","intentionalRecall":false,"noPrecedentReason":null,"borrowedDesignPrinciples":["make both clues necessary"]},"blend":{"learningObjective":"Compare evidence before choosing a claim.","primarySkill":"information_integration","secondarySkills":["local_inference"],"genre":"multi_document_comparison","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"multi_document","evidenceSpan":"multi_paragraph_global","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"The first report showed high numbers.","isExplicit":true},{"location":"studentLesson.reading.blocks.1.text","anchorText":"The second report showed lower numbers.","isExplicit":true}],"reasoningOperations":["compare claims across sources"],"distractorStrategies":["unsupported_world_knowledge"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"blend","intentionalRecall":false,"noPrecedentReason":null,"synthesizedDesignPrinciples":["combine comparison with causal elimination"]},"calibration":{"learningObjective":"Evaluate which explanation best fits all evidence.","primarySkill":"purpose_speaker_intent","secondarySkills":["information_integration"],"genre":"dialogue","targetLanguageDifficulty":"A2_basic","targetCognitiveDepth":"D3_multi_step_synthesis","evidenceMode":"text_only","evidenceSpan":"multi_paragraph_global","evidenceScope":"primary_reading","evidenceAnchors":[{"location":"studentLesson.reading.blocks.0.text","anchorText":"Jay said the battery was hot.","isExplicit":true}],"reasoningOperations":["test each explanation against all evidence"],"distractorStrategies":["partial_truth"],"precedentRefs":["cap-0123456789ab"],"precedentMode":"calibration","intentionalRecall":false,"noPrecedentReason":null,"benchmarkQualities":["requires evidence integration"],"noveltyRationale":"Uses a new evidence arrangement while preserving the reasoning floor."}}}
 ```
 
-## 2B. Compact CAP Precedent Routing Index
-Lossless dictionary table: each row is a card; columns name its fields; each cell is an explicit dictionary key (zero-based); -1 means absent. Resolve row values to select relevant cards, then read the referenced same-SHA shards. No references or routing attributes are removed.
+## 2B. Retrieved Authoritative CAP Precedent Cards (Selective)
+The following bounded authoritative CAP precedent cards have been selectively retrieved for this claimed lesson context from verified shards.
+Anchor, blend, or calibrate against these relevant design principles without structural imitation.
 ```json
-{"version":"1.1.0","authorityStatus":"authoritative","capKnowledgeVersion":"cap-knowledge-cca0e12892d9531c","capCorpusHash":"cca0e12892d9531ccfa96f9b2e77cf81d15eb65bf5b7de7a7ed4bd36047f7595","capBundleVersion":"cap-runtime-1.1.0","plannerVersion":"cap-planner-1.1.0","qualityFloorVersion":"cap-floor-1.1.0","encoding":"dictionary-table-v1","columns":["ref","genre","primarySkill","secondarySkills","cognitiveDepth","languageDifficulty","evidenceMode","evidenceSpan","shard"],"dictionary":{"0":"cap-ecbd8ecef915","1":"single","2":"discourse_relationship","3":["discourse_relationship"],"4":"D2_single_step_inference","5":"A1_elementary","6":"text_only","7":"single_sentence","8":"packages/generator/curriculum/cap-precedent-shards/discourse_relationship--D2_single_step_inference.json","9":"cap-1e42148522f4","10":"vocabulary_in_context","11":[],"12":"packages/generator/curriculum/cap-precedent-shards/vocabulary_in_context--D2_single_step_inference.json","13":"cap-68e9969defd0","14":"cap-b4586e0cb56e","15":"grammar_in_context","16":"packages/generator/curriculum/cap-precedent-shards/grammar_in_context--D2_single_step_inference.json","17":"cap-d0ddea32d703","18":"cap-ea68c826339e","19":"cap-e9dc2caa6165","20":"cap-8bfc7c481de8","21":"cap-f3cb857252be","22":"cap-195cb350b195","23":"cap-d85d4bc3c822","24":"cap-541a97156cc4","25":"cap-5596bef6ba95","26":"cap-2b0da1e62e2b","27":"cap-233325f32f70","28":"cap-aabf50a9c88b","29":"cap-d52488773e82","30":"cap-9e89511e33a9","31":"A2_basic","32":"cap-8016a6c08618","33":"infographic_chart_table","34":"information_integration","35":"multimodal_mixed","36":"multimodal_text_and_graphic","37":"packages/generator/curriculum/cap-precedent-shards/information_integration--D2_single_step_inference.json","38":"cap-5880a9ef4b4e","39":"D3_multi_step_synthesis","40":"packages/generator/curriculum/cap-precedent-shards/information_integration--D3_multi_step_synthesis.json","41":"cap-06c826d31484","42":"cap-784e10cfb014","43":"purpose_speaker_intent","44":["information_integration"],"45":"packages/generator/curriculum/cap-precedent-shards/purpose_speaker_intent--D3_multi_step_synthesis.json","46":"cap-ea8d068eb1d8","47":"article_informational","48":"cross_sentence_local","49":"packages/generator/curriculum/cap-precedent-shards/purpose_speaker_intent--D2_single_step_inference.json","50":"cap-c3579daa444a","51":"text_structure","52":"packages/generator/curriculum/cap-precedent-shards/text_structure--D2_single_step_inference.json","53":"cap-e201005ab68b","54":"local_inference","55":"B1_intermediate","56":"packages/generator/curriculum/cap-precedent-shards/local_inference--D2_single_step_inference.json","57":"cap-46bc8b1ceb50","58":"explicit_detail","59":"D1_verbatim_retrieval","60":"packages/generator/curriculum/cap-precedent-shards/explicit_detail--D1_verbatim_retrieval.json","61":"cap-4a06218a465b","62":"multi_paragraph_global","63":"packages/generator/curriculum/cap-precedent-shards/text_structure--D3_multi_step_synthesis.json","64":"cap-48b130d6f2be","65":"reference_resolution","66":"packages/generator/curriculum/cap-precedent-shards/reference_resolution--D2_single_step_inference.json","67":"cap-2bc3c14b97d3","68":"cap-a4fe639716ea","69":"spatial","70":"cap-74088b1902d9","71":"cap-b3a5b1f920ba","72":"cap-eb52f5c63327","73":"cap-50d266ecb04a","74":"cap-b10e8ce94a36","75":"cap-1d58863aeaa1","76":"cloze_passage","77":"cap-0e58e5cbf854","78":"cap-6683f481cccd","79":"cap-d7faf2e3ce31","80":"main_idea","81":"packages/generator/curriculum/cap-precedent-shards/main_idea--D3_multi_step_synthesis.json","82":"cap-c097e93f3126","83":["local_inference"],"84":"cap-fcc6b69326a7","85":["sequence_cause_consequence"],"86":"cap-832d058860ec","87":"cap-150015e5fed2","88":"cap-e3c92b0d9465","89":["other_uncertain"],"90":"cap-2287c9ec8293","91":"cap-dfa7c42f6ff8","92":"cap-1228aa17909a","93":"cap-9955595d3464","94":["pragmatic_meaning"],"95":"cap-43b726ad4cf6","96":"cap-1b39c13422c4","97":"cap-66b87fae4a99","98":"cap-36fd0465031a","99":"cap-951e1e286ac5","100":"cap-b8c78f3881f5","101":"cap-46fa49f86d5a","102":"cap-6a54f35f868b","103":["reference_resolution"],"104":"cap-45c654078bfe","105":"cap-03d05aa39df6","106":"cap-e9a3867665ee","107":"cap-abd9d6fe139d","108":"cap-a4e4ed1a48e6","109":"cap-92ca6df5388b","110":"cap-74d9da4bc141","111":"packages/generator/curriculum/cap-precedent-shards/explicit_detail--D2_single_step_inference.json","112":"cap-51ac44c1ff69","113":"cap-a0a77ab1a4b8","114":["explicit_detail"],"115":"cap-b4ffc155b5ae","116":"cap-8a97eeb7d83e","117":"cap-5f35ce975531","118":"cross_sentence_inference","119":"packages/generator/curriculum/cap-precedent-shards/cross_sentence_inference--D2_single_step_inference.json","120":"cap-249540b9930d","121":["main_idea"],"122":"cap-3b59df8ffdf9","123":"cap-93563c17b35b","124":"cap-dfc42a9b8b83","125":"cap-c7149bc47dc3","126":"sequence_cause_consequence","127":["cross_sentence_inference"],"128":"packages/generator/curriculum/cap-precedent-shards/sequence_cause_consequence--D2_single_step_inference.json","129":"cap-8a5ca300b26c","130":"cap-58b567025b9f","131":"cap-4377e4dee7e6","132":"cap-6e9e5bbb4bee","133":"cap-992a5f1fa2f0","134":"packages/generator/curriculum/cap-precedent-shards/cross_sentence_inference--D3_multi_step_synthesis.json","135":"cap-bef8c7dc9212","136":["other_uncertain","local_inference"],"137":"cap-a871357359fa","138":["other_uncertain","sequence_cause_consequence"],"139":"cap-16e747a76c6d","140":"cap-95b4ec54f9b3","141":"cap-c0ec2303e947","142":["reference_resolution","other_uncertain"],"143":"cap-d11c9628e33e","144":"cap-ab5059a7a4b5","145":["grammar_in_context","other_uncertain"],"146":"cap-afe13836c61f","147":"cap-c1880fddcb92","148":"cap-6a1d3c08ac63","149":"cap-ff069e6cdd5b","150":"cap-93fb81d6084d","151":"packages/generator/curriculum/cap-precedent-shards/vocabulary_in_context--D1_verbatim_retrieval.json","152":"cap-3dcfbd662599","153":["other_uncertain","reference_resolution"],"154":"cap-61bab3778477","155":"cap-490f167349ea","156":"cap-fa458e5f163e","157":["pragmatic_meaning","other_uncertain"],"158":"cap-efbe8bfd56c1","159":"cap-9a66a6c51849","160":["grammar_in_context"],"161":"packages/generator/curriculum/cap-precedent-shards/reference_resolution--D3_multi_step_synthesis.json","162":"cap-2f6ebec0a534","163":"cap-02dc142c8c22","164":"cap-8bd5c53da955","165":["purpose_speaker_intent","sequence_cause_consequence"],"166":"cap-14d211098d8f","167":["information_integration","other_uncertain"],"168":"packages/generator/curriculum/cap-precedent-shards/explicit_detail--D3_multi_step_synthesis.json","169":"cap-fc4dae467d01","170":"brochure_flyer","171":"cap-c390090dcd63","172":"cap-c74892736cc0","173":"pragmatic_meaning","174":["local_inference","information_integration"],"175":"packages/generator/curriculum/cap-precedent-shards/pragmatic_meaning--D3_multi_step_synthesis.json","176":"cap-45cb5bc555bd","177":"cap-5225d45a6e3f","178":"other_uncertain","179":["purpose_speaker_intent"],"180":"packages/generator/curriculum/cap-precedent-shards/other_uncertain--D2_single_step_inference.json","181":"cap-68c661dbf164","182":"cap-35cc7f1a2c07","183":["reference_resolution","purpose_speaker_intent"],"184":"cap-9270daa2b83b","185":["sequence_cause_consequence","pragmatic_meaning"],"186":"cap-cd7d319bcb4f","187":"cap-37d74df4f614","188":["local_inference","other_uncertain"],"189":"cap-03168e9cfe28","190":"cap-a9e06ee3bd60","191":"packages/generator/curriculum/cap-precedent-shards/other_uncertain--D3_multi_step_synthesis.json","192":"cap-dbca9e67bf19","193":"packages/generator/curriculum/cap-precedent-shards/local_inference--D3_multi_step_synthesis.json","194":"cap-3491c190506f","195":"cap-4644aa4528cb","196":"cap-d27352f9e080","197":"cap-f40e0079858f","198":"cap-9a9c9d1b2e48","199":"cap-3019d36ab51d","200":"cap-c26018bd4fe4","201":"packages/generator/curriculum/cap-precedent-shards/grammar_in_context--D1_verbatim_retrieval.json","202":"cap-9a53368b5e71","203":"cap-d10d7ae61df6","204":"cap-3d8d004ef67b","205":"cap-fad0f2689a48","206":"cap-6aa69d4060df","207":["sequence_cause_consequence","grammar_in_context"],"208":"cap-774344c7d257","209":"cap-4473ae898bff","210":"cap-ec9c91e8ee43","211":"cap-e7883e2d446c","212":["text_structure","other_uncertain"],"213":"cap-916b5272273e","214":"cap-31a0f3be7210","215":"packages/generator/curriculum/cap-precedent-shards/pragmatic_meaning--D2_single_step_inference.json","216":"cap-a97c65e44445","217":"packages/generator/curriculum/cap-precedent-shards/grammar_in_context--D3_multi_step_synthesis.json","218":"cap-86a26dcb5e08","219":"cap-54715c20d219","220":"cap-12675c2e04e5","221":["vocabulary_in_context","other_uncertain"],"222":"cap-dd1dd66487e9","223":["other_uncertain","vocabulary_in_context"],"224":"cap-550378c78bc9","225":"dialogue","226":["purpose_speaker_intent","cross_sentence_inference"],"227":"cap-bc45683400fc","228":["information_integration","local_inference"],"229":"cap-7716ecad88c3","230":"cap-27214c97e62b","231":["explicit_detail","sequence_cause_consequence"],"232":"cap-df0dd93208ab","233":["explicit_detail","information_integration"],"234":"packages/generator/curriculum/cap-precedent-shards/main_idea--D2_single_step_inference.json","235":"cap-be2e51c987e2","236":"cap-cd6115400538","237":"comic_strip","238":["sequence_cause_consequence","information_integration"],"239":"cap-673c957e5f85","240":"cap-07f3cc6f2d29","241":["local_inference","sequence_cause_consequence"],"242":"cap-65c449243821","243":"packages/generator/curriculum/cap-precedent-shards/purpose_speaker_intent--D1_verbatim_retrieval.json","244":"cap-03ba662a2f8e","245":"cap-79165d60f1f2","246":"D4_evaluative_pragmatic","247":"packages/generator/curriculum/cap-precedent-shards/information_integration--D4_evaluative_pragmatic.json","248":"cap-9b63bfc118fc","249":["text_structure","information_integration"],"250":"cap-18928c63a20f","251":["cross_sentence_inference","information_integration"],"252":"packages/generator/curriculum/cap-precedent-shards/pragmatic_meaning--D4_evaluative_pragmatic.json","253":"cap-036ccb9ba5b5","254":["vocabulary_in_context","information_integration"],"255":"cap-f90bcf32a85e","256":"cap-65a504b34c1b","257":"packages/generator/curriculum/cap-precedent-shards/discourse_relationship--D3_multi_step_synthesis.json","258":"cap-9f92fd446c43","259":"cap-e77001ff79cc","260":"cap-98aa5fc8dafc","261":"cap-cb48b2a3c0fc","262":"cap-d614d9af8093","263":"cap-094aedcb0925","264":"cap-2412aefe45d3","265":"cap-335c6e441f02","266":"cap-2a02687234c1","267":"cap-f841ac7c3405","268":"cap-efa5fec4d9d3","269":"cap-1eaa6bd47042","270":"cap-6173efd09dbf","271":"cap-899edf88e261","272":"cap-ae56440af9b1","273":"cap-d23f19eecb8f","274":"cap-4a41b2a14ccc","275":"cap-9412ab276938","276":"cap-ffa828c20793","277":"cap-a4fcfce466fb","278":"cap-7f8721a1c8dc","279":"cap-4a7ef12cadc3","280":["information_integration","explicit_detail"],"281":"cap-e49c31166864","282":"cap-f1f56d7a6309","283":"cap-6b22490235f8","284":"cap-b65797db5957","285":"cap-0e35ad2905fa","286":"cap-8fe59b87f83b","287":"cap-1c48c4a41c98","288":"cap-c825ffec373c","289":"cap-5aea36b37d9e","290":"cap-605532037c07","291":"cap-e7c766fb0987","292":"cap-391233e5a3b7","293":"cap-f98a1b6cd8bb","294":"multi_document_comparison","295":"cap-6b282c8a2668","296":["explicit_detail","purpose_speaker_intent"],"297":"cap-872d6cf35c1a","298":"cap-908199d0b44d","299":"cap-7162d16d2150","300":["sequence_cause_consequence","local_inference"],"301":"cap-8fcb1f6997aa","302":"cap-43c2a2e4f3f9","303":["reference_resolution","local_inference"],"304":"cap-aefce0e9b6b3","305":"packages/generator/curriculum/cap-precedent-shards/local_inference--D4_evaluative_pragmatic.json"},"rows":[[0,1,2,3,4,5,6,7,8],[9,1,10,11,4,5,6,7,12],[13,1,10,11,4,5,6,7,12],[14,1,15,11,4,5,6,7,16],[17,1,10,11,4,5,6,7,12],[18,1,10,11,4,5,6,7,12],[19,1,15,11,4,5,6,7,16],[20,1,10,11,4,5,6,7,12],[21,1,15,11,4,5,6,7,16],[22,1,15,11,4,5,6,7,16],[23,1,15,11,4,5,6,7,16],[24,1,10,11,4,5,6,7,12],[25,1,15,11,4,5,6,7,16],[26,1,15,11,4,5,6,7,16],[27,1,15,11,4,5,6,7,16],[28,1,15,11,4,5,6,7,16],[29,1,15,11,4,5,6,7,16],[30,1,10,11,4,31,6,7,12],[32,33,34,3,4,31,35,36,37],[38,33,34,3,39,31,35,36,40],[41,33,34,3,39,31,35,36,40],[42,33,43,44,39,31,35,36,45],[46,47,43,3,4,31,6,48,49],[50,47,51,3,4,31,6,48,52],[53,47,54,3,4,55,6,48,56],[57,47,58,11,59,31,6,48,60],[61,47,51,3,39,55,6,62,63],[64,47,65,3,4,55,6,48,66],[67,47,34,3,39,55,35,36,40],[68,47,34,3,39,55,69,36,40],[70,47,10,11,4,31,6,48,12],[71,47,54,3,4,55,6,48,56],[72,47,58,11,59,31,6,48,60],[73,47,10,11,4,31,6,48,12],[74,47,34,3,39,55,69,36,40],[75,76,2,3,4,31,6,48,8],[77,76,34,3,4,31,35,48,37],[78,76,10,11,4,31,6,48,12],[79,76,80,3,39,55,6,62,81],[82,1,10,83,4,5,6,7,12],[84,1,10,85,4,5,6,48,12],[86,1,15,11,4,31,6,7,16],[87,1,10,83,4,31,6,7,12],[88,1,15,89,4,31,6,48,16],[90,1,10,83,4,31,6,7,12],[91,1,10,44,4,5,6,48,12],[92,1,2,85,4,31,6,7,8],[93,1,10,94,4,31,6,48,12],[95,1,15,85,4,31,6,7,16],[96,1,15,85,4,31,6,7,16],[97,1,15,85,4,31,6,7,16],[98,1,10,85,4,31,6,7,12],[99,1,10,3,4,31,6,7,12],[100,1,10,85,4,31,6,48,12],[101,1,10,85,4,31,6,48,12],[102,1,15,103,4,31,6,7,16],[104,1,15,85,4,31,6,48,16],[105,1,10,85,4,31,6,7,12],[106,1,15,89,4,31,6,7,16],[107,33,34,85,39,31,35,36,40],[108,33,34,85,39,31,35,36,40],[109,33,34,85,39,31,35,36,40],[110,33,58,94,4,31,35,36,111],[112,33,58,44,4,31,35,36,111],[113,33,34,114,39,55,35,36,40],[115,47,58,85,4,31,6,48,111],[116,47,58,85,4,31,6,48,111],[117,47,118,85,4,31,6,48,119],[120,47,34,121,39,55,6,62,40],[122,47,58,89,4,55,6,48,111],[123,47,58,103,4,55,6,62,111],[124,47,80,44,39,55,6,62,81],[125,47,126,127,4,55,6,48,128],[129,47,80,44,39,55,6,62,81],[130,47,10,83,4,55,6,48,12],[131,47,34,114,39,55,6,62,40],[132,76,34,121,39,55,6,48,40],[133,76,118,44,39,55,6,62,134],[135,1,10,136,4,5,6,7,12],[137,1,10,138,4,31,6,48,12],[139,1,10,83,4,5,6,48,12],[140,1,10,85,4,5,6,48,12],[141,1,15,142,4,31,6,7,16],[143,1,15,11,4,31,6,7,16],[144,1,10,145,4,31,6,7,12],[146,1,10,85,4,5,6,48,12],[147,1,10,89,4,5,6,7,12],[148,1,15,89,4,31,6,7,16],[149,1,15,89,4,31,6,7,16],[150,1,10,145,59,31,6,7,151],[152,1,15,153,4,31,6,7,16],[154,1,10,89,4,31,6,7,12],[155,1,10,136,4,31,6,7,12],[156,1,10,157,4,31,6,7,12],[158,1,15,89,4,31,6,7,16],[159,1,65,160,39,31,6,7,161],[162,1,15,89,4,31,6,7,16],[163,47,58,153,4,31,6,48,111],[164,47,54,165,4,31,6,48,56],[166,33,58,167,39,31,35,36,168],[169,170,34,89,4,31,69,36,37],[171,170,34,114,39,31,69,36,40],[172,47,173,174,39,31,35,62,175],[176,47,65,89,4,31,6,48,66],[177,47,178,179,4,31,6,48,180],[181,47,54,89,4,31,6,48,56],[182,47,178,183,4,31,6,48,180],[184,47,43,185,4,31,6,48,49],[186,47,58,89,4,31,6,48,111],[187,47,10,188,4,55,6,48,12],[189,47,34,85,39,55,6,48,40],[190,47,178,11,39,55,6,62,191],[192,47,54,89,39,55,6,62,193],[194,76,178,11,4,55,6,48,180],[195,76,34,11,4,31,35,7,37],[196,76,54,138,39,55,35,48,193],[197,76,2,89,4,31,6,48,8],[198,1,10,89,4,31,6,7,12],[199,1,10,138,4,31,6,7,12],[200,1,15,11,59,31,6,48,201],[202,1,10,89,59,31,6,7,151],[203,1,10,153,4,31,6,7,12],[204,1,10,138,4,31,6,7,12],[205,1,65,89,4,31,6,7,66],[206,1,10,207,4,31,6,7,12],[208,1,15,89,4,31,6,7,16],[209,1,10,138,59,31,6,7,151],[210,1,15,153,4,31,6,7,16],[211,1,65,212,4,31,6,7,66],[213,1,15,89,4,31,6,7,16],[214,1,173,89,4,31,6,7,215],[216,1,15,11,39,31,6,7,217],[218,1,15,153,4,31,6,7,16],[219,1,178,85,39,31,6,7,191],[220,47,58,221,59,31,6,62,60],[222,47,126,223,4,31,6,48,128],[224,225,173,226,4,31,6,36,215],[227,225,173,228,39,31,6,36,175],[229,47,58,44,59,31,6,7,60],[230,47,34,231,39,31,6,36,40],[232,47,80,233,4,31,6,48,234],[235,47,10,83,4,31,6,48,12],[236,237,80,238,39,31,35,36,81],[239,237,58,238,59,31,35,36,60],[240,237,65,241,4,31,35,36,66],[242,47,43,153,59,31,6,62,243],[244,47,34,11,4,31,6,48,37],[245,47,34,89,246,31,6,62,247],[248,47,80,249,4,31,6,62,234],[250,47,173,251,246,31,35,36,252],[253,47,173,254,39,31,6,48,175],[255,76,15,89,59,31,6,62,201],[256,76,2,89,39,31,6,48,257],[258,76,80,138,39,31,6,62,81],[259,76,173,89,4,31,6,48,215],[260,76,15,89,4,31,6,62,16],[261,1,10,85,4,5,6,7,12],[262,1,10,11,4,5,6,7,12],[263,1,10,85,4,5,6,7,12],[264,1,10,11,59,5,6,7,151],[265,1,15,11,59,5,6,7,201],[266,1,10,85,4,5,6,7,12],[267,1,15,103,39,31,6,7,217],[268,1,15,103,4,5,6,7,16],[269,1,15,11,4,31,6,7,16],[270,1,15,11,4,31,6,7,16],[271,1,65,160,4,5,6,7,66],[272,1,10,83,4,31,6,7,12],[273,1,10,83,4,31,6,7,12],[274,1,15,85,39,31,6,7,217],[275,1,15,85,4,5,6,7,16],[276,1,65,160,4,31,6,48,66],[277,1,15,94,4,5,6,48,16],[278,33,34,114,4,31,35,36,37],[279,33,126,280,4,31,35,36,128],[281,237,54,44,39,31,35,36,193],[282,237,10,228,4,31,35,36,12],[283,170,178,44,4,31,69,36,180],[284,170,34,114,4,31,69,36,37],[285,225,126,44,4,31,6,48,128],[286,225,65,44,39,31,6,62,161],[287,47,43,83,4,31,6,62,49],[288,47,58,44,4,31,6,48,111],[289,47,80,44,39,31,6,62,81],[290,33,80,167,39,31,35,36,81],[291,33,126,280,4,31,35,36,128],[292,33,126,44,4,31,35,48,128],[293,294,10,83,4,55,6,48,12],[295,294,51,296,39,31,6,62,63],[297,294,58,103,39,31,6,62,168],[298,294,34,127,246,31,6,62,247],[299,76,2,300,39,31,6,48,257],[301,76,2,85,39,31,6,48,257],[302,76,2,303,4,31,6,48,8],[304,76,54,185,246,31,6,62,305]]}
+[]
 ```
 
 ## 3. Model Quality Profile Resolution & Provenance
@@ -911,9 +912,9 @@ Distinguish real-world production facts, events inside a fictional work, and int
 Keep a concise private selection rationale in existing planning evidence: public interest connection, angles actually explored, chosen question, decisive source evidence, and why this angle/structure fits the target and recent history. Never fabricate searches. No candidate-count quota, category rotation, or mandatory biography. Critic reviews the depth of the connection and evidence, not the presence of a favorite name or a prescribed genre.
 
 ## 5. Prompt 01: Planning Engine
-# Prompt 01: Consolidated Production Planning (v2.12.0)
+# Prompt 01: Consolidated Production Planning (v2.13.0)
 
-You are the Planning Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.12.0. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
+You are the Planning Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. This is the active consolidated contract. Do not reconstruct or inherit historical prompt overlays.
 
 ## 1. Authority and planning order
 
@@ -924,7 +925,7 @@ Plan from the smallest set of evidence that actually matters:
 3. forward grade-appropriate progression and due retrieval;
 4. CAP quality floor and curriculum coverage;
 5. evidence-led exploration of specific interests;
-6. joint selection of researched angle and genre/information structure.
+6. joint selection of researched angle, information structure, and pedagogical response formats.
 
 Explicit relevant feedback is the highest curriculum evidence and may override default progression/review/diversity heuristics. Exposure alone is never weakness. Do not re-promote previously taught grammar as the primary target unless feedback, actual failure evidence, or prerequisite repair justifies it. Previously exposed vocabulary may be reviewed when feedback or semantic learning evidence makes that useful; never relabel an exposed word as new.
 
@@ -936,9 +937,43 @@ Keep language natural, age-appropriate, self-study friendly, and aligned to the 
 
 Use profile `weekly_minutes` as `targetMinutes`. `learningPlan.estimatedMinutes` is truthful represented-work evidence and must not simply copy the target. Plan meaningful work near the configured target band without filler, fake duration, or deleting essential learning stages.
 
-For major targets, plan a coherent progression from teaching/guided work into independent evidence, transfer/production, delayed retrieval, or homework. Supporting targets may remain lighter when pedagogically justified. Consider the thinking action and useful paper form together: timelines, evidence-to-inference notes, decision comparisons, cause/effect chains, sorting matrices, procedure checklists, and partially worked examples can use existing table/organizer layouts. Choose a form when it helps the learner organize or reason, not only when a table is unavoidable. Lines and MCQs remain valid; no weekly format quota. For supported multi-field responses, plan a concrete Schema 2.4.0 `responseLayout`.
+## 3. Deliberate Response Format Selection
 
-## 3. Grounded research
+Response formats must actively serve the learner's thinking task rather than relying on model randomness or mechanical rotation quotas. There is no quota forcing a table every week. All formats are expressed strictly through Schema 2.5.0 layout primitives: `lines`, `table`, `organizer`, and `sequence`.
+
+Use this canonical format selection decision matrix:
+
+| 學習任務 (Learning Task) | 優先形式 (Preferred Format) | Schema 2.5.0 Primitive |
+|---|---|---|
+| 時間／事件順序 | timeline / sequence | `sequence` (vertical or horizontal) |
+| 步驟與創作歷程 | process sequence | `sequence` (vertical) |
+| 比較兩個選項、版本或角色 | comparison matrix | `table` (grid with clear dimension headers) |
+| 從文本證據得到結論 | evidence → inference organizer | `organizer` (clue → inference → reason) |
+| 原因、事件、結果 | cause chain | `sequence` (condition → event → consequence) |
+| 分辨類型或特徵 | sort / classify grid | `table` (category columns & item rows) |
+| 修改前後的差異 | before / after table | `table` (before / change / after) |
+| 整理人物成長、角色抉擇 | turning-point sequence | `sequence` (challenge → turning point → outcome) |
+| 自由表達、句型產出 | structured lines | `lines` (with writingLines >= 1) |
+
+For every key assessment item (reading comprehension, guided practice, independent challenge, transfer, and homework), the Planner must explicitly specify:
+- `learningFunction`: the specific cognitive/pedagogical purpose of this item
+- `reasoningOperation`: the primary thinking operation (e.g. sequence, inference, comparison, cause_effect, classification)
+- `responseFormat`: the concrete pedagogical format choice matching the task
+- `formatRationale`: explicit pedagogical explanation of why this format best serves the task and evidence
+- `recentFormatCollision`: boolean indicating whether this format collides with heavily used recent formats in `formatPlanningCapsule.avoidMechanicalRepeat`
+- `scaffoldLevel`: scaffold tier (`supported`, `on-level`, `stretch`)
+
+### Using the Format Planning Capsule as Decision Input
+
+The runtime context provides `diversityCapsule.formatPlanningCapsule`:
+- `recentFormatUse`: count of format usage over the last 3–4 deliveries
+- `recentReasoning`: recently exercised reasoning operations
+- `avoidMechanicalRepeat`: formats used consecutively or heavily (recommendation to avoid uncritical reuse)
+- `availableButRecentlyUnused`: recommended pedagogical formats that have not appeared recently
+
+`availableButRecentlyUnused` is a helpful recommendation signal, **not** a rigid quota. If this week's passage (e.g. a musician's creative journey or animation production process) is genuinely best supported by a timeline or process sequence, the sequence format may be selected even if it was used recently, provided the Planner records a sound `formatRationale` justifying the pedagogical necessity.
+
+## 4. Grounded research
 
 After the single authoritative batch claim, conduct privacy-safe public research before authoring. Search queries may contain public topic terms, including specific public people, works, characters, groups, and meaningful numbers extracted privately from preferences. Never transmit learner identity, IDs, school, grade/level, feedback, mistakes, history, profile prose, or private notes.
 
@@ -959,20 +994,28 @@ For factual claims involving a named product, organization, model, version, mode
 
 A source being broadly about the same product or organization is not enough. Never combine individually true fragments from different modes/features into a false relationship. If sources distinguish modes, preserve that distinction or simplify the claim.
 
-## 4. Assessment planning
+## 5. Assessment planning & Precedent Binding Order
 
-For normal assessment/application/comprehension items, consult the authoritative non-holdout CAP runtime bundle before authoring. CAP is the quality floor, not a mold. Use `anchor`, `blend`, or `calibration` based on fit, while keeping language difficulty independent from cognitive depth. Intentional vocabulary/grammar retrieval is valid when explicitly planned as retrieval. Retrieval may test lexical form, meaning, collocation, discrimination, or usage, but every student-facing assessment stage—including retrieval and homework—must supply meaningful semantic or sentence context. Never plan bare Chinese-to-English or English-to-Chinese lookup, isolated dictionary-definition questions, or duplicated flashcard-style prompts; intentionalRecall permits D1 retrieval but never exempts context-free lookup.
+The generation pipeline enforces a strict precedence order:
+`learning state + interest evidence -> packet plan -> per-item assessment intents -> CAP metadata retrieval -> bounded shard expansion -> author -> critic`
 
-Reading-comprehension and reading-based CAP-transfer items use `evidenceScope: "primary_reading"` and exact evidence anchors from the primary reading. Plan varied mechanisms across a packet: retrieval, evidence organization, inference, comparison/integration, context clues, and open transfer as appropriate. Do not mechanically require every type each week.
+For every normal assessment/application/comprehension item:
+1. CAP is the quality floor, not a mold. Define the item's `primarySkill`, `targetCognitiveDepth`, `targetLanguageDifficulty`, `genre`, `evidenceScope`, and `reasoningOperations`.
+2. Retrieve 1–5 relevant non-holdout CAP precedent cards matching the specific item's pedagogical intent.
+3. If no suitable precedent exists matching the pedagogical intent, record an explicit `noPrecedentReason`. Never silently substitute unrelated cards or default fallback cards.
+4. Keep language difficulty independent from cognitive depth.
+5. Reading-comprehension and reading-based CAP-transfer items use `evidenceScope: "primary_reading"` and exact evidence anchors from the primary reading.
 
-## 5. Planning output
+Intentional vocabulary/grammar retrieval is valid when explicitly planned as retrieval. Every student-facing assessment stage—including retrieval and homework—must supply meaningful semantic or sentence context. Never plan bare Chinese-to-English or English-to-Chinese lookup, isolated dictionary-definition questions, or duplicated flashcard-style prompts.
 
-Produce a coherent Schema 2.4.0 learning plan, grounding plan, CAP assessment plans, and internal rationale sufficient for Author and Critic to execute. Internal planning evidence stays out of Student/Parent prose. Prefer clear high-level principles over accumulating exception lists.
+## 6. Planning output
+
+Produce a coherent Schema 2.5.0 learning plan, grounding plan, CAP assessment plans, format selections, and internal rationale sufficient for Author and Critic to execute. Internal planning evidence stays out of Student/Parent prose.
 
 ## 6. Prompt 02: Authoring Engine
-# Prompt 02: Consolidated Production Authoring (v2.12.0)
+# Prompt 02: Consolidated Production Authoring (v2.13.0)
 
-You are the Author Engine for **紙屬英文**, Schema 2.4.0 / Prompt 2.12.0. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative CAP runtime knowledge, and verified public grounding. Do not inherit historical prompt overlays.
+You are the Author Engine for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. Author one coherent self-study weekly package from the approved plan, canonical curriculum state, learner context, authoritative retrieved CAP precedents, and verified public grounding. Do not inherit historical prompt overlays.
 
 ## 1. Teach before testing
 
@@ -1004,15 +1047,19 @@ Every correct answer and parent rationale must be text-supported or explicitly f
 
 Author each question together with its answer object so Student/Parent outputs stay aligned. Model answers and accepted answers must obey every explicit task constraint, including requested counts, sentence form, comparison conditions, and procedure completeness.
 
-## 4. Task progression and layouts
+## 4. Task progression, response formats, and layouts
 
-Use the planned cognitive progression rather than repeating one template. Across guided, independent, CAP-transfer, production, retrieval, and homework, reject bare bilingual lookup and isolated dictionary-definition prompts. Retrieval remains useful when a meaningful sentence or semantic situation tests lexical form, meaning, collocation, discrimination, or usage; intentionalRecall: true does not authorize context-free translation or definition recall. Include genuine evidence organization before harder transfer when the plan calls for it, then production/retrieval/homework as appropriate. CAP precedent informs reasoning quality without forcing structural imitation.
+Translate the Planner's format choices directly into concrete Schema 2.5.0 structures:
 
-If a question asks the learner to complete a table, organizer, comparison matrix, or multi-field mapping, include a valid Schema 2.4.0 `responseLayout` with usable headers and rows. Never say "fill in the table below" when no table metadata exists.
+- **Timelines, process sequences, cause chains, and turning-point sequences**: Use `responseLayout: { type: "sequence", layoutDirection: "vertical", steps: [...] }` or horizontal where appropriate.
+- **Comparison matrices, sort/classify grids, before/after tables**: Use `responseLayout: { type: "table", headers: [...], rows: [...] }` with clear structural cues and distinct response cells.
+- **Evidence → inference organizers**: Use `responseLayout: { type: "organizer", organizerType: "clue_inference", headers: [...], rows: [...] }`.
+- **Free expression, sentence production, or structured short responses**: Use `writingLines >= 1` or `responseLayout: { type: "lines", lineCount: ... }`.
+- **Multiple choice**: Use 4 distinct, pedagogically plausible options.
 
-Use existing instruction patterns, workedExamples, and commonMistakes for varied self-study scaffolds: a decision rule, contrast pair, annotated worked sequence, or misconception-and-repair explanation. Keep required fields but vary their teaching purpose; do not invent unsupported schema fields. Organizer headers name actual relationships, rows provide enough cues without revealing answers, and parent answers identify each requested cell or relationship. Never flatten a useful organizer into generic questions for template consistency.
+Never say "fill in the table below" without providing the valid `responseLayout`. Never flatten an organizer or comparison into generic multiple-choice questions for template uniformity. Each response unit must have a stable ID, and matching parent answers must explain the expected answer for every blank or cell.
 
-MCQ answer positions should remain non-predictable, but do not distort good items to chase artificial equal percentages.
+Use existing instruction patterns, workedExamples, and commonMistakes for varied self-study scaffolds: a decision rule, contrast pair, annotated worked sequence, or misconception-and-repair explanation. Keep required fields but vary their teaching purpose; do not invent unsupported schema fields.
 
 ## 5. Workload and learner-facing polish
 
@@ -1021,9 +1068,9 @@ Represent real work truthfully. Do not pad with filler, clone exercises, or fals
 Record why this week differs from the prior week in parent-friendly language. Internal provenance, CAP IDs, critic machinery, raw URLs, and engineering terms never appear in learner-facing PDFs.
 
 ## 7. Prompt 03: Critic Engine
-# Prompt 03: Consolidated Adversarial Semantic Critic (v2.12.0)
+# Prompt 03: Consolidated Adversarial Semantic Critic (v2.13.0)
 
-You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.4.0 / Prompt 2.12.0. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
+You are the independent senior curriculum Critic for **紙屬英文**, Schema 2.5.0 / Prompt 2.13.0. Review the authored package adversarially as a tired junior-high learner studying alone. Do not inherit historical prompt overlays and do not turn approximate heuristics into publication rules.
 
 Record substantive findings with `info`, `warning`, or `critical`. A critical semantic failure must be repaired before approval. Finisher separately owns objective integrity; your job is semantic, factual, linguistic, pedagogical, and answer-quality judgment.
 
@@ -1037,11 +1084,15 @@ Review these dimensions substantively rather than as label bookkeeping:
 4. `task-topology` — The packet teaches before it tests and uses meaningful cognitive variety instead of repeated template mechanics. CAP serves as a quality floor, not a mold.
 5. `level-calibration` — Reading, grammar, vocabulary, scaffolding, workload, and reasoning fit the learner's current state and feedback without childish flattening or needless overload.
 
-Preserve pedagogically useful tables and organizers. Judge actual thinking actions and response affordances, not itemType labels or format counts. Repeated science explanations or plain responses are not automatically failures; require a concrete missed learning opportunity before requesting repair.
+### Format and Thinking Fit Review
 
-Also inspect personalization, grammar/vocabulary progression truth, self-study clarity, parent burden, print usability, and response-layout/task alignment wherever relevant.
+Actively inspect the response formats selected across the packet:
+- Does each format directly support the item's thinking action (e.g. sequence for timeline/creation steps, table for comparisons/classifications, organizer for evidence deduction)?
+- If the item uses a repeated format that collided with recent weeks (`recentFormatCollision: true`), does the Planner provide a credible `formatRationale` based on the specific passage evidence?
+- Flag mechanical format repetition that lacks pedagogical rationale as a `warning` or `critical` finding depending on severity.
+- Never penalize a well-chosen format merely because it appeared in a previous week if the passage genuinely calls for it (e.g. creative journey steps).
 
-Apply the critical rule lexical-retrieval-value across every student-facing assessment stage, including retrieval and homework. Explicitly inspect for: bare Chinese→English lookup; bare English→Chinese lookup; isolated “what does X mean?” questions; duplicated flashcard-style retrieval; and retrieval that adds no contextual usage, collocation, discrimination, or production value. intentionalRecall: true may justify D1 retrieval but never excuses context-free translation or dictionary lookup. Record an actionable finding naming each affected question and the missing semantic value, then direct targeted repair into a contextual cloze, meaningful selection, collocation task, or sentence production as appropriate.
+Apply the critical rule lexical-retrieval-value across every student-facing assessment stage, including retrieval and homework. Explicitly inspect for: bare Chinese→English lookup; bare English→Chinese lookup; isolated “what does X mean?” questions; duplicated flashcard-style retrieval; and retrieval that adds no contextual usage, collocation, discrimination, or production value. Record an actionable finding naming each affected question and the missing semantic value.
 
 ## 2. Grounding accuracy and exact attribution
 
@@ -1051,11 +1102,11 @@ For named products, organizations, models, versions, modes, features, APIs, poli
 
 `exact entity/version/mode -> exact capability/behavior -> exact control flow/condition/limit/qualifier`
 
-Reject when the lesson swaps modes, merges features, transfers one mode's numeric limit to another mode's workflow, drops decisive conditions, converts marketing language into stronger fact, or fuses separately true fragments into a false relationship. In particular, never transfer one mode’s limit to another mode’s workflow. A source being broadly about the same product or organization does **not** establish this binding.
+Reject when the lesson swaps modes, merges features, transfers one mode's numeric limit to another mode's workflow, drops decisive conditions, converts marketing language into stronger fact, or fuses separately true fragments into a false relationship. In particular, never transfer one mode’s limit to another mode’s workflow.
 
 When a factual comparison is central to the lesson or multiple closely named modes/features appear in the source set, adversarially cross-check the bindings rather than assuming nearby source text belongs to the same feature.
 
-Apply the shared interest exploration contract: evaluate the specific connection, researched alternatives, and justified choice. Do not reject a supported character interpretation, origin story, or creative process for lacking news or practical tips. Time sensitivity belongs to the selected question. For time-sensitive questions, require substantive inspection of credible recent developments unless the planning evidence gives a defensible pedagogical reason. Reject generic evergreen noun-skinning when a strong, reliable, teachable current angle served the target equally well or better; also reject `current` chosen merely because it is recent when a durable angle is clearer, safer, better sourced, or pedagogically stronger. A well-supported evergreen fallback remains valid when recent candidates are speculative, weak, unsafe, too complex, vocabulary-heavy, factually thin, or otherwise inferior.
+Apply the shared interest exploration contract: evaluate the specific connection, researched alternatives, and justified choice. Do not reject a supported character interpretation, origin story, or creative process for lacking news or practical tips. Time sensitivity belongs to the selected question. For time-sensitive questions, require substantive inspection of credible recent developments unless the planning evidence gives a defensible pedagogical reason. Reject generic evergreen noun-skinning when a strong, reliable, teachable current angle served the target equally well or better; also reject `current` chosen merely because it is recent when a durable angle is clearer, safer, better sourced, or pedagogically stronger.
 
 For `current` material, verify publication/event dates, topic-aware freshness, recency claims, and the newest credible evidence reasonably needed for the way the lesson presents the topic. Reject rumor, prediction, unsupported speculation, stale-as-current framing, required-but-undated evidence, and any recency claim not supported by its cited source.
 
@@ -1078,9 +1129,9 @@ Judge whether the represented work is meaningful for the learner's target time. 
 Approve only when there are no unresolved critical semantic findings. Keep findings specific enough for targeted repair. Do not rewrite good sections merely to make them different, and do not invent new requirements from old historical prompt text.
 
 ## 8. Prompt 04: Repair Specialist
-# Prompt 04: Consolidated Targeted Repair (v2.12.0)
+# Prompt 04: Consolidated Targeted Repair (v2.13.0)
 
-Repair an existing Schema 2.4.0 package from Critic or Finisher evidence. Preserve immutable prior attempts. Treat `retryContext.previousCanonicalPackage`, findings, and repair instructions as authoritative when supplied.
+Repair an existing Schema 2.5.0 package from Critic or Finisher evidence. Preserve immutable prior attempts. Treat `retryContext.previousCanonicalPackage`, findings, and repair instructions as authoritative when supplied.
 
 ## 1. Surgical scope
 
@@ -1102,16 +1153,18 @@ If two modes/features were accidentally fused, separate them or simplify the cla
 
 For `current` material, update only the stale/unsupported recency evidence and dependent claims. Preserve a valid evergreen fallback when current evidence is not strong enough.
 
-## 3. Curriculum and answer repairs
+## 3. Curriculum, format, and answer repairs
 
+- Format/thinking mismatch: update the question's `responseLayout` to match the intended cognitive task (e.g. sequence for processes, table for comparisons, organizer for deductions), preserving valid question IDs and content where possible.
+- Unjustified format collision: if flagged for mechanical format repeat without rationale, switch to a recommended unused format from `formatPlanningCapsule.availableButRecentlyUnused` or supply explicit pedagogical justification.
 - Evidence-boundary failure: move required facts into the primary reading only when pedagogically appropriate, otherwise revise the item to use existing passage evidence.
 - Answer-entailment failure: repair the key, options, rationale, accepted variants, or dependent passage fact so the answer is uniquely justified.
 - Explicit task constraint failure: make the model answer actually obey requested counts, sentence form, comparison controls, or procedure completeness.
 - Lexical issue: simplify, teach/context-support, or correctly classify the affected lexical unit without quota filling.
 - Grammar progression issue: use learner evidence; do not re-promote old grammar without support and do not erase justified feedback-driven review.
 - Task-topology issue: change only the repetitive/weak tasks needed to restore meaningful cognitive variety.
-- Lexical-retrieval-value failure: replace each bare bilingual/dictionary or duplicated flashcard prompt with a meaningful contextual cloze, collocation/discrimination choice, or sentence-production task while preserving the retrieval target and answer alignment. Never retain the bare prompt because intentionalRecall is true.
-- Missing table/organizer rendering metadata: add the valid Schema 2.4.0 `responseLayout` required by the existing prompt.
+- Lexical-retrieval-value failure: replace each bare bilingual/dictionary or duplicated flashcard prompt with a meaningful contextual cloze, collocation/discrimination choice, or sentence-production task while preserving the retrieval target and answer alignment.
+- Missing table/organizer/sequence rendering metadata: add the valid Schema 2.5.0 `responseLayout` required by the task prompt.
 - Workload issue: add useful dependent learning work or remove redundancy; never falsify duration metadata.
 
 Keep the latest candidate only once in model context. Preserve immutable originals outside the prompt. When a newer local candidate supersedes retryContext.previousCanonicalPackage, retain findings and repair instructions but omit that superseded duplicate from the model-facing context. Do not drop the sole candidate or its dependencies.

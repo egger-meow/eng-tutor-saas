@@ -8,13 +8,13 @@
  * - `CURRENT_QUALITY_PROFILE_VERSION`: Quality profile revision ('1.2.0')
  */
 
-export const CURRENT_RELEASE_ID = 'rel_1.7.0'
-export const CURRENT_ENGINE_VERSION = '1.7.0'
+export const CURRENT_RELEASE_ID = 'rel_1.8.0'
+export const CURRENT_ENGINE_VERSION = '1.8.0'
 export const CURRENT_SCHEMA_VERSION = '2.5.0'
-export const CURRENT_PROMPT_VERSION = '2.12.0'
+export const CURRENT_PROMPT_VERSION = '2.13.0'
 export const CURRENT_ERA_TAG = 'engine_v1' as const
 export const CURRENT_QUALITY_PROFILE_VERSION = '1.2.0'
-export const CURRENT_WORKER_VERSION = '1.6.0'
+export const CURRENT_WORKER_VERSION = '1.7.0'
 export const CURRENT_PDF_RENDERER_VERSION = '1.5.0'
 
 export const CURRENT_ENGINE_MANIFEST = {
