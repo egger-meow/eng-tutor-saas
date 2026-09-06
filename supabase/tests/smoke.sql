@@ -4639,14 +4639,14 @@ begin
       if sqlerrm not like '%CUTOFF_TIMESTAMP_EXCEEDS_SNAPSHOT%' then raise; end if;
     end;
 
-    -- Test E: Successful targeted query - bounded by snapshot cutoff
+    -- Test E: Successful targeted query with exact client parameter names - bounded by snapshot cutoff
     rel_history_result := public.worker_fetch_targeted_student_history(
-      p_job_id := rel_job_id,
-      p_worker_id := rel_worker_id,
-      p_claim_snapshot_id := rel_job_id,
-      p_cutoff_timestamp := now() - interval '1 hour',
-      p_target_ids := array['target-vocab-alpha', 'target-grammar-beta'],
-      p_evidence_limit := 10
+      job_id := rel_job_id,
+      worker_id := rel_worker_id,
+      claim_snapshot_id := rel_job_id,
+      cutoff_timestamp := now() - interval '1 hour',
+      target_ids := array['target-vocab-alpha', 'target-grammar-beta'],
+      evidence_limit := 10
     );
 
     if (rel_history_result->>'evidenceCount')::int <> 2 then
@@ -4657,14 +4657,42 @@ begin
       raise exception 'Invalid manifestHash in result: %', rel_history_result->>'manifestHash';
     end if;
 
-    -- Verify manifest was persisted in audit table
+    if (rel_history_result->>'cached')::boolean is not false then
+      raise exception 'Expected first fetch to be fresh (cached=false)';
+    end if;
+
+    -- Verify manifest and full evidence were persisted in audit table
     select count(*) into rel_manifest_count
     from private_generation.targeted_history_manifests
-    where job_id = rel_job_id and manifest_hash = rel_history_result->>'manifestHash';
+    where job_id = rel_job_id
+      and manifest_hash = rel_history_result->>'manifestHash'
+      and jsonb_array_length(evidence) = 2;
 
     if rel_manifest_count <> 1 then
-      raise exception 'Expected 1 persisted manifest row, got %', rel_manifest_count;
+      raise exception 'Expected 1 persisted manifest row with 2 evidence items, got %', rel_manifest_count;
     end if;
+
+    -- Test F: Second fetch for identical claim returns cached immutable result
+    declare
+      rel_second_fetch jsonb;
+    begin
+      rel_second_fetch := public.worker_fetch_targeted_student_history(
+        job_id := rel_job_id,
+        worker_id := rel_worker_id,
+        claim_snapshot_id := rel_job_id,
+        cutoff_timestamp := now() - interval '1 hour',
+        target_ids := array['target-vocab-alpha', 'target-grammar-beta'],
+        evidence_limit := 10
+      );
+
+      if (rel_second_fetch->>'cached')::boolean is not true then
+        raise exception 'Expected second fetch to return cached result (cached=true)';
+      end if;
+
+      if rel_second_fetch->>'manifestHash' <> rel_history_result->>'manifestHash' then
+        raise exception 'Cached manifestHash mismatch: % vs %', rel_second_fetch->>'manifestHash', rel_history_result->>'manifestHash';
+      end if;
+    end;
 
     -- Clean up test records
     delete from private_generation.targeted_history_manifests where job_id = rel_job_id;

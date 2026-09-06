@@ -229,4 +229,181 @@ describe('Production Runner Orchestration (End-to-End)', () => {
     expect(submittedPackage.metadata.engineVersion).toBe(CURRENT_ENGINE_VERSION)
     expect(submittedPackage.metadata.jobId).toBe(jobId)
   })
+
+  it('retries packet planning with repair diagnostic when round 0 fails and succeeds on round 1', async () => {
+    const jobId = '01234567-89ab-cdef-0123-456789abcdef'
+    const childId = 'fedcba98-7654-3210-fedc-ba9876543210'
+    const fingerprint = 'abcdef0123456789abcdef0123456789'
+    const cutoffTimestamp = '2026-09-06T12:00:00.000Z'
+
+    const claimedContext = {
+      job: { id: jobId, childId },
+      profile: { id: childId, name: 'Learner Two', grade: 'A2_basic', grade_level: 'A2_basic', interests: ['biology'] },
+      preferences: { topics: ['marine biology'] },
+      targetIds: ['v_habitat'],
+      cutoffTimestamp,
+      claimSnapshotId: jobId,
+      inputFingerprint: fingerprint,
+    }
+
+    let submitted = false
+    const client: WorkerClient = {
+      rpc: vi.fn(async (name: string) => {
+        if (name === 'worker_claim_local_authoring_batch') {
+          return { data: { bridgeVersion: '1.4.0', claimed: [claimedContext], claimedCount: 1, normalCapacity: 15, mandatoryCapacityOverride: false, oldestOutstandingDeadline: null }, error: null }
+        }
+        if (name === 'worker_fetch_targeted_student_history') {
+          return { data: { jobId, childId, cutoffTimestamp, targetIds: ['v_habitat'], evidence: [], evidenceCount: 0, manifestHash: 'sha256:1234' }, error: null }
+        }
+        if (name === 'worker_submit_local_curriculum_package') {
+          submitted = true
+          return { data: { success: true }, error: null }
+        }
+        throw new Error(`Unexpected RPC: ${name}`)
+      }),
+      storage: { from: () => ({ upload: vi.fn() } as any) },
+    }
+
+    let packetPlanRounds = 0
+    let repairPromptObserved = false
+
+    const run = vi.fn(async (executable: string, args: string[], options?: any) => {
+      if (executable === 'git') return { stdout: '0123456789abcdef0123456789abcdef01234567\n', stderr: '' }
+      if (args[0] === '--version') return { stdout: 'codex-cli 0.149.1\n', stderr: '' }
+      if (args[0] === 'exec' && args[1] === '--help') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
+      if (args[0] === 'login') return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
+
+      const outIndex = args.indexOf('--output-last-message')
+      const outputPath = outIndex !== -1 ? args[outIndex + 1] : undefined
+
+      // Stage 1
+      if (options?.input && options.input.includes('bounded private topic capsule')) {
+        await writeFile(outputPath!, JSON.stringify({ queries: ['ocean biology'], topicSummary: 'Summary' }), 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      // Stage 3
+      if (options?.input && options.input.includes('privacy-screened public-interest research brief')) {
+        await writeFile(outputPath!, '# Grounding', 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      // Stage 4: Packet Planning
+      if (options?.input && options.input.includes('Private Packet Planner')) {
+        packetPlanRounds += 1
+        if (packetPlanRounds === 1) {
+          // First attempt: invalid output (missing assessmentPlans)
+          await writeFile(outputPath!, JSON.stringify({ selectedAngle: 'Test', evidenceRationale: 'Rationale', assessmentPlans: [] }), 'utf8')
+          return { stdout: '', stderr: '' }
+        } else {
+          // Second attempt: repair prompt should be present
+          if (options.input.includes('Plan Repair Required')) {
+            repairPromptObserved = true
+          }
+          const validPlan = {
+            selectedAngle: 'Marine Adaptations',
+            evidenceRationale: 'Grounded in tidal zone research',
+            selectedLearningTargets: { vocabulary: ['v_habitat'], grammar: [] },
+            assessmentPlans: [
+              {
+                itemId: 'q1',
+                targetSkill: 'detail_extraction',
+                primarySkill: 'detail_extraction',
+                targetLanguageDifficulty: 'A2_basic',
+                targetCognitiveDepth: 'D2_single_step_inference',
+                learningFunction: 'evidence',
+                reasoningOperation: 'inference',
+                responseFormat: 'lines',
+                formatRationale: 'lines',
+                scaffoldLevel: 'on-level',
+              },
+            ],
+          }
+          await writeFile(outputPath!, JSON.stringify(validPlan), 'utf8')
+          return { stdout: '', stderr: '' }
+        }
+      }
+      // Stage 5
+      if (options?.input && options.input.includes('You are the private curriculum author')) {
+        const validPkg = makeValidV24Package(jobId, childId, fingerprint)
+        await writeFile(outputPath!, JSON.stringify(validPkg), 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      return { stdout: '', stderr: '' }
+    })
+
+    const summary = await runLocalCodexAuthoringBatch(client, defaultRepoRoot(), run as any)
+    expect(summary.claimed).toBe(1)
+    expect(summary.submitted).toBe(1)
+    expect(packetPlanRounds).toBe(2)
+    expect(repairPromptObserved).toBe(true)
+    expect(submitted).toBe(true)
+  })
+
+  it('fails closed with PACKET_PLANNING_FAILED when packet planning exhausts attempts without falling back to generic targets', async () => {
+    const jobId = '01234567-89ab-cdef-0123-456789abcdef'
+    const childId = 'fedcba98-7654-3210-fedc-ba9876543210'
+    const fingerprint = 'abcdef0123456789abcdef0123456789'
+
+    const claimedContext = {
+      job: { id: jobId, childId },
+      profile: { id: childId, name: 'Learner Three', grade: 'A2_basic', grade_level: 'A2_basic', interests: ['space'] },
+      preferences: { topics: ['astronomy'] },
+      claimSnapshotId: jobId,
+      inputFingerprint: fingerprint,
+    }
+
+    let releasedErrorCode: string | undefined
+    const client: WorkerClient = {
+      rpc: vi.fn(async (name: string, params: any) => {
+        if (name === 'worker_claim_local_authoring_batch') {
+          return { data: { bridgeVersion: '1.4.0', claimed: [claimedContext], claimedCount: 1, normalCapacity: 15, mandatoryCapacityOverride: false, oldestOutstandingDeadline: null }, error: null }
+        }
+        if (name === 'worker_fetch_targeted_student_history') {
+          return { data: { jobId, childId, cutoffTimestamp: '2026-09-06T12:00:00.000Z', targetIds: [], evidence: [], evidenceCount: 0, manifestHash: 'sha256:1234' }, error: null }
+        }
+        if (name === 'worker_release_local_unsubmitted_claim') {
+          releasedErrorCode = params.error_code
+          return { data: { success: true }, error: null }
+        }
+        if (name === 'worker_local_curriculum_submission_status') {
+          return { data: { submissionFound: false }, error: null }
+        }
+        throw new Error(`Unexpected RPC: ${name}`)
+      }),
+      storage: { from: () => ({ upload: vi.fn() } as any) },
+    }
+
+    const run = vi.fn(async (executable: string, args: string[], options?: any) => {
+      if (executable === 'git') return { stdout: '0123456789abcdef0123456789abcdef01234567\n', stderr: '' }
+      if (args[0] === '--version') return { stdout: 'codex-cli 0.149.1\n', stderr: '' }
+      if (args[0] === 'exec' && args[1] === '--help') return { stdout: '--ephemeral --model --config --sandbox --ignore-user-config --skip-git-repo-check --output-last-message', stderr: '' }
+      if (args[0] === 'login') return { stdout: 'Logged in using ChatGPT\n', stderr: '' }
+
+      const outIndex = args.indexOf('--output-last-message')
+      const outputPath = outIndex !== -1 ? args[outIndex + 1] : undefined
+
+      // Stage 1
+      if (options?.input && options.input.includes('bounded private topic capsule')) {
+        await writeFile(outputPath!, JSON.stringify({ queries: ['space telescopes'], topicSummary: 'Summary' }), 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      // Stage 3
+      if (options?.input && options.input.includes('privacy-screened public-interest research brief')) {
+        await writeFile(outputPath!, '# Grounding', 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      // Stage 4: Always fails validation
+      if (options?.input && options.input.includes('Private Packet Planner')) {
+        await writeFile(outputPath!, 'INVALID_JSON_CONTENT', 'utf8')
+        return { stdout: '', stderr: '' }
+      }
+      return { stdout: '', stderr: '' }
+    })
+
+    const summary = await runLocalCodexAuthoringBatch(client, defaultRepoRoot(), run as any)
+    expect(summary.claimed).toBe(1)
+    expect(summary.submitted).toBe(0)
+    expect(summary.failed).toBe(1)
+    expect(summary.jobs[0]?.errorCode).toBe('PACKET_PLANNING_FAILED')
+    expect(releasedErrorCode).toBe('PACKET_PLANNING_FAILED')
+  })
 })

@@ -120,3 +120,20 @@ it('includes reading tables and retains only recent response forms', () => {
   expect(summary.responseForms).toEqual(['table', 'choice', 'lines'])
   expect(buildDiversityCapsule([{ materialWeek: 'old', responseForms: ['organizer'] }, summary], 1).recentResponseForms).toEqual(['table', 'choice', 'lines'])
 })
+
+it('guarantees identical lookback window regardless of whether history is passed ascending or descending', () => {
+  const historyAsc: HistoricalPackageSummary[] = [
+    { materialWeek: '2026-W30', genre: 'article' },
+    { materialWeek: '2026-W31', genre: 'dialogue' },
+    { materialWeek: '2026-W32', genre: 'interview' },
+    { materialWeek: '2026-W33', genre: 'schedule' },
+    { materialWeek: '2026-W34', genre: 'notice' },
+  ]
+  const historyDesc = [...historyAsc].reverse()
+
+  const capsuleAsc = buildDiversityCapsule(historyAsc, 3)
+  const capsuleDesc = buildDiversityCapsule(historyDesc, 3)
+
+  expect(capsuleAsc.recentGenres).toEqual(['interview', 'schedule', 'notice'])
+  expect(capsuleDesc.recentGenres).toEqual(capsuleAsc.recentGenres)
+})

@@ -11,6 +11,7 @@ import {
   verifyCodexCli,
 } from './local-codex-authoring.js'
 import { adaptAssessmentIntent } from '@paper-english/generator'
+import { buildPacketPlanningPrompt, validatePacketPlan } from './packet-planning.js'
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
@@ -251,6 +252,33 @@ describe('selective CAP precedent authoring bundle compaction', () => {
 
     const p6 = adaptAssessmentIntent({ targetSkill: 'detail_extraction' }, 6)
     expect(p6.targetLanguageDifficulty).toBe('A1_elementary')
+  })
+})
+
+describe('packet planning repair and fail-closed behavior', () => {
+  it('guarantees formatPlanningCapsule recommendations in packet planning prompt even without previous deliveries', () => {
+    const prompt = buildPacketPlanningPrompt({}, '# Grounding text')
+    expect(prompt).toContain('formatPlanningGuidance')
+    expect(prompt).toContain('availableRecommendedFormats')
+    expect(prompt).toContain('sequence:horizontal')
+  })
+
+  it('includes plan repair diagnostics and previous output when repairIssue is provided', () => {
+    const prompt = buildPacketPlanningPrompt(
+      {},
+      '# Grounding text',
+      '{"invalid": true}',
+      'PACKET_PLAN_INVALID: assessmentPlans must contain at least 1 item',
+    )
+    expect(prompt).toContain('## 4. Plan Repair Required')
+    expect(prompt).toContain('PACKET_PLAN_INVALID: assessmentPlans must contain at least 1 item')
+    expect(prompt).toContain('{"invalid": true}')
+  })
+
+  it('validates packet plan and rejects missing angle, rationale, or assessment items', () => {
+    expect(() => validatePacketPlan({}, {})).toThrow('PACKET_PLAN_INVALID: selectedAngle is required')
+    expect(() => validatePacketPlan({ selectedAngle: 'Valid' }, {})).toThrow('PACKET_PLAN_INVALID: evidenceRationale is required')
+    expect(() => validatePacketPlan({ selectedAngle: 'Valid', evidenceRationale: 'Valid' }, {})).toThrow('PACKET_PLAN_INVALID: assessmentPlans must contain at least 1 item')
   })
 })
 

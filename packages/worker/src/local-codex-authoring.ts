@@ -25,7 +25,6 @@ import { fetchTargetedStudentHistory } from './history-client.js'
 import {
   buildPacketPlanningPrompt,
   validatePacketPlan,
-  createDefaultPacketPlan,
   type PacketPlan,
 } from './packet-planning.js'
 
@@ -168,7 +167,7 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   return pkg
 }
 
-function planningPrompt(capsule: Record<string, unknown>, policy: string): string {
+export function planningPrompt(capsule: Record<string, unknown>, policy: string): string {
   return [
     'You are a privacy boundary inside a local curriculum runner. Web access is disabled.',
     `Use this bounded private topic capsule: ${JSON.stringify(capsule)}`,
@@ -243,7 +242,7 @@ export function validatePublicResearchBrief(raw: unknown, context: Record<string
   return serialized
 }
 
-function researchPrompt(brief: string, policy: string): string {
+export function researchPrompt(brief: string, policy: string): string {
   return [
     'Research the following privacy-screened public-interest research brief using first-party live web search.',
     'Do not inspect local files. Do not infer or request learner identity or personal context.',
@@ -253,7 +252,7 @@ function researchPrompt(brief: string, policy: string): string {
   ].join('\n')
 }
 
-function authoringPrompt(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string): string {
+export function authoringPrompt(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string): string {
   const retry = previousOutput
     ? `This is a surgical repair round. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}\nPREVIOUS PACKAGE:\n${previousOutput}`
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
@@ -460,27 +459,50 @@ async function authorOne(
   }
   const grounding = await readFile(groundingPath, 'utf8')
 
-  // STAGE 4: Private Packet Planning
+  // Ensure formatPlanningCapsule and authoring context compaction are in place before Stage 4
+  context = compactAuthoringContext(context)
+
+  // STAGE 4: Private Packet Planning with Limited Repair (fail-closed, no generic mock fallback)
   const packetPlanningDir = await mkdtemp(resolve(tmpdir(), 'paper-english-packet-plan-'))
-  let packetPlan: PacketPlan
+  let packetPlan: PacketPlan | undefined
+  let previousPlanOutput: string | undefined
+  let planIssue: string | undefined
+  const MAX_PLANNING_ROUNDS = 2
+
   try {
-    const planOutputPath = resolve(packetPlanningDir, 'packet-plan.json')
-    await run(codexExecutable, [
-      'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
-      '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
-      '--config', PRIVATE_CODEX_CONFIG,
-      '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
-      '--output-last-message', planOutputPath,
-      '-',
-    ], { cwd: packetPlanningDir, input: buildPacketPlanningPrompt(context, grounding) })
-    const rawPlan = parseCodexJson(await readFile(planOutputPath, 'utf8'))
-    packetPlan = validatePacketPlan(rawPlan, context)
-  } catch {
-    packetPlan = createDefaultPacketPlan(context)
+    for (let planRound = 0; planRound < MAX_PLANNING_ROUNDS; planRound += 1) {
+      const planOutputPath = resolve(packetPlanningDir, `packet-plan-${planRound}.json`)
+      try {
+        await run(codexExecutable, [
+          'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
+          '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
+          '--config', PRIVATE_CODEX_CONFIG,
+          '--sandbox', 'read-only', '--ignore-user-config', '--ignore-rules', '--color', 'never',
+          '--output-last-message', planOutputPath,
+          '-',
+        ], {
+          cwd: packetPlanningDir,
+          input: buildPacketPlanningPrompt(context, grounding, previousPlanOutput, planIssue),
+        })
+        const rawContent = await readFile(planOutputPath, 'utf8')
+        previousPlanOutput = rawContent
+        const rawPlan = parseCodexJson(rawContent)
+        packetPlan = validatePacketPlan(rawPlan, context)
+        break
+      } catch (error) {
+        planIssue = error instanceof Error ? error.message : String(error)
+        if (planRound === MAX_PLANNING_ROUNDS - 1) {
+          throw new Error(`PACKET_PLANNING_FAILED: ${planIssue}`)
+        }
+      }
+    }
   } finally {
     await rm(packetPlanningDir, { recursive: true, force: true })
   }
 
+  if (!packetPlan) {
+    throw new Error(`PACKET_PLANNING_FAILED: ${planIssue || 'Unknown planning error'}`)
+  }
   context.packetPlan = packetPlan
   const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
   const { bundle: activeBundle, itemResults } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, {

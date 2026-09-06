@@ -1,8 +1,9 @@
-﻿import {
+import {
   adaptAssessmentIntent,
   type CapRetrievalIntent,
   type RawAssessmentPlan,
   type FormatPlanningCapsule,
+  buildFormatPlanningCapsule,
 } from '@paper-english/generator'
 
 export interface PacketPlanItem {
@@ -38,17 +39,26 @@ export interface PacketPlan {
  * 2. Retrieved targeted older evidence (if any)
  * 3. Recent format memory and FormatPlanningCapsule recommendations
  * 4. Public research grounding propositions and sources
+ * 5. Optional repair diagnostic if a previous planning attempt failed
  */
 export function buildPacketPlanningPrompt(
   context: Record<string, unknown>,
   grounding: string,
+  previousPlanOutput?: string,
+  repairIssue?: string,
 ): string {
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? {}) as Record<string, unknown>
   const lifetime = (context.lifetimeLearningMemory ?? {}) as Record<string, unknown>
   const targetedEvidence = Array.isArray(context.targetedOlderEvidence) ? context.targetedOlderEvidence : []
-  const diversityCapsule = (context.diversityCapsule ?? {}) as Record<string, unknown>
-  const formatCapsule = (diversityCapsule.formatPlanningCapsule ?? {}) as FormatPlanningCapsule
+  let diversityCapsule = (context.diversityCapsule ?? {}) as Record<string, unknown>
+  let formatCapsule = diversityCapsule.formatPlanningCapsule as FormatPlanningCapsule | undefined
+  if (!formatCapsule || !Array.isArray(formatCapsule.availableButRecentlyUnused)) {
+    const memory = (context.recentDeliveryMemory ?? diversityCapsule.recentDeliveryMemory ?? []) as any[]
+    formatCapsule = buildFormatPlanningCapsule(memory, 4)
+    diversityCapsule = { ...diversityCapsule, formatPlanningCapsule: formatCapsule }
+    context.diversityCapsule = diversityCapsule
+  }
 
   const planningContext = {
     profile: {
@@ -101,6 +111,15 @@ export function buildPacketPlanningPrompt(
     '   - responseFormat: format choice (e.g. "sequence:horizontal", "table:grid", "table:organizer", "written:lines", "mcq:4-option")',
     '   - formatRationale: why this format best serves the task',
     '   - scaffoldLevel: "supported" | "on-level" | "stretch"',
+    ...(repairIssue
+      ? [
+          '',
+          '## 4. Plan Repair Required',
+          `The previous packet plan attempt failed validation: ${repairIssue}`,
+          'Please address this specific issue, revise the plan, and output ONLY valid JSON matching the schema.',
+          ...(previousPlanOutput ? ['', 'Previous attempt output:', '```json', previousPlanOutput, '```'] : []),
+        ]
+      : []),
     '',
     'Return ONLY valid JSON shaped as:',
     '```json',

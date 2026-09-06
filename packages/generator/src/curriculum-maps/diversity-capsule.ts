@@ -64,8 +64,19 @@ export function buildDiversityCapsule(
     }
   }
 
-  // Take the most recent `lookbackWeeks` items
-  const recentSlice = history.slice(-lookbackWeeks)
+  const parseWeek = (item: HistoricalPackageSummary | DeliveryMemoryProjection): number => {
+    if ('materialWeek' in item) {
+      const val = item.materialWeek
+      if (typeof val === 'number') return val
+      const match = String(val).match(/\d+/gu)
+      if (match) return parseInt(match.join(''), 10)
+    }
+    return 0
+  }
+
+  // Sort chronologically ascending so slice(-lookbackWeeks) reliably takes the newest weeks regardless of input order
+  const sorted = [...history].sort((a, b) => parseWeek(a) - parseWeek(b))
+  const recentSlice = sorted.slice(-lookbackWeeks)
 
   const recentGenres: string[] = []
   const recentContextKeys: string[] = []
@@ -102,11 +113,30 @@ export function buildDiversityCapsule(
         }
       }
       if (Array.isArray(item.responseForms)) {
+        const layoutTypes: Array<'lines' | 'table' | 'organizer' | 'sequence'> = []
+        const pedFormats: string[] = []
         for (const form of item.responseForms) {
-          if (form && typeof form === 'string' && !recentResponseForms.includes(form)) {
-            recentResponseForms.push(form)
+          if (form && typeof form === 'string') {
+            if (!recentResponseForms.includes(form)) {
+              recentResponseForms.push(form)
+            }
+            if (form === 'organizer') { layoutTypes.push('organizer'); pedFormats.push('table:organizer') }
+            else if (form === 'table') { layoutTypes.push('table'); pedFormats.push('table:grid') }
+            else if (form === 'lines') { layoutTypes.push('lines'); pedFormats.push('written:lines') }
+            else if (form === 'choice') { pedFormats.push('mcq:4-option') }
+            else if (form === 'sequence') { layoutTypes.push('sequence'); pedFormats.push('sequence:horizontal') }
+            else { pedFormats.push(form) }
           }
         }
+        recentDeliveryMemory.push({
+          materialWeek: String((item as any).materialWeek ?? ''),
+          readingGenre: item.genre ?? '',
+          readingTitle: item.contextKey ?? '',
+          introducedVocabulary: [],
+          responseLayoutTypes: layoutTypes,
+          pedagogicalFormats: pedFormats,
+          reasoningOperations: [],
+        })
       }
     }
   }

@@ -16,22 +16,25 @@
 
 Release 1.8.1 delivers the Commander Review corrections on top of baseline `587a16b`, addressing runtime integration gaps, database security invariants, prompt version freezing, and authentic reproducible benchmarking:
 
-1. **Targeted Student History RPC Integrity**:
-   - Corrected `public.worker_fetch_targeted_student_history` and `private_generation.fetch_targeted_student_history` via Migration `20260906230000`.
-   - Removed caller-trusted `child_id`; derived strictly from active job lease, verifying matching worker lease and claim snapshot authority.
-   - Enforced immutable cutoff (`observed_at <= cutoffTimestamp`) preventing future evidence leakage.
-   - Validated tenant isolation and rollback transactions in `supabase/tests/smoke.sql`.
+1. **Targeted Student History RPC Contract Alignment & Immutable Evidence**:
+   - Corrected `public.worker_fetch_targeted_student_history` and `private_generation.fetch_targeted_student_history` parameter names (`job_id`, `worker_id`, `claim_snapshot_id`, `cutoff_timestamp`, `target_ids`, `evidence_limit`) via Migration `20260907000000`.
+   - Persisted full `evidence jsonb` in `private_generation.targeted_history_manifests` and enforced immutable caching on repeat reads for the same claim snapshot.
+   - Enforced active worker lease and immutable cutoff (`observed_at <= cutoffTimestamp`), preventing future evidence leakage.
+   - Validated tenant isolation, manifest hashing, and rollback transactions in `supabase/tests/smoke.sql`.
 
-2. **Format Planning Capsule & Runtime Delivery**:
-   - Fixed the window ordering in `packages/generator/src/curriculum-maps/format-planning-capsule.ts` to sort newest-first before taking the lookback slice.
-   - Added automatic runtime injection in `packages/worker/src/authoring-context.ts` so the `formatPlanningCapsule` is attached to prompt presentation context.
+2. **Format Planning Capsule Upfront Injection & Window Ordering**:
+   - Fixed window ordering in `packages/generator/src/curriculum-maps/diversity-capsule.ts` to sort chronologically ascending before slicing the last `lookbackWeeks`.
+   - Injected format planning memory upfront into context before Stage 4 Packet Planning, guaranteeing `recentFormatUse`, `avoidMechanicalRepeat`, and `availableRecommendedFormats` are present.
 
-3. **Authentic Context Compaction**:
-   - Retracted legacy modeled estimates (which assumed a fictional 98,000-character routing index).
-   - Replaced with authentic measurements: Base bundle is 83,259 chars (83,559 bytes); monolithic bundle with 17,116-char routing table was 100,208 chars (100,508 bytes).
-   - Across 8 realistic benchmark scenarios, context compaction delivers an authentic net savings of 292,392 characters (~73,098 estimated tokens).
+3. **Fail-Closed Packet Planning (No Generic Fallback)**:
+   - Eliminated silent generic fallback (`createDefaultPacketPlan`) in `packages/worker/src/local-codex-authoring.ts`.
+   - Implemented a 2-round attempt loop with diagnostic plan repair; throws `PACKET_PLANNING_FAILED` on failure.
 
-4. **Version Contract & Prompt Succession**:
+4. **Authentic Lifecycle Context Compaction**:
+   - All character counts, UTF-8 byte sizes, and estimated token usages are directly measured from real prompt builders (`planningPrompt`, `researchPrompt`, `buildPacketPlanningPrompt`, and `authoringPrompt`) and compiled bundles.
+   - Across 8 realistic benchmark scenarios, context compaction delivers an authentic net savings of 496,032 characters (~124,009 estimated tokens), achieving an average 23.5% reduction across all 5 generation stages.
+
+5. **Version Contract & Prompt Succession**:
    - Prompts `2.13.0` are frozen byte-for-byte in tests.
    - Prompts `2.13.1` are consolidated and compiled into `packages/generator/bundles/production-authoring-bundle.md` (`2.13.1-prod`).
 
@@ -40,30 +43,28 @@ Release 1.8.1 delivers the Commander Review corrections on top of baseline `587a
 ## 2. Core Pillars & Implementation Verification
 
 ### Pillar 1: Targeted History RPC Integrity & DB Smoke Verification
-- Migration `20260906230000_advance_generation_release_to_1_8_1_and_tighten_history_rpc.sql`:
-  - Enforces active lease requirement on `generation_jobs`.
-  - Rejects unowned, expired, or worker-mismatched claim snapshots.
-  - Derives `child_id` strictly from the server record.
-  - Applies SHA-256 manifest hashing over retrieved evidence rows.
+- Migration `20260907000000_align_history_rpc_contract_and_immutable_evidence.sql`:
+   - Aligns parameter names between Postgres RPC and TypeScript client (`history-client.ts`).
+   - Persists immutable evidence array in `private_generation.targeted_history_manifests`.
+   - Caches and returns identical evidence on re-reads within the same claim.
+   - Applies SHA-256 manifest hashing over retrieved evidence rows.
 - Verified in `supabase/tests/smoke.sql`:
-  - Validates `worker_fetch_targeted_student_history` under authentic tenant isolation.
-  - Tests Week 1 Fast Publisher path (`worker_claim_week1_fast_submissions` / `worker_complete_week1_fast_submission`).
-  - Confirms Week 2+ generation job creation and feedback prerequisites.
-  - `pnpm test:db` passes with complete transactional rollback.
+   - Validates `worker_fetch_targeted_student_history` with exact named arguments.
+   - Confirms `cached: false` on first call, persists to audit table, and `cached: true` on repeat call.
+   - `pnpm test:db` passes with complete transactional rollback.
 
-### Pillar 2: Format Planning Capsule Runtime Delivery
-- `packages/generator/src/curriculum-maps/format-planning-capsule.ts`:
-  - Normalizes deliveries newest-first, then takes `[0, lookbackWeeks]`.
-  - Accurately identifies `recentFormatUse` and `availableButRecentlyUnused`.
-- `packages/worker/src/authoring-context.ts`:
-  - `compactAuthoringContext` ensures `diversityCapsule.formatPlanningCapsule` is synthesized and passed to model prompts.
-  - Unit tested in `authoring-context.test.ts`.
+### Pillar 2: Format Planning Capsule Upfront Delivery & Window Sorting
+- `packages/generator/src/curriculum-maps/diversity-capsule.ts`:
+   - Normalizes weeks chronologically ascending before `slice(-lookbackWeeks)`, ensuring order invariance.
+   - Maps historical package summaries to delivery projections so format memory is always populated.
+- `packages/worker/src/local-codex-authoring.ts` & `packet-planning.ts`:
+   - Guarantees format memory is compacted and injected before Stage 4 Packet Planning.
 
 ### Pillar 3: Authentic Compaction Benchmarking
 - Evaluated via `packages/generator/scripts/run-context-compaction-benchmark.ts`:
-  - All 8 scenarios measured against authentic compiled bundles and realistic history payloads.
-  - Generates `docs/evaluations/release-1.8.1-compaction-benchmark.md` and `docs/evaluations/release-1.8.1-compaction-manifest.json`.
-  - Average context reduction: **10.3%** across all generation stages.
+   - All 8 scenarios measured against authentic compiled bundles and real stage prompts.
+   - Generates `docs/evaluations/release-1.8.1-compaction-benchmark.md` and `docs/evaluations/release-1.8.1-compaction-manifest.json`.
+   - Average context reduction: **23.5%** across all 5 generation stages.
 
 ---
 
