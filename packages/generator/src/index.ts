@@ -197,6 +197,19 @@ export type {
   StudentHistoryRetrievalResult,
 } from './history-retrieval.js'
 
+// Retrieval Evaluation & Hybrid Search Benchmark
+export {
+  runRetrievalBenchmark,
+  assertChildIsolation,
+  buildContextualHeader,
+  CANONICAL_BENCHMARK_CASES,
+} from './retrieval-experiment/hybrid-search-eval.js'
+export type {
+  RetrievalBenchmarkCase,
+  RetrievalMethodResult,
+  HybridSearchEvaluationReport,
+} from './retrieval-experiment/hybrid-search-eval.js'
+
 // Model-Specific Pre-Submit Quality Profiles & Critic Layer
 export {
   DEFAULT_QUALITY_PROFILES_DIR,
