@@ -17,10 +17,18 @@ begin
   ] loop
     definition := pg_get_functiondef(signature::regprocedure);
     if signature like '%chatgpt_submit_curriculum_package%' then
-      old_binding := $binding$coalesce(claim_snapshot.generation_context->>'targetReleaseId', 'rel_1.7.0')$binding$;
+      if definition like '%coalesce(claim_snapshot.generation_context->>''targetReleaseId'', ''rel_1.7.0'')%' then
+        old_binding := $binding$coalesce(claim_snapshot.generation_context->>'targetReleaseId', 'rel_1.7.0')$binding$;
+      else
+        old_binding := $binding$coalesce(claim_snapshot.generation_context->>'targetReleaseId', 'rel_1.6.0')$binding$;
+      end if;
       new_binding := $binding$coalesce(claim_snapshot.generation_context->>'targetReleaseId', 'rel_1.8.0')$binding$;
     else
-      old_binding := $binding$'targetReleaseId', 'rel_1.7.0'$binding$;
+      if definition like '%''targetReleaseId'', ''rel_1.7.0''%' then
+        old_binding := $binding$'targetReleaseId', 'rel_1.7.0'$binding$;
+      else
+        old_binding := $binding$'targetReleaseId', 'rel_1.6.0'$binding$;
+      end if;
       new_binding := $binding$'targetReleaseId', 'rel_1.8.0'$binding$;
     end if;
     if (length(definition) - length(replace(definition, old_binding, ''))) <> length(old_binding) then
