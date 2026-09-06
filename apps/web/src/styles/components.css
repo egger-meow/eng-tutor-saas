@@ -390,7 +390,7 @@
 .status-past_due, .status-canceled { background: var(--color-error-soft); color: var(--color-error); }
 .status-paused { background: var(--color-paper-deep); color: var(--color-muted); }
 .narrow-page { width: min(42rem, 100%); margin-inline: auto; }
-.empty-state { padding: var(--space-8); border: 1px dashed var(--color-rule-strong); color: var(--color-muted); text-align: center; }
+.empty-state { padding: var(--space-8); border: 1px dashed var(--color-rule-strong); border-radius: var(--radius-surface); color: var(--color-muted); text-align: center; }
 
 /* Announcement Center Styles */
 .announcements-page, .announcement-detail-page { width: min(48rem, 100%); margin-inline: auto; }

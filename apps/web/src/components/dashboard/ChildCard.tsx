@@ -143,7 +143,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
               data-history-label={historyCount === 0 ? '過往教材：目前還沒有' : historyOpen ? '收起過往教材' : `查看過往教材（${historyCount} 筆）`}
               onClick={() => setHistoryOpen((prev) => !prev)}
             >
-              <span>{historyOpen ? '收起過去教材' : `檢視過去教材 (${historyCount} 份)`}</span>
+              <span>{historyOpen ? '收起過往教材' : `查看過往教材 (${historyCount} 份)`}</span>
               {historyCount > 0 && <span className={`toggle-arrow ${historyOpen ? 'expanded' : ''}`}>▼</span>}
             </button>
 
@@ -178,7 +178,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
                 <p>目前系統名額等候中，我們不會收取任何費用。當名額開放時，系統會立即以 Email 通知您，屆時再決定是否啟用訂閱。</p>
               </section>
             ) : child.waitlist?.status === 'released' ? (
-              <section className="empty-state" style={{ borderColor: '#059669', background: '#064e3b15' }}>
+              <section className="empty-state" style={{ borderColor: '#059669', borderStyle: 'solid', borderRadius: '16px', background: '#064e3b15' }}>
                 <h2 style={{ color: '#047857' }}>🎉 學習名額已為孩子開放！</h2>
                 <p>系統已為 {child.display_name} 保留專屬名額，請前往訂閱頁面完成方案選擇與啟用。</p>
                 <div style={{ marginTop: '12px' }}>
