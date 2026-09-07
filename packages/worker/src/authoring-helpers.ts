@@ -4,6 +4,7 @@ import {
   CURRENT_ENGINE_VERSION,
   CURRENT_PROMPT_VERSION,
   CURRENT_SCHEMA_VERSION,
+  normalizePromptVersion,
   type CurriculumPackage,
 } from '@paper-english/generator'
 import type { WorkerClient } from './pipeline.js'
@@ -180,7 +181,9 @@ export function validatePreSubmitPackage(
   if (pkg.metadata.schemaVersion !== CURRENT_SCHEMA_VERSION) {
     issues.push(`SCHEMA_VERSION_MISMATCH: expected ${CURRENT_SCHEMA_VERSION}, got ${pkg.metadata.schemaVersion}`)
   }
-  if (pkg.metadata.promptVersion !== `prompt/${CURRENT_PROMPT_VERSION}`) {
+  const normalizedPrompt = normalizePromptVersion(pkg.metadata.promptVersion)
+  const expectedPrompt = normalizePromptVersion(CURRENT_PROMPT_VERSION)
+  if (normalizedPrompt !== expectedPrompt) {
     issues.push(`PROMPT_VERSION_MISMATCH: expected prompt/${CURRENT_PROMPT_VERSION}, got ${pkg.metadata.promptVersion}`)
   }
   if (pkg.metadata.engineVersion !== CURRENT_ENGINE_VERSION) {

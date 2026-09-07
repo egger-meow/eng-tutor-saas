@@ -312,6 +312,56 @@ describe('validatePreSubmitPackage', () => {
     expect(result.issues.some((i) => i.toLowerCase().includes('writing') || i.toLowerCase().includes('lines'))).toBe(true)
   })
 
+  it('accepts package with promptVersion without prompt/ prefix (e.g. 2.12.0)', () => {
+    const pkg = makeValidV24Package(
+      validContext.job.id,
+      validContext.job.childId,
+      validContext.inputFingerprint,
+    )
+    pkg.metadata.promptVersion = '2.12.0'
+    pkg.metadata.engineVersion = '1.7.0'
+    const result = validatePreSubmitPackage(pkg, validContext)
+    expect(result.valid).toBe(true)
+    expect(result.issues).toEqual([])
+  })
+
+  it('accepts package with promptVersion with prompt/ prefix (e.g. prompt/2.12.0)', () => {
+    const pkg = makeValidV24Package(
+      validContext.job.id,
+      validContext.job.childId,
+      validContext.inputFingerprint,
+    )
+    pkg.metadata.promptVersion = 'prompt/2.12.0'
+    pkg.metadata.engineVersion = '1.7.0'
+    const result = validatePreSubmitPackage(pkg, validContext)
+    expect(result.valid).toBe(true)
+    expect(result.issues).toEqual([])
+  })
+
+  it('fails if promptVersion is mismatched', () => {
+    const pkg = makeValidV24Package(
+      validContext.job.id,
+      validContext.job.childId,
+      validContext.inputFingerprint,
+    )
+    pkg.metadata.promptVersion = 'prompt/2.10.0'
+    const result = validatePreSubmitPackage(pkg, validContext)
+    expect(result.valid).toBe(false)
+    expect(result.issues.some((i) => i.includes('PROMPT_VERSION_MISMATCH'))).toBe(true)
+  })
+
+  it('fails if engineVersion is mismatched', () => {
+    const pkg = makeValidV24Package(
+      validContext.job.id,
+      validContext.job.childId,
+      validContext.inputFingerprint,
+    )
+    pkg.metadata.engineVersion = '1.0.0'
+    const result = validatePreSubmitPackage(pkg, validContext)
+    expect(result.valid).toBe(false)
+    expect(result.issues.some((i) => i.includes('ENGINE_VERSION_MISMATCH'))).toBe(true)
+  })
+
   it('fails if inputFingerprint does not match context', () => {
     const pkg = makeValidV24Package(
       validContext.job.id,
