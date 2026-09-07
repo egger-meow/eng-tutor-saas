@@ -46,12 +46,14 @@ describe('Week 1 Fast Lane production contract', () => {
     expect(dispatcher).not.toMatch(/client_payload:\s*\{[^}]*package/iu)
   })
 
-  it('routes every Week 1 submission away from the normal Finisher', async () => {
+  it('keeps fresh Week 1 submissions on the Fast Publisher path', async () => {
     const isolation = await source('supabase/migrations/20260905222000_week1_fast_lane_finisher_isolation.sql')
+    const fallback = await source('supabase/migrations/20260907020000_week1_fast_finisher_fallback.sql')
     expect(isolation).toContain('job.source_material_id is not null')
     expect(isolation).toContain("publication_path = 'week1_fast'")
     expect(isolation).toContain('job.claimed_by = submission.generation_worker_id')
-    expect(isolation).toContain('Normal deterministic Finisher claim. Week 1 is explicitly excluded')
+    expect(fallback).toContain("submission.status = 'pending'")
+    expect(fallback).toContain("coalesce(submission.error_code, '') = 'WEEK1_FAST_PUBLISH_FAILED'")
   })
 
   it('publishes Week 1 without the normal Finisher semantic audit', async () => {
