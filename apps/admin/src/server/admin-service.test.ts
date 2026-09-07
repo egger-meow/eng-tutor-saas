@@ -285,6 +285,54 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect(doneRows.get('quality-override')?.retryState).toBe('delivered_after_retry')
   })
 
+  it('excludes waiting-feedback jobs from readyToClaim and places them into waitingFeedback', () => {
+    const now = '2026-08-24T12:00:00.000Z'
+    const base = {
+      child_id: 'child-1',
+      max_attempts: 5,
+      created_at: '2026-08-24T00:00:00.000Z',
+      updated_at: '2026-08-24T01:00:00.000Z',
+    }
+    const jobs = [
+      // 1. Week 1 onboarding job (no source material, no prior materials) -> READY TO CLAIM
+      { ...base, id: 'job-week1', child_id: 'child-new', material_week: '2026-08-24', status: 'pending', attempt_count: 0, source_material_id: null },
+      // 2. Retry job (attempt > 0) -> RETRY READY
+      { ...base, id: 'job-retry', material_week: '2026-08-24', status: 'pending', attempt_count: 1, source_material_id: 'mat-prev-1' },
+      // 3. Parent feedback already submitted -> READY TO CLAIM
+      { ...base, id: 'job-fb-received', material_week: '2026-08-24', status: 'pending', attempt_count: 0, source_material_id: 'mat-prev-2' },
+      // 4. Feedback cutoff passed -> READY TO CLAIM
+      { ...base, id: 'job-cutoff-passed', material_week: '2026-08-24', status: 'pending', attempt_count: 0, source_material_id: 'mat-prev-3', feedback_cutoff_at: '2026-08-24T11:00:00.000Z' },
+      // 5. Waiting for parent feedback (not cutoff yet, no feedback) -> WAITING FEEDBACK
+      { ...base, id: 'job-waiting-fb', material_week: '2026-08-24', status: 'pending', attempt_count: 0, source_material_id: 'mat-prev-4', feedback_cutoff_at: '2026-08-25T12:00:00.000Z' },
+    ]
+
+    const pipeline = deriveOperationsPipeline({
+      jobs,
+      submissions: [],
+      overrides: [],
+      childNames: new Map([['child-1', 'Test Child'], ['child-new', 'New Child']]),
+      maskName: (name) => name || 'unknown',
+      now,
+      feedbackMaterialIds: new Set(['mat-prev-2']),
+      childMaterialCounts: new Map([['child-1', 1], ['child-new', 0]]),
+    })
+
+    const readyIds = pipeline.readyToClaim.map((r) => r.jobId)
+    const waitingIds = pipeline.waitingFeedback.map((r) => r.jobId)
+
+    // Strictly claimable jobs only in readyToClaim
+    expect(readyIds).toContain('job-week1')
+    expect(readyIds).toContain('job-retry')
+    expect(readyIds).toContain('job-fb-received')
+    expect(readyIds).toContain('job-cutoff-passed')
+    expect(readyIds).not.toContain('job-waiting-fb')
+
+    // Waiting feedback jobs are isolated in waitingFeedback
+    expect(waitingIds).toEqual(['job-waiting-fb'])
+    expect(pipeline.waitingFeedback[0].status).toBe('WAITING FEEDBACK')
+    expect(pipeline.waitingFeedback[0].feedbackStatus).toBe('waiting_feedback')
+  })
+
   it('never treats generator_version as schema provenance and labels missing components unobservable', async () => {
     const service = new AdminService({ client: createMockSupabaseClient({
       children: [{ id: 'child-1', display_name: 'Test Child', is_active: true, is_internal_test: false }],

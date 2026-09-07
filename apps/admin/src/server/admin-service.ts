@@ -28,7 +28,7 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
     }
   }
   const overrideByJob = new Map(input.overrides.map((override: any) => [override.job_id, override]))
-  const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [] }
+  const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [], waitingFeedback: [] }
 
   for (const job of input.jobs) {
     if (job.status === 'canceled') continue
@@ -57,10 +57,12 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
     // Determine status
     let status = job.status
     if (job.status === 'pending') {
-      if (feedbackStatus === 'waiting_feedback') {
+      if (attempt > 0) {
+        status = 'RETRY READY'
+      } else if (feedbackStatus === 'waiting_feedback') {
         status = 'WAITING FEEDBACK'
       } else {
-        status = attempt > 0 ? 'RETRY READY' : 'READY TO CLAIM'
+        status = 'READY TO CLAIM'
       }
     } else if (job.status === 'claimed' && !current) {
       status = 'AUTHORING CLAIMED — AWAITING SUBMISSION'
@@ -114,7 +116,9 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
       status,
     }
 
-    if (['WAITING FEEDBACK', 'READY TO CLAIM', 'RETRY READY', 'AUTHORING CLAIMED — AWAITING SUBMISSION', 'GENERATION FAILED — RETRY REQUIRED'].includes(status) || job.status === 'pending') {
+    if (status === 'WAITING FEEDBACK') {
+      pipeline.waitingFeedback.push(row)
+    } else if (['READY TO CLAIM', 'RETRY READY', 'AUTHORING CLAIMED — AWAITING SUBMISSION', 'GENERATION FAILED — RETRY REQUIRED'].includes(status) || job.status === 'pending') {
       pipeline.readyToClaim.push(row)
     } else if (['AWAITING FINISHER', 'FINISHER PROCESSING', 'TECHNICAL FAILURE — RETRYABLE'].includes(status)) {
       pipeline.awaitingFinisher.push(row)

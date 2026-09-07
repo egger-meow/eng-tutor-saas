@@ -95,6 +95,7 @@ function PipelineColumn({ title, hint, jobs, onOpen }: { title: string; hint: st
 
 export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimeline }) => {
   const [manifestOpen, setManifestOpen] = useState(true)
+  const [waitingFeedbackOpen, setWaitingFeedbackOpen] = useState(false)
   const [pathFilter, setPathFilter] = useState<'all' | 'week1_fast' | 'normal_finisher'>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -158,10 +159,35 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
       </section>
 
       <div className="pipeline-grid">
-        <PipelineColumn title="等待生成" hint="新的生成工作與等待重試工作" jobs={data.pipeline.readyToClaim} onOpen={open} />
+        <PipelineColumn title="等待生成" hint="隨時可開始之生成與重試工作" jobs={data.pipeline.readyToClaim} onOpen={open} />
         <PipelineColumn title="等待品質審核" hint="已有提交，等待 Finisher 結果" jobs={data.pipeline.awaitingFinisher} onOpen={open} />
         <PipelineColumn title="審核完成" hint="最新嘗試已產生終態結果" jobs={data.pipeline.finisherDone} onOpen={open} />
       </div>
+
+      {Boolean(data.pipeline.waitingFeedback?.length) && (
+        <div style={{ marginTop: '12px', padding: '10px 14px', background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+              ⏳ 目前有 <strong style={{ color: '#eab308' }}>{data.pipeline.waitingFeedback.length}</strong> 位學員正在等待家長回饋中（未達截止時間，暫不進入生成佇列）
+            </span>
+          </div>
+          <button
+            type="button"
+            className="refresh-btn"
+            style={{ fontSize: '11px', padding: '3px 8px' }}
+            onClick={() => setWaitingFeedbackOpen(!waitingFeedbackOpen)}
+          >
+            {waitingFeedbackOpen ? '收合名單' : '查看名單'}
+          </button>
+        </div>
+      )}
+      {waitingFeedbackOpen && Boolean(data.pipeline.waitingFeedback?.length) && (
+        <div style={{ marginTop: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '8px' }}>
+          {data.pipeline.waitingFeedback?.map((job) => (
+            <JobRow key={job.jobId} job={job} onOpen={() => open(job)} />
+          ))}
+        </div>
+      )}
 
       {/* Universal Curriculum Submissions & Processor Queue Section */}
       <section className="cockpit-card" style={{ marginTop: '24px' }}>

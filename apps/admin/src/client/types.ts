@@ -254,6 +254,7 @@ export interface OperationsOverview {
     readyToClaim: PipelineJobRow[]
     awaitingFinisher: PipelineJobRow[]
     finisherDone: PipelineJobRow[]
+    waitingFeedback: PipelineJobRow[]
   }
   engineInspector: {
     expected: Record<string, string>
