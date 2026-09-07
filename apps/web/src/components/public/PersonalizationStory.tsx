@@ -302,7 +302,7 @@ export function PersonalizationStory() {
                     </div>
                   </div>
                   <div className="paper-seal">
-                    <span>雙份紙本 · 週五出刊</span>
+                    <span>雙份紙本 · 每週一份</span>
                   </div>
                 </div>
               </motion.div>
