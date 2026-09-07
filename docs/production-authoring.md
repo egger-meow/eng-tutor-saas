@@ -15,7 +15,7 @@ The canonical protocol is designed so that multiple executors can fulfill the au
 
 Local Windows execution is a primary local environment, but it is **one client of the protocol, not the protocol itself**. Database state, claim leases, immutable submissions, and server-owned publication state are the source of truth.
 
-Week 1 has one deliberate publication-path exception: it skips the independent normal Finisher semantic/audit pass and goes from an already Author/Critic-approved immutable submission into the objective-integrity-only **Week 1 Fast Publisher**. Week 2+ continues through the normal deterministic Finisher.
+Week 1 has one deliberate primary publication-path exception: it skips the independent normal Finisher semantic/audit pass and goes from an already Author/Critic-approved immutable submission into the objective-integrity-only **Week 1 Fast Publisher**. Week 2+ continues through the normal deterministic Finisher. If and only if the Fast Publisher explicitly records `WEEK1_FAST_PUBLISH_FAILED`, that failed immutable Week 1 submission is handed to the normal Finisher as a recovery path. Fresh pending or live-processing Week 1 submissions remain exclusive to the Fast Publisher, so the fallback cannot race normal fast publication.
 
 ```text
                Authoritative Queue & Claim
@@ -41,10 +41,13 @@ Local / Scheduled / Manual             chatgpt-week1-fast
               ▼                       ▼
        Fast Publisher            Deterministic Finisher
   objective integrity only       normal quality/integrity path
-              │                       │
-              └───────────┬───────────┘
-                          ▼
-             Storage / Private weekly PDFs
+              │
+              ├─ success ───────────────┐
+              │                         │
+              └─ explicit fast failure ─┼──> Deterministic Finisher recovery
+                                        │
+                                        ▼
+                           Storage / Private weekly PDFs
 ```
 
 ---
@@ -107,7 +110,7 @@ When a claimed job has an existing authoring attempt that failed validation or q
    - Assessment items in `cap-transfer`, `independent` (4 options), and `homework` (4 options) require corresponding internal `cap-plan:<questionId>` checks in `qualityEvidence.criticalChecks`. Intentional grammar/vocabulary recall items outside `cap-transfer` must explicitly declare `"intentionalRecall": true`.
    - Reading-dependent items require an internal `evidence-plan:<questionId>` with canonical `evidenceAnchors` resolving to `studentLesson.reading.blocks`.
 
-Week 1 speed does **not** mean skipping Author, Critic, research, or targeted repair. It removes only the second independent publication-time semantic Finisher gate.
+Week 1 speed does **not** mean skipping Author, Critic, research, or targeted repair. On the healthy primary path it removes only the second independent publication-time semantic Finisher gate. If Fast Publisher publication itself explicitly fails, the normal Finisher may run that normal audit as the recovery path rather than leaving the immutable submission stranded.
 
 ---
 
@@ -121,7 +124,7 @@ Every package must be validated before submitting over the wire.
   ```
 - **Checks performed** include strict Curriculum Package schema, `inputFingerprint`, job/child identity, model/prompt metadata, and current production authoring quality contract.
 
-Submission is blocked unless pre-submit validation succeeds. Week 1 Fast Publisher relies on this already-approved immutable source and performs only objective publication integrity checks afterward.
+Submission is blocked unless pre-submit validation succeeds. The healthy Week 1 Fast Publisher path relies on this already-approved immutable source and performs only objective publication integrity checks afterward. An explicit Fast Publisher technical failure may hand the same immutable source to the normal Finisher recovery path.
 
 ---
 
@@ -137,7 +140,7 @@ Submission is blocked unless pre-submit validation succeeds. Week 1 Fast Publish
 - Stores the canonical package into `private_generation.curriculum_submissions` at `authoring_attempt = job.attempt_count`.
 - Idempotent: re-submitting the exact same package for the same attempt returns `deduplicated: true`.
 
-Every Week 1 submission is server-routed to `publication_path = 'week1_fast'` regardless of which approved production author created it. Every Week 2+ submission remains on the normal Finisher path.
+Every Week 1 submission is server-routed to `publication_path = 'week1_fast'` regardless of which approved production author created it. Every Week 2+ submission remains on the normal Finisher path. `publication_path = 'week1_fast'` remains the provenance of a first-packet submission even if an explicit Fast Publisher failure later requires the normal Finisher recovery path.
 
 ### Read-After-Write Status Verification
 - **Helper CLI**:
@@ -157,26 +160,28 @@ Every Week 1 submission is server-routed to `publication_path = 'week1_fast'` re
 Week 1 is defined by `generation_jobs.source_material_id IS NULL`.
 
 The Fast Publisher:
-1. claims only Week 1 immutable submissions;
+1. claims only fresh Week 1 immutable submissions or expired Fast Publisher processing leases;
 2. performs strict schema / identity / release / artifact-path integrity checks;
 3. **does not call `auditCurriculumPackageForFinisher()` and does not re-author or repair content**;
 4. renders deterministic Student and Parent Answer PDFs;
 5. inspects the PDF pair and rejects broken/non-matching artifacts;
 6. uploads to private Supabase Storage;
 7. atomically creates `public.materials`, completes the job/submission, and releases Week 1 immediately;
-8. reanchors Week 2 to the actual Week 1 release plus seven days.
+8. reanchors Week 2 to the actual Week 1 release plus seven days;
+9. on an explicit technical publication failure, records `WEEK1_FAST_PUBLISH_FAILED` and yields that immutable submission to the normal Finisher recovery path instead of repeatedly re-claiming it.
 
-GitHub `repository_dispatch` is only a wake signal. Supabase is the authoritative queue. A five-minute workflow schedule is a publication fallback if the immediate publish doorbell is lost.
+GitHub `repository_dispatch` is only a wake signal. Supabase is the authoritative queue. A five-minute workflow schedule is a publication fallback if the immediate publish doorbell is lost. A lost wake or crashed processing lease is still recovered by Fast Publisher; only an explicitly recorded Fast Publisher publication failure crosses into normal Finisher recovery.
 
-### 7.2 Normal Deterministic Finisher (Week 2+)
+### 7.2 Normal Deterministic Finisher (Week 2+ + explicit Week 1 recovery)
 
-The normal Finisher must not claim Week 1 submissions. `public.worker_claim_curriculum_submissions` is Week 2+ only.
+`public.worker_claim_curriculum_submissions` normally claims Week 2+ submissions. It must exclude fresh pending and live-processing Week 1 submissions. The only Week 1 exception is an immutable `publication_path = 'week1_fast'` submission in `technical_failed` with `error_code = 'WEEK1_FAST_PUBLISH_FAILED'`, still bound to its actively claimed Week 1 job and original author identity. That explicit failure may be claimed by the normal Finisher as deterministic recovery.
 
 - **Finisher Processor Command**:
   ```powershell
   pnpm worker process-submissions --processor github-actions-finisher --limit 15
   ```
-- It runs the current deterministic validation/audit contract, renders/uploads PDFs, creates materials, and completes normal submissions.
+- It runs the current deterministic validation/audit contract, renders/uploads PDFs, creates materials, and completes normal submissions plus the narrowly defined failed-Week-1 fallback.
+- A successful Week 1 fallback still uses the existing Week 1 completion semantics: immediate actual release and Week 2 scheduling from that release anchor.
 
 ---
 
@@ -198,7 +203,7 @@ Paper English supports switching between local authoring and server-side online 
   pnpm worker production-authoring mode --set online
   ```
 
-The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change the selected normal scheduler mode.
+The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change the selected normal scheduler mode. The explicit failed-publication Finisher fallback is recovery behavior, not a scheduler mode.
 
 ---
 
@@ -206,9 +211,9 @@ The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change t
 
 | Executor | Documentation / Guide | Claim / Ingestion Path | Submission Path | Publication / Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` | Week 2+ Finisher; Week 1 Fast Publisher |
+| **Interactive Codex / Antigravity Agent** | `docs/production-authoring.md` | `pnpm worker production-authoring claim` | `pnpm worker production-authoring submit` | Week 2+ Finisher; Week 1 Fast Publisher with explicit failure fallback |
 | **Codex Desktop Scheduler** | `docs/local-codex-production-authoring.md` | Scheduled runner task invoking helper CLI | Helper CLI `submit` | Server-routed by week |
 | **Local Batch Runner** | `docs/local-codex-production-authoring.md` | normal queue claim | bridge submission | Server-routed by week |
 | **ChatGPT Online Manual** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `POST /start` / `GET /batch` | `POST /submit` | Server-routed by week |
-| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | scheduled normal batch | bridge submission | Week 2+ Finisher; Week 1 fallback Fast Publisher |
-| **ChatGPT Week 1 Fast Lane** | `docs/superpowers/specs/2026-09-05-week1-fast-lane-design.md` | `POST /week1/start` / `GET /week1/batch` | existing immutable bridge | Fast Publisher only |
+| **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | scheduled normal batch | bridge submission | Week 2+ Finisher; Week 1 Fast Publisher with explicit failure fallback |
+| **ChatGPT Week 1 Fast Lane** | `docs/superpowers/specs/2026-09-05-week1-fast-lane-design.md` | `POST /week1/start` / `GET /week1/batch` | existing immutable bridge | Fast Publisher primary path; normal Finisher only after explicit publish failure |
