@@ -159,6 +159,8 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         message: ex.message,
         stage: 'finisher_audit',
         evidence: ex.evidence,
+        processorId: ex.processorId || null,
+        publicationPath: ex.publicationPath || null,
       }))
     }
     if (selectedErrorCodeModal) {
@@ -173,6 +175,8 @@ export const FailureIntelligenceView: React.FC<Props> = ({
         message: occ.message,
         stage: occ.stage,
         evidence: occ.failureEvidence,
+        processorId: occ.processorId || null,
+        publicationPath: occ.publicationPath || null,
       }))
     }
     return []
@@ -524,6 +528,22 @@ export const FailureIntelligenceView: React.FC<Props> = ({
                       <span>👤 {item.childPseudonym}</span>
                       <span className="occurrence-tag">📅 {item.materialWeek}</span>
                       <span className="occurrence-tag">🔄 第 {item.attempt || 1} 次嘗試</span>
+                      {item.publicationPath && (
+                        <span
+                          className="status-pill"
+                          style={{
+                            fontSize: '10px',
+                            background: item.publicationPath === 'week1_fast' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                            color: item.publicationPath === 'week1_fast' ? '#818cf8' : '#22d3ee',
+                            border: `1px solid ${item.publicationPath === 'week1_fast' ? '#6366f1' : '#0891b2'}`,
+                          }}
+                        >
+                          {item.publicationPath === 'week1_fast' ? '⚡ Week 1 Fast' : 'Normal Finisher'}
+                        </span>
+                      )}
+                      {item.processorId && (
+                        <span className="occurrence-tag">🖥️ {item.processorId}</span>
+                      )}
                       {item.stage && <span className="occurrence-tag">⚙️ {item.stage}</span>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

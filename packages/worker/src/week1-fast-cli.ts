@@ -21,6 +21,6 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : 'Unknown Week 1 fast publisher error'
-  process.stderr.write(`${message}\n`)
+  process.stderr.write(`[week1-fast] fatal error: ${message}\n`)
   process.exitCode = 1
 })

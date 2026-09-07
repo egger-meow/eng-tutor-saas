@@ -31,20 +31,18 @@ Local / Scheduled / Manual             chatgpt-week1-fast
             Author / Critic / Targeted Repair
                           │
                           ▼
-            Immutable Submission Bridge
-       (private_generation.curriculum_submissions)
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-       Week 1 submission          Week 2+ submission
-              │                       │
-              ▼                       ▼
-       Fast Publisher            Deterministic Finisher
-  objective integrity only       normal quality/integrity path
-              │                       │
-              └───────────┬───────────┘
-                          ▼
-             Storage / Private weekly PDFs
+             Immutable Submission Bridge
+        (private_generation.curriculum_submissions)
+                           │
+               ┌───────────┴───────────┐
+               ▼                       ▼
+      Week 1 Fast Publisher       Universal Finisher
+    (Week 1 prioritized,       (All weeks: Week 1 & 2+,
+     objective integrity)       full audit & recovery)
+               │                       │
+               └───────────┬───────────┘
+                           ▼
+              Storage / Private weekly PDFs
 ```
 
 ---
@@ -168,9 +166,9 @@ The Fast Publisher:
 
 GitHub `repository_dispatch` is only a wake signal. Supabase is the authoritative queue. A five-minute workflow schedule is a publication fallback if the immediate publish doorbell is lost.
 
-### 7.2 Normal Deterministic Finisher (Week 2+)
+### 7.2 Universal Deterministic Finisher (Week 1 and Week 2+)
 
-The normal Finisher must not claim Week 1 submissions. `public.worker_claim_curriculum_submissions` is Week 2+ only.
+The normal Finisher is a universal submission processor. `public.worker_claim_curriculum_submissions` claims pending submissions across all weeks (Week 1 and Week 2+), as well as stale-leased submissions from interrupted Fast Publisher runs (`SKIP LOCKED` ensures zero duplicate processing).
 
 - **Finisher Processor Command**:
   ```powershell

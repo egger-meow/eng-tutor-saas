@@ -4743,6 +4743,214 @@ begin
     delete from public.children where id = rel_child_id;
   end;
 
+  -- =========================================================================
+  -- Universal Finisher & Fast Publisher Concurrency / Lease / Observability
+  -- =========================================================================
+  declare
+    uf_child_id uuid := '00000000-0000-0000-0000-000000000089';
+    uf_job_w1_a uuid := '00000000-0000-0000-0000-000000000091';
+    uf_job_w1_b uuid := '00000000-0000-0000-0000-000000000092';
+    uf_job_w1_c uuid := '00000000-0000-0000-0000-000000000093';
+    uf_claimed_count int;
+    uf_pkg jsonb;
+    uf_admin_subs jsonb;
+    uf_mat_id uuid;
+  begin
+    insert into public.children (id, parent_id, display_name, grade, grade_stage)
+    values (uf_child_id, '00000000-0000-0000-0000-000000000001', 'Universal Finisher Test Student', 7, 'grade_7');
+    update public.subscriptions set status = 'active' where child_id = uf_child_id;
+
+    -- Job W1-A: Week 1 job (source_material_id is null)
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+      source_material_id, claimed_by
+    ) values (
+      uf_job_w1_a, uf_child_id, current_date + 7, 'test-v1', 'uf-job-w1-a', 'claimed',
+      now() - interval '1 minute', 1, 3, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+      null, 'chatgpt-online-manual'
+    );
+
+    -- Author submits via chatgpt-online-manual (non-pinned worker ID)
+    insert into private_generation.generation_claim_snapshots (
+      job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+    ) values (
+      uf_job_w1_a, 'chatgpt-online-manual', jsonb_build_object('targetReleaseId', 'rel_1.8.2'), 'sha256:' || repeat('a', 64), now()
+    );
+    uf_pkg := jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.5.0', 'jobId', uf_job_w1_a::text,
+      'childId', uf_child_id::text, 'inputFingerprint', 'sha256:' || repeat('a', 64)
+    ));
+    perform private_generation.chatgpt_submit_curriculum_package(uf_job_w1_a, 'chatgpt-online-manual', uf_pkg);
+
+    -- 1. Verify Universal Finisher claims Week 1 submission (worker_claim_curriculum_submissions)
+    select count(*) into uf_claimed_count
+    from public.worker_claim_curriculum_submissions('universal-finisher-1', 5)
+    where job_id = uf_job_w1_a;
+    if uf_claimed_count <> 1 then
+      raise exception 'Universal finisher failed to claim Week 1 submission';
+    end if;
+
+    -- Verify submission is marked processing with universal-finisher-1 and publication_path is normal_finisher
+    if not exists (
+      select 1 from private_generation.curriculum_submissions
+      where job_id = uf_job_w1_a and processor_id = 'universal-finisher-1'
+        and publication_path = 'normal_finisher' and status = 'processing'
+    ) then
+      raise exception 'Claimed Week 1 submission did not stamp processor_id or publication_path = normal_finisher';
+    end if;
+
+    -- Universal Finisher completes the Week 1 submission
+    perform public.worker_finish_curriculum_submission(
+      uf_job_w1_a, 1, 'universal-finisher-1', 'completed', null, null, null
+    );
+    if not exists (
+      select 1 from private_generation.curriculum_submissions
+      where job_id = uf_job_w1_a and status = 'completed'
+    ) then
+      raise exception 'Universal finisher failed to complete Week 1 submission';
+    end if;
+
+    -- Job W1-B: Week 1 job for mutual exclusion race & Fast Publisher completion
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+      source_material_id, claimed_by
+    ) values (
+      uf_job_w1_b, uf_child_id, current_date + 14, 'test-v1', 'uf-job-w1-b', 'claimed',
+      now() - interval '1 minute', 1, 3, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+      null, 'chatgpt-online-manual'
+    );
+    insert into private_generation.generation_claim_snapshots (
+      job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+    ) values (
+      uf_job_w1_b, 'chatgpt-online-manual', jsonb_build_object('targetReleaseId', 'rel_1.8.2'), 'sha256:' || repeat('b', 64), now()
+    );
+    uf_pkg := jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.5.0', 'jobId', uf_job_w1_b::text,
+      'childId', uf_child_id::text, 'inputFingerprint', 'sha256:' || repeat('b', 64)
+    ));
+    perform private_generation.chatgpt_submit_curriculum_package(uf_job_w1_b, 'chatgpt-online-manual', uf_pkg);
+
+    -- 2. Fast publisher claims W1-B
+    select count(*) into uf_claimed_count
+    from public.worker_claim_week1_fast_submissions('fast-publisher-1', 5)
+    where job_id = uf_job_w1_b;
+    if uf_claimed_count <> 1 then
+      raise exception 'Fast publisher failed to claim Week 1 submission';
+    end if;
+
+    -- 3. Mutual exclusion race: Universal Finisher trying to claim W1-B gets 0 rows (SKIP LOCKED / already leased)
+    select count(*) into uf_claimed_count
+    from public.worker_claim_curriculum_submissions('universal-finisher-2', 5)
+    where job_id = uf_job_w1_b;
+    if uf_claimed_count <> 0 then
+      raise exception 'Universal finisher claimed an actively leased Week 1 submission';
+    end if;
+
+    -- Fast publisher completes W1-B
+    select canonical_source into uf_pkg
+    from private_generation.curriculum_submissions
+    where job_id = uf_job_w1_b and authoring_attempt = 1;
+
+    uf_mat_id := public.worker_complete_week1_fast_submission(
+      uf_job_w1_b, 1, 'fast-publisher-1',
+      uf_child_id::text || '/' || uf_job_w1_b::text || '/student.pdf',
+      uf_child_id::text || '/' || uf_job_w1_b::text || '/parent-answer.pdf',
+      uf_pkg, '{}'::jsonb, 'test-prompt', 'test-generator', 'test-model'
+    );
+    if uf_mat_id is null then
+      raise exception 'worker_complete_week1_fast_submission failed to return material id';
+    end if;
+
+    -- Job W1-C: Stale lease recovery & worker_fail_week1_fast_submission with non-pinned worker ID
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+      source_material_id, claimed_by
+    ) values (
+      uf_job_w1_c, uf_child_id, current_date + 21, 'test-v1', 'uf-job-w1-c', 'claimed',
+      now() - interval '1 minute', 1, 3, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+      null, 'chatgpt-online-manual'
+    );
+    insert into private_generation.generation_claim_snapshots (
+      job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+    ) values (
+      uf_job_w1_c, 'chatgpt-online-manual', jsonb_build_object('targetReleaseId', 'rel_1.8.2'), 'sha256:' || repeat('c', 64), now()
+    );
+    uf_pkg := jsonb_build_object('metadata', jsonb_build_object(
+      'schemaVersion', '2.5.0', 'jobId', uf_job_w1_c::text,
+      'childId', uf_child_id::text, 'inputFingerprint', 'sha256:' || repeat('c', 64)
+    ));
+    perform private_generation.chatgpt_submit_curriculum_package(uf_job_w1_c, 'chatgpt-online-manual', uf_pkg);
+
+    -- Fast publisher claims W1-C
+    perform public.worker_claim_week1_fast_submissions('fast-publisher-c', 5);
+
+    -- 4. Test worker_fail_week1_fast_submission with non-pinned authoring worker and rich failure_evidence
+    if not public.worker_fail_week1_fast_submission(
+      uf_job_w1_c, 1, 'fast-publisher-c', 'WEEK1_FAST_PDF_RENDER_FAILED', 'PDF rendering crashed',
+      jsonb_build_object('stage', 'rendering', 'detail', 'Font load timeout'),
+      'technical_failed'
+    ) then
+      raise exception 'worker_fail_week1_fast_submission failed to record technical failure';
+    end if;
+
+    -- Verify submission recorded technical_failed, error code, and failure_evidence
+    if not exists (
+      select 1 from private_generation.curriculum_submissions
+      where job_id = uf_job_w1_c and status = 'technical_failed'
+        and error_code = 'WEEK1_FAST_PDF_RENDER_FAILED'
+        and failure_evidence->>'stage' = 'rendering'
+    ) then
+      raise exception 'Failed submission missing error_code or failure_evidence';
+    end if;
+
+    -- Verify job remains claimed so technical failure does not cause unnecessary LLM re-authoring
+    if not exists (
+      select 1 from public.generation_jobs
+      where id = uf_job_w1_c and status = 'claimed'
+    ) then
+      raise exception 'Technical failure unexpectedly changed generation job status';
+    end if;
+
+    -- 5. Stale lease recovery: simulate stale leased submission by resetting to processing with past lease
+    update private_generation.curriculum_submissions
+    set status = 'processing', processor_id = 'stuck-publisher',
+        processor_lease_expires_at = now() - interval '5 minutes'
+    where job_id = uf_job_w1_c;
+
+    -- Universal Finisher claims the stale leased Week 1 submission
+    select count(*) into uf_claimed_count
+    from public.worker_claim_curriculum_submissions('universal-finisher-recovery', 5)
+    where job_id = uf_job_w1_c;
+    if uf_claimed_count <> 1 then
+      raise exception 'Universal finisher failed to recover stale-leased Week 1 submission';
+    end if;
+
+    -- 6. Verify admin_get_curriculum_submissions returns publication_path, processor_lease_expires_at, and material_id
+    select jsonb_agg(to_jsonb(s)) into uf_admin_subs
+    from public.admin_get_curriculum_submissions(p_job_id := uf_job_w1_b) s;
+
+    if uf_admin_subs is null or jsonb_array_length(uf_admin_subs) = 0 then
+      raise exception 'admin_get_curriculum_submissions did not return submission W1-B';
+    end if;
+    if not ((uf_admin_subs->0) ? 'publication_path')
+       or not ((uf_admin_subs->0) ? 'processor_lease_expires_at')
+       or not ((uf_admin_subs->0) ? 'material_id') then
+      raise exception 'admin_get_curriculum_submissions missing required columns: %', uf_admin_subs->0;
+    end if;
+
+    -- Clean up test records
+    delete from private_generation.curriculum_submissions where job_id in (uf_job_w1_a, uf_job_w1_b, uf_job_w1_c);
+    delete from private_generation.week1_publish_outbox where job_id in (uf_job_w1_a, uf_job_w1_b, uf_job_w1_c);
+    delete from private_generation.generation_claim_snapshots where job_id in (uf_job_w1_a, uf_job_w1_b, uf_job_w1_c);
+    delete from public.generation_jobs where source_material_id = uf_mat_id;
+    delete from public.generation_jobs where id in (uf_job_w1_a, uf_job_w1_b, uf_job_w1_c);
+    delete from public.materials where id = uf_mat_id;
+    delete from public.children where id = uf_child_id;
+  end;
+
   -- Clean up
   delete from public.announcements
   where id in (

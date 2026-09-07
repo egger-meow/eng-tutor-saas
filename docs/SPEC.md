@@ -4116,7 +4116,7 @@ For an eligible child, Week 1 is complete only when:
 5. the current production-authoring bundle and immutable child/context snapshot are read;
 6. research, planning, authoring, Critic review, targeted repair, and pre-submit validation complete under the current production contract;
 7. one immutable curriculum submission is durably stored and read-after-write verified;
-8. that first-packet submission is routed exclusively to the Week 1 Fast Publisher and cannot be claimed by the normal Finisher;
+8. that first-packet submission enters the unified curriculum-submission queue; it is claimed by whichever processor acquires it first (either the latency-optimized Week 1 Fast Publisher or the universal normal Finisher), with guaranteed mutual exclusion (`SKIP LOCKED`), lease renewal, and deterministic material generation;
 9. the Fast Publisher performs objective package/identity integrity validation, deterministic Student and Parent PDF rendering, and PDF-pair inspection without running a second semantic Finisher audit;
 10. both PDFs are stored privately at canonical job-bound paths;
 11. material, job, submission, and publication state complete atomically and idempotently, with actual Week 1 release set to successful publication time;
@@ -4250,10 +4250,10 @@ The operator can:
 * retry safely without duplicate material;
 * inspect version metadata and immutable attempt history;
 * distinguish Week 1 Fast Lane authoring/publication from the normal Week 2+ pipeline;
-* verify that normal Finisher claims exclude first-packet submissions and Fast Publisher claims include only eligible first packets;
+* verify that the unified curriculum-submission queue allows universal Normal Finisher processing for all weeks while allowing Fast Publisher claims for eligible Week 1 submissions, with strict single-processor lease guarantees;
 * inspect wake/publish outbox state without exposing private learner payloads in GitHub events;
 * distinguish the current pipeline stage from historical attempts;
-* inspect exact objective publication-integrity failures for Week 1 and exact normal Finisher rejection rules for Week 2+;
+* inspect exact objective publication-integrity failures with structured stage diagnostics for Week 1, and exact normal Finisher rejection rules for Week 2+;
 * identify any production engine-version drift;
 * identify `delivered_with_quality_override` without treating it as a quality pass;
 * explain from immutable planning/quality evidence why a fast-moving interest selected a current development or a principled evergreen fallback, without exposing that machinery in Student or Parent PDFs.
@@ -4427,22 +4427,20 @@ Static Assets frontend    (Local Codex / Desktop / Agent / ChatGPT)
        │                       │
        └───────────┬───────────┘
                    ▼
-                Supabase
-     Auth / child memory / feedback
-     jobs / submissions / materials
-                   │
-         ┌─────────┴─────────┐
-         │                   │
-       Week 1              Week 2+
-         │                   │
-         ▼                   ▼
- Week 1 Fast Publisher   Deterministic Finisher
- objective integrity     normal publication lifecycle
- render / inspect        render / inspect
- Storage / completion    Storage / completion
+                 Supabase
+      Auth / child memory / feedback
+      jobs / submissions / materials
+                    │
+         ┌──────────┴──────────┐
+         ▼                     ▼
+   Fast Publisher      Universal Finisher
+(Week 1 prioritized)  (All weeks: Week 1 & 2+)
+ objective integrity   full deterministic path
+   render / inspect      render / inspect
+ Storage / completion  Storage / completion
 ```
 
-Week 1 and Week 2+ share the same explicit-job, immutable-submission, private-storage, and deterministic-artifact principles. Their publication paths differ intentionally: Week 1 removes the second semantic Finisher gate after Author/Critic to minimize time-to-first-material, while Week 2+ retains the normal deterministic Finisher lifecycle.
+Week 1 and Week 2+ share the same explicit-job, immutable-submission, private-storage, and deterministic-artifact principles across a single unified curriculum-submission queue. The Normal Finisher is a universal consumer that can claim and complete all weeks, while the Week 1 Fast Publisher provides an optimized, non-isolated lower-latency consumer on the same queue. Mutual exclusion (`SKIP LOCKED`) guarantees exactly one processor claims each submission without duplicate material or release race conditions. Week 1 Fast Publisher removes the second semantic audit after Author/Critic to minimize time-to-first-material, while Week 2+ submissions retain the full deterministic Finisher semantic audit.
 
 ---
 

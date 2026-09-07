@@ -268,6 +268,26 @@ export interface OperationsOverview {
       status: 'version_drift' | 'unobservable'
     }>
   }
+  recentSubmissions?: OperationsOverviewSubmissionRow[]
+}
+
+export interface OperationsOverviewSubmissionRow {
+  jobId: string
+  childId: string
+  childPseudonym: string
+  materialWeek: string
+  authoringAttempt: number
+  generationWorkerId: string
+  processorId: string | null
+  publicationPath: string | null
+  status: string
+  processorLeaseExpiresAt: string | null
+  errorCode: string | null
+  errorMessage: string | null
+  failureEvidence: Record<string, unknown> | null
+  materialId: string | null
+  submittedAt: string
+  processedAt: string | null
 }
 
 export interface PipelineJobRow {
@@ -348,6 +368,8 @@ export interface FailureIntelligence {
       message: string
       stage: string
       failureEvidence?: Record<string, unknown> | null
+      processorId?: string | null
+      publicationPath?: string | null
     }>
   }>
   qualityRuleViolations: Array<{
@@ -369,6 +391,8 @@ export interface FailureIntelligence {
       timestamp: string
       message: string
       evidence: Record<string, unknown>
+      processorId?: string | null
+      publicationPath?: string | null
     }>
   }>
   dailyTrend: Array<{
@@ -395,6 +419,8 @@ export interface FailureIntelligence {
     schemaVersion: string | null
     promptVersion: string | null
     modelName: string | null
+    processorId?: string | null
+    publicationPath?: string | null
   }>
 }
 

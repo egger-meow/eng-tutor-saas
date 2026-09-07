@@ -95,10 +95,25 @@ function PipelineColumn({ title, hint, jobs, onOpen }: { title: string; hint: st
 
 export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimeline }) => {
   const [manifestOpen, setManifestOpen] = useState(true)
+  const [pathFilter, setPathFilter] = useState<'all' | 'week1_fast' | 'normal_finisher'>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+
   if (!data) return <div>載入營運資料中…</div>
   const open = (job: PipelineJobRow) => onDrillDownTimeline(job.childId, job.materialWeek)
   const state = data.engineInspector.alignmentStatus
   const alignmentLabel = state === 'version_drift' ? '版本不一致' : state === 'unobservable' ? '尚無可驗證版本資料' : '規格已全面生效'
+
+  const allSubmissions = data.recentSubmissions || []
+  const filteredSubmissions = allSubmissions.filter((sub) => {
+    if (pathFilter !== 'all') {
+      const p = sub.publicationPath || (sub.processorId?.includes('fast') ? 'week1_fast' : 'normal_finisher')
+      if (p !== pathFilter) return false
+    }
+    if (statusFilter !== 'all') {
+      if (sub.status !== statusFilter) return false
+    }
+    return true
+  })
 
   return (
     <div className="operations-cockpit">
@@ -147,6 +162,182 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
         <PipelineColumn title="等待品質審核" hint="已有提交，等待 Finisher 結果" jobs={data.pipeline.awaitingFinisher} onOpen={open} />
         <PipelineColumn title="審核完成" hint="最新嘗試已產生終態結果" jobs={data.pipeline.finisherDone} onOpen={open} />
       </div>
+
+      {/* Universal Curriculum Submissions & Processor Queue Section */}
+      <section className="cockpit-card" style={{ marginTop: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>教材提交佇列與處理紀錄 (Curriculum Submissions & Processor Queue)</span>
+              <span className="status-pill active" style={{ fontSize: '11px' }}>
+                共 {allSubmissions.length} 筆
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+              統一教材提交佇列（Universal Queue），監控 Week 1 Fast Lane 與 Normal Finisher 之處理進度、租約狀態與錯誤回報。
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* Publication Path Filter */}
+            <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-elevated)', padding: '2px', borderRadius: '6px' }}>
+              <button
+                type="button"
+                className={`refresh-btn ${pathFilter === 'all' ? 'active' : ''}`}
+                style={{ fontSize: '11px', padding: '3px 8px', background: pathFilter === 'all' ? '#2563eb' : 'transparent', color: pathFilter === 'all' ? '#fff' : 'var(--text-muted)' }}
+                onClick={() => setPathFilter('all')}
+              >
+                全部管道
+              </button>
+              <button
+                type="button"
+                className={`refresh-btn ${pathFilter === 'week1_fast' ? 'active' : ''}`}
+                style={{ fontSize: '11px', padding: '3px 8px', background: pathFilter === 'week1_fast' ? '#4f46e5' : 'transparent', color: pathFilter === 'week1_fast' ? '#fff' : 'var(--text-muted)' }}
+                onClick={() => setPathFilter('week1_fast')}
+              >
+                ⚡ Week 1 Fast
+              </button>
+              <button
+                type="button"
+                className={`refresh-btn ${pathFilter === 'normal_finisher' ? 'active' : ''}`}
+                style={{ fontSize: '11px', padding: '3px 8px', background: pathFilter === 'normal_finisher' ? '#0891b2' : 'transparent', color: pathFilter === 'normal_finisher' ? '#fff' : 'var(--text-muted)' }}
+                onClick={() => setPathFilter('normal_finisher')}
+              >
+                Normal Finisher
+              </button>
+            </div>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="form-select"
+              style={{ fontSize: '12px', padding: '4px 8px', width: 'auto' }}
+            >
+              <option value="all">所有狀態 (All Statuses)</option>
+              <option value="processing">處理中 (Processing)</option>
+              <option value="pending">等待處理 (Pending)</option>
+              <option value="completed">處理完成 (Completed)</option>
+              <option value="quality_rejected">品質退回 (Quality Rejected)</option>
+              <option value="technical_failed">技術失敗 (Technical Failed)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="data-table-wrapper">
+          <table className="cockpit-table" style={{ width: '100%', fontSize: '12px' }}>
+            <thead>
+              <tr>
+                <th>學員</th>
+                <th>週次 / 次數</th>
+                <th>發行管道</th>
+                <th>處理器 (Processor)</th>
+                <th>狀態</th>
+                <th>提交 / 處理時間</th>
+                <th>診斷 / 錯誤代碼</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSubmissions.length > 0 ? (
+                filteredSubmissions.map((sub) => {
+                  const resolvedPath = sub.publicationPath || (sub.processorId?.includes('fast') ? 'week1_fast' : 'normal_finisher')
+                  const isWeek1Fast = resolvedPath === 'week1_fast'
+                  return (
+                    <tr key={`${sub.jobId}-${sub.authoringAttempt}`} style={{ cursor: 'pointer' }} onClick={() => sub.childId && onDrillDownTimeline(sub.childId, sub.materialWeek)}>
+                      <td style={{ fontWeight: 600 }}>{sub.childPseudonym}</td>
+                      <td>
+                        <span style={{ fontFamily: 'monospace' }}>{sub.materialWeek}</span>
+                        <span style={{ color: 'var(--text-muted)', marginLeft: '4px' }}>#{sub.authoringAttempt}</span>
+                      </td>
+                      <td>
+                        <span
+                          className="status-pill"
+                          style={{
+                            fontSize: '10px',
+                            background: isWeek1Fast ? 'rgba(99, 102, 241, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                            color: isWeek1Fast ? '#818cf8' : '#22d3ee',
+                            border: `1px solid ${isWeek1Fast ? '#6366f1' : '#0891b2'}`,
+                          }}
+                        >
+                          {isWeek1Fast ? '⚡ Week 1 Fast' : 'Normal Finisher'}
+                        </span>
+                      </td>
+                      <td>
+                        <code style={{ fontSize: '11px', color: sub.processorId ? '#e2e8f0' : 'var(--text-dim)' }}>
+                          {sub.processorId || (sub.status === 'processing' ? '租約中' : '尚未領取')}
+                        </code>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-pill ${
+                            sub.status === 'completed'
+                              ? 'active'
+                              : sub.status === 'processing'
+                              ? 'warning'
+                              : sub.status === 'quality_rejected'
+                              ? 'danger'
+                              : sub.status === 'technical_failed'
+                              ? 'danger'
+                              : 'pending'
+                          }`}
+                          style={{ fontSize: '10px' }}
+                        >
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td style={{ color: 'var(--text-dim)', fontSize: '11px' }}>
+                        <div>送出: {sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'}</div>
+                        {sub.processedAt && (
+                          <div>完成: {new Date(sub.processedAt).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
+                        )}
+                        {sub.status === 'processing' && sub.processorLeaseExpiresAt && (
+                          <div style={{ color: 'var(--status-amber)' }}>
+                            租約至: {new Date(sub.processorLeaseExpiresAt).toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ maxWidth: '200px' }}>
+                        {sub.errorCode ? (
+                          <div title={sub.errorMessage || sub.errorCode}>
+                            <code style={{ color: 'var(--status-rose)', fontSize: '11px' }}>{sub.errorCode}</code>
+                            {sub.errorMessage && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {sub.errorMessage}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-dim)' }}>-</span>
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="refresh-btn"
+                          style={{ fontSize: '11px', padding: '3px 8px' }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (sub.childId) onDrillDownTimeline(sub.childId, sub.materialWeek)
+                          }}
+                        >
+                          時間軸 →
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
+              ) : (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                    無符合條件的教材提交紀錄
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   )
 }

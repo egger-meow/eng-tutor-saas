@@ -653,6 +653,19 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                                   {formatEngineEraLabel(att.era, att.engineVersion)}
                                 </span>
                               )}
+                              {att.publicationPath && (
+                                <span
+                                  className="status-pill"
+                                  style={{
+                                    fontSize: '10px',
+                                    background: att.publicationPath === 'week1_fast' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+                                    color: att.publicationPath === 'week1_fast' ? '#818cf8' : '#22d3ee',
+                                    border: `1px solid ${att.publicationPath === 'week1_fast' ? '#6366f1' : '#0891b2'}`,
+                                  }}
+                                >
+                                  {att.publicationPath === 'week1_fast' ? '⚡ Week 1 Fast' : 'Normal Finisher'}
+                                </span>
+                              )}
                               {(att.schemaVersion || att.promptVersion || att.engineVersion) && (
                                 <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                                   {att.engineVersion ? `e${att.engineVersion} · ` : ''}v{att.schemaVersion || '2.2.0'} / p{att.promptVersion || '2.4.0'}
@@ -672,7 +685,8 @@ export const ChildWeekTimelineView: React.FC<ChildWeekTimelineProps> = ({
                             <>
                               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
                                 提交時間: {att.submittedAt ? new Date(att.submittedAt).toLocaleString('zh-TW', { hour12: false }) : 'N/A'}
-                                {att.processorId ? ` | 處理 Finisher: ${att.processorId}` : ''}
+                                {att.processorId ? ` | 處理器: ${att.processorId}` : ''}
+                                {att.publicationPath ? ` | 管道: ${att.publicationPath === 'week1_fast' ? 'Week 1 Fast' : 'Normal Finisher'}` : ''}
                                 {att.modelName ? ` | 模型: ${att.modelName}` : ''}
                               </div>
                               {att.errorMessage && (

@@ -22,11 +22,89 @@ export type Week1FastSubmission = {
   canonical_source: unknown
 }
 
+export type Week1FastPublishStage =
+  | 'context_loading'
+  | 'release_validation'
+  | 'schema_integrity_validation'
+  | 'rendering'
+  | 'pdf_inspection'
+  | 'upload'
+  | 'db_completion'
+
 export type Week1FastPublishResult = {
   jobId: string
-  status: 'completed' | 'technical_failed'
+  status: 'completed' | 'technical_failed' | 'quality_rejected'
   materialId?: string
   errorCode?: string
+  errorMessage?: string
+  stage?: Week1FastPublishStage
+}
+
+export type Week1FastFailureClassification = {
+  outcome: 'technical_failed' | 'quality_rejected'
+  errorCode: string
+  evidence?: Record<string, unknown>
+}
+
+export function classifyWeek1FastFailure(
+  stage: Week1FastPublishStage,
+  error: unknown,
+): Week1FastFailureClassification {
+  const message = error instanceof Error ? error.message : String(error)
+
+  if (stage === 'release_validation' || /Release mismatch/iu.test(message)) {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'RELEASE_MISMATCH',
+    }
+  }
+
+  if (stage === 'schema_integrity_validation') {
+    return {
+      outcome: 'quality_rejected',
+      errorCode: 'QUALITY_REJECTED',
+    }
+  }
+
+  if (stage === 'context_loading') {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'CONTEXT_LOAD_FAILED',
+    }
+  }
+
+  if (stage === 'rendering') {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'PDF_RENDER_FAILED',
+    }
+  }
+
+  if (stage === 'pdf_inspection') {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'PDF_INSPECTION_FAILED',
+    }
+  }
+
+  if (stage === 'upload') {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'STORAGE_UPLOAD_FAILED',
+    }
+  }
+
+  if (stage === 'db_completion') {
+    return {
+      outcome: 'technical_failed',
+      errorCode: 'COMPLETION_RPC_FAILED',
+    }
+  }
+
+  return {
+    outcome: 'technical_failed',
+    errorCode: 'WEEK1_FAST_PUBLISH_FAILED',
+  }
 }
 
 type Render = (pkg: CurriculumPackage) => Promise<CurriculumPdfBytes>
@@ -97,19 +175,46 @@ async function recordFailure(
   client: WorkerClient,
   submission: Week1FastSubmission,
   processorId: string,
+  stage: Week1FastPublishStage,
   error: unknown,
+  classified: Week1FastFailureClassification,
 ): Promise<void> {
   const message = error instanceof Error ? error.message : String(error)
-  try {
-    await client.rpc('worker_fail_week1_fast_submission', {
-      p_job_id: submission.job_id,
-      p_authoring_attempt: submission.authoring_attempt,
-      p_processor_id: processorId,
-      p_error_code: 'WEEK1_FAST_PUBLISH_FAILED',
-      p_error_message: message.slice(0, 2000),
-    })
-  } catch {
-    console.error('[week1-fast] failed to record publisher failure', { jobId: submission.job_id })
+  const diagnostics = {
+    jobId: submission.job_id,
+    authoringAttempt: submission.authoring_attempt,
+    processorId,
+    publicationPath: 'week1_fast',
+    stage,
+    errorCode: classified.errorCode,
+    originalMessage: message,
+  }
+
+  process.stderr.write(`[week1-fast] publication failure: ${JSON.stringify(diagnostics)}\n`)
+
+  const failureEvidence = {
+    stage,
+    publicationPath: 'week1_fast',
+    processorId,
+    originalMessage: message.slice(0, 2000),
+    ...(classified.evidence ?? {}),
+  }
+
+  const result = await client.rpc('worker_fail_week1_fast_submission', {
+    p_job_id: submission.job_id,
+    p_authoring_attempt: submission.authoring_attempt,
+    p_processor_id: processorId,
+    p_error_code: classified.errorCode,
+    p_error_message: message.slice(0, 2000),
+    p_failure_evidence: failureEvidence,
+    p_outcome: classified.outcome,
+  })
+
+  if (result.error) {
+    throw new Error(`[week1-fast] recordFailure RPC error for job ${submission.job_id}: ${result.error.message}`)
+  }
+  if (result.data !== true) {
+    throw new Error(`[week1-fast] recordFailure RPC failed for job ${submission.job_id}: lease lost or unexpected response (${JSON.stringify(result.data)})`)
   }
 }
 
@@ -135,6 +240,7 @@ export async function processWeek1FastSubmissions(
 
   for (const submission of submissions) {
     const createdPaths: string[] = []
+    let stage: Week1FastPublishStage = 'context_loading'
     try {
       if (!submission.generation_worker_id || submission.generation_worker_id.length < 3) {
         throw new Error('Week 1 submission is missing its authoring worker identity')
@@ -145,6 +251,7 @@ export async function processWeek1FastSubmissions(
         throw new Error('Week 2+ job reached Week 1 publisher')
       }
 
+      stage = 'release_validation'
       const raw = submission.canonical_source && typeof submission.canonical_source === 'object'
         ? submission.canonical_source as Record<string, any>
         : {}
@@ -157,19 +264,36 @@ export async function processWeek1FastSubmissions(
         throw new Error('Week 1 immutable submission releaseId does not match claimed release')
       }
 
+      stage = 'schema_integrity_validation'
       // Validate and render from the immutable submission. The parsed package is an in-memory
       // normalized view only; the completion RPC receives the original canonical source.
       const parsed = validateCurriculumPackageForFinisher(submission.canonical_source)
       if (!parsed.success) {
-        throw new Error(`Week 1 package integrity invalid: ${parsed.issues.map((issue) => `${issue.path}:${issue.message}`).join(' | ')}`)
+        const issuesMessage = parsed.issues.map((issue) => `${issue.path}:${issue.message}`).join(' | ')
+        const err = new Error(`Week 1 package integrity invalid: ${issuesMessage}`)
+        ;(err as any).evidence = {
+          failureType: 'QUALITY_REJECTED',
+          findings: parsed.issues.map((issue) => ({
+            source: 'validation',
+            path: issue.path,
+            dimension: 'deterministic-validation',
+            message: issue.message,
+          })),
+        }
+        throw err
       }
       const pkg = parsed.curriculumPackage
       if (pkg.metadata.jobId !== submission.job_id || pkg.metadata.childId !== context.job.childId) {
         throw new Error('Week 1 package identity does not match claimed job')
       }
 
+      stage = 'rendering'
       const rendered = await render(pkg)
+
+      stage = 'pdf_inspection'
       const expectedInspection = await inspect(pkg, rendered)
+
+      stage = 'upload'
       const paths = {
         student: `${context.job.childId}/${submission.job_id}/student.pdf`,
         parent: `${context.job.childId}/${submission.job_id}/parent-answer.pdf`,
@@ -185,6 +309,7 @@ export async function processWeek1FastSubmissions(
         : await inspect(pkg, { student: studentResult.bytes, parentAnswer: parentResult.bytes })
       assertMatchingPdfPair(expectedInspection, actualInspection)
 
+      stage = 'db_completion'
       const materialId = unwrap(await client.rpc('worker_complete_week1_fast_submission', {
         p_job_id: submission.job_id,
         p_authoring_attempt: submission.authoring_attempt,
@@ -213,8 +338,18 @@ export async function processWeek1FastSubmissions(
       if (createdPaths.length > 0) {
         try { await client.storage.from(BUCKET).remove(createdPaths) } catch { /* best effort cleanup */ }
       }
-      await recordFailure(client, submission, processorId, error)
-      results.push({ jobId: submission.job_id, status: 'technical_failed', errorCode: 'WEEK1_FAST_PUBLISH_FAILED' })
+      const classified = classifyWeek1FastFailure(stage, error)
+      if ((error as any)?.evidence) {
+        classified.evidence = { ...(classified.evidence ?? {}), ...(error as any).evidence }
+      }
+      await recordFailure(client, submission, processorId, stage, error, classified)
+      results.push({
+        jobId: submission.job_id,
+        status: classified.outcome,
+        errorCode: classified.errorCode,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        stage,
+      })
     }
   }
 

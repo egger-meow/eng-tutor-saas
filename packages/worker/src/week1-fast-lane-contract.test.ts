@@ -83,6 +83,27 @@ describe('Week 1 Fast Lane production contract', () => {
     expect(component).not.toMatch(/\b\d{1,3}%\b/u)
   })
 
+  it('makes normal Finisher a universal submission consumer and Fast Publisher an optimized Week 1 consumer on the same queue', async () => {
+    const universalMigration = await source('supabase/migrations/20260907100000_universal_finisher_submission_consumer.sql')
+    expect(universalMigration).toContain('public.worker_claim_curriculum_submissions')
+    // Universal finisher does NOT restrict by source_material_id
+    expect(universalMigration).not.toContain('job.source_material_id is not null')
+    // Fast publisher claims Week 1 from any author
+    expect(universalMigration).toContain('public.worker_claim_week1_fast_submissions')
+    expect(universalMigration).not.toContain("submission.publication_path = 'week1_fast'")
+    // worker_fail_week1_fast_submission supports any worker and failure_evidence
+    expect(universalMigration).toContain('p_failure_evidence jsonb default null')
+    expect(universalMigration).toContain("p_outcome text default 'technical_failed'")
+    expect(universalMigration).not.toContain("worker_id <> 'chatgpt-week1-fast'")
+  })
+
+  it('provides stage-aware failure tracking and RPC unwrap assertion in Fast Publisher', async () => {
+    const publisher = await source('packages/worker/src/week1-fast-publisher.ts')
+    expect(publisher).toContain('classifyWeek1FastFailure')
+    expect(publisher).toContain('data !== true')
+    expect(publisher).toContain('[week1-fast] publication failure:')
+  })
+
   it('removes the parent-facing next-day Week 1 promise', async () => {
     const landing = await source('apps/web/src/routes/LandingPage.tsx')
     expect(landing).toContain('完成孩子資料後會立即開始製作')

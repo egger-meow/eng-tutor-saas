@@ -1458,6 +1458,28 @@ export class AdminService {
     const drift: OperationsOverview['engineInspector']['drift'] = []
     const alignmentStatus = 'aligned'
 
+    const recentSubmissions: NonNullable<OperationsOverview['recentSubmissions']> = submissions.slice(0, 50).map((s: any) => {
+      const childDisplayName = s.child_id ? childMap.get(s.child_id) : null
+      return {
+        jobId: s.job_id,
+        childId: s.child_id || '',
+        childPseudonym: s.child_id ? this.maskName(childDisplayName, s.child_id) : `Job #${s.job_id.slice(0, 6)}`,
+        materialWeek: s.material_week || 'Week Cycle',
+        authoringAttempt: Number(s.authoring_attempt) || 1,
+        generationWorkerId: s.generation_worker_id || 'unknown',
+        processorId: s.processor_id || null,
+        publicationPath: s.publication_path || null,
+        status: s.status,
+        processorLeaseExpiresAt: s.processor_lease_expires_at || null,
+        errorCode: s.error_code || null,
+        errorMessage: s.error_message || null,
+        failureEvidence: s.failure_evidence || null,
+        materialId: s.material_id || null,
+        submittedAt: s.submitted_at,
+        processedAt: s.processed_at || null,
+      }
+    })
+
     return {
       systemHealth,
       selectedEra: era,
@@ -1515,6 +1537,7 @@ export class AdminService {
       anomalies,
       pipeline,
       engineInspector: { expected, aligned: alignmentStatus === 'aligned', alignmentStatus, drift },
+      recentSubmissions,
     }
   }
 
@@ -2394,6 +2417,8 @@ export class AdminService {
         message: string
         stage: string
         failureEvidence?: Record<string, unknown> | null
+        processorId?: string | null
+        publicationPath?: string | null
       }>
     }> = {}
 
@@ -2523,7 +2548,7 @@ export class AdminService {
       const effectiveMaterialWeek = sub.material_week || parentJob?.material_week || 'Week Cycle'
       const code = sub.error_code || (sub.status === 'quality_rejected' ? 'QUALITY_REJECTED' : 'CURRICULUM_PIPELINE_FAILED')
       const msg = sub.error_message || (sub.status === 'quality_rejected' ? 'Curriculum quality verification rejected by Finisher' : 'Finisher processing failure')
-      const stage = sub.status === 'quality_rejected' ? 'finisher_audit' : 'chatgpt_authoring'
+      const stage = sub.status === 'quality_rejected' ? 'finisher_audit' : this.classifySubmissionFailureStage(code, msg, sub.failure_evidence)
       const subEra = getSubEra(sub)
       stageCounts[stage]++
 
@@ -2579,6 +2604,8 @@ export class AdminService {
         message: msg,
         stage,
         failureEvidence: sub.failure_evidence || null,
+        processorId: sub.processor_id || null,
+        publicationPath: sub.publication_path || null,
       })
 
       if (sub.failure_evidence && typeof sub.failure_evidence === 'object') {
@@ -2609,6 +2636,8 @@ export class AdminService {
             timestamp: subTimestamp,
             message: finding.message || finding.description || ruleName,
             evidence: sub.failure_evidence,
+            processorId: sub.processor_id || null,
+            publicationPath: sub.publication_path || null,
           })
         }
       }
@@ -2629,6 +2658,8 @@ export class AdminService {
         schemaVersion: sub.schema_version || (sub.failure_evidence?.schemaVersion ?? null),
         promptVersion: sub.prompt_version || (sub.failure_evidence?.promptVersion ?? null),
         modelName: sub.model_name || null,
+        processorId: sub.processor_id || null,
+        publicationPath: sub.publication_path || null,
       })
     }
 
@@ -3006,7 +3037,10 @@ export class AdminService {
           status: sub.status,
           hasSubmission: true,
           submittedAt: sub.submitted_at,
-          processorId: sub.processor_id,
+          processorId: sub.processor_id || null,
+          publicationPath: sub.publication_path || null,
+          processorLeaseExpiresAt: sub.processor_lease_expires_at || null,
+          materialId: sub.material_id || null,
           processedAt: sub.processed_at,
           errorCode: sub.error_code,
           errorMessage: sub.error_message,
@@ -3201,6 +3235,18 @@ export class AdminService {
     if (upperMsg.includes('QUALITY') || upperMsg.includes('VOCABULARY')) return 'finisher_audit'
 
     return 'finisher_audit'
+  }
+
+  private classifySubmissionFailureStage(code: string, msg: string, failureEvidence?: any): FailureIntelligence['stageBreakdown'][number]['stage'] {
+    const evidenceStage = failureEvidence && typeof failureEvidence === 'object' ? failureEvidence.stage : null
+    if (typeof evidenceStage === 'string') {
+      const lower = evidenceStage.toLowerCase()
+      if (lower === 'rendering' || lower === 'pdf_inspection') return 'pdf_rendering'
+      if (lower === 'upload') return 'storage_upload'
+      if (lower === 'schema_integrity_validation') return 'finisher_audit'
+      if (lower === 'context_loading' || lower === 'release_validation' || lower === 'db_completion') return 'worker_claim'
+    }
+    return this.classifyStage(code, msg)
   }
 
   private suggestRemedy(code: string): string {
