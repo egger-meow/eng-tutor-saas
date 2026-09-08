@@ -3824,6 +3824,8 @@ GitHub Actions may handle:
 
 MVP lesson generation remains orchestrated separately.
 
+Generation releases use the central desired manifest in packages/generator/src/engine-version.ts, distinct from the verified production active contract. Verify compatibility across bundle, authors, claim/submit RPCs, schema validators, publishers, Finisher and renderer before activation. Behavior tests must prove target-schema acceptance, mismatched-contract rejection and supported historical/in-flight compatibility. Deploy compatible consumers before switching new claims; preserve immutable attempt contracts. Record artifact hashes, deployed identities and fresh production evidence. Missing checks mean incomplete delivery. Follow docs/production-release-policy.md and perform its checks manually where automation is absent.
+
 ---
 
 # 179. Testing Requirements

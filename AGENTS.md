@@ -448,3 +448,12 @@ Source lives under `apps/web/src/`, `packages/generator/src/`, and `packages/pdf
 # Supabase Production Delivery
 
 After committing and pushing a completed change, if the commit includes new Supabase migrations, apply the pending migration chain to the linked production database and verify the remote migration history. If the commit includes new or changed Supabase Edge Functions, deploy the affected functions to the linked production project and verify the deployment. Treat these production deployment steps as part of the default delivery workflow unless the user explicitly opts out or production access is unavailable.
+
+
+# Mandatory Generation Release Consistency
+
+Every generation release/version change MUST follow [Production release consistency policy](docs/production-release-policy.md). The central desired manifest is packages/generator/src/engine-version.ts; the fresh production active contract establishes deployed versions. Never hardcode versions in reusable executor prompts or infer them from completed materials.
+
+Verify bundle/compiler, all authoring adapters, both claim paths, submit RPC, schema validators, Week 1 publisher, Finisher, renderer and deployed workers/workflows. Prove target-schema acceptance, mismatched-contract rejection and supported historical/in-flight compatibility with behavior tests. Source-text searches and local tests alone do not prove production compatibility.
+
+Deploy compatible consumers and verify them before activating new claims. Preserve immutable claim snapshots. Record source/artifact hashes, deployed identities, production read-back and test evidence. Missing required checks mean incomplete delivery; do not advance activation. Perform checks manually where automation is absent and never claim documentation implements enforcement.
