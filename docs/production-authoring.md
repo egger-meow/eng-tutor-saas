@@ -60,6 +60,8 @@ Before performing any curriculum generation or repair work, every authoring exec
 
 New authoring uses Release `rel_1.8.2`, Engine `1.8.2`, Prompt `2.13.2`, Worker `1.7.2`, Schema `2.5.0`, and PDF Renderer `1.5.0`. The bundle compiler selects prompt stages and metadata from `engine-version.ts`; changing the deployment release alone does not select a prompt suite. Every executor must refresh the repository/bundle before a new batch. Record versions actually used; never relabel an existing immutable attempt or completed PDF.
 
+Online executors must call `GET /contract` before the single `POST /start`. The returned contract is also embedded in each new server-owned claim snapshot. Verify the current bundle SHA-256 against `bundleSha256`; if the matching bundle cannot be read, stop before authoring or submission. Never infer the active contract from completed-material metadata. Submission fails closed when schema, prompt, engine, worker, renderer, or release metadata differs from the claimed contract.
+
 ### Shared interest exploration and compact context (Prompt 2.13.2)
 
 Every entry point uses the bundle's shared `interest-exploration.md` policy. Privately extract public artists, groups, works, characters and specific questions; screen out learner identity and learning records before research. Choose the evidence-supported angle and information structure together after setting the learning target. A creative process or fictional decision can supply substantive knowledge; neither news nor science is mandatory. Preserve good science explanations when they fit.

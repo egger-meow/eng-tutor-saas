@@ -90,6 +90,12 @@ Deno.serve(async (request) => {
   const path = url.pathname.replace(/^\/(?:functions\/v1\/)?authoring-bridge/, '').replace(/\/$/, '')
 
   try {
+    if (request.method === 'GET' && path === '/contract') {
+      const { data, error } = await client.rpc('worker_current_authoring_contract')
+      if (error) return json(500, { error: error.message })
+      return json(200, data)
+    }
+
     if (request.method === 'POST' && path === '/start') {
       const { data, error } = await client.rpc('worker_start_authoring_batch', {
         worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,

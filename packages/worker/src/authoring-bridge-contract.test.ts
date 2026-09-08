@@ -66,6 +66,7 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
   it('exposes only narrow business operations and zero SQL/table/database capability', async () => {
     const openapi = await readFile(resolve(root, 'docs/authoring-bridge-openapi.yaml'), 'utf8')
     expect(openapi).toContain('/start:')
+    expect(openapi).toContain('/contract:')
     expect(openapi).toContain('/batch:')
     expect(openapi).toContain('/submit:')
     expect(openapi).toContain('/status:')
@@ -75,6 +76,18 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(openapi).not.toContain('postgres')
   })
 
+  it('pins the active authoring contract into claims and validates it on submit', async () => {
+    const migration = await readFile(resolve(root, 'supabase/migrations/20260908044708_pin_production_authoring_contract.sql'), 'utf8')
+    expect(migration).toContain("'promptVersion', '2.13.2'")
+    expect(migration).toContain("'engineVersion', '1.8.2'")
+    expect(migration).toContain("'workerVersion', '1.7.2'")
+    expect(migration).toContain("'bundleVersion', '2.13.2-prod'")
+    expect(migration).toContain("'activeAuthoringContract', public.worker_current_authoring_contract()")
+    expect(migration).toContain('AUTHORING_CONTRACT_MISMATCH')
+    const edgeFunctionSource = await readFile(resolve(root, 'supabase/functions/authoring-bridge/index.ts'), 'utf8')
+    expect(edgeFunctionSource).toContain("path === '/contract'")
+    expect(edgeFunctionSource).toContain("rpc('worker_current_authoring_contract')")
+  })
   it('proves /start -> /submit -> /status semantics match the canonical production authoring protocol', async () => {
     const openapi = await readFile(resolve(root, 'docs/authoring-bridge-openapi.yaml'), 'utf8')
     expect(openapi).toContain('inputFingerprint:')

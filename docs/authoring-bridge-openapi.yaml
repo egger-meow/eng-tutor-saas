@@ -11,6 +11,23 @@ servers:
   - url: https://ykzszjrqynrhgdhoeovo.supabase.co/functions/v1/authoring-bridge
     description: Production Supabase Edge Functions Authoring Bridge
 paths:
+  /contract:
+    get:
+      summary: Get Active Production Authoring Contract
+      description: >
+        Returns the server-owned release, schema, prompt, engine, worker, renderer,
+        bundle version, and bundle SHA-256 required for every new claim. Historical
+        completed-material metadata must never be used to infer this contract.
+      operationId: getActiveAuthoringContract
+      responses:
+        '200':
+          description: Active contract returned successfully
+        '401':
+          description: Missing or invalid authorization token
+        '500':
+          description: Server error
+        '503':
+          description: Bridge secret not configured
   /start:
     post:
       summary: Start Authoritative Production Authoring Batch
