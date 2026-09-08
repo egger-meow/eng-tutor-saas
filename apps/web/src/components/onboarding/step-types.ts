@@ -4,6 +4,7 @@ export type OnboardingStepProps = {
   draft: ProfileDraft
   errors: Record<string, string>
   update: (patch: Partial<ProfileDraft>) => void
+  onAutoAdvance?: () => void
 }
 
 export const levels = [

@@ -20,10 +20,12 @@ vi.mock('../../lib/enrollment', () => ({
 }))
 
 describe('LandingOnboardingPanel', () => {
-  it('starts with the existing child learning form instead of an email gate', () => {
+  it('starts with the 4-step child learning form instead of an email gate', () => {
     mockEnrollmentState = null
     const html = renderToStaticMarkup(<LandingOnboardingPanel />)
 
+    expect(html).toContain('步驟 1 / 4')
+    expect(html).toContain('4 步驟約 2 分鐘快速完成')
     expect(html).toContain('先抓孩子現在的大概位置')
     expect(html).toContain('孩子怎麼稱呼？')
     expect(html).not.toContain('type="email"')

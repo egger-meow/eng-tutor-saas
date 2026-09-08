@@ -5,18 +5,19 @@ import { easings } from '../motion/motion-tokens'
 
 type OnboardingLayoutProps = {
   step: number
+  totalSteps?: number
   title: string
   description: string
   children: ReactNode
   actions: ReactNode
 }
 
-export function OnboardingLayout({ step, title, description, children, actions }: OnboardingLayoutProps) {
+export function OnboardingLayout({ step, totalSteps, title, description, children, actions }: OnboardingLayoutProps) {
   const reduceMotion = useReducedMotion()
 
   return (
     <section className="onboarding-layout">
-      <OnboardingProgress step={step} />
+      <OnboardingProgress step={step} totalSteps={totalSteps} />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={step}

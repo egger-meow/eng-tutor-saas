@@ -8,12 +8,30 @@ const gradeStages = [
   { value: 'grade_9', label: '國三' },
 ] as const
 
-export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
+export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingStepProps) {
   function selectGradeStage(gradeStage: typeof draft.gradeStage) {
     update({
       gradeStage,
       grade: gradeStage === 'incoming_grade_7' ? 7 : Number(gradeStage.slice(-1)),
     })
+  }
+
+  function selectBaselineLevel(levelValue: string) {
+    update({ baselineLevel: levelValue })
+    if (onAutoAdvance && draft.displayName.trim().length > 0) {
+      window.setTimeout(() => {
+        onAutoAdvance()
+      }, 220)
+    }
+  }
+
+  function handleNameKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      if (draft.displayName.trim().length > 0 && draft.baselineLevel && onAutoAdvance) {
+        onAutoAdvance()
+      }
+    }
   }
 
   return (
@@ -25,6 +43,7 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
           placeholder="例如：翔翔、Emma"
           value={draft.displayName}
           onChange={(event) => update({ displayName: event.target.value })}
+          onKeyDown={handleNameKeyDown}
           aria-invalid={Boolean(errors.displayName)}
         />
         {errors.displayName && <span className="field-error">{errors.displayName}</span>}
@@ -62,7 +81,7 @@ export function AboutStep({ draft, errors, update }: OnboardingStepProps) {
                 key={lvl.value}
                 type="button"
                 className={`level-card-option ${isSelected ? 'selected' : ''}`}
-                onClick={() => update({ baselineLevel: lvl.value })}
+                onClick={() => selectBaselineLevel(lvl.value)}
                 role="radio"
                 aria-checked={isSelected}
               >

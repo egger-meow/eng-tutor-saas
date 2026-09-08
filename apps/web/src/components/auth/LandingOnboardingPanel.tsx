@@ -21,10 +21,13 @@ import '../../styles/landing-onboarding.css'
 
 const LANDING_DRAFT_KEY = 'paper-english:landing-profile-draft'
 
+export const LANDING_TOTAL_STEPS = 4
+
 const stepMeta = [
   ['先抓孩子現在的大概位置', '暱稱、年級、英文程度，憑印象選就可以。'],
   ['孩子最近真的喜歡什麼？', '先選興趣大類，再補幾個他最近真的在看的、玩的或著迷的東西。'],
-  ['最後，設定每週節奏', '選一個做得到的時間，再告訴我們最希望先加強什麼。'],
+  ['設定每週節奏與加強目標', '選一個做得到的時間，再告訴我們最希望先加強什麼。'],
+  ['最後留下 Email，我們就開始準備第一週', '名額可用時立即排入第一週專屬教材製作，完成後寄信通知。'],
 ] as const
 
 type PanelMode = 'profile' | 'email' | 'existing' | 'submitted'
@@ -103,6 +106,14 @@ export function LandingOnboardingPanel() {
     }
   }, [mode, submissionStatus])
 
+  useEffect(() => {
+    if (step === LANDING_TOTAL_STEPS) {
+      window.requestAnimationFrame(() => {
+        document.getElementById('landing-onboarding-email')?.focus({ preventScroll: true })
+      })
+    }
+  }, [step])
+
   function markStarted() {
     if (started.current) return
     started.current = true
@@ -129,19 +140,17 @@ export function LandingOnboardingPanel() {
 
   function next() {
     markStarted()
-    const nextErrors = validateProfileStep(step, draft)
-    setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
-    if (step === profileStepCount) {
-      setMode('email')
-      scrollToCard()
-      window.requestAnimationFrame(() => {
-        document.getElementById('landing-onboarding-email')?.focus({ preventScroll: true })
-      })
-      return
+    if (step <= profileStepCount) {
+      const nextErrors = validateProfileStep(step, draft)
+      setErrors(nextErrors)
+      if (Object.keys(nextErrors).length > 0) return
     }
-    setStep((current) => Math.min(profileStepCount, current + 1))
-    scrollToCard()
+    if (step < LANDING_TOTAL_STEPS) {
+      const nextStep = Math.min(LANDING_TOTAL_STEPS, step + 1)
+      setStep(nextStep)
+      if (nextStep === LANDING_TOTAL_STEPS) setMode('email')
+      scrollToCard()
+    }
   }
 
   function prev() {
@@ -150,7 +159,9 @@ export function LandingOnboardingPanel() {
       loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       loginEl?.querySelector('input')?.focus()
     } else {
-      setStep((current) => current - 1)
+      const prevStep = step - 1
+      setStep(prevStep)
+      if (prevStep < LANDING_TOTAL_STEPS) setMode('profile')
       scrollToCard()
     }
   }
@@ -158,11 +169,12 @@ export function LandingOnboardingPanel() {
   async function submitEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (busy || mode === 'submitted') return
+    if (!email.trim()) return
     setBusy(true)
     setNotice(null)
     try {
       const result = await startLandingOnboarding({
-        email,
+        email: email.trim(),
         draft,
         anonymousId: getAnonymousId(),
         redirectOrigin: window.location.origin,
@@ -188,7 +200,7 @@ export function LandingOnboardingPanel() {
     return (
       <div className="landing-onboarding-panel">
         <EmailAuthPanel />
-        <button className="text-link" type="button" onClick={() => setMode('profile')}>第一次使用？先填孩子資料</button>
+        <button className="text-link" type="button" onClick={() => { setMode('profile'); setStep(1); }}>第一次使用？先填孩子資料</button>
       </div>
     )
   }
@@ -223,59 +235,6 @@ export function LandingOnboardingPanel() {
     )
   }
 
-  if (mode === 'email') {
-    return (
-      <div className="onboarding-container landing-onboarding-panel">
-        <header className="onboarding-welcome-header">
-          <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 紙屬英文 Beta · 目前 NT$0' : '第一週免費'}</div>
-          <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-          <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間；完成 3 個步驟後留下 Email，名額可用時就會排入第一週教材製作。</p>
-        </header>
-        <section className="onboarding-layout" aria-labelledby="landing-email-title">
-          <div className="onboarding-heading">
-            <p className="overline">孩子資料完成（第 3/3 步已完成）</p>
-            <h2 id="landing-email-title">最後留下 Email，我們就開始準備第一週</h2>
-            <p className="muted">剛剛填的資料不需要重填。送出後會排入第一週教材製作；完成後也會寄 Email 通知你。安全連結則用來登入與管理孩子。</p>
-          </div>
-          <form onSubmit={submitEmail} className="onboarding-fields">
-            <label htmlFor="landing-onboarding-email">家長 Email</label>
-            <input
-              id="landing-onboarding-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="parent@example.com"
-              disabled={busy}
-            />
-            <p className="auth-legal-consent">
-              點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
-            </p>
-            <div className="onboarding-actions">
-              <button
-                className="button button-secondary"
-                type="button"
-                disabled={busy}
-                onClick={() => {
-                  setMode('profile')
-                  scrollToCard()
-                }}
-              >
-                上一步
-              </button>
-              <button className="button" type="submit" disabled={busy}>
-                {busy ? '送出中…' : '開始準備第一週教材'}
-              </button>
-            </div>
-          </form>
-          {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
-        </section>
-      </div>
-    )
-  }
-
   const StepComponent = [AboutStep, SchoolStep, RoutineStep][step - 1] ?? AboutStep
   const [title, description] = stepMeta[step - 1] ?? stepMeta[0]
 
@@ -284,10 +243,11 @@ export function LandingOnboardingPanel() {
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 紙屬英文 Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-        <p className="onboarding-main-desc">不用考試、不綁卡。先填寫孩子的年級、興趣與每週時間，完成 3 個步驟後留下 Email；名額可用時就會排入第一週教材製作。</p>
+        <p className="onboarding-main-desc">免考試・免綁卡・4 步驟約 2 分鐘快速完成。先填寫年級、興趣、每週時間與收件 Email；名額可用時立即排入第一週專屬教材製作。</p>
       </header>
       <OnboardingLayout
         step={step}
+        totalSteps={LANDING_TOTAL_STEPS}
         title={title}
         description={description}
         actions={
@@ -295,15 +255,59 @@ export function LandingOnboardingPanel() {
             <button
               className="button button-secondary"
               type="button"
+              disabled={busy}
               onClick={prev}
             >
               {step === 1 ? '已有帳號？直接登入' : '上一步'}
             </button>
-            <button className="button" type="button" onClick={next}>{step === profileStepCount ? '孩子資料填好了，繼續' : '繼續'}</button>
+            {step === LANDING_TOTAL_STEPS ? (
+              <button
+                className="button"
+                type="submit"
+                form="landing-email-form"
+                disabled={busy}
+              >
+                {busy ? '送出中…' : '開始準備第一週教材'}
+              </button>
+            ) : (
+              <button className="button" type="button" onClick={next}>
+                {step === 1 ? '繼續' : step === 2 ? '選好了，繼續' : '下一步：收件 Email (最後一步)'}
+              </button>
+            )}
           </>
         }
       >
-        <StepComponent draft={draft} errors={errors} update={update} />
+        {step === LANDING_TOTAL_STEPS ? (
+          <div className="onboarding-step-content">
+            <form id="landing-email-form" onSubmit={submitEmail} className="landing-email-step-form">
+              <label className="field-group" htmlFor="landing-onboarding-email">
+                <span className="field-title">家長 Email <small className="field-hint">接收每週教材與安全登入連結</small></span>
+                <input
+                  id="landing-onboarding-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="parent@example.com"
+                  disabled={busy}
+                />
+              </label>
+              <p className="auth-legal-consent">
+                點擊送出即代表您已審閱並同意紙屬英文的 <a href="/terms" target="_blank" rel="noreferrer">服務條款</a> 與 <a href="/privacy" target="_blank" rel="noreferrer">隱私權政策</a>。
+              </p>
+            </form>
+            {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
+          </div>
+        ) : (
+          <StepComponent
+            draft={draft}
+            errors={errors}
+            update={update}
+            onAutoAdvance={step === 1 ? next : undefined}
+          />
+        )}
       </OnboardingLayout>
     </div>
   )

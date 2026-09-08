@@ -43,4 +43,15 @@ describe('streamlined child onboarding', () => {
     expect(html).toContain('國三')
     expect(html).not.toContain('國中七年級')
   })
+
+  it('renders AboutStep with auto-advance enabled and nickname placeholder', () => {
+    const html = renderToStaticMarkup(
+      <AboutStep
+        {...baseProps}
+        onAutoAdvance={() => undefined}
+      />,
+    )
+    expect(html).toContain('例如：翔翔、Emma')
+    expect(html).toContain('憑印象選即可，不用先考試')
+  })
 })

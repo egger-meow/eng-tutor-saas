@@ -236,7 +236,7 @@ describe('Landing Page — Onboarding & Direct Login', () => {
   it('keeps child-first instructions and avoids autofocus jumps', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('填寫一位孩子的學習狀況')
-    expect(html).toContain('完成 3 個步驟後留下 Email')
+    expect(html).toContain('4 個步驟快速完成（程度 ➔ 興趣 ➔ 節奏 ➔ Email）')
     expect(html).toContain('送出後立即開始製作，完成後直接開放下載')
     expect(html).not.toContain('第一份專屬教材預計隔天開放下載')
     expect(html).not.toContain('從家長 Email 建立帳號')

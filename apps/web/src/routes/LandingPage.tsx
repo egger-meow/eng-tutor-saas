@@ -93,9 +93,9 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </h1>
             <p className="lede"><strong>從孩子真的有興趣的內容開始，但一路對齊學校進度、國中英文與會考能力。</strong>每週的程度、錯題與回饋會接到下一週，不是每次重新抽一篇文章。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
+              <li>4 步驟約 2 分鐘快速定位，免考試、免綁卡</li>
               <li>每週 Student PDF + Parent Answer PDF</li>
               <li>孩子用紙筆閱讀、作答與思考</li>
-              <li>家長不用找教材、備課或出題</li>
             </ul>
 
             {isFreePilot ? (
@@ -212,7 +212,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && (
               <ul className="login-expectations">
                 <li>填寫一位孩子的學習狀況</li>
-                <li>完成 3 個步驟後留下 Email</li>
+                <li>4 個步驟快速完成（程度 ➔ 興趣 ➔ 節奏 ➔ Email）</li>
                 <li>送出後立即開始製作，完成後直接開放下載</li>
               </ul>
             )}
