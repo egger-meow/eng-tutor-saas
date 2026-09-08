@@ -49,7 +49,7 @@ export function buildPacketPlanningPrompt(
 ): string {
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const child = (context.child ?? {}) as Record<string, unknown>
-  const preferences = (context.preferences ?? child.preferences ?? {}) as Record<string, unknown>
+  const preferences = (context.preferences ?? child.preferences ?? profile.preferences ?? {}) as Record<string, unknown>
   const lifetime = (context.lifetimeLearningMemory ?? {}) as Record<string, unknown>
   const targetedEvidence = Array.isArray(context.targetedOlderEvidence) ? context.targetedOlderEvidence : []
   let diversityCapsule = (context.diversityCapsule ?? {}) as Record<string, unknown>

@@ -29,3 +29,7 @@ it('measures UTF-8 inputs without recording private prompt content or claiming t
   expect(metric).not.toHaveProperty('input')
   expect(metric).not.toHaveProperty('tokens')
 })
+
+it('uses profile preferences when other claim preference shapes are absent', () => {
+  expect(buildPacketPlanningPrompt({ profile: { preferences: { interests: ['IU'] } } }, 'evidence')).toContain('IU')
+})

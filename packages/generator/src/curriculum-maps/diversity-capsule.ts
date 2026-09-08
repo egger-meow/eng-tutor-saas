@@ -67,20 +67,7 @@ export function buildDiversityCapsule(
     }
   }
 
-  const parseWeek = (item: HistoricalPackageSummary | DeliveryMemoryProjection): number => {
-    const seq = (item as any).sequence_number ?? (item as any).weekNumber
-    if (typeof seq === 'number' && Number.isFinite(seq)) return seq
-    if ('materialWeek' in item) {
-      const val = item.materialWeek
-      if (typeof val === 'number') return val
-      const match = String(val).match(/\d+/gu)
-      if (match) return parseInt(match.join(''), 10)
-    }
-    return 0
-  }
-
-  const sorted = [...history].sort((a, b) => parseWeek(a) - parseWeek(b))
-  const recentSlice = lookbackWeeks > 0 ? sorted.slice(-lookbackWeeks) : []
+  const recentSlice = [...history].sort(compareDeliveryRecency).slice(0, Math.max(0, lookbackWeeks)).reverse()
 
   const recentGenres: string[] = []
   const recentContextKeys: string[] = []
@@ -133,7 +120,9 @@ export function buildDiversityCapsule(
           }
         }
         recentDeliveryMemory.push({
-          materialWeek: String((item as any).materialWeek ?? ''),
+          materialWeek: item.materialWeek,
+          sequence_number: item.sequence_number,
+          weekNumber: item.weekNumber,
           readingGenre: item.genre ?? '',
           readingTitle: item.contextKey ?? '',
           introducedVocabulary: [],

@@ -11,16 +11,16 @@ import {
   CurriculumPackageV20Schema,
 } from './curriculum-package-schema.js'
 
-describe('Prompt 2.12.0 consolidated active invariant contract with frozen historical provenance', () => {
+describe('Prompt 2.13.2 consolidated active invariant contract with frozen historical provenance', () => {
 
   it('keeps the active production prompt compact while covering the generalized exact-attribution hole', async () => {
-    const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.12.0/01-plan.md'), 'utf8')
-    const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.12.0/02-author.md'), 'utf8')
-    const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.12.0/03-critic.md'), 'utf8')
-    const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.12.0/04-repair.md'), 'utf8')
+    const plan = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.13.2/01-plan.md'), 'utf8')
+    const author = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.13.2/02-author.md'), 'utf8')
+    const critic = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.13.2/03-critic.md'), 'utf8')
+    const repair = await readFile(resolve(REPO_ROOT, 'packages/generator/prompts/2.13.2/04-repair.md'), 'utf8')
 
     for (const stage of [plan, author, critic, repair]) {
-      expect(stage).toContain('2.12.0')
+      expect(stage).toContain('2.13.2')
       expect(stage).not.toContain('Apply the complete inherited')
     }
     expect(plan).toContain('explicit learner/profile/parent feedback')
@@ -144,9 +144,9 @@ describe('Prompt 2.12.0 consolidated active invariant contract with frozen histo
     expect(CurriculumPackageV20Schema.shape.metadata.shape.schemaVersion.safeParse('2.2.0').success).toBe(false)
 
     // Bundle compiled with the grounded production versions and unchanged engine generation.
-    expect(bundle).toContain('bundleVersion: "2.12.0-prod"')
+    expect(bundle).toContain('bundleVersion: "2.13.2-prod"')
     expect(bundle).toContain('schemaVersion: "2.5.0"')
-    expect(bundle).toContain('engineVersion: "1.7.0"')
+    expect(bundle).toContain('engineVersion: "1.8.2"')
 
     // Assert adaptiveExtension is optional in Schema 2.4 studentLesson
     const studentLessonShape = CurriculumPackageSchema.shape.studentLesson.shape

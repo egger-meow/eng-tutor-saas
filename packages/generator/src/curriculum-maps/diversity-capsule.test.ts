@@ -137,3 +137,13 @@ it('guarantees identical lookback window regardless of whether history is passed
   expect(capsuleAsc.recentGenres).toEqual(['interview', 'schedule', 'notice'])
   expect(capsuleDesc.recentGenres).toEqual(capsuleAsc.recentGenres)
 })
+
+it('preserves canonical sequence through the diversity and format projections', () => {
+  const capsule = buildDiversityCapsule([
+    { materialWeek: '2099-W20', sequence_number: 1, responseForms: ['lines'] },
+    { materialWeek: '2026-W01', sequence_number: 2, responseForms: ['table'] },
+  ], 1)
+  expect(capsule.recentResponseForms).toEqual(['table'])
+  expect(capsule.recentDeliveryMemory?.[0].sequence_number).toBe(2)
+  expect(capsule.formatPlanningCapsule?.recentFormatUse).toEqual({ 'table:grid': 1 })
+})

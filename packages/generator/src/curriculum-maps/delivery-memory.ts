@@ -174,5 +174,8 @@ export function compareDeliveryRecency(
   const left = a.sequence_number ?? a.weekNumber
   const right = b.sequence_number ?? b.weekNumber
   if (left !== undefined && right !== undefined && left !== right) return right - left
+  const leftHasLabel = /\d/u.test(String(a.materialWeek ?? ''))
+  const rightHasLabel = /\d/u.test(String(b.materialWeek ?? ''))
+  if (leftHasLabel !== rightHasLabel) return leftHasLabel ? -1 : 1
   return String(b.materialWeek ?? '').localeCompare(String(a.materialWeek ?? ''), 'en', { numeric: true })
 }
