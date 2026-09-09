@@ -11,7 +11,7 @@ Windows Task Scheduler / Interactive Agent / Codex CLI
 → checkActiveLeaseState (collision check)
 → claimProductionBatch / worker_claim_local_authoring_batch
 → privacy-screened generalized live-web research
-→ authoritative authoring (GPT-5.6 Sol)
+→ authoritative authoring (actual executor model)
 → validatePreSubmitPackage (Schema 2.5.0, audit floor, inputFingerprint)
 → submitProductionPackage (immutable curriculum submission)
 → read-after-write verification (getSubmissionStatus)
@@ -115,3 +115,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-production
 ```
 
 The local mutex `Local\PaperEnglishProductionAuthoring` prevents overlapping author runs. A nonzero exit code means preflight, Git update, authoring, validation, submission, or recovery failed.
+
+### Model provenance
+
+Record the actual authoring model in `metadata.model`. Validators accept non-empty model identifiers without a fixed model whitelist. Executor defaults select a model; they do not restrict submission compatibility. Changing models never waives schema, identity, fingerprint, grounding, answer, or quality checks, and must never be hidden by relabeling the model.

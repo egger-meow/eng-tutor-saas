@@ -2627,7 +2627,7 @@ Supported interchangeable authoring executors:
 4. **ChatGPT online / manual execution** (staged claims, browser prompt execution);
 5. **ChatGPT Scheduled Work** (daily server-side scheduled claims via pg_cron).
 
-Local Windows execution is a primary local environment, but it is an interchangeable adapter of the protocol rather than the exclusive architecture. Production authoring authenticates with an existing ChatGPT login and uses GPT-5.6 Sol; production authoring must not require an OpenAI API key, Responses API integration, or ChatGPT app/plugin permissions.
+Local Windows execution is a primary local environment, but it is an interchangeable adapter of the protocol rather than the exclusive architecture. Production authoring authenticates with an existing ChatGPT login and records the actual authoring model; production authoring must not require an OpenAI API key, Responses API integration, or ChatGPT app/plugin permissions.
 
 Its job is to:
 
@@ -2905,7 +2905,7 @@ New production authoring uses Engine 1.8.2, Schema 2.5.0, Prompt 2.13.2, and Wor
 
 Every material should record the model used.
 
-Do not assume "latest model" is sufficient for auditability.
+Do not assume "latest model" is sufficient for auditability. Model identifiers are provenance, not a fixed submission whitelist. Accept any actual non-empty model identifier under the same curriculum validation rules. Executor defaults do not constrain submission compatibility. Never relabel output to impersonate a different model.
 
 ---
 

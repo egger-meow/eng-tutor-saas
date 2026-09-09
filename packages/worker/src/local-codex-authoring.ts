@@ -155,7 +155,7 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   const identity = contextIdentity(context)
   if (pkg.metadata.jobId !== identity.jobId || pkg.metadata.childId !== identity.childId) throw new Error('LOCAL_METADATA_CONTEXT_MISMATCH')
   if (pkg.metadata.inputFingerprint !== identity.fingerprint) throw new Error('LOCAL_INPUT_FINGERPRINT_MISMATCH')
-  if (pkg.metadata.model !== LOCAL_CODEX_MODEL) throw new Error('LOCAL_MODEL_METADATA_MISMATCH')
+  if (!pkg.metadata.model.trim()) throw new Error('LOCAL_MODEL_METADATA_REQUIRED')
   if (pkg.metadata.schemaVersion !== CURRENT_SCHEMA_VERSION) throw new Error('LOCAL_SCHEMA_VERSION_MISMATCH')
   if (normalizePromptVersion(pkg.metadata.promptVersion) !== normalizePromptVersion(CURRENT_PROMPT_VERSION)) throw new Error('LOCAL_PROMPT_VERSION_MISMATCH')
   if (pkg.metadata.engineVersion !== CURRENT_ENGINE_VERSION) throw new Error('LOCAL_ENGINE_VERSION_MISMATCH')

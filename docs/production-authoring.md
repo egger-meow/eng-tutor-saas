@@ -216,3 +216,7 @@ The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change t
 | **ChatGPT Online Manual** | `docs/chatgpt-work-daily-schedule.md` | Authoring Bridge `POST /start` / `GET /batch` | `POST /submit` | Server-routed by week |
 | **ChatGPT Online Scheduled Work** | `docs/chatgpt-work-daily-schedule.md` | scheduled normal batch | bridge submission | Week 2+ Finisher; Week 1 fallback Fast Publisher |
 | **ChatGPT Week 1 Fast Lane** | `docs/superpowers/specs/2026-09-05-week1-fast-lane-design.md` | `POST /week1/start` / `GET /week1/batch` | existing immutable bridge | Fast Publisher only |
+
+### Model provenance
+
+Record the actual authoring model in `metadata.model`. Validators accept non-empty model identifiers without a fixed model whitelist. Executor defaults select a model; they do not restrict submission compatibility. Changing models never waives schema, identity, fingerprint, grounding, answer, or quality checks, and must never be hidden by relabeling the model.

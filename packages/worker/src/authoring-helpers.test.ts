@@ -1,3 +1,4 @@
+import { validateAuthoredPackage } from './local-codex-authoring.js'
 import { describe, expect, it, vi } from 'vitest'
 import {
   checkActiveLeaseState,
@@ -286,6 +287,23 @@ export function makeValidV24Package(jobId: string, childId: string, fingerprint:
 
 describe('validatePreSubmitPackage', () => {
   const validContext = makeMockContext()
+
+  it.each(['gpt-6', 'gpt-5.6-sol', 'another-provider/new-model'])('accepts actual model %s in both validators', (model) => {
+    const pkg = makeValidV24Package(validContext.job.id, validContext.job.childId, validContext.inputFingerprint)
+    pkg.metadata.model = model
+    expect(validatePreSubmitPackage(pkg, validContext).valid).toBe(true)
+    expect(validateAuthoredPackage(pkg, validContext).metadata.model).toBe(model)
+    pkg.metadata.inputFingerprint = 'wrong-fingerprint'
+    expect(validatePreSubmitPackage(pkg, validContext).valid).toBe(false)
+    expect(() => validateAuthoredPackage(pkg, validContext)).toThrow()
+  })
+
+  it.each(['', '   '])('rejects missing model provenance %j in both validators', (model) => {
+    const pkg = makeValidV24Package(validContext.job.id, validContext.job.childId, validContext.inputFingerprint)
+    pkg.metadata.model = model
+    expect(validatePreSubmitPackage(pkg, validContext).valid).toBe(false)
+    expect(() => validateAuthoredPackage(pkg, validContext)).toThrow()
+  })
 
   it('accepts a valid V24 package with matching metadata', () => {
     const pkg = makeValidV24Package(

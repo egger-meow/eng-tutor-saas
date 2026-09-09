@@ -173,9 +173,9 @@ export function validatePreSubmitPackage(
 
   const pkg = parsed.curriculumPackage
 
-  const modelNormalized = pkg.metadata.model?.toLowerCase() ?? ''
-  if (!modelNormalized.includes('gpt-5.6-sol')) {
-    issues.push(`MODEL_METADATA_MISMATCH: expected gpt-5.6-sol, got ${pkg.metadata.model}`)
+  // Model is provenance, not a curriculum compatibility gate.
+  if (!pkg.metadata.model.trim()) {
+    issues.push('MODEL_METADATA_REQUIRED: record the actual authoring model')
   }
 
   if (pkg.metadata.schemaVersion !== CURRENT_SCHEMA_VERSION) {
