@@ -220,3 +220,9 @@ The Week 1 Fast Lane is an orthogonal event-triggered path. It does not change t
 ### Model provenance
 
 Record the actual authoring model in `metadata.model`. Validators accept non-empty model identifiers without a fixed model whitelist. Executor defaults select a model; they do not restrict submission compatibility. Changing models never waives schema, identity, fingerprint, grounding, answer, or quality checks, and must never be hidden by relabeling the model.
+
+### Reviewed bundle-hash errata for existing claims
+
+If a recovered claim has a bundle hash mismatch, call the read-only service-role RPC `worker_resolve_authoring_bundle({ claim_contract: context.activeAuthoringContract })` using the repository client. Compare the returned `bundleSha256` to SHA-256 computed from the actual bundle bytes. Continue only on exact equality; save the returned resolution alongside private run artifacts. Do not replace `activeAuthoringContract`, `inputFingerprint`, or any part of the immutable context. Unknown malformed hashes are rejected; well-formed hashes are returned unchanged and still require exact artifact equality.
+
+Correction `20260909181131_bundle_hash_typo` recognizes only the exact historical contract containing the truncated hash. This is a server-reviewed transcription correction, not a version upgrade or authorization to skip verification. Resume owned jobs through read-only recovery without another claim. Fresh production contract may be read through `worker_current_authoring_contract()` or authenticated `GET /contract`; equivalent reviewed RPC access does not require an Edge Function secret.

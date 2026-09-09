@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -74,6 +75,15 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(openapi).not.toContain('execute_sql')
     expect(openapi).not.toContain('sql')
     expect(openapi).not.toContain('postgres')
+  })
+
+  it('pins the corrected bundle digest to actual compiled bytes', async () => {
+    const bytes = await readFile(resolve(root, 'packages/generator/bundles/production-authoring-bundle.md'))
+    const digest = createHash('sha256').update(bytes).digest('hex')
+    const migration = await readFile(resolve(root, 'supabase/migrations/20260909181131_correct_authoring_bundle_hash.sql'), 'utf8')
+    const currentFunction = migration.split('-- Read-only, exact-contract erratum resolution.')[0]
+    expect(currentFunction).toContain(`'bundleSha256', '${digest}'`)
+    expect(digest).toHaveLength(64)
   })
 
   it('pins the active authoring contract into claims and validates it on submit', async () => {
