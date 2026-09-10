@@ -32,6 +32,8 @@ Every correct answer and parent rationale must be text-supported or explicitly f
 
 Author each question together with its answer object so Student/Parent outputs stay aligned. Model answers and accepted answers must obey every explicit task constraint, including requested counts, sentence form, comparison conditions, and procedure completeness.
 
+CAP metadata is exact machine data, never prose. Every governed `cap-plan:<questionId>` must contain every canonical contract key; `noPrecedentReason` must be `null` whenever `precedentRefs` is non-empty, and may be a specific non-empty reason only when authoritative retrieval found no suitable precedent and `precedentRefs` is `[]`. Set `qualityEvidence.precedentRefs` to the exact deduplicated union of all governed per-item `precedentRefs`. The passing `criticalChecks` entry `id: "cap-provenance"` must encode JSON with the exact authoritative runtime values for `capKnowledgeVersion`, `capCorpusHash`, `capBundleVersion`, `plannerVersion`, and `qualityFloorVersion`; never paraphrase, summarize, infer, or guess these values.
+
 ## 4. Task progression, response formats, and layouts
 
 Translate the Planner's format choices directly into concrete Schema 2.5.0 structures:
