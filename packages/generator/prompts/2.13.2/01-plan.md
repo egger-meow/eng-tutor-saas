@@ -88,7 +88,7 @@ The generation pipeline enforces a strict precedence order:
 For every normal assessment/application/comprehension item:
 1. CAP is the quality floor, not a mold. Define the item's `primarySkill`, `targetCognitiveDepth`, `targetLanguageDifficulty`, `genre`, `evidenceScope`, and `reasoningOperations`.
 2. Retrieve 1–5 relevant non-holdout CAP precedent cards matching the specific item's pedagogical intent.
-3. If no suitable precedent exists matching the pedagogical intent, record an explicit `noPrecedentReason`. Never silently substitute unrelated cards or default fallback cards.
+3. Serialize every canonical `cap-plan` key. `noPrecedentReason` is never omitted: set it to `null` when `precedentRefs` is non-empty; only when no suitable authoritative precedent exists may `precedentRefs` be `[]`, with a specific non-empty `noPrecedentReason`. Never silently substitute unrelated cards or default fallback cards.
 4. Keep language difficulty independent from cognitive depth.
 5. Reading-comprehension and reading-based CAP-transfer items use `evidenceScope: "primary_reading"` and exact evidence anchors from the primary reading.
 
