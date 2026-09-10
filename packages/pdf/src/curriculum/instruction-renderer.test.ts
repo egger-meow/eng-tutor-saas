@@ -46,3 +46,39 @@ describe('instruction-renderer', () => {
     expect(renderInstructionSection(undefined as any)).toBe('')
   })
 })
+
+it('renders authored instruction blocks in order without compulsory legacy sections', () => {
+  const html = renderInstructionSection([{
+    id: 'compare', titleZh: '看主詞，再選動詞', blocks: [
+      { type: 'comparison', headers: ['主詞', '例句'], rows: [['I', 'I run.'], ['She', 'She runs.']], takeawayZh: '留意動詞結尾。' },
+      { type: 'prose', textZh: '先觀察兩句。\n再找差異。' },
+      { type: 'bullets', itemsZh: ['看主詞', '看動詞'] },
+      { type: 'steps', titleZh: '判斷順序', itemsZh: ['找出主詞。', '決定動詞形式。'] },
+      { type: 'worked-example', example: 'He runs.', walkthroughZh: 'He 是第三人稱單數。' },
+      { type: 'error-analysis', wrong: 'She run.', corrected: 'She runs.', whyZh: 'She 搭配 runs。' },
+    ],
+  }])
+  expect(html).toContain('<th scope="col">主詞</th>')
+  expect(html).toContain('<td>She runs.</td>')
+  expect(html).toContain('<ul class="instruction-bullets">')
+  expect(html).toContain('<ol class="instruction-steps">')
+  expect(html.indexOf('instruction-comparison')).toBeLessThan(html.indexOf('instruction-prose'))
+  expect(html).toContain('He 是第三人稱單數。')
+  expect(html).toContain('She 搭配 runs。')
+  expect(html).not.toContain('核心句型結構')
+  expect(html).not.toContain('完整示範')
+})
+
+it('escapes every authored instructional block instead of interpreting HTML', () => {
+  const html = renderInstructionSection([{
+    id: 'escaped', titleZh: '<b>title</b>', blocks: [
+      { type: 'comparison', headers: ['<img>', '例句'], rows: [['<script>', '<i>']] },
+      { type: 'steps', itemsZh: ['<script>alert(1)</script>'] },
+      { type: 'prose', textZh: '<b>prose</b>' },
+    ],
+  }])
+  expect(html).toContain('&lt;script&gt;')
+  expect(html).not.toContain('<script>')
+  expect(html).not.toContain('<img>')
+  expect(html).not.toContain('<b>')
+})

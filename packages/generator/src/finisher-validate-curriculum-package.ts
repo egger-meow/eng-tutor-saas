@@ -1,6 +1,7 @@
 import { z, type ZodError } from 'zod'
 
 import {
+  CurriculumPackageV26Schema,
   CurriculumPackageV25Schema,
   CurriculumPackageV24Schema,
   type CurriculumPackage,
@@ -74,6 +75,24 @@ export const FinisherCurriculumPackageV25Schema = CurriculumPackageV25Schema.ext
     selfCheckZh: z.array(CurriculumPackageV25Schema.shape.studentLesson.shape.selfCheckZh.element).min(1).max(8),
     homework: homeworkV25Schema.extend({
       questions: z.array(homeworkV25Schema.shape.questions.element).min(1).max(20),
+    }),
+  }),
+})
+
+// Apply the same objective-only publication policy to structured teaching blocks.
+const lessonV26 = CurriculumPackageV26Schema.shape.studentLesson
+export const FinisherCurriculumPackageV26Schema = CurriculumPackageV26Schema.extend({
+  learningPlan: CurriculumPackageV26Schema.shape.learningPlan.extend({
+    targets: z.array(targetV25Schema).min(1).max(10),
+  }),
+  studentLesson: lessonV26.extend({
+    opening: lessonV26.shape.opening.extend({
+      goalsZh: z.array(lessonV26.shape.opening.shape.goalsZh.element).min(1).max(6),
+    }),
+    reading: lessonV26.shape.reading.extend({ wordCount: z.number().int().min(1).max(900) }),
+    selfCheckZh: z.array(lessonV26.shape.selfCheckZh.element).min(1).max(8),
+    homework: lessonV26.shape.homework.extend({
+      questions: z.array(lessonV26.shape.homework.shape.questions.element).min(1).max(20),
     }),
   }),
 })
@@ -270,8 +289,9 @@ export function validateCurriculumPackageForFinisher(input: unknown): Curriculum
     return issues.length > 0 ? { success: false, issues } : { success: true, curriculumPackage }
   }
 
-  if (version === '2.5.0') {
-    const parsed = FinisherCurriculumPackageV25Schema.safeParse(normalized)
+  if (version === '2.5.0' || version === '2.6.0') {
+    const schema = version === '2.6.0' ? FinisherCurriculumPackageV26Schema : FinisherCurriculumPackageV25Schema
+    const parsed = schema.safeParse(normalized)
     if (!parsed.success) return { success: false, issues: schemaIssues(parsed.error) }
     const curriculumPackage = parsed.data as CurriculumPackage
     const issues = objectiveRelationshipIssues(curriculumPackage)

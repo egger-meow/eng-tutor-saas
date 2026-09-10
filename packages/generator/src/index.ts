@@ -42,6 +42,7 @@ export type { LessonValidationIssue, LessonValidationResult } from './validate-l
 export { syntheticWeekOne } from './fixtures/synthetic-week-1.js'
 export {
   CurriculumPackageSchema,
+  CurriculumPackageV26Schema,
   CurriculumPackageV25Schema,
   CurriculumPackageV24Schema,
   CurriculumPackageV23Schema,
@@ -69,6 +70,7 @@ export {
 } from './curriculum-package-schema.js'
 export type {
   CurriculumPackage,
+  CurriculumPackageV26,
   CurriculumPackageV25,
   CurriculumPackageV24,
   CurriculumPackageV23,

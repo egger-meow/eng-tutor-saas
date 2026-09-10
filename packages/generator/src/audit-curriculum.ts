@@ -1,3 +1,4 @@
+import { instructionTexts } from './instruction-content.js'
 import { access, readFile } from 'node:fs/promises'
 import { isAbsolute, resolve } from 'node:path'
 import { findForbiddenPersonalizationJargon, validateCurriculumPackage } from './validate-curriculum-package.js'
@@ -392,7 +393,7 @@ export function auditCurriculumPackage(
   }
 
   if (pkg.studentLesson.opening.goalsZh.length < 2 || cjk(pkg.studentLesson.opening.howToUseZh) < 8) add('semantic-critical', 'self-study', 'warning', '開場中文目標或使用說明偏少；請確認學生仍能自行理解如何使用教材。')
-  if (pkg.studentLesson.instruction.some((section) => section.workedExamples.length < 2 || section.commonMistakes.length < 1)) add('semantic-critical', 'self-study', 'warning', '部分新概念的 worked examples / 錯誤對照較少；由 Critic 判斷是否真的影響自學。')
+  if (pkg.studentLesson.instruction.some((section) => !('blocks' in section) && (section.workedExamples.length < 2 || section.commonMistakes.length < 1))) add('semantic-critical', 'self-study', 'warning', '部分新概念的 worked examples / 錯誤對照較少；由 Critic 判斷是否真的影響自學。')
   if (pkg.studentLesson.reading.blocks.length < 2 || passageWords < 120) add('semantic-critical', 'substance', 'warning', `閱讀只有 ${passageWords} 字，可能不足以承載 planned skill。`)
   if (pkg.studentLesson.vocabulary.length > 15) add('semantic-critical', 'cognitive-load', 'warning', '核心單字超過 15 個，可能造成不必要負擔。')
   const phraseCount = pkg.studentLesson.vocabulary.filter((v) => lexicalUnitTokens(v.word).length > 1).length
@@ -443,7 +444,7 @@ export function auditCurriculumPackage(
 
   const studentFacingTexts: string[] = [
     rawPassageText,
-    ...pkg.studentLesson.instruction.flatMap((inst) => inst.workedExamples.map((ex) => ex.example)),
+    ...pkg.studentLesson.instruction.flatMap((inst) => instructionTexts(inst)),
     ...questions.map((q) => `${q.prompt} ${(q.options ?? []).join(' ')}`),
     ...adaptiveExtensionTexts,
   ]

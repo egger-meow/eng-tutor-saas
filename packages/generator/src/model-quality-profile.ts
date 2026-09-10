@@ -100,6 +100,28 @@ function performDeterministicSurgicalRepair(
     }
 
     for (const inst of pkg.studentLesson.instruction) {
+      if ('blocks' in inst) {
+        for (const [index, block] of inst.blocks.entries()) {
+          const fields = block as Record<string, unknown>
+          for (const key of ['titleZh', 'textZh', 'walkthroughZh', 'whyZh', 'takeawayZh', 'itemsZh']) {
+            const value = fields[key]
+            if (typeof value === 'string') {
+              const res = fixChineseTerms(value)
+              if (res.changed) {
+                fields[key] = res.text
+                repairedFields.push(`studentLesson.instruction.${inst.id}.blocks.${index}.${key}`)
+              }
+            } else if (Array.isArray(value)) {
+              fields[key] = value.map((text, itemIndex) => {
+                const res = fixChineseTerms(text)
+                if (res.changed) repairedFields.push(`studentLesson.instruction.${inst.id}.blocks.${index}.${key}.${itemIndex}`)
+                return res.text
+              })
+            }
+          }
+        }
+        continue
+      }
       const res = fixChineseTerms(inst.explanationZh)
       if (res.changed) {
         inst.explanationZh = res.text

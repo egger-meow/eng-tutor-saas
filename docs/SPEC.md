@@ -2636,7 +2636,7 @@ Its job is to:
 3. read production generation rules;
 4. load permitted child state from Supabase;
 5. generate canonical material source;
-6. validate and repair the canonical source locally against Schema 2.5.0 and the CAP quality floor;
+6. validate and repair the canonical source locally against the schema bound to its immutable claim contract and the CAP quality floor;
 7. submit it through the immutable curriculum submission bridge;
 8. leave deterministic PDF rendering and private Storage writes to the GitHub Actions Finisher;
 9. recover uncertain submissions by read-after-write status;
@@ -2897,7 +2897,9 @@ Git provides:
 
 Every material should record the relevant git-based rule / prompt version.
 
-New production authoring uses Engine 1.8.2, Schema 2.5.0, Prompt 2.13.2, and Worker 1.7.2 under deployment release rel_1.8.2. Renderer remains 1.5.0. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.13.2 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.11.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+The deployed authoring contract is authoritative for new claims; the repository manifest describes the desired release. The last verified deployed baseline is rel_1.8.2 (Engine 1.8.2, Schema 2.5.0, Prompt 2.13.2, Worker 1.7.2, Renderer 1.5.0). The prepared diversity release is rel_1.9.0 (Engine 1.9.0, Schema 2.6.0, Prompt 2.14.0, Worker 1.8.0, Renderer 1.6.0); preparation does not activate it. Deploy and verify compatible consumers before activation, and preserve each existing claim and submitted artifact under its original contract. The submission bridge also accepts Schema 2.4.0 for in-flight compatible packets; it preserves server-owned claim fingerprints and immutable attempt contents. Prompt 2.13.2 is the consolidated active baseline: production model context reads the current compact plan/author/critic/repair suite directly instead of concatenating historical overlays. Prompt 2.4.0 through 2.11.1 remain frozen historical inputs for provenance and legacy interpretation. Future permanent prompt improvements should update or replace concise sections in the active consolidated baseline rather than resume an indefinitely growing overlay chain.
+
+Schema 2.6 supports four opening choices: a reflection question, observation, reading purpose, or direct reading. Instruction may use prose, bullets, comparison tables, steps, worked examples, or error analysis. Choose formats for the learning task and learner needs; neither a question opening nor a fixed sequence or quota of block types is mandatory. Use recent opening, teaching, and response-format history to notice mechanical repetition, while allowing repetition with a pedagogical reason. Supported historical packages retain their original structure and provenance.
 
 ---
 

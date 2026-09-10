@@ -128,12 +128,29 @@ export function computeDeterministicPlanMinutes(pkg: Record<string, any>): numbe
   const vocabMinutes = vocabCount * 1.0
   const instructionMinutes = Array.isArray(lesson.instruction)
     ? lesson.instruction.reduce((total: number, section: any) => {
+      if (Array.isArray(section?.blocks)) {
+        const blockMinutes = section.blocks.reduce((minutes: number, block: any) => {
+          switch (block?.type) {
+            case 'worked-example':
+            case 'error-analysis': return minutes + 2
+            case 'comparison': return minutes + 1 + (block.rows?.length ?? 0) * 0.5
+            case 'steps':
+            case 'bullets': return minutes + 0.5 + (block.itemsZh?.length ?? 0) * 0.5
+            case 'prose': return minutes + 1
+            default: return minutes
+          }
+        }, 0)
+        return total + 1 + blockMinutes
+      }
       const examples = Array.isArray(section?.workedExamples) ? section.workedExamples.length : 0
       const mistakes = Array.isArray(section?.commonMistakes) ? section.commonMistakes.length : 0
       return total + 4 + examples + mistakes
     }, 0)
     : 7
-  const warmUpMinutes = typeof lesson.opening?.warmUp === 'string' && lesson.opening.warmUp.trim() ? 2 : 0
+  const activity = lesson.opening?.activity
+  const warmUpMinutes = activity
+    ? activity.type === 'question' ? 2 : activity.type === 'observation' ? 1.5 : activity.type === 'reading-purpose' ? 0.5 : 0
+    : typeof lesson.opening?.warmUp === 'string' && lesson.opening.warmUp.trim() ? 2 : 0
   const selfCheckMinutes = Array.isArray(lesson.selfCheckZh) ? Math.ceil(lesson.selfCheckZh.length * 0.5) : 0
   const adaptiveExtensionMinutes = lesson.adaptiveExtension
     ? 2 + (lesson.adaptiveExtension.taskZh ? 2 : 0) + Math.ceil((lesson.adaptiveExtension.taskWritingLines ?? 0) * 0.5)

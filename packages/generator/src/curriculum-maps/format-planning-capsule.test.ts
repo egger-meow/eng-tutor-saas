@@ -54,7 +54,7 @@ describe('format-planning-capsule', () => {
 
     // Unused recommendations
     expect(capsule.availableButRecentlyUnused).toContain('comparison_matrix')
-    expect(capsule.availableButRecentlyUnused).toContain('evidence_inference')
+    expect(capsule.availableButRecentlyUnused).not.toContain('evidence_inference')
     expect(capsule.availableButRecentlyUnused).toContain('sort_classify_grid')
     expect(capsule.availableButRecentlyUnused).toContain('before_after_table')
   })
@@ -82,4 +82,18 @@ it('uses numeric legacy week order and canonical delivery ordinals before labels
   const row = (materialWeek: string, format: string, weekNumber?: number): DeliveryMemoryProjection => ({ materialWeek, weekNumber, readingGenre: 'article', readingTitle: '', introducedVocabulary: [], responseLayoutTypes: [], pedagogicalFormats: [format] })
   expect(buildFormatPlanningCapsule([row('Week 9', 'written:lines'), row('Week 10', 'table:grid')], 1).recentFormatUse).toEqual({ 'table:grid': 1 })
   expect(buildFormatPlanningCapsule([row('2099-W20', 'written:lines', 1), row('2026-W01', 'table:grid', 2)], 1).recentFormatUse).toEqual({ 'table:grid': 1 })
+})
+
+it('counts response items only where known and retains historical missing-count coverage', () => {
+  const base: DeliveryMemoryProjection = { materialWeek: '2026-W01', readingGenre: 'article', readingTitle: '', introducedVocabulary: [], responseLayoutTypes: [], pedagogicalFormats: ['mcq:4-option'] }
+  const capsule = buildFormatPlanningCapsule([
+    base,
+    { ...base, materialWeek: '2026-W02', openingMode: 'observation', instructionModes: ['comparison', 'comparison'], responseFormatCounts: { 'mcq:4-option': 20 } },
+    { ...base, materialWeek: '2026-W03', openingMode: 'direct-reading', instructionModes: ['steps'], responseFormatCounts: { 'mcq:4-option': 1 } },
+  ])
+  expect(capsule.recentFormatUse['mcq:4-option']).toBe(3)
+  expect(capsule.recentResponseItemCounts['mcq:4-option']).toBe(21)
+  expect(capsule.responseCountCoverage).toEqual({ knownDeliveries: 2, totalDeliveries: 3 })
+  expect(capsule.recentOpeningUse).toEqual({ 'direct-reading': 1, observation: 1 })
+  expect(capsule.recentInstructionUse).toEqual({ steps: 1, comparison: 1 })
 })

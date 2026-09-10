@@ -1,3 +1,4 @@
+import { claimAuthoringContract, readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import { compactAuthoringContext, compactAuthoringBundle } from './authoring-context.js'
 import { createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
@@ -16,9 +17,6 @@ import {
   adaptAssessmentIntent,
   type CapRetrievalIntent,
   type ItemPrecedentRetrievalResult,
-  CURRENT_ENGINE_VERSION,
-  CURRENT_PROMPT_VERSION,
-  CURRENT_SCHEMA_VERSION,
   normalizePromptVersion,
   type CurriculumPackage,
 } from '@paper-english/generator'
@@ -153,12 +151,14 @@ export function validateAuthoredPackage(raw: unknown, context: Record<string, un
   }
   const pkg = parsed.curriculumPackage
   const identity = contextIdentity(context)
+  const contract = claimAuthoringContract(context)
   if (pkg.metadata.jobId !== identity.jobId || pkg.metadata.childId !== identity.childId) throw new Error('LOCAL_METADATA_CONTEXT_MISMATCH')
   if (pkg.metadata.inputFingerprint !== identity.fingerprint) throw new Error('LOCAL_INPUT_FINGERPRINT_MISMATCH')
   if (!pkg.metadata.model.trim()) throw new Error('LOCAL_MODEL_METADATA_REQUIRED')
-  if (pkg.metadata.schemaVersion !== CURRENT_SCHEMA_VERSION) throw new Error('LOCAL_SCHEMA_VERSION_MISMATCH')
-  if (normalizePromptVersion(pkg.metadata.promptVersion) !== normalizePromptVersion(CURRENT_PROMPT_VERSION)) throw new Error('LOCAL_PROMPT_VERSION_MISMATCH')
-  if (pkg.metadata.engineVersion !== CURRENT_ENGINE_VERSION) throw new Error('LOCAL_ENGINE_VERSION_MISMATCH')
+  if (pkg.metadata.schemaVersion !== contract.schemaVersion) throw new Error('LOCAL_SCHEMA_VERSION_MISMATCH')
+  if (normalizePromptVersion(pkg.metadata.promptVersion) !== normalizePromptVersion(contract.promptVersion)) throw new Error('LOCAL_PROMPT_VERSION_MISMATCH')
+  if (pkg.metadata.engineVersion !== contract.engineVersion) throw new Error('LOCAL_ENGINE_VERSION_MISMATCH')
+  if (context.activeAuthoringContract && (pkg.metadata.promptVersion !== contract.promptVersion || pkg.metadata.workerVersion !== contract.workerVersion || pkg.metadata.rendererVersion !== contract.rendererVersion)) throw new Error('LOCAL_AUTHORING_CONTRACT_MISMATCH')
   const audit = auditCurriculumPackage(pkg, {
     targetMinutes: typeof (context.profile as Record<string, unknown> | undefined)?.weekly_minutes === 'number'
       ? (context.profile as Record<string, number>).weekly_minutes
@@ -256,6 +256,7 @@ export function researchPrompt(brief: string, policy: string): string {
 }
 
 export function authoringPrompt(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string): string {
+  const contract = claimAuthoringContract(context)
   const retry = previousOutput
     ? `This is a surgical repair round. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}\nPREVIOUS PACKAGE:\n${previousOutput}`
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
@@ -265,7 +266,7 @@ export function authoringPrompt(bundle: string, context: Record<string, unknown>
     `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(compactAuthoringContext(context, Boolean(previousOutput)))}`,
     `PUBLIC FACTUAL GROUNDING (web access is disabled in this private stage):\n${grounding}`,
     retry,
-    `Set metadata.model exactly to ${LOCAL_CODEX_MODEL}, schemaVersion to ${CURRENT_SCHEMA_VERSION}, promptVersion to prompt/${CURRENT_PROMPT_VERSION}, engineVersion to ${CURRENT_ENGINE_VERSION}, and copy the server inputFingerprint exactly.`,
+    `Set metadata.model exactly to ${LOCAL_CODEX_MODEL}, schemaVersion to ${contract.schemaVersion}, promptVersion to ${context.activeAuthoringContract ? contract.promptVersion : `prompt/${contract.promptVersion}`}, engineVersion to ${contract.engineVersion}, workerVersion to ${contract.workerVersion}, rendererVersion to ${contract.rendererVersion}, and copy the server inputFingerprint exactly.`,
     'Every translation, sentence-production, or short-response item without options must provide writingLines >= 1 or a valid non-empty responseLayout.',
     'Return only the complete canonical Curriculum Package JSON object. Do not use Markdown fences or commentary.',
   ].join('\n')
@@ -414,6 +415,7 @@ async function authorOne(
   workerId?: string,
 ): Promise<CurriculumPackage> {
   const { jobId, childId } = contextIdentity(context)
+  const contract = claimAuthoringContract(context)
   const jobDir = resolve(repoRoot, '.runtime/private-generation', jobId)
   await mkdir(jobDir, { recursive: true })
   const promptMetrics: Array<ReturnType<typeof measurePromptInput> & { status: string }> = []
@@ -427,8 +429,8 @@ async function authorOne(
     } finally {
       promptMetrics.push({ ...metric, status })
       await writeFile(resolve(jobDir, 'prompt-metrics.json'), JSON.stringify({
-        measurement: 'actual-runner-inputs', engineVersion: CURRENT_ENGINE_VERSION,
-        promptVersion: CURRENT_PROMPT_VERSION, calls: promptMetrics,
+        measurement: 'actual-runner-inputs', engineVersion: contract.engineVersion,
+        promptVersion: contract.promptVersion, calls: promptMetrics,
         totalChars: promptMetrics.reduce((sum, row) => sum + row.chars, 0),
         totalBytes: promptMetrics.reduce((sum, row) => sum + row.bytes, 0),
         scope: 'stdin prompts only; excludes provider tool responses, hidden/system input and billed tokens',
@@ -536,7 +538,7 @@ async function authorOne(
     throw new Error(`PACKET_PLANNING_FAILED: ${planIssue || 'Unknown planning error'}`)
   }
   context.packetPlan = packetPlan
-  const rawBundle = await readFile(resolve(repoRoot, 'packages/generator/bundles/production-authoring-bundle.md'), 'utf8')
+  const rawBundle = await readClaimAuthoringBundle(repoRoot, context)
   const { bundle: activeBundle, itemResults } = await prepareAuthoringBundleWithPrecedents(rawBundle, context, {
     repoRoot,
     assessmentPlans: packetPlan.assessmentPlans,

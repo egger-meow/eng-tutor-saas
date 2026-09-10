@@ -1,3 +1,4 @@
+import { instructionTexts as extractInstructionTexts } from './instruction-content.js'
 import { createHash } from 'node:crypto'
 
 import runtimeJson from '../curriculum/cap-precedent-cards.json' with { type: 'json' }
@@ -481,17 +482,7 @@ export function auditReadingEvidenceBoundary(pkgInput: unknown): EvidenceBoundar
   const instructionTexts: string[] = []
   for (const inst of instructionSections) {
     if (inst.titleZh) instructionTexts.push(inst.titleZh)
-    if (inst.explanationZh) instructionTexts.push(inst.explanationZh)
-    for (const p of inst.patterns ?? []) instructionTexts.push(p)
-    for (const ex of inst.workedExamples ?? []) {
-      if (ex.example) instructionTexts.push(ex.example)
-      if (ex.walkthroughZh) instructionTexts.push(ex.walkthroughZh)
-    }
-    for (const cm of inst.commonMistakes ?? []) {
-      if (cm.wrong) instructionTexts.push(cm.wrong)
-      if (cm.corrected) instructionTexts.push(cm.corrected)
-      if (cm.whyZh) instructionTexts.push(cm.whyZh)
-    }
+    instructionTexts.push(...extractInstructionTexts(inst))
   }
   const instructionFullText = instructionTexts.join(' ').toLowerCase().replace(/\s+/gu, ' ')
 

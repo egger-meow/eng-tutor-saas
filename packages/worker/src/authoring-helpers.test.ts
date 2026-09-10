@@ -282,7 +282,18 @@ export function makeValidV24Package(jobId: string, childId: string, fingerprint:
       }),
     })
   }
-  return upgradeV24ToV25(v24)
+  const v25 = upgradeV24ToV25(v24)
+  return {
+    ...v25, metadata: { ...v25.metadata, schemaVersion: '2.6.0' as const },
+    studentLesson: { ...v25.studentLesson,
+      opening: { goalsZh: v25.studentLesson.opening.goalsZh, howToUseZh: v25.studentLesson.opening.howToUseZh, activity: { type: 'direct-reading' as const } },
+      instruction: v25.studentLesson.instruction.map(section => ({ id: section.id, titleZh: section.titleZh, blocks: [
+        { type: 'prose' as const, textZh: section.explanationZh },
+        ...section.workedExamples.map(example => ({ type: 'worked-example' as const, ...example })),
+        ...section.commonMistakes.map(mistake => ({ type: 'error-analysis' as const, ...mistake })),
+      ] })),
+    },
+  }
 }
 
 describe('validatePreSubmitPackage', () => {
@@ -305,7 +316,7 @@ describe('validatePreSubmitPackage', () => {
     expect(() => validateAuthoredPackage(pkg, validContext)).toThrow()
   })
 
-  it('accepts a valid V24 package with matching metadata', () => {
+  it('accepts a valid V26 package with matching metadata', () => {
     const pkg = makeValidV24Package(
       validContext.job.id,
       validContext.job.childId,
@@ -330,27 +341,27 @@ describe('validatePreSubmitPackage', () => {
     expect(result.issues.some((i) => i.toLowerCase().includes('writing') || i.toLowerCase().includes('lines'))).toBe(true)
   })
 
-  it('accepts package with promptVersion without prompt/ prefix (e.g. 2.13.2)', () => {
+  it('accepts package with promptVersion without prompt/ prefix (e.g. 2.14.0)', () => {
     const pkg = makeValidV24Package(
       validContext.job.id,
       validContext.job.childId,
       validContext.inputFingerprint,
     )
-    pkg.metadata.promptVersion = '2.13.2'
-    pkg.metadata.engineVersion = '1.8.2'
+    pkg.metadata.promptVersion = '2.14.0'
+    pkg.metadata.engineVersion = '1.9.0'
     const result = validatePreSubmitPackage(pkg, validContext)
     expect(result.valid).toBe(true)
     expect(result.issues).toEqual([])
   })
 
-  it('accepts package with promptVersion with prompt/ prefix (e.g. prompt/2.13.2)', () => {
+  it('accepts package with promptVersion with prompt/ prefix (e.g. prompt/2.14.0)', () => {
     const pkg = makeValidV24Package(
       validContext.job.id,
       validContext.job.childId,
       validContext.inputFingerprint,
     )
-    pkg.metadata.promptVersion = 'prompt/2.13.2'
-    pkg.metadata.engineVersion = '1.8.2'
+    pkg.metadata.promptVersion = 'prompt/2.14.0'
+    pkg.metadata.engineVersion = '1.9.0'
     const result = validatePreSubmitPackage(pkg, validContext)
     expect(result.valid).toBe(true)
     expect(result.issues).toEqual([])

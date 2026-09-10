@@ -1,9 +1,9 @@
+import { claimAuthoringContract } from './authoring-claim-contract.js'
 import {
   adaptAssessmentIntent,
   type RawAssessmentPlan,
   type FormatPlanningCapsule,
   buildFormatPlanningCapsule,
-  CURRENT_PROMPT_VERSION,
 } from '@paper-english/generator'
 
 export interface PacketPlanItem {
@@ -47,6 +47,7 @@ export function buildPacketPlanningPrompt(
   previousPlanOutput?: string,
   repairIssue?: string,
 ): string {
+  const contract = claimAuthoringContract(context)
   const profile = (context.profile ?? {}) as Record<string, unknown>
   const child = (context.child ?? {}) as Record<string, unknown>
   const preferences = (context.preferences ?? child.preferences ?? profile.preferences ?? {}) as Record<string, unknown>
@@ -97,13 +98,17 @@ export function buildPacketPlanningPrompt(
     targetedOlderEvidence: targetedEvidence,
     formatPlanningGuidance: {
       recentFormatUse: formatCapsule.recentFormatUse ?? {},
+      recentOpeningUse: formatCapsule.recentOpeningUse ?? {},
+      recentInstructionUse: formatCapsule.recentInstructionUse ?? {},
+      recentResponseItemCounts: formatCapsule.recentResponseItemCounts ?? {},
+      responseCountCoverage: formatCapsule.responseCountCoverage,
       avoidMechanicalRepeat: formatCapsule.avoidMechanicalRepeat ?? [],
       availableRecommendedFormats: formatCapsule.availableButRecentlyUnused ?? [],
     },
   }
 
   return [
-    `You are the Private Packet Planner for 紙屬英文 (Schema 2.5.0 / Prompt ${CURRENT_PROMPT_VERSION}).`,
+    `You are the Private Packet Planner for 紙屬英文 (Schema ${contract.schemaVersion} / Prompt ${contract.promptVersion}).`,
     'Your task is to plan this week\'s personalized English packet based on the learner\'s memory and public research grounding.',
     'Do not write full student lesson prose or parent answers yet. Output only a structured JSON packet plan.',
     '',

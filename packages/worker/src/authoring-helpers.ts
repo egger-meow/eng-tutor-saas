@@ -1,9 +1,7 @@
+import { claimAuthoringContract } from './authoring-claim-contract.js'
 import {
   auditCurriculumPackage,
   validateCurriculumPackage,
-  CURRENT_ENGINE_VERSION,
-  CURRENT_PROMPT_VERSION,
-  CURRENT_SCHEMA_VERSION,
   normalizePromptVersion,
   type CurriculumPackage,
 } from '@paper-english/generator'
@@ -172,22 +170,32 @@ export function validatePreSubmitPackage(
   }
 
   const pkg = parsed.curriculumPackage
+  let contract
+  try { contract = claimAuthoringContract(context) } catch (error) {
+    return { valid: false, issues: [...issues, String(error)] }
+  }
 
   // Model is provenance, not a curriculum compatibility gate.
   if (!pkg.metadata.model.trim()) {
     issues.push('MODEL_METADATA_REQUIRED: record the actual authoring model')
   }
 
-  if (pkg.metadata.schemaVersion !== CURRENT_SCHEMA_VERSION) {
-    issues.push(`SCHEMA_VERSION_MISMATCH: expected ${CURRENT_SCHEMA_VERSION}, got ${pkg.metadata.schemaVersion}`)
+  if (pkg.metadata.schemaVersion !== contract.schemaVersion) {
+    issues.push(`SCHEMA_VERSION_MISMATCH: expected ${contract.schemaVersion}, got ${pkg.metadata.schemaVersion}`)
   }
   const normalizedPrompt = normalizePromptVersion(pkg.metadata.promptVersion)
-  const expectedPrompt = normalizePromptVersion(CURRENT_PROMPT_VERSION)
+  const expectedPrompt = normalizePromptVersion(contract.promptVersion)
   if (normalizedPrompt !== expectedPrompt) {
-    issues.push(`PROMPT_VERSION_MISMATCH: expected prompt/${CURRENT_PROMPT_VERSION}, got ${pkg.metadata.promptVersion}`)
+    issues.push(`PROMPT_VERSION_MISMATCH: expected prompt/${contract.promptVersion}, got ${pkg.metadata.promptVersion}`)
   }
-  if (pkg.metadata.engineVersion !== CURRENT_ENGINE_VERSION) {
-    issues.push(`ENGINE_VERSION_MISMATCH: expected ${CURRENT_ENGINE_VERSION}, got ${pkg.metadata.engineVersion}`)
+  if (pkg.metadata.engineVersion !== contract.engineVersion) {
+    issues.push(`ENGINE_VERSION_MISMATCH: expected ${contract.engineVersion}, got ${pkg.metadata.engineVersion}`)
+  }
+
+  if (context.activeAuthoringContract) {
+    for (const key of ['promptVersion', 'workerVersion', 'rendererVersion'] as const) {
+      if (pkg.metadata[key] !== contract[key]) issues.push(`AUTHORING_CONTRACT_MISMATCH: ${key}`)
+    }
   }
 
   // Verify written response questions have writing space

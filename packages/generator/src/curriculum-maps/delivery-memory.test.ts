@@ -219,3 +219,19 @@ describe('Delivery Memory Projection and Shared Cross-Week Memory', () => {
   })
 })
 
+
+it('records teaching modes and distinguishes one choice from twenty without inventing historical modes', () => {
+  const memory = extractDeliveryMemory({ studentLesson: {
+    opening: { activity: { type: 'direct-reading' } },
+    instruction: [{ blocks: [{ type: 'comparison' }, { type: 'steps' }, { type: 'comparison' }] }],
+    practice: [{ questions: Array.from({ length: 20 }, (_, i) => ({ id: `q${i}`, options: ['a', 'b', 'c', 'd'] })) }],
+  } })
+  expect(memory.openingMode).toBe('direct-reading')
+  expect(memory.instructionModes).toEqual(['comparison', 'steps'])
+  expect(memory.responseFormatCounts).toEqual({ 'mcq:4-option': 20 })
+  expect(memory.pedagogicalFormats).toEqual(['mcq:4-option'])
+  const legacy = extractDeliveryMemory({ studentLesson: { opening: { warmUp: 'Reflect' }, instruction: [{ explanationZh: 'Explain' }] } })
+  expect(legacy.openingMode).toBe('legacy-warmup')
+  expect(legacy.instructionModes).toEqual(['legacy-explanation'])
+  expect(extractDeliveryMemory({}).openingMode).toBeUndefined()
+})

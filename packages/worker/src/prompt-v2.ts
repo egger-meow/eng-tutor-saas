@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import type { GenerationContext } from './pipeline.js'
 import { compactAuthoringContext } from './authoring-context.js'
 import {
@@ -10,9 +11,9 @@ import {
   type CapRetrievalIntent,
 } from '@paper-english/generator'
 
-/** All production entry points consume the same compiled policy and current schema. */
+/** All production entry points consume the compiled policy and schema bound to the claim. */
 export async function buildCurriculumPromptBundle(context: GenerationContext): Promise<string> {
-  const bundle = await readFile(new URL('../../generator/bundles/production-authoring-bundle.md', import.meta.url), 'utf8')
+  const bundle = await readClaimAuthoringBundle(fileURLToPath(new URL('../../../', import.meta.url)), context)
   const record = context as unknown as Record<string, unknown>
   let assembledBundle = bundle
 

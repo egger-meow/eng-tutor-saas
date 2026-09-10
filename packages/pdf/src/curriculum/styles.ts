@@ -225,6 +225,17 @@ export const curriculumStyles = `
     margin-bottom: 2mm;
   }
 
+  .opening-examples {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3mm;
+    margin: 2mm 0 3mm;
+  }
+  .opening-example { border-left: 2px solid #8c8275; padding: 2mm 3mm; overflow-wrap: anywhere; }
+  .opening-notice { margin-bottom: 0; }
+  .opening-purpose { border-left: 3px solid #8c8275; padding: 1mm 4mm; margin: 3mm 0 5mm; break-inside: avoid; }
+  .opening-purpose h2 { margin-top: 0; }
+
   /* Reading Section & Genres */
   .reading-container {
     margin: 4mm 0 6mm;
@@ -501,6 +512,26 @@ export const curriculumStyles = `
     font-weight: 700;
     font-size: 10.5pt;
   }
+
+  /* Structured lessons may flow across pages; keep individual rows and examples together. */
+  .instruction-structured { break-inside: auto; page-break-inside: auto; }
+  .instruction-block { margin: 2.5mm 0 3.5mm; }
+  .instruction-block-steps, .instruction-block-bullets { break-inside: avoid; page-break-inside: avoid; }
+  .instruction-prose { white-space: pre-line; orphans: 3; widows: 3; }
+  .instruction-bullets li, .instruction-steps li { break-inside: avoid; }
+  .instruction-steps li { padding-left: 1.5mm; margin-bottom: 2mm; }
+  .instruction-comparison { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 9.5pt; }
+  .instruction-comparison th, .instruction-comparison td {
+    border: 1px solid #8c8275;
+    padding: 2.5mm 3mm;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+  .instruction-comparison th { background: #f2eee8; }
+  .instruction-comparison thead { display: table-header-group; }
+  .instruction-comparison tr { break-inside: avoid; }
+  .instruction-takeaway { margin-top: 2mm; font-weight: 600; }
 
   /* Worked Examples */
   .worked-examples-group {

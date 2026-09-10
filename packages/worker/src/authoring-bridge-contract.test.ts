@@ -77,8 +77,8 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(openapi).not.toContain('postgres')
   })
 
-  it('pins the corrected bundle digest to actual compiled bytes', async () => {
-    const bytes = await readFile(resolve(root, 'packages/generator/bundles/production-authoring-bundle.md'))
+  it('preserves the corrected historical bundle digest in its immutable archive', async () => {
+    const bytes = await readFile(resolve(root, 'packages/generator/bundles/2.13.2-production-authoring-bundle.md'))
     const digest = createHash('sha256').update(bytes).digest('hex')
     const migration = await readFile(resolve(root, 'supabase/migrations/20260909181131_correct_authoring_bundle_hash.sql'), 'utf8')
     const currentFunction = migration.split('-- Read-only, exact-contract erratum resolution.')[0]

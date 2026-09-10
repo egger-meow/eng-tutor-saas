@@ -344,6 +344,7 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
       const canonical = buildSampleCanonicalPackage()
       canonical.studentLesson.opening.howToUseZh = '先讀初中任務說明，再讀英文。'
       canonical.studentLesson.vocabulary[0]!.meaningZh = '初中機器人'
+      if (!('explanationZh' in canonical.studentLesson.instruction[0]!)) throw new Error('Expected historical fixture')
       canonical.studentLesson.instruction[0]!.explanationZh = '這是在初中常見的句型。'
 
       const originalTargetIds = canonical.learningPlan.targets.map((t) => t.id)
@@ -356,6 +357,7 @@ describe('Model-Specific Pre-Submit Quality Profiles', () => {
 
       expect(repaired.studentLesson.opening.howToUseZh).toBe('先讀國中任務說明，再讀英文。')
       expect(repaired.studentLesson.vocabulary[0]!.meaningZh).toBe('國中機器人')
+      if (!('explanationZh' in repaired.studentLesson.instruction[0]!)) throw new Error('Expected historical fixture')
       expect(repaired.studentLesson.instruction[0]!.explanationZh).toBe('這是在國中常見的句型。')
 
       expect(repaired.learningPlan.targets.map((t) => t.id)).toEqual(originalTargetIds)

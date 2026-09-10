@@ -1,6 +1,6 @@
+import { validateConsumerRelease } from './consumer-release-policy.js'
 import {
   CURRENT_PDF_RENDERER_VERSION,
-  CURRENT_RELEASE_ID,
   CURRENT_WORKER_VERSION,
   validateCurriculumPackageForFinisher,
   type CurriculumPackage,
@@ -165,6 +165,7 @@ function buildSummary(pkg: CurriculumPackage, targetReleaseId: string): Record<s
     learningAdjustmentSummary: fallback.join('；'),
     personalizationReasons: fallback,
     publicationPath: 'week1_fast',
+    execution: { workerVersion: CURRENT_WORKER_VERSION, rendererVersion: CURRENT_PDF_RENDERER_VERSION },
     releaseId: targetReleaseId,
     rendererVersion: CURRENT_PDF_RENDERER_VERSION,
     workerVersion: CURRENT_WORKER_VERSION,
@@ -256,13 +257,7 @@ export async function processWeek1FastSubmissions(
         ? submission.canonical_source as Record<string, any>
         : {}
       const rawMetadata = raw.metadata && typeof raw.metadata === 'object' ? raw.metadata : {}
-      const targetReleaseId = context.targetReleaseId ?? rawMetadata.releaseId ?? CURRENT_RELEASE_ID
-      if (targetReleaseId !== CURRENT_RELEASE_ID) {
-        throw new Error(`Week 1 release mismatch: ${targetReleaseId} != ${CURRENT_RELEASE_ID}`)
-      }
-      if (rawMetadata.releaseId && rawMetadata.releaseId !== targetReleaseId) {
-        throw new Error('Week 1 immutable submission releaseId does not match claimed release')
-      }
+      const targetReleaseId = validateConsumerRelease(context, rawMetadata)
 
       stage = 'schema_integrity_validation'
       // Validate and render from the immutable submission. The parsed package is an in-memory

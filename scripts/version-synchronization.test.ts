@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
@@ -23,24 +23,22 @@ describe('Canonical Version Synchronization Guardrails', () => {
     expect(CURRENT_ENGINE_MANIFEST.qualityProfile).toBe(CURRENT_QUALITY_PROFILE_VERSION)
     expect(CURRENT_ENGINE_MANIFEST.worker).toBe(CURRENT_WORKER_VERSION)
     expect(CURRENT_ENGINE_MANIFEST.pdfRenderer).toBe(CURRENT_PDF_RENDERER_VERSION)
-    expect(CURRENT_PDF_RENDERER_VERSION).toBe('1.5.0')
+    expect(CURRENT_PDF_RENDERER_VERSION).toBe('1.6.0')
   })
 
-  it('ensures the latest advance release migration in Supabase emits CURRENT_RELEASE_ID', () => {
-    const migrationsDir = resolve(REPO_ROOT, 'supabase/migrations')
-    const migrationFiles = readdirSync(migrationsDir).sort()
-    const releaseMigrations = migrationFiles.filter((f) => f.includes('advance_generation_release_to_') || f.includes('harden_chatgpt_submission_bridge') || f.includes('release_'))
-    expect(releaseMigrations.length).toBeGreaterThan(0)
-    const latestReleaseMigration = releaseMigrations[releaseMigrations.length - 1]!
-    const content = readFileSync(resolve(migrationsDir, latestReleaseMigration), 'utf8')
-
-    // Must emit CURRENT_RELEASE_ID in chatgpt_claim_generation_batch
-    expect(content).toContain(`'targetReleaseId', '${CURRENT_RELEASE_ID}'`)
+  it('binds both claim paths to the deployed contract independently of desired release', () => {
+    const content = readFileSync(resolve(REPO_ROOT,
+      'supabase/migrations/20260910133101_prepare_curriculum_diversity_consumers.sql'), 'utf8')
+    expect(content).toContain('private_generation.chatgpt_claim_generation_batch(text)')
+    expect(content).toContain('private_generation.claim_week1_fast_generation_batch(text)')
+    expect(content).toContain("'targetReleaseId', public.worker_current_authoring_contract()->>'releaseId'")
+    // Consumer preparation must not activate the desired release.
+    expect(content).not.toContain(`'releaseId', '${CURRENT_RELEASE_ID}'`)
   })
 
-  it('ensures supabase/tests/smoke.sql tests CURRENT_RELEASE_ID in claim contexts', () => {
+  it('checks actual claim contexts against the deployed active contract in SQL smoke tests', () => {
     const smokeSql = readFileSync(resolve(REPO_ROOT, 'supabase/tests/smoke.sql'), 'utf8')
-    expect(smokeSql).toContain(`'targetReleaseId' <> '${CURRENT_RELEASE_ID}'`)
-    expect(smokeSql).toContain(`targetReleaseId ${CURRENT_RELEASE_ID}`)
+    expect(smokeSql.match(/->> 'targetReleaseId' is distinct from public\.worker_current_authoring_contract\(\)->>'releaseId'/gu)).toHaveLength(4)
+    expect(smokeSql).not.toContain("->> 'targetReleaseId' <> 'rel_1.8.2'")
   })
 })

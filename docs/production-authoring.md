@@ -50,7 +50,7 @@ Local / Scheduled / Manual             chatgpt-week1-fast
 ## 2. Mandatory Input: Compiled Production Authoring Bundle
 
 Before performing any curriculum generation or repair work, every authoring executor MUST:
-1. **Read `packages/generator/bundles/production-authoring-bundle.md`**: Treat this current compiled bundle as the authoritative, non-negotiable curriculum-generation contract. Do not rely on agents discovering the bundle indirectly through `AGENTS.md` or `SPEC.md`.
+1. **Read the bundle matching the claim contract**: Resolve fresh `GET /contract` before claiming, then use the immutable contract in the claim. The desired bundle is `packages/generator/bundles/production-authoring-bundle.md`; supported in-flight 2.13.2 claims use `packages/generator/bundles/2.13.2-production-authoring-bundle.md`. Verify its SHA-256 against the bound contract. Treat this current compiled bundle as the authoritative, non-negotiable curriculum-generation contract (or the matching archived bundle for supported in-flight claims). Do not rely on agents discovering the bundle indirectly through `AGENTS.md` or `SPEC.md`.
 2. **Verify and record bundle provenance**: Check and record the current repository Git commit SHA and the bundle frontmatter metadata (`bundleVersion`, `promptVersion`, `schemaVersion`) before claiming any production queue batch.
 3. **Strict real data fidelity**: Adhere strictly to the core pedagogical guidelines, CAP alignment, and real data rules in the bundle. Forbid invented learner, private, or source facts, while explicitly authoring the new educational passages and exercises required by the production bundle.
 
@@ -102,7 +102,7 @@ Normal production authoring must check active authoritative leases before claimi
 When a claimed job has an existing authoring attempt that failed validation or quality review, the claim payload includes an authoritative `retryContext`.
 
 ### Invariants for Authoring & Retries:
-1. **Authoritative Curriculum Bundle**: Authoring executors MUST read `packages/generator/bundles/production-authoring-bundle.md` and treat the current compiled production-authoring bundle as the authoritative curriculum authoring contract.
+1. **Authoritative Curriculum Bundle**: Authoring executors MUST resolve and hash-check the bundle matching the immutable claim contract, including the archived bundle for supported previous claims. A new desired release never changes an existing attempt’s contract.
 2. **Evidence-Driven**: Targeted repair MUST be guided strictly by `retryContext.findings` and `retryContext.failureEvidence`.
 3. **Immutability & Preservation**: Preserve all valid package content, stable IDs, stage ordering, learning objectives, and `inputFingerprint`.
 4. **Never Synthesize Fake Data**: Follow the Strict Real Data Rule (`rules/strict-data-fidelity.md`). Never invent placeholder data or bypass author/critic quality requirements.

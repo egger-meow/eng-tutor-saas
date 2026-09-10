@@ -1,3 +1,4 @@
+import { validateConsumerRelease } from './consumer-release-policy.js'
 import {
   auditCurriculumPackageForFinisher,
   buildCapCoverageCapsule,
@@ -437,6 +438,7 @@ function curriculumSummary(pkg: CurriculumPackage): Record<string, unknown> {
     learningAdjustmentSummary: finalReasons.join('；'),
     learningFocus: pkg.parentSummary?.focusZh ?? null,
     personalizationReasons: finalReasons,
+    execution: { workerVersion: CURRENT_WORKER_VERSION, rendererVersion: CURRENT_PDF_RENDERER_VERSION },
   }
 }
 
@@ -522,23 +524,15 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     const raw = (input.curriculumPackage && typeof input.curriculumPackage === 'object') ? input.curriculumPackage as any : {}
     const rawMetadata = (raw.metadata && typeof raw.metadata === 'object') ? raw.metadata : {}
 
-    // Resolve target release ID: from server-owned claim context or from submission metadata
-    const targetReleaseId = input.context.targetReleaseId ?? rawMetadata.releaseId ?? CURRENT_RELEASE_ID
-
-    // Finisher must verify the submission targetReleaseId equals its CURRENT_RELEASE_ID before processing.
-    // If they differ, fail explicitly as a release/worker mismatch; never overwrite the artifact into another release identity.
-    if (targetReleaseId !== CURRENT_RELEASE_ID) {
-      throw new ReleaseMismatchError(targetReleaseId, CURRENT_RELEASE_ID)
-    }
-
-    const preparedPackage = {
+    const immutableClaim = input.context.targetReleaseId !== undefined || input.context.activeAuthoringContract !== undefined || ['2.5.0', '2.6.0'].includes(rawMetadata.schemaVersion)
+    const targetReleaseId = immutableClaim
+      ? validateConsumerRelease(input.context, rawMetadata)
+      : rawMetadata.releaseId ?? CURRENT_RELEASE_ID
+    if (!immutableClaim && targetReleaseId !== CURRENT_RELEASE_ID) throw new ReleaseMismatchError(targetReleaseId, CURRENT_RELEASE_ID)
+    // Bound submissions retain their authoring identity; runtime identity is separate evidence.
+    const preparedPackage = immutableClaim ? raw : {
       ...raw,
-      metadata: {
-        ...rawMetadata,
-        releaseId: targetReleaseId,
-        rendererVersion: CURRENT_PDF_RENDERER_VERSION,
-        workerVersion: CURRENT_WORKER_VERSION,
-      },
+      metadata: { ...rawMetadata, releaseId: targetReleaseId, rendererVersion: CURRENT_PDF_RENDERER_VERSION, workerVersion: CURRENT_WORKER_VERSION },
     }
     const parsed = validateCurriculumPackageForFinisher(preparedPackage)
     if (!parsed.success) throw new CurriculumQualityError({
@@ -548,13 +542,6 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       })),
     })
     const pkg = parsed.curriculumPackage
-    // Finisher preserves the immutable targetReleaseId and stamps deterministic renderer/worker versions
-    pkg.metadata = {
-      ...pkg.metadata,
-      releaseId: targetReleaseId,
-      rendererVersion: CURRENT_PDF_RENDERER_VERSION,
-      workerVersion: CURRENT_WORKER_VERSION,
-    }
     assertCurriculumMatchesContext(pkg, input.context)
     const progressionFindings = forwardProgressionIssues(pkg, input.context)
     if (progressionFindings.length > 0) throw new CurriculumQualityError({
@@ -599,7 +586,7 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       worker_id: input.workerId,
       student_pdf_path: paths.student,
       parent_answer_pdf_path: paths.parent,
-      canonical_source: pkg,
+      canonical_source: immutableClaim ? input.curriculumPackage : pkg,
       generation_summary: curriculumSummary(pkg),
       prompt_version: pkg.metadata.promptVersion,
       generator_version: pkg.metadata.curriculumVersion,

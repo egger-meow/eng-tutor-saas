@@ -5,6 +5,10 @@ export interface FormatPlanningCapsule {
   recentReasoning: string[]
   avoidMechanicalRepeat: string[]
   availableButRecentlyUnused: string[]
+  recentOpeningUse: Record<string, number>
+  recentInstructionUse: Record<string, number>
+  recentResponseItemCounts: Record<string, number>
+  responseCountCoverage: { knownDeliveries: number; totalDeliveries: number }
 }
 
 export const CANONICAL_PEDAGOGICAL_FORMAT_CANDIDATES = [
@@ -12,12 +16,6 @@ export const CANONICAL_PEDAGOGICAL_FORMAT_CANDIDATES = [
   'table:grid',
   'sequence:vertical',
   'sequence:horizontal',
-  'comparison_matrix',
-  'evidence_inference',
-  'cause_chain',
-  'sort_classify_grid',
-  'before_after_table',
-  'turning_point_sequence',
   'written:lines',
   'mcq:4-option',
 ] as const
@@ -94,7 +92,7 @@ export const FORMAT_SELECTION_RULES = [
  * Minimalist, deterministic extraction:
  * - recentFormatUse: count of times each format was used across recent delivered weeks
  * - recentReasoning: distinct reasoning operations observed recently
- * - avoidMechanicalRepeat: formats used heavily or consecutively (e.g. >= 2 weeks in window)
+ * - avoidMechanicalRepeat: formats present in multiple deliveries (not a consecutive-use claim)
  * - availableButRecentlyUnused: pedagogical formats with 0 recent uses, offered as recommendation signals
  */
 export function buildFormatPlanningCapsule(
@@ -105,8 +103,20 @@ export function buildFormatPlanningCapsule(
 
   const recentFormatUse: Record<string, number> = {}
   const recentReasoningSet = new Set<string>()
+  const recentOpeningUse: Record<string, number> = {}
+  const recentInstructionUse: Record<string, number> = {}
+  const recentResponseItemCounts: Record<string, number> = {}
+  let knownDeliveries = 0
 
   for (const delivery of recentSlice) {
+    if (delivery.openingMode) recentOpeningUse[delivery.openingMode] = (recentOpeningUse[delivery.openingMode] ?? 0) + 1
+    for (const mode of new Set(delivery.instructionModes ?? [])) recentInstructionUse[mode] = (recentInstructionUse[mode] ?? 0) + 1
+    if (delivery.responseFormatCounts) {
+      knownDeliveries += 1
+      for (const [format, count] of Object.entries(delivery.responseFormatCounts)) {
+        if (Number.isFinite(count) && count >= 0) recentResponseItemCounts[format] = (recentResponseItemCounts[format] ?? 0) + count
+      }
+    }
     // Count formats from pedagogicalFormats
     const formatsSeenThisDelivery = new Set<string>()
     for (const fmt of delivery.pedagogicalFormats ?? []) {
@@ -166,5 +176,9 @@ export function buildFormatPlanningCapsule(
     recentReasoning: Array.from(recentReasoningSet).sort(),
     avoidMechanicalRepeat,
     availableButRecentlyUnused,
+    recentOpeningUse,
+    recentInstructionUse,
+    recentResponseItemCounts,
+    responseCountCoverage: { knownDeliveries, totalDeliveries: recentSlice.length },
   }
 }

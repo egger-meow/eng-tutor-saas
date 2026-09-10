@@ -224,7 +224,7 @@ describe('Production Runner Orchestration (End-to-End)', () => {
 
     // 5. Verify submitted package conforms strictly to production invariants
     expect(submittedPackage).toBeDefined()
-    expect(submittedPackage.metadata.schemaVersion).toBe('2.5.0')
+    expect(submittedPackage.metadata.schemaVersion).toBe('2.6.0')
     expect(submittedPackage.metadata.promptVersion).toBe(`prompt/${CURRENT_PROMPT_VERSION}`)
     expect(submittedPackage.metadata.engineVersion).toBe(CURRENT_ENGINE_VERSION)
     expect(submittedPackage.metadata.jobId).toBe(jobId)

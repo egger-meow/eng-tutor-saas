@@ -397,8 +397,47 @@ export const CurriculumPackageV25Schema = CurriculumPackageV24Schema.extend({
   answers: z.array(AnswerItemV25Schema).min(1),
 })
 
+/** Opening questions are ungraded reflection; assessed items belong in practice. */
+export const OpeningActivitySchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('question'), titleZh: Text, prompt: Text, writingLines: z.number().int().min(1).max(6) }),
+  z.strictObject({ type: z.literal('observation'), titleZh: Text, examples: z.array(Text).min(2).max(4), noticeZh: Text }),
+  z.strictObject({ type: z.literal('reading-purpose'), titleZh: Text, purposeZh: Text }),
+  z.strictObject({ type: z.literal('direct-reading') }),
+])
+export type OpeningActivity = z.infer<typeof OpeningActivitySchema>
+
+export const InstructionBlockSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('prose'), titleZh: Text.optional(), textZh: Text }),
+  z.strictObject({ type: z.literal('bullets'), titleZh: Text.optional(), itemsZh: z.array(Text).min(1).max(8) }),
+  z.strictObject({
+    type: z.literal('comparison'), titleZh: Text.optional(),
+    headers: z.array(Text).min(2).max(4),
+    rows: z.array(z.array(Text).min(2).max(4)).min(1).max(8),
+    takeawayZh: Text.optional(),
+  }).superRefine((block, ctx) => {
+    block.rows.forEach((row, index) => {
+      if (row.length !== block.headers.length) {
+        ctx.addIssue({ code: 'custom', path: ['rows', index], message: 'Comparison row must match header count' })
+      }
+    })
+  }),
+  z.strictObject({ type: z.literal('steps'), titleZh: Text.optional(), itemsZh: z.array(Text).min(1).max(8) }),
+  z.strictObject({ type: z.literal('worked-example'), titleZh: Text.optional(), example: Text, walkthroughZh: Text }),
+  z.strictObject({ type: z.literal('error-analysis'), titleZh: Text.optional(), wrong: Text, corrected: Text, whyZh: Text }),
+])
+export type InstructionBlock = z.infer<typeof InstructionBlockSchema>
+
+// New packets select teaching blocks deliberately; historical layouts stay frozen.
+export const CurriculumPackageV26Schema = CurriculumPackageV25Schema.extend({
+  metadata: CurriculumPackageV25Schema.shape.metadata.extend({ schemaVersion: z.literal('2.6.0') }),
+  studentLesson: CurriculumPackageV25Schema.shape.studentLesson.extend({
+    opening: z.strictObject({ goalsZh: z.array(Text).min(2).max(6), howToUseZh: Text, activity: OpeningActivitySchema }),
+    instruction: z.array(z.strictObject({ id: StableId, titleZh: Text, blocks: z.array(InstructionBlockSchema).min(1).max(12) })).min(1).max(4),
+  }),
+})
+
 /** The one canonical schema used for all newly authored production packages. */
-export const CurriculumPackageSchema = CurriculumPackageV25Schema
+export const CurriculumPackageSchema = CurriculumPackageV26Schema
 
 // Legacy 2.1.0 Schema
 export const CurriculumPackageV21Schema = z.strictObject({
@@ -552,11 +591,12 @@ export const CurriculumPackageV20Schema = z.strictObject({
   }),
 })
 
+export type CurriculumPackageV26 = z.infer<typeof CurriculumPackageV26Schema>
 export type CurriculumPackageV25 = z.infer<typeof CurriculumPackageV25Schema>
 export type CurriculumPackageV24 = z.infer<typeof CurriculumPackageV24Schema>
 export type CurriculumPackageV23 = z.infer<typeof CurriculumPackageV23Schema>
 export type CurriculumPackageV22 = z.infer<typeof CurriculumPackageV22Schema>
-export type CurriculumPackage = CurriculumPackageV25 | CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
+export type CurriculumPackage = CurriculumPackageV26 | CurriculumPackageV25 | CurriculumPackageV24 | CurriculumPackageV23 | CurriculumPackageV22
 export type CurriculumPackageV21 = z.infer<typeof CurriculumPackageV21Schema>
 export type CurriculumPackageV20 = z.infer<typeof CurriculumPackageV20Schema>
 export type CurriculumQuestionV25 = z.infer<typeof QuestionV25Schema>

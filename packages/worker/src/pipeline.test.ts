@@ -266,26 +266,18 @@ describe('completeCurriculumJob', () => {
     }))
   })
 
-  it('stamps server-owned target release when LLM releaseId is missing or forged without quality rejection', async () => {
+  it('rejects forged metadata under a server-owned target without stamping it', async () => {
     const state = setup()
     const grounded = structuredClone(curriculumSample)
     grounded.metadata.releaseId = 'fake-forged-release-id'
-    await expect(completeCurriculumJob({
-      client: state.client,
-      workerId: 'worker-1',
+    const render = vi.fn(async () => pdfs)
+    await expect(completeCurriculumJob({ client: state.client, workerId: 'worker-1',
       context: { ...curriculumContext, targetReleaseId: CURRENT_RELEASE_ID },
-      curriculumPackage: grounded,
-      render: async () => pdfs,
-      inspect,
-    })).resolves.toBe('material-1')
-
-    expect(state.rpc).toHaveBeenCalledWith('worker_complete_generation_job', expect.objectContaining({
-      canonical_source: expect.objectContaining({
-        metadata: expect.objectContaining({
-          releaseId: CURRENT_RELEASE_ID,
-        }),
-      }),
-    }))
+      curriculumPackage: grounded, render, inspect,
+    })).rejects.toThrow('Release mismatch: immutable metadata releaseId')
+    expect(render).not.toHaveBeenCalled()
+    expect(grounded.metadata.releaseId).toBe('fake-forged-release-id')
+    expect(state.uploads).toEqual([])
   })
 
   it('fails explicitly as release mismatch when submission targetReleaseId does not match Finisher CURRENT_RELEASE_ID', async () => {
@@ -299,7 +291,7 @@ describe('completeCurriculumJob', () => {
       curriculumPackage: grounded,
       render: async () => pdfs,
       inspect,
-    })).rejects.toThrow(/Release mismatch: submission target release 'rel_1.2.0' does not match Finisher CURRENT_RELEASE_ID/u)
+    })).rejects.toThrow(/Release mismatch: unsupported consumer target release 'rel_1.2.0'/u)
   })
 
   it('rejects broken 2.3 prose grounding before rendering or storage', async () => {

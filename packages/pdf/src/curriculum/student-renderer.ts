@@ -7,6 +7,7 @@ import { renderVocabularySection } from './vocabulary-renderer.js'
 import { renderInstructionSection } from './instruction-renderer.js'
 import { renderPracticeStages, renderSelfCheckSection, renderHomeworkSection } from './practice-renderer.js'
 import { renderAdaptiveExtension } from './adaptive-extension-renderer.js'
+import { renderOpeningActivity } from './opening-renderer.js'
 
 export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   const lesson = pkg.studentLesson
@@ -28,17 +29,10 @@ export function renderCurriculumStudentHtml(pkg: CurriculumPackage): string {
   </div>
 </section>`
 
-  const warmupHtml = `<section class="warmup-box">
-  <h2>先想一想</h2>
-  <div class="warmup-prompt">${h(lesson.opening.warmUp)}</div>
-  <div class="writing-lines-container">
-    <div class="writing-line"></div>
-    <div class="writing-line"></div>
-  </div>
-</section>`
+  const warmupHtml = renderOpeningActivity(lesson.opening)
 
   const targetPatterns = Array.isArray(lesson.instruction)
-    ? lesson.instruction.flatMap((i) => (Array.isArray(i.patterns) ? i.patterns : []))
+    ? lesson.instruction.flatMap((i) => ('patterns' in i && Array.isArray(i.patterns) ? i.patterns : []))
     : []
   const readingHtml = renderReadingSection(lesson.reading, lesson.vocabulary, targetPatterns)
   const vocabHtml = renderVocabularySection(lesson.vocabulary)

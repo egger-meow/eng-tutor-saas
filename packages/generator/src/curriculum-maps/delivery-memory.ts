@@ -15,6 +15,10 @@ export interface DeliveryMemoryProjection {
   pedagogicalFormats: string[]
   scaffoldLevels?: string[]
   reasoningOperations?: string[]
+  openingMode?: string
+  instructionModes?: string[]
+  /** Response item counts, not elapsed minutes; formats may overlap within an item. */
+  responseFormatCounts?: Record<string, number>
   snapshotId?: string
   materialId?: string
 }
@@ -74,9 +78,23 @@ export function extractDeliveryMemory(
   const pedagogicalFormatsSet = new Set<string>()
   const scaffoldLevelsSet = new Set<string>()
   const reasoningOperationsSet = new Set<string>()
+  const responseFormatCounts: Record<string, number> = {}
+  const opening = (pkg as any).studentLesson?.opening
+  const openingMode = opening?.activity?.type ?? (typeof opening?.warmUp === 'string' ? 'legacy-warmup' : undefined)
+  const instructionModes = [...new Set<string>(((pkg as any).studentLesson?.instruction ?? []).flatMap((section: any) =>
+    Array.isArray(section.blocks) ? section.blocks.map((block: any) => block.type).filter((type: unknown) => typeof type === 'string') : ['legacy-explanation'],
+  ))]
 
   for (const q of allQuestions) {
     if (!q || typeof q !== 'object') continue
+    const itemFormats = new Set<string>()
+    const responseType = q.responseLayout?.type
+    if (responseType === 'table') itemFormats.add('table:grid')
+    else if (responseType === 'organizer') itemFormats.add('table:organizer')
+    else if (responseType === 'sequence') itemFormats.add(q.responseLayout.layoutDirection === 'horizontal' ? 'sequence:horizontal' : 'sequence:vertical')
+    else if (responseType === 'lines' || (!q.responseLayout && q.writingLines > 0)) itemFormats.add('written:lines')
+    if (Array.isArray(q.options) && q.options.length > 0) itemFormats.add(q.options.length === 4 ? 'mcq:4-option' : 'mcq:multi-option')
+    for (const format of itemFormats) responseFormatCounts[format] = (responseFormatCounts[format] ?? 0) + 1
 
     const layout = q.responseLayout
     if (layout && typeof layout === 'object') {
@@ -129,6 +147,9 @@ export function extractDeliveryMemory(
     pedagogicalFormats: Array.from(pedagogicalFormatsSet),
     scaffoldLevels: Array.from(scaffoldLevelsSet),
     reasoningOperations: Array.from(reasoningOperationsSet),
+    openingMode,
+    instructionModes,
+    responseFormatCounts,
     snapshotId: (pkg as any).snapshotId ?? meta.snapshotId,
     materialId: (pkg as any).materialId ?? meta.materialId,
   }

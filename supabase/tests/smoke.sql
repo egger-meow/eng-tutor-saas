@@ -1,5 +1,17 @@
 begin;
 
+-- Successful bridge fixtures use the immutable claim contract, never guessed versions.
+create function pg_temp.smoke_claim_metadata(context jsonb)
+returns jsonb language plpgsql as $$
+declare contract jsonb := context -> 'activeAuthoringContract';
+begin
+  if contract is null then raise exception 'smoke fixture missing bound authoring contract'; end if;
+  return jsonb_build_object(
+    'schemaVersion', contract ->> 'schemaVersion', 'promptVersion', contract ->> 'promptVersion',
+    'engineVersion', contract ->> 'engineVersion', 'workerVersion', contract ->> 'workerVersion',
+    'rendererVersion', contract ->> 'rendererVersion', 'releaseId', contract ->> 'releaseId');
+end $$;
+
 do $$
 declare
   claimed_count integer;
@@ -469,8 +481,8 @@ begin
     raise exception 'chatgpt_claim_generation_batch response violates Scheduled Work API contract: %', bridge_claim_result;
   end if;
   bridge_context := bridge_claim_result #> '{claimed,0}';
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
-    raise exception 'claim context missing server-owned targetReleaseId rel_1.8.2: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' is distinct from public.worker_current_authoring_contract()->>'releaseId' then
+    raise exception 'claim context missing server-owned targetReleaseId matching active contract: %', bridge_context;
   end if;
   bridge_job_id := (bridge_context #>> '{job,id}')::uuid;
   bridge_child_id := (bridge_context #>> '{job,childId}')::uuid;
@@ -576,8 +588,8 @@ begin
     raise exception 'ChatGPT bridge accepted a fabricated input fingerprint';
   end if;
 
-  first_package := jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.4.0', 'jobId', bridge_job_id::text,
+  first_package := jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
+      'jobId', bridge_job_id::text,
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ));
   select attempt_count into bridge_attempt_before
@@ -696,8 +708,8 @@ begin
   if bridge_context is null then
     raise exception 'second claim failed to return claimed job after quality rejection';
   end if;
-  if bridge_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
-    raise exception 'retry claim context missing server-owned targetReleaseId rel_1.8.2: %', bridge_context;
+  if bridge_context ->> 'targetReleaseId' is distinct from public.worker_current_authoring_contract()->>'releaseId' then
+    raise exception 'retry claim context missing server-owned targetReleaseId matching active contract: %', bridge_context;
   end if;
   if bridge_context #>> '{retryContext,previousAttemptNumber}' <> '1'
     or bridge_context #>> '{retryContext,failureType}' <> 'QUALITY_REJECTED'
@@ -708,8 +720,8 @@ begin
   end if;
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
-  second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.4.0', 'jobId', bridge_job_id::text,
+  second_package := jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
+    'jobId', bridge_job_id::text,
     'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repairMarker', 'targeted-attempt-2'
   ));
@@ -779,8 +791,8 @@ begin
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
   perform private_generation.chatgpt_submit_curriculum_package(
     '00000000-0000-0000-0000-000000000071', 'max-attempt-smoke',
-    jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.4.0', 'jobId', '00000000-0000-0000-0000-000000000071',
+    jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
+      'jobId', '00000000-0000-0000-0000-000000000071',
       'childId', bridge_child_id::text, 'inputFingerprint', bridge_fingerprint
     ))
   );
@@ -866,8 +878,8 @@ begin
   where item #>> '{job,id}' = recovery_job_id::text;
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
 
-  first_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.4.0', 'jobId', recovery_job_id::text,
+  first_package := jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
+    'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint
   ));
   perform private_generation.chatgpt_submit_curriculum_package(
@@ -988,8 +1000,8 @@ begin
   end if;
 
   bridge_fingerprint := bridge_context ->> 'inputFingerprint';
-  second_package := jsonb_build_object('metadata', jsonb_build_object(
-    'schemaVersion', '2.4.0', 'jobId', recovery_job_id::text,
+  second_package := jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
+    'jobId', recovery_job_id::text,
     'childId', recovery_child_id::text, 'inputFingerprint', bridge_fingerprint,
     'repaired', true
   ));
@@ -1081,16 +1093,23 @@ begin
     select item into mismatch_context
     from jsonb_array_elements(mismatch_claim_result -> 'claimed') as claimed(item)
     where item #>> '{job,id}' = mismatch_job_id::text;
-    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.2' then
+    if mismatch_context is null or mismatch_context ->> 'targetReleaseId' is distinct from public.worker_current_authoring_contract()->>'releaseId' then
       raise exception 'mismatch test attempt 1 claim failed: %', mismatch_claim_result;
     end if;
 
     -- 2. Submit package for Attempt 1
-    mismatch_package := jsonb_build_object('metadata', jsonb_build_object(
-      'schemaVersion', '2.4.0', 'jobId', mismatch_job_id::text,
-      'childId', mismatch_child_id::text, 'inputFingerprint', mismatch_context ->> 'inputFingerprint',
-      'releaseId', 'rel_1.4.0'
+    mismatch_package := jsonb_build_object('metadata', pg_temp.smoke_claim_metadata(mismatch_context) || jsonb_build_object(
+      'jobId', mismatch_job_id::text,
+      'childId', mismatch_child_id::text, 'inputFingerprint', mismatch_context ->> 'inputFingerprint'
     ));
+    begin
+      perform private_generation.chatgpt_submit_curriculum_package(mismatch_job_id, 'mismatch-worker',
+        jsonb_set(mismatch_package, '{metadata,releaseId}', '"rel_1.4.0"'::jsonb));
+      raise exception 'bound release mismatch was silently accepted';
+    exception when others then
+      if sqlerrm not like 'AUTHORING_CONTRACT_MISMATCH:%' then raise; end if;
+    end;
+    -- A valid submission is required to exercise the separate Finisher recovery path.
     perform private_generation.chatgpt_submit_curriculum_package(mismatch_job_id, 'mismatch-worker', mismatch_package);
 
     -- 3. Finisher encounters release mismatch -> technical_failed with RELEASE_MISMATCH
@@ -1129,8 +1148,8 @@ begin
       raise exception 'attempt 2 claim was blocked after RELEASE_MISMATCH';
     end if;
 
-    -- 7. Verify attempt 2 claim context has targetReleaseId=rel_1.8.2 and NO retryContext (fresh authoring, not quality repair)
-    if mismatch_context ->> 'targetReleaseId' <> 'rel_1.8.2'
+    -- 7. Verify attempt 2 claim context has targetReleaseId matching the active contract and NO retryContext (fresh authoring, not quality repair)
+    if mismatch_context ->> 'targetReleaseId' is distinct from public.worker_current_authoring_contract()->>'releaseId'
       or (mismatch_context #>> '{job,attemptCount}')::integer <> 2
       or mismatch_context ? 'retryContext' then
       raise exception 'attempt 2 claim context invalid or incorrectly has retryContext: %', mismatch_context;
@@ -1448,6 +1467,18 @@ $$;
 rollback;
 
 begin;
+
+-- Successful bridge fixtures use the immutable claim contract, never guessed versions.
+create function pg_temp.smoke_claim_metadata(context jsonb)
+returns jsonb language plpgsql as $$
+declare contract jsonb := context -> 'activeAuthoringContract';
+begin
+  if contract is null then raise exception 'smoke fixture missing bound authoring contract'; end if;
+  return jsonb_build_object(
+    'schemaVersion', contract ->> 'schemaVersion', 'promptVersion', contract ->> 'promptVersion',
+    'engineVersion', contract ->> 'engineVersion', 'workerVersion', contract ->> 'workerVersion',
+    'rendererVersion', contract ->> 'rendererVersion', 'releaseId', contract ->> 'releaseId');
+end $$;
 
 do $$
 declare
@@ -1796,18 +1827,16 @@ begin
     if sqlerrm = 'legacy curriculum schema was accepted for new production submission' then
       raise;
     end if;
-    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.4.0 or 2.5.0 object%' then
+    if sqlerrm not like 'canonical_source must be a Curriculum Package 2.4.0, 2.5.0 or 2.6.0 object%' then
       raise exception 'unexpected legacy schema rejection: %', sqlerrm;
     end if;
   end;
 
   test_package := jsonb_build_object(
-    'metadata', jsonb_build_object(
-      'schemaVersion', '2.4.0',
+    'metadata', pg_temp.smoke_claim_metadata(bridge_context) || jsonb_build_object(
       'jobId', test_job_id::text,
       'childId', '00000000-0000-0000-0000-000000000099',
       'inputFingerprint', bridge_fingerprint,
-      'promptVersion', 'test-prompt',
       'curriculumVersion', 'test-generator',
       'model', 'test-model'
     ),
