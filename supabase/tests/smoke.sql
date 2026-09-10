@@ -2811,10 +2811,7 @@ begin
   end if;
 
   -- Restore Free Pilot active state for remaining tests
-  update public.enrollment_settings
-  set free_pilot_ended_at = null,
-      free_pilot_enabled = true
-  where key = 'default';
+  perform public.admin_privileged_reopen_free_pilot('Smoke test reset for next scenario', 'CONFIRM_REOPEN_FREE_PILOT');
 
   -- Item 1: Deployed webhook payload -> actual production RPC signature resolves with exact named arguments.
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
@@ -3627,10 +3624,7 @@ begin
     end if;
 
     -- Restore Free Pilot active state
-    update public.enrollment_settings
-    set free_pilot_ended_at = null,
-        free_pilot_enabled = true
-    where key = 'default';
+    perform public.admin_privileged_reopen_free_pilot('Smoke test reset after machine-gun test', 'CONFIRM_REOPEN_FREE_PILOT');
 
     -- -----------------------------------------------------------------------
     -- Test Case 2: In-Progress Worker Claim Protection
@@ -4357,7 +4351,7 @@ begin
     end;
 
     -- =========================================================================
-    -- ADVERSARIAL TEST 2: Batch Waitlist Release Across 100 Threshold (99 -> 100)
+    -- ADVERSARIAL TEST 2: Rolling Active Threshold & Irreversible Cutover
     -- =========================================================================
     declare
       adv_cur_count integer;
@@ -4369,7 +4363,21 @@ begin
       adv_released integer;
       adv_sub_1 public.subscriptions%rowtype;
       adv_sub_2 public.subscriptions%rowtype;
+
+      -- Test 2B variables
+      adv_dormant_parent uuid := gen_random_uuid();
+      adv_batch_100 uuid[] := '{}';
+
+      -- Test 2C variables (99 -> 101 jump)
+      adv_p uuid;
+      adv_c uuid;
+      adv_jump_parent uuid := gen_random_uuid();
+      adv_jump_c1 uuid := gen_random_uuid();
+      adv_jump_c2 uuid := gen_random_uuid();
     begin
+      -- -----------------------------------------------------------------------
+      -- 2A. Admissions past 100 in ledger while Pilot is active
+      -- -----------------------------------------------------------------------
       select count(*)::integer into adv_cur_count from private_generation.historical_pilot_admissions;
       adv_needed := 99 - adv_cur_count;
 
@@ -4384,8 +4392,8 @@ begin
           (select count(*) from private_generation.historical_pilot_admissions);
       end if;
 
-      -- Ensure capacity allows releasing 2 children
-      update public.enrollment_settings set capacity = 200 where key = 'default';
+      -- Ensure capacity allows releasing children
+      update public.enrollment_settings set capacity = 500 where key = 'default';
 
       -- Create 2 children in waitlist
       insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
@@ -4400,7 +4408,6 @@ begin
         ('00000000-0000-0000-0000-000000000001', adv_child_batch_2, 'p@ex.com', 'waiting')
       on conflict (child_id) do update set status = 'waiting';
 
-      -- Remove subscriptions to test batch release subscription creation
       delete from public.subscriptions where child_id in (adv_child_batch_1, adv_child_batch_2);
 
       -- Release both children in a SINGLE atomic call
@@ -4409,14 +4416,13 @@ begin
         raise exception 'Adv Test 2 failed: expected 2 released children, got %', adv_released;
       end if;
 
-      -- Invariants verification:
-      -- A. Exactly 100 historical admissions
-      if (select count(*) from private_generation.historical_pilot_admissions) <> 100 then
-        raise exception 'Adv Test 2 failed: historical admissions count is %, expected exactly 100',
+      -- Under rolling active rules:
+      -- A. Both children 100 and 101 are logged in historical_pilot_admissions
+      if (select count(*) from private_generation.historical_pilot_admissions) <> 101 then
+        raise exception 'Adv Test 2 failed: historical admissions count is %, expected 101',
           (select count(*) from private_generation.historical_pilot_admissions);
       end if;
 
-      -- B. Child 1 has sequence 100
       if not exists (
         select 1 from private_generation.historical_pilot_admissions
         where child_id = adv_child_batch_1 and admission_sequence = 100
@@ -4424,30 +4430,138 @@ begin
         raise exception 'Adv Test 2 failed: Batch Child 1 was not assigned admission sequence 100';
       end if;
 
-      -- C. Child 2 is NOT in historical_pilot_admissions (no sequence 101)
-      if exists (
-        select 1 from private_generation.historical_pilot_admissions where child_id = adv_child_batch_2
+      if not exists (
+        select 1 from private_generation.historical_pilot_admissions
+        where child_id = adv_child_batch_2 and admission_sequence = 101
       ) then
-        raise exception 'Adv Test 2 failed: Batch Child 2 was incorrectly granted pilot admission';
+        raise exception 'Adv Test 2 failed: Batch Child 2 was not assigned admission sequence 101';
       end if;
 
-      -- D. Pilot is ended atomically in enrollment_settings
-      if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not false
-        or (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
-        raise exception 'Adv Test 2 failed: free pilot was not atomically closed on 100th child';
+      -- B. Pilot does NOT cut over simply because admissions reached 100 (inactive parents)
+      if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not true
+        or (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is not null then
+        raise exception 'Adv Test 2 failed: Free Pilot prematurely ended without reaching rolling active threshold';
       end if;
 
-      -- E. Subscription verification:
-      -- Batch Child 1 gets current_period_end is null (Free Pilot entitled)
+      -- C. Both children receive unexpired Free Pilot subscriptions (current_period_end is null)
       select * into adv_sub_1 from public.subscriptions where child_id = adv_child_batch_1;
       if adv_sub_1.current_period_end is not null then
-        raise exception 'Adv Test 2 failed: Batch Child 1 current_period_end should be null, got %', adv_sub_1.current_period_end;
+        raise exception 'Adv Test 2 failed: Batch Child 1 should have null current_period_end';
+      end if;
+      select * into adv_sub_2 from public.subscriptions where child_id = adv_child_batch_2;
+      if adv_sub_2.current_period_end is not null then
+        raise exception 'Adv Test 2 failed: Batch Child 2 should have null current_period_end';
       end if;
 
-      -- Batch Child 2 gets current_period_end is not null (post-pilot 14 days)
-      select * into adv_sub_2 from public.subscriptions where child_id = adv_child_batch_2;
-      if adv_sub_2.current_period_end is null then
-        raise exception 'Adv Test 2 failed: Batch Child 2 should have post-pilot 14-day expiry, but got null';
+      -- -----------------------------------------------------------------------
+      -- 2B. Admin Release 100 Times NEVER Touches Parent Activity or Cuts Over
+      -- -----------------------------------------------------------------------
+      insert into auth.users (id, raw_user_meta_data)
+      values (adv_dormant_parent, '{"display_name":"Dormant Parent"}'::jsonb);
+      update public.profiles set last_active_at = null where id = adv_dormant_parent;
+
+      update public.enrollment_settings set capacity = 500 where key = 'default';
+
+      for adv_i in 1..100 loop
+        adv_dummy_child := gen_random_uuid();
+        insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+        values (adv_dummy_child, adv_dormant_parent, 'Waitlist Child ' || adv_i, 7, 'grade_7', false);
+
+        insert into public.waitlist (parent_id, child_id, email, status)
+        values (adv_dormant_parent, adv_dummy_child, 'dormant@ex.com', 'waiting')
+        on conflict (child_id) do update set status = 'waiting';
+
+        delete from public.subscriptions where child_id = adv_dummy_child;
+        adv_batch_100 := array_append(adv_batch_100, adv_dummy_child);
+      end loop;
+
+      adv_released := public.admin_release_waitlist_children(adv_batch_100);
+      if adv_released <> 100 then
+        raise exception 'Adv Test 2B failed: expected 100 released children, got %', adv_released;
+      end if;
+
+      -- Invariants:
+      -- Admin release MUST NOT touch parent activity
+      if (select last_active_at from public.profiles where id = adv_dormant_parent) is not null then
+        raise exception 'Adv Test 2B failed: admin release modified parent last_active_at';
+      end if;
+
+      -- Free pilot MUST NOT cut over from admin actions
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is not null
+        or (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not true then
+        raise exception 'Adv Test 2B failed: admin release triggered Free Pilot cutover';
+      end if;
+
+      -- -----------------------------------------------------------------------
+      -- 2C. Jump 99 -> 101 Active Children via Returning Parent with Sibling Slot
+      -- -----------------------------------------------------------------------
+      -- Clean up any lingering jobs and clear last_active_at for isolation
+      delete from public.generation_jobs where status in ('pending', 'claimed');
+      update public.profiles set last_active_at = null;
+
+      -- Setup exactly 99 active service children across 99 active parents
+      update public.enrollment_settings set capacity = 1000 where key = 'default';
+
+      for adv_i in 1..99 loop
+        adv_p := gen_random_uuid();
+        adv_c := gen_random_uuid();
+        insert into auth.users (id, raw_user_meta_data)
+        values (adv_p, ('{"display_name":"Active Parent ' || adv_i || '"}'::text)::jsonb);
+        update public.profiles set last_active_at = now() where id = adv_p;
+        insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+        values (adv_c, adv_p, 'Active Svc Child ' || adv_i, 7, 'grade_7', false);
+      end loop;
+
+      if (select private_generation.rolling_active_service_child_count()) <> 99 then
+        raise exception 'Adv Test 2C setup failed: rolling active count is %, expected 99',
+          (select private_generation.rolling_active_service_child_count());
+      end if;
+
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is not null then
+        raise exception 'Adv Test 2C setup failed: free_pilot_ended_at already set';
+      end if;
+
+      -- Create 100th parent who has been dormant > 14 days and has 2 children (sibling slot)
+      insert into auth.users (id, raw_user_meta_data)
+      values (adv_jump_parent, '{"display_name":"Returning Parent"}'::jsonb);
+      update public.profiles set last_active_at = now() - interval '30 days' where id = adv_jump_parent;
+
+      insert into public.children (id, parent_id, display_name, grade, grade_stage, is_internal_test)
+      values
+        (adv_jump_c1, adv_jump_parent, 'Jump Child 1', 7, 'grade_7', false),
+        (adv_jump_c2, adv_jump_parent, 'Jump Child 2', 7, 'grade_7', false);
+
+      -- Prior to touch: rolling count is still 99, pilot remains open
+      if (select private_generation.rolling_active_service_child_count()) <> 99 then
+        raise exception 'Adv Test 2C failed: dormant parent children counted before touch, got %',
+          (select private_generation.rolling_active_service_child_count());
+      end if;
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is not null then
+        raise exception 'Adv Test 2C failed: free pilot ended prematurely';
+      end if;
+
+      -- Returning parent now touches activity (simulating authenticated touchpoint)
+      perform set_config('request.jwt.claim.sub', adv_jump_parent::text, true);
+      perform public.touch_parent_activity();
+
+      -- Verify:
+      -- 1. Parent activity was updated
+      if (select last_active_at from public.profiles where id = adv_jump_parent) < (now() - interval '1 minute') then
+        raise exception 'Adv Test 2C failed: touch_parent_activity did not update last_active_at';
+      end if;
+
+      -- 2. Rolling active count jumped from 99 to 101
+      if (select private_generation.rolling_active_service_child_count()) <> 101 then
+        raise exception 'Adv Test 2C failed: rolling active count is %, expected 101',
+          (select private_generation.rolling_active_service_child_count());
+      end if;
+
+      -- 3. Cutover triggered cleanly and atomically
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
+        raise exception 'Adv Test 2C failed: free_pilot_ended_at was not stamped on jump to 101';
+      end if;
+      if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not false then
+        raise exception 'Adv Test 2C failed: free_pilot_enabled was not set to false on cutover';
       end if;
     end;
 
@@ -4457,14 +4571,14 @@ begin
     declare
       adv_err_msg text;
     begin
-      -- A. Sequence ceiling check (> 100 rejected)
+      -- A. Sequence validity check (sequence < 1 rejected)
       begin
         insert into private_generation.historical_pilot_admissions (
           child_id, admission_sequence, admitted_at
         ) values (
-          '00000000-0000-0000-0000-000000000862', 101, now()
+          '00000000-0000-0000-0000-000000000862', 0, now()
         );
-        raise exception 'Adv Test 3A failed: insert sequence 101 was allowed!';
+        raise exception 'Adv Test 3A failed: insert sequence 0 was allowed!';
       exception when check_violation then
         null;
       end;
@@ -4488,7 +4602,7 @@ begin
         null;
       end;
 
-      -- D. Monotonic cutover trigger on enrollment_settings (cannot reopen pilot)
+      -- D. Monotonic cutover trigger on enrollment_settings (cannot reopen pilot via direct update)
       begin
         update public.enrollment_settings
         set free_pilot_enabled = true
@@ -4506,6 +4620,30 @@ begin
       exception when others then
         null;
       end;
+
+      -- E. Privileged Owner Override works with audit log
+      perform public.admin_privileged_reopen_free_pilot(
+        'Testing privileged reopen in smoke tests',
+        'CONFIRM_REOPEN_FREE_PILOT'
+      );
+
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is not null
+        or (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not true then
+        raise exception 'Adv Test 3F failed: privileged reopen did not re-enable Free Pilot';
+      end if;
+
+      if not exists (
+        select 1 from private_generation.pilot_override_audit
+        where reason = 'Testing privileged reopen in smoke tests'
+      ) then
+        raise exception 'Adv Test 3F failed: privileged reopen did not record audit row';
+      end if;
+
+      -- Re-execute cutover to return to cutover state
+      perform private_generation.check_and_execute_free_pilot_cutover();
+      if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
+        raise exception 'Adv Test 3F failed: re-cutover failed after privileged reopen';
+      end if;
     end;
 
     -- 6. Monotonic cutoff and in-flight job cutover safety:

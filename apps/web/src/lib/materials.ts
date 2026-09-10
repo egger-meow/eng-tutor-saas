@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { touchParentActivity } from './parent-activity'
 import { getSupabaseClient } from './supabase'
 
 export type MaterialFeedback = {
@@ -403,6 +404,8 @@ export async function openMaterialDownload(path: string, filename: string): Prom
   const response = await fetch(data.signedUrl)
   if (!response.ok) throw new Error(`Material download failed (${response.status})`)
 
+  void touchParentActivity()
+
   const objectUrl = URL.createObjectURL(await response.blob())
   const link = document.createElement('a')
   link.href = objectUrl
@@ -425,4 +428,5 @@ export async function saveFeedback(childId: string, materialId: string, input: F
     parent_comments: input.parent_comments.trim() || null,
   }, { onConflict: 'child_id,material_id' })
   if (error) throw error
+  void touchParentActivity()
 }

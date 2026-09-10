@@ -63,7 +63,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
         </h3>
         <p style={{ color: '#166534', margin: '0.35rem 0 0', fontSize: '0.95rem', lineHeight: '1.6' }}>
           免填信用卡、免綁卡。每週完成孩子作答回饋後，系統會繼續為他準備下一週教材。<br />
-          Beta 目前以歷史錄取 100 位學員作為階段邊界；結束後恢復標準方案，不會自動替你開啟付費訂閱。
+          Beta 目前以 100 位 14 天內活躍學習學員作為階段邊界；達標後永久結束並恢復標準方案，不會自動替你開啟付費訂閱。
         </p>
       </div>
     )}
@@ -147,7 +147,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
     <CapacityStatus enrollment={enrollment} />
     <p className="capacity-explainer">
       {enrollment?.freePilotActive
-        ? '100 位是目前服務容量與 Beta 階段邊界。歷史錄取滿 100 位後，Beta 免費階段結束並恢復標準方案；已完成與正在準備中的教材不受影響，系統不會因為你曾使用 Beta 就自動替你開啟付費訂閱。'
+        ? '100 位是目前服務容量與 Beta 階段邊界。當 14 天內活躍學習學員首次達到 100 位後，Beta 免費階段即永久結束並恢復標準方案；已完成與正在準備中的教材不受影響，系統不會因為你曾使用 Beta 就自動替你開啟付費訂閱。'
         : '服務計數以孩子為單位，非家長帳戶。額滿後新加入者會先進入候補；已完成與正在準備中的教材不受影響，後續每週服務依訂閱方案繼續。'}
     </p>
   </section>

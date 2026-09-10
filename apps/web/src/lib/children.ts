@@ -1,3 +1,4 @@
+import { touchParentActivity } from './parent-activity'
 import { getSupabaseClient } from './supabase'
 
 export type Child = {
@@ -36,15 +37,19 @@ export async function createChild(input: ChildInput): Promise<string> {
   if (userError || !user) throw userError ?? new Error('登入已失效，請重新登入。')
   const { data, error } = await getSupabaseClient().from('children').insert({ ...cleanInput(input), parent_id: user.id }).select('id').single()
   if (error) throw error
+  void touchParentActivity()
   return data.id as string
 }
 
 export async function updateChild(id: string, input: ChildInput): Promise<void> {
   const { error } = await getSupabaseClient().from('children').update(cleanInput(input)).eq('id', id)
   if (error) throw error
+  void touchParentActivity()
 }
 
 export async function archiveChild(id: string): Promise<void> {
   const { error } = await getSupabaseClient().rpc('archive_owned_child', { p_child_id: id })
   if (error) throw error
+  void touchParentActivity()
 }
+

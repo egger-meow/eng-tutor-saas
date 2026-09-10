@@ -1426,6 +1426,13 @@ export class AdminService {
     const foundingLimit = enrollment?.founding_limit ?? 30
     const capacityStatus = enrollment?.status ?? enrollment?.capacity_status ?? (activeChildren.length >= maxCapacity ? 'closed' : 'open')
 
+    const rawRolling = enrollment?.rolling_active_count ?? (enrollment?.free_pilot_active ? enrollment?.active_count : null)
+    const admissions = Number(enrollment?.free_pilot_admissions ?? 0)
+    const rollingCount = rawRolling !== null && rawRolling !== undefined ? Number(rawRolling) : null
+    const dormantCount = (enrollment?.free_pilot_active && rollingCount !== null)
+      ? Math.max(0, admissions - rollingCount)
+      : 0
+
     const capacity: OperationsOverview['capacity'] = {
       activeCount: enrollment?.active_count ?? activeChildren.length,
       maxCapacity,
@@ -1437,8 +1444,13 @@ export class AdminService {
       totalDemand: enrollment?.total_demand
         ?? ((enrollment?.active_count ?? activeChildren.length) + (enrollment?.waiting_count ?? 0) + (enrollment?.released_count ?? 0)),
       freePilotActive: enrollment?.free_pilot_active ?? false,
-      freePilotAdmissions: enrollment?.free_pilot_admissions ?? 0,
+      freePilotAdmissions: admissions,
       freePilotLimit: enrollment?.free_pilot_limit ?? 100,
+      rollingActiveCount: rollingCount,
+      activityWindowDays: enrollment?.activity_window_days ?? 14,
+      freePilotEndedAt: enrollment?.free_pilot_ended_at ?? null,
+      dormantCount,
+      operationalOccupancy: enrollment?.active_count ?? activeChildren.length,
     }
 
     const latestSubmissionByJob = new Map<string, any>()
@@ -3273,7 +3285,10 @@ export class AdminService {
   async getWaitlistData(): Promise<WaitlistData> {
     const client = this.ensureClient()
     const [enrollmentRes, waitlistRes, activeSubsRes] = await Promise.all([
-      client.from('enrollment_settings').select('*').limit(1).maybeSingle(),
+      client.rpc('get_enrollment_state').then((res: any) => ({
+        data: Array.isArray(res.data) ? res.data[0] ?? null : res.data,
+        error: res.error,
+      })),
       client.rpc('admin_get_waitlist'),
       client
         .from('subscriptions')
@@ -3284,7 +3299,7 @@ export class AdminService {
 
     const enrollment = enrollmentRes.data as any
     const capacity = enrollment?.capacity ?? 100
-    const activeCount = activeSubsRes.data?.length ?? 0
+    const activeCount = enrollment?.active_count ?? (activeSubsRes.data?.length ?? 0)
 
     const rawEntries = (waitlistRes.data || []) as any[]
     const entries: WaitlistEntry[] = rawEntries.map((row: any) => ({

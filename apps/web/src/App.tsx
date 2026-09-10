@@ -26,6 +26,7 @@ import { AuthenticatedMaterialPage } from './routes/AuthenticatedMaterialPage'
 import { AnnouncementsPage } from './routes/AnnouncementsPage'
 import { AnnouncementDetailPage } from './routes/AnnouncementDetailPage'
 import { PayPage } from './routes/PayPage'
+import { touchParentActivity } from './lib/parent-activity'
 import { flushPendingLegalAcceptance } from './lib/legal-acceptance'
 import {
   trackAdditionalChildConfirmed,
@@ -109,6 +110,7 @@ function App() {
       setSession(nextSession)
       setReady(true)
       if (nextSession) {
+        void touchParentActivity()
         void flushPendingLegalAcceptance()
         trackAuthComplete({ user_id: nextSession.user.id })
         const onboardingToken = readOnboardingToken()
@@ -120,6 +122,12 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => { handleSession(nextSession) })
     return () => subscription.unsubscribe()
   }, [isPaymentLinkRoute])
+
+  useEffect(() => {
+    if (session) {
+      void touchParentActivity()
+    }
+  }, [session, route])
 
   async function confirmAdditionalChild() {
     if (!additionalChildConfirmation || additionalChildBusy) return

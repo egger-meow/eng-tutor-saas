@@ -15,6 +15,9 @@ export type EnrollmentState = {
   freePilotActive?: boolean
   freePilotAdmissions?: number
   freePilotLimit?: number
+  rollingActiveCount?: number
+  activityWindowDays?: number
+  freePilotEndedAt?: string | null
 }
 type EnrollmentRow = {
   status: EnrollmentStatus
@@ -29,6 +32,9 @@ type EnrollmentRow = {
   free_pilot_active?: boolean
   free_pilot_admissions?: number
   free_pilot_limit?: number
+  rolling_active_count?: number
+  activity_window_days?: number
+  free_pilot_ended_at?: string | null
 }
 
 export async function getEnrollmentState(): Promise<EnrollmentState> {
@@ -49,6 +55,9 @@ export async function getEnrollmentState(): Promise<EnrollmentState> {
     freePilotActive: row.free_pilot_active ?? false,
     freePilotAdmissions: row.free_pilot_admissions ?? 0,
     freePilotLimit: row.free_pilot_limit ?? 100,
+    rollingActiveCount: row.rolling_active_count ?? row.active_count,
+    activityWindowDays: row.activity_window_days ?? 14,
+    freePilotEndedAt: row.free_pilot_ended_at ?? null,
   }
 }
 

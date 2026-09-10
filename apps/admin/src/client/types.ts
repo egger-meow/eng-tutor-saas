@@ -191,6 +191,11 @@ export interface OperationsOverview {
     freePilotActive?: boolean
     freePilotAdmissions?: number
     freePilotLimit?: number
+    rollingActiveCount?: number | null
+    activityWindowDays?: number
+    freePilotEndedAt?: string | null
+    dormantCount?: number
+    operationalOccupancy?: number
   }
   queueStats: {
     pending: number

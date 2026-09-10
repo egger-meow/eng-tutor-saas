@@ -640,22 +640,23 @@ Referral codes and rewards are out of scope.
 
 Paper English operates under a **FREE PILOT** phase.
 
-Until the service has historically admitted 100 real children:
+Until the service first reaches 100 rolling 14-day active service children:
 
 > all admitted children continue receiving their personalized weekly materials for free, every week, without requiring a Paddle subscription.
 
 This is NOT merely “Week 1 free”. During the Free Pilot, Week 1, Week 2, Week 3, etc. remain service-entitled while the pilot is active.
 
-When the 100th real child has historically been admitted:
+When rolling 14-day active service children reaches 100 for the first time:
 
-> the free pilot ends permanently.
+> the free pilot ends permanently and irreversibly.
 
 From that point onward, normal paid-subscription entitlement governs future weekly service.
 
-The transition is strictly monotonic:
-once the historical 100-child threshold has been reached, deleting, archiving, canceling, expiring, or otherwise removing children must NEVER reactivate the free pilot.
-Internal/test children must never advance the historical pilot counter.
-Pilot authority is derived from a durable authoritative transactional representation (`private_generation.historical_pilot_admissions` and `enrollment_settings.free_pilot_ended_at`), never from a volatile active-subscription or service-occupancy count.
+The transition is strictly monotonic and irreversible:
+once the rolling 100-active-child threshold has been reached and `enrollment_settings.free_pilot_ended_at` is set, deleting, archiving, canceling, expiring, dormancy, or active count falling below 100 must NEVER reactivate the free pilot.
+Before cutover, the active count may naturally fluctuate (e.g. 15 → 10 → 20 → 17 → 35 → 100) based on rolling 14-day parent activity.
+Internal/test children must never advance the pilot counter or affect active capacity.
+Pilot cutover authority is derived from an authoritative database evaluation (`private_generation.rolling_active_service_child_count()` and `enrollment_settings.free_pilot_ended_at`), executed transactionally with row-level locks on `enrollment_settings`.
 
 For a new family joining during the Free Pilot, the entry flow is:
 
@@ -781,8 +782,8 @@ The system operates with two related but distinct 100-child product boundaries:
 1. **Operational Service Capacity (100 active service children)**:
    The concurrent active service occupancy (`locked_capacity_count()`) is capped at 100. When active occupancy reaches 100, new applicants enter the waitlist. Capacity is not silently auto-raised.
 
-2. **Free Pilot Threshold (100 historical real-child admissions)**:
-   Until 100 real children have historically been admitted into the service, all admitted children receive their personalized weekly materials for free every week. When the 100th real child has historically been admitted, the Free Pilot phase ends permanently and monotonically.
+2. **Free Pilot Threshold (100 rolling 14-day active service children)**:
+   Until the system first reaches 100 rolling 14-day active service children, admitted children receive their personalized weekly materials for free every week. When rolling active service children reaches 100 for the first time, the Free Pilot phase ends permanently and irreversibly (`free_pilot_ended_at = now()`, `free_pilot_enabled = false`).
 
 These are real operational and business model boundaries, not fake scarcity.
 
@@ -804,9 +805,9 @@ During this stage the team observes:
 * operational workload;
 * learner retention.
 
-If the product reaches 100 historical real-child admissions:
+If the product reaches 100 rolling active service children:
 
-> that is evidence strong enough to conclude the free pilot phase, transition to normal paid subscriptions, and review system upgrades before expanding capacity.
+> that is evidence of genuine active demand strong enough to conclude the free pilot phase, transition to normal paid subscriptions, and review system upgrades before expanding capacity.
 
 ---
 
@@ -839,11 +840,12 @@ Example:
 
 Active service occupancy (`locked_capacity_count()`) counts:
 1. Active Paddle subscriptions (`trialing`, `active`, `past_due`);
-2. Free Pilot active children (admitted real children receiving weekly service while pilot is active or holding in-flight generation jobs);
-3. Released waitlist entries holding reserved capacity;
-4. Unresolved capacity checkout claims.
+2. During Free Pilot: admitted real children whose parent has `profiles.last_active_at >= now() - interval '14 days'`, plus any child holding an in-flight generation job;
+3. Post Free Pilot: active subscription-backed children;
+4. Released waitlist entries holding reserved capacity;
+5. Unresolved capacity checkout claims.
 
-Archived children and waitlisted children in `waiting` status do not count. Internal test children never count.
+Dormant pilot children (parents inactive > 14 days without in-flight jobs) do not block incoming families from entering. Archived children and waitlisted children in `waiting` status do not count. Internal test children never count.
 
 ---
 
@@ -3054,11 +3056,11 @@ Generation eligibility uses an explicit, authoritative entitlement decision.
 
 Canonical entitlement forms:
 
-* **Free Pilot Entitlement**: While the global Free Pilot phase is active (fewer than 100 historical real-child admissions and `free_pilot_ended_at is null`), all historically admitted real children have service entitlement week after week without requiring a Paddle subscription;
+* **Free Pilot Entitlement**: While the global Free Pilot phase is active (`free_pilot_ended_at is null` and rolling 14-day active service children has not reached 100), all admitted real children have service entitlement week after week without requiring a Paddle subscription;
 * **Cutover Protection**: When the Free Pilot ends, any generation job legitimately created prior to `free_pilot_ended_at` remains entitled to finish through the normal Finisher pipeline;
 * **Voluntary Paid Subscription During Pilot**: A family may voluntarily subscribe during the Free Pilot (locking Founder 30 if available). If canceled while the Free Pilot is still active, the child does not lose the globally free service solely because the Paddle subscription ended;
 * **Standard Active Paid Subscription**: After the Free Pilot ends, newly created future weekly jobs require an active Paddle subscription (`standard_monthly`, `standard_annual`, or `founder_monthly`);
-* **Operator Internal Test Entitlement**: An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, public waitlist demand, public capacity accounting, and the historical pilot admissions counter. Enabling or disabling it must not overwrite, cancel, or otherwise mutate a real subscription. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics, founding quota, and historical pilot counts.
+* **Operator Internal Test Entitlement**: An operator-owned internal test child may receive an explicit internal-test entitlement without a paid subscription. This entitlement bypasses billing, founding allocation, public waitlist demand, public capacity accounting, and the pilot cutover counter. Enabling or disabling it must not overwrite, cancel, or otherwise mutate a real subscription. The child must use the exact production generation, validation, retry, Finisher, rendering, storage, release, and feedback lifecycle without quality shortcuts, and must be excluded from paid subscriber metrics, founding quota, and active pilot counts.
 
 The generator must never infer entitlement merely from the existence of a child profile row.
 
@@ -4201,13 +4203,13 @@ When operational capacity is below 100:
  
 > new service capacity acquisition can proceed, and new real children are admitted into the Free Pilot (while active).
 
-While the Free Pilot is active (under 100 historical real-child admissions):
+While the Free Pilot is active (rolling 14-day active service children has not reached 100 and `free_pilot_ended_at is null`):
 * admitted children receive personalized weekly materials for free, week after week (Week 1, Week 2, Week 3, etc.), without needing a Paddle subscription;
 * parents may voluntarily subscribe early via Paddle to lock the Founder NT$349/month price; early subscription begins charging immediately;
 * voluntary paid subscribers who cancel while the Free Pilot is still active do not lose free service during the active pilot.
 
-When the 100th real child is historically admitted:
-* the Free Pilot ends permanently and monotonically (deleting/archiving children never reopens the pilot);
+When rolling 14-day active service children reaches 100 for the first time:
+* the Free Pilot ends permanently and irreversibly (`free_pilot_ended_at` is set, deleting/archiving children or activity drop never reopens the pilot);
 * already legitimately created or in-progress generation jobs survive cutover and complete safely;
 * future weekly service requires an active paid Paddle subscription;
 * unpaid children pause their generation cadence until a paid subscription is activated.
@@ -4281,7 +4283,7 @@ A new parent can find a clear guide explaining:
 
 # 201. Post-100 Review & Pilot Conclusion
 
-Reaching 100 historical real-child admissions concludes the Free Pilot phase permanently and triggers an intentional product, commercial, and infrastructure review before considering any raise to operational service capacity.
+Reaching 100 rolling 14-day active service children concludes the Free Pilot phase permanently and triggers an intentional product, commercial, and infrastructure review before considering any raise to operational service capacity.
 
 Review areas:
 
@@ -4461,13 +4463,13 @@ each child has independent entitlement & learning history
 Free Pilot phase:
 
 ```text
-First 100 historically admitted real children
+Rolling 14-day active service children (up to 100)
 ↓
 Personalized materials free week after week while pilot active
 ↓
 Optional early subscription locks Founder 30 if seats remain (charges immediately)
 ↓
-100th real child admitted -> Free Pilot ends permanently & monotonically
+100 rolling active children reached -> Free Pilot ends permanently & irreversibly
 ↓
 Post-pilot future weekly service requires active paid subscription
 ```

@@ -119,15 +119,37 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
   return (
     <div className="operations-cockpit">
       <section className="capacity-strip" aria-label="服務容量與公測狀態">
-        <div><span>服務中孩子</span><strong>{data.capacity.activeCount} / {data.capacity.maxCapacity}</strong></div>
         <div>
-          <span>公測階段 (歷史 100 名)</span>
+          <div>
+            <span>服務中孩子</span>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              {data.capacity.freePilotActive ? '14 天活躍席次' : '總佔用席次'}
+            </small>
+          </div>
+          <strong>{data.capacity.activeCount} / {data.capacity.maxCapacity}</strong>
+        </div>
+        <div>
+          <div>
+            <span>Beta 轉商門檻 (14天活躍)</span>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              {data.capacity.freePilotActive
+                ? `累計錄取 ${data.capacity.freePilotAdmissions ?? 0} · 靜止 ${data.capacity.dormantCount ?? 0}`
+                : '已達標永久關閉'}
+            </small>
+          </div>
           <strong style={{ color: data.capacity.freePilotActive ? '#16a34a' : '#6b7280' }}>
-            {data.capacity.freePilotActive ? `進行中 (${data.capacity.freePilotAdmissions ?? 0}/${data.capacity.freePilotLimit ?? 100})` : '已截止'}
+            {data.capacity.freePilotActive
+              ? `${data.capacity.rollingActiveCount ?? data.capacity.activeCount} / ${data.capacity.freePilotLimit ?? 100}`
+              : '已轉商'}
           </strong>
         </div>
         <div>
-          <span>學員結構</span>
+          <div>
+            <span>學員結構</span>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              活躍中學員
+            </small>
+          </div>
           <strong>免費 {data.subscriptionBreakdown.freePilotActiveCount ?? 0} · 付費 {data.subscriptionBreakdown.paidActiveCount}</strong>
         </div>
         <div><span>等候名單</span><strong>{data.capacity.waitingCount || 0}</strong></div>
