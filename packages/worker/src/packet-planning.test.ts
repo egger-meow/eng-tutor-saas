@@ -33,3 +33,37 @@ it('measures UTF-8 inputs without recording private prompt content or claiming t
 it('uses profile preferences when other claim preference shapes are absent', () => {
   expect(buildPacketPlanningPrompt({ profile: { preferences: { interests: ['IU'] } } }, 'evidence')).toContain('IU')
 })
+
+it('includes assessment evidence and resolved evidence in prompt, honoring precedence', () => {
+  const context = {
+    child: { grade: 7 },
+    cutoffTimestamp: '2026-09-01T00:00:00.000Z',
+    assessmentEvidence: {
+      projectionVersion: 'child-assessment-state-v1',
+      assessedAt: '2026-08-15T00:00:00.000Z',
+      freshness: 'fresh',
+      ageDays: 17,
+      domains: {
+        reading: { domain: 'reading', level: 'needs_support', confidence: 'high' },
+        grammar: { domain: 'grammar', level: 'developing', confidence: 'medium' },
+        vocabulary: { domain: 'vocabulary', level: 'developing', confidence: 'high' },
+      },
+      skills: {
+        inference: {
+          level: 'needs_support',
+          confidence: 'high',
+        },
+      },
+    },
+  }
+
+  const prompt = buildPacketPlanningPrompt(context, 'Research evidence on marine biology')
+  expect(prompt).toContain('"assessmentEvidence"')
+  expect(prompt).toContain('"resolvedEvidence"')
+  expect(prompt).toContain('"prioritySkills"')
+  expect(prompt).toContain('"canonicalCapSkill":"local_inference"')
+  expect(prompt).toContain('"direction":"support"')
+  expect(prompt).toContain('"fresh"')
+  // Ensure the planning guidance mentions resolvedEvidence
+  expect(prompt).toContain('Calibrate difficulty and scaffolding using `resolvedEvidence`')
+})

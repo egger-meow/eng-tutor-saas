@@ -274,3 +274,25 @@ export {
   isPromptVersionGte,
 } from './engine-version.js'
 export type { EraTag } from './engine-version.js'
+
+// Deterministic Learner Evidence Resolver (assessment-evidence-v1)
+export {
+  ASSESSMENT_EVIDENCE_POLICY_VERSION,
+  ASSESSMENT_READING_TO_CAP_SKILL_MAP,
+  calculateAssessmentFreshness,
+  resolveLearnerEvidence,
+} from './evidence-resolver.js'
+export type {
+  AssessmentFreshness,
+  DiagnosticLevel,
+  DiagnosticConfidence,
+  SignalSource,
+  SkillDirection,
+  CompactDiagnosticSkill,
+  CompactDiagnosticDomain,
+  AssessmentEvidenceCapsule,
+  ResolvedDomainSignal,
+  ResolvedSkillSignal,
+  ResolvedEvidenceCapsule,
+  EvidenceResolverOptions,
+} from './evidence-resolver.js'

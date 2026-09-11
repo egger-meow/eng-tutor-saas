@@ -79,6 +79,37 @@ V1 sends only to the Supabase account/login email. A verified alternate delivery
 
 Operators may adjust normal capacity in Supabase, manually invoke the same worker procedure, or requeue a reviewed failure. Mandatory work still bypasses normal capacity. A rerun must reuse the idempotency key and detect already-uploaded artifacts. Repeated failures require human review rather than unbounded retries.
 
+12. End with a concise run report: waiting for feedback, mandatory/overdue, claimed, completed, failed, deferred, observation-write failures, and oldest outstanding deadline.
+
+## Release and Notification Dispatch
+
+Material release and email notification are separate state machines. The deterministic finisher may complete a package before `release_at`; no notification is eligible until the job is completed and `release_at <= now()`. At that moment the existing Dashboard release rules make it available even if email is unavailable.
+
+An independent lightweight GitHub Actions schedule runs `pnpm worker dispatch-material-emails --worker github-actions-material-email --limit 15` every ten minutes. It does not install Chromium or run the PDF finisher. The database discovers newly eligible material, snapshots the owning account/login email, and atomically leases retryable rows with `FOR UPDATE SKIP LOCKED`. Attempts are bounded at five. The dispatcher calls a provider-neutral transactional-email interface; Gmail SMTP is the current adapter. A stable application idempotency key becomes a stable RFC Message-ID, while the unique delivery row, leases, durable `send_started_at`, and terminal `sent_at` remain authoritative. Explicit SMTP failures clear send-start state and are retryable. Because SMTP cannot prove exactly-once delivery after an interrupted transaction, an expired lease with send-start recorded is moved to an observable uncertain/dead state instead of being automatically resent; after an accepted send, completion is retried in-process and never reclassified as sendable. Failures never mutate material release or Dashboard availability.
+
+Each delivery has one 90-day access token deterministically derived with the server-only `MATERIAL_LINK_SECRET`; only its hash is stored. Rotation globally revokes outstanding links, and individual rows support explicit revocation. Token validity does not depend on `sent_at`, so a recipient can use an accepted email even if the dispatcher crashes before its success acknowledgement is stored. The no-login resolver grants only the linked material and mints 30-minute URLs for its two exact private objects. The browser retains the raw token only in that tab's `sessionStorage` after removing it from the visible URL. It never grants Dashboard access or creates a Supabase Auth session.
+
+> **Email = notification + scoped convenience access. Dashboard = canonical authenticated material history.**
+
+V1 sends only to the Supabase account/login email. A verified alternate delivery email is future work.
+
+## Guardrails
+
+- Never commit generated PDFs, child data, secrets, or copied database rows.
+- Never answer exercises on behalf of the learner in the student packet.
+- Do not treat `trackingDelta` as proven mastery; it contains hypotheses to verify through future evidence.
+- Keep learner-performance feedback separate from packet-quality feedback. Repeated packet-quality signals become reviewed rubric candidates rather than silently mutating prompts in production.
+- Preserve prompt, rubric, curriculum, renderer, model, and input-fingerprint versions with every material.
+- Never mutate a completed material; create a corrected version with traceability.
+- Stop generation for inactive entitlements or missing required context.
+- Exceed normal capacity only for mandatory jobs; report the overflow explicitly.
+- Do not use feedback submitted after a job's cutoff for that delivery.
+- Do not fetch `eng-tutor` at runtime; use only production rules committed here.
+
+## Recovery
+
+Operators may adjust normal capacity in Supabase, manually invoke the same worker procedure, or requeue a reviewed failure. Mandatory work still bypasses normal capacity. A rerun must reuse the idempotency key and detect already-uploaded artifacts. Repeated failures require human review rather than unbounded retries.
+
 ### Historical Student Library backfill
 
 `worker_backfill_student_library(p_child_id, p_limit)` is service-only and processes completed materials in canonical delivery order. Use small batches (the default is 100) and rerun safely until `created = 0`. Historical completion/release time is preserved as `recorded_at`; execution time is stored separately as `backfilled_at`. Missing historical facts remain null or empty, and answer keys never create learner evidence. A conflicting existing snapshot aborts the transaction rather than overwriting history.
@@ -88,6 +119,39 @@ Repository implementation and CI must not invoke a production backfill. Operator
 ## Longitudinal generation memory
 
 `worker_generation_context()` preserves the existing server-owned fingerprint boundary and bounded compact history. It additionally returns lifetime counts and bounded target IDs for due, weak, uncertain, evidence-mastered, and regression targets, plus targeted older incorrect/partial evidence. Superseded feedback revisions are excluded. Full snapshots, canonical packets, prompts, and answer keys are never serialized into lifetime context.
+
+## Direct Assessment Evidence in Generation
+
+`worker_generation_context()` incorporates compact diagnostic evidence from `public.child_assessment_state` under strict claim snapshot boundaries:
+
+1. **Snapshot Boundary Enforcement**:
+   - `assessed_at <= v_cutoff`, where `v_cutoff` is resolved from the job's immutable claim snapshot (`private_generation.generation_claim_snapshots`) if claimed, or `now()` if unclaimed.
+   - Any assessment completed after the claim cutoff timestamp ($T_2 > T_1$) is excluded from $T_1$'s snapshot and prompt context. Retrying or replaying a claimed job at $T_3$ preserves the original $T_1$ cutoff and reproduces identical context and input fingerprints.
+   - A subsequent new job claim at $T_4$ after the assessment will incorporate the diagnostic evidence with freshly calculated age and freshness.
+
+2. **Assessment Freshness Lifecycle**:
+   - `fresh`: $\le 90$ days from cutoff. High/medium confidence signals actively calibrate initial difficulty and scaffolding when weekly evidence is absent.
+   - `aging`: $91$–$180$ days from cutoff. Diagnostic signals provide soft guidance; demonstrated weekly homework/feedback overrides them.
+   - `stale`: $> 180$ days from cutoff. Treated as historical baseline context only. Must not constrain vocabulary ceilings, grammar targets, or passage difficulty.
+
+3. **Evidence Precedence and Conflict Resolution**:
+   - **Rule A (Specific > Broad)**: Demonstrated weekly homework/feedback takes precedence over broad assessment domains.
+   - **Rule B (Demonstrated Weakness Wins)**: Weekly learning struggles are targeted regardless of assessment scores.
+   - **Rule C (Newer Success Wins)**: Recent weekly successes supersede older assessment weakness.
+   - **Rule D (Assessment Beats Self-Report)**: Fresh high/medium confidence assessment beats parent baseline self-report for untested curriculum areas.
+   - **Rule E (Low Confidence is Advisory)**: Low-confidence diagnostic signals prompt gentle confirmation, never aggressive remediation.
+   - **Rule F (Stale is Non-Restricting)**: Stale assessment (> 180d) never restricts learner growth or ceilings.
+
+4. **Skill Mapping & Bounding Discipline**:
+   - Diagnostic reading skills map deterministically to canonical CAP skills:
+     - `explicit_information` $\to$ `explicit_detail`
+     - `main_idea` $\to$ `main_idea`
+     - `vocabulary_in_context` $\to$ `vocabulary_in_context`
+     - `inference` $\to$ `local_inference`
+     - `information_integration` $\to$ `information_integration`
+   - Bounded to maximum 8 priority skills (ordered: `needs_support` > `developing` > `secure`, high confidence first).
+   - Only compact signals (`level`, `confidence`, `direction`) are transmitted. Zero raw item responses, item IDs, or grading secrets are ever exposed to generation prompts or learner-facing text.
+
 
 ## Schedule Activation Checklist
 

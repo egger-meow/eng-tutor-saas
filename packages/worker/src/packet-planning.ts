@@ -4,6 +4,7 @@ import {
   type RawAssessmentPlan,
   type FormatPlanningCapsule,
   buildFormatPlanningCapsule,
+  resolveLearnerEvidence,
 } from '@paper-english/generator'
 
 export interface PacketPlanItem {
@@ -61,6 +62,8 @@ export function buildPacketPlanningPrompt(
     diversityCapsule = { ...diversityCapsule, formatPlanningCapsule: formatCapsule }
   }
 
+  const resolvedEvidence = resolveLearnerEvidence(context)
+
   const planningContext = {
     profile: {
       grade: profile.grade ?? child.grade,
@@ -85,6 +88,8 @@ export function buildPacketPlanningPrompt(
     communicationCapsule: context.communicationCapsule,
     vocabularyCapsule: context.vocabularyCapsule,
     grammarCapsule: context.grammarCapsule,
+    assessmentEvidence: context.assessmentEvidence ?? null,
+    resolvedEvidence,
     sourceMaterial: context.sourceMaterial,
     schoolProgress: context.schoolProgress,
     learningMemory: context.learningMemory,
@@ -122,7 +127,8 @@ export function buildPacketPlanningPrompt(
     '1. Selected Angle: Choose a specific, age-appropriate angle connecting the learner\'s interests with curriculum goals.',
     '2. Evidence Rationale: Explain why the factual evidence supports this angle and serves the learning target.',
     '3. Select meaningful vocabulary and grammar from demonstrated needs and passage burden within weekly_minutes; no fixed vocabulary quota. Explicit feedback takes precedence. Exposure alone is not weakness.',
-    '4. Plan all intended assessment items across reading, practice and homework with distinct IDs. Preserve cognitive depth when simplifying language.',
+    '4. Calibrate difficulty and scaffolding using `resolvedEvidence`: specific weekly learning evidence takes highest precedence; fresh high-confidence assessment evidence (<= 90 days) guides initial difficulty and scaffolding when weekly evidence is absent; aging assessment (91-180 days) is soft guidance; stale assessment (> 180 days) must not constrain ceilings or difficulty. Never let low-confidence diagnostic signals restrict learner growth. Provide "supported" scaffolding for skills marked needs_support, and "on-level" or "stretch" for secure skills.',
+    '5. Plan all intended assessment items across reading, practice and homework with distinct IDs. Preserve cognitive depth when simplifying language.',
     'Choose exact artists, groups, works or characters and an evidence-supported origin, turning point, creative process, choice or mechanism when relevant. Do not flatten specific interests into generic useful knowledge.',
     'Formats are recommendations, not quotas. Timeline/process/cause chain -> sequence; comparison/classification/before-after -> table; evidence-inference -> organizer. Reuse when pedagogically useful. Preserve answer-cell IDs, Student/Parent answer coverage and truthful workload.',
     '   For each item, specify:',
