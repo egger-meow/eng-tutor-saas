@@ -7,6 +7,7 @@ import {
   SKILL_LABELS,
   DOMAIN_LABELS,
   AssessmentItemSchema,
+  AssessmentClientItemSchema,
   AssessmentPassageSchema,
   AssessmentResponseSchema,
   AssessmentSessionResultSchema,
@@ -170,6 +171,67 @@ describe('Direct Assessment Contracts', () => {
       }
       const parsed = AssessmentItemSchema.safeParse(item)
       expect(parsed.success).toBe(false)
+    })
+
+    it('rejects domain and skill mismatch (e.g. vocabulary domain with inference skill)', () => {
+      const item = {
+        id: 'mismatch_01',
+        domain: 'vocabulary',
+        skill: 'inference',
+        difficulty: 2,
+        gradeBand: 'grade_7',
+        responseType: 'single_choice',
+        prompt: 'Prompt',
+        choices: [
+          { id: 'A', text: '1' },
+          { id: 'B', text: '2' },
+        ],
+        correctChoice: 'A',
+      }
+      const parsed = AssessmentItemSchema.safeParse(item)
+      expect(parsed.success).toBe(false)
+      if (!parsed.success) {
+        expect(parsed.error.issues[0]?.message).toContain('domain does not match skill')
+      }
+    })
+
+    it('accepts valid domain and skill combinations across all 13 skills', () => {
+      for (const skill of ASSESSMENT_SKILLS) {
+        const domain = SKILL_TO_DOMAIN_MAP[skill]
+        const item = {
+          id: `valid_${skill}`,
+          domain,
+          skill,
+          difficulty: 1,
+          gradeBand: 'grade_7',
+          responseType: 'single_choice',
+          prompt: 'Prompt text',
+          choices: [
+            { id: 'A', text: 'Option A' },
+            { id: 'B', text: 'Option B' },
+          ],
+          correctChoice: 'A',
+        }
+        const parsed = AssessmentItemSchema.safeParse(item)
+        expect(parsed.success).toBe(true)
+      }
+    })
+  })
+
+  describe('AssessmentClientItemSchema', () => {
+    it('validates rendering projection without grading secrets', () => {
+      const clientItem = {
+        id: 'v_01',
+        responseType: 'single_choice',
+        passageId: null,
+        prompt: 'What does "ancient" mean?',
+        choices: [
+          { id: 'A', text: 'very old' },
+          { id: 'B', text: 'very new' },
+        ],
+      }
+      const parsed = AssessmentClientItemSchema.safeParse(clientItem)
+      expect(parsed.success).toBe(true)
     })
   })
 

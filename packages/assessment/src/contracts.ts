@@ -185,8 +185,23 @@ export const AssessmentItemSchema = z.object({
     message:
       'single_choice requires valid choices and matching correctChoice; short_answer requires acceptedAnswers',
   }
+).refine(
+  (item) => SKILL_TO_DOMAIN_MAP[item.skill] === item.domain,
+  {
+    message: 'domain does not match skill',
+  }
 )
 export type AssessmentItem = z.infer<typeof AssessmentItemSchema>
+
+// Client rendering projection: strictly excludes correctChoice, acceptedAnswers, difficulty, tags, and internals
+export const AssessmentClientItemSchema = z.object({
+  id: z.string().min(1).max(80),
+  responseType: z.enum(ASSESSMENT_RESPONSE_TYPES),
+  passageId: z.string().nullable().optional(),
+  prompt: z.string().min(1).max(2000),
+  choices: z.array(AssessmentChoiceSchema).nullable().optional(),
+})
+export type AssessmentClientItem = z.infer<typeof AssessmentClientItemSchema>
 
 export const AssessmentResponseSchema = z.object({
   id: z.string().uuid().optional(),

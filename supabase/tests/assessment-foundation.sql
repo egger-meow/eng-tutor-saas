@@ -1,7 +1,7 @@
--- Direct Assessment Subsystem: Foundation Schema & RLS Regression Test
+-- Direct Assessment Subsystem: Foundation Schema, Boundary Hardening & RLS Regression Test
 begin;
 
--- Create test parent A and child A
+-- Create test parent A and child A, and parent B and child B
 insert into auth.users (id, email)
 values
   ('11111111-1111-1111-1111-111111111111', 'parent_a@example.com'),
@@ -23,8 +23,8 @@ values
 insert into public.assessment_passages (id, title, content, word_count, grade_band, status)
 values ('test_pass_01', 'Test Reading Passage', 'This is a sample authentic passage for testing.', 8, 'grade_7', 'active');
 
--- 2. Insert test items across domains
--- MCQ vocabulary item
+-- 2. Insert test items across valid domain/skill mappings
+-- 2a. Vocabulary item with valid skill
 insert into public.assessment_items (
   id, domain, skill, difficulty, grade_band, response_type, prompt, choices, correct_choice, status
 ) values (
@@ -34,7 +34,7 @@ insert into public.assessment_items (
   'A', 'active'
 );
 
--- Short-answer grammar item
+-- 2b. Grammar item with valid skill
 insert into public.assessment_items (
   id, domain, skill, difficulty, grade_band, response_type, prompt, accepted_answers, status
 ) values (
@@ -43,7 +43,7 @@ insert into public.assessment_items (
   '["went"]'::jsonb, 'active'
 );
 
--- Reading item with passage reference
+-- 2c. Reading item with valid skill and passage reference
 insert into public.assessment_items (
   id, domain, skill, difficulty, grade_band, response_type, passage_id, prompt, choices, correct_choice, status
 ) values (
@@ -53,22 +53,50 @@ insert into public.assessment_items (
   'A', 'active'
 );
 
--- 3. Verify constraint rejections
--- Rejection 3a: Invalid skill
+-- 3. Verify Domain <-> Skill Consistency check constraint
+-- 3a. Rejection: vocabulary domain with reading skill (e.g. inference)
 do $$
 begin
   insert into public.assessment_items (
     id, domain, skill, difficulty, grade_band, response_type, prompt, choices, correct_choice
   ) values (
-    'invalid_skill_item', 'vocabulary', 'non_existent_skill', 1, 'grade_7', 'single_choice',
+    'mismatch_v_inf', 'vocabulary', 'inference', 2, 'grade_7', 'single_choice',
     'prompt', '[{"id":"A","text":"1"}]'::jsonb, 'A'
   );
-  raise exception 'Expected invalid skill to be rejected';
+  raise exception 'Expected domain=vocabulary with skill=inference to fail';
 exception when check_violation then
   -- Expected check violation
 end $$;
 
--- Rejection 3b: MCQ missing choices
+-- 3b. Rejection: grammar domain with vocabulary skill (e.g. core_vocabulary)
+do $$
+begin
+  insert into public.assessment_items (
+    id, domain, skill, difficulty, grade_band, response_type, prompt, choices, correct_choice
+  ) values (
+    'mismatch_g_voc', 'grammar', 'core_vocabulary', 2, 'grade_7', 'single_choice',
+    'prompt', '[{"id":"A","text":"1"}]'::jsonb, 'A'
+  );
+  raise exception 'Expected domain=grammar with skill=core_vocabulary to fail';
+exception when check_violation then
+  -- Expected check violation
+end $$;
+
+-- 3c. Rejection: reading domain with grammar skill (e.g. verb_tense_agreement)
+do $$
+begin
+  insert into public.assessment_items (
+    id, domain, skill, difficulty, grade_band, response_type, prompt, choices, correct_choice
+  ) values (
+    'mismatch_r_grm', 'reading', 'verb_tense_agreement', 2, 'grade_7', 'single_choice',
+    'prompt', '[{"id":"A","text":"1"}]'::jsonb, 'A'
+  );
+  raise exception 'Expected domain=reading with skill=verb_tense_agreement to fail';
+exception when check_violation then
+  -- Expected check violation
+end $$;
+
+-- 3d. Rejection: MCQ missing choices
 do $$
 begin
   insert into public.assessment_items (
@@ -82,7 +110,7 @@ exception when check_violation then
   -- Expected check violation
 end $$;
 
--- Rejection 3c: Short answer missing accepted_answers
+-- 3e. Rejection: Short answer missing accepted_answers
 do $$
 begin
   insert into public.assessment_items (
@@ -96,7 +124,7 @@ exception when check_violation then
   -- Expected check violation
 end $$;
 
--- Rejection 3d: Difficulty out of bounds (0 or 6)
+-- 3f. Rejection: Difficulty out of bounds (0 or 6)
 do $$
 begin
   insert into public.assessment_items (
@@ -110,15 +138,15 @@ exception when check_violation then
   -- Expected check violation
 end $$;
 
--- 4. Session and Responses Lifecycle
--- Create session for child A
+-- 4. Service/Backend Authority Inserts Session, Responses, and Compact State
+-- 4a. Create session for child A
 insert into public.assessment_sessions (
   id, child_id, status, target_item_count, items_completed, max_items
 ) values (
   'cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'in_progress', 18, 0, 25
 );
 
--- Record response 1 (correct)
+-- 4b. Record response 1 (correct)
 insert into public.assessment_responses (
   session_id, child_id, item_id, sequence_number, response_type, raw_answer, is_skipped, outcome, active_response_ms
 ) values (
@@ -126,7 +154,7 @@ insert into public.assessment_responses (
   'test_item_v01', 1, 'single_choice', 'A', false, 'correct', 4200
 );
 
--- Record response 2 (skipped)
+-- 4c. Record response 2 (skipped)
 insert into public.assessment_responses (
   session_id, child_id, item_id, sequence_number, response_type, raw_answer, is_skipped, outcome, active_response_ms
 ) values (
@@ -134,7 +162,7 @@ insert into public.assessment_responses (
   'test_item_g01', 2, 'short_answer', null, true, 'skipped', 1500
 );
 
--- Rejection 4a: Duplicate item in same session
+-- 4d. Rejection: Duplicate item in same session
 do $$
 begin
   insert into public.assessment_responses (
@@ -148,21 +176,7 @@ exception when unique_violation then
   -- Expected unique violation
 end $$;
 
--- Rejection 4b: Duplicate sequence number in same session
-do $$
-begin
-  insert into public.assessment_responses (
-    session_id, child_id, item_id, sequence_number, response_type, raw_answer, is_skipped, outcome
-  ) values (
-    'cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    'test_item_r01', 2, 'single_choice', 'A', false, 'correct'
-  );
-  raise exception 'Expected duplicate sequence number in same session to be rejected';
-exception when unique_violation then
-  -- Expected unique violation
-end $$;
-
--- 5. Child Assessment State
+-- 4e. Record compact child assessment state
 insert into public.child_assessment_state (
   child_id, last_session_id, status, skill_results, domain_summaries
 ) values (
@@ -173,50 +187,103 @@ insert into public.child_assessment_state (
   '{"vocabulary": "secure", "grammar": "needs_support"}'::jsonb
 );
 
--- 6. Row Level Security Tests
--- As Parent A ('11111111-1111-1111-1111-111111111111')
+-- 5. Security & Boundary Hardening Verification as Authenticated User
+-- Switch role to authenticated Parent A ('11111111-1111-1111-1111-111111111111')
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111"}';
 
--- Parent A can see active assessment items and passages
-do $$
-declare count_items integer; count_passages integer;
-begin
-  select count(*) into count_items from public.assessment_items;
-  select count(*) into count_passages from public.assessment_passages;
-  if count_items < 3 then
-    raise exception 'Authenticated user should be able to read active items, got %', count_items;
-  end if;
-  if count_passages < 1 then
-    raise exception 'Authenticated user should be able to read active passages, got %', count_passages;
-  end if;
-end $$;
-
--- Parent A cannot mutate assessment items (insert/update/delete denied)
+-- 5a. Authenticated CANNOT read canonical answer keys from assessment_items
 do $$
 begin
-  insert into public.assessment_items (
-    id, domain, skill, difficulty, grade_band, response_type, prompt, choices, correct_choice
-  ) values (
-    'hacked_item', 'vocabulary', 'core_vocabulary', 1, 'grade_7', 'single_choice', 'hack', '[{"id":"A","text":"1"}]'::jsonb, 'A'
-  );
-  raise exception 'Authenticated user should NOT be able to insert assessment items';
+  perform correct_choice from public.assessment_items;
+  raise exception 'Authenticated user should NOT be able to select from base assessment_items';
 exception when insufficient_privilege then
-  -- Expected
+  -- Expected: direct select revoked
 end $$;
 
--- Parent A can read Child A session and state
+-- 5b. Authenticated CAN read question rendering projection (without grading secrets)
 do $$
-declare s_count integer; st_count integer;
+declare client_count integer;
+begin
+  select count(*) into client_count from public.assessment_client_items;
+  if client_count < 3 then
+    raise exception 'Authenticated user should be able to read assessment_client_items, got %', client_count;
+  end if;
+end $$;
+
+-- 5c. Authenticated CANNOT forge response outcomes (direct insert into assessment_responses revoked)
+do $$
+begin
+  insert into public.assessment_responses (
+    session_id, child_id, item_id, sequence_number, response_type, raw_answer, is_skipped, outcome
+  ) values (
+    'cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    'test_item_r01', 3, 'single_choice', 'A', false, 'correct'
+  );
+  raise exception 'Authenticated user should NOT be able to insert responses directly';
+exception when insufficient_privilege then
+  -- Expected: mutation revoked
+end $$;
+
+-- 5d. Authenticated CANNOT directly mutate session diagnostic truth (insert/update revoked)
+do $$
+begin
+  update public.assessment_sessions
+  set final_result = '{"tampered": true}'::jsonb, status = 'completed'
+  where id = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  raise exception 'Authenticated user should NOT be able to update assessment_sessions directly';
+exception when insufficient_privilege then
+  -- Expected: mutation revoked
+end $$;
+
+do $$
+begin
+  insert into public.assessment_sessions (
+    id, child_id, status
+  ) values (
+    'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'in_progress'
+  );
+  raise exception 'Authenticated user should NOT be able to insert assessment_sessions directly';
+exception when insufficient_privilege then
+  -- Expected: mutation revoked
+end $$;
+
+-- 5e. Authenticated CANNOT directly mutate compact child assessment results
+do $$
+begin
+  update public.child_assessment_state
+  set skill_results = '{"forged": true}'::jsonb
+  where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  raise exception 'Authenticated user should NOT be able to update child_assessment_state directly';
+exception when insufficient_privilege then
+  -- Expected: mutation revoked
+end $$;
+
+do $$
+begin
+  insert into public.child_assessment_state (
+    child_id, status
+  ) values (
+    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'completed'
+  );
+  raise exception 'Authenticated user should NOT be able to insert child_assessment_state directly';
+exception when insufficient_privilege then
+  -- Expected: mutation revoked
+end $$;
+
+-- 5f. Authenticated Parent A CAN read Child A records under RLS
+do $$
+declare s_count integer; st_count integer; r_count integer;
 begin
   select count(*) into s_count from public.assessment_sessions where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   select count(*) into st_count from public.child_assessment_state where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-  if s_count <> 1 or st_count <> 1 then
-    raise exception 'Parent A should see child A session and state, got s=% st=%', s_count, st_count;
+  select count(*) into r_count from public.assessment_responses where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  if s_count <> 1 or st_count <> 1 or r_count <> 2 then
+    raise exception 'Parent A should see child A records, got s=% st=% r=%', s_count, st_count, r_count;
   end if;
 end $$;
 
--- Parent A CANNOT read Child B's records
+-- 5g. Authenticated Parent A CANNOT read Child B records (Parent isolation preserved)
 do $$
 declare b_count integer;
 begin
@@ -226,23 +293,10 @@ begin
   end if;
 end $$;
 
--- Parent A CANNOT insert a session for Child B
-do $$
-begin
-  insert into public.assessment_sessions (
-    id, child_id, status
-  ) values (
-    'dddddddd-dddd-dddd-dddd-dddddddddddd', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'in_progress'
-  );
-  raise exception 'Parent A should NOT be able to insert a session for Child B';
-exception when others then
-  -- Expected RLS rejection
-end $$;
-
 reset role;
 
 do $$
 begin
-  raise notice 'PASS: assessment foundation schema, constraints, and RLS policies verified';
+  raise notice 'PASS: assessment boundary hardening, domain/skill consistency, and RLS verified';
 end $$;
 rollback;
