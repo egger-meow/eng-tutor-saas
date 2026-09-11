@@ -251,14 +251,31 @@ export const AssessmentSessionResultSchema = z.object({
 })
 export type AssessmentSessionResult = z.infer<typeof AssessmentSessionResultSchema>
 
+export const ASSESSMENT_PROJECTION_VERSION = 'assessment-projection-v1' as const
+export type AssessmentProjectionVersion = typeof ASSESSMENT_PROJECTION_VERSION
+
+export const CompactAssessmentSkillStateSchema = z.object({
+  level: z.enum(SKILL_RESULTS),
+  confidence: z.enum(CONFIDENCE_LEVELS),
+})
+export type CompactAssessmentSkillState = z.infer<typeof CompactAssessmentSkillStateSchema>
+
+export const CompactAssessmentDomainStateSchema = z.object({
+  level: z.enum(SKILL_RESULTS),
+  confidence: z.enum(CONFIDENCE_LEVELS),
+})
+export type CompactAssessmentDomainState = z.infer<typeof CompactAssessmentDomainStateSchema>
+
 export const ChildAssessmentStateSchema = z.object({
   childId: z.string().uuid(),
-  lastSessionId: z.string().uuid().nullable(),
-  status: z.enum(['pending', 'in_progress', 'completed']),
-  skillResults: z.record(z.string(), z.any()),
-  domainSummaries: z.record(z.string(), z.any()),
+  lastSessionId: z.string().uuid(),
+  status: z.literal('completed'),
+  skillResults: z.record(z.enum(ASSESSMENT_SKILLS), CompactAssessmentSkillStateSchema),
+  domainSummaries: z.record(z.enum(ASSESSMENT_DOMAINS), CompactAssessmentDomainStateSchema),
   assessedAt: z.string(),
+  projectionVersion: z.literal(ASSESSMENT_PROJECTION_VERSION),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 })
 export type ChildAssessmentState = z.infer<typeof ChildAssessmentStateSchema>
+
