@@ -318,4 +318,153 @@ describe('evidence-resolver', () => {
       }
     })
   })
+
+  describe('Evidence chronology & temporal conflict resolution (A-E)', () => {
+    const cutoffTimestamp = '2026-09-20T00:00:00.000Z'
+    const assessmentDate = '2026-09-01T00:00:00.000Z'
+
+    it('A. Old success must not beat newer assessment (pre-assessment successes do not erase later diagnostic weakness)', () => {
+      const context = {
+        cutoffTimestamp,
+        profile: { reading_level: 'intermediate' },
+        // Two successes observed BEFORE the assessment
+        targetedOlderEvidence: [
+          { targetSkill: 'local_inference', result: 'correct', observedAt: '2026-08-01T10:00:00.000Z' },
+          { targetSkill: 'inference', result: 'correct', observedAt: '2026-08-08T10:00:00.000Z' },
+        ],
+        assessmentEvidence: {
+          projectionVersion: 'assessment-projection-v1',
+          assessedAt: assessmentDate,
+          domains: {
+            reading: { level: 'needs_support', confidence: 'high' },
+          },
+          skills: {
+            inference: { level: 'needs_support', confidence: 'high' },
+          },
+        } as AssessmentEvidenceCapsule,
+      }
+
+      const resolved = resolveLearnerEvidence(context)
+      // Assessment weakness remains active!
+      expect(resolved.signals.reading.level).toBe('needs_support')
+      expect(resolved.signals.reading.source).toBe('assessment')
+      expect(resolved.prioritySkills.some(s => s.skill === 'inference' && s.direction === 'support')).toBe(true)
+    })
+
+    it('B. New success can beat older assessment (post-assessment successes supersede older assessment weakness)', () => {
+      const context = {
+        cutoffTimestamp,
+        profile: { reading_level: 'intermediate' },
+        // Two successes observed AFTER the assessment and before cutoff
+        targetedOlderEvidence: [
+          { targetSkill: 'local_inference', result: 'correct', observedAt: '2026-09-08T10:00:00.000Z' },
+          { targetSkill: 'inference', result: 'correct', observedAt: '2026-09-15T10:00:00.000Z' },
+        ],
+        assessmentEvidence: {
+          projectionVersion: 'assessment-projection-v1',
+          assessedAt: assessmentDate,
+          domains: {
+            reading: { level: 'needs_support', confidence: 'high' },
+          },
+          skills: {
+            inference: { level: 'needs_support', confidence: 'high' },
+          },
+        } as AssessmentEvidenceCapsule,
+      }
+
+      const resolved = resolveLearnerEvidence(context)
+      // Rule C applies: Newer weekly success supersedes older assessment weakness
+      expect(resolved.signals.reading.level).toBe('developing')
+      expect(resolved.signals.reading.source).toBe('demonstrated')
+      expect(resolved.prioritySkills.some(s => s.skill === 'inference' && s.direction === 'support')).toBe(false)
+      expect(resolved.guidanceSummary.some(g => g.includes('superseded older assessment'))).toBe(true)
+    })
+
+    it('C. Mixed chronology: one success before assessment, one after must NOT count as two newer successes', () => {
+      const context = {
+        cutoffTimestamp,
+        profile: { reading_level: 'intermediate' },
+        // 1 before assessment, 1 after assessment
+        targetedOlderEvidence: [
+          { targetSkill: 'local_inference', result: 'correct', observedAt: '2026-08-10T10:00:00.000Z' },
+          { targetSkill: 'inference', result: 'correct', observedAt: '2026-09-08T10:00:00.000Z' },
+        ],
+        assessmentEvidence: {
+          projectionVersion: 'assessment-projection-v1',
+          assessedAt: assessmentDate,
+          domains: {
+            reading: { level: 'needs_support', confidence: 'high' },
+          },
+          skills: {
+            inference: { level: 'needs_support', confidence: 'high' },
+          },
+        } as AssessmentEvidenceCapsule,
+      }
+
+      const resolved = resolveLearnerEvidence(context)
+      // Only 1 newer success -> does not meet 2-success threshold -> assessment weakness remains active
+      expect(resolved.signals.reading.level).toBe('needs_support')
+      expect(resolved.signals.reading.source).toBe('assessment')
+      expect(resolved.prioritySkills.some(s => s.skill === 'inference' && s.direction === 'support')).toBe(true)
+    })
+
+    it('D. Newer failure beats secure assessment (post-assessment struggle overrides secure assessment)', () => {
+      const context = {
+        cutoffTimestamp,
+        profile: { reading_level: 'intermediate' },
+        // Post-assessment failure on inference
+        targetedOlderEvidence: [
+          { targetSkill: 'local_inference', result: 'incorrect', observedAt: '2026-09-08T10:00:00.000Z' },
+        ],
+        assessmentEvidence: {
+          projectionVersion: 'assessment-projection-v1',
+          assessedAt: assessmentDate,
+          domains: {
+            reading: { level: 'secure', confidence: 'high' },
+          },
+          skills: {
+            inference: { level: 'secure', confidence: 'high' },
+          },
+        } as AssessmentEvidenceCapsule,
+      }
+
+      const resolved = resolveLearnerEvidence(context)
+      // Demonstrated weakness wins over secure assessment
+      expect(resolved.signals.reading.level).toBe('needs_support')
+      expect(resolved.signals.reading.source).toBe('demonstrated')
+      // Inference is marked as needing support, NOT stretch
+      const inferenceSkill = resolved.prioritySkills.find(s => s.skill === 'inference')
+      expect(inferenceSkill?.direction).toBe('support')
+      expect(inferenceSkill?.level).toBe('needs_support')
+      expect(inferenceSkill?.source).toBe('demonstrated')
+    })
+
+    it('E. Evidence after claim cutoff must never influence the claimed job even if newer than assessment', () => {
+      const context = {
+        cutoffTimestamp: '2026-09-10T00:00:00.000Z',
+        profile: { reading_level: 'intermediate' },
+        // Evidence observed on Sep 15 (AFTER cutoff of Sep 10)
+        targetedOlderEvidence: [
+          { targetSkill: 'local_inference', result: 'correct', observedAt: '2026-09-15T10:00:00.000Z' },
+          { targetSkill: 'inference', result: 'correct', observedAt: '2026-09-16T10:00:00.000Z' },
+        ],
+        assessmentEvidence: {
+          projectionVersion: 'assessment-projection-v1',
+          assessedAt: assessmentDate, // Sep 1
+          domains: {
+            reading: { level: 'needs_support', confidence: 'high' },
+          },
+          skills: {
+            inference: { level: 'needs_support', confidence: 'high' },
+          },
+        } as AssessmentEvidenceCapsule,
+      }
+
+      const resolved = resolveLearnerEvidence(context)
+      // Evidence after cutoff is strictly excluded by snapshot boundary; assessment weakness remains active
+      expect(resolved.signals.reading.level).toBe('needs_support')
+      expect(resolved.signals.reading.source).toBe('assessment')
+      expect(resolved.prioritySkills.some(s => s.skill === 'inference' && s.direction === 'support')).toBe(true)
+    })
+  })
 })

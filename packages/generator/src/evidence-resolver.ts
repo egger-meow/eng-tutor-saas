@@ -162,6 +162,11 @@ export function resolveLearnerEvidence(
     cutoffTimestamp,
   )
 
+  const assessedTime = (assessmentEvidence?.assessedAt && freshness !== 'none')
+    ? Date.parse(assessmentEvidence.assessedAt)
+    : NaN
+  const hasAssessment = !Number.isNaN(assessedTime)
+
   // 2. Parse Demonstrated Weekly Evidence
   const vocabWeakIds = new Set<string>(Array.isArray(lifetime.vocabulary?.verifiedWeakTargetIds) ? lifetime.vocabulary.verifiedWeakTargetIds : [])
   const vocabDueIds = new Set<string>(Array.isArray(lifetime.vocabulary?.dueTargetIds) ? lifetime.vocabulary.dueTargetIds : [])
@@ -179,18 +184,43 @@ export function resolveLearnerEvidence(
     return true
   })
 
-  // Group evidence by targetId/targetSkill to evaluate Rule C (newer success superseding older weakness)
-  const recentSkillSuccessCount: Record<string, number> = {}
-  const recentSkillFailureCount: Record<string, number> = {}
+  // Distinguish evidence observed after assessment vs general evidence
+  // For conflict-resolution against assessment:
+  // observedAt > assessmentEvidence.assessedAt AND observedAt <= cutoffTimestamp
+  const postAssessmentEvidence = validOlderEvidence.filter((e: any) => {
+    if (!hasAssessment) return false
+    if (typeof e.observedAt !== 'string') return false
+    const t = Date.parse(e.observedAt)
+    return !Number.isNaN(t) && t > assessedTime && t <= cutoffTime
+  })
+
+  // Post-assessment counts for conflict resolution against assessment
+  const postAssessmentSkillSuccessCount: Record<string, number> = {}
+  const postAssessmentSkillFailureCount: Record<string, number> = {}
+
+  for (const item of postAssessmentEvidence) {
+    const id = String(item.targetId ?? item.targetSkill ?? '')
+    if (!id) continue
+    const res = item.result
+    if (res === 'correct' || res === 'mastered') {
+      postAssessmentSkillSuccessCount[id] = (postAssessmentSkillSuccessCount[id] ?? 0) + 1
+    } else if (res === 'incorrect' || res === 'partial' || res === 'struggled') {
+      postAssessmentSkillFailureCount[id] = (postAssessmentSkillFailureCount[id] ?? 0) + 1
+    }
+  }
+
+  // General counts for when no assessment exists
+  const generalSkillSuccessCount: Record<string, number> = {}
+  const generalSkillFailureCount: Record<string, number> = {}
 
   for (const item of validOlderEvidence) {
     const id = String(item.targetId ?? item.targetSkill ?? '')
     if (!id) continue
     const res = item.result
     if (res === 'correct' || res === 'mastered') {
-      recentSkillSuccessCount[id] = (recentSkillSuccessCount[id] ?? 0) + 1
+      generalSkillSuccessCount[id] = (generalSkillSuccessCount[id] ?? 0) + 1
     } else if (res === 'incorrect' || res === 'partial' || res === 'struggled') {
-      recentSkillFailureCount[id] = (recentSkillFailureCount[id] ?? 0) + 1
+      generalSkillFailureCount[id] = (generalSkillFailureCount[id] ?? 0) + 1
     }
   }
 
@@ -275,23 +305,28 @@ export function resolveLearnerEvidence(
   }
 
   // Resolve Reading Domain
-  const readingSuccesses = Object.entries(recentSkillSuccessCount).filter(([k]) =>
+  // Active reading evidence counts: when assessment exists, use post-assessment demonstrated observations
+  // When no assessment exists, existing history behavior remains unchanged
+  const activeReadingSuccessCount = hasAssessment ? postAssessmentSkillSuccessCount : generalSkillSuccessCount
+  const activeReadingFailureCount = hasAssessment ? postAssessmentSkillFailureCount : generalSkillFailureCount
+
+  const readingSuccesses = Object.entries(activeReadingSuccessCount).filter(([k]) =>
     ['reading', 'inference', 'detail', 'explicit_detail', 'main_idea', 'local_inference', 'information_integration'].some(s => k.includes(s)),
   ).reduce((acc, [, v]) => acc + v, 0)
 
-  const readingFailures = Object.entries(recentSkillFailureCount).filter(([k]) =>
+  const readingFailures = Object.entries(activeReadingFailureCount).filter(([k]) =>
     ['reading', 'inference', 'detail', 'explicit_detail', 'main_idea', 'local_inference', 'information_integration'].some(s => k.includes(s)),
   ).reduce((acc, [, v]) => acc + v, 0)
 
   if (readingFailures > 0 && readingFailures >= readingSuccesses) {
-    // Demonstrated weekly reading struggles
+    // Demonstrated weekly reading struggles (newer demonstrated failure beats assessment)
     signals.reading = {
       level: 'needs_support',
       confidence: 'high',
       source: 'demonstrated',
     }
     guidanceSummary.push('Reading comprehension shows recent demonstrated struggles in weekly learning.')
-  } else if (readingSuccesses >= 2 && readingFailures === 0 && assessmentEvidence?.domains?.reading?.level === 'needs_support') {
+  } else if (hasAssessment && readingSuccesses >= 2 && readingFailures === 0 && assessmentEvidence?.domains?.reading?.level === 'needs_support') {
     // Rule C: Newer demonstrated weekly evidence supersedes older assessment weakness
     signals.reading = {
       level: 'developing',
@@ -335,11 +370,11 @@ export function resolveLearnerEvidence(
 
       // Check Rule C: has newer weekly evidence superseded this assessment weakness?
       const capKey = capSkill ?? skillKey
-      const recentSuccesses = (recentSkillSuccessCount[capKey] ?? 0) + (capKey !== skillKey ? (recentSkillSuccessCount[skillKey] ?? 0) : 0)
-      const recentFailures = (recentSkillFailureCount[capKey] ?? 0) + (capKey !== skillKey ? (recentSkillFailureCount[skillKey] ?? 0) : 0)
+      const postSuccesses = (postAssessmentSkillSuccessCount[capKey] ?? 0) + (capKey !== skillKey ? (postAssessmentSkillSuccessCount[skillKey] ?? 0) : 0)
+      const postFailures = (postAssessmentSkillFailureCount[capKey] ?? 0) + (capKey !== skillKey ? (postAssessmentSkillFailureCount[skillKey] ?? 0) : 0)
 
       if (skillEval.level === 'needs_support') {
-        if (recentSuccesses >= 2 && recentFailures === 0) {
+        if (postSuccesses >= 2 && postFailures === 0) {
           // Rule C applies: Newer weekly success supersedes older assessment weakness!
           continue
         }
@@ -382,18 +417,32 @@ export function resolveLearnerEvidence(
           })
         }
       } else if (skillEval.level === 'secure' && skillEval.confidence === 'high') {
-        prioritySkills.push({
-          skill: skillKey,
-          canonicalCapSkill: capSkill,
-          domain,
-          level: 'secure',
-          direction: 'stretch',
-          confidence: 'high',
-          source: 'assessment',
-          scaffoldGuidance: signals[domain].level === 'secure'
-            ? 'Demonstrated area of strength; permits stretch opportunities.'
-            : 'Demonstrated area of strength within developing domain; permits stretch opportunities.',
-        })
+        // If there are post-assessment demonstrated failures on this skill, demonstrated weakness wins
+        if (postFailures > 0) {
+          prioritySkills.push({
+            skill: skillKey,
+            canonicalCapSkill: capSkill,
+            domain,
+            level: 'needs_support',
+            direction: 'support',
+            confidence: 'high',
+            source: 'demonstrated',
+            scaffoldGuidance: 'Demonstrated recent struggle on this target supersedes prior assessment strength; provide targeted scaffolding.',
+          })
+        } else {
+          prioritySkills.push({
+            skill: skillKey,
+            canonicalCapSkill: capSkill,
+            domain,
+            level: 'secure',
+            direction: 'stretch',
+            confidence: 'high',
+            source: 'assessment',
+            scaffoldGuidance: signals[domain].level === 'secure'
+              ? 'Demonstrated area of strength; permits stretch opportunities.'
+              : 'Demonstrated area of strength within developing domain; permits stretch opportunities.',
+          })
+        }
       }
     }
   }

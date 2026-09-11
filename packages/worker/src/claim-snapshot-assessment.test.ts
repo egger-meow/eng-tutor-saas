@@ -26,15 +26,30 @@ describe('Direct Assessment Generation Context & Claim Snapshot Boundaries (Scen
     },
   }
 
+  interface MockAssessmentState {
+    projectionVersion: string
+    assessedAt: string
+    overallBand?: string
+    overallEstimatedDifficulty?: number
+    domains?: Record<string, any>
+    skills?: Record<string, any>
+  }
+
   // Helper simulating the worker_generation_context logic:
-  // Query child_assessment_state where assessed_at <= cutoffTimestamp
+  // When snapshot exists: reuse snapshot.assessmentEvidence and snapshot.cutoffTimestamp directly.
+  // When snapshot does NOT exist: query child_assessment_state where assessed_at <= cutoffTimestamp.
   function resolveWorkerContext(
     jobClaimTimestamp: string,
-    storedAssessment: typeof assessmentState | null,
+    storedAssessment: MockAssessmentState | null,
+    existingSnapshot?: { assessmentEvidence?: any; cutoffTimestamp?: string } | null,
   ) {
     let assessmentEvidence: any = null
+    let cutoffTimestamp = jobClaimTimestamp
 
-    if (storedAssessment) {
+    if (existingSnapshot !== undefined && existingSnapshot !== null) {
+      cutoffTimestamp = existingSnapshot.cutoffTimestamp ?? jobClaimTimestamp
+      assessmentEvidence = existingSnapshot.assessmentEvidence ?? null
+    } else if (storedAssessment) {
       const assessedMs = Date.parse(storedAssessment.assessedAt)
       const cutoffMs = Date.parse(jobClaimTimestamp)
 
@@ -55,7 +70,7 @@ describe('Direct Assessment Generation Context & Claim Snapshot Boundaries (Scen
     return {
       job: { id: 'job-123', childId: baseChild.id },
       child: baseChild,
-      cutoffTimestamp: jobClaimTimestamp,
+      cutoffTimestamp,
       claimSnapshotId: 'claim-snap-123',
       assessmentEvidence,
     }
@@ -145,5 +160,85 @@ describe('Direct Assessment Generation Context & Claim Snapshot Boundaries (Scen
     expect(resolved.signals.reading.source).toBe('parent')
     expect(resolved.prioritySkills).toHaveLength(0)
     expect(resolved.guidanceSummary.some(g => g.includes('stale'))).toBe(true)
+  })
+
+  it('Scenario 6: Claim snapshot freeze & overwrite regression (Assessment A -> Claim 1 -> Assessment B -> Replay 1 -> Claim 2 & Inverse)', () => {
+    // T0: Assessment A completed
+    const t0 = '2026-08-01T10:00:00.000Z'
+    const assessmentA = {
+      projectionVersion: 'child-assessment-state-v1' as const,
+      assessedAt: t0,
+      overallBand: 'developing',
+      overallEstimatedDifficulty: 1.8,
+      domains: {
+        reading: { domain: 'reading' as const, level: 'needs_support' as const, confidence: 'high' as const },
+        grammar: { domain: 'grammar' as const, level: 'developing' as const, confidence: 'medium' as const },
+        vocabulary: { domain: 'vocabulary' as const, level: 'developing' as const, confidence: 'high' as const },
+      },
+      skills: {
+        inference: { level: 'needs_support' as const, confidence: 'high' as const },
+      },
+    }
+
+    // T1: Job 1 claimed
+    const t1 = '2026-08-15T10:00:00.000Z'
+    const contextJob1 = resolveWorkerContext(t1, assessmentA)
+    const snapshotJob1 = {
+      generation_context: contextJob1,
+      cutoffTimestamp: t1,
+      assessmentEvidence: contextJob1.assessmentEvidence,
+    }
+    const fingerprint1 = JSON.stringify(contextJob1)
+
+    // T2: Assessment B completed (> T1), child_assessment_state latest projection becomes B
+    const t2 = '2026-08-20T10:00:00.000Z'
+    const assessmentB = {
+      projectionVersion: 'child-assessment-state-v1' as const,
+      assessedAt: t2,
+      overallBand: 'secure',
+      overallEstimatedDifficulty: 2.8,
+      domains: {
+        reading: { domain: 'reading' as const, level: 'secure' as const, confidence: 'high' as const },
+        grammar: { domain: 'grammar' as const, level: 'secure' as const, confidence: 'high' as const },
+        vocabulary: { domain: 'vocabulary' as const, level: 'secure' as const, confidence: 'high' as const },
+      },
+      skills: {
+        inference: { level: 'secure' as const, confidence: 'high' as const },
+      },
+    }
+
+    // T3: Replay Job 1 (> T2)
+    // Worker context replayed with snapshot present
+    const replayJob1 = resolveWorkerContext(t1, assessmentB, snapshotJob1)
+    const replayFingerprint1 = JSON.stringify(replayJob1)
+
+    // Assertions for Job 1 replay:
+    // - Job 1 still receives Assessment A
+    expect(replayJob1.assessmentEvidence?.domains?.reading?.level).toBe('needs_support')
+    // - Job 1 does NOT receive Assessment B
+    expect(replayJob1.assessmentEvidence?.domains?.reading?.level).not.toBe('secure')
+    // - Capsule is byte/JSON equivalent to frozen snapshot capsule
+    expect(replayJob1.assessmentEvidence).toEqual(snapshotJob1.assessmentEvidence)
+    // - Input fingerprint remains authoritative and unchanged
+    expect(replayFingerprint1).toBe(fingerprint1)
+
+    // T4: Job 2 claimed (> T2) without prior snapshot
+    const t4 = '2026-08-25T10:00:00.000Z'
+    const contextJob2 = resolveWorkerContext(t4, assessmentB)
+    // Job 2 receives Assessment B
+    expect(contextJob2.assessmentEvidence?.domains?.reading?.level).toBe('secure')
+
+    // Inverse test: Job 3 claimed with no assessment, assessment completed later, Job 3 replay remains assessment-free
+    const contextJob3 = resolveWorkerContext(t1, null)
+    expect(contextJob3.assessmentEvidence).toBeNull()
+    const snapshotJob3 = {
+      generation_context: contextJob3,
+      cutoffTimestamp: t1,
+      assessmentEvidence: null,
+    }
+
+    // Assessment completed later (assessmentB), then Job 3 replayed
+    const replayJob3 = resolveWorkerContext(t1, assessmentB, snapshotJob3)
+    expect(replayJob3.assessmentEvidence).toBeNull()
   })
 })

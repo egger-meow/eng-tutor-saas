@@ -294,6 +294,198 @@ end;
 $$;
 
 -- ----------------------------------------------------------------------------
+-- Scenario 6: Assessment Overwrite & Snapshot Freeze Integrity
+-- 1. Assessment A completed at T0
+-- 2. Job 1 claimed at T1 -> snapshot freezes Assessment A
+-- 3. Assessment B completed at T2 > T1 -> child_assessment_state becomes B
+-- 4. worker_generation_context(Job 1) replayed at T3:
+--    - Job 1 still receives Assessment A
+--    - Job 1 does not receive Assessment B
+--    - Job 1 assessment capsule is byte/JSON equivalent to frozen snapshot capsule
+--    - snapshot input fingerprint remains authoritative and unchanged
+-- 5. Job 2 claimed at T4 > T2:
+--    - Job 2 receives Assessment B
+-- 6. Inverse test:
+--    - Job 3 claimed with no assessment
+--    - Assessment C completed later
+--    - Job 3 replay remains assessment-free
+-- ----------------------------------------------------------------------------
+do $$
+declare
+  v_child_id uuid := 'c4000000-0000-0000-0000-000000000004';
+  v_job_id_1 uuid := 'b6000000-0000-0000-0000-000000000006';
+  v_job_id_2 uuid := 'b7000000-0000-0000-0000-000000000007';
+  v_job_id_3 uuid := 'b8000000-0000-0000-0000-000000000008';
+  v_session_a uuid := 'e6000000-0000-0000-0000-000000000006';
+  v_session_b uuid := 'e7000000-0000-0000-0000-000000000007';
+  v_session_c uuid := 'e8000000-0000-0000-0000-000000000008';
+  v_t0 timestamptz := now() - interval '4 hours';
+  v_t1 timestamptz := now() - interval '3 hours';
+  v_t2 timestamptz := now() - interval '2 hours';
+  v_context_1 jsonb;
+  v_fingerprint_1 text;
+  v_replay_1 jsonb;
+  v_replay_fingerprint_1 text;
+  v_context_2 jsonb;
+  v_context_3 jsonb;
+  v_fingerprint_3 text;
+  v_replay_3 jsonb;
+begin
+  insert into public.children (id, parent_id, display_name, grade, grade_stage, is_active)
+  values (v_child_id, 'a1000000-0000-0000-0000-000000000001', 'Gen Child 4 (Overwrite Test)', 7, 'grade_7', true);
+
+  -- Step 1: Assessment A completed at T0 (4 hours ago)
+  insert into public.assessment_sessions (id, child_id, status, items_completed, target_item_count, completed_at, final_result)
+  values (v_session_a, v_child_id, 'completed', 18, 18, v_t0, '{}'::jsonb);
+
+  insert into public.child_assessment_state (
+    child_id, last_session_id, status, skill_results, domain_summaries,
+    assessed_at, projection_version, created_at, updated_at
+  ) values (
+    v_child_id, v_session_a, 'completed',
+    jsonb_build_object('inference', jsonb_build_object('level', 'needs_support', 'confidence', 'high')),
+    jsonb_build_object('reading', jsonb_build_object('level', 'needs_support', 'confidence', 'high'),
+                       'grammar', jsonb_build_object('level', 'developing', 'confidence', 'medium'),
+                       'vocabulary', jsonb_build_object('level', 'developing', 'confidence', 'medium')),
+    v_t0, 'assessment-projection-v1', v_t0, v_t0
+  );
+
+  -- Step 2: Job 1 claimed at T1 (3 hours ago) -> snapshot freezes Assessment A
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, lease_expires_at, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    v_job_id_1, v_child_id, '2026-09-15', '2.0.0',
+    'idemp-gen-scenario-6-job1', 'claimed',
+    v_t1, 'worker-scenario-test', now() + interval '30 minutes',
+    v_t1 + interval '48 hours', v_t1, v_t1 + interval '24 hours'
+  );
+
+  v_context_1 := public.worker_generation_context(v_job_id_1, 'worker-scenario-test');
+  -- Freeze cutoff timestamp to T1
+  v_context_1 := jsonb_set(v_context_1, '{cutoffTimestamp}', to_jsonb(v_t1));
+  v_fingerprint_1 := 'sha256:' || encode(extensions.digest(convert_to(v_context_1::text, 'UTF8'), 'sha256'), 'hex');
+
+  insert into private_generation.generation_claim_snapshots (
+    job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+  ) values (
+    v_job_id_1, 'worker-scenario-test', v_context_1, v_fingerprint_1, v_t1
+  );
+
+  -- Assert Job 1 snapshot received Assessment A
+  if (v_context_1->'assessmentEvidence'->'domains'->'reading'->>'level') <> 'needs_support' then
+    raise exception 'Scenario 6 setup failed: Job 1 did not receive Assessment A';
+  end if;
+
+  -- Step 3: Assessment B completed at T2 > T1 (2 hours ago)
+  -- child_assessment_state latest projection is overwritten with Assessment B
+  insert into public.assessment_sessions (id, child_id, status, items_completed, target_item_count, completed_at, final_result)
+  values (v_session_b, v_child_id, 'completed', 18, 18, v_t2, '{}'::jsonb);
+
+  update public.child_assessment_state
+  set last_session_id = v_session_b,
+      skill_results = jsonb_build_object('inference', jsonb_build_object('level', 'secure', 'confidence', 'high')),
+      domain_summaries = jsonb_build_object('reading', jsonb_build_object('level', 'secure', 'confidence', 'high'),
+                                            'grammar', jsonb_build_object('level', 'secure', 'confidence', 'high'),
+                                            'vocabulary', jsonb_build_object('level', 'secure', 'confidence', 'high')),
+      assessed_at = v_t2,
+      updated_at = v_t2
+  where child_id = v_child_id;
+
+  -- Step 4: worker_generation_context(Job 1) replayed at T3 (now)
+  v_replay_1 := public.worker_generation_context(v_job_id_1, 'worker-scenario-test');
+  v_replay_fingerprint_1 := 'sha256:' || encode(extensions.digest(convert_to(v_replay_1::text, 'UTF8'), 'sha256'), 'hex');
+
+  -- Assertions on Job 1 replay:
+  -- - Still receives Assessment A
+  -- - Does NOT receive Assessment B
+  if (v_replay_1->'assessmentEvidence'->'domains'->'reading'->>'level') <> 'needs_support' then
+    raise exception 'Scenario 6 failed: Job 1 replay must still receive Assessment A (needs_support), got: %',
+      v_replay_1->'assessmentEvidence'->'domains'->'reading';
+  end if;
+  if (v_replay_1->'assessmentEvidence'->'domains'->'reading'->>'level') = 'secure' then
+    raise exception 'Scenario 6 failed: Job 1 replay leaked Assessment B!';
+  end if;
+
+  -- - Capsule is JSON equivalent to the frozen snapshot capsule
+  if (v_replay_1->'assessmentEvidence') <> (v_context_1->'assessmentEvidence') then
+    raise exception 'Scenario 6 failed: Job 1 assessment capsule altered on replay: expected %, got %',
+      v_context_1->'assessmentEvidence', v_replay_1->'assessmentEvidence';
+  end if;
+
+  -- - Snapshot input fingerprint remains authoritative and unchanged
+  if v_replay_fingerprint_1 <> v_fingerprint_1 then
+    raise exception 'Scenario 6 failed: input fingerprint changed on replay: expected %, got %',
+      v_fingerprint_1, v_replay_fingerprint_1;
+  end if;
+
+  -- Step 5: Job 2 claimed at T4 (now, after Assessment B)
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, lease_expires_at, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    v_job_id_2, v_child_id, '2026-09-22', '2.0.0',
+    'idemp-gen-scenario-6-job2', 'claimed',
+    now(), 'worker-scenario-test', now() + interval '30 minutes',
+    now() + interval '48 hours', now(), now() + interval '24 hours'
+  );
+
+  v_context_2 := public.worker_generation_context(v_job_id_2, 'worker-scenario-test');
+
+  -- Assert Job 2 receives Assessment B (reading secure)
+  if (v_context_2->'assessmentEvidence'->'domains'->'reading'->>'level') <> 'secure' then
+    raise exception 'Scenario 6 failed: Job 2 did not receive Assessment B: %', v_context_2->'assessmentEvidence';
+  end if;
+
+  -- Step 6: Inverse test: Job 3 claimed with no assessment, assessment completed later, Job 3 replay remains assessment-free
+  insert into public.children (id, parent_id, display_name, grade, grade_stage, is_active)
+  values ('c5000000-0000-0000-0000-000000000005', 'a1000000-0000-0000-0000-000000000001', 'Gen Child 5 (Inverse Test)', 7, 'grade_7', true);
+
+  insert into public.generation_jobs (
+    id, child_id, material_week, rule_version, idempotency_key, status,
+    scheduled_for, claimed_by, lease_expires_at, release_at, feedback_cutoff_at, generation_due_at
+  ) values (
+    v_job_id_3, 'c5000000-0000-0000-0000-000000000005', '2026-09-15', '2.0.0',
+    'idemp-gen-scenario-6-job3', 'claimed',
+    v_t1, 'worker-scenario-test', now() + interval '30 minutes',
+    v_t1 + interval '48 hours', v_t1, v_t1 + interval '24 hours'
+  );
+
+  v_context_3 := public.worker_generation_context(v_job_id_3, 'worker-scenario-test');
+  v_context_3 := jsonb_set(v_context_3, '{cutoffTimestamp}', to_jsonb(v_t1));
+  v_fingerprint_3 := 'sha256:' || encode(extensions.digest(convert_to(v_context_3::text, 'UTF8'), 'sha256'), 'hex');
+
+  insert into private_generation.generation_claim_snapshots (
+    job_id, generation_worker_id, generation_context, input_fingerprint, claimed_at
+  ) values (
+    v_job_id_3, 'worker-scenario-test', v_context_3, v_fingerprint_3, v_t1
+  );
+
+  -- Complete assessment C for child 5 later
+  insert into public.assessment_sessions (id, child_id, status, items_completed, target_item_count, completed_at, final_result)
+  values (v_session_c, 'c5000000-0000-0000-0000-000000000005', 'completed', 18, 18, now(), '{}'::jsonb);
+
+  insert into public.child_assessment_state (
+    child_id, last_session_id, status, skill_results, domain_summaries,
+    assessed_at, projection_version, created_at, updated_at
+  ) values (
+    'c5000000-0000-0000-0000-000000000005', v_session_c, 'completed',
+    jsonb_build_object('inference', jsonb_build_object('level', 'needs_support', 'confidence', 'high')),
+    jsonb_build_object('reading', jsonb_build_object('level', 'needs_support', 'confidence', 'high')),
+    now(), 'assessment-projection-v1', now(), now()
+  );
+
+  -- Replay Job 3
+  v_replay_3 := public.worker_generation_context(v_job_id_3, 'worker-scenario-test');
+
+  -- Assert Job 3 replay remains assessment-free
+  if v_replay_3 ? 'assessmentEvidence' then
+    raise exception 'Scenario 6 failed: Job 3 replay leaked post-claim assessment C!';
+  end if;
+end;
+$$;
+
+-- ----------------------------------------------------------------------------
 -- Security: Anonymous & Authenticated clients must NOT execute worker_generation_context
 -- ----------------------------------------------------------------------------
 do $$
