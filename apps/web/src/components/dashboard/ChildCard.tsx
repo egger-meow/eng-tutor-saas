@@ -12,6 +12,7 @@ import { DeliveryStatus } from './DeliveryStatus'
 import { MaterialHistory } from '../materials/MaterialHistory'
 import { OwnedWeek1FastProgress } from '../materials/OwnedWeek1FastProgress'
 import { LearningJourneyPanel } from './LearningJourneyPanel'
+import { AssessmentRecommendation } from './AssessmentRecommendation'
 import { useEnrollmentState } from '../../lib/enrollment'
 
 interface ChildCardProps {
@@ -135,6 +136,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
           </div>
 
           <LearningJourneyPanel childId={child.id} />
+          <AssessmentRecommendation childId={child.id} childName={child.display_name} />
 
           <div className="history-toggle-section">
             <button
@@ -209,6 +211,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
             {!child.waitlist || child.waitlist.status === 'converted' ? (
               <DeliveryStatus delivery={delivery} />
             ) : null}
+            <AssessmentRecommendation childId={child.id} childName={child.display_name} />
           </div>
           </motion.div>
         ))}

@@ -8,6 +8,7 @@ describe('root-hosted route paths', () => {
 
   it('matches child routes directly from the domain root', () => {
     expect(parseRoute('/children/child-1/edit')).toMatchObject({ name: 'child-edit', params: { id: 'child-1' } })
+    expect(parseRoute('/children/child-1/assessment')).toMatchObject({ name: 'child-assessment', params: { id: 'child-1' } })
   })
 
   it('keeps the public sample route addressable', () => {

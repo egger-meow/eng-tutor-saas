@@ -12,6 +12,7 @@ export type RouteName =
   | 'child-overview'
   | 'child-edit'
   | 'child-materials'
+  | 'child-assessment'
   | 'feedback'
   | 'parent-guide-feedback'
   | 'billing'
@@ -61,14 +62,16 @@ export function parseRoute(pathname: string): Route {
     return { name: 'announcement-detail', params: { id: decodeURIComponent(announcementMatch[1]) }, path }
   }
 
-  const childMatch = path.match(/^\/children\/([^/]+)(?:\/(edit|materials))?$/)
+  const childMatch = path.match(/^\/children\/([^/]+)(?:\/(edit|materials|assessment))?$/)
   if (childMatch) {
     const [, id, childAction] = childMatch
     const name = childAction === 'edit'
       ? 'child-edit'
       : childAction === 'materials'
         ? 'child-materials'
-        : 'child-overview'
+        : childAction === 'assessment'
+          ? 'child-assessment'
+          : 'child-overview'
     return { name, params: { id: decodeURIComponent(id) }, path }
   }
 
