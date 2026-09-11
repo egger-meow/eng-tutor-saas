@@ -201,14 +201,13 @@ exception when insufficient_privilege then
   -- Expected: direct select revoked
 end $$;
 
--- 5b. Authenticated CAN read question rendering projection (without grading secrets)
+-- 5b. Authenticated CANNOT read question bank projection (broad enumeration revoked in Phase 3)
 do $$
-declare client_count integer;
 begin
-  select count(*) into client_count from public.assessment_client_items;
-  if client_count < 3 then
-    raise exception 'Authenticated user should be able to read assessment_client_items, got %', client_count;
-  end if;
+  perform id from public.assessment_client_items;
+  raise exception 'Authenticated user should NOT be able to select from assessment_client_items';
+exception when insufficient_privilege then
+  -- Expected: broad enumeration revoked
 end $$;
 
 -- 5c. Authenticated CANNOT forge response outcomes (direct insert into assessment_responses revoked)
@@ -360,10 +359,186 @@ begin
   end if;
 end $$;
 
+-- 7. Historical Assessment Immutability Verification
+-- 7a. Ensure test_pass_01 has an item with responses
+insert into public.assessment_responses (
+  session_id, child_id, item_id, sequence_number, response_type, raw_answer, is_skipped, outcome, active_response_ms
+) values (
+  'cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+  'test_item_r01', 3, 'single_choice', 'A', false, 'correct', 2500
+);
+
+-- 7b. Attempt to modify semantic field (prompt) of test_item_v01
+do $$
+begin
+  update public.assessment_items
+  set prompt = 'Tampered prompt'
+  where id = 'test_item_v01';
+  raise exception 'Expected modifying prompt of used item to fail';
+exception when others then
+  if sqlerrm not like '%Cannot modify semantic fields of assessment item%' then
+    raise;
+  end if;
+end $$;
+
+-- 7c. Attempt to modify semantic field (difficulty) of test_item_v01
+do $$
+begin
+  update public.assessment_items
+  set difficulty = 4
+  where id = 'test_item_v01';
+  raise exception 'Expected modifying difficulty of used item to fail';
+exception when others then
+  if sqlerrm not like '%Cannot modify semantic fields of assessment item%' then
+    raise;
+  end if;
+end $$;
+
+-- 7d. Attempt to delete used item
+do $$
+begin
+  delete from public.assessment_items where id = 'test_item_v01';
+  raise exception 'Expected deleting used item to fail';
+exception when others then
+  -- Expected rejection by trigger or foreign key
+end $$;
+
+-- 7e. Modifying non-semantic field (status) is allowed for archival lifecycle
+do $$
+begin
+  update public.assessment_items set status = 'archived' where id = 'test_item_v01';
+  update public.assessment_items set status = 'active' where id = 'test_item_v01';
+end $$;
+
+-- 7f. Attempt to modify semantic content of test_pass_01
+do $$
+begin
+  update public.assessment_passages
+  set content = 'Tampered reading text'
+  where id = 'test_pass_01';
+  raise exception 'Expected modifying content of used passage to fail';
+exception when others then
+  if sqlerrm not like '%Cannot modify semantic content of assessment passage%' then
+    raise;
+  end if;
+end $$;
+
+-- 7g. Attempt to delete used passage
+do $$
+begin
+  delete from public.assessment_passages where id = 'test_pass_01';
+  raise exception 'Expected deleting used passage to fail';
+exception when others then
+  if sqlerrm not like '%Cannot delete assessment passage%' then
+    raise;
+  end if;
+end $$;
+
+-- 8. Authoritative Session Engine & RPC Verification as Authenticated User
+set local role authenticated;
+set local "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111"}';
+
+-- 8a. Parent A cannot start session for Child B (cross-parent boundary)
+do $$
+begin
+  perform public.start_or_resume_assessment_session('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+  raise exception 'Parent A should NOT be able to start session for Child B';
+exception when others then
+  if sqlerrm not like '%Child not found or not owned by user%' then
+    raise;
+  end if;
+end $$;
+
+-- 8b. Parent A starts or resumes session for Child A
+do $$
+declare
+  v_payload jsonb;
+  v_item jsonb;
+  v_session_id uuid;
+  v_item_id text;
+  v_sub_payload jsonb;
+  v_sub_dup jsonb;
+begin
+  v_payload := public.start_or_resume_assessment_session('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+  if v_payload->>'status' <> 'in_progress' then
+    raise exception 'Expected status in_progress, got %', v_payload->>'status';
+  end if;
+
+  v_session_id := (v_payload->>'sessionId')::uuid;
+  v_item := v_payload->'currentItem';
+
+  if v_item is null then
+    raise exception 'Expected currentItem in payload';
+  end if;
+
+  -- Verify no answer keys or internal tags leaked
+  if v_item ? 'correctChoice' or v_item ? 'acceptedAnswers' or v_item ? 'domain' or v_item ? 'skill' or v_item ? 'difficulty' then
+    raise exception 'Leaked grading secret or internal taxonomy in currentItem: %', v_item;
+  end if;
+
+  v_item_id := v_item->>'id';
+
+  -- 8c. Negative active_response_ms rejected
+  begin
+    perform public.submit_assessment_response(v_session_id, v_item_id, 'A', false, -500);
+    raise exception 'Expected negative active_response_ms to be rejected';
+  exception when others then
+    if sqlerrm not like '%Active response time must be non-negative%' then
+      raise;
+    end if;
+  end;
+
+  -- 8d. Submitting mismatched item ID rejected
+  begin
+    perform public.submit_assessment_response(v_session_id, 'arbitrary_fake_item', 'A', false, 2000);
+    raise exception 'Expected mismatched item ID to be rejected';
+  exception when others then
+    if sqlerrm not like '%Submitted item does not match currently presented item%' then
+      raise;
+    end if;
+  end;
+
+  -- 8e. Valid response submission advances sequence
+  v_sub_payload := public.submit_assessment_response(v_session_id, v_item_id, 'A', false, 3200);
+  if (v_sub_payload->>'itemsCompleted')::integer <> 1 then
+    raise exception 'Expected itemsCompleted = 1, got %', v_sub_payload->>'itemsCompleted';
+  end if;
+
+  -- 8f. Idempotency: re-submitting same response returns current state without advancing twice
+  v_sub_dup := public.submit_assessment_response(v_session_id, v_item_id, 'A', false, 3200);
+  if (v_sub_dup->>'itemsCompleted')::integer <> 1 then
+    raise exception 'Duplicate submission advanced itemsCompleted: %', v_sub_dup->>'itemsCompleted';
+  end if;
+
+  -- 8g. get_assessment_session_state returns safe state
+  v_payload := public.get_assessment_session_state(v_session_id);
+  if (v_payload->>'itemsCompleted')::integer <> 1 or v_payload->>'status' <> 'in_progress' then
+    raise exception 'Unexpected session state: %', v_payload;
+  end if;
+end $$;
+
+-- 8h. Parent B cannot access or submit to Child A's session
+do $$
+declare
+  v_s_id uuid;
+begin
+  select id into v_s_id from public.assessment_sessions where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' limit 1;
+  -- Switch claims to Parent B
+  set local "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222"}';
+  begin
+    perform public.get_assessment_session_state(v_s_id);
+    raise exception 'Parent B should NOT be able to read Child A session state';
+  exception when others then
+    if sqlerrm not like '%Assessment session not owned by user%' then
+      raise;
+    end if;
+  end;
+end $$;
+
 reset role;
 
 do $$
 begin
-  raise notice 'PASS: assessment boundary hardening, canonical bank seeding, and RLS verified';
+  raise notice 'PASS: assessment boundary hardening, canonical bank seeding, historical immutability, and authoritative engine RPCs verified';
 end $$;
 rollback;
