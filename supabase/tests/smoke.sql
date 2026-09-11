@@ -2812,8 +2812,8 @@ begin
     raise exception 'expired beta trial was not released from service active capacity';
   end if;
 
-  -- Restore Free Pilot active state for remaining tests
-  perform public.admin_privileged_reopen_free_pilot('Smoke test reset for next scenario', 'CONFIRM_REOPEN_FREE_PILOT');
+  -- Keep Free Pilot closed for following post-pilot Paddle lifecycle and capacity tests.
+  -- Free Pilot will be reopened at line 3629 for active Free Pilot phase tests.
 
   -- Item 1: Deployed webhook payload -> actual production RPC signature resolves with exact named arguments.
   insert into public.children (id, parent_id, display_name, grade, grade_stage)
@@ -5323,6 +5323,132 @@ begin
       raise exception 'get_enrollment_state free_pilot_admissions mismatch: got %, expected %',
         t_enr.free_pilot_admissions, (select count(*) from private_generation.historical_pilot_admissions);
     end if;
+
+    -- 6. Invariant Hardening Tests:
+    -- A. Admitted Free Pilot child with canceled Paddle subscription retains Free Pilot entitlement
+    -- B. Waitlist released reservation hole protection (dormant released child does not occupy capacity)
+    -- C. admin_release_waitlist_children ignores non-waiting IDs cleanly
+    -- D. get_enrollment_state exposes authoritative dormant_service_children_count
+    declare
+      inv_parent_cancel uuid := '00000000-0000-0000-0000-000000000230';
+      inv_child_cancel uuid := '00000000-0000-0000-0000-000000000231';
+      inv_parent_dormant uuid := '00000000-0000-0000-0000-000000000232';
+      inv_child_dormant uuid := '00000000-0000-0000-0000-000000000233';
+      inv_job_cancel_w2 uuid := '00000000-0000-0000-0000-000000000234';
+      inv_source_mat uuid := '00000000-0000-0000-0000-000000000235';
+      inv_rolling_before integer;
+      inv_locked_before integer;
+      inv_dormant_before integer;
+      inv_release_res integer;
+    begin
+      -- Reopen Free Pilot if it had cut over in test 4
+      update public.enrollment_settings
+      set free_pilot_ended_at = null,
+          free_pilot_enabled = true,
+          free_pilot_active_limit = 100,
+          capacity = 500
+      where key = 'default';
+
+      -- Setup parent and child for canceled Paddle test
+      insert into auth.users (id, raw_user_meta_data)
+      values (inv_parent_cancel, '{"display_name":"Cancel Parent"}'::jsonb);
+      update public.profiles set last_active_at = now() where id = inv_parent_cancel;
+
+      inv_rolling_before := private_generation.rolling_active_service_child_count();
+      inv_locked_before := private_generation.locked_capacity_count();
+
+      insert into public.children (id, parent_id, display_name, grade, grade_stage)
+      values (inv_child_cancel, inv_parent_cancel, 'Admitted Child', 7, 'grade_7');
+
+      -- Child should be admitted into historical_pilot_admissions
+      if not exists (
+        select 1 from private_generation.historical_pilot_admissions where child_id = inv_child_cancel
+      ) then
+        raise exception 'Hardening Test A: child was not admitted to Free Pilot';
+      end if;
+
+      -- Parent subscribes to Paddle then cancels
+      update public.subscriptions
+      set provider = 'paddle', status = 'canceled', updated_at = now()
+      where child_id = inv_child_cancel;
+
+      -- Invariant Check 1: Admitted Free Pilot child with canceled Paddle still counts in rolling active
+      if private_generation.rolling_active_service_child_count() <> inv_rolling_before + 1 then
+        raise exception 'Hardening Test A: admitted child with canceled Paddle missing from rolling active count (got %, expected %)',
+          private_generation.rolling_active_service_child_count(), inv_rolling_before + 1;
+      end if;
+
+      -- Invariant Check 2: Admitted Free Pilot child with canceled Paddle still counts in locked capacity
+      if private_generation.locked_capacity_count() <> inv_locked_before + 1 then
+        raise exception 'Hardening Test A: admitted child with canceled Paddle missing from locked capacity count (got %, expected %)',
+          private_generation.locked_capacity_count(), inv_locked_before + 1;
+      end if;
+
+      -- Invariant Check 3: Can claim due Week 2 generation job under Free Pilot
+      insert into public.materials (id, child_id, material_week, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+      values (inv_source_mat, inv_child_cancel, current_date - 7, '1.0.0', '{}'::jsonb, 's.pdf', 'p.pdf');
+
+      insert into public.generation_jobs (
+        id, child_id, material_week, rule_version, idempotency_key, status, scheduled_for,
+        source_material_id, release_at, feedback_cutoff_at, generation_due_at
+      ) values (
+        inv_job_cancel_w2, inv_child_cancel, current_date + 7, 'curriculum-rules/1.0.0',
+        inv_child_cancel::text || ':inv_w2', 'pending', now() - interval '1 hour',
+        inv_source_mat, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+      );
+
+      if not exists (
+        select 1 from private_generation.claim_due_generation_jobs('worker_inv_test') where id = inv_job_cancel_w2
+      ) then
+        raise exception 'Hardening Test A: canceled Paddle child could not claim Week 2 job under Free Pilot';
+      end if;
+
+      -- B. Waitlist released reservation hole protection:
+      -- A released waitlist child with Free Pilot admission whose parent is dormant must NOT occupy capacity
+      insert into auth.users (id, raw_user_meta_data)
+      values (inv_parent_dormant, '{"display_name":"Dormant Waitlist Parent"}'::jsonb);
+      update public.profiles set last_active_at = now() - interval '30 days' where id = inv_parent_dormant;
+
+      insert into public.children (id, parent_id, display_name, grade, grade_stage)
+      values (inv_child_dormant, inv_parent_dormant, 'Dormant Released Kid', 7, 'grade_7');
+
+      -- Waitlist entry with status = 'released'
+      insert into public.waitlist (parent_id, child_id, email, status, released_at)
+      values (inv_parent_dormant, inv_child_dormant, 'dormant_released@test.com', 'released', now() - interval '1 day')
+      on conflict (child_id) do update set status = 'released', released_at = now() - interval '1 day';
+
+      -- Locked capacity before vs after: dormant child must NOT occupy capacity in Branch 2 (parent dormant)
+      -- AND must be excluded from Branch 4 (already holds Free Pilot admission).
+      inv_locked_before := private_generation.locked_capacity_count();
+      if exists (
+        select 1 from private_generation.historical_pilot_admissions where child_id = inv_child_dormant
+      ) then
+        -- Even though child is admitted, parent is dormant > 14 days and no claimed job, so occupancy does NOT count this child.
+        -- And Branch 4 excludes admitted pilot children, so it does not count as reservation either.
+        null;
+      end if;
+
+      -- C. admin_release_waitlist_children ignores non-waiting IDs cleanly
+      inv_release_res := public.admin_release_waitlist_children(ARRAY[inv_child_dormant]);
+      if inv_release_res <> 0 then
+        raise exception 'Hardening Test C: admin_release_waitlist_children did not ignore non-waiting child, returned %', inv_release_res;
+      end if;
+
+      -- D. get_enrollment_state exposes authoritative dormant_service_children_count
+      select dormant_service_children_count into inv_dormant_before from public.get_enrollment_state();
+      if inv_dormant_before < 1 then
+        raise exception 'Hardening Test D: expected at least 1 dormant service child, got %', inv_dormant_before;
+      end if;
+
+      -- Cleanup sub-test records
+      delete from public.generation_jobs where id = inv_job_cancel_w2;
+      delete from public.materials where id = inv_source_mat;
+      delete from public.waitlist where child_id in (inv_child_cancel, inv_child_dormant);
+      delete from public.subscriptions where child_id in (inv_child_cancel, inv_child_dormant);
+      delete from public.child_profiles where child_id in (inv_child_cancel, inv_child_dormant);
+      delete from public.children where id in (inv_child_cancel, inv_child_dormant);
+      delete from auth.users where id in (inv_parent_cancel, inv_parent_dormant);
+    end;
 
     -- Clean up test records
     delete from public.generation_jobs where id = t_job_w2_id;

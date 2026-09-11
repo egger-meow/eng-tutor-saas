@@ -196,6 +196,7 @@ export interface OperationsOverview {
     activityWindowDays?: number
     freePilotEndedAt?: string | null
     dormantCount?: number
+    dormantServiceChildrenCount?: number
     operationalOccupancy?: number
   }
   queueStats: {

@@ -1430,9 +1430,11 @@ export class AdminService {
     const admissions = Number(enrollment?.free_pilot_admissions ?? 0)
     const totalRealChildren = Number(enrollment?.total_real_children ?? enrollment?.free_pilot_admissions ?? 0)
     const rollingCount = rawRolling !== null && rawRolling !== undefined ? Number(rawRolling) : null
-    const dormantCount = (enrollment?.free_pilot_active && rollingCount !== null)
-      ? Math.max(0, admissions - rollingCount)
-      : 0
+    const dormantCount = enrollment?.dormant_service_children_count !== undefined
+      ? Number(enrollment.dormant_service_children_count)
+      : (enrollment?.free_pilot_active && rollingCount !== null)
+        ? Math.max(0, admissions - rollingCount)
+        : 0
 
     const capacity: OperationsOverview['capacity'] = {
       activeCount: enrollment?.active_count ?? activeChildren.length,
@@ -1452,6 +1454,7 @@ export class AdminService {
       activityWindowDays: enrollment?.activity_window_days ?? 14,
       freePilotEndedAt: enrollment?.free_pilot_ended_at ?? null,
       dormantCount,
+      dormantServiceChildrenCount: Number(enrollment?.dormant_service_children_count ?? 0),
       operationalOccupancy: enrollment?.operational_occupancy ?? enrollment?.active_count ?? activeChildren.length,
     }
 
