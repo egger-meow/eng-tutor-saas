@@ -1,6 +1,6 @@
 # Curriculum diversity: local implementation evidence
 
-Status: implementation and verification complete; ready for commit, push, and remote migration deployment.
+Status: implementation committed and compatibility migrations deployed; target release activation and deployed-consumer verification remain incomplete.
 Base HEAD: `168367e62682b644688986976c70c7e472cd6ffe` (origin/main).
 
 ## Implemented
@@ -35,7 +35,7 @@ Target release: rel_1.9.0 / schema 2.6.0 / prompt 2.14.0 / engine 1.9.0 / worker
 Bundle version: 2.14.0-prod, SHA-256: `971e2b7d3f497c9448bf95171b5ab9258d278312bd3ea43d2f1d5ba531ed526c`.
 Predecessor bundle: 2.13.2-prod, SHA-256: `227bd0953d6062695023846327b8ab4e0391082ac7967c8ab0282ffeaee58340`.
 
-Migrations to apply to remote production database:
+Migrations confirmed in production migration history during review on 2026-09-11:
 1. `20260910132933_diversity_format_memory.sql`
 2. `20260910133101_prepare_curriculum_diversity_consumers.sql`
 
@@ -76,3 +76,13 @@ Migrations to apply to remote production database:
   "packages/worker/src/consumer-release-policy.test.ts": "52513681175761b93273138550ee0843d5e105bdeaaafd25c32b30818d75924a"
 }
 ```
+
+## Post-delivery review (2026-09-11)
+
+- Implementation commit: `ed760b9630ed36e69e036992e30770689509ffa6`, present on remote main (reviewed remote head `cf36a34eed343b99e6c8b3560945db1aefad1f22`).
+- Independently recomputed current bundle SHA-256: `971e2b7d3f497c9448bf95171b5ab9258d278312bd3ea43d2f1d5ba531ed526c`.
+- Independently reran `pnpm test:db`: all three suites passed, including both claim paths, six metadata mismatches per path and predecessor immutability.
+- Fresh production `worker_current_authoring_contract()` read-back: release `rel_1.8.2`, schema `2.5.0`, prompt `2.13.2`, engine `1.8.2`, worker `1.7.2`, renderer `1.5.0`, bundle `2.13.2-prod`, SHA-256 `227bd0953d6062695023846327b8ab4e0391082ac7967c8ab0282ffeaee58340`.
+- Both listed preparation migrations exist in production migration history. They intentionally do not activate the desired release.
+- Full test/build/PDF results above are implementation-stage evidence, not fresh production runtime verification. This review reran the database suites only.
+- No deployed Week 1 publisher / Finisher runtime identities or isolated deployed behavior evidence are recorded here. Complete that verification under `docs/production-release-policy.md` before activating `rel_1.9.0`; then record fresh contract read-back and both claim-path checks. Production delivery must not be described as fully complete until those checks and activation are complete.
