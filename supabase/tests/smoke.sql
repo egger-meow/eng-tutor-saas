@@ -4554,18 +4554,18 @@ begin
         raise exception 'Adv Test 2C failed: touch_parent_activity did not update last_active_at';
       end if;
 
-      -- 2. Rolling active count jumped from 99 to 101
-      if (select private_generation.rolling_active_service_child_count()) <> 101 then
-        raise exception 'Adv Test 2C failed: rolling active count is %, expected 101',
-          (select private_generation.rolling_active_service_child_count());
-      end if;
-
-      -- 3. Cutover triggered cleanly and atomically
+      -- 2. Cutover triggered cleanly and atomically when jump reached 101
       if (select free_pilot_ended_at from public.enrollment_settings where key = 'default') is null then
         raise exception 'Adv Test 2C failed: free_pilot_ended_at was not stamped on jump to 101';
       end if;
       if (select free_pilot_enabled from public.enrollment_settings where key = 'default') is not false then
         raise exception 'Adv Test 2C failed: free_pilot_enabled was not set to false on cutover';
+      end if;
+
+      -- 3. Post-cutover semantic gate: unpaid historical Free Pilot children no longer count in rolling active count
+      if (select private_generation.rolling_active_service_child_count()) <> 0 then
+        raise exception 'Adv Test 2C failed: post-cutover rolling active count is %, expected 0',
+          (select private_generation.rolling_active_service_child_count());
       end if;
     end;
 
@@ -5405,6 +5405,9 @@ begin
 
       -- B. Waitlist released reservation hole protection:
       -- A released waitlist child with Free Pilot admission whose parent is dormant must NOT occupy capacity
+      inv_locked_before := private_generation.locked_capacity_count();
+      inv_rolling_before := private_generation.rolling_active_service_child_count();
+
       insert into auth.users (id, raw_user_meta_data)
       values (inv_parent_dormant, '{"display_name":"Dormant Waitlist Parent"}'::jsonb);
       update public.profiles set last_active_at = now() - interval '30 days' where id = inv_parent_dormant;
@@ -5412,20 +5415,30 @@ begin
       insert into public.children (id, parent_id, display_name, grade, grade_stage)
       values (inv_child_dormant, inv_parent_dormant, 'Dormant Released Kid', 7, 'grade_7');
 
+      if not exists (
+        select 1 from private_generation.historical_pilot_admissions where child_id = inv_child_dormant
+      ) then
+        raise exception 'Hardening Test B: child was not admitted to Free Pilot';
+      end if;
+
       -- Waitlist entry with status = 'released'
       insert into public.waitlist (parent_id, child_id, email, status, released_at)
       values (inv_parent_dormant, inv_child_dormant, 'dormant_released@test.com', 'released', now() - interval '1 day')
       on conflict (child_id) do update set status = 'released', released_at = now() - interval '1 day';
 
-      -- Locked capacity before vs after: dormant child must NOT occupy capacity in Branch 2 (parent dormant)
+      -- Invariant Check 1: Locked capacity must NOT increase:
+      -- Dormant child must NOT occupy capacity in Branch 2 (parent dormant > 14 days, no claimed job)
       -- AND must be excluded from Branch 4 (already holds Free Pilot admission).
-      inv_locked_before := private_generation.locked_capacity_count();
-      if exists (
-        select 1 from private_generation.historical_pilot_admissions where child_id = inv_child_dormant
-      ) then
-        -- Even though child is admitted, parent is dormant > 14 days and no claimed job, so occupancy does NOT count this child.
-        -- And Branch 4 excludes admitted pilot children, so it does not count as reservation either.
-        null;
+      if private_generation.locked_capacity_count() <> inv_locked_before then
+        raise exception 'Hardening Test B: dormant released admitted child erroneously occupied locked capacity (got %, expected %)',
+          private_generation.locked_capacity_count(), inv_locked_before;
+      end if;
+
+      -- Invariant Check 2: Rolling active count must NOT increase:
+      -- Parent is dormant > 14 days, so child must not be counted in rolling active count.
+      if private_generation.rolling_active_service_child_count() <> inv_rolling_before then
+        raise exception 'Hardening Test B: dormant admitted child erroneously counted in rolling active (got %, expected %)',
+          private_generation.rolling_active_service_child_count(), inv_rolling_before;
       end if;
 
       -- C. admin_release_waitlist_children ignores non-waiting IDs cleanly
@@ -5439,6 +5452,43 @@ begin
       if inv_dormant_before < 1 then
         raise exception 'Hardening Test D: expected at least 1 dormant service child, got %', inv_dormant_before;
       end if;
+
+      -- E. Post-cutover semantic gate:
+      -- An admitted unpaid child whose parent is active must NOT increment rolling active count once pilot has ended
+      -- 1) First verify that under active Free Pilot, parent activity DOES increment rolling active count
+      update public.profiles set last_active_at = now() where id = inv_parent_dormant;
+      if private_generation.rolling_active_service_child_count() <> inv_rolling_before + 1 then
+        raise exception 'Hardening Test E: active parent under active pilot did not increment rolling active count (got %, expected %)',
+          private_generation.rolling_active_service_child_count(), inv_rolling_before + 1;
+      end if;
+
+      -- 2) Now cut over Free Pilot (ended_at stamped, enabled = false)
+      update public.enrollment_settings
+      set free_pilot_ended_at = now(),
+          free_pilot_enabled = false
+      where key = 'default';
+
+      -- 3) Post-cutover: even though parent is active and child is in historical_pilot_admissions,
+      -- unpaid child is NOT counted as active service child in rolling_active_service_child_count()
+      if private_generation.rolling_active_service_child_count() > (
+        select count(distinct s.child_id)::integer
+        from public.subscriptions s
+        join public.children c on c.id = s.child_id
+        join public.profiles p on p.id = c.parent_id
+        where c.is_active and not c.is_internal_test
+          and s.provider = 'paddle' and s.status in ('trialing', 'active', 'past_due')
+          and p.last_active_at >= now() - interval '14 days'
+      ) then
+        raise exception 'Hardening Test E: post-cutover unpaid admitted children were incorrectly counted in rolling_active_service_child_count() (got %)',
+          private_generation.rolling_active_service_child_count();
+      end if;
+
+      -- 4) Reopen pilot with privileged override so remaining tests/cleanup operate in clean state
+      perform set_config('app.privileged_pilot_override', 'true', true);
+      update public.enrollment_settings
+      set free_pilot_ended_at = null,
+          free_pilot_enabled = true
+      where key = 'default';
 
       -- Cleanup sub-test records
       delete from public.generation_jobs where id = inv_job_cancel_w2;
