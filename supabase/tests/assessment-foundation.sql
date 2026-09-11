@@ -295,8 +295,75 @@ end $$;
 
 reset role;
 
+-- 6. Canonical Assessment Bank Verification
+do $$
+declare
+  passage_cnt integer;
+  item_cnt integer;
+  vocab_cnt integer;
+  grammar_cnt integer;
+  reading_cnt integer;
+  client_cnt integer;
+  skill_rec record;
+begin
+  -- 6a. Verify passages
+  select count(*) into passage_cnt from public.assessment_passages where id like 'pass_%' and status = 'active';
+  if passage_cnt < 16 then
+    raise exception 'Expected at least 16 canonical passages, got %', passage_cnt;
+  end if;
+
+  -- 6b. Verify total items
+  select count(*) into item_cnt from public.assessment_items where id not like 'test_%' and status = 'active';
+  if item_cnt < 108 then
+    raise exception 'Expected at least 108 canonical items, got %', item_cnt;
+  end if;
+
+  -- 6c. Verify domain counts
+  select count(*) into vocab_cnt from public.assessment_items where domain = 'vocabulary' and id not like 'test_%' and status = 'active';
+  select count(*) into grammar_cnt from public.assessment_items where domain = 'grammar' and id not like 'test_%' and status = 'active';
+  select count(*) into reading_cnt from public.assessment_items where domain = 'reading' and id not like 'test_%' and status = 'active';
+
+  if vocab_cnt <> 24 then
+    raise exception 'Expected 24 canonical vocabulary items, got %', vocab_cnt;
+  end if;
+  if grammar_cnt <> 44 then
+    raise exception 'Expected 44 canonical grammar items, got %', grammar_cnt;
+  end if;
+  if reading_cnt <> 40 then
+    raise exception 'Expected 40 canonical reading items, got %', reading_cnt;
+  end if;
+
+  -- 6d. Verify each of the 13 coarse skills has at least 6 active items
+  for skill_rec in
+    select skill, count(*) as cnt
+    from public.assessment_items
+    where id not like 'test_%' and status = 'active'
+    group by skill
+  loop
+    if skill_rec.cnt < 6 then
+      raise exception 'Expected skill % to have at least 6 items, got %', skill_rec.skill, skill_rec.cnt;
+    end if;
+  end loop;
+
+  -- 6e. Verify reading items all link to valid passages
+  if exists (
+    select 1 from public.assessment_items
+    where domain = 'reading' and id not like 'test_%' and (passage_id is null or passage_id not in (select id from public.assessment_passages))
+  ) then
+    raise exception 'Found reading items without valid passage link';
+  end if;
+
+  -- 6f. Verify client projection contains all active items
+  select count(*) into client_cnt from public.assessment_client_items where id not like 'test_%';
+  if client_cnt < 108 then
+    raise exception 'Expected at least 108 items in assessment_client_items view, got %', client_cnt;
+  end if;
+end $$;
+
+reset role;
+
 do $$
 begin
-  raise notice 'PASS: assessment boundary hardening, domain/skill consistency, and RLS verified';
+  raise notice 'PASS: assessment boundary hardening, canonical bank seeding, and RLS verified';
 end $$;
 rollback;
