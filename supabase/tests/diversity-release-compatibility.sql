@@ -4,12 +4,13 @@ begin;
 do $test$
 declare
  p uuid:=gen_random_uuid(); c uuid; j uuid; old_j uuid; ctx jsonb; old_ctx jsonb; old_row jsonb; claimed jsonb; ct jsonb;
- old_ct jsonb:=public.worker_current_authoring_contract();
+ deployed_ct jsonb:=public.worker_current_authoring_contract();
+ old_ct jsonb:='{"releaseId":"rel_1.8.2","schemaVersion":"2.5.0","promptVersion":"2.13.2","engineVersion":"1.8.2","workerVersion":"1.7.2","rendererVersion":"1.5.0","bundleVersion":"2.13.2-prod","bundleSha256":"227bd0953d6062695023846327b8ab4e0391082ac7967c8ab0282ffeaee58340"}';
  new_ct jsonb:='{"releaseId":"rel_1.9.0","schemaVersion":"2.6.0","promptVersion":"2.14.0","engineVersion":"1.9.0","workerVersion":"1.8.0","rendererVersion":"1.6.0","bundleVersion":"2.14.0-prod","bundleSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}';
  original_def text:=pg_get_functiondef('public.worker_current_authoring_contract()'::regprocedure);
  payload jsonb; rejected boolean; k text; lane integer; w text;
 begin
- assert old_ct->>'releaseId'='rel_1.8.2','Requires predecessor baseline';
+ execute format('create or replace function public.worker_current_authoring_contract() returns jsonb language sql stable security definer set search_path = '''' as %L','select '||quote_literal(old_ct::text)||'::jsonb');
  assert not exists(select 1 from public.generation_jobs where status in ('pending','claimed')),'Requires isolated empty local queue';
  insert into auth.users(id,raw_user_meta_data) values(p,'{"display_name":"Local release fixture"}');
  update public.profiles set terms_version='2026-08-26-v2',privacy_version='2026-08-16-v1',legal_accepted_at=now() where id=p;
@@ -54,7 +55,7 @@ begin
  perform private_generation.chatgpt_submit_curriculum_package(old_j,'local-release-test',payload);
  assert exists(select 1 from private_generation.curriculum_submissions where job_id=old_j and canonical_source=payload),'Old in-flight submission rejected or relabeled';
  execute original_def;
- assert public.worker_current_authoring_contract()=old_ct;
+ assert public.worker_current_authoring_contract()=deployed_ct;
  raise notice 'PASS: both claim paths, target acceptance, six mismatches per path, predecessor immutability';
 end;
 $test$;
