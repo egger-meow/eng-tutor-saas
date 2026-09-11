@@ -16,6 +16,6 @@ Bundle: 2.14.0-prod, SHA-256 `971e2b7d3f497c9448bf95171b5ab9258d278312bd3ea43d2f
 
 ## Activation and recovery
 
-Prepared and locally tested; production application and final read-back pending.
+Activated in production from commit `905dfac`. Migration history is synchronized through `20260911042629`. Fresh authenticated GET /contract and independent database RPC both returned the exact target tuple and bundle SHA-256 above. Anonymous and authenticated database roles retain no EXECUTE permission on the contract function. All three isolated database suites passed again after production activation. No recovery was needed.
 The migration updates only the active contract function, preserves restricted execution grants, and rejects an unexpected predecessor. Existing claim snapshots and canonical submissions remain unchanged.
 If post-activation verification fails, restore the predecessor contract through a new reviewed migration based on the contract function in `20260909181131_correct_authoring_bundle_hash.sql`; retain both compatible consumers so existing new-version claims remain processable. Never rewrite claim or package metadata.

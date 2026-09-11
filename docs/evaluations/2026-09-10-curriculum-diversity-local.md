@@ -86,3 +86,4 @@ Migrations confirmed in production migration history during review on 2026-09-11
 - Both listed preparation migrations exist in production migration history. They intentionally do not activate the desired release.
 - Full test/build/PDF results above are implementation-stage evidence, not fresh production runtime verification. This review reran the database suites only.
 - No deployed Week 1 publisher / Finisher runtime identities or isolated deployed behavior evidence are recorded here. Complete that verification under `docs/production-release-policy.md` before activating `rel_1.9.0`; then record fresh contract read-back and both claim-path checks. Production delivery must not be described as fully complete until those checks and activation are complete.
+Activation update: the pending status above was superseded by the verified production activation recorded in [2026-09-11 activation evidence](2026-09-11-curriculum-diversity-activation.md).
