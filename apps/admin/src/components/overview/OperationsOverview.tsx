@@ -121,19 +121,19 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
       <section className="capacity-strip" aria-label="服務容量與公測狀態">
         <div>
           <div>
-            <span>服務中孩子</span>
+            <span>營運佔用席次</span>
             <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              {data.capacity.freePilotActive ? '14 天活躍席次' : '總佔用席次'}
+              運營承載上限 {data.capacity.maxCapacity}
             </small>
           </div>
-          <strong>{data.capacity.activeCount} / {data.capacity.maxCapacity}</strong>
+          <strong>{data.capacity.operationalOccupancy ?? data.capacity.activeCount} / {data.capacity.maxCapacity}</strong>
         </div>
         <div>
           <div>
-            <span>Beta 轉商門檻 (14天活躍)</span>
+            <span>Beta 14 天活躍</span>
             <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
               {data.capacity.freePilotActive
-                ? `累計錄取 ${data.capacity.freePilotAdmissions ?? 0} · 靜止 ${data.capacity.dormantCount ?? 0}`
+                ? `門檻席次 ${data.capacity.freePilotLimit ?? 100}`
                 : '已達標永久關閉'}
             </small>
           </div>
@@ -142,6 +142,24 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
               ? `${data.capacity.rollingActiveCount ?? data.capacity.activeCount} / ${data.capacity.freePilotLimit ?? 100}`
               : '已轉商'}
           </strong>
+        </div>
+        <div>
+          <div>
+            <span>歷史錄取學員</span>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              累計錄取人數
+            </small>
+          </div>
+          <strong>{data.capacity.freePilotAdmissions ?? data.capacity.totalRealChildren ?? 0}</strong>
+        </div>
+        <div>
+          <div>
+            <span>休眠學員</span>
+            <small style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+              逾 14 天未活躍
+            </small>
+          </div>
+          <strong>{data.capacity.dormantCount ?? 0}</strong>
         </div>
         <div>
           <div>

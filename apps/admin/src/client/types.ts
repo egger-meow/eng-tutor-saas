@@ -190,6 +190,7 @@ export interface OperationsOverview {
     totalDemand: number
     freePilotActive?: boolean
     freePilotAdmissions?: number
+    totalRealChildren?: number
     freePilotLimit?: number
     rollingActiveCount?: number | null
     activityWindowDays?: number

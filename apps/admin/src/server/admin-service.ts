@@ -1428,6 +1428,7 @@ export class AdminService {
 
     const rawRolling = enrollment?.rolling_active_count ?? (enrollment?.free_pilot_active ? enrollment?.active_count : null)
     const admissions = Number(enrollment?.free_pilot_admissions ?? 0)
+    const totalRealChildren = Number(enrollment?.total_real_children ?? enrollment?.free_pilot_admissions ?? 0)
     const rollingCount = rawRolling !== null && rawRolling !== undefined ? Number(rawRolling) : null
     const dormantCount = (enrollment?.free_pilot_active && rollingCount !== null)
       ? Math.max(0, admissions - rollingCount)
@@ -1445,12 +1446,13 @@ export class AdminService {
         ?? ((enrollment?.active_count ?? activeChildren.length) + (enrollment?.waiting_count ?? 0) + (enrollment?.released_count ?? 0)),
       freePilotActive: enrollment?.free_pilot_active ?? false,
       freePilotAdmissions: admissions,
+      totalRealChildren,
       freePilotLimit: enrollment?.free_pilot_limit ?? 100,
       rollingActiveCount: rollingCount,
       activityWindowDays: enrollment?.activity_window_days ?? 14,
       freePilotEndedAt: enrollment?.free_pilot_ended_at ?? null,
       dormantCount,
-      operationalOccupancy: enrollment?.active_count ?? activeChildren.length,
+      operationalOccupancy: enrollment?.operational_occupancy ?? enrollment?.active_count ?? activeChildren.length,
     }
 
     const latestSubmissionByJob = new Map<string, any>()

@@ -44,7 +44,8 @@ begin
     '{"display_name":"Migration Test"}'::jsonb
   );
   update public.profiles
-  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now()
+  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now(),
+      last_active_at = now()
   where id = '00000000-0000-0000-0000-000000000001';
 
   insert into public.children (id, parent_id, display_name, grade)
@@ -1752,7 +1753,8 @@ begin
     '{"display_name":"Migration Test"}'::jsonb
   );
   update public.profiles
-  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now()
+  set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now(),
+      last_active_at = now()
   where id = '00000000-0000-0000-0000-000000000001';
 
   insert into public.children (id, parent_id, display_name, grade, grade_stage, textbook_version)
@@ -4378,6 +4380,8 @@ begin
       -- -----------------------------------------------------------------------
       -- 2A. Admissions past 100 in ledger while Pilot is active
       -- -----------------------------------------------------------------------
+      update public.profiles set last_active_at = null where id = '00000000-0000-0000-0000-000000000001';
+
       select count(*)::integer into adv_cur_count from private_generation.historical_pilot_admissions;
       adv_needed := 99 - adv_cur_count;
 
@@ -5116,6 +5120,226 @@ begin
     delete from public.generation_jobs where id in (uf_job_w1_a, uf_job_w1_b, uf_job_w1_c);
     delete from public.materials where id = uf_mat_id;
     delete from public.children where id = uf_child_id;
+  end;
+
+  -- =========================================================================
+  -- Pilot Capacity Gate, Dormant Cadence & Lock Ordering Tests
+  -- =========================================================================
+  declare
+    t_parent_active_id uuid := '00000000-0000-0000-0000-000000000201';
+    t_parent_dormant_id uuid := '00000000-0000-0000-0000-000000000202';
+    t_parent_paddle_id uuid := '00000000-0000-0000-0000-000000000203';
+    t_parent_release_id uuid := '00000000-0000-0000-0000-000000000204';
+    t_child_dormant_id uuid := '00000000-0000-0000-0000-000000000210';
+    t_child_active_id uuid := '00000000-0000-0000-0000-000000000211';
+    t_child_paddle_id uuid := '00000000-0000-0000-0000-000000000212';
+    t_child_release_id uuid := '00000000-0000-0000-0000-000000000213';
+    t_source_mat_id uuid := '00000000-0000-0000-0000-000000000220';
+    t_job_w2_id uuid := '00000000-0000-0000-0000-000000000221';
+    t_claimed_jobs integer;
+    t_released_count integer;
+    t_enr record;
+    t_cap_before integer;
+    t_cap_after_dormant integer;
+    t_cap_after_active integer;
+    t_prev_ended timestamptz;
+    t_prev_enabled boolean;
+    t_prev_limit integer;
+    t_prev_capacity integer;
+  begin
+    -- Save current enrollment settings
+    select free_pilot_ended_at, free_pilot_enabled, free_pilot_active_limit, capacity
+    into t_prev_ended, t_prev_enabled, t_prev_limit, t_prev_capacity
+    from public.enrollment_settings where key = 'default';
+
+    -- Reset enrollment settings for controlled testing
+    update public.enrollment_settings
+    set free_pilot_ended_at = null,
+        free_pilot_enabled = true,
+        free_pilot_active_limit = 100,
+        capacity = 500
+    where key = 'default';
+
+    -- Clear lingering parent activity from earlier tests for isolation
+    update public.profiles set last_active_at = null;
+
+    -- Create test parents
+    insert into auth.users (id, raw_user_meta_data)
+    values
+      (t_parent_active_id, '{"display_name":"Active Parent"}'::jsonb),
+      (t_parent_dormant_id, '{"display_name":"Dormant Parent"}'::jsonb),
+      (t_parent_paddle_id, '{"display_name":"Paddle Parent"}'::jsonb),
+      (t_parent_release_id, '{"display_name":"Release Parent"}'::jsonb);
+
+    update public.profiles set terms_version = '2026-08-26-v2', privacy_version = '2026-08-16-v1', legal_accepted_at = now()
+    where id in (t_parent_active_id, t_parent_dormant_id, t_parent_paddle_id, t_parent_release_id);
+
+    -- Set last_active_at
+    update public.profiles set last_active_at = now() where id = t_parent_active_id;
+    update public.profiles set last_active_at = now() - interval '20 days' where id = t_parent_dormant_id;
+    update public.profiles set last_active_at = now() where id = t_parent_paddle_id;
+    update public.profiles set last_active_at = now() where id = t_parent_release_id;
+
+    -- 1. Test pre-cutover capacity replacement:
+    t_cap_before := private_generation.locked_capacity_count();
+
+    -- Create dormant child
+    insert into public.children (id, parent_id, display_name, grade)
+    values (t_child_dormant_id, t_parent_dormant_id, 'Dormant Kid', 7);
+
+    t_cap_after_dormant := private_generation.locked_capacity_count();
+    if t_cap_after_dormant <> t_cap_before then
+      raise exception 'Pre-cutover capacity test failed: dormant child increased locked_capacity_count from % to %',
+        t_cap_before, t_cap_after_dormant;
+    end if;
+
+    -- Create active child
+    insert into public.children (id, parent_id, display_name, grade)
+    values (t_child_active_id, t_parent_active_id, 'Active Kid', 7);
+
+    t_cap_after_active := private_generation.locked_capacity_count();
+    if t_cap_after_active <> t_cap_before + 1 then
+      raise exception 'Pre-cutover capacity test failed: active child did not increase locked_capacity_count from % (got %)',
+        t_cap_before, t_cap_after_active;
+    end if;
+
+    -- Verify that dormant child received beta subscription despite not occupying capacity
+    if not exists (
+      select 1 from public.subscriptions
+      where child_id = t_child_dormant_id and provider = 'beta' and status = 'trialing'
+    ) then
+      raise exception 'Dormant child missing beta subscription';
+    end if;
+
+    -- 2. Test Dormant Beta generation pause & resume:
+    -- Insert a dummy source material for Week 1 so this job represents Week 2
+    insert into public.materials (id, child_id, material_week, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
+    values (t_source_mat_id, t_child_dormant_id, current_date, 'test-v1', '{}'::jsonb, 's.pdf', 'p.pdf');
+
+    insert into public.generation_jobs (
+      id, child_id, material_week, rule_version, idempotency_key, status,
+      scheduled_for, attempt_count, max_attempts, release_at, feedback_cutoff_at, generation_due_at,
+      source_material_id
+    ) values (
+      t_job_w2_id, t_child_dormant_id, current_date + 7, 'test-v1', 't-job-w2', 'pending',
+      now() - interval '2 days', 0, 3, now() + interval '12 hours', (now() + interval '12 hours') - interval '48 hours', (now() + interval '12 hours') - interval '24 hours',
+      t_source_mat_id
+    );
+
+    -- Worker attempts to claim due jobs: dormant child's Week 2 job MUST be skipped
+    select count(*) into t_claimed_jobs
+    from private_generation.claim_due_generation_jobs('test-worker-dormant')
+    where id = t_job_w2_id;
+
+    if t_claimed_jobs <> 0 then
+      raise exception 'Claim due generation jobs claimed a Week 2 job for a dormant beta child';
+    end if;
+
+    -- Now touch parent activity for the dormant parent
+    update public.profiles set last_active_at = now() where id = t_parent_dormant_id;
+
+    -- Worker attempts to claim again: now that parent is active, the job MUST be claimed
+    select count(*) into t_claimed_jobs
+    from private_generation.claim_due_generation_jobs('test-worker-dormant')
+    where id = t_job_w2_id;
+
+    if t_claimed_jobs <> 1 then
+      raise exception 'Claim due generation jobs failed to claim Week 2 job after parent became active';
+    end if;
+
+    -- 3. Test Admin release preserves Paddle subscription:
+    insert into public.children (id, parent_id, display_name, grade, grade_stage)
+    values (t_child_paddle_id, t_parent_paddle_id, 'Paddle Kid', 7, 'grade_7');
+
+    -- Simulate real Paddle subscription
+    update public.subscriptions
+    set provider = 'paddle', status = 'active', plan_code = 'standard_monthly', current_period_end = now() + interval '30 days'
+    where child_id = t_child_paddle_id;
+
+    -- Put in waitlist
+    insert into public.waitlist (parent_id, child_id, email, status)
+    values (t_parent_paddle_id, t_child_paddle_id, 'paddle@test.com', 'waiting')
+    on conflict (child_id) do update set status = 'waiting';
+
+    -- Release from waitlist
+    t_released_count := public.admin_release_waitlist_children(ARRAY[t_child_paddle_id]);
+    if t_released_count <> 1 then
+      raise exception 'admin_release_waitlist_children failed to release paddle child';
+    end if;
+
+    -- Verify subscription provider is STILL 'paddle' and NOT corrupted to 'beta'
+    if not exists (
+      select 1 from public.subscriptions
+      where child_id = t_child_paddle_id and provider = 'paddle' and status = 'active'
+    ) then
+      raise exception 'admin_release_waitlist_children corrupted Paddle subscription to beta!';
+    end if;
+
+    -- 4. Test Admin release cutover check:
+    -- Set limit to current rolling count + 1 so releasing 1 child triggers cutover
+    select count(*) into t_claimed_jobs
+    from public.children c
+    join public.profiles p on p.id = c.parent_id
+    join public.subscriptions s on s.child_id = c.id
+    where c.is_active and not c.is_internal_test
+      and ((s.provider = 'beta' and s.status = 'trialing') or (s.provider = 'paddle' and s.status in ('trialing', 'active', 'past_due')))
+      and p.last_active_at >= now() - interval '14 days';
+
+    update public.enrollment_settings
+    set free_pilot_active_limit = t_claimed_jobs + 1
+    where key = 'default';
+
+    -- Add child to waitlist whose parent is active
+    insert into public.children (id, parent_id, display_name, grade, grade_stage)
+    values (t_child_release_id, t_parent_release_id, 'Release Kid', 7, 'grade_7');
+
+    delete from public.subscriptions where child_id = t_child_release_id;
+
+    insert into public.waitlist (parent_id, child_id, email, status)
+    values (t_parent_release_id, t_child_release_id, 'release@test.com', 'waiting')
+    on conflict (child_id) do update set status = 'waiting';
+
+    -- Release from waitlist
+    t_released_count := public.admin_release_waitlist_children(ARRAY[t_child_release_id]);
+    if t_released_count <> 1 then
+      raise exception 'Failed to release cutover trigger child';
+    end if;
+
+    -- Verify cutover executed automatically!
+    if not exists (
+      select 1 from public.enrollment_settings
+      where key = 'default' and free_pilot_ended_at is not null and free_pilot_enabled = false
+    ) then
+      raise exception 'admin_release_waitlist_children did not trigger cutover when threshold reached';
+    end if;
+
+    -- 5. Test get_enrollment_state()
+    select * into t_enr from public.get_enrollment_state();
+    if t_enr.total_real_children <> (select count(*)::integer from public.children where not is_internal_test) then
+      raise exception 'get_enrollment_state total_real_children mismatch: got %, expected %',
+        t_enr.total_real_children, (select count(*) from public.children where not is_internal_test);
+    end if;
+    if t_enr.free_pilot_admissions <> (select count(*)::integer from private_generation.historical_pilot_admissions) then
+      raise exception 'get_enrollment_state free_pilot_admissions mismatch: got %, expected %',
+        t_enr.free_pilot_admissions, (select count(*) from private_generation.historical_pilot_admissions);
+    end if;
+
+    -- Clean up test records
+    delete from public.generation_jobs where id = t_job_w2_id;
+    delete from public.materials where id = t_source_mat_id;
+    delete from public.waitlist where child_id in (t_child_dormant_id, t_child_active_id, t_child_paddle_id, t_child_release_id);
+    delete from public.subscriptions where child_id in (t_child_dormant_id, t_child_active_id, t_child_paddle_id, t_child_release_id);
+    delete from public.child_profiles where child_id in (t_child_dormant_id, t_child_active_id, t_child_paddle_id, t_child_release_id);
+    delete from public.children where id in (t_child_dormant_id, t_child_active_id, t_child_paddle_id, t_child_release_id);
+    delete from auth.users where id in (t_parent_active_id, t_parent_dormant_id, t_parent_paddle_id, t_parent_release_id);
+
+    -- Restore enrollment settings
+    update public.enrollment_settings
+    set free_pilot_ended_at = t_prev_ended,
+        free_pilot_enabled = t_prev_enabled,
+        free_pilot_active_limit = t_prev_limit,
+        capacity = t_prev_capacity
+    where key = 'default';
   end;
 
   -- Clean up

@@ -741,6 +741,8 @@ Therefore:
 * successful Fast Publisher completion sets actual Week 1 release to the successful publication time and opens the material immediately;
 * Week 2 is scheduled from the actual Week 1 release anchor plus seven days and then returns to the normal Week 2+ Submission → deterministic Finisher lifecycle;
 * while the Free Pilot is active, Week 2 and later remain fully entitled without requiring Paddle; after the pilot ends, normal paid entitlement governs future new weekly jobs;
+* during the Free Pilot, Week 2+ generation is paused for dormant Beta learners whose parents have not engaged within the rolling activity window (14 days), conserving LLM tokens and worker capacity; touching parent activity immediately resumes job claiming and generation without data loss;
+* trusted onboarding follows canonical ENROLLMENT-SETTINGS-FIRST lock ordering to prevent concurrency deadlocks with parent activity touches;
 * for Week 1, `feedback_cutoff_at` remains an invariant-derived placeholder and is not an actionable parent feedback deadline because no prior material exists;
 * a short-lived, hashed, single-purpose progress token may expose only sanitized Week 1 progress before authentication; authenticated parents use owner-scoped progress access;
 * dispatch loss must not lose work: private wake/publish outboxes remain retryable and duplicate doorbells are harmless because claims and completion are idempotent and authoritative in Supabase;
@@ -780,7 +782,7 @@ It is not an MVP blocker.
 The system operates with two related but distinct 100-child product boundaries:
 
 1. **Operational Service Capacity (100 active service children)**:
-   The concurrent active service occupancy (`locked_capacity_count()`) is capped at 100. When active occupancy reaches 100, new applicants enter the waitlist. Capacity is not silently auto-raised.
+   The concurrent active service occupancy (`locked_capacity_count()`) is capped at 100. During the Free Pilot, dormant Beta children (> 14 days without parent activity and not actively claimed) do not occupy operational capacity, allowing incoming families to acquire service capacity and replace inactive learners until the active service threshold is genuinely reached. When active occupancy reaches 100, new applicants enter the waitlist. Capacity is not silently auto-raised.
 
 2. **Free Pilot Threshold (100 rolling 14-day active service children)**:
    Until the system first reaches 100 rolling 14-day active service children, admitted children receive their personalized weekly materials for free every week. When rolling active service children reaches 100 for the first time, the Free Pilot phase ends permanently and irreversibly (`free_pilot_ended_at = now()`, `free_pilot_enabled = false`).
@@ -840,7 +842,7 @@ Example:
 
 Active service occupancy (`locked_capacity_count()`) counts:
 1. Active Paddle subscriptions (`trialing`, `active`, `past_due`);
-2. During Free Pilot: admitted real children whose parent has `profiles.last_active_at >= now() - interval '14 days'`, plus any child holding an in-flight generation job;
+2. During Free Pilot: admitted real children whose parent has `profiles.last_active_at >= now() - interval '14 days'`, plus any child holding an actively claimed in-flight generation job (`job.status = 'claimed' and job.lease_expires_at > now()`);
 3. Post Free Pilot: active subscription-backed children;
 4. Released waitlist entries holding reserved capacity;
 5. Unresolved capacity checkout claims.
@@ -908,6 +910,10 @@ status
 Notification may initially be manual.
 
 A complex referral or waitlist-ranking system is not required.
+
+When operators release waitlist entries via `admin_release_waitlist_children()`:
+* Existing Paddle subscriptions are strictly preserved (`WHERE subscriptions.provider = 'beta'`); a paying customer is never downgraded or overwritten to Beta.
+* After releasing children, if the newly released children belong to parents already active within the rolling window and push rolling active count to 100, `private_generation.check_and_execute_free_pilot_cutover()` triggers immediately.
 
 ---
 
@@ -4205,6 +4211,10 @@ When operational capacity is below 100:
 
 While the Free Pilot is active (rolling 14-day active service children has not reached 100 and `free_pilot_ended_at is null`):
 * admitted children receive personalized weekly materials for free, week after week (Week 1, Week 2, Week 3, etc.), without needing a Paddle subscription;
+* dormant Beta children (> 14 days without parent activity and not actively claimed) do not occupy operational capacity, allowing new active families to be admitted without waitlisting;
+* Week 2+ generation jobs for dormant Beta children are paused until the parent visits or logs in, at which point activity is touched and generation immediately resumes;
+* onboarding follows canonical enrollment-settings-first lock ordering to prevent concurrency deadlocks;
+* admin waitlist releases strictly preserve existing Paddle subscriptions;
 * parents may voluntarily subscribe early via Paddle to lock the Founder NT$349/month price; early subscription begins charging immediately;
 * voluntary paid subscribers who cancel while the Free Pilot is still active do not lose free service during the active pilot.
 
