@@ -284,19 +284,24 @@ describe('Landing Page — Direct Assessment Positioning & Marketing Boundaries'
     const q3 = faqItems.find(([q]) => q === '多久可以重新做程度診斷？')
 
     expect(q1).toBeDefined()
-    expect(q1?.[1]).toContain('15 分鐘程度診斷')
+    expect(q1?.[1]).toContain('程度診斷')
+    expect(q1?.[1]).toContain('題數會依作答情況調整')
     expect(q2).toBeDefined()
     expect(q2?.[1]).toContain('不用，完全是選用的')
+    expect(q2?.[1]).toContain('題數會依作答情況調整')
     expect(q3).toBeDefined()
     expect(q3?.[1]).toContain('90 天')
     expect(q3?.[1]).toContain('不需要依賴頻繁重測')
   })
 
-  it('strictly adheres to marketing boundaries without forbidden ETS-like claims', () => {
+  it('strictly adheres to marketing boundaries without forbidden ETS-like claims or unsupported duration promises', () => {
     const html = renderToStaticMarkup(<LandingPage />)
     expect(html).not.toContain('精準測出')
     expect(html).not.toContain('標準化測驗')
     expect(html).not.toContain('CEFR')
     expect(html).not.toContain('會考落點預測')
+    expect(html).not.toContain('15 分鐘')
+    expect(html).not.toContain('10–15 題')
+    expect(html).not.toContain('10-15 題')
   })
 })

@@ -184,17 +184,10 @@ begin
     raise exception 'Scenario 2 failed: previous completed session was mutated!';
   end if;
 
-  -- Guard: In-progress assessment prevents another duplicate retake
-  v_err_caught := false;
-  begin
-    perform public.start_assessment_retake(v_child_1);
-  exception when others then
-    if sqlerrm like '%already in progress%' then
-      v_err_caught := true;
-    end if;
-  end;
-  if not v_err_caught then
-    raise exception 'Scenario 2 failed: concurrent retake was not blocked';
+  -- Calling start_assessment_retake when in_progress session exists safely resumes that authoritative session
+  v_retake_res := public.start_assessment_retake(v_child_1);
+  if (v_retake_res->>'sessionId')::uuid <> v_session_new or (v_retake_res->>'status') <> 'in_progress' then
+    raise exception 'Scenario 2 failed: retake did not resume existing in_progress session: %', v_retake_res;
   end if;
 end;
 $$;

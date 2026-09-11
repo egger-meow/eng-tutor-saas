@@ -17,6 +17,7 @@ on conflict (id) do nothing;
 insert into public.children (id, parent_id, display_name, grade, grade_stage)
 values
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Child A', 7, 'grade_7'),
+  ('a2a2a2a2-a2a2-a2a2-a2a2-a2a2a2a2a2a2', '11111111-1111-1111-1111-111111111111', 'Child A2', 7, 'grade_7'),
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'Child B', 8, 'grade_8');
 
 -- 1. Insert test passage
@@ -470,7 +471,7 @@ declare
   v_sub_payload jsonb;
   v_sub_dup jsonb;
 begin
-  v_payload := public.start_or_resume_assessment_session('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+  v_payload := public.start_or_resume_assessment_session('a2a2a2a2-a2a2-a2a2-a2a2-a2a2a2a2a2a2');
   if v_payload->>'status' <> 'in_progress' then
     raise exception 'Expected status in_progress, got %', v_payload->>'status';
   end if;

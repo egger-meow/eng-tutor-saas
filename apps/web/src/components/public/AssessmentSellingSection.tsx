@@ -7,7 +7,7 @@ export function AssessmentSellingSection() {
         <p className="overline">選用程度診斷</p>
         <h2 id="assessment-section-title">不只問程度，讓孩子直接做給系統看。</h2>
         <p>
-          註冊只要 2 分鐘完成基礎設定；登入後可隨時讓孩子進行 15 分鐘程度診斷，亦可直接開始學習，系統皆能自動循序調整。
+          註冊約 2 分鐘完成基礎設定；登入後可隨時讓孩子做一段程度診斷，也可以直接開始學習，系統皆能自動循序調整。
         </p>
       </div>
 
