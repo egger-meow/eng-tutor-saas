@@ -270,26 +270,37 @@ exception when insufficient_privilege then
   -- Expected: mutation revoked
 end $$;
 
--- 5f. Authenticated Parent A CAN read Child A records under RLS
+-- 5f. Authenticated user CANNOT directly SELECT from internal assessment tables or passages
 do $$
-declare s_count integer; st_count integer; r_count integer;
 begin
-  select count(*) into s_count from public.assessment_sessions where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-  select count(*) into st_count from public.child_assessment_state where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-  select count(*) into r_count from public.assessment_responses where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-  if s_count <> 1 or st_count <> 1 or r_count <> 2 then
-    raise exception 'Parent A should see child A records, got s=% st=% r=%', s_count, st_count, r_count;
-  end if;
+  perform id from public.assessment_sessions;
+  raise exception 'Authenticated user should NOT be able to select from assessment_sessions';
+exception when insufficient_privilege then
+  -- Expected: select revoked
 end $$;
 
--- 5g. Authenticated Parent A CANNOT read Child B records (Parent isolation preserved)
 do $$
-declare b_count integer;
 begin
-  select count(*) into b_count from public.assessment_sessions where child_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-  if b_count <> 0 then
-    raise exception 'Parent A should NOT see Child B sessions, got %', b_count;
-  end if;
+  perform id from public.assessment_responses;
+  raise exception 'Authenticated user should NOT be able to select from assessment_responses';
+exception when insufficient_privilege then
+  -- Expected: select revoked
+end $$;
+
+do $$
+begin
+  perform child_id from public.child_assessment_state;
+  raise exception 'Authenticated user should NOT be able to select from child_assessment_state';
+exception when insufficient_privilege then
+  -- Expected: select revoked
+end $$;
+
+do $$
+begin
+  perform id from public.assessment_passages;
+  raise exception 'Authenticated user should NOT be able to select from assessment_passages';
+exception when insufficient_privilege then
+  -- Expected: select revoked
 end $$;
 
 reset role;
@@ -515,24 +526,56 @@ begin
   if (v_payload->>'itemsCompleted')::integer <> 1 or v_payload->>'status' <> 'in_progress' then
     raise exception 'Unexpected session state: %', v_payload;
   end if;
-end $$;
 
--- 8h. Parent B cannot access or submit to Child A's session
-do $$
-declare
-  v_s_id uuid;
-begin
-  select id into v_s_id from public.assessment_sessions where child_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' limit 1;
-  -- Switch claims to Parent B
+  -- 8h. Parent B cannot access or submit to Child A's session
   set local "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222"}';
   begin
-    perform public.get_assessment_session_state(v_s_id);
+    perform public.get_assessment_session_state(v_session_id);
     raise exception 'Parent B should NOT be able to read Child A session state';
   exception when others then
     if sqlerrm not like '%Assessment session not owned by user%' then
       raise;
     end if;
   end;
+end $$;
+
+-- 9. Anonymous Role Access Restrictions
+set local role anon;
+
+-- 9a. Anon CANNOT execute start_or_resume_assessment_session
+do $$
+begin
+  perform public.start_or_resume_assessment_session('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+  raise exception 'Anon should NOT be able to execute start_or_resume_assessment_session';
+exception when insufficient_privilege then
+  -- Expected: execute revoked
+end $$;
+
+-- 9b. Anon CANNOT execute submit_assessment_response
+do $$
+begin
+  perform public.submit_assessment_response('cccccccc-cccc-cccc-cccc-cccccccccccc', 'test_item_v01', 'A', false, 1000);
+  raise exception 'Anon should NOT be able to execute submit_assessment_response';
+exception when insufficient_privilege then
+  -- Expected: execute revoked
+end $$;
+
+-- 9c. Anon CANNOT execute get_assessment_session_state
+do $$
+begin
+  perform public.get_assessment_session_state('cccccccc-cccc-cccc-cccc-cccccccccccc');
+  raise exception 'Anon should NOT be able to execute get_assessment_session_state';
+exception when insufficient_privilege then
+  -- Expected: execute revoked
+end $$;
+
+-- 9d. Anon CANNOT execute compute_assessment_final_result
+do $$
+begin
+  perform public.compute_assessment_final_result('cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{}'::jsonb);
+  raise exception 'Anon should NOT be able to execute compute_assessment_final_result';
+exception when insufficient_privilege then
+  -- Expected: execute revoked
 end $$;
 
 reset role;

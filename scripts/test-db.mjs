@@ -9,7 +9,7 @@ function run(command, args) {
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
 
-for (const file of ['smoke.sql', 'diversity-format-memory.sql', 'diversity-release-compatibility.sql', 'assessment-foundation.sql']) {
+for (const file of ['smoke.sql', 'diversity-format-memory.sql', 'diversity-release-compatibility.sql', 'assessment-foundation.sql', 'assessment-conformance.sql']) {
   const source = resolve('supabase/tests', file)
   const destination = `/tmp/eng-tutor-${file}`
   run('docker', ['cp', source, `${container}:${destination}`])

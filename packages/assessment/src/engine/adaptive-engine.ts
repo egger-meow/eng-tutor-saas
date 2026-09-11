@@ -82,16 +82,20 @@ export class AdaptiveEngine {
       initialEvidenceMap[s] = createInitialSkillEvidence(s)
     }
 
-    const firstSkill = broadProbeRemaining.shift()!
-    const firstItem = selectCandidateItem(
-      availableItems,
-      firstSkill,
-      startingDifficulty,
-      new Set<string>()
-    )
+    let firstSkill: AssessmentSkill | undefined
+    let firstItem: AssessmentItem | null = null
+    while (broadProbeRemaining.length > 0 && !firstItem) {
+      firstSkill = broadProbeRemaining.shift()!
+      firstItem = selectCandidateItem(
+        availableItems,
+        firstSkill,
+        startingDifficulty,
+        new Set<string>()
+      )
+    }
 
-    if (!firstItem) {
-      throw new Error(`No available items for initial broad probe skill: ${firstSkill}`)
+    if (!firstItem || !firstSkill) {
+      throw new Error('No available items in question bank for broad probe.')
     }
 
     const state: ProvisionalEngineState = {
