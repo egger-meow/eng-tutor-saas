@@ -11,6 +11,7 @@ import { PageTransition } from '../components/motion/PageTransition'
 import { DisclosureItem } from '../components/motion/Disclosure'
 import { AnimatedDetails } from '../components/motion/AnimatedDetails'
 import { PersonalizationStory } from '../components/public/PersonalizationStory'
+import { AssessmentSellingSection } from '../components/public/AssessmentSellingSection'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
@@ -23,7 +24,7 @@ const abilityBenefits = [
 ] as const
 
 const evolutionPillars = [
-  ['01', '孩子越用，教材越懂他', '程度、學校進度、學過的內容、常錯的地方與家長回饋會持續累積，下一週接著孩子真正的位置往前。'],
+  ['01', '孩子越用，教材越懂他', '起點程度、選用的程度診斷、學校進度、學過的內容與每週真實作答回饋會持續累積，系統以最新學習表現為優先依據往前推進。'],
   ['02', '教材系統自己也會持續升級', '題型、課程對齊、錯誤診斷與教材設計能力會持續改善，後續教材直接承接這些改善。'],
   ['03', 'AI 進步，教材也跟著進步', '我們持續把更適合教育的模型與方法接進系統；家長不用研究模型版本。'],
 ] as const
@@ -36,7 +37,9 @@ const usageModes = [
 
 export const faqItems = [
   ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
-  ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本、學校進度、已知強弱項與家長描述。第一週同時是校準教材；收到使用回饋後，下一週可以做更明顯的難度調整。'],
+  ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本與家長設定的起點程度。登入後，家長亦可自由選擇讓孩子完成約 15 分鐘程度診斷，讓系統直接掌握單字、文法與閱讀的具體能力輪廓；即使不進行診斷，第一週也會依年級基準出題，並在收到每週作答回饋後迅速微調難度。'],
+  ['程度診斷一定要做嗎？', '不用，完全是選用的。如果不做診斷，系統會先依據年級與家長填寫的起點程度生成每週教材，並隨每週實際作答回饋逐步調整。若孩子願意做，約 15 分鐘的自適應診斷能讓系統在第一時間掌握更具體的能力輪廓。'],
+  ['多久可以重新做程度診斷？', '完成診斷後需間隔 90 天才能再次進行。這項設計是為了避免孩子產生頻繁測驗的壓力，同時給孩子足夠的時間透過每週教材與練習累積真實進步。在 90 天冷卻期間，系統會持續依據每週的作答回饋自動微調教材，不需要依賴頻繁重測。'],
   ['多久可以拿到第一份教材？', '名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。'],
   ['一定要讓孩子自己學嗎？', '不用。孩子可以自己完成，也可以由家長陪讀，或把 Student PDF 與 Parent Answer PDF 交給家教、老師當作每週教學內容與回家練習。教材準備好，怎麼使用由家庭決定。'],
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
@@ -93,7 +96,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </h1>
             <p className="lede"><strong>從孩子真的有興趣的內容開始，但一路對齊學校進度、國中英文與會考能力。</strong>每週的程度、錯題與回饋會接到下一週，不是每次重新抽一篇文章。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
-              <li>4 步驟約 2 分鐘快速定位，免考試、免綁卡</li>
+              <li>4 步驟 2 分鐘基礎設定，免綁卡；登入後可選用 15 分鐘程度診斷或直接開始學習</li>
               <li>每週 Student PDF + Parent Answer PDF</li>
               <li>孩子用紙筆閱讀、作答與思考</li>
             </ul>
@@ -140,6 +143,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <nav className="landing-section-nav" aria-label="首頁快速導覽">
           <a href="#samples">先看教材</a>
+          <a href="#assessment">程度診斷</a>
           <a href="#onboarding">免費開始</a>
           <a href="#personalization">怎麼個人化</a>
           <a href="#usage-modes">怎麼使用</a>
@@ -203,6 +207,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </article>
           </div>
         </section>
+
+        <AssessmentSellingSection />
 
         <section className="public-section onboarding-login-section" aria-labelledby="onboarding-section-title">
           <div className="section-heading">

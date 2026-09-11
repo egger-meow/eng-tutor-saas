@@ -74,6 +74,8 @@ export const RESULT_DISPLAY_LABELS: Record<'needs_support' | 'developing' | 'sec
 
 export const LOW_CONFIDENCE_LABEL = '目前資料較少'
 
+export const ASSESSMENT_RETAKE_COOLDOWN_DAYS = 90
+
 // 2. Client Zod Schemas
 export const AssessmentOverviewSchema = z.object({
   childId: z.string().uuid(),
@@ -82,6 +84,9 @@ export const AssessmentOverviewSchema = z.object({
   itemsCompleted: z.number().int().nonnegative(),
   targetItemCount: z.number().int().positive(),
   completedAt: z.string().nullable(),
+  retakeEligible: z.boolean().default(false),
+  daysSinceCompleted: z.number().int().nullable().default(null),
+  cooldownDays: z.number().int().default(90),
 })
 export type AssessmentOverview = z.infer<typeof AssessmentOverviewSchema>
 
@@ -165,6 +170,19 @@ export async function startOrResumeAssessmentSession(childId: string): Promise<A
 
   if (error) {
     throw new Error(`無法開始或繼續評估: ${error.message}`)
+  }
+
+  return AssessmentSessionStateSchema.parse(data)
+}
+
+export async function startAssessmentRetake(childId: string): Promise<AssessmentSessionState> {
+  const supabase = getSupabaseClient()
+  const { data, error } = await supabase.rpc('start_assessment_retake', {
+    p_child_id: childId,
+  })
+
+  if (error) {
+    throw new Error(`無法開始重新診斷: ${error.message}`)
   }
 
   return AssessmentSessionStateSchema.parse(data)

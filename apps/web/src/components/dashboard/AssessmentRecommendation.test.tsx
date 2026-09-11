@@ -14,6 +14,9 @@ describe('AssessmentRecommendation Component', () => {
           itemsCompleted: 0,
           targetItemCount: 18,
           completedAt: null,
+          retakeEligible: false,
+          daysSinceCompleted: null,
+          cooldownDays: 90,
         }}
       />
     )
@@ -35,6 +38,9 @@ describe('AssessmentRecommendation Component', () => {
           itemsCompleted: 7,
           targetItemCount: 18,
           completedAt: null,
+          retakeEligible: false,
+          daysSinceCompleted: null,
+          cooldownDays: 90,
         }}
       />
     )
@@ -43,7 +49,7 @@ describe('AssessmentRecommendation Component', () => {
     expect(html).toContain('已完成 7 題')
   })
 
-  it('renders completed state with view result CTA', () => {
+  it('renders recent completed state (<90 days) with view result CTA and cooldown note', () => {
     const html = renderToStaticMarkup(
       <AssessmentRecommendation
         childId="c1111111-1111-1111-1111-111111111111"
@@ -53,11 +59,43 @@ describe('AssessmentRecommendation Component', () => {
           sessionId: 's1111111-1111-1111-1111-111111111111',
           itemsCompleted: 18,
           targetItemCount: 18,
-          completedAt: '2026-09-12T00:00:00Z',
+          completedAt: '2026-09-01T00:00:00Z',
+          retakeEligible: false,
+          daysSinceCompleted: 11,
+          cooldownDays: 90,
         }}
       />
     )
 
+    expect(html).toContain('程度診斷已完成')
     expect(html).toContain('查看診斷結果')
+    expect(html).toContain('下次可重新診斷時間為完成後 90 天')
+    expect(html).not.toContain('action=retake')
+  })
+
+  it('renders retake-eligible state (90+ days) with retake and view previous CTAs', () => {
+    const html = renderToStaticMarkup(
+      <AssessmentRecommendation
+        childId="c1111111-1111-1111-1111-111111111111"
+        initialOverview={{
+          childId: 'c1111111-1111-1111-1111-111111111111',
+          status: 'completed',
+          sessionId: 's1111111-1111-1111-1111-111111111111',
+          itemsCompleted: 18,
+          targetItemCount: 18,
+          completedAt: '2026-06-01T00:00:00Z',
+          retakeEligible: true,
+          daysSinceCompleted: 95,
+          cooldownDays: 90,
+        }}
+      />
+    )
+
+    expect(html).toContain('建議更新程度診斷')
+    expect(html).toContain('上次診斷已超過 90 天')
+    expect(html).toContain('重新診斷')
+    expect(html).toContain('/children/c1111111-1111-1111-1111-111111111111/assessment?action=retake')
+    expect(html).toContain('查看上次結果')
+    expect(html).toContain('/children/c1111111-1111-1111-1111-111111111111/assessment')
   })
 })

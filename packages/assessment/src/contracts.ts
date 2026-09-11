@@ -279,3 +279,5 @@ export const ChildAssessmentStateSchema = z.object({
 })
 export type ChildAssessmentState = z.infer<typeof ChildAssessmentStateSchema>
 
+export const ASSESSMENT_RETAKE_COOLDOWN_DAYS = 90
+

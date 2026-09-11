@@ -261,3 +261,42 @@ describe('Landing Page — Onboarding & Direct Login', () => {
     expect(html).toContain('登記候補')
   })
 })
+
+describe('Landing Page — Direct Assessment Positioning & Marketing Boundaries', () => {
+  it('renders the dedicated diagnostic selling section and demo result preview', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+    expect(html).toContain('id="assessment"')
+    expect(html).toContain('href="#assessment"')
+    expect(html).toContain('程度診斷')
+    expect(html).toContain('不只問程度，讓孩子直接做給系統看。')
+    expect(html).toContain('溫和自適應出題')
+    expect(html).toContain('三大領域 13 項指標')
+    expect(html).toContain('進度隨存，即時投影')
+    expect(html).toContain('國一程度診斷能力輪廓')
+    expect(html).toContain('單字領域')
+    expect(html).toContain('文法領域')
+    expect(html).toContain('閱讀領域')
+  })
+
+  it('includes updated and new assessment FAQs explaining optionality and 90-day cooldown', () => {
+    const q1 = faqItems.find(([q]) => q === '第一週怎麼判斷孩子程度？')
+    const q2 = faqItems.find(([q]) => q === '程度診斷一定要做嗎？')
+    const q3 = faqItems.find(([q]) => q === '多久可以重新做程度診斷？')
+
+    expect(q1).toBeDefined()
+    expect(q1?.[1]).toContain('15 分鐘程度診斷')
+    expect(q2).toBeDefined()
+    expect(q2?.[1]).toContain('不用，完全是選用的')
+    expect(q3).toBeDefined()
+    expect(q3?.[1]).toContain('90 天')
+    expect(q3?.[1]).toContain('不需要依賴頻繁重測')
+  })
+
+  it('strictly adheres to marketing boundaries without forbidden ETS-like claims', () => {
+    const html = renderToStaticMarkup(<LandingPage />)
+    expect(html).not.toContain('精準測出')
+    expect(html).not.toContain('標準化測驗')
+    expect(html).not.toContain('CEFR')
+    expect(html).not.toContain('會考落點預測')
+  })
+})

@@ -1,0 +1,205 @@
+.assessment-selling-section {
+  position: relative;
+  isolation: isolate;
+  padding-top: clamp(3rem, 6vw, 5rem);
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+.assessment-selling-heading {
+  max-width: 62rem;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+.assessment-selling-heading h2 {
+  max-width: min(100%, 44rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.24;
+  text-wrap: balance;
+  margin-bottom: 1rem;
+}
+
+.assessment-selling-heading > p:last-child {
+  max-width: 48rem;
+  color: var(--color-muted, #6c6b63);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.assessment-selling-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .assessment-selling-layout {
+    grid-template-columns: 1fr 1.1fr;
+  }
+}
+
+.assessment-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.assessment-feature-card {
+  background: var(--color-paper, #fffdf8);
+  border: 1px solid var(--color-rule, #d8d0c1);
+  border-radius: var(--radius-surface, 0.75rem);
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  box-shadow: 0 4px 16px rgba(24, 38, 31, 0.04);
+}
+
+.assessment-feature-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-action, #284f3e);
+  background: var(--color-success-soft, #e6efe8);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.assessment-feature-text h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-ink, #18261f);
+  margin: 0 0 0.4rem 0;
+}
+
+.assessment-feature-text p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text, #3e413c);
+  margin: 0;
+}
+
+/* Demo Result Card */
+.assessment-demo-card {
+  background: #fff;
+  border: 1px solid var(--color-rule-strong, #c4baa7);
+  border-radius: var(--radius-surface, 0.75rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  box-shadow: 0 12px 36px rgba(24, 38, 31, 0.08);
+}
+
+.assessment-demo-header {
+  border-bottom: 1px solid var(--color-rule, #d8d0c1);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.assessment-demo-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background: var(--color-warm-soft, #f4efe6);
+  color: var(--color-accent-strong, #8d4f29);
+  margin-bottom: 0.5rem;
+}
+
+.assessment-demo-header h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-ink, #18261f);
+  margin: 0 0 0.5rem 0;
+}
+
+.assessment-demo-narrative {
+  font-size: 0.925rem;
+  line-height: 1.6;
+  color: var(--color-ink, #18261f);
+  background: var(--color-success-soft, #e6efe8);
+  border-left: 3px solid var(--color-action, #284f3e);
+  padding: 0.75rem 1rem;
+  border-radius: 0 0.375rem 0.375rem 0;
+  margin: 0;
+}
+
+.assessment-demo-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.assessment-demo-domain-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  background: var(--color-paper, #fffdf8);
+  border: 1px solid var(--color-rule, #d8d0c1);
+  border-radius: var(--radius-control, 0.5rem);
+}
+
+.assessment-demo-domain-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.assessment-demo-domain-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-ink, #18261f);
+}
+
+.assessment-demo-domain-skills {
+  font-size: 0.8rem;
+  color: var(--color-muted, #6c6b63);
+}
+
+.assessment-demo-badge-status {
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.assessment-demo-badge-status.status-secure {
+  background: #e6efe8;
+  color: #1f5139;
+}
+
+.assessment-demo-badge-status.status-growing {
+  background: #eaf1f7;
+  color: #1d466c;
+}
+
+.assessment-demo-badge-status.status-support {
+  background: #faebe5;
+  color: #8c3823;
+}
+
+.assessment-demo-footer {
+  border-top: 1px solid var(--color-rule, #d8d0c1);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.assessment-demo-footer p {
+  font-size: 0.85rem;
+  color: var(--color-muted, #6c6b63);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.assessment-demo-cta {
+  align-self: flex-start;
+}

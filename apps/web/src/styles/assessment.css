@@ -404,6 +404,28 @@
   color: var(--color-ink, #18261f);
 }
 
+.assessment-latest-snapshot-notice {
+  margin-top: 1rem;
+  background: var(--color-warm-soft, #f4efe6);
+  border: 1px solid var(--color-rule, #d8d0c1);
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-control, 0.625rem);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text, #3e413c);
+}
+
+.assessment-cooldown-notice {
+  margin-top: 1rem;
+  background: #fff8eb;
+  border: 1px solid #f6d8a8;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-control, 0.625rem);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #7c4a03;
+}
+
 .assessment-domains-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -594,4 +616,11 @@
 
 .assessment-rec-cta {
   flex-shrink: 0;
+}
+
+.assessment-rec-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }

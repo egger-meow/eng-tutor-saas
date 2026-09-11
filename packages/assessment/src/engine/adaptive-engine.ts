@@ -49,6 +49,7 @@ export interface InitSessionParams {
   onboardingLevel?: OnboardingLevel | string | null
   availableItems: readonly AssessmentItem[]
   config?: Partial<AdaptiveEngineConfig>
+  previousSessionItemIds?: readonly string[] | null
 }
 
 export interface ProcessResponseParams {
@@ -73,7 +74,7 @@ export class AdaptiveEngine {
     state: ProvisionalEngineState
     decision: NextItemDecision
   } {
-    const { sessionId, childId, gradeStage, onboardingLevel, availableItems } = params
+    const { sessionId, childId, gradeStage, onboardingLevel, availableItems, previousSessionItemIds } = params
     const startingDifficulty = computeStartingDifficulty(gradeStage, onboardingLevel)
 
     const broadProbeRemaining = [...DEFAULT_BROAD_PROBE_SKILLS]
@@ -90,7 +91,9 @@ export class AdaptiveEngine {
         availableItems,
         firstSkill,
         startingDifficulty,
-        new Set<string>()
+        new Set<string>(),
+        null,
+        previousSessionItemIds
       )
     }
 
@@ -107,6 +110,7 @@ export class AdaptiveEngine {
       currentPresentedItemId: firstItem.id,
       itemsCompleted: 0,
       itemHistory: [firstItem.id],
+      previousSessionItemIds: previousSessionItemIds ? [...previousSessionItemIds] : undefined,
     }
 
     const decision: NextItemDecision = {
@@ -195,7 +199,8 @@ export class AdaptiveEngine {
           nextSkill,
           state.startingDifficulty,
           usedItemSet,
-          lastPassageId
+          lastPassageId,
+          state.previousSessionItemIds
         )
       }
 
@@ -377,7 +382,14 @@ export class AdaptiveEngine {
         }
       }
 
-      const item = selectCandidateItem(availableItems, skill, targetDiff, usedItemIds)
+      const item = selectCandidateItem(
+        availableItems,
+        skill,
+        targetDiff,
+        usedItemIds,
+        null,
+        state.previousSessionItemIds
+      )
       if (item) {
         return {
           skill,

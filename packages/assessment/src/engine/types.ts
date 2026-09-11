@@ -50,6 +50,7 @@ export interface ProvisionalEngineState {
   currentPresentedItemId: string | null
   itemsCompleted: number
   itemHistory: string[]
+  previousSessionItemIds?: string[]
 }
 
 export interface NextItemDecision {

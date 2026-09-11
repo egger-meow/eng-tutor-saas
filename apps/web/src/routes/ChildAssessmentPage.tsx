@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import {
   getChildAssessmentOverview,
   startOrResumeAssessmentSession,
+  startAssessmentRetake,
   submitAssessmentResponse,
   getAssessmentSessionResult,
   type AssessmentOverview,
@@ -255,12 +256,19 @@ export function AssessmentQuestionView({
 
 export function AssessmentResultView({
   result,
+  overview,
+  cooldownNotice,
   onExit,
+  onRetake,
 }: {
   result: SanitizedAssessmentResult
+  overview?: AssessmentOverview | null
+  cooldownNotice?: string | null
   onExit: () => void
+  onRetake?: () => void
 }) {
   const domains: AssessmentDomain[] = ['vocabulary', 'grammar', 'reading']
+  const isRetakeEligible = overview?.status === 'completed' && Boolean(overview?.retakeEligible)
 
   return (
     <main className="assessment-page">
@@ -281,6 +289,14 @@ export function AssessmentResultView({
               {new Date(result.completedAt).toLocaleDateString('zh-TW')}
             </div>
             <div className="assessment-narrative-box">{result.overallNarrativeZh}</div>
+            <div className="assessment-latest-snapshot-notice">
+              這次結果已更新孩子目前的程度診斷。系統後續將以最新的能力輪廓與每週學習表現共同規劃合適材料。
+            </div>
+            {cooldownNotice && (
+              <div className="assessment-cooldown-notice" role="status">
+                {cooldownNotice}
+              </div>
+            )}
           </section>
 
           {/* Three Domain Cards */}
@@ -352,15 +368,28 @@ export function AssessmentResultView({
           {/* Completion Next Steps */}
           <footer className="assessment-completion-footer">
             <p className="assessment-completion-note">
-              診斷結果已完成。後續個人化整合將由系統的學習檔案處理。
+              {isRetakeEligible
+                ? '上次診斷已超過 90 天，若需要可進行重新診斷；若未重測，系統將持續以每週最新作答表現為優先調整材料。'
+                : '診斷結果已完成。後續個人化整合將由系統的學習檔案處理。下次可重新診斷時間為完成後 90 天。'}
             </p>
-            <button
-              className="assessment-submit-btn"
-              type="button"
-              onClick={onExit}
-            >
-              回到孩子學習頁
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {isRetakeEligible && onRetake && (
+                <button
+                  className="button button-primary"
+                  type="button"
+                  onClick={onRetake}
+                >
+                  重新診斷
+                </button>
+              )}
+              <button
+                className={`button ${isRetakeEligible ? 'button-secondary' : 'button-primary'}`}
+                type="button"
+                onClick={onExit}
+              >
+                回到孩子學習頁
+              </button>
+            </div>
           </footer>
         </div>
       </div>
@@ -392,6 +421,8 @@ type AssessmentPageState =
   | {
       type: 'completed'
       result: SanitizedAssessmentResult
+      overview?: AssessmentOverview | null
+      cooldownNotice?: string | null
     }
 
 export function ChildAssessmentPage({ session: _session, childId }: ChildAssessmentPageProps) {
@@ -411,11 +442,71 @@ export function ChildAssessmentPage({ session: _session, childId }: ChildAssessm
         const overview = await getChildAssessmentOverview(childId)
         if (!active) return
 
+        const url = new URL(window.location.href)
+        const isRetakeRequested = url.searchParams.get('action') === 'retake'
+
+        if (isRetakeRequested) {
+          if (overview.status === 'in_progress' && overview.sessionId) {
+            const sessionState = await startOrResumeAssessmentSession(childId)
+            if (!active) return
+            if (sessionState.status === 'completed') {
+              const result = await getAssessmentSessionResult(sessionState.sessionId)
+              if (!active) return
+              setState({ type: 'completed', result, overview })
+            } else if (sessionState.currentItem) {
+              setState({
+                type: 'in_progress',
+                sessionState,
+                currentItem: sessionState.currentItem,
+                rawAnswer: '',
+                isSubmitting: false,
+                errorMessage: null,
+              })
+            } else {
+              setState({ type: 'error', message: '目前無法載入題目，請稍後再試。' })
+            }
+            return
+          }
+
+          if (overview.retakeEligible) {
+            const sessionState = await startAssessmentRetake(childId)
+            if (!active) return
+            if (sessionState.currentItem) {
+              resetTimer()
+              setState({
+                type: 'in_progress',
+                sessionState,
+                currentItem: sessionState.currentItem,
+                rawAnswer: '',
+                isSubmitting: false,
+                errorMessage: null,
+              })
+              return
+            } else {
+              setState({ type: 'error', message: '目前無法載入重新診斷題目，請稍後再試。' })
+              return
+            }
+          }
+
+          if (overview.status === 'completed') {
+            const result = await getAssessmentSessionResult(overview.sessionId!)
+            if (!active) return
+            setState({
+              type: 'completed',
+              result,
+              overview,
+              cooldownNotice:
+                '距離上次診斷尚未滿 90 天，目前暫不開放重新診斷。系統會持續依據每週學習表現動態微調。',
+            })
+            return
+          }
+        }
+
         if (overview.status === 'completed' && overview.sessionId) {
           // Load completed session result
           const result = await getAssessmentSessionResult(overview.sessionId)
           if (!active) return
-          setState({ type: 'completed', result })
+          setState({ type: 'completed', result, overview })
         } else if (overview.status === 'in_progress' && overview.sessionId) {
           // Resume in-progress session
           const sessionState = await startOrResumeAssessmentSession(childId)
@@ -423,7 +514,7 @@ export function ChildAssessmentPage({ session: _session, childId }: ChildAssessm
           if (sessionState.status === 'completed') {
             const result = await getAssessmentSessionResult(sessionState.sessionId)
             if (!active) return
-            setState({ type: 'completed', result })
+            setState({ type: 'completed', result, overview })
           } else if (sessionState.currentItem) {
             setState({
               type: 'in_progress',
@@ -452,7 +543,7 @@ export function ChildAssessmentPage({ session: _session, childId }: ChildAssessm
     return () => {
       active = false
     }
-  }, [childId])
+  }, [childId, resetTimer])
 
   // Start Assessment from Intro
   async function handleStartAssessment() {
@@ -477,6 +568,30 @@ export function ChildAssessmentPage({ session: _session, childId }: ChildAssessm
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '開始評估時發生錯誤'
+      setState({ type: 'error', message: msg })
+    }
+  }
+
+  // Start Assessment Retake
+  async function handleStartRetake() {
+    setState({ type: 'loading' })
+    try {
+      const sessionState = await startAssessmentRetake(childId)
+      if (sessionState.currentItem) {
+        resetTimer()
+        setState({
+          type: 'in_progress',
+          sessionState,
+          currentItem: sessionState.currentItem,
+          rawAnswer: '',
+          isSubmitting: false,
+          errorMessage: null,
+        })
+      } else {
+        setState({ type: 'error', message: '目前無法載入重新診斷題目，請稍後再試。' })
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '開始重新診斷時發生錯誤'
       setState({ type: 'error', message: msg })
     }
   }
@@ -621,7 +736,10 @@ export function ChildAssessmentPage({ session: _session, childId }: ChildAssessm
   return (
     <AssessmentResultView
       result={state.result}
+      overview={state.overview}
+      cooldownNotice={state.cooldownNotice}
       onExit={() => navigate('/')}
+      onRetake={() => void handleStartRetake()}
     />
   )
 }

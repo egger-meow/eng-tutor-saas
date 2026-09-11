@@ -313,6 +313,7 @@ describe('ChildAssessmentPage Subcomponents', () => {
 
       // Truthful next steps note
       expect(html).toContain('診斷結果已完成。後續個人化整合將由系統的學習檔案處理。')
+      expect(html).toContain('這次結果已更新孩子目前的程度診斷。')
       expect(html).toContain('回到孩子學習頁')
 
       // Strict Security & Privacy Assertions: Internal enum IDs, difficulty numbers, and engine version MUST NOT be rendered
@@ -324,6 +325,50 @@ describe('ChildAssessmentPage Subcomponents', () => {
       expect(html).not.toContain('v1.0.0')
       expect(html).not.toContain('broad_probe')
       expect(html).not.toContain('targeted_confirmation')
+
+      // Strictly NO fake improvement percentage or score delta
+      expect(html).not.toContain('進步')
+      expect(html).not.toContain('%')
+      expect(html).not.toContain('+')
+    })
+
+    it('renders retake-eligible options when 90+ days have passed', () => {
+      const eligibleOverview: assessmentLib.AssessmentOverview = {
+        childId: '11111111-1111-1111-1111-111111111111',
+        status: 'completed',
+        sessionId: '22222222-2222-2222-2222-222222222222',
+        itemsCompleted: 18,
+        targetItemCount: 18,
+        completedAt: '2026-06-01T00:00:00Z',
+        retakeEligible: true,
+        daysSinceCompleted: 95,
+        cooldownDays: 90,
+      }
+
+      const html = renderToStaticMarkup(
+        <AssessmentResultView
+          result={mockResult}
+          overview={eligibleOverview}
+          onExit={() => {}}
+          onRetake={() => {}}
+        />
+      )
+
+      expect(html).toContain('重新診斷')
+      expect(html).toContain('上次診斷已超過 90 天')
+      expect(html).toContain('回到孩子學習頁')
+    })
+
+    it('renders cooldown notice when retake attempted during active cooldown', () => {
+      const html = renderToStaticMarkup(
+        <AssessmentResultView
+          result={mockResult}
+          cooldownNotice="距離上次診斷尚未滿 90 天，目前暫不開放重新診斷。系統會持續依據每週學習表現動態微調。"
+          onExit={() => {}}
+        />
+      )
+
+      expect(html).toContain('距離上次診斷尚未滿 90 天，目前暫不開放重新診斷')
     })
   })
 })
