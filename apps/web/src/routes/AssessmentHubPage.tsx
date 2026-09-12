@@ -16,13 +16,13 @@ import '../styles/assessment.css'
 
 interface ChildAssessmentCardProps {
   child: Child
-  overview?: AssessmentOverview | null
+  overview: AssessmentOverview
 }
 
 export function ChildAssessmentCard({ child, overview }: ChildAssessmentCardProps) {
-  const status = overview?.status ?? 'not_started'
-  const isRetakeEligible = status === 'completed' && Boolean(overview?.retakeEligible)
-  const completedDate = formatAssessmentDate(overview?.completedAt)
+  const status = overview.status
+  const isRetakeEligible = status === 'completed' && Boolean(overview.retakeEligible)
+  const completedDate = formatAssessmentDate(overview.completedAt)
 
   return (
     <article className="assessment-child-card surface-card" data-child-id={child.id}>
@@ -47,7 +47,7 @@ export function ChildAssessmentCard({ child, overview }: ChildAssessmentCardProp
               診斷進行中
             </p>
             <p className="assessment-child-status-subtitle">
-              已完成 {overview?.itemsCompleted ?? 0} 題
+              已完成 {overview.itemsCompleted} 題
             </p>
           </>
         )}
@@ -158,20 +158,18 @@ export function AssessmentHubPage({
       setChildren(childList)
 
       if (childList.length > 0) {
-        const results = await Promise.allSettled(
+        const results = await Promise.all(
           childList.map((c) => getChildAssessmentOverview(c.id))
         )
         const overviewMap: Record<string, AssessmentOverview> = {}
-        results.forEach((res, idx) => {
-          if (res.status === 'fulfilled') {
-            overviewMap[childList[idx].id] = res.value
-          }
+        childList.forEach((child, idx) => {
+          overviewMap[child.id] = results[idx]
         })
         setOverviews(overviewMap)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '載入程度診斷資料失敗，請稍後再試。'
-      setError(msg)
+      const msg = err instanceof Error ? err.message : '程度診斷狀態載入失敗，請稍後再試。'
+      setError(msg || '程度診斷狀態載入失敗，請稍後再試。')
     } finally {
       setLoading(false)
     }
@@ -249,13 +247,17 @@ export function AssessmentHubPage({
               role="list"
               aria-label="孩子的程度診斷列表"
             >
-              {children.map((child) => (
-                <ChildAssessmentCard
-                  key={child.id}
-                  child={child}
-                  overview={overviews[child.id]}
-                />
-              ))}
+              {children.map((child) => {
+                const overview = overviews[child.id]
+                if (!overview) return null
+                return (
+                  <ChildAssessmentCard
+                    key={child.id}
+                    child={child}
+                    overview={overview}
+                  />
+                )
+              })}
             </div>
           )}
         </section>

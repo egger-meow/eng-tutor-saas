@@ -166,12 +166,24 @@ describe('AssessmentHubPage', () => {
   })
 
   describe('AssessmentHubPage layout and invariants', () => {
+    const overviewPax: AssessmentOverview = {
+      childId: childPax.id,
+      status: 'not_started',
+      sessionId: null,
+      itemsCompleted: 0,
+      targetItemCount: 18,
+      completedAt: null,
+      retakeEligible: false,
+      daysSinceCompleted: null,
+      cooldownDays: 90,
+    }
+
     it('renders top-level heading and educational orientation lede', () => {
       const html = renderToStaticMarkup(
         <AssessmentHubPage
           session={mockSession}
           initialChildren={[childPax]}
-          initialOverviews={{}}
+          initialOverviews={{ [childPax.id]: overviewPax }}
         />
       )
 
@@ -185,7 +197,7 @@ describe('AssessmentHubPage', () => {
         <AssessmentHubPage
           session={mockSession}
           initialChildren={[childPax]}
-          initialOverviews={{}}
+          initialOverviews={{ [childPax.id]: overviewPax }}
         />
       )
 
@@ -196,19 +208,20 @@ describe('AssessmentHubPage', () => {
       expect(html).toContain('開始程度診斷')
     })
 
-    it('renders independent cards for multiple children', () => {
-      const overviewPax: AssessmentOverview = {
-        childId: childPax.id,
-        status: 'not_started',
-        sessionId: null,
-        itemsCompleted: 0,
-        targetItemCount: 18,
-        completedAt: null,
-        retakeEligible: false,
-        daysSinceCompleted: null,
-        cooldownDays: 90,
-      }
+    it('does not render cards when overview is missing or failed', () => {
+      // Missing overview for childPax means it will not be rendered as a card
+      const html = renderToStaticMarkup(
+        <AssessmentHubPage
+          session={mockSession}
+          initialChildren={[childPax]}
+          initialOverviews={{}}
+        />
+      )
 
+      expect(html).not.toContain('尚未完成程度診斷')
+    })
+
+    it('renders independent cards for multiple children', () => {
       const overviewAmy: AssessmentOverview = {
         childId: childAmy.id,
         status: 'completed',
