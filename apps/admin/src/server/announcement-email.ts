@@ -111,8 +111,8 @@ export function formatMarkdownToEmailHtml(content: string): string {
         index++
       }
       output.push(
-        `<ul style="margin:0 0 16px 20px;padding:0;color:#24382f;line-height:1.8;font-size:15px;">` +
-          items.map((it) => `<li style="margin-bottom:6px;">${renderInline(it)}</li>`).join('') +
+        `<ul style="margin:0 0 16px 20px;padding:0;color:#111827;line-height:1.8;font-size:15px;">` +
+          items.map((it) => `<li style="margin-bottom:6px;color:#111827;">${renderInline(it)}</li>`).join('') +
           `</ul>`,
       )
       continue
@@ -125,14 +125,14 @@ export function formatMarkdownToEmailHtml(content: string): string {
         index++
       }
       output.push(
-        `<ol style="margin:0 0 16px 20px;padding:0;color:#24382f;line-height:1.8;font-size:15px;">` +
-          items.map((it) => `<li style="margin-bottom:6px;">${renderInline(it)}</li>`).join('') +
+        `<ol style="margin:0 0 16px 20px;padding:0;color:#111827;line-height:1.8;font-size:15px;">` +
+          items.map((it) => `<li style="margin-bottom:6px;color:#111827;">${renderInline(it)}</li>`).join('') +
           `</ol>`,
       )
       continue
     }
 
-    output.push(`<p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#24382f;">${renderInline(line)}</p>`)
+    output.push(`<p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#111827;">${renderInline(line)}</p>`)
     index++
   }
 
@@ -177,11 +177,11 @@ export function buildAnnouncementEmailHtml(
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>紙屬英文公告 — ${escapeHtml(announcement.title)}</title>
   </head>
-  <body style="margin:0;padding:0;background:#f4f0e6;color:#24382f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;-webkit-font-smoothing:antialiased;">
+  <body style="margin:0;padding:0;background:#f4f0e6;color:#111827;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif;-webkit-font-smoothing:antialiased;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f0e6;padding:32px 16px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background:#fffdf7;border:1px solid #ded7c7;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background:#fffdf7;color:#111827;border:1px solid #ded7c7;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
             <!-- Header -->
             <tr>
               <td style="background:#173f35;padding:22px 32px;color:#fffdf7;">
@@ -202,7 +202,7 @@ export function buildAnnouncementEmailHtml(
 
             <!-- Content Area -->
             <tr>
-              <td style="padding:32px 32px 28px;">
+              <td style="padding:32px 32px 28px;color:#111827;">
                 <!-- Category Badge -->
                 <div style="margin-bottom:12px;">
                   <span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:${catInfo.bg};color:${catInfo.color};">
@@ -211,12 +211,12 @@ export function buildAnnouncementEmailHtml(
                 </div>
 
                 <!-- Title -->
-                <h1 style="margin:0 0 20px;font-size:22px;line-height:1.45;color:#173f35;font-weight:700;font-family:Georgia,'Noto Serif TC',serif;">
+                <h1 style="margin:0 0 20px;font-size:22px;line-height:1.45;color:#111827;font-weight:700;font-family:Georgia,'Noto Serif TC',serif;">
                   ${escapeHtml(announcement.title)}
                 </h1>
 
                 <!-- Body Content -->
-                <div style="border-top:1px solid #eee7db;padding-top:20px;margin-bottom:28px;">
+                <div style="border-top:1px solid #eee7db;padding-top:20px;margin-bottom:28px;color:#111827;">
                   ${contentHtml}
                 </div>
 
@@ -225,13 +225,13 @@ export function buildAnnouncementEmailHtml(
                   <a href="${escapeHtml(actionUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#c96c43;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 36px;border-radius:999px;letter-spacing:0.5px;box-shadow:0 3px 10px rgba(201,108,67,0.25);">
                     ${escapeHtml(buttonText)} →
                   </a>
-                  <div style="margin-top:12px;font-size:12px;color:#85948c;line-height:1.5;">
-                    官網連結：<a href="${escapeHtml(actionUrl)}" target="_blank" rel="noopener noreferrer" style="color:#c96c43;text-decoration:underline;word-break:break-all;">${escapeHtml(actionUrl)}</a>
+                  <div style="margin-top:12px;font-size:12px;color:#64748b;line-height:1.5;">
+                    官網連結：<a href="${escapeHtml(actionUrl)}" target="_blank" rel="noopener noreferrer" style="color:#c96c43;text-decoration:underline;word-break:break-all;font-weight:600;">${escapeHtml(actionUrl)}</a>
                   </div>
                 </div>
 
                 <!-- Footer Note inside Card -->
-                <div style="margin-top:24px;padding-top:18px;border-top:1px solid #eee7db;font-size:13px;line-height:1.7;color:#617068;">
+                <div style="margin-top:24px;padding-top:18px;border-top:1px solid #eee7db;font-size:13px;line-height:1.7;color:#475569;">
                   親愛的家長您好，此信件為紙屬英文最新發布之服務公告通知。<br>
                   您也可以隨時登入紙屬英文後台查看所有歷史公告與教材進度。
                 </div>
@@ -240,7 +240,7 @@ export function buildAnnouncementEmailHtml(
 
             <!-- Subtle Bottom Footer -->
             <tr>
-              <td style="background:#f9f6ef;padding:14px 32px;font-size:12px;color:#85948c;text-align:center;border-top:1px solid #ded7c7;">
+              <td style="background:#f9f6ef;padding:14px 32px;font-size:12px;color:#64748b;text-align:center;border-top:1px solid #ded7c7;">
                 紙屬英文團隊 · 專為台灣國中生打造的個人化英文自學教材
               </td>
             </tr>

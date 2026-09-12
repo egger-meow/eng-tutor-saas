@@ -56,11 +56,11 @@ describe('announcement-email module', () => {
       const md = '- 第一點\n- 第二點\n\n1. 步驟一\n2. 步驟二'
       const html = formatMarkdownToEmailHtml(md)
       expect(html).toContain('<ul')
-      expect(html).toContain('<li style="margin-bottom:6px;">第一點</li>')
-      expect(html).toContain('<li style="margin-bottom:6px;">第二點</li>')
+      expect(html).toContain('<li style="margin-bottom:6px;color:#111827;">第一點</li>')
+      expect(html).toContain('<li style="margin-bottom:6px;color:#111827;">第二點</li>')
       expect(html).toContain('<ol')
-      expect(html).toContain('<li style="margin-bottom:6px;">步驟一</li>')
-      expect(html).toContain('<li style="margin-bottom:6px;">步驟二</li>')
+      expect(html).toContain('<li style="margin-bottom:6px;color:#111827;">步驟一</li>')
+      expect(html).toContain('<li style="margin-bottom:6px;color:#111827;">步驟二</li>')
     })
   })
 

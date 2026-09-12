@@ -2203,6 +2203,37 @@ button, input, select, textarea {
   line-height: 1.6;
 }
 
+/* Announcement Email Preview Card (Explicit high-contrast light mode styles) */
+.announcement-email-preview-wrapper {
+  background: #f4f0e6 !important;
+  color: #111827 !important;
+}
+
+.announcement-email-preview-card {
+  background: #fffdf7 !important;
+  color: #111827 !important;
+}
+
+.announcement-email-preview-card p,
+.announcement-email-preview-card li,
+.announcement-email-preview-card td,
+.announcement-email-preview-card .markdown-preview-root {
+  color: #111827 !important;
+}
+
+.announcement-email-preview-card strong {
+  color: #0f172a !important;
+  font-weight: 700;
+}
+
+.announcement-email-preview-card h1,
+.announcement-email-preview-card h2,
+.announcement-email-preview-card h3,
+.announcement-email-preview-card h4 {
+  color: #111827 !important;
+  font-weight: 700;
+}
+
 /* ==========================================================================
    Timeline View & Test Mode
    ========================================================================== */

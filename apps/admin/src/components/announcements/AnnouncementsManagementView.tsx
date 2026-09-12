@@ -613,7 +613,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                   />
                 ) : previewTab === 'preview' ? (
                   <div className="markdown-preview-container">
-                    <MarkdownPreview content={body} />
+                    <MarkdownPreview content={body} textColor="var(--text-main, #f1f5f9)" />
                     {ctaUrl.trim() && (
                       <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid var(--border-light, #e2e8f0)', textAlign: 'center' }}>
                         <a
@@ -631,15 +631,18 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 ) : (
                   /* Branded Email Preview */
                   <div
+                    className="announcement-email-preview-wrapper"
                     style={{
                       background: '#f4f0e6',
                       padding: '24px 16px',
                       borderRadius: '10px',
                       border: '1px solid #ded7c7',
                       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif",
+                      color: '#111827',
                     }}
                   >
                     <div
+                      className="announcement-email-preview-card"
                       style={{
                         maxWidth: '560px',
                         margin: '0 auto',
@@ -648,6 +651,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         overflow: 'hidden',
                         border: '1px solid #ded7c7',
                         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                        color: '#111827',
                       }}
                     >
                       {/* Email Header */}
@@ -658,6 +662,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
+                          color: '#fffdf7',
                         }}
                       >
                         <span
@@ -685,7 +690,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                       </div>
 
                       {/* Email Content */}
-                      <div style={{ padding: '24px 24px 20px' }}>
+                      <div style={{ padding: '24px 24px 20px', color: '#111827' }}>
                         <div style={{ marginBottom: '10px' }}>
                           <span
                             style={{
@@ -705,17 +710,18 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         <h2
                           style={{
                             margin: '0 0 16px',
-                            fontSize: '18px',
+                            fontSize: '20px',
                             lineHeight: 1.45,
-                            color: '#173f35',
+                            color: '#111827',
+                            fontWeight: 700,
                             fontFamily: "Georgia, 'Noto Serif TC', serif",
                           }}
                         >
                           {title || '（未輸入公告標題）'}
                         </h2>
 
-                        <div style={{ borderTop: '1px solid #eee7db', paddingTop: '16px', marginBottom: '24px' }}>
-                          <MarkdownPreview content={body || '（未輸入公告內容）'} />
+                        <div style={{ borderTop: '1px solid #eee7db', paddingTop: '16px', marginBottom: '24px', color: '#111827', fontSize: '15px', lineHeight: 1.8 }}>
+                          <MarkdownPreview content={body || '（未輸入公告內容）'} textColor="#111827" />
                         </div>
 
                         {/* CTA Button in Email */}
@@ -725,9 +731,9 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                               display: 'inline-block',
                               background: '#c96c43',
                               color: '#ffffff',
-                              fontSize: '15px',
+                              fontSize: '16px',
                               fontWeight: 700,
-                              padding: '13px 34px',
+                              padding: '14px 36px',
                               borderRadius: '999px',
                               boxShadow: '0 3px 10px rgba(201,108,67,0.25)',
                               letterSpacing: '0.5px',
@@ -738,13 +744,13 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                           <div
                             style={{
                               marginTop: '10px',
-                              fontSize: '11px',
-                              color: '#85948c',
+                              fontSize: '12px',
+                              color: '#64748b',
                               wordBreak: 'break-all',
                             }}
                           >
                             官網連結：
-                            <span style={{ color: '#c96c43', textDecoration: 'underline' }}>
+                            <span style={{ color: '#c96c43', textDecoration: 'underline', fontWeight: 600 }}>
                               {ctaUrl.trim()
                                 ? ctaUrl.trim().startsWith('/')
                                   ? `https://paperbond.jjmowlab.com${ctaUrl.trim()}`
@@ -760,8 +766,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                             marginTop: '20px',
                             paddingTop: '14px',
                             borderTop: '1px solid #eee7db',
-                            fontSize: '12px',
-                            color: '#617068',
+                            fontSize: '13px',
+                            color: '#334155',
                             lineHeight: 1.6,
                           }}
                         >
@@ -775,8 +781,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         style={{
                           background: '#f9f6ef',
                           padding: '12px 24px',
-                          fontSize: '11px',
-                          color: '#85948c',
+                          fontSize: '12px',
+                          color: '#475569',
                           textAlign: 'center',
                           borderTop: '1px solid #ded7c7',
                         }}
