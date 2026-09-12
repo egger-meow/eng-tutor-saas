@@ -914,6 +914,8 @@ export interface AnnouncementItem {
   body: string
   category: AnnouncementCategory
   status: AnnouncementStatus
+  cta_text?: string | null
+  cta_url?: string | null
   published_at: string | null
   email_sent_at?: string | null
   email_sent_count?: number
@@ -937,6 +939,8 @@ export interface CreateAnnouncementInput {
   body: string
   category: AnnouncementCategory
   status?: AnnouncementStatus
+  cta_text?: string | null
+  cta_url?: string | null
   sendEmail?: boolean
 }
 
@@ -946,6 +950,8 @@ export interface UpdateAnnouncementInput {
   body?: string
   category?: AnnouncementCategory
   status?: AnnouncementStatus
+  cta_text?: string | null
+  cta_url?: string | null
   sendEmail?: boolean
 }
 

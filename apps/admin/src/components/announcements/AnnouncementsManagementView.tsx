@@ -51,8 +51,10 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [category, setCategory] = useState<AnnouncementCategory>('feature')
+  const [ctaText, setCtaText] = useState('')
+  const [ctaUrl, setCtaUrl] = useState('')
   const [sendEmail, setSendEmail] = useState(false)
-  const [previewTab, setPreviewTab] = useState<'write' | 'preview'>('write')
+  const [previewTab, setPreviewTab] = useState<'write' | 'preview' | 'email'>('write')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -64,6 +66,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
     setTitle('')
     setBody('')
     setCategory('feature')
+    setCtaText('')
+    setCtaUrl('')
     setSendEmail(false)
     setPreviewTab('write')
     setFeedbackMessage(null)
@@ -75,6 +79,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
     setTitle(item.title)
     setBody(item.body)
     setCategory(item.category)
+    setCtaText(item.cta_text || '')
+    setCtaUrl(item.cta_url || '')
     setSendEmail(false)
     setPreviewTab('write')
     setFeedbackMessage(null)
@@ -121,6 +127,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
           body: trimmedBody,
           category,
           status: targetStatus ?? editingItem.status,
+          cta_text: ctaText.trim() || null,
+          cta_url: ctaUrl.trim() || null,
           sendEmail: willSendEmail,
         })
         if (!res.success) {
@@ -135,6 +143,8 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
           body: trimmedBody,
           category,
           status: targetStatus ?? 'draft',
+          cta_text: ctaText.trim() || null,
+          cta_url: ctaUrl.trim() || null,
           sendEmail: willSendEmail,
         })
         if (!res.success) {
@@ -520,6 +530,43 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 </div>
               </div>
 
+              {/* Action Button & Link (CTA) */}
+              <div className="form-row-2col" style={{ marginTop: '14px' }}>
+                <div>
+                  <label
+                    htmlFor="announcement-cta-text"
+                    className="form-label"
+                  >
+                    官網連結按鈕文字 (選填)
+                  </label>
+                  <input
+                    id="announcement-cta-text"
+                    type="text"
+                    value={ctaText}
+                    onChange={(e) => setCtaText(e.target.value)}
+                    placeholder="預設：前往紙屬英文官網（例：立即前往程度診斷）"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="announcement-cta-url"
+                    className="form-label"
+                  >
+                    按鈕目標網址 / 路徑 (選填)
+                  </label>
+                  <input
+                    id="announcement-cta-url"
+                    type="text"
+                    value={ctaUrl}
+                    onChange={(e) => setCtaUrl(e.target.value)}
+                    placeholder="預設：官網首頁（例：/assessment 或完整網址）"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
               {/* Markdown Body Tabs */}
               <div style={{ marginTop: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -543,7 +590,14 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                       onClick={() => setPreviewTab('preview')}
                       className={`editor-tab-btn ${previewTab === 'preview' ? 'active' : ''}`}
                     >
-                      即時預覽
+                      網頁預覽
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewTab('email')}
+                      className={`editor-tab-btn ${previewTab === 'email' ? 'active' : ''}`}
+                    >
+                      Email 預覽
                     </button>
                   </div>
                 </div>
@@ -557,9 +611,179 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     placeholder="支援段落、粗體 (**text**)、清單 (- 或 1.)、連結 ([text](url)) 等輕量 Markdown。"
                     className="form-textarea"
                   />
-                ) : (
+                ) : previewTab === 'preview' ? (
                   <div className="markdown-preview-container">
                     <MarkdownPreview content={body} />
+                    {ctaUrl.trim() && (
+                      <div style={{ marginTop: '20px', paddingTop: '14px', borderTop: '1px solid var(--border-light, #e2e8f0)', textAlign: 'center' }}>
+                        <a
+                          href={ctaUrl.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="create-btn"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+                        >
+                          {ctaText.trim() || '前往查看'} →
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Branded Email Preview */
+                  <div
+                    style={{
+                      background: '#f4f0e6',
+                      padding: '24px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid #ded7c7',
+                      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif",
+                    }}
+                  >
+                    <div
+                      style={{
+                        maxWidth: '560px',
+                        margin: '0 auto',
+                        background: '#fffdf7',
+                        borderRadius: '14px',
+                        overflow: 'hidden',
+                        border: '1px solid #ded7c7',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                      }}
+                    >
+                      {/* Email Header */}
+                      <div
+                        style={{
+                          background: '#173f35',
+                          padding: '16px 24px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: "Georgia, 'Noto Serif TC', serif",
+                            fontSize: '20px',
+                            fontWeight: 700,
+                            color: '#fffdf7',
+                          }}
+                        >
+                          紙屬英文
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            padding: '2px 8px',
+                            borderRadius: '999px',
+                            background: 'rgba(255,255,255,0.2)',
+                            color: '#fffdf7',
+                            fontWeight: 600,
+                          }}
+                        >
+                          服務公告
+                        </span>
+                      </div>
+
+                      {/* Email Content */}
+                      <div style={{ padding: '24px 24px 20px' }}>
+                        <div style={{ marginBottom: '10px' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              backgroundColor: (CATEGORY_MAP[category] || CATEGORY_MAP.notice).bg,
+                              color: (CATEGORY_MAP[category] || CATEGORY_MAP.notice).color,
+                            }}
+                          >
+                            {(CATEGORY_MAP[category] || CATEGORY_MAP.notice).label}
+                          </span>
+                        </div>
+
+                        <h2
+                          style={{
+                            margin: '0 0 16px',
+                            fontSize: '18px',
+                            lineHeight: 1.45,
+                            color: '#173f35',
+                            fontFamily: "Georgia, 'Noto Serif TC', serif",
+                          }}
+                        >
+                          {title || '（未輸入公告標題）'}
+                        </h2>
+
+                        <div style={{ borderTop: '1px solid #eee7db', paddingTop: '16px', marginBottom: '24px' }}>
+                          <MarkdownPreview content={body || '（未輸入公告內容）'} />
+                        </div>
+
+                        {/* CTA Button in Email */}
+                        <div style={{ textAlign: 'center', margin: '28px 0 20px' }}>
+                          <div
+                            style={{
+                              display: 'inline-block',
+                              background: '#c96c43',
+                              color: '#ffffff',
+                              fontSize: '15px',
+                              fontWeight: 700,
+                              padding: '13px 34px',
+                              borderRadius: '999px',
+                              boxShadow: '0 3px 10px rgba(201,108,67,0.25)',
+                              letterSpacing: '0.5px',
+                            }}
+                          >
+                            {ctaText.trim() || '前往紙屬英文官網'} →
+                          </div>
+                          <div
+                            style={{
+                              marginTop: '10px',
+                              fontSize: '11px',
+                              color: '#85948c',
+                              wordBreak: 'break-all',
+                            }}
+                          >
+                            官網連結：
+                            <span style={{ color: '#c96c43', textDecoration: 'underline' }}>
+                              {ctaUrl.trim()
+                                ? ctaUrl.trim().startsWith('/')
+                                  ? `https://paperbond.jjmowlab.com${ctaUrl.trim()}`
+                                  : ctaUrl.trim()
+                                : 'https://paperbond.jjmowlab.com'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Footer Note */}
+                        <div
+                          style={{
+                            marginTop: '20px',
+                            paddingTop: '14px',
+                            borderTop: '1px solid #eee7db',
+                            fontSize: '12px',
+                            color: '#617068',
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          親愛的家長您好，此信件為紙屬英文最新發布之服務公告通知。<br />
+                          您也可以隨時登入紙屬英文後台查看所有歷史公告與教材進度。
+                        </div>
+                      </div>
+
+                      {/* Email Footer */}
+                      <div
+                        style={{
+                          background: '#f9f6ef',
+                          padding: '12px 24px',
+                          fontSize: '11px',
+                          color: '#85948c',
+                          textAlign: 'center',
+                          borderTop: '1px solid #ded7c7',
+                        }}
+                      >
+                        紙屬英文團隊 · 專為台灣國中生打造的個人化英文自學教材
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

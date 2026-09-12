@@ -12,6 +12,8 @@ export type Announcement = {
   body: string
   category: AnnouncementCategory
   status: AnnouncementStatus
+  cta_text?: string | null
+  cta_url?: string | null
   published_at: string | null
   created_at: string
   updated_at: string

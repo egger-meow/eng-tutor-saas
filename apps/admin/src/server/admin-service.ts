@@ -3662,6 +3662,8 @@ export class AdminService {
       }
 
       const publishedAt = status === 'published' ? new Date().toISOString() : null
+      const ctaText = input.cta_text?.trim() || null
+      const ctaUrl = input.cta_url?.trim() || null
 
       const { data, error } = await client
         .from('announcements')
@@ -3670,6 +3672,8 @@ export class AdminService {
           body,
           category,
           status,
+          cta_text: ctaText,
+          cta_url: ctaUrl,
           published_at: publishedAt,
         })
         .select('*')
@@ -3752,6 +3756,14 @@ export class AdminService {
           return { success: false, error: 'INVALID_CATEGORY', message: '無效的公告分類。' }
         }
         updates.category = input.category
+      }
+
+      if (input.cta_text !== undefined) {
+        updates.cta_text = input.cta_text?.trim() || null
+      }
+
+      if (input.cta_url !== undefined) {
+        updates.cta_url = input.cta_url?.trim() || null
       }
 
       if (input.status !== undefined) {

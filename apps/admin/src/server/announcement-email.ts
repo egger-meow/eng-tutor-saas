@@ -139,18 +139,36 @@ export function formatMarkdownToEmailHtml(content: string): string {
   return output.join('\n')
 }
 
+export function resolveCtaUrl(rawUrl: string | null | undefined, siteUrl: string): string {
+  const cleanSiteUrl = siteUrl.replace(/\/$/, '')
+  if (!rawUrl || !rawUrl.trim()) {
+    return cleanSiteUrl
+  }
+  const trimmed = rawUrl.trim()
+  if (trimmed.startsWith('/')) {
+    return `${cleanSiteUrl}${trimmed}`
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+  return `${cleanSiteUrl}/${trimmed}`
+}
+
 export function buildAnnouncementEmailHtml(
   announcement: {
     title: string
     body: string
     category: AnnouncementCategory | string
+    cta_text?: string | null
+    cta_url?: string | null
     published_at?: string | null
   },
   siteUrl: string,
 ): string {
   const catInfo = CATEGORY_MAP[announcement.category] || CATEGORY_MAP.notice
   const contentHtml = formatMarkdownToEmailHtml(announcement.body)
-  const dashboardUrl = `${siteUrl.replace(/\/$/, '')}/dashboard`
+  const buttonText = announcement.cta_text?.trim() || '前往紙屬英文官網'
+  const actionUrl = resolveCtaUrl(announcement.cta_url, siteUrl)
 
   return `<!doctype html>
 <html lang="zh-Hant">
@@ -204,9 +222,12 @@ export function buildAnnouncementEmailHtml(
 
                 <!-- Action CTA -->
                 <div style="text-align:center;margin:32px 0 24px;">
-                  <a href="${escapeHtml(dashboardUrl)}" style="display:inline-block;background:#c96c43;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:13px 28px;border-radius:999px;letter-spacing:0.5px;">
-                    前往紙屬英文查看
+                  <a href="${escapeHtml(actionUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#c96c43;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 36px;border-radius:999px;letter-spacing:0.5px;box-shadow:0 3px 10px rgba(201,108,67,0.25);">
+                    ${escapeHtml(buttonText)} →
                   </a>
+                  <div style="margin-top:12px;font-size:12px;color:#85948c;line-height:1.5;">
+                    官網連結：<a href="${escapeHtml(actionUrl)}" target="_blank" rel="noopener noreferrer" style="color:#c96c43;text-decoration:underline;word-break:break-all;">${escapeHtml(actionUrl)}</a>
+                  </div>
                 </div>
 
                 <!-- Footer Note inside Card -->

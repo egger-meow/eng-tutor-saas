@@ -3,9 +3,28 @@ import {
   buildAnnouncementEmailHtml,
   formatMarkdownToEmailHtml,
   dispatchAnnouncementEmails,
+  resolveCtaUrl,
 } from './announcement-email.js'
 
 describe('announcement-email module', () => {
+  describe('resolveCtaUrl', () => {
+    it('returns siteUrl when ctaUrl is empty or null', () => {
+      expect(resolveCtaUrl(null, 'https://paperbond.jjmowlab.com')).toBe('https://paperbond.jjmowlab.com')
+      expect(resolveCtaUrl('', 'https://paperbond.jjmowlab.com/')).toBe('https://paperbond.jjmowlab.com')
+      expect(resolveCtaUrl('   ', 'https://paperbond.jjmowlab.com')).toBe('https://paperbond.jjmowlab.com')
+    })
+
+    it('resolves relative URLs against siteUrl', () => {
+      expect(resolveCtaUrl('/assessment', 'https://paperbond.jjmowlab.com')).toBe('https://paperbond.jjmowlab.com/assessment')
+      expect(resolveCtaUrl('assessment', 'https://paperbond.jjmowlab.com/')).toBe('https://paperbond.jjmowlab.com/assessment')
+    })
+
+    it('preserves absolute URLs', () => {
+      expect(resolveCtaUrl('https://custom.site.com/test', 'https://paperbond.jjmowlab.com')).toBe('https://custom.site.com/test')
+      expect(resolveCtaUrl('http://example.org', 'https://paperbond.jjmowlab.com')).toBe('http://example.org')
+    })
+  })
+
   describe('formatMarkdownToEmailHtml', () => {
     it('formats headings correctly', () => {
       const md = '# 大標題\n## 次標題\n### 小標題'
@@ -46,7 +65,7 @@ describe('announcement-email module', () => {
   })
 
   describe('buildAnnouncementEmailHtml', () => {
-    it('builds complete branded email HTML with category, title, content, and CTA', () => {
+    it('builds complete branded email HTML with default official website button and fallback link', () => {
       const html = buildAnnouncementEmailHtml(
         {
           title: '教材更懂得孩子了',
@@ -59,9 +78,28 @@ describe('announcement-email module', () => {
       expect(html).toContain('紙屬英文')
       expect(html).toContain('教材更新')
       expect(html).toContain('教材更懂得孩子了')
-      expect(html).toContain('前往紙屬英文查看')
-      expect(html).toContain('https://paperbond.jjmowlab.com/dashboard')
+      expect(html).toContain('前往紙屬英文官網 →')
+      expect(html).toContain('https://paperbond.jjmowlab.com')
+      expect(html).toContain('官網連結：<a href="https://paperbond.jjmowlab.com"')
       expect(html).toContain('專為台灣國中生打造的個人化英文自學教材')
+    })
+
+    it('builds email HTML with custom CTA button text and relative URL for feature release', () => {
+      const html = buildAnnouncementEmailHtml(
+        {
+          title: '🧭 程度診斷上線！',
+          body: '孩子可以直接做 **單字・文法・閱讀** 診斷！\n👉 登入後點上方「程度診斷」就可以開始！',
+          category: 'feature',
+          cta_text: '立即進行程度診斷',
+          cta_url: '/assessment',
+        },
+        'https://paperbond.jjmowlab.com',
+      )
+
+      expect(html).toContain('🧭 程度診斷上線！')
+      expect(html).toContain('立即進行程度診斷 →')
+      expect(html).toContain('href="https://paperbond.jjmowlab.com/assessment"')
+      expect(html).toContain('官網連結：<a href="https://paperbond.jjmowlab.com/assessment"')
     })
   })
 

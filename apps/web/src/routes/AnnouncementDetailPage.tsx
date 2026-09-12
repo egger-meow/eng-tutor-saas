@@ -124,6 +124,22 @@ export function AnnouncementDetailPage({
               <div className="announcement-detail-body">
                 <MarkdownContent content={announcement.body} />
               </div>
+
+              {announcement.cta_url && (
+                <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>
+                  <a
+                    href={announcement.cta_url}
+                    className="button button-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 2rem', fontSize: '1rem', fontWeight: 600 }}
+                    {...(announcement.cta_url.startsWith('/')
+                      ? { onClick: handleInternalLink }
+                      : { target: '_blank', rel: 'noopener noreferrer' })}
+                  >
+                    <span>{announcement.cta_text || '前往查看'}</span>
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+              )}
             </article>
           )}
         </section>
