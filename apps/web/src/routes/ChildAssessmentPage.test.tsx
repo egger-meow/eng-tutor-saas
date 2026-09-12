@@ -134,6 +134,39 @@ describe('ChildAssessmentPage Subcomponents', () => {
       expect(html).toContain('輸入完成後可按 Enter 或點擊下方確認送出')
     })
 
+    it('renders structured prompt layout with instruction, target word emphasis, and sentence block', () => {
+      const structuredItem: assessmentLib.AssessmentClientItem = {
+        id: 'grm_tns_03',
+        responseType: 'short_answer',
+        prompt:
+          'Type the simple past tense of "see": "Last Friday evening, my friends and I ______ an exciting basketball match on television."',
+      }
+
+      const html = renderToStaticMarkup(
+        <AssessmentQuestionView
+          sessionState={baseSessionState}
+          currentItem={structuredItem}
+          rawAnswer=""
+          isSubmitting={false}
+          errorMessage={null}
+          onAnswerChange={() => {}}
+          onSubmit={() => {}}
+          onSkip={() => {}}
+          onExit={() => {}}
+          onRetry={() => {}}
+        />
+      )
+
+      expect(html).toContain('assessment-prompt-instructional')
+      expect(html).toContain('assessment-prompt-instruction')
+      expect(html).toContain('Type the simple past tense of')
+      expect(html).toContain('assessment-target-word')
+      expect(html).toContain('&quot;see&quot;')
+      expect(html).toContain('assessment-sentence-block')
+      expect(html).toContain('assessment-blank-slot')
+      expect(html).toContain('Last Friday evening, my friends and I')
+    })
+
     it('renders reading question with passage content', () => {
       const readingItem: assessmentLib.AssessmentClientItem = {
         id: 'r_main_01',

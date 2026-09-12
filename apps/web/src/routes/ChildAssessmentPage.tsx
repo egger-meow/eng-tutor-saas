@@ -20,6 +20,7 @@ import {
 } from '../lib/assessment'
 import { useActiveTimer } from '../hooks/use-active-timer'
 import { navigate } from '../app/use-route'
+import { AssessmentPromptBlock } from '../components/assessment/AssessmentPromptBlock'
 import '../styles/assessment.css'
 
 // ============================================================================
@@ -180,7 +181,7 @@ export function AssessmentQuestionView({
           )}
 
           {/* Prompt */}
-          <h1 className="assessment-prompt">{currentItem.prompt}</h1>
+          <AssessmentPromptBlock prompt={currentItem.prompt} />
 
           {/* Answer Input */}
           {currentItem.responseType === 'single_choice' ? (

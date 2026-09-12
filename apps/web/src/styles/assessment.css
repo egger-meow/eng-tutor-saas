@@ -186,12 +186,106 @@
   white-space: pre-line;
 }
 
+/* Question Prompt & Visual Hierarchy */
 .assessment-prompt {
   font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.6;
   color: var(--color-ink, #18261f);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.assessment-prompt-container {
+  max-width: 44rem;
+  margin-bottom: 1.75rem;
+}
+
+.assessment-prompt-instruction {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-muted, #6c6b63);
+  margin: 0 0 0.65rem 0;
+  letter-spacing: 0.01em;
+}
+
+.assessment-sentence-block,
+.assessment-context-sentence {
+  background: #fbf9f4;
+  border: 1px solid var(--color-rule, #d8d0c1);
+  border-left: 3.5px solid var(--color-action, #284f3e);
+  border-radius: var(--radius-control, 0.625rem);
+  padding: 1.1rem 1.35rem;
+  margin: 0.75rem 0 1.25rem 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.18rem;
+  line-height: 1.75;
+  color: var(--color-ink, #18261f);
+}
+
+.assessment-context-sentence {
+  font-style: normal;
+}
+
+.assessment-sentence-line {
+  margin: 0;
+}
+
+.assessment-sentence-line + .assessment-sentence-line {
+  margin-top: 0.5rem;
+}
+
+.assessment-dialogue-line {
+  color: var(--color-ink, #18261f);
+  padding-left: 0.5rem;
+}
+
+.assessment-context-question,
+.assessment-prompt-question,
+.assessment-prompt-sentence {
+  font-size: 1.18rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--color-ink, #18261f);
+  margin: 0;
+}
+
+.assessment-target-word {
+  font-weight: 700;
+  color: var(--color-ink, #18261f);
+  background-color: rgba(40, 79, 62, 0.09);
+  padding: 0.12rem 0.35rem;
+  border-radius: 0.25rem;
+  border-bottom: 1.5px solid rgba(40, 79, 62, 0.3);
+  display: inline;
+}
+
+.assessment-target-choice {
+  font-weight: 600;
+  color: var(--color-action, #284f3e);
+  background: rgba(40, 79, 62, 0.07);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  display: inline;
+}
+
+.assessment-blank-slot {
+  display: inline-block;
+  min-width: 4rem;
+  margin: 0 0.35rem;
+  border-bottom: 2.5px solid var(--color-action, #284f3e);
+  color: var(--color-action, #284f3e);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: center;
+  vertical-align: baseline;
+}
+
+.assessment-sentence-clue {
+  font-style: italic;
+  color: var(--color-muted, #6c6b63);
+  font-weight: 500;
+  margin-left: 0.25rem;
 }
 
 /* Single Choice Options */
