@@ -242,10 +242,12 @@
 
 .assessment-context-question,
 .assessment-prompt-question,
-.assessment-prompt-sentence {
+.assessment-prompt-sentence,
+.assessment-prompt-container h1 {
   font-size: 1.18rem;
   font-weight: 600;
   line-height: 1.6;
+  letter-spacing: normal;
   color: var(--color-ink, #18261f);
   margin: 0;
 }
@@ -271,13 +273,14 @@
 
 .assessment-blank-slot {
   display: inline-block;
-  min-width: 4rem;
-  margin: 0 0.35rem;
-  border-bottom: 2.5px solid var(--color-action, #284f3e);
-  color: var(--color-action, #284f3e);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-align: center;
+  letter-spacing: 0;
+  color: var(--color-ink, #18261f);
+  border: none;
+  border-bottom: none;
+  margin: 0 0.15rem;
+  text-decoration: none;
   vertical-align: baseline;
 }
 
@@ -849,5 +852,18 @@
 .assessment-hub-empty p {
   color: var(--color-muted, #6c6b63);
   margin-bottom: 1.5rem;
+}
+
+/* Accessible screen-reader only utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 

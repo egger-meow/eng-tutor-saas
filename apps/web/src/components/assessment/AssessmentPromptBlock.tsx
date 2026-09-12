@@ -66,7 +66,6 @@ export function AssessmentPromptBlock({
           className={`assessment-prompt assessment-prompt-container assessment-prompt-dialogue ${className}`.trim()}
           data-testid="assessment-prompt-block"
         >
-          <h1 className="sr-only">{prompt}</h1>
           <div className="assessment-sentence-block assessment-dialogue-block">
             {layout.dialogueLines?.map((line, idx) => (
               <p
