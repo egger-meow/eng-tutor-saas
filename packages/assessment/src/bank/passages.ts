@@ -145,4 +145,31 @@ export const CANONICAL_PASSAGES: readonly AssessmentPassage[] = [
     gradeBand: 'grade_9',
     status: 'active',
   },
+  {
+    id: 'pass_17',
+    title: 'Green Library Rules',
+    content:
+      'Green Library is open from Monday to Friday, 9:00 AM to 5:00 PM. All students must keep quiet and put books back after reading. Food and sweet drinks are not allowed inside.',
+    wordCount: 32,
+    gradeBand: 'grade_7',
+    status: 'active',
+  },
+  {
+    id: 'pass_18',
+    title: 'Invitation: Leo’s 13th Birthday Party',
+    content:
+      'Hi friends! Please come to my 13th birthday party this Saturday, October 18, from 2:00 PM to 5:00 PM at Sunshine Pizza House. We will make our own mini pizzas and play board games! Please text my sister Amy at 0912-333-888 before October 15.',
+    wordCount: 44,
+    gradeBand: 'grade_7',
+    status: 'active',
+  },
+  {
+    id: 'pass_19',
+    title: 'Junior Basketball Morning Camp',
+    content:
+      'Join our summer basketball morning camp at Riverside Sports Center from July 10 to July 14, 8:30 AM to 11:30 AM daily. Coach David will teach basic dribbling, passing, and team defense. Fee: NT$1,200 (includes a camp T-shirt and water bottle). Please bring indoor sports shoes and a clean towel.',
+    wordCount: 50,
+    gradeBand: 'grade_7',
+    status: 'active',
+  },
 ] as const

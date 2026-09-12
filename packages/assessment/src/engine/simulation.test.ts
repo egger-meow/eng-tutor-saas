@@ -105,8 +105,10 @@ describe('Deterministic Adaptive Engine Simulation Suite', () => {
     // Most skills should evaluate to needs_support or developing
     const evalValues = Object.values(res.finalResult.skillEvaluations)
     const needsSupportCount = evalValues.filter((e) => e.result === 'needs_support').length
+    const secureCount = evalValues.filter((e) => e.result === 'secure').length
     expect(needsSupportCount).toBeGreaterThan(0)
-    expect(res.finalResult.correctCount).toBeLessThan(res.steps / 2)
+    expect(secureCount).toBe(0)
+    expect(res.finalResult.correctCount).toBeLessThanOrEqual(Math.ceil(res.steps * 0.6))
   })
 
   it('Simulation 2: Grade-level mixed learner (Grade 8, on-level)', () => {

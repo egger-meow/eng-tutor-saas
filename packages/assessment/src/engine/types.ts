@@ -17,6 +17,7 @@ export interface AdaptiveEngineConfig {
   softMaxItemCount: number
   hardMaxItemCount: number
   maxItemsPerSkill: number
+  randomizer?: () => number
 }
 
 export const DEFAULT_ENGINE_CONFIG: AdaptiveEngineConfig = {

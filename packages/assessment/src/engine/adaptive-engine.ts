@@ -35,8 +35,8 @@ export const DEFAULT_BROAD_PROBE_SKILLS: readonly AssessmentSkill[] = [
   'questions_and_negatives',
   'modifiers_and_relations',
   'complex_structures',
-  'main_idea',
   'explicit_information',
+  'main_idea',
   'vocabulary_in_context',
   'inference',
   'information_integration',
@@ -50,6 +50,7 @@ export interface InitSessionParams {
   availableItems: readonly AssessmentItem[]
   config?: Partial<AdaptiveEngineConfig>
   previousSessionItemIds?: readonly string[] | null
+  randomizer?: () => number
 }
 
 export interface ProcessResponseParams {
@@ -64,6 +65,7 @@ export interface ProcessResponseParams {
   }
   availableItems: readonly AssessmentItem[]
   config?: Partial<AdaptiveEngineConfig>
+  randomizer?: () => number
 }
 
 export class AdaptiveEngine {
@@ -75,6 +77,7 @@ export class AdaptiveEngine {
     decision: NextItemDecision
   } {
     const { sessionId, childId, gradeStage, onboardingLevel, availableItems, previousSessionItemIds } = params
+    const randomizer = params.randomizer ?? params.config?.randomizer
     const startingDifficulty = computeStartingDifficulty(gradeStage, onboardingLevel)
 
     const broadProbeRemaining = [...DEFAULT_BROAD_PROBE_SKILLS]
@@ -93,7 +96,8 @@ export class AdaptiveEngine {
         startingDifficulty,
         new Set<string>(),
         null,
-        previousSessionItemIds
+        previousSessionItemIds,
+        randomizer
       )
     }
 
@@ -140,6 +144,7 @@ export class AdaptiveEngine {
       ...params.config,
     }
 
+    const randomizer = params.randomizer ?? cfg.randomizer
     const state: ProvisionalEngineState = {
       ...params.state,
       broadProbeRemainingSkills: [...params.state.broadProbeRemainingSkills],
@@ -200,7 +205,8 @@ export class AdaptiveEngine {
           state.startingDifficulty,
           usedItemSet,
           lastPassageId,
-          state.previousSessionItemIds
+          state.previousSessionItemIds,
+          randomizer
         )
       }
 
@@ -247,7 +253,7 @@ export class AdaptiveEngine {
     }
 
     // 6. Select next skill and difficulty for targeted confirmation
-    const nextTarget = this.pickNextTargetSkill(state, availableItems, usedItemSet, cfg)
+    const nextTarget = this.pickNextTargetSkill(state, availableItems, usedItemSet, cfg, randomizer)
     if (!nextTarget || !nextTarget.item) {
       // If no valid candidate item can be chosen anywhere, terminate session
       state.phase = 'completed'
@@ -328,7 +334,8 @@ export class AdaptiveEngine {
     state: ProvisionalEngineState,
     availableItems: readonly AssessmentItem[],
     usedItemIds: Set<string>,
-    cfg: AdaptiveEngineConfig
+    cfg: AdaptiveEngineConfig,
+    randomizer?: () => number
   ): { skill: AssessmentSkill; difficulty: number; item: AssessmentItem; reason: string } | null {
     // Filter skills that have not yet reached max items per skill
     const eligibleSkills = ASSESSMENT_SKILLS.filter((skill) => {
@@ -388,7 +395,8 @@ export class AdaptiveEngine {
         targetDiff,
         usedItemIds,
         null,
-        state.previousSessionItemIds
+        state.previousSessionItemIds,
+        randomizer
       )
       if (item) {
         return {

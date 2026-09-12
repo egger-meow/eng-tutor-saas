@@ -28,8 +28,8 @@ describe('Canonical Assessment Bank & Deterministic Quality Validator', () => {
     expect(result.isValid).toBe(true)
 
     // Total counts
-    expect(result.coverage.totalItems).toBe(108)
-    expect(result.coverage.totalPassages).toBe(16)
+    expect(result.coverage.totalItems).toBe(117)
+    expect(result.coverage.totalPassages).toBe(19)
   })
 
   it('matches the planned domain and response-type distribution', () => {
@@ -39,11 +39,11 @@ describe('Canonical Assessment Bank & Deterministic Quality Validator', () => {
     // Domain breakdown
     expect(domainCounts.vocabulary).toBe(24)
     expect(domainCounts.grammar).toBe(44)
-    expect(domainCounts.reading).toBe(40)
+    expect(domainCounts.reading).toBe(49)
 
-    // Response type breakdown: ~65% single_choice, ~35% short_answer
-    // Exactly: 72 single_choice (66.7%), 36 short_answer (33.3%)
-    expect(responseTypeCounts.single_choice).toBe(72)
+    // Response type breakdown
+    // Exactly: 81 single_choice, 36 short_answer
+    expect(responseTypeCounts.single_choice).toBe(81)
     expect(responseTypeCounts.short_answer).toBe(36)
 
     // Difficulty distribution coverage: levels 1 to 5 all well-represented
@@ -54,7 +54,7 @@ describe('Canonical Assessment Bank & Deterministic Quality Validator', () => {
     expect(difficultyCounts[5]).toBeGreaterThanOrEqual(8)
 
     const sumDiff = Object.values(difficultyCounts).reduce((a, b) => a + b, 0)
-    expect(sumDiff).toBe(108)
+    expect(sumDiff).toBe(117)
   })
 
   it('covers all 13 coarse diagnostic skills with at least 6 items per skill', () => {
@@ -76,17 +76,17 @@ describe('Canonical Assessment Bank & Deterministic Quality Validator', () => {
       expect(skillCounts[s]).toBeGreaterThanOrEqual(8)
     }
 
-    // Check reading skills (6 to 9 items)
+    // Check reading skills (7 to 13 items)
     for (const s of DOMAIN_SKILLS_MAP.reading) {
       expect(skillCounts[s]).toBeGreaterThanOrEqual(6)
     }
   })
 
-  it('binds all 16 passages to exactly 2 or 3 reading items each', () => {
+  it('binds all 19 passages to exactly 2 or 3 reading items each', () => {
     const result = validateAssessmentBank(CANONICAL_ITEMS, CANONICAL_PASSAGES)
     const { itemsPerPassage } = result.coverage
 
-    expect(Object.keys(itemsPerPassage)).toHaveLength(16)
+    expect(Object.keys(itemsPerPassage)).toHaveLength(19)
     for (const [pId, count] of Object.entries(itemsPerPassage)) {
       expect(count).toBeGreaterThanOrEqual(2)
       expect(count).toBeLessThanOrEqual(3)

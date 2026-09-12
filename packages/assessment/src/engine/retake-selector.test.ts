@@ -138,4 +138,29 @@ describe('Direct Assessment Selector — Retake Repetition Avoidance', () => {
     )
     expect(choice?.id).toBe('read-p1-item-01')
   })
+
+  it('randomizes among tied candidates when randomizer is provided', () => {
+    // Both vocab-item-001 and vocab-item-002 are tied on difficulty 2 and not in previous session
+    const choice0 = selectCandidateItem(
+      items,
+      'core_vocabulary',
+      2,
+      new Set<string>(),
+      null,
+      null,
+      () => 0.0
+    )
+    expect(choice0?.id).toBe('vocab-item-001')
+
+    const choice1 = selectCandidateItem(
+      items,
+      'core_vocabulary',
+      2,
+      new Set<string>(),
+      null,
+      null,
+      () => 0.99
+    )
+    expect(choice1?.id).toBe('vocab-item-002')
+  })
 })

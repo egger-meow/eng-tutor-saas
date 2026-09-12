@@ -3,6 +3,11 @@ import type { AssessmentItem, AssessmentSkill } from '../contracts.js'
 /**
  * Deterministically selects the best candidate item for a skill and target difficulty,
  * guaranteeing no item repetition within the same session.
+ *
+ * When multiple candidates tie for the highest priority (same difficulty distance,
+ * same passage continuity, and same previous-session avoidance), an optional randomizer
+ * selects randomly among the tied top-tier candidates. If no randomizer is provided,
+ * stable alphabetical tie-breaking by ID is preserved.
  */
 export function selectCandidateItem(
   items: readonly AssessmentItem[],
@@ -11,6 +16,7 @@ export function selectCandidateItem(
   usedItemIds: ReadonlySet<string> | readonly string[],
   currentPassageId?: string | null,
   previousSessionItemIds?: ReadonlySet<string> | readonly string[] | null,
+  randomizer?: () => number
 ): AssessmentItem | null {
   const usedSet = usedItemIds instanceof Set ? usedItemIds : new Set(usedItemIds)
   const previousSet = previousSessionItemIds
@@ -62,5 +68,24 @@ export function selectCandidateItem(
     return a.id.localeCompare(b.id)
   })
 
-  return candidates[0] || null
+  if (!randomizer) {
+    return candidates[0] || null
+  }
+
+  // Identify all candidates that tie on the top priority tier
+  const best = candidates[0]
+  const bestDist = Math.abs(best.difficulty - targetDifficulty)
+  const bestMatch = currentPassageId && best.passageId === currentPassageId ? 1 : 0
+  const bestPrev = previousSet && previousSet.has(best.id) ? 1 : 0
+
+  const topTier = candidates.filter((item) => {
+    const dist = Math.abs(item.difficulty - targetDifficulty)
+    const match = currentPassageId && item.passageId === currentPassageId ? 1 : 0
+    const prev = previousSet && previousSet.has(item.id) ? 1 : 0
+    return dist === bestDist && match === bestMatch && prev === bestPrev
+  })
+
+  const randVal = randomizer()
+  const idx = Math.min(topTier.length - 1, Math.max(0, Math.floor(randVal * topTier.length)))
+  return topTier[idx] || null
 }
