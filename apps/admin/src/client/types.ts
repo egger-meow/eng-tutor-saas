@@ -915,6 +915,8 @@ export interface AnnouncementItem {
   category: AnnouncementCategory
   status: AnnouncementStatus
   published_at: string | null
+  email_sent_at?: string | null
+  email_sent_count?: number
   created_at: string
   updated_at: string
 }
@@ -935,6 +937,7 @@ export interface CreateAnnouncementInput {
   body: string
   category: AnnouncementCategory
   status?: AnnouncementStatus
+  sendEmail?: boolean
 }
 
 export interface UpdateAnnouncementInput {
@@ -943,6 +946,7 @@ export interface UpdateAnnouncementInput {
   body?: string
   category?: AnnouncementCategory
   status?: AnnouncementStatus
+  sendEmail?: boolean
 }
 
 export interface AnnouncementActionResult {
@@ -950,6 +954,12 @@ export interface AnnouncementActionResult {
   announcement?: AnnouncementItem
   error?: string
   message?: string
+  emailDelivery?: {
+    total: number
+    sent: number
+    failed: number
+    error?: string
+  }
 }
 
 export type FunnelStepName =

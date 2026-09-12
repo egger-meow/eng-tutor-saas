@@ -51,17 +51,20 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [category, setCategory] = useState<AnnouncementCategory>('feature')
+  const [sendEmail, setSendEmail] = useState(false)
   const [previewTab, setPreviewTab] = useState<'write' | 'preview'>('write')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [confirmArchiveId, setConfirmArchiveId] = useState<string | null>(null)
+  const [confirmSendEmailItem, setConfirmSendEmailItem] = useState<AnnouncementItem | null>(null)
 
   const openCreateModal = () => {
     setEditingItem(null)
     setTitle('')
     setBody('')
     setCategory('feature')
+    setSendEmail(false)
     setPreviewTab('write')
     setFeedbackMessage(null)
     setIsEditorOpen(true)
@@ -72,6 +75,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
     setTitle(item.title)
     setBody(item.body)
     setCategory(item.category)
+    setSendEmail(false)
     setPreviewTab('write')
     setFeedbackMessage(null)
     setIsEditorOpen(true)
@@ -97,6 +101,14 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
       return
     }
 
+    const finalStatus = targetStatus ?? editingItem?.status ?? 'draft'
+    const willSendEmail = sendEmail && finalStatus === 'published'
+
+    if (willSendEmail) {
+      const confirmSend = window.confirm('確定要發布此公告並同步寄送 Email 通知給所有使用者嗎？')
+      if (!confirmSend) return
+    }
+
     setIsSubmitting(true)
     setFeedbackMessage(null)
 
@@ -109,6 +121,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
           body: trimmedBody,
           category,
           status: targetStatus ?? editingItem.status,
+          sendEmail: willSendEmail,
         })
         if (!res.success) {
           setFeedbackMessage({ type: 'error', text: res.message || res.error || '更新失敗' })
@@ -122,6 +135,7 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
           body: trimmedBody,
           category,
           status: targetStatus ?? 'draft',
+          sendEmail: willSendEmail,
         })
         if (!res.success) {
           setFeedbackMessage({ type: 'error', text: res.message || res.error || '建立失敗' })
@@ -134,6 +148,25 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
       onRefresh()
     } catch (err: any) {
       setFeedbackMessage({ type: 'error', text: err?.message || '操作發生錯誤' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleSendEmail = async (id: string) => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      const res = await adminApi.sendAnnouncementEmail(id)
+      if (!res.success) {
+        alert(res.message || res.error || '寄送 Email 失敗')
+        return
+      }
+      alert(res.message || 'Email 寄送成功')
+      setConfirmSendEmailItem(null)
+      onRefresh()
+    } catch (err: any) {
+      alert(err?.message || '寄送 Email 發生異常')
     } finally {
       setIsSubmitting(false)
     }
@@ -225,9 +258,10 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 <th style={{ width: '90px' }}>狀態</th>
                 <th style={{ width: '100px' }}>分類</th>
                 <th>標題</th>
-                <th style={{ width: '150px' }}>發布時間</th>
-                <th style={{ width: '150px' }}>更新時間</th>
-                <th style={{ width: '130px', textAlign: 'right' }}>操作</th>
+                <th style={{ width: '130px' }}>Email 通知</th>
+                <th style={{ width: '140px' }}>發布時間</th>
+                <th style={{ width: '140px' }}>更新時間</th>
+                <th style={{ width: '170px', textAlign: 'right' }}>操作</th>
               </tr>
             </thead>
             <tbody>
@@ -272,6 +306,34 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                         {item.body.slice(0, 80)}
                       </div>
                     </td>
+                    <td>
+                      {item.email_sent_at ? (
+                        <div>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '2px 7px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              backgroundColor: '#dcfce7',
+                              color: '#15803d',
+                            }}
+                          >
+                            ✓ 已寄 {item.email_sent_count ?? 0} 人
+                          </span>
+                          <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                            {formatDate(item.email_sent_at)}
+                          </div>
+                        </div>
+                      ) : item.status === 'published' ? (
+                        <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>未寄信</span>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>—</span>
+                      )}
+                    </td>
                     <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                       {formatDate(item.published_at)}
                     </td>
@@ -280,6 +342,21 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
+                        {item.status === 'published' && (
+                          <button
+                            type="button"
+                            className="action-btn-sm"
+                            style={{
+                              background: item.email_sent_at ? undefined : '#173f35',
+                              color: item.email_sent_at ? undefined : '#fffdf7',
+                            }}
+                            title={item.email_sent_at ? '重新發送公告 Email' : '立即發送公告 Email 給所有使用者'}
+                            onClick={() => setConfirmSendEmailItem(item)}
+                          >
+                            {item.email_sent_at ? '補發信' : '寄信'}
+                          </button>
+                        )}
+
                         <button
                           type="button"
                           className="action-btn-sm"
@@ -331,6 +408,44 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                 onClick={() => handleArchive(confirmArchiveId)}
               >
                 {isSubmitting ? '封存中…' : '確認封存'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Send Email */}
+      {confirmSendEmailItem && (
+        <div className="modal-overlay">
+          <div className="cockpit-card modal-dialog-sm">
+            <h3 style={{ margin: '0 0 12px', fontSize: '16px', color: 'var(--text-main)' }}>確認寄送公告 Email？</h3>
+            <p style={{ margin: '0 0 8px', fontSize: '13px', color: 'var(--text-main)', fontWeight: 600 }}>
+              標題：{confirmSendEmailItem.title}
+            </p>
+            <p style={{ margin: '0 0 20px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              將透過本地 SMTP 伺服器將此公告寄送給全體註冊會員信箱。
+              {confirmSendEmailItem.email_sent_at && (
+                <span style={{ display: 'block', color: '#b45309', marginTop: '6px' }}>
+                  ⚠️ 注意：此公告已於 {formatDate(confirmSendEmailItem.email_sent_at)} 發送過（{confirmSendEmailItem.email_sent_count ?? 0} 人）。確認要再次補發嗎？
+                </span>
+              )}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                className="refresh-btn"
+                disabled={isSubmitting}
+                onClick={() => setConfirmSendEmailItem(null)}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                className="create-btn"
+                disabled={isSubmitting}
+                onClick={() => handleSendEmail(confirmSendEmailItem.id)}
+              >
+                {isSubmitting ? '寄送中…' : '確認寄送'}
               </button>
             </div>
           </div>
@@ -448,6 +563,49 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                   </div>
                 )}
               </div>
+
+              {/* Email Broadcast Option */}
+              <div
+                style={{
+                  marginTop: '16px',
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  background: 'var(--bg-elevated, #f8fafc)',
+                  border: '1px solid var(--border-light, #e2e8f0)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                }}
+              >
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={sendEmail}
+                    onChange={(e) => setSendEmail(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: '#173f35', cursor: 'pointer' }}
+                  />
+                  <span>發布時同步發送 Email 通知給所有使用者</span>
+                </label>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', paddingLeft: '24px', lineHeight: 1.4 }}>
+                  勾選後，發布時將透過 SMTP 伺服器寄送專屬排版公告信至所有註冊會員信箱。
+                  {editingItem?.email_sent_at && (
+                    <span style={{ display: 'block', color: '#15803d', marginTop: '4px', fontWeight: 500 }}>
+                      ℹ️ 此公告先前已於 {formatDate(editingItem.email_sent_at)} 發送過（{editingItem.email_sent_count ?? 0} 位會員）。再次勾選並發布將重新發送。
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Modal Footer Actions */}
@@ -489,10 +647,10 @@ export const AnnouncementsManagementView: React.FC<AnnouncementsManagementViewPr
                   onClick={() => handleSave('published')}
                 >
                   {isSubmitting
-                    ? '處理中…'
+                    ? (sendEmail ? '發布與寄信中…' : '處理中…')
                     : editingItem?.status === 'published'
-                    ? '更新發布'
-                    : '立即發布'}
+                    ? (sendEmail ? '更新並寄信' : '更新發布')
+                    : (sendEmail ? '發布並寄信' : '立即發布')}
                 </button>
               </div>
             </div>

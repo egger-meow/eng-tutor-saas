@@ -121,6 +121,33 @@ export async function handleApiRequest(
       return true
     }
 
+    if (pathname === '/api/announcements/send-email') {
+      if (req.method !== 'POST') {
+        res.statusCode = 405
+        res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        return true
+      }
+      const body = await readRequestBody(req)
+      let parsed: any = {}
+      try {
+        parsed = body ? JSON.parse(body) : {}
+      } catch {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_JSON', message: 'Malformed JSON payload' }))
+        return true
+      }
+      const id = parsed?.id
+      if (!id || typeof id !== 'string') {
+        res.statusCode = 400
+        res.end(JSON.stringify({ error: 'INVALID_ID', message: 'id is required' }))
+        return true
+      }
+      const result = await service.sendAnnouncementEmail(id)
+      res.statusCode = result.success ? 200 : 400
+      res.end(JSON.stringify(result))
+      return true
+    }
+
     if (pathname === '/api/jobs/grant-retry') {
       if (req.method !== 'POST') {
         res.statusCode = 405

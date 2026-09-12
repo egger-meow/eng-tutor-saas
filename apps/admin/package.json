@@ -14,11 +14,13 @@
   "dependencies": {
     "@paper-english/generator": "workspace:*",
     "@supabase/supabase-js": "^2.57.4",
+    "nodemailer": "7.0.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
+    "@types/nodemailer": "7.0.11",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",

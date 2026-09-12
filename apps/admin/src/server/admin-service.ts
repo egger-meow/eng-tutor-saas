@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { PipelineJobRow } from '../client/types.js'
+import { dispatchAnnouncementEmails } from './announcement-email.js'
 export * from '../client/types.js'
 
 
@@ -3687,10 +3688,22 @@ export class AdminService {
         timestamp: new Date().toISOString(),
       })
 
+      let emailDelivery: any = undefined
+      if (input.sendEmail) {
+        if (status === 'published') {
+          emailDelivery = await dispatchAnnouncementEmails(client, data)
+        }
+      }
+
       return {
         success: true,
         announcement: data,
-        message: status === 'published' ? '公告已成功建立並發布。' : '公告草稿已成功儲存。',
+        emailDelivery,
+        message: status === 'published'
+          ? (emailDelivery
+              ? `公告已成功建立並發布，已發送 Email 給 ${emailDelivery.sent} 位會員。`
+              : '公告已成功建立並發布。')
+          : '公告草稿已成功儲存。',
       }
     } catch (err: any) {
       return {
@@ -3772,10 +3785,26 @@ export class AdminService {
         timestamp: new Date().toISOString(),
       })
 
+      let emailDelivery: any = undefined
+      if (input.sendEmail) {
+        if (updated.status === 'published') {
+          emailDelivery = await dispatchAnnouncementEmails(client, updated)
+        } else {
+          return {
+            success: false,
+            error: 'NOT_PUBLISHED',
+            message: '僅有已發布的公告方可發送 Email 給所有使用者。',
+          }
+        }
+      }
+
       return {
         success: true,
         announcement: updated,
-        message: '公告已成功更新。',
+        emailDelivery,
+        message: emailDelivery
+          ? `公告已成功更新，已發送 Email 給 ${emailDelivery.sent} 位會員。`
+          : '公告已成功更新。',
       }
     } catch (err: any) {
       return {
@@ -3788,6 +3817,52 @@ export class AdminService {
 
   async archiveAnnouncement(id: string): Promise<AnnouncementActionResult> {
     return this.updateAnnouncement({ id, status: 'archived' })
+  }
+
+  async sendAnnouncementEmail(id: string): Promise<AnnouncementActionResult> {
+    try {
+      const client = this.ensureClient()
+      if (!id || typeof id !== 'string') {
+        return { success: false, error: 'ID_REQUIRED', message: '公告 ID 為必填。' }
+      }
+
+      const { data: existing, error: fetchError } = await client
+        .from('announcements')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle()
+
+      if (fetchError || !existing) {
+        return { success: false, error: 'NOT_FOUND', message: '找不到指定的公告。' }
+      }
+
+      if (existing.status !== 'published') {
+        return { success: false, error: 'NOT_PUBLISHED', message: '僅有「已發布」狀態的公告可發送 Email 給使用者。' }
+      }
+
+      const delivery = await dispatchAnnouncementEmails(client, existing)
+
+      const { data: refreshed } = await client
+        .from('announcements')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      return {
+        success: true,
+        announcement: refreshed || existing,
+        emailDelivery: delivery,
+        message: delivery.error
+          ? `寄信過程發生錯誤: ${delivery.error}`
+          : `已成功寄送 Email 給 ${delivery.sent} 位使用者（共 ${delivery.total} 位，失敗 ${delivery.failed} 位）。`,
+      }
+    } catch (err: any) {
+      return {
+        success: false,
+        error: 'UNEXPECTED_ERROR',
+        message: err instanceof Error ? err.message : String(err),
+      }
+    }
   }
 
   private classifyQualityCategory(rule: string): 'lexical_ceiling' | 'forbidden_jargon' | 'prompt_clipped' | 'cap_deficit' | 'schema_mismatch' | 'other' {

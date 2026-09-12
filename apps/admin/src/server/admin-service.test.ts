@@ -198,6 +198,23 @@ function createMockSupabaseClient(
         },
       }),
     },
+    auth: {
+      admin: {
+        listUsers: async (_params: any = {}) => {
+          const authUsers = tableData.auth_users || [
+            { id: 'user-1', email: 'parent1@example.com' },
+            { id: 'user-2', email: 'parent2@example.com' },
+          ]
+          return { data: { users: authUsers }, error: null }
+        },
+        generateLink: async (params: any) => {
+          return {
+            data: { properties: { action_link: `https://example.com/magic?email=${params.email}` } },
+            error: null,
+          }
+        },
+      },
+    },
   } as any
 }
 
@@ -208,6 +225,11 @@ describe('AdminService Authoritative Truth Layer', () => {
     delete process.env.RESEND_API_KEY
     delete process.env.EMAIL_FROM
     delete process.env.SITE_URL
+    delete process.env.SMTP_HOST
+    delete process.env.SMTP_PORT
+    delete process.env.SMTP_SECURE
+    delete process.env.SMTP_USER
+    delete process.env.SMTP_PASS
   })
   it('throws an error if no Supabase connection is configured', async () => {
     const service = new AdminService({ supabaseUrl: '', supabaseSecretKey: '' })
@@ -2292,6 +2314,113 @@ describe('AdminService Authoritative Truth Layer', () => {
       expect(draftData.announcements).toHaveLength(1)
       expect(draftData.announcements[0].title).toBe('Draft 1')
       expect(draftData.stats.total).toBe(4)
+    })
+
+    it('dispatches emails when creating announcement with status published and sendEmail true', async () => {
+      process.env.SMTP_HOST = 'smtp.example.com'
+      process.env.SMTP_PORT = '465'
+      process.env.SMTP_SECURE = 'true'
+      process.env.SMTP_USER = 'admin@example.com'
+      process.env.SMTP_PASS = 'secret'
+      process.env.EMAIL_FROM = '紙屬英文 <noreply@example.com>'
+
+      const mockClient = createMockSupabaseClient({ announcements: [] })
+      const service = new AdminService({ client: mockClient })
+
+      const nodemailer = await import('nodemailer')
+      const sendMailMock = vi.fn().mockResolvedValue({ messageId: 'test-msg-id' })
+      vi.spyOn(nodemailer.default, 'createTransport').mockReturnValue({
+        sendMail: sendMailMock,
+      } as any)
+
+      const res = await service.createAnnouncement({
+        title: '發布即寄信公告',
+        body: '這是一篇帶寄信的公告',
+        category: 'notice',
+        status: 'published',
+        sendEmail: true,
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.announcement?.status).toBe('published')
+      expect(res.emailDelivery).toBeDefined()
+      expect(res.emailDelivery?.total).toBe(2)
+      expect(res.emailDelivery?.sent).toBe(2)
+      expect(sendMailMock).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not dispatch emails when creating draft even if sendEmail is true', async () => {
+      const mockClient = createMockSupabaseClient({ announcements: [] })
+      const service = new AdminService({ client: mockClient })
+
+      const nodemailer = await import('nodemailer')
+      const sendMailMock = vi.fn()
+      vi.spyOn(nodemailer.default, 'createTransport').mockReturnValue({
+        sendMail: sendMailMock,
+      } as any)
+
+      const res = await service.createAnnouncement({
+        title: '草稿不寄信',
+        body: '草稿內容',
+        category: 'notice',
+        status: 'draft',
+        sendEmail: true,
+      })
+
+      expect(res.success).toBe(true)
+      expect(res.emailDelivery).toBeUndefined()
+      expect(sendMailMock).not.toHaveBeenCalled()
+    })
+
+    it('allows manually triggering email broadcast via sendAnnouncementEmail', async () => {
+      process.env.SMTP_HOST = 'smtp.example.com'
+      process.env.SMTP_PORT = '465'
+      process.env.SMTP_USER = 'admin@example.com'
+      process.env.SMTP_PASS = 'secret'
+
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          {
+            id: 'ann-published-1',
+            title: '已發布補寄信',
+            body: '內文',
+            category: 'feature',
+            status: 'published',
+            published_at: '2026-09-12T12:00:00Z',
+          },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const nodemailer = await import('nodemailer')
+      const sendMailMock = vi.fn().mockResolvedValue({ messageId: 'msg-id' })
+      vi.spyOn(nodemailer.default, 'createTransport').mockReturnValue({
+        sendMail: sendMailMock,
+      } as any)
+
+      const res = await service.sendAnnouncementEmail('ann-published-1')
+      expect(res.success).toBe(true)
+      expect(res.emailDelivery?.sent).toBe(2)
+      expect(sendMailMock).toHaveBeenCalledTimes(2)
+    })
+
+    it('rejects sendAnnouncementEmail for non-published announcements', async () => {
+      const mockClient = createMockSupabaseClient({
+        announcements: [
+          {
+            id: 'ann-draft-1',
+            title: '草稿',
+            body: '內文',
+            category: 'feature',
+            status: 'draft',
+          },
+        ],
+      })
+      const service = new AdminService({ client: mockClient })
+
+      const res = await service.sendAnnouncementEmail('ann-draft-1')
+      expect(res.success).toBe(false)
+      expect(res.error).toBe('NOT_PUBLISHED')
     })
   })
 })

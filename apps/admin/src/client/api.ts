@@ -100,6 +100,7 @@ export const adminApi = {
   createAnnouncement: (input: CreateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/create', input as unknown as Record<string, unknown>),
   updateAnnouncement: (input: UpdateAnnouncementInput) => postJson<AnnouncementActionResult>('/api/announcements/update', input as unknown as Record<string, unknown>),
   archiveAnnouncement: (id: string) => postJson<AnnouncementActionResult>('/api/announcements/archive', { id }),
+  sendAnnouncementEmail: (id: string) => postJson<AnnouncementActionResult>('/api/announcements/send-email', { id }),
 
   // Fast Synchronous Cache Readers
   getCachedTimeline: (childId?: string, week?: string): ChildWeekTimeline | null => {
