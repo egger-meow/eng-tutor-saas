@@ -428,13 +428,13 @@ begin
   -- Check if any historical completed session exists to avoid repeat items
   select coalesce(jsonb_agg(r.item_id), '[]'::jsonb) into v_prev_items
   from (
-    select session_id
+    select id
     from public.assessment_sessions
     where child_id = p_child_id and status = 'completed'
     order by completed_at desc nulls last, created_at desc
     limit 1
   ) s
-  join public.assessment_responses r on r.session_id = s.session_id;
+  join public.assessment_responses r on r.session_id = s.id;
 
   v_first_item_id := null;
   v_first_skill_idx := 1;
