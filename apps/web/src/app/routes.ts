@@ -8,6 +8,7 @@ export type RouteName =
   | 'pay'
   | 'authenticated-material'
   | 'dashboard'
+  | 'assessment'
   | 'child-new'
   | 'child-overview'
   | 'child-edit'
@@ -37,6 +38,7 @@ const staticRoutes = new Map<string, RouteName>([
   ['/material', 'material'],
   ['/pay', 'pay'],
   ['/dashboard', 'dashboard'],
+  ['/assessment', 'assessment'],
   ['/announcements', 'announcements'],
   ['/parent-guide-feedback', 'parent-guide-feedback'],
   ['/children', 'child-overview'],

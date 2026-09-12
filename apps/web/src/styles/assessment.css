@@ -624,3 +624,136 @@
   gap: 0.5rem;
   flex-wrap: wrap;
 }
+
+/* Assessment Hub Page */
+.assessment-hub-page {
+  width: min(52rem, 100%);
+  margin-inline: auto;
+  padding-bottom: var(--space-8, 2rem);
+}
+
+.assessment-hub-header {
+  margin-bottom: var(--space-8, 2rem);
+}
+
+.assessment-hub-header h1 {
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-top: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-3, 0.75rem);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.assessment-hub-lede {
+  color: var(--color-muted, #6c6b63);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.assessment-hub-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-5, 1.25rem);
+}
+
+.assessment-child-card {
+  background: var(--color-paper, #fffdf8);
+  border: 1px solid var(--color-rule, #d8d0c1);
+  border-radius: var(--radius-surface, 0.75rem);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assessment-child-card:hover {
+  border-color: var(--color-rule-strong, #9e978a);
+}
+
+.assessment-child-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.assessment-child-card-name {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-ink, #18261f);
+  margin: 0;
+}
+
+.assessment-child-card-grade {
+  font-size: 0.9375rem;
+  color: var(--color-muted, #6c6b63);
+  margin: 0;
+}
+
+.assessment-child-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--color-rule-soft, #ebe7dc);
+  border-bottom: 1px solid var(--color-rule-soft, #ebe7dc);
+}
+
+.assessment-child-status-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.assessment-status-not-started {
+  color: var(--color-ink, #18261f);
+}
+
+.assessment-status-completed {
+  color: var(--color-action, #284f3e);
+}
+
+.assessment-status-in-progress {
+  color: #b45309;
+}
+
+.assessment-status-retake-eligible {
+  color: #b45309;
+}
+
+.assessment-child-status-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-muted, #6c6b63);
+  margin: 0;
+}
+
+.assessment-child-card-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.assessment-hub-empty {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border: 1px dashed var(--color-rule, #d8d0c1);
+  border-radius: var(--radius-surface, 0.75rem);
+  background: var(--color-paper, #fffdf8);
+}
+
+.assessment-hub-empty h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.assessment-hub-empty p {
+  color: var(--color-muted, #6c6b63);
+  margin-bottom: 1.5rem;
+}
+

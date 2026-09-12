@@ -3438,6 +3438,18 @@ Edit profile and preferences.
 Material history.
 
 ```text
+/assessment
+```
+
+Parent assessment overview and child diagnostic selection hub.
+
+```text
+/children/:id/assessment
+```
+
+Direct assessment for a specific child.
+
+```text
 /feedback/:materialId
 ```
 

@@ -252,3 +252,18 @@ export async function getChildLatestAssessmentResult(childId: string): Promise<S
   if (!data) return null
   return SanitizedAssessmentResultSchema.parse(data)
 }
+
+export function formatAssessmentDate(isoString: string | null | undefined): string {
+  if (!isoString) return ''
+  try {
+    const d = new Date(isoString)
+    if (isNaN(d.getTime())) return isoString
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}/${m}/${day}`
+  } catch {
+    return isoString
+  }
+}
+
