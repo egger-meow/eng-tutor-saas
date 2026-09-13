@@ -5,6 +5,8 @@ import { AppShell } from '../components/layout/AppShell'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { PublicFooter } from '../components/layout/PublicFooter'
 import { PageTransition } from '../components/motion/PageTransition'
+import { MaterialPreview } from '../components/materials/MaterialPreview'
+import { materialDownloadFilename } from '../lib/materials'
 import { getSupabaseClient } from '../lib/supabase'
 import { captureScopedMaterialToken, forgetScopedMaterialToken } from '../lib/scoped-material-token'
 
@@ -68,42 +70,31 @@ export function ScopedMaterialContent({
         </p>
         <h1>本週教材</h1>
         <p className="scoped-material-subtitle">
-          每週一份專屬英文教材已備妥，請點擊下方按鈕預覽或下載列印。
+          每週一份專屬英文教材已備妥，可直接在下方預覽學生教材，或下載列印。
         </p>
       </div>
 
-      <div className="scoped-material-downloads">
-        <div className="scoped-download-item">
-          <div className="scoped-download-item-header">
-            <span className="scoped-download-badge">學生學習版</span>
-            <h2>學生教材</h2>
-            <p>包含自然閱讀短文、精選核心單字、文法解析與自主思考練習題。</p>
-          </div>
-          <a
-            className="button button-primary"
-            href={state.studentPdfUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            預覽 / 下載 PDF
-          </a>
-        </div>
+      <MaterialPreview pdfUrl={state.studentPdfUrl} />
 
-        <div className="scoped-download-item">
-          <div className="scoped-download-item-header">
-            <span className="scoped-download-badge badge-parent">家長解答版</span>
-            <h2>家長解答</h2>
-            <p>包含本週重點摘要、參考解答與引導提示，方便協助孩子核對檢討。</p>
-          </div>
-          <a
-            className="button button-secondary"
-            href={state.parentAnswerPdfUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            預覽 / 下載 PDF
-          </a>
-        </div>
+      <div className="material-actions scoped-material-actions">
+        <a
+          className="button button-primary"
+          href={state.studentPdfUrl}
+          download={materialDownloadFilename(state.material.childName, state.material.materialWeek, 'student', state.material.weekNumber)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          下載學生教材
+        </a>
+        <a
+          className="button button-secondary"
+          href={state.parentAnswerPdfUrl}
+          download={materialDownloadFilename(state.material.childName, state.material.materialWeek, 'parent', state.material.weekNumber)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          下載家長解答
+        </a>
       </div>
 
       <div className="scoped-material-footer">
