@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { MaterialActions } from '../components/materials/MaterialActions'
 import { MaterialPreview } from '../components/materials/MaterialPreview'
+import { WeeklyLearningPanel } from '../components/dashboard/WeeklyLearningPanel'
 import { loadAuthenticatedMaterial } from '../lib/authenticated-material-loader'
 import { AuthenticatedMaterialContent } from './AuthenticatedMaterialPage'
 import { ScopedMaterialContent, ScopedMaterialLoadingState, ScopedMaterialPage } from './ScopedMaterialPage'
@@ -253,5 +255,60 @@ describe('weekly material inline preview and page states', () => {
     const previewLoading = renderToStaticMarkup(<MaterialPreview isLoading={true} />)
     expect(previewLoading).toContain('正在載入教材預覽…')
     expect(previewLoading).toContain('material-preview-loading-surface')
+  })
+
+  it('9. dashboard WeeklyLearningPanel provides direct preview entry point to /materials/:id', () => {
+    const mockMaterial = {
+      id: 'mat-released-123',
+      child_id: 'child-1',
+      material_week: '2026-09-13',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-released-123/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-released-123/answer.pdf',
+      generation_summary: {
+        title: 'How Does a Game Place Sound Around You?',
+        learningFocus: '本週改用遊戲 spatial audio',
+      },
+      created_at: '2026-09-13T00:00:00Z',
+      release_at: '2026-09-13T00:00:00Z',
+      feedback: null,
+    }
+
+    const html = renderToStaticMarkup(
+      <WeeklyLearningPanel material={mockMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
+    )
+
+    // Direct preview button linking to /materials/:id
+    expect(html).toContain('線上預覽教材')
+    expect(html).toContain('href="/materials/mat-released-123"')
+
+    // Title links to preview route as well
+    expect(html).toContain('How Does a Game Place Sound Around You?</a>')
+
+    // Download buttons remain accessible
+    expect(html).toContain('下載學生教材')
+    expect(html).toContain('下載家長解答')
+  })
+
+  it('10. MaterialActions does not expose preview link when material is unreleased', () => {
+    const futureMaterial = {
+      id: 'mat-future-456',
+      child_id: 'child-1',
+      material_week: '2026-09-20',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-future-456/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-future-456/answer.pdf',
+      generation_summary: {},
+      created_at: '2026-09-13T00:00:00Z',
+      release_at: '2026-09-20T00:00:00Z',
+      feedback: null,
+    }
+
+    const html = renderToStaticMarkup(
+      <MaterialActions material={futureMaterial} childName="Jonathan" showPreviewLink={true} />
+    )
+
+    expect(html).not.toContain('線上預覽教材')
+    expect(html).toContain('尚未開放下載')
   })
 })

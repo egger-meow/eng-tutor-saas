@@ -1,9 +1,14 @@
 import { useState } from 'react'
+import { handleInternalLink } from '../../app/use-route'
 import { isMaterialReleased, materialDownloadFilename, openMaterialDownload, type Material } from '../../lib/materials'
 
-type MaterialActionsProps = { material: Material; childName: string }
+type MaterialActionsProps = {
+  material: Material
+  childName: string
+  showPreviewLink?: boolean
+}
 
-export function MaterialActions({ material, childName }: MaterialActionsProps) {
+export function MaterialActions({ material, childName, showPreviewLink = false }: MaterialActionsProps) {
   const [busy, setBusy] = useState<'student' | 'parent' | null>(null)
   const [error, setError] = useState('')
   const released = isMaterialReleased(material)
@@ -26,8 +31,31 @@ export function MaterialActions({ material, childName }: MaterialActionsProps) {
     <div>
       {!released && material.release_at && <p className="muted">教材已準備完成，於 {new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(material.release_at))} 開放下載。</p>}
       <div className="material-actions">
-        <button className="button" type="button" disabled={!released || busy !== null} onClick={() => void download('student')}>{busy === 'student' ? '準備中…' : released ? '下載學生教材' : '尚未開放下載'}</button>
-        <button className="button button-secondary" type="button" disabled={!released || busy !== null} onClick={() => void download('parent')}>{busy === 'parent' ? '準備中…' : released ? '下載家長解答' : '尚未開放下載'}</button>
+        {showPreviewLink && released && (
+          <a
+            className="button button-primary"
+            href={`/materials/${material.id}`}
+            onClick={handleInternalLink}
+          >
+            線上預覽教材
+          </a>
+        )}
+        <button
+          className={`button ${showPreviewLink ? 'button-secondary' : ''}`}
+          type="button"
+          disabled={!released || busy !== null}
+          onClick={() => void download('student')}
+        >
+          {busy === 'student' ? '準備中…' : released ? '下載學生教材' : '尚未開放下載'}
+        </button>
+        <button
+          className="button button-secondary"
+          type="button"
+          disabled={!released || busy !== null}
+          onClick={() => void download('parent')}
+        >
+          {busy === 'parent' ? '準備中…' : released ? '下載家長解答' : '尚未開放下載'}
+        </button>
       </div>
       {error && <p className="notice notice-error" role="alert">{error}</p>}
     </div>
