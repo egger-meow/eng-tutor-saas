@@ -36,7 +36,7 @@ export function renderVocabularySection(vocabulary?: readonly VocabularyItem[]):
   const entriesHtml = vocabulary.map(renderVocabEntry).join('\n')
 
   return `<section class="vocab-section">
-  <h2>核心單字</h2>
+  <h2>核心單字與片語</h2>
   <div class="vocab-grid">
     ${entriesHtml}
   </div>

@@ -1624,7 +1624,7 @@ Do not choose obscure words only to make the worksheet appear advanced.
 
 Vocabulary cards should be almost entirely genuinely new, meaningful, grade-appropriate difficult words. A word already exposed in an earlier packet may recur naturally in reading, questions, examples, practice, or homework, but it must never be labeled `new` or consume the weekly new-word quota.
 
-When a useful multi-word expression teaches more than another isolated word, **0–3 core items may be grade-appropriate phrases or collocations**. Do not force phrases to fill a quota. Phrase/collocation items use the same stable-ID, novelty, status, spaced-review, and tracking rules as single-word items.
+To strengthen natural language application and collocation awareness, packets are actively encouraged to include **1–2 high-frequency, grade-appropriate phrases or collocations** (e.g. key verb phrases, prepositional combinations), with tolerance up to **3–4 core items**. Do not force phrases beyond pedagogical utility. Phrase/collocation items use the same stable-ID, novelty, status, spaced-review, and tracking rules as single-word items, and appear in the Student PDF under the designated section 「核心單字與片語」.
 
 Include **0–4 review cards, default 0**, only when a word is genuinely difficult/useful and due for spaced review or supported by actual difficulty evidence. Review cards do not consume the new-word quota and must be clearly labeled as review in the Student PDF.
 

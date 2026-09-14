@@ -7,15 +7,15 @@ generatedAt: "2026-08-18T15:45:00.000Z"
 sourceHashes:
   "packages/generator/curriculum/interest-exploration.md": "826cbeb444e6cfb969bfd9d95148f38b7c3f9ed929299a3f704506f873d5e7e3"
   "packages/generator/src/compact-routing-index.ts": "6e1348e3b42948f8ad30334e64699612b1ff6b1b620828feece168fab6aa1d6d"
-  "packages/generator/prompts/2.14.0/01-plan.md": "8f439f001f9f38a5d095c823805a8f157415672ffd20202fd0f968f7f04fd419"
-  "packages/generator/prompts/2.14.0/02-author.md": "120cd6e8f89941dc7effd6c0b848943d4a98e54adcd66c4759334ddb4c4e5274"
-  "packages/generator/prompts/2.14.0/03-critic.md": "e4f3e48e5fa307e8869af49f73e53e5ac83060ccadb6585f7192d639f77f6df5"
+  "packages/generator/prompts/2.14.0/01-plan.md": "43c2776f60accba0c17b1c83384613971a65e0da3a5cb59a85738ce034652bda"
+  "packages/generator/prompts/2.14.0/02-author.md": "f7ff76e080d404fb0e601d88f910e4ffb3e504333d230f8945cc84d1cc526c12"
+  "packages/generator/prompts/2.14.0/03-critic.md": "542d1a32a07d8625984fa2a19d06adc2671935de9627f10e7e7047927fdbce2d"
   "packages/generator/prompts/2.14.0/04-repair.md": "32ea8c4abd81665614084544e76eadfde46bc7b6dd318ac42b6a6eee0ba80c39"
   "packages/generator/src/curriculum-package-schema.ts": "415f97a63ee9278856da6d0059f155048e0fb17396205f8a2fbfd900630f8bf7"
   "packages/generator/quality-profiles/default.md": "f09d1e3e68a0297848f960ddd2b2620e7a996ec799766d52ca9b6013fcfb2a03"
   "packages/generator/quality-profiles/gemini-3.7-flash.md": "9db1cc2a142e40efcbb75dfcb76436cd61edeb13b065d6517af5dc97bd2fc37b"
   "docs/curriculum-quality-rubric.md": "4c8481256dbd6da8cd7c4aafb85abdc73e39c2738b6d6828e22bded1d517a518"
-  "docs/product-rules.md": "681565306d36ffa2f33eafc6ba9d76dff96a16110e9a067983fabfa70ba55e16"
+  "docs/product-rules.md": "ce46da6ddecaddfd805f6b5407c0fdef95820f10c5c90da538a59bdc418c60a3"
   "packages/generator/curriculum/cap-precedent-contract.md": "036ad256be8d16ab98776a1d5e30770154265247535c6b1b3e5315da6bf27e6b"
   "packages/generator/src/cap-assessment-plan-contract.ts": "5ed552ce3254b6b3eefe4c0b66861ba125b0ef76d372d7e4f10073676c30bcec"
   "packages/generator/curriculum/cap-precedent-cards.json": "23d051d7811591d5604fcd82309c639a078c3dc61c2b4e79646bf443df85452e"
@@ -40,7 +40,7 @@ Every student packet should contain:
 
 - a clear weekly goal and estimated workload;
 - one level-appropriate reading with contextual clues;
-- a bounded lexical-unit set chosen for genuine learning value; useful grade-appropriate phrases/collocations are allowed when they teach more than another isolated word, never as quota fillers;
+- a bounded lexical-unit set chosen for genuine learning value; actively encourage 1–2 high-frequency, grade-appropriate phrases/collocations (with tolerance up to 3–4 items) that teach natural language use beyond isolated words;
 - grammar practice connected to the reading rather than isolated drills;
 - comprehension and transfer questions;
 - space to mark unknowns, corrections, and reflection.
@@ -973,7 +973,7 @@ Interest is the hook, not the learning objective. Preserve `learning need -> tar
 
 ## 2. Learner level, lexical plan, and workload
 
-Keep language natural, age-appropriate, self-study friendly, and aligned to the learner's demonstrated level. Select meaningful new vocabulary from the passage's real learning burden rather than a fixed list or quota. Known words may recur naturally. Difficult passage-critical words should be taught, context-supported, already known, necessary proper nouns, or simplified.
+Keep language natural, age-appropriate, self-study friendly, and aligned to the learner's demonstrated level. Select meaningful new vocabulary from the passage's real learning burden rather than a fixed list or quota. Treat core vocabulary as lexical units: actively include 1–2 high-frequency, grade-appropriate phrases or collocations (e.g., key verb phrases, prepositional collocations, fixed expressions, with tolerance up to 3–4 items) that carry genuine communicative value in the reading, rather than relying exclusively on isolated words. Known words may recur naturally. Difficult passage-critical words should be taught, context-supported, already known, necessary proper nouns, or simplified.
 
 Use profile `weekly_minutes` as `targetMinutes`. `learningPlan.estimatedMinutes` is truthful represented-work evidence and must not simply copy the target. Plan meaningful work near the configured target band without filler, fake duration, or deleting essential learning stages.
 
@@ -1071,7 +1071,7 @@ You are the Author Engine for **紙屬英文**, Schema 2.6.0 / Prompt 2.14.0. Au
 
 Write natural, age-appropriate English that a junior-high learner can study independently. Use concise Traditional Chinese scaffolding where it gives a usable mental model, worked example, decision rule, contrast, or mistake explanation. Avoid internal engine labels and developer jargon in Student/Parent copy.
 
-The primary reading must feel like real discourse and teach supported, specific knowledge, including stories, creative processes, and work/character interpretation under the shared interest contract. Avoid generic interest noun-skinning. Core vocabulary should represent genuine learning burden and new/extension items must be naturally anchored in the primary reading with useful context. Do not create fake novelty or fill numerical quotas. Previously exposed vocabulary may recur or be explicitly reviewed, but never masquerades as new.
+The primary reading must feel like real discourse and teach supported, specific knowledge, including stories, creative processes, and work/character interpretation under the shared interest contract. Avoid generic interest noun-skinning. Core vocabulary should represent genuine learning burden, and new/extension items must be naturally anchored in the primary reading with useful context. Treat vocabulary as lexical units: actively anchor and include 1–2 high-frequency, grade-appropriate phrases or collocations (e.g., verb phrases, prepositional collocations, up to 3–4 items) with clear part-of-speech labeling (such as `phr.`, `v. phr.`, `prep. phr.`) and authentic contextual usage examples, rather than selecting solely single words. Do not create fake novelty or fill numerical quotas. Previously exposed vocabulary may recur or be explicitly reviewed, but never masquerades as new.
 
 Primary grammar normally advances. Previously exposed grammar can recur naturally in retrieval/application and becomes primary again only when feedback, actual failure evidence, or prerequisite repair supports it.
 
@@ -1146,7 +1146,7 @@ Review these dimensions substantively rather than as label bookkeeping:
 
 1. `evidence-boundary` — Reading comprehension and reading-based CAP transfer are answerable from the primary reading, with valid evidence scope/anchors and no hidden dependence on later instruction or outside facts.
 2. `answer-entailment` — Correct answers, accepted variants, rationales, modality, qualifiers, counts, and procedure constraints are actually supported and complete. Reject unsupported composite claims and ambiguous keys.
-3. `lexical-integrity` — New/extension vocabulary is genuinely anchored and useful; hidden untaught difficulty does not exceed what this learner can reasonably handle. Judge language semantically, not by finite allowlists or morphology tricks.
+3. `lexical-integrity` — New/extension vocabulary is genuinely anchored and useful; multi-word lexical units (phrases/collocations) are encouraged (normally 1–2 items, with tolerance up to 3–4) and should have natural communicative usage; hidden untaught difficulty does not exceed what this learner can reasonably handle. Judge language semantically, not by finite allowlists or morphology tricks.
 4. `task-topology` — The packet teaches before it tests and uses meaningful cognitive variety instead of repeated template mechanics. CAP serves as a quality floor, not a mold.
 5. `level-calibration` — Reading, grammar, vocabulary, scaffolding, workload, and reasoning fit the learner's current state and feedback without childish flattening or needless overload.
 

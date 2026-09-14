@@ -10,7 +10,7 @@ Every student packet should contain:
 
 - a clear weekly goal and estimated workload;
 - one level-appropriate reading with contextual clues;
-- a bounded lexical-unit set chosen for genuine learning value; useful grade-appropriate phrases/collocations are allowed when they teach more than another isolated word, never as quota fillers;
+- a bounded lexical-unit set chosen for genuine learning value; actively encourage 1–2 high-frequency, grade-appropriate phrases/collocations (with tolerance up to 3–4 items) that teach natural language use beyond isolated words;
 - grammar practice connected to the reading rather than isolated drills;
 - comprehension and transfer questions;
 - space to mark unknowns, corrections, and reflection.

@@ -27,7 +27,7 @@ describe('vocabulary-renderer', () => {
     ]
 
     const html = renderVocabularySection(vocabList)
-    expect(html).toContain('<h2>核心單字</h2>')
+    expect(html).toContain('<h2>核心單字與片語</h2>')
     expect(html).toContain('class="vocab-grid"')
     expect(html).toContain('class="vocab-entry"')
     expect(html).toContain('class="vocab-word">partner</span>')

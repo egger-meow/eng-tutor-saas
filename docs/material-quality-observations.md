@@ -45,9 +45,9 @@ Lifecycle: `monitoring → repeated-evidence → decision → closed/promoted`
 - **ID:** OBS-003
 - **Title:** Multiword lexical units rarely selected
 - **Evidence:** The 2026-08-22 15-job production load test produced almost entirely single-word core vocabulary despite optional 0–3 phrase/collocation support.
-- **Interpretation/risk:** Not currently a defect because phrases are intentionally optional.
-- **Action threshold:** Review only after longitudinal real-user vocabulary data shows useful phrase learning is systematically absent.
-- **Status:** monitoring
+- **Interpretation/risk:** Low selection rate was caused by passive "optional 0–3 items" guidance and exclusively "核心單字" header in Student PDF.
+- **Resolution:** Addressed in Prompt 2.14.0 and PDF renderer update: actively encourages 1–2 high-frequency phrases/collocations (with tolerance up to 3–4), and renames the Student PDF section to 「核心單字與片語」.
+- **Status:** addressed
 
 ### OBS-004 — Some analytical vocabulary repeats across unrelated learners
 

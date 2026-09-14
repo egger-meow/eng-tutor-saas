@@ -10,7 +10,7 @@ Review these dimensions substantively rather than as label bookkeeping:
 
 1. `evidence-boundary` — Reading comprehension and reading-based CAP transfer are answerable from the primary reading, with valid evidence scope/anchors and no hidden dependence on later instruction or outside facts.
 2. `answer-entailment` — Correct answers, accepted variants, rationales, modality, qualifiers, counts, and procedure constraints are actually supported and complete. Reject unsupported composite claims and ambiguous keys.
-3. `lexical-integrity` — New/extension vocabulary is genuinely anchored and useful; hidden untaught difficulty does not exceed what this learner can reasonably handle. Judge language semantically, not by finite allowlists or morphology tricks.
+3. `lexical-integrity` — New/extension vocabulary is genuinely anchored and useful; multi-word lexical units (phrases/collocations) are encouraged (normally 1–2 items, with tolerance up to 3–4) and should have natural communicative usage; hidden untaught difficulty does not exceed what this learner can reasonably handle. Judge language semantically, not by finite allowlists or morphology tricks.
 4. `task-topology` — The packet teaches before it tests and uses meaningful cognitive variety instead of repeated template mechanics. CAP serves as a quality floor, not a mold.
 5. `level-calibration` — Reading, grammar, vocabulary, scaffolding, workload, and reasoning fit the learner's current state and feedback without childish flattening or needless overload.
 

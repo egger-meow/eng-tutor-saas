@@ -220,17 +220,21 @@ describe('curriculum audit & lexical contract', () => {
     expect(report.findings.find((f) => f.dimension === 'lexical-ceiling' && /work|together/u.test(f.message))).toBeUndefined()
   })
 
-  it('treats more than three phrase or collocation cards as warning-only telemetry', () => {
+  it('accommodates up to four phrase cards cleanly and treats more than four as warning-only telemetry', () => {
     const pkg = canonicalPackage()
     const phrases = ['work together', 'after school', 'take notes', 'find out']
     phrases.forEach((word, index) => {
       pkg.studentLesson.vocabulary[index] = { ...pkg.studentLesson.vocabulary[index], word, partOfSpeech: 'phr.' }
     })
 
-    const report = auditCurriculumPackage(pkg)
-    const finding = report.findings.find((f) => f.dimension === 'lexical-unit-mix')
+    const reportFour = auditCurriculumPackage(pkg)
+    expect(reportFour.findings.find((f) => f.dimension === 'lexical-unit-mix')).toBeUndefined()
+
+    pkg.studentLesson.vocabulary[4] = { ...pkg.studentLesson.vocabulary[4], word: 'look forward to', partOfSpeech: 'phr.' }
+    const reportFive = auditCurriculumPackage(pkg)
+    const finding = reportFive.findings.find((f) => f.dimension === 'lexical-unit-mix')
     expect(finding?.severity).toBe('warning')
-    expect(report.passed).toBe(true)
+    expect(reportFive.passed).toBe(true)
   })
 
   it('does not emit fixed-list lexical findings for isolated off-list words', () => {
