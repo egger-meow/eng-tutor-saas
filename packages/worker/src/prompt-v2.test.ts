@@ -12,13 +12,17 @@ it('uses the exact current production bundle and preserves private claimed conte
 })
 
 
-it('keeps an in-flight previous claim on its frozen bundle after the desired release changes', async () => {
-  const { PREVIOUS_AUTHORING_CONTRACT } = await import('./authoring-claim-contract.js')
-  const canonical = await readFile(new URL('../../generator/bundles/2.13.2-production-authoring-bundle.md', import.meta.url), 'utf8')
+it.each([
+  ['PREVIOUS_AUTHORING_CONTRACT', '../../generator/bundles/2.14.0-production-authoring-bundle.md'],
+  ['LEGACY_AUTHORING_CONTRACT', '../../generator/bundles/2.13.2-production-authoring-bundle.md'],
+] as const)('keeps an in-flight %s claim on its frozen bundle after the desired release changes', async (contractName, bundlePath) => {
+  const contracts = await import('./authoring-claim-contract.js')
+  const contract = contracts[contractName]
+  const canonical = await readFile(new URL(bundlePath, import.meta.url), 'utf8')
   const context = {
     job: { id: 'old-job', childId: 'child-1', materialWeek: '2026-09-10', ruleVersion: 'curriculum/2.0.0' },
-    targetReleaseId: PREVIOUS_AUTHORING_CONTRACT.releaseId,
-    activeAuthoringContract: { ...PREVIOUS_AUTHORING_CONTRACT },
+    targetReleaseId: contract.releaseId,
+    activeAuthoringContract: { ...contract },
   }
   const snapshot = structuredClone(context)
   expect((await buildCurriculumPromptBundle(context)).startsWith(canonical)).toBe(true)

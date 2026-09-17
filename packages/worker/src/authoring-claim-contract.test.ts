@@ -2,15 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { PREVIOUS_AUTHORING_CONTRACT, desiredAuthoringContract, claimAuthoringContract, readClaimAuthoringBundle } from './authoring-claim-contract.js'
+import { LEGACY_AUTHORING_CONTRACT, PREVIOUS_AUTHORING_CONTRACT, desiredAuthoringContract, claimAuthoringContract, readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import { makeValidV24Package } from './authoring-helpers.test.js'
 import { validatePreSubmitPackage } from './authoring-helpers.js'
 import { authoringPrompt, validateAuthoredPackage } from './local-codex-authoring.js'
 import { buildPacketPlanningPrompt } from './packet-planning.js'
 
 const root = resolve(import.meta.dirname, '../../..')
-async function contextFor(previous = false) {
-  const contract = previous ? PREVIOUS_AUTHORING_CONTRACT : {
+async function contextFor(historical: 'current' | 'previous' | 'legacy' = 'current') {
+  const contract = historical === 'previous' ? PREVIOUS_AUTHORING_CONTRACT : historical === 'legacy' ? LEGACY_AUTHORING_CONTRACT : {
     ...desiredAuthoringContract,
     bundleSha256: createHash('sha256').update(await readFile(resolve(root, 'packages/generator/bundles/production-authoring-bundle.md'))).digest('hex'),
   }
@@ -37,8 +37,8 @@ function packageFor(context: Awaited<ReturnType<typeof contextFor>>) {
   return pkg
 }
 describe('immutable authoring claim contracts across release changes', () => {
-  it.each([false, true])('validates and authors the exact bound current/previous contract (previous=%s)', async previous => {
-    const context = await contextFor(previous)
+  it.each(['current', 'previous', 'legacy'] as const)('validates and authors the exact bound %s contract', async historical => {
+    const context = await contextFor(historical)
     const snapshot = structuredClone(context)
     const pkg = packageFor(context)
     const result = validatePreSubmitPackage(pkg, context)
@@ -51,15 +51,15 @@ describe('immutable authoring claim contracts across release changes', () => {
     expect(context).toEqual(snapshot)
   })
   it.each(['schemaVersion', 'promptVersion', 'engineVersion', 'workerVersion', 'rendererVersion'])('rejects mismatched package %s in both actual adapters', async key => {
-    const context = await contextFor()
+    const context = await contextFor('current')
     const pkg = packageFor(context)
     pkg.metadata[key] = '0.0.0'
     expect(validatePreSubmitPackage(pkg, context).valid).toBe(false)
     expect(() => validateAuthoredPackage(pkg, context)).toThrow()
   })
   it('rejects release mismatch, unsupported contracts and tampered bundles', async () => {
-    const context = await contextFor(true)
-    expect(() => claimAuthoringContract({ ...context, targetReleaseId: 'rel_1.9.0' })).toThrow()
+    const context = await contextFor('previous')
+    expect(() => claimAuthoringContract({ ...context, targetReleaseId: 'rel_1.9.1' })).toThrow()
     expect(() => claimAuthoringContract({ ...context, activeAuthoringContract: { ...context.activeAuthoringContract, schemaVersion: '99.0.0' } })).toThrow()
     context.activeAuthoringContract.bundleSha256 = '0'.repeat(64)
     await expect(readClaimAuthoringBundle(root, context)).rejects.toThrow('AUTHORING_BUNDLE_HASH_MISMATCH')

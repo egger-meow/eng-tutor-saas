@@ -86,6 +86,18 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(digest).toHaveLength(64)
   })
 
+  it('pins the prompt patch activation to the exact current and previous bundle digests', async () => {
+    const currentBytes = await readFile(resolve(root, 'packages/generator/bundles/production-authoring-bundle.md'))
+    const previousBytes = await readFile(resolve(root, 'packages/generator/bundles/2.14.0-production-authoring-bundle.md'))
+    const currentDigest = createHash('sha256').update(currentBytes).digest('hex')
+    const previousDigest = createHash('sha256').update(previousBytes).digest('hex')
+    const migration = await readFile(resolve(root, 'supabase/migrations/20260918090000_activate_prompt_patch_release.sql'), 'utf8')
+    expect(migration).toContain(`'bundleSha256', '${previousDigest}'`)
+    expect(migration).toContain(`'bundleSha256', '${currentDigest}'`)
+    expect(migration).toContain("'releaseId', 'rel_1.9.1'")
+    expect(currentDigest).not.toBe(previousDigest)
+  })
+
   it('pins the active authoring contract into claims and validates it on submit', async () => {
     const migration = await readFile(resolve(root, 'supabase/migrations/20260908044708_pin_production_authoring_contract.sql'), 'utf8')
     expect(migration).toContain("'promptVersion', '2.13.2'")

@@ -137,6 +137,13 @@ export const FROZEN_2132_FILES = [
   'packages/generator/prompts/2.13.2/04-repair.md',
 ] as const
 
+export const FROZEN_2140_FILES = [
+  'packages/generator/prompts/2.14.0/01-plan.md',
+  'packages/generator/prompts/2.14.0/02-author.md',
+  'packages/generator/prompts/2.14.0/03-critic.md',
+  'packages/generator/prompts/2.14.0/04-repair.md',
+] as const
+
 export const SOURCE_FILES = [
   'packages/generator/curriculum/interest-exploration.md',
   'packages/generator/src/compact-routing-index.ts',
@@ -316,6 +323,16 @@ export async function computeFrozen2131Hashes(repoRoot: string = REPO_ROOT): Pro
 export async function computeFrozen2132Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
   const hashes: Record<string, string> = {}
   for (const relativePath of FROZEN_2132_FILES) {
+    const fullPath = resolve(repoRoot, relativePath)
+    const content = await readFile(fullPath, 'utf8')
+    hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')
+  }
+  return hashes
+}
+
+export async function computeFrozen2140Hashes(repoRoot: string = REPO_ROOT): Promise<Record<string, string>> {
+  const hashes: Record<string, string> = {}
+  for (const relativePath of FROZEN_2140_FILES) {
     const fullPath = resolve(repoRoot, relativePath)
     const content = await readFile(fullPath, 'utf8')
     hashes[relativePath] = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex')

@@ -186,7 +186,7 @@ describe('Multi-Week Trajectory Evaluation (10-Week Continuous Learning)', () =>
 
   it('verifies version contracts and Schema 2.6 contract', () => {
     expect(CURRENT_ENGINE_VERSION).toBe('1.9.0')
-    expect(CURRENT_PROMPT_VERSION).toBe('2.14.0')
+    expect(CURRENT_PROMPT_VERSION).toBe('2.14.1')
     expect(CURRENT_SCHEMA_VERSION).toBe('2.6.0')
   })
 })

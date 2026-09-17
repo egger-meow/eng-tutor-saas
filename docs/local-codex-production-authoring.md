@@ -34,7 +34,7 @@ Then read:
 - docs/local-codex-production-authoring.md
 - packages/generator/bundles/production-authoring-bundle.md
 
-Treat the current compiled production-authoring bundle as the authoritative curriculum authoring contract.
+Treat the bundle selected by the immutable claim contract as authoritative: the current compiled bundle for the desired release, or the matching archived Prompt 2.14.0 / 2.13.2 bundle for supported in-flight claims.
 
 Execute exactly one production authoring run using the local adapter.
 

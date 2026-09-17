@@ -1,6 +1,6 @@
-# Prompt Suite 2.14.0: Formats Decision & Shared Selective Precedent Authoring
+# Prompt Suite 2.14.1: Formats Decision & Shared Selective Precedent Authoring
 
-Prompt Suite `2.14.0` is the frozen consolidated baseline activated with `rel_1.9.0` for Schema 2.6.0. Its prompt-stage bytes must not be edited; subsequent prompt changes belong in a new versioned directory.
+Prompt Suite `2.14.1` is the consolidated prompt patch for Schema 2.6.0 and `rel_1.9.1`. It preserves the 2.14.0 learning contract while adding explicit multi-word lexical-unit guidance.
 
 1. **Deliberate Response Format Selection**:
    - Incorporates the Format Selection Decision Rule table into Prompt 01 (Planning Engine).

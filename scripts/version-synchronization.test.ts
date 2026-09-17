@@ -23,7 +23,7 @@ describe('Canonical Version Synchronization Guardrails', () => {
     expect(CURRENT_ENGINE_MANIFEST.qualityProfile).toBe(CURRENT_QUALITY_PROFILE_VERSION)
     expect(CURRENT_ENGINE_MANIFEST.worker).toBe(CURRENT_WORKER_VERSION)
     expect(CURRENT_ENGINE_MANIFEST.pdfRenderer).toBe(CURRENT_PDF_RENDERER_VERSION)
-    expect(CURRENT_PDF_RENDERER_VERSION).toBe('1.6.0')
+    expect(CURRENT_PDF_RENDERER_VERSION).toBe('1.6.1')
   })
 
   it('binds both claim paths to the deployed contract independently of desired release', () => {

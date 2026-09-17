@@ -3,9 +3,9 @@ import { capRuntimeMetadata, upgradeV23ToV24, upgradeV24ToV25, type CurriculumPa
 import { curriculumSample } from '../../pdf/src/generate-curriculum-sample.js'
 import { completeCurriculumJob, type WorkerClient } from './pipeline.js'
 import { processWeek1FastSubmissions } from './week1-fast-publisher.js'
-import { desiredAuthoringContract, PREVIOUS_AUTHORING_CONTRACT } from './authoring-claim-contract.js'
+import { desiredAuthoringContract, LEGACY_AUTHORING_CONTRACT, PREVIOUS_AUTHORING_CONTRACT } from './authoring-claim-contract.js'
 
-function fixture(current: boolean) {
+function fixture(release: 'current' | 'previous' | 'legacy') {
   const pkg: any = upgradeV24ToV25(upgradeV23ToV24(structuredClone(curriculumSample) as any))
   const precedent = 'cap-ea8d068eb1d8'
   ;(pkg.qualityEvidence as any).precedentRefs = [precedent]
@@ -51,11 +51,13 @@ function fixture(current: boolean) {
       }),
     })
   }
-  const contract = current ? { ...desiredAuthoringContract, bundleSha256: 'a'.repeat(64) } : { ...PREVIOUS_AUTHORING_CONTRACT }
+  const contract = release === 'current'
+    ? { ...desiredAuthoringContract, bundleSha256: 'a'.repeat(64) }
+    : release === 'previous' ? { ...PREVIOUS_AUTHORING_CONTRACT } : { ...LEGACY_AUTHORING_CONTRACT }
   Object.assign(pkg.metadata, contract)
   delete pkg.metadata.bundleSha256
   delete pkg.metadata.bundleVersion
-  if (current) {
+  if (contract.schemaVersion === '2.6.0') {
     const opening = pkg.studentLesson.opening
     pkg.studentLesson.opening = { goalsZh: opening.goalsZh, howToUseZh: opening.howToUseZh, activity: { type: 'direct-reading' } }
     pkg.studentLesson.instruction = [{ id: 'instruction-1', titleZh: '閱讀說明', blocks: [{ type: 'prose', textZh: '閱讀文章並注意例句。' }] }]
@@ -78,8 +80,8 @@ for (const lane of ['finisher', 'week1'] as const) describe(`${lane} immutable r
     if (result?.status !== 'completed') throw new Error(result?.errorMessage)
     return result.materialId
   }
-  it.each([false, true])('accepts supported current=%s without mutating canonical identity', async current => {
-    const { pkg, contract } = fixture(current)
+  it.each(['current', 'previous', 'legacy'] as const)('accepts supported %s release without mutating canonical identity', async release => {
+    const { pkg, contract } = fixture(release)
     const original = structuredClone(pkg)
     const state = harness(pkg, contract)
     await expect(run(state, pkg)).resolves.toBe('material-test')
@@ -91,7 +93,7 @@ for (const lane of ['finisher', 'week1'] as const) describe(`${lane} immutable r
     expect(args[lane === 'finisher' ? 'generation_summary' : 'p_generation_summary'].execution).toEqual({ workerVersion: desiredAuthoringContract.workerVersion, rendererVersion: desiredAuthoringContract.rendererVersion })
   })
   it.each(['releaseId', 'schemaVersion', 'promptVersion', 'engineVersion', 'workerVersion', 'rendererVersion'])('rejects forged %s before rendering', async key => {
-    const { pkg, contract } = fixture(false)
+    const { pkg, contract } = fixture('previous')
     pkg.metadata[key] = 'forged'
     const state = harness(pkg, contract)
     await expect(run(state, pkg)).rejects.toThrow('Release mismatch')
@@ -100,21 +102,21 @@ for (const lane of ['finisher', 'week1'] as const) describe(`${lane} immutable r
     expect(state.rpc.mock.calls.some(([name]) => name.startsWith('worker_complete_'))).toBe(false)
   })
   it.each(['schemaVersion', 'promptVersion', 'engineVersion', 'workerVersion', 'rendererVersion'])('rejects bound contract %s disagreement', async key => {
-    const { pkg, contract } = fixture(false)
+    const { pkg, contract } = fixture('previous')
     const state = harness(pkg, { ...contract, [key]: 'forged' })
     await expect(run(state, pkg)).rejects.toThrow('AUTHORING_CONTRACT')
     expect(state.render).not.toHaveBeenCalled()
     expect(state.upload).not.toHaveBeenCalled()
   })
   it('rejects a target release that disagrees with the immutable contract', async () => {
-    const { pkg, contract } = fixture(false)
+    const { pkg, contract } = fixture('previous')
     const state = harness(pkg, contract)
     state.context.targetReleaseId = desiredAuthoringContract.releaseId
     await expect(run(state, pkg)).rejects.toThrow('AUTHORING_CONTRACT')
     expect(state.render).not.toHaveBeenCalled()
   })
   it('rejects an unsupported bound contract before rendering', async () => {
-    const { pkg, contract } = fixture(false)
+    const { pkg, contract } = fixture('previous')
     const state = harness(pkg, { ...contract, releaseId: 'rel_1.2.0' })
     await expect(run(state, pkg)).rejects.toThrow('AUTHORING_CONTRACT')
     expect(state.render).not.toHaveBeenCalled()
