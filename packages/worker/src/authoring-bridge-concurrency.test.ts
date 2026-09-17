@@ -127,4 +127,27 @@ describe('Production Authoring Shared Concurrency & Serialization Invariants', (
     expect(resSame1).toEqual({ type: 'claimed', batchCount: 1 })
     expect(resSame2).toEqual({ type: 'recovered', batchCount: 1 })
   })
+
+  it('proves 20260918004500_exclude_submitted_authoring_leases excludes submitted jobs from active authoring leases', async () => {
+    const migration = (await readFile(
+      resolve(root, 'supabase/migrations/20260918004500_exclude_submitted_authoring_leases.sql'),
+      'utf8'
+    )).replace(/\r\n/g, '\n')
+
+    // worker_get_active_generation_leases excludes submitted jobs
+    expect(migration).toContain('create or replace function public.worker_get_active_generation_leases()')
+    expect(migration).toContain('from private_generation.curriculum_submissions as submission')
+    expect(migration).toContain('submission.authoring_attempt = job.attempt_count')
+
+    // worker_start_authoring_batch excludes submitted jobs
+    expect(migration).toContain('create or replace function public.worker_start_authoring_batch(worker_id text)')
+    expect(migration).toContain('ACTIVE_AUTHORING_LEASE_CONFLICT')
+
+    // chatgpt_recover_claimed_generation_batch excludes submitted jobs
+    expect(migration).toContain('create or replace function private_generation.chatgpt_recover_claimed_generation_batch(worker_id text)')
+
+    // worker_start_week1_fast_batch excludes submitted jobs
+    expect(migration).toContain('create or replace function public.worker_start_week1_fast_batch(worker_id text)')
+  })
 })
+

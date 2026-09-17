@@ -340,8 +340,8 @@ begin
   if grammar_cnt <> 44 then
     raise exception 'Expected 44 canonical grammar items, got %', grammar_cnt;
   end if;
-  if reading_cnt <> 40 then
-    raise exception 'Expected 40 canonical reading items, got %', reading_cnt;
+  if reading_cnt <> 49 then
+    raise exception 'Expected 49 canonical reading items, got %', reading_cnt;
   end if;
 
   -- 6d. Verify each of the 13 coarse skills has at least 6 active items
