@@ -17,7 +17,11 @@ function makeMockContext(overrides: Record<string, unknown> = {}) {
       materialWeek: '2026-09-02',
     },
     profile: {
-      weekly_minutes: 120,
+      weekly_minutes: 80,
+    },
+    child: {
+      grade: 7,
+      gradeStage: 'grade_7',
     },
     inputFingerprint: 'fp-1234567890abcdef',
     ...overrides,
@@ -416,6 +420,20 @@ describe('validatePreSubmitPackage', () => {
     const result = validatePreSubmitPackage(pkg, validContext)
     expect(result.valid).toBe(false)
     expect(result.issues.some((i) => i.includes('FINGERPRINT_MISMATCH'))).toBe(true)
+  })
+
+  it('fails if grade or gradeStage differs from immutable claim context', () => {
+    const pkg = makeValidV24Package(
+      validContext.job.id,
+      validContext.job.childId,
+      validContext.inputFingerprint,
+    )
+    pkg.metadata.grade = 8
+    pkg.metadata.gradeStage = 'grade_8'
+    const result = validatePreSubmitPackage(pkg, validContext)
+    expect(result.valid).toBe(false)
+    expect(result.issues.some((i) => i.includes('METADATA_GRADE_MISMATCH'))).toBe(true)
+    expect(result.issues.some((i) => i.includes('METADATA_GRADE_STAGE_MISMATCH'))).toBe(true)
   })
 })
 
