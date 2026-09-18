@@ -101,15 +101,11 @@ Deno.serve(async (request) => {
     }
 
     if (request.method === 'POST' && path === '/start') {
-      const runId = crypto.randomUUID()
-      const workerId = `${ONLINE_MANUAL_WORKER_PREFIX}${runId}`
-      const { data, error } = await client.rpc('worker_start_authoring_batch', {
-        worker_id: workerId,
-      })
+      const { data, error } = await client.rpc('worker_start_online_manual_authoring_batch')
       if (error) {
         return json(500, { error: 'database_error', message: error.message })
       }
-      return json(200, { ...(data ?? { claimed: [], claimedCount: 0 }), runId, workerId })
+      return json(200, data ?? { claimed: [], claimedCount: 0 })
     }
 
     if (request.method === 'POST' && path === '/week1/start') {
