@@ -40,6 +40,11 @@ export type GenerationContext = {
   profile?: {
     weekly_minutes?: number | null
   }
+  child?: {
+    grade?: number | null
+    gradeStage?: string | null
+    [key: string]: unknown
+  }
   vocabularyCapsule?: {
     dueForReview: string[]
     weakRecent: string[]
@@ -543,6 +548,30 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
     })
     const pkg = parsed.curriculumPackage
     assertCurriculumMatchesContext(pkg, input.context)
+
+    const identityFindings: CurriculumFailureEvidence['findings'] = []
+    const expectedGrade = input.context.child?.grade
+    const expectedGradeStage = input.context.child?.gradeStage
+    if (typeof expectedGrade === 'number' && pkg.metadata.grade !== expectedGrade) {
+      identityFindings.push({
+        source: 'validation',
+        dimension: 'claim-identity',
+        path: 'metadata.grade',
+        message: 'METADATA_GRADE_MISMATCH: expected immutable claim grade ' + expectedGrade + ', got ' + pkg.metadata.grade,
+      })
+    }
+    if (typeof expectedGradeStage === 'string' && expectedGradeStage && pkg.metadata.gradeStage !== expectedGradeStage) {
+      identityFindings.push({
+        source: 'validation',
+        dimension: 'claim-identity',
+        path: 'metadata.gradeStage',
+        message: 'METADATA_GRADE_STAGE_MISMATCH: expected immutable claim gradeStage ' + expectedGradeStage + ', got ' + pkg.metadata.gradeStage,
+      })
+    }
+    if (identityFindings.length > 0) {
+      throw new CurriculumQualityError({ failureType: 'QUALITY_REJECTED', findings: identityFindings })
+    }
+
     const progressionFindings = forwardProgressionIssues(pkg, input.context)
     if (progressionFindings.length > 0) throw new CurriculumQualityError({
       failureType: 'QUALITY_REJECTED',
