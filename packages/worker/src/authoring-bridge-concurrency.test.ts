@@ -39,6 +39,10 @@ describe('Production Authoring Parallel Claim Invariants', () => {
       resolve(root, 'supabase/functions/authoring-bridge/index.ts'),
       'utf8',
     )
+    const migration = await readFile(
+      resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'),
+      'utf8',
+    )
 
     expect(edgeFunction).toContain("ONLINE_MANUAL_WORKER_PREFIX = 'chatgpt-online-manual:'")
     expect(migration).toContain('create or replace function public.worker_start_online_manual_authoring_batch()')
