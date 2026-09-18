@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
 import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext } from './pipeline.js'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
-import { processCurriculumSubmissions } from './submission-processor.js'
+import { drainCurriculumSubmissions, processCurriculumSubmissions } from './submission-processor.js'
 import { dispatchMaterialEmails } from './material-email.js'
 import { createSmtpEmailProvider } from './transactional-email.js'
 import { runLocalCodexAuthoringBatch } from './local-codex-authoring.js'
@@ -174,6 +174,13 @@ async function main(): Promise<void> {
     if (!Number.isInteger(claimLimit) || claimLimit < 1 || claimLimit > 25) {
       throw new Error('--limit must be an integer between 1 and 25')
     }
+    if (process.argv.includes('--drain')) {
+      const summary = await drainCurriculumSubmissions(client, processorId, claimLimit)
+      process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
+      if (summary.results.some((result) => result.status !== 'completed')) process.exitCode = 1
+      return
+    }
+
     const results = await processCurriculumSubmissions(client, processorId, claimLimit)
     process.stdout.write(`${JSON.stringify({ claimed: results.length, results }, null, 2)}\n`)
     if (results.some((result) => result.status !== 'completed')) process.exitCode = 1
