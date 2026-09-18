@@ -70,3 +70,5 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: pnpm worker process-submissions --processor github-actions-finisher --limit 15 --drain
+
+# targeted-repair retry 1
