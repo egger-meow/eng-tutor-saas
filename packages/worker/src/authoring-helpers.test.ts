@@ -64,7 +64,7 @@ describe('checkActiveLeaseState', () => {
 
     const state = await checkActiveLeaseState(client, 'worker-me')
     expect(state.hasActiveClaim).toBe(true)
-    expect(state.canClaim).toBe(false)
+    expect(state.canClaim).toBe(true)
     expect(state.isOwnedByCaller).toBe(false)
     expect(state.claimedBy).toBe('other-worker')
   })
@@ -113,18 +113,33 @@ describe('checkActiveLeaseState', () => {
 })
 
 describe('claimProductionBatch safety', () => {
-  it('refuses to claim if another worker holds an active lease', async () => {
+  it('allows a distinct worker to claim while another worker is active', async () => {
+    const rpcCalls: string[] = []
     const client: WorkerClient = {
       rpc: vi.fn(async (name) => {
+        rpcCalls.push(name)
         if (name === 'worker_get_active_generation_leases') {
           return {
             data: [
               {
-                id: 'job-1',
+                id: 'job-existing',
                 claimed_by: 'active-other-worker',
                 lease_expires_at: new Date(Date.now() + 3600000).toISOString(),
               },
             ],
+            error: null,
+          }
+        }
+        if (name === 'worker_claim_local_authoring_batch') {
+          return {
+            data: {
+              bridgeVersion: '1.4.0',
+              claimed: [{ job: { id: 'job-new', childId: 'child-new' }, inputFingerprint: 'fp-new' }],
+              claimedCount: 1,
+              normalCapacity: 10,
+              mandatoryCapacityOverride: false,
+              oldestOutstandingDeadline: null,
+            },
             error: null,
           }
         }
@@ -133,9 +148,10 @@ describe('claimProductionBatch safety', () => {
       storage: { from: vi.fn() as any },
     }
 
-    await expect(claimProductionBatch(client, 'worker-me')).rejects.toThrow(
-      'ACTIVE_LEASE_EXISTS: Active lease held by active-other-worker',
-    )
+    const result = await claimProductionBatch(client, 'worker-me')
+    expect(result.source).toBe('new_claim')
+    expect(result.claimedCount).toBe(1)
+    expect(rpcCalls).toEqual(['worker_get_active_generation_leases', 'worker_claim_local_authoring_batch'])
   })
 
   it('claims cleanly when no active lease exists', async () => {
