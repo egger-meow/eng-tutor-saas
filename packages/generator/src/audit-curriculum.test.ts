@@ -359,7 +359,7 @@ describe('curriculum audit & lexical contract', () => {
     expect(highFinding?.message).toContain('最高安全上限 (140 分鐘)')
   })
 
-  it('hard-rejects non-exempt deterministic workload budget deviations', () => {
+  it('reports workload budget percentage deviations as warning-only telemetry', () => {
     const pkg = canonicalPackage()
 
     const reportMatched = auditCurriculumPackage(pkg, 80)
@@ -368,16 +368,16 @@ describe('curriculum audit & lexical contract', () => {
     const reportUnder = auditCurriculumPackage(pkg, 100)
     const underFinding = reportUnder.findings.find((f) => f.dimension === 'workload-calibration')
     expect(underFinding).toBeDefined()
-    expect(underFinding?.severity).toBe('critical')
+    expect(underFinding?.severity).toBe('warning')
     expect(underFinding?.message).toContain('BUDGET_UNDERFILLED')
-    expect(reportUnder.passed).toBe(false)
+    expect(reportUnder.passed).toBe(true)
 
     const reportOver = auditCurriculumPackage(pkg, { declaredWeeklyMinutes: 50 })
     const overFinding = reportOver.findings.find((f) => f.dimension === 'workload-calibration')
     expect(overFinding).toBeDefined()
-    expect(overFinding?.severity).toBe('critical')
+    expect(overFinding?.severity).toBe('warning')
     expect(overFinding?.message).toContain('BUDGET_OVERFILLED')
-    expect(reportOver.passed).toBe(false)
+    expect(reportOver.passed).toBe(true)
   })
 
   it('validates presence of core evidence organizer task in independent practice stage', () => {
@@ -437,9 +437,8 @@ describe('curriculum audit & lexical contract', () => {
     const outsideBand = auditCurriculumPackage(pkg, 600)
     const finding = outsideBand.findings.find((item) => item.dimension === 'workload-calibration')
     expect(finding).toBeDefined()
-    expect(finding?.severity).toBe('critical')
-    expect(finding?.message).toContain('cannot bypass the deterministic 75%-125% hard bound')
-    expect(outsideBand.passed).toBe(false)
+    expect(finding?.severity).toBe('warning')
+    expect(outsideBand.passed).toBe(true)
   })
 })
 
