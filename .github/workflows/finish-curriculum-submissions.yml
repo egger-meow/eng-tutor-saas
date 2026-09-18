@@ -15,7 +15,7 @@ concurrency:
 jobs:
   finish:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -73,4 +73,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-        run: pnpm worker process-submissions --processor github-actions-finisher --limit 15
+        run: pnpm worker process-submissions --processor github-actions-finisher --limit 15 --drain
