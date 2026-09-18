@@ -140,7 +140,7 @@ export async function drainCurriculumSubmissions(
   processorId: string,
   claimLimit: number,
   complete?: CompleteSubmission,
-  runId = randomUUID(),
+  runId: string = randomUUID(),
 ): Promise<CurriculumSubmissionDrainResult> {
   const scopedProcessorId = `${processorId}:${runId}`
   const results: CurriculumSubmissionResult[] = []
