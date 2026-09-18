@@ -17,7 +17,7 @@ function makeMockContext(overrides: Record<string, unknown> = {}) {
       materialWeek: '2026-09-02',
     },
     profile: {
-      weekly_minutes: 80,
+      weekly_minutes: 120,
     },
     child: {
       grade: 7,
