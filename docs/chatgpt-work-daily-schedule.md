@@ -66,7 +66,7 @@ Supabase pg_cron (16:10 UTC / 00:10 Taipei Time daily, '10 16 * * *')
 
 ### Protocol Invariants Maintained
 1. **Pinned Active Contract**: Read the service-owned active contract before recovery or the single manual start. Every new claim snapshot carries that contract; never infer versions from completed materials.
-2. **Single Authoritative Claim**: The 16:10 UTC (00:10 Taipei Time) cron job claims due jobs server-side under worker ID `chatgpt-work-daily`. No second claim can occur while this lease is active.
+2. **Single Authoritative Claim**: The 16:10 UTC (00:10 Taipei Time) cron job claims at most 10 due jobs server-side under worker ID `chatgpt-work-daily`. No second claim can occur while this lease is active.
 3. **Read-Only Recovery**: ChatGPT Scheduled Work wakes at 16:15 UTC (00:15 Taipei Time) and recovers the exact staged batch snapshot. It does not claim new jobs.
 4. **Immutable Submission**: New contracted claims require Schema 2.5.0, Prompt 2.13.2, Engine 1.8.2, Worker 1.7.2, Renderer 1.5.0, Release rel_1.8.2, and exact `inputFingerprint`, job, child, and active-lease ownership. Existing immutable in-flight attempts retain their original contract.
 5. **Read-After-Write Status Recovery**: If submission response is lost, the agent checks status before retrying.

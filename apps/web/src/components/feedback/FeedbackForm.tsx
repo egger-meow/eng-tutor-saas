@@ -16,6 +16,7 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
   })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [detailsOpen, setDetailsOpen] = useState(hasExistingDetails)
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -23,7 +24,11 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
     setBusy(true)
     setError('')
     try {
-      await saveFeedback(material.child_id, material.id, input)
+      const result = await saveFeedback(material.child_id, material.id, input)
+      if (result.reason === 'MONTHLY_LIMIT') {
+        setNotice(`回饋已儲存。本服務月已使用 ${result.used ?? 4}/${result.limit ?? 4} 份，下一個服務月可再次申請。`)
+        return
+      }
       onSaved()
     } catch (caught) {
       console.error('Weekly feedback save failed', caught)
@@ -106,10 +111,11 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
       )}
 
       <div className="feedback-submit field-wide">
-        <button className="button" type="submit" disabled={busy}>{busy ? '儲存中…' : existing ? '更新本週回饋' : '送出本週回饋'}</button>
-        <p className="muted">回饋會用於下一份教材，不會改動這一週的內容。</p>
+        <button className="button" type="submit" disabled={busy}>{busy ? '送出中…' : input.completion_rate === 0 ? '儲存回饋' : '送出回饋並申請下一份'}</button>
+        <p className="muted">完成一些內容後送出，就會開始製作下一份教材；完成即開放。每位孩子每個服務月最多 4 份。</p>
       </div>
       {error && <p className="field-wide notice notice-error" role="alert">{error}</p>}
+      {notice && <p className="field-wide notice" role="status">{notice}</p>}
     </form>
   )
 }

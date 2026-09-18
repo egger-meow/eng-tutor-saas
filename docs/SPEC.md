@@ -739,7 +739,7 @@ Therefore:
 * parent-facing Week 1 state is the authoritative five-stage projection `received → queued → authoring → publishing → ready`;
 * the parent is told that production starts immediately and that the PDFs become available when complete; no fabricated percentage, countdown, `明天`, `隔天`, or fixed completion date is shown;
 * successful Fast Publisher completion sets actual Week 1 release to the successful publication time and opens the material immediately;
-* Week 2 is scheduled from the actual Week 1 release anchor plus seven days and then returns to the normal Week 2+ Submission → deterministic Finisher lifecycle;
+* Week 2 is requested only after the parent submits valid Week 1 feedback and explicitly asks for the next packet, then returns to the normal Week 2+ Submission → deterministic Finisher lifecycle;
 * while the Free Pilot is active, Week 2 and later remain fully entitled without requiring Paddle; after the pilot ends, normal paid entitlement governs future new weekly jobs;
 * during the Free Pilot, Week 2+ generation is paused for dormant Beta learners whose parents have not engaged within the rolling activity window (14 days), conserving LLM tokens and worker capacity; touching parent activity immediately resumes job claiming and generation without data loss;
 * trusted onboarding follows canonical ENROLLMENT-SETTINGS-FIRST lock ordering to prevent concurrency deadlocks with parent activity touches;
@@ -748,7 +748,7 @@ Therefore:
 * dispatch loss must not lose work: private wake/publish outboxes remain retryable and duplicate doorbells are harmless because claims and completion are idempotent and authoritative in Supabase;
 * when operational capacity is full, the authoritative waitlist state is shown and the UI must not claim Week 1 is being produced when no generation job exists.
 
-Subsequent weeks continue on the child's rolling seven-day service cadence. `generation_jobs.release_at` remains authoritative for normal Week 2+ parent delivery scheduling; Week 1 is the explicit immediate-release exception described above.
+Subsequent packets are feedback-requested and have no fixed weekly cadence. Accepted Week 2+ requests begin production immediately and become available when publication completes.
 
 ---
 
@@ -2514,9 +2514,7 @@ Feedback affects:
 
 > future materials only.
 
-Submitting feedback must not trigger immediate regeneration.
-
-Each promised next delivery already has a generation job. Feedback submitted on or before that job's cutoff makes the job eligible for the normal worker queue; it does not create a second job. Feedback submitted after the cutoff is reserved for the following cycle.
+The parent action is explicitly labeled `送出回饋並申請下一份`. It atomically saves feedback and requests one next packet. Editing or resubmitting the same material feedback remains idempotent and never creates another job or consumes another quota slot. A 0% completion report saves feedback only.
 
 Correct flow:
 
@@ -2586,7 +2584,7 @@ Possible reasons:
 
 # 116. Next Generation Time
 
-Every active child should have a weekly generation cadence represented through:
+Every active child may have a requested next generation represented through:
 
 ```text
 next_generation_at
@@ -2768,16 +2766,13 @@ The public product cap is:
 
 The internal job-processing limit is an operational setting.
 
-The default normal capacity is 15 jobs per daily run. It is not a delivery cap:
+Every authoring invocation claims at most 10 jobs. This is a batch size, not a daily delivery cap:
 
-* jobs at or beyond their generation deadline are mandatory;
-* every mandatory job is claimed even when the count exceeds normal capacity;
-* when mandatory work is below capacity, eligible normal work fills the remaining slots;
+* overdue jobs receive priority but never bypass the per-invocation batch limit;
+* when overdue work is below capacity, eligible normal work fills the remaining slots;
 * unused capacity never causes a job that is still waiting for feedback to run early.
 
-Each child has an independent rolling cadence. A successful delivery schedules the next `release_at` exactly seven days after the existing release anchor, not seven days after generation happens to finish. The feedback cutoff is 48 hours before release and the generation deadline is 24 hours before release.
-
-This rolling seven-day cadence applies to continuous active subscription periods. During periods without entitlement, the rolling cadence clock is paused. The Finisher enforces a defensive future guard (`greatest(effective_release_at + interval '7 days', tomorrow)`) to physically prevent scheduling any subsequent job in the past.
+Week 1 is enqueued automatically. A successful delivery does not schedule a later packet. Week 2+ begins only when the parent submits valid feedback for the latest canonical material and explicitly requests the next packet. Each child may receive at most four packets per service month, including Week 1; unused quota does not roll over. Accepted requests enter authoring immediately and become available when publication finishes, without a fabricated fixed delivery date.
 
 ---
 
@@ -2785,7 +2780,7 @@ This rolling seven-day cadence applies to continuous active subscription periods
 
 A worker must claim a job before processing it.
 
-A job with a preceding `source_material_id` is eligible only when qualifying feedback was submitted by `feedback_cutoff_at`, or that cutoff has passed. When the cutoff passes without feedback, generation continues from existing learning state and records `feedback_missing = true`; missing feedback must not be interpreted as successful completion.
+A job with a preceding `source_material_id` exists only after the owner-scoped feedback/request transaction has saved valid feedback, verified entitlement and reserved monthly quota. Passing time never substitutes for feedback. A 0% completion report is saved but does not request a packet.
 
 Claim priority is mandatory work first, then earliest `generation_due_at`, then oldest creation time. Claiming must remain atomic under concurrent workers.
 

@@ -417,16 +417,23 @@ export async function openMaterialDownload(path: string, filename: string): Prom
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
 }
 
-export async function saveFeedback(childId: string, materialId: string, input: FeedbackInput): Promise<void> {
-  const { error } = await getSupabaseClient().from('feedback').upsert({
-    child_id: childId,
-    material_id: materialId,
-    ...input,
-    weak_area: input.weak_area || null,
-    mistakes_text: input.mistakes_text.trim() || null,
-    child_comments: input.child_comments.trim() || null,
-    parent_comments: input.parent_comments.trim() || null,
-  }, { onConflict: 'child_id,material_id' })
+export type FeedbackRequestResult = {
+  feedbackSaved: boolean
+  requested: boolean
+  reason?: 'NOT_STARTED' | 'MONTHLY_LIMIT'
+  used?: number
+  limit?: number
+  resetsAt?: string
+}
+
+export async function saveFeedback(childId: string, materialId: string, input: FeedbackInput): Promise<FeedbackRequestResult> {
+  const { data, error } = await getSupabaseClient().rpc('submit_feedback_and_request_next_material', {
+    p_child_id: childId, p_material_id: materialId, p_difficulty: input.difficulty,
+    p_completion_rate: input.completion_rate, p_weak_area: input.weak_area || null,
+    p_mistakes_text: input.mistakes_text, p_child_comments: input.child_comments,
+    p_parent_comments: input.parent_comments,
+  })
   if (error) throw error
   void touchParentActivity()
+  return data as FeedbackRequestResult
 }

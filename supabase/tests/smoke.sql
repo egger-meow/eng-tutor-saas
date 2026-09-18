@@ -305,6 +305,15 @@ begin
     'migration-test/answer.pdf'
   );
 
+  insert into public.material_generation_requests (
+    child_id, source_material_id, service_period_start, service_period_end
+  ) values (
+    '00000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000003',
+    date_trunc('month', now()),
+    date_trunc('month', now()) + interval '1 month'
+  );
+
   insert into public.generation_jobs (
     child_id, material_week, rule_version, idempotency_key, scheduled_for,
     source_material_id, release_at, feedback_cutoff_at, generation_due_at
@@ -345,8 +354,8 @@ begin
   into claimed_count
   from private_generation.claim_due_generation_jobs('migration-test');
 
-  if claimed_count <> 15 then
-    raise exception 'expected 15 claims, got %', claimed_count;
+  if claimed_count <> 10 then
+    raise exception 'expected 10 claims, got %', claimed_count;
   end if;
 
   if (
@@ -422,14 +431,15 @@ begin
   into claimed_count
   from private_generation.claim_due_generation_jobs('mandatory-test');
 
-  if claimed_count <> 18 then
-    raise exception 'expected all 18 mandatory claims, got %', claimed_count;
+  if claimed_count <> 10 then
+    raise exception 'expected 10 mandatory claims, got %', claimed_count;
   end if;
 
   if exists (
     select 1
     from public.generation_jobs
     where idempotency_key like 'mandatory-%'
+      and status = 'claimed'
       and feedback_missing = false
   ) then
     raise exception 'mandatory jobs without feedback were not marked feedback_missing';
@@ -439,9 +449,12 @@ begin
     select integer_value
     from public.operational_settings
     where key = 'daily_generation_limit'
-  ) <> 15 then
+  ) <> 10 then
     raise exception 'daily generation limit mismatch';
   end if;
+
+  update public.generation_jobs set status = 'canceled'
+  where (idempotency_key like 'mandatory-%' or idempotency_key like 'test-%') and status = 'pending';
 
   insert into public.materials (
     id, child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path
@@ -454,6 +467,14 @@ begin
     '{}'::jsonb,
     'materials/test/week-1.pdf',
     'materials/test/week-1-answers.pdf'
+  );
+
+  insert into public.material_generation_requests (
+    child_id, source_material_id, service_period_start, service_period_end
+  ) values (
+    '00000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000099',
+    date_trunc('month', now()), date_trunc('month', now()) + interval '1 month'
   );
 
   insert into public.generation_jobs (
@@ -756,23 +777,19 @@ begin
   if (select count(*) from public.materials where id = completed_material_id) <> 1 then
     raise exception 'attempt 2 did not complete exactly one material';
   end if;
-  if not exists (
-    select 1
-    from public.generation_jobs as week_one
-    join public.generation_jobs as week_two
-      on week_two.source_material_id = week_one.material_id
-    where week_one.id = bridge_job_id
-      and week_one.release_at <= now()
-      and week_one.feedback_cutoff_at = week_one.release_at - interval '48 hours'
-      and week_one.generation_due_at = week_one.release_at - interval '24 hours'
-      and week_two.release_at = week_one.release_at + interval '7 days'
-      and week_two.feedback_cutoff_at = week_one.release_at + interval '7 days' - interval '48 hours'
-      and week_two.generation_due_at = week_one.release_at + interval '7 days' - interval '24 hours'
-  ) then
-    raise exception 'completed Week 1 did not release immediately or anchor Week 2 at actual release + 7 days';
+  if not exists (select 1 from public.generation_jobs where id = bridge_job_id and release_at <= now())
+     or exists (select 1 from public.generation_jobs where source_material_id = completed_material_id) then
+    raise exception 'completed Week 1 did not release immediately or auto-created a follow-up job';
   end if;
   perform public.worker_finish_curriculum_submission(
     bridge_job_id, 2, 'smoke-finisher-2', 'completed', null, null, null
+  );
+
+  insert into public.material_generation_requests (
+    child_id, source_material_id, service_period_start, service_period_end
+  ) values (
+    bridge_child_id, completed_material_id,
+    date_trunc('month', now()), date_trunc('month', now()) + interval '1 month'
   );
 
   insert into public.generation_jobs (
@@ -3603,17 +3620,13 @@ begin
       'gemini-2.5-flash'
     );
 
-    -- ASSERTION: Next job (Week 3) is scheduled for 7 days in the future
+    -- ASSERTION: completion does not schedule Week 3 without a parent request.
     select * into next_w3_job
     from public.generation_jobs
     where child_id = pause_child_id and source_material_id = completed_w2_mat_id;
 
-    if next_w3_job.id is null then
-      raise exception 'Test 1 Failure: Week 3 job was not scheduled';
-    end if;
-
-    if next_w3_job.release_at <= now() then
-      raise exception 'Test 1 Failure: Week 3 job release_at must be in the future, got %', next_w3_job.release_at;
+    if next_w3_job.id is not null then
+      raise exception 'Test 1 Failure: Week 3 job was scheduled without feedback request';
     end if;
 
     -- ASSERTION: Worker runs claim again -> MUST RETURN 0 JOBS! No machine gun cascade!
@@ -3906,18 +3919,13 @@ begin
         'dsc_founder', null, null, null, null, false, null, null
       );
 
-      -- ASSERTION: The new resumed job points to seq_m_canonical (sequence 2), NOT seq_m_date_later
+      -- ASSERTION: billing resumption does not bypass the feedback request gate.
       select * into seq_resumed_job
       from public.generation_jobs
       where child_id = seq_child_id and material_id is null;
 
-      if seq_resumed_job.id is null then
-        raise exception 'Test 6 Failure: resumed generation job was not created';
-      end if;
-
-      if seq_resumed_job.source_material_id <> seq_m_canonical then
-        raise exception 'Test 6 Failure: source_material_id authority violation! Expected % (sequence 2), got %',
-          seq_m_canonical, seq_resumed_job.source_material_id;
+      if seq_resumed_job.id is not null then
+        raise exception 'Test 6 Failure: billing resumption created a job without feedback request';
       end if;
     end;
 
@@ -4677,7 +4685,7 @@ begin
       ) values (
         inflight_job_id, fp_child_1, current_date + 21, 'curriculum-rules/1.0.0',
         fp_child_1::text || ':fp_inflight', 'pending', now() - interval '1 hour',
-        fp_m2_id, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours',
+        fp_m2_id, now() - interval '99 days', now() - interval '101 days', now() - interval '100 days',
         now() - interval '10 minutes'
       );
 
@@ -5222,7 +5230,7 @@ begin
       source_material_id
     ) values (
       t_job_w2_id, t_child_dormant_id, current_date + 7, 'test-v1', 't-job-w2', 'pending',
-      now() - interval '2 days', 0, 3, now() + interval '12 hours', (now() + interval '12 hours') - interval '48 hours', (now() + interval '12 hours') - interval '24 hours',
+      now() - interval '2 days', 0, 3, now() - interval '199 days', now() - interval '201 days', now() - interval '200 days',
       t_source_mat_id
     );
 
@@ -5394,7 +5402,7 @@ begin
       ) values (
         inv_job_cancel_w2, inv_child_cancel, current_date + 7, 'curriculum-rules/1.0.0',
         inv_child_cancel::text || ':inv_w2', 'pending', now() - interval '1 hour',
-        inv_source_mat, now() + interval '12 hours', now() - interval '36 hours', now() - interval '12 hours'
+        inv_source_mat, now() - interval '299 days', now() - interval '301 days', now() - interval '300 days'
       );
 
       if not exists (

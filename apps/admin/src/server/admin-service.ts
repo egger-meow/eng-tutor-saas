@@ -18,6 +18,7 @@ type PipelineInput = {
   now: string
   feedbackMaterialIds?: Set<string>
   childMaterialCounts?: Map<string, number>
+  completedWindowDays?: 3 | 7 | 30 | null
 }
 
 export function deriveOperationsPipeline(input: PipelineInput): OperationsOverview['pipeline'] {
@@ -29,7 +30,9 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
     }
   }
   const overrideByJob = new Map(input.overrides.map((override: any) => [override.job_id, override]))
-  const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [], waitingFeedback: [] }
+  const pipeline: OperationsOverview['pipeline'] = { readyToClaim: [], awaitingFinisher: [], finisherDone: [], finisherHistory: [], waitingFeedback: [] }
+  const completedWindowDays = input.completedWindowDays === undefined ? 7 : input.completedWindowDays
+  const completedSince = completedWindowDays === null ? null : new Date(new Date(input.now).getTime() - completedWindowDays * 86_400_000).toISOString()
 
   for (const job of input.jobs) {
     if (job.status === 'canceled') continue
@@ -114,6 +117,7 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
       createdAt: job.created_at,
       updatedAt: current?.processed_at || current?.submitted_at || job.completed_at || job.started_at || job.updated_at || job.created_at,
       relevantTimestamp: current?.processed_at || current?.submitted_at || job.generation_due_at || job.scheduled_for || null,
+      completedAt: current?.processed_at || job.completed_at || null,
       status,
     }
 
@@ -123,10 +127,15 @@ export function deriveOperationsPipeline(input: PipelineInput): OperationsOvervi
       pipeline.readyToClaim.push(row)
     } else if (['AWAITING FINISHER', 'FINISHER PROCESSING', 'TECHNICAL FAILURE — RETRYABLE'].includes(status)) {
       pipeline.awaitingFinisher.push(row)
+    } else if (isCompletedOutcome) {
+      pipeline.finisherHistory.push(row)
+      if (row.completedAt && (completedSince === null || row.completedAt >= completedSince)) pipeline.finisherDone.push(row)
     } else {
-      pipeline.finisherDone.push(row)
+      pipeline.awaitingFinisher.push(row)
     }
   }
+  pipeline.finisherHistory.sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
+  pipeline.finisherDone.sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
   return pipeline
 }
 

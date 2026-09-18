@@ -261,6 +261,7 @@ export interface OperationsOverview {
     readyToClaim: PipelineJobRow[]
     awaitingFinisher: PipelineJobRow[]
     finisherDone: PipelineJobRow[]
+    finisherHistory: PipelineJobRow[]
     waitingFeedback: PipelineJobRow[]
   }
   engineInspector: {
@@ -311,6 +312,7 @@ export interface PipelineJobRow {
   createdAt: string
   updatedAt: string
   relevantTimestamp: string | null
+  completedAt: string | null
   status: string
 }
 

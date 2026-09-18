@@ -98,6 +98,7 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
   const [waitingFeedbackOpen, setWaitingFeedbackOpen] = useState(false)
   const [pathFilter, setPathFilter] = useState<'all' | 'week1_fast' | 'normal_finisher'>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [completedRange, setCompletedRange] = useState<3 | 7 | 30 | 'all'>(7)
 
   if (!data) return <div>載入營運資料中…</div>
   const open = (job: PipelineJobRow) => onDrillDownTimeline(job.childId, job.materialWeek)
@@ -201,7 +202,21 @@ export const OperationsOverviewView: React.FC<Props> = ({ data, onDrillDownTimel
       <div className="pipeline-grid">
         <PipelineColumn title="等待生成" hint="隨時可開始之生成與重試工作" jobs={data.pipeline.readyToClaim} onOpen={open} />
         <PipelineColumn title="等待品質審核" hint="已有提交，等待 Finisher 結果" jobs={data.pipeline.awaitingFinisher} onOpen={open} />
-        <PipelineColumn title="審核完成" hint="最新嘗試已產生終態結果" jobs={data.pipeline.finisherDone} onOpen={open} />
+        <div>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+            {([3, 7, 30, 'all'] as const).map((range) => (
+              <button key={range} type="button" className="refresh-btn" onClick={() => setCompletedRange(range)} aria-pressed={completedRange === range}>
+                {range === 'all' ? '查歷史' : `${range} 天`}
+              </button>
+            ))}
+          </div>
+          <PipelineColumn
+            title={completedRange === 'all' ? '歷史成功完成' : `近 ${completedRange} 天成功完成`}
+            hint="僅列成功完成；依實際完成時間倒序"
+            jobs={(data.pipeline.finisherHistory ?? data.pipeline.finisherDone).filter((job) => completedRange === 'all' || Boolean(job.completedAt && new Date(job.completedAt).getTime() >= Date.now() - completedRange * 86_400_000))}
+            onOpen={open}
+          />
+        </div>
       </div>
 
       {Boolean(data.pipeline.waitingFeedback?.length) && (

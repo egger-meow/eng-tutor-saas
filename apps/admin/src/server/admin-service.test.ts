@@ -272,10 +272,10 @@ describe('AdminService Authoritative Truth Layer', () => {
       { job_id: 'finisher-pending', authoring_attempt: 1, status: 'pending' },
       { job_id: 'finisher-processing', authoring_attempt: 1, status: 'processing' },
       { job_id: 'finisher-technical', authoring_attempt: 1, status: 'technical_failed' },
-      { job_id: 'completed-released', authoring_attempt: 1, status: 'completed' },
-      { job_id: 'completed-unreleased', authoring_attempt: 1, status: 'completed' },
+      { job_id: 'completed-released', authoring_attempt: 1, status: 'completed', processed_at: '2026-08-24T11:00:00.000Z' },
+      { job_id: 'completed-unreleased', authoring_attempt: 1, status: 'completed', processed_at: '2026-08-24T10:00:00.000Z' },
       { job_id: 'quality-exhausted', authoring_attempt: 5, status: 'quality_rejected' },
-      { job_id: 'quality-override', authoring_attempt: 5, status: 'quality_rejected' },
+      { job_id: 'quality-override', authoring_attempt: 5, status: 'quality_rejected', processed_at: '2026-08-24T09:00:00.000Z' },
     ]
     const pipeline = deriveOperationsPipeline({
       jobs,
@@ -293,11 +293,11 @@ describe('AdminService Authoritative Truth Layer', () => {
     expect([...ready.keys()]).toEqual(['pending-new', 'pending-retry', 'claimed-unsubmitted', 'generation-failed'])
     expect(ready.get('pending-retry')).toBe('RETRY READY')
     expect(ready.get('claimed-unsubmitted')).toBe('AUTHORING CLAIMED — AWAITING SUBMISSION')
-    expect([...awaiting.keys()]).toEqual(['finisher-pending', 'finisher-processing', 'finisher-technical'])
+    expect([...awaiting.keys()]).toEqual(['finisher-pending', 'finisher-processing', 'finisher-technical', 'quality-exhausted'])
     expect(awaiting.get('finisher-technical')).toBe('TECHNICAL FAILURE — RETRYABLE')
     expect(done.get('completed-released')).toBe('RELEASED')
     expect(done.get('completed-unreleased')).toBe('AWAITING RELEASE')
-    expect(done.get('quality-exhausted')).toBe('QUALITY REJECTED')
+    expect(awaiting.get('quality-exhausted')).toBe('QUALITY REJECTED')
     expect(done.get('quality-override')).toBe('DELIVERED WITH QUALITY OVERRIDE')
     expect(done.has('finisher-technical')).toBe(false)
     expect(pipeline.readyToClaim.length + pipeline.awaitingFinisher.length + pipeline.finisherDone.length).toBe(11)

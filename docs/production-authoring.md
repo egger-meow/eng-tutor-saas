@@ -85,7 +85,7 @@ Normal production authoring must check active authoritative leases before claimi
 ### Normal Authoritative Batch Claim
 - **Helper CLI**: `pnpm worker production-authoring claim --worker <worker_id>`
 - **Database RPC**: `public.worker_claim_local_authoring_batch(worker_id)` (or `private_generation.chatgpt_claim_generation_batch(worker_id)`)
-- Claims up to normal capacity.
+- Claims at most 10 jobs per invocation across overdue and normal candidates. This is a batch limit, not a daily throughput limit.
 - Generates and records an immutable `inputFingerprint` in the claim snapshot.
 
 ### Week 1 Fast Claim
