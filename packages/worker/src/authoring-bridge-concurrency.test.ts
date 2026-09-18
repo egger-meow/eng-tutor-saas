@@ -7,7 +7,7 @@ describe('Production Authoring Parallel Claim Invariants', () => {
 
   it('serializes only the short start/claim critical section', async () => {
     const migration = await readFile(
-      resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'),
+      resolve(root, 'supabase/migrations/20260918074329_parallel_authoring_batches.sql'),
       'utf8',
     )
 
@@ -20,7 +20,7 @@ describe('Production Authoring Parallel Claim Invariants', () => {
 
   it('keeps row claims atomic and bounded by the shared setting', async () => {
     const migration = await readFile(
-      resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'),
+      resolve(root, 'supabase/migrations/20260918074329_parallel_authoring_batches.sql'),
       'utf8',
     )
     const capMigration = await readFile(
@@ -40,7 +40,7 @@ describe('Production Authoring Parallel Claim Invariants', () => {
       'utf8',
     )
     const migration = await readFile(
-      resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'),
+      resolve(root, 'supabase/migrations/20260918074329_parallel_authoring_batches.sql'),
       'utf8',
     )
 
