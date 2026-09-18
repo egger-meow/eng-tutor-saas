@@ -339,6 +339,7 @@ export function auditCurriculumPackage(
     'mcq-position-leakage',
     'grounding-substance',
     'grounding-coverage',
+    'workload-calibration',
     'parent-personalization',
   ])
   const add = (tier: CurriculumAuditTier, dimension: string, severity: CurriculumAuditFinding['severity'], message: string) => {
