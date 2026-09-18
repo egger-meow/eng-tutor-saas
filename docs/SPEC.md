@@ -2637,7 +2637,7 @@ Local Windows execution is a primary local environment, but it is an interchange
 
 Its job is to:
 
-1. read due `generation_jobs` and verify absence of colliding leases;
+1. read due `generation_jobs`, recover any caller-owned active batch, and allow other workers to remain active because claims are atomically isolated;
 2. claim eligible jobs via authoritative batch claim;
 3. read production generation rules;
 4. load permitted child state from Supabase;
@@ -2766,11 +2766,12 @@ The public product cap is:
 
 The internal job-processing limit is an operational setting.
 
-Every authoring invocation claims at most 10 jobs. This is a batch size, not a daily delivery cap:
+Every authoring invocation is bounded by the single operational setting `authoring_batch_limit`. This is a configurable per-invocation batch size, not a daily delivery cap. Changing that one setting changes the normal and Week 1 authoring batch ceiling without changing code or prompts.
 
 * overdue jobs receive priority but never bypass the per-invocation batch limit;
 * when overdue work is below capacity, eligible normal work fills the remaining slots;
-* unused capacity never causes a job that is still waiting for feedback to run early.
+* unused capacity never causes a job that is still waiting for feedback to run early;
+* different worker/run identities may hold active batches concurrently; row claims remain atomic so the same job cannot be claimed twice.
 
 Week 1 is enqueued automatically. A successful delivery does not schedule a later packet. Week 2+ begins only when the parent submits valid feedback for the latest canonical material and explicitly requests the next packet. Each child may receive at most four packets per service month, including Week 1; unused quota does not roll over. Accepted requests enter authoring immediately and become available when publication finishes, without a fabricated fixed delivery date.
 
