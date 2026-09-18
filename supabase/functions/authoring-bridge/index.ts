@@ -7,7 +7,8 @@ const corsHeaders = {
   'access-control-allow-headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-export const PINNED_ONLINE_MANUAL_WORKER_ID = 'chatgpt-online-manual'
+export const LEGACY_ONLINE_MANUAL_WORKER_ID = 'chatgpt-online-manual'
+export const ONLINE_MANUAL_WORKER_PREFIX = 'chatgpt-online-manual:'
 export const PINNED_SCHEDULED_WORKER_ID = 'chatgpt-work-daily'
 export const PINNED_WEEK1_FAST_WORKER_ID = 'chatgpt-week1-fast'
 
@@ -28,11 +29,14 @@ async function resolveJobRoute(
     .eq('id', jobId)
     .maybeSingle()
 
-  const workerId = data?.claimed_by === PINNED_WEEK1_FAST_WORKER_ID
+  const claimedBy = data?.claimed_by
+  const workerId = claimedBy === PINNED_WEEK1_FAST_WORKER_ID
     ? PINNED_WEEK1_FAST_WORKER_ID
-    : data?.claimed_by === PINNED_SCHEDULED_WORKER_ID
+    : claimedBy === PINNED_SCHEDULED_WORKER_ID
       ? PINNED_SCHEDULED_WORKER_ID
-      : PINNED_ONLINE_MANUAL_WORKER_ID
+      : typeof claimedBy === 'string' && (claimedBy === LEGACY_ONLINE_MANUAL_WORKER_ID || claimedBy.startsWith(ONLINE_MANUAL_WORKER_PREFIX))
+        ? claimedBy
+        : LEGACY_ONLINE_MANUAL_WORKER_ID
 
   return { workerId, isWeek1: data?.source_material_id == null }
 }
@@ -97,19 +101,15 @@ Deno.serve(async (request) => {
     }
 
     if (request.method === 'POST' && path === '/start') {
+      const runId = crypto.randomUUID()
+      const workerId = `${ONLINE_MANUAL_WORKER_PREFIX}${runId}`
       const { data, error } = await client.rpc('worker_start_authoring_batch', {
-        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
+        worker_id: workerId,
       })
       if (error) {
-        const isConflict =
-          error.message?.includes('ACTIVE_AUTHORING_LEASE_CONFLICT') ||
-          error.message?.includes('CONFLICT')
-        return json(isConflict ? 409 : 500, {
-          error: isConflict ? 'lease_conflict' : 'database_error',
-          message: error.message,
-        })
+        return json(500, { error: 'database_error', message: error.message })
       }
-      return json(200, data ?? { claimed: [], claimedCount: 0 })
+      return json(200, { ...(data ?? { claimed: [], claimedCount: 0 }), runId, workerId })
     }
 
     if (request.method === 'POST' && path === '/week1/start') {
@@ -135,8 +135,21 @@ Deno.serve(async (request) => {
     }
 
     if (request.method === 'GET' && (path === '/batch' || path === '')) {
+      const runId = url.searchParams.get('run_id') ?? url.searchParams.get('runId')
+      if (runId) {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId)) {
+          return json(400, { error: 'invalid_run_id', message: 'run_id must be the UUID returned by /start' })
+        }
+        const workerId = `${ONLINE_MANUAL_WORKER_PREFIX}${runId}`
+        const { data, error } = await client.rpc('worker_recover_active_authoring_batch', {
+          worker_id: workerId,
+        })
+        if (error) return json(500, { error: error.message })
+        return json(200, { ...(data ?? { claimed: [], claimedCount: 0 }), runId, workerId })
+      }
+
       let { data, error } = await client.rpc('worker_recover_active_authoring_batch', {
-        worker_id: PINNED_ONLINE_MANUAL_WORKER_ID,
+        worker_id: LEGACY_ONLINE_MANUAL_WORKER_ID,
       })
       if (!error && (!data || data.claimedCount === 0)) {
         const scheduled = await client.rpc('worker_recover_active_authoring_batch', {
