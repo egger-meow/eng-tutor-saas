@@ -153,6 +153,9 @@ export function validatePreSubmitPackage(
   const expectedJobId = typeof job.id === 'string' ? job.id : ''
   const expectedChildId = typeof job.childId === 'string' ? job.childId : ''
   const expectedFingerprint = typeof context.inputFingerprint === 'string' ? context.inputFingerprint : ''
+  const child = (context.child ?? {}) as Record<string, unknown>
+  const expectedGrade = typeof child.grade === 'number' ? child.grade : undefined
+  const expectedGradeStage = typeof child.gradeStage === 'string' ? child.gradeStage : undefined
 
   if (rawMeta) {
     if (expectedJobId && rawMeta.jobId !== expectedJobId) {
@@ -163,6 +166,12 @@ export function validatePreSubmitPackage(
     }
     if (expectedFingerprint && rawMeta.inputFingerprint !== expectedFingerprint) {
       issues.push(`FINGERPRINT_MISMATCH: expected ${expectedFingerprint}, got ${rawMeta.inputFingerprint}`)
+    }
+    if (expectedGrade !== undefined && rawMeta.grade !== expectedGrade) {
+      issues.push(`METADATA_GRADE_MISMATCH: expected ${expectedGrade}, got ${rawMeta.grade}`)
+    }
+    if (expectedGradeStage && rawMeta.gradeStage !== expectedGradeStage) {
+      issues.push(`METADATA_GRADE_STAGE_MISMATCH: expected ${expectedGradeStage}, got ${rawMeta.gradeStage}`)
     }
   }
 
