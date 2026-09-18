@@ -1649,7 +1649,7 @@ must not quietly introduce substantially harder unknown words that are not taugh
 
 If a genuinely difficult word is necessary, the author should normally teach it, support it from context, or rewrite using simpler language.
 
-This is a semantic curriculum objective, not a fixed-list Finisher gate. Deterministic validation must not reject material solely on 2000-word-list membership, token frequency thresholds, morphology guesses, or fixed counts of off-list words. The independent author/critic pair owns the judgment of whether hidden vocabulary actually makes the packet too difficult for the learner.
+This is a semantic curriculum objective, not a fixed-list Finisher gate. Deterministic validation must not reject material solely on 2000-word-list membership, token frequency thresholds, morphology guesses, or fixed counts of off-list words. The independent Author/Critic pair owns the learner-aware judgment of whether hidden vocabulary actually makes the packet too difficult. A Critic approval must be based on inspecting the real reading/questions/options/examples/homework against the declared core vocabulary and learner level; a self-authored `lexical-integrity: passed` label is evidence bookkeeping, not proof by itself.
 
 ---
 
@@ -1673,7 +1673,7 @@ This requirement prevents the common AI worksheet failure:
 
 > supposedly teaching 10 words while secretly requiring 25 more.
 
-Validation should therefore prioritize semantic author/critic judgment over brittle token allowlists. Deterministic lexical heuristics may be used for diagnostics, regression investigation, or non-blocking telemetry, but they must not become publication gates unless they prove an objective integrity error rather than approximate language difficulty.
+Validation therefore prioritizes semantic Author/Critic judgment over brittle token allowlists. Deterministic lexical heuristics may be used for diagnostics, regression investigation, or non-blocking telemetry, but they must not become publication gates unless they prove an objective integrity error rather than approximate language difficulty. Pre-submit approval must not treat the mere presence of a passed lexical check as sufficient when the actual packet visibly carries substantial untaught learner-level difficulty.
 
 ---
 
@@ -2848,7 +2848,7 @@ Future operator flow should allow:
 
 During early beta, manual quality inspection is acceptable.
 
-Quality-rejected authoring retries automatically up to five attempts. After attempt five, the Finisher may deliver a valid and renderable candidate only when every remaining rejection belongs to the explicit code-reviewed soft pedagogical allowlist. The rejected submission and evidence remain immutable; the delivery is recorded separately as `delivered_with_quality_override` with an override reason and is never represented as passed or completed. Material/job completion, immutable rejection, and the separate override outcome must commit atomically so no candidate becomes releasable before all three records exist. Invalid schema, missing required content, progression-integrity failures, broken rendering, storage failures, PII or safety violations, grounding/provenance failures, and corrupted artifacts are never bypassable.
+Quality-rejected authoring retries automatically up to five attempts. After attempt five, the Finisher may deliver a valid and renderable candidate only when every remaining rejection belongs to the explicit code-reviewed soft pedagogical allowlist. The rejected submission and evidence remain immutable; the delivery is recorded separately as `delivered_with_quality_override` with an override reason and is never represented as passed or completed. Material/job completion, immutable rejection, and the separate override outcome must commit atomically so no candidate becomes releasable before all three records exist. Invalid schema, missing required content, package identity/grade/grade-stage mismatch, non-exempt workload-budget rejection, workload outside the 75%-125% outer bound, progression-integrity failures, broken rendering, storage failures, PII or safety violations, grounding/provenance failures, and corrupted artifacts are never bypassable.
 
 ---
 
@@ -3876,7 +3876,9 @@ At minimum test:
 * anonymous responses do not disclose whether an Auth account already existed;
 * release-time email eligibility, retry bounds, atomic concurrent claims, and provider idempotency;
 * invalid, expired, revoked, cross-child, cross-week, and unreleased scoped material access;
-* equivalent scoped authorization for both private PDF artifacts without weakening normal Dashboard RLS.
+* equivalent scoped authorization for both private PDF artifacts without weakening normal Dashboard RLS;
+* authored duration metadata cannot bypass deterministic workload normalization, including a regression where a 200-minute target is represented by roughly one hour of actual work;
+* Finisher rejects package grade or grade-stage metadata that differs from the immutable claim snapshot.
 
 ---
 
@@ -3890,6 +3892,8 @@ Automated or semi-automated validation should eventually check:
 * declared core vocabulary count reasonable;
 * vocabulary appears in expected places;
 * semantic review finds no material hidden-vocabulary burden for the learner; deterministic 2000-word membership is not a publish gate;
+* normalized content-derived workload is compared with immutable profile `weekly_minutes`: 85%-115% is the normal publish band; only an explicit evidence-backed exception may use 75%-125%; outside 75%-125% always rejects;
+* package `metadata.grade` and `metadata.gradeStage` exactly match the immutable claimed child snapshot;
 * grammar focus matches selected topic;
 * PDF renders successfully;
 * Homework exists;
@@ -4280,6 +4284,8 @@ The operator can:
 * inspect exact objective publication-integrity failures with structured stage diagnostics for Week 1, and exact normal Finisher rejection rules for Week 2+;
 * identify any production engine-version drift;
 * identify `delivered_with_quality_override` without treating it as a quality pass;
+* verify that deterministic workload normalization cannot be bypassed by authored duration metadata and that non-exempt 85%-115% budget violations are rejected before rendering;
+* verify package grade and grade-stage identity against the immutable claim snapshot before rendering;
 * verify that one normal Finisher invocation drains eligible submissions in bounded claim batches until the queue is empty, while a technical failure is attempted at most once by that drain invocation and remains retryable by a later invocation;
 * explain from immutable planning/quality evidence why a fast-moving interest selected a current development or a principled evergreen fallback, without exposing that machinery in Student or Parent PDFs.
 
@@ -4414,18 +4420,18 @@ For weekly-material work specifically:
 16. Require real grounding for every new production 2.3.0 primary reading; never use null or N/A.
 17. Bind every factual claim to exact canonical lesson prose. For current material, require valid publication dates, distinguish event and publication timing, and independently verify topic-aware freshness; reject stale evidence, unsupported recency, rumor, prediction, speculation, and social-media hearsay.
 18. Synthesize original educational prose; never reproduce protected dialogue, scripts, subtitles, manga text, or excessive plot summaries.
-19. Treat profile `weekly_minutes` as `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`.
-20. Local Codex authoring plans and critiques workload against the inclusive 85%-115% target band, but the repository Finisher is the authoritative deterministic normalizer and gate; it emits immutable `BUDGET_UNDERFILLED` or `BUDGET_OVERFILLED` findings outside the band before rendering.
-21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; the Finisher then normalizes, recomputes, and audits again. Never falsify duration metadata or delete required stages.
+19. Treat profile `weekly_minutes` as immutable `targetMinutes`, a real planning capacity constraint distinct from content-derived `learningPlan.estimatedMinutes`. Authored `estimatedMinutes` must never simply copy the target; deterministic normalization recomputes it from represented work before any workload decision.
+20. Author/Critic planning and pre-submit diagnostics target the inclusive 85%-115% band. The normal Finisher independently normalizes the canonical package and treats `BUDGET_UNDERFILLED` / `BUDGET_OVERFILLED` as publication-blocking findings. This workload comparison is an explicit product-capacity invariant at publication time, not warning-only style telemetry.
+21. A subsequent authoring retry uses those findings for surgical repair with useful dependent learning work or removal of redundancy; validation then normalizes, recomputes, and audits again. Never falsify duration metadata, copy `targetMinutes` into `estimatedMinutes`, pad with filler, or delete required stages.
 22. Prefer a strong, reliable, age-appropriate, lexically feasible current angle only when it serves the learning target equally well or better. Do not force current; preserve an explainable evergreen fallback when recent candidates are weak, unsafe, too complex, factually thin, copyright-dependent, or pedagogically inferior.
 23. Current selection never relaxes source quality, factual density, original synthesis, semantic lexical appropriateness, grammar, CAP relevance, answer entailment, workload, copyright, or personalization review.
 24. Repair freshness, temporal selection, source adequacy, factual support, and their dependent prose fragments surgically; preserve valid unrelated content, immutable attempts, retry semantics, and the applicable Claim/Submit/publication boundary (Week 1 Fast Publisher for the first packet; normal Finisher for Week 2+).
-25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific evidence, and never outside the deterministic 75%-125% hard bound.
+25. Permit a workload exception only through an explicit passing `workload-budget-exception` check with specific learner-benefit evidence. An exception may relax the normal 85%-115% band only within the deterministic 75%-125% outer bound; outside that outer bound publication always fails and no soft-quality override may bypass it.
 26. Under Prompt 2.9+, normal assessment/application/comprehension authoring is precedent-first: retrieve 1–5 relevant authoritative non-holdout CAP references before writing the item, then anchor, blend, or calibrate a novel design that meets or exceeds the CAP quality floor without requiring structural imitation.
 27. Keep language difficulty independent from cognitive depth. A1/A2 surface language may still carry D2/D3 reasoning when that serves the learner.
 28. Record per-item CAP design provenance internally, never in Student/Parent PDFs; intentional vocabulary/grammar retrieval is allowed only when explicitly planned as retrieval and supplied with meaningful semantic or sentence context. `intentionalRecall: true` never exempts bare bilingual lookup or isolated dictionary-definition questions.
-29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, or cognitive-depth/shallow-assessment failures. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition and targeted repair.
-30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, workload percentage bands, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation.
+29. The deterministic Finisher must fail closed on missing/unknown/holdout CAP refs, authority/provenance mismatch, blank-page authoring when relevant CAP knowledge exists, invalid retrieval exemptions, copy overlap, answer ambiguity, missing meaningful distractor planning, cognitive-depth/shallow-assessment failures, package grade/grade-stage mismatch against the immutable claim snapshot, and workload-budget violations after deterministic normalization. It must not reject an item merely for changing topology, answer construction, distractor structure, primary skill, or repeatedly using a still-relevant ref. Semantic Critic review owns unjustified mechanical repetition, learner-aware hidden-vocabulary judgment, and targeted repair.
+30. Deterministic quality heuristics that approximate style or difficulty through finite lists, morphology rules, character counts, answer-position percentages, vocabulary-card counts, phrase quotas, grounding-density counts, or forbidden-jargon word lists are warning-only unless they establish an objective integrity violation. **Workload budget is the explicit exception to this heuristic rule:** once represented work has been deterministically normalized, comparing it with the immutable `weekly_minutes` target is authoritative and publication-blocking under Rules 19-25.
 31. Grounding review for named products, organizations, models, versions, modes, features, APIs, policies, mechanisms, and similar scoped entities must verify the exact relationship `entity/version/mode -> capability/behavior -> control flow/condition/limit/qualifier`. Reject semantic feature fusion or compositional attribution; do not implement product-specific deterministic keyword rules as a substitute for Critic judgment.
 32. Prompt 2.12.0 is a consolidated production baseline. Historical prompt suites remain frozen for auditability but are not concatenated into normal production model context. Future permanent quality improvements should edit/replace concise active sections or create a new consolidated baseline instead of accumulating an unbounded overlay stack.
 

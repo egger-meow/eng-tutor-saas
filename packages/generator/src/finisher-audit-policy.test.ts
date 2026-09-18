@@ -175,7 +175,7 @@ describe('Finisher audit authority boundary', () => {
     expect(result.findings.every((finding) => finding.severity === 'critical')).toBe(true)
   })
 
-  it('keeps objective metadata contradictions blocking while percentage/count heuristics stay advisory', () => {
+  it('keeps objective metadata and normalized workload contradictions blocking while other percentage/count heuristics stay advisory', () => {
     const result = applyFinisherAuditPolicy(report([
       {
         tier: 'semantic-critical',
@@ -204,13 +204,14 @@ describe('Finisher audit authority boundary', () => {
       {
         tier: 'semantic-critical',
         dimension: 'workload-calibration',
-        severity: 'critical',
-        message: 'BUDGET_UNDERFILLED: fixed percentage band heuristic.',
+        severity: 'warning',
+        message: 'BUDGET_UNDERFILLED: deterministic workload is below the learner target band.',
       },
     ]))
 
     expect(result.passed).toBe(false)
     expect(result.findings.slice(0, 3).every((finding) => finding.severity === 'critical')).toBe(true)
-    expect(result.findings.slice(3).every((finding) => finding.severity === 'warning')).toBe(true)
+    expect(result.findings[3]?.severity).toBe('warning')
+    expect(result.findings[4]?.severity).toBe('critical')
   })
 })

@@ -130,7 +130,7 @@ Every package must be validated before submitting over the wire.
   ```powershell
   pnpm worker production-authoring validate --package <path-to-package.json> --context <path-to-context.json>
   ```
-- **Checks performed** include strict Curriculum Package schema, `inputFingerprint`, job/child identity, model/prompt metadata, and current production authoring quality contract.
+- **Checks performed** include strict Curriculum Package schema, `inputFingerprint`, job/child/grade/grade-stage identity, model/prompt metadata, deterministic workload normalization against immutable `weekly_minutes`, and the current production authoring quality contract. Authored `estimatedMinutes` is not trusted as a duration assertion.
 
 Submission is blocked unless pre-submit validation succeeds. Week 1 Fast Publisher relies on this already-approved immutable source and performs only objective publication integrity checks afterward.
 
@@ -189,7 +189,9 @@ The normal Finisher is a universal submission processor. `public.worker_claim_cu
   ```
 - `--limit 15` is the per-claim batch size, not a whole-workflow cap. With `--drain`, one Finisher invocation repeatedly claims and processes batches until no eligible submission remains.
 - Each drain invocation uses a run-scoped processor identity. A `technical_failed` submission is not immediately reclaimed by the same drain run, so one persistent failure cannot create an infinite retry loop; it remains retryable by a later invocation.
-- It runs the current deterministic validation/audit contract, renders/uploads PDFs, creates materials, and completes normal submissions.
+- It runs the current deterministic validation/audit contract before rendering. Package grade/grade-stage must match the immutable claim snapshot. Workload is recomputed from canonical content: 85%-115% is the normal publish band; only an explicit evidence-backed exception can use 75%-125%; outside 75%-125% cannot publish.
+- Hidden-vocabulary difficulty remains learner-aware Author/Critic semantic judgment; the Finisher does not substitute a fixed 2000-word allowlist or morphology heuristic for that review.
+- After passing the gate it renders/uploads PDFs, creates materials, and completes normal submissions.
 
 ---
 

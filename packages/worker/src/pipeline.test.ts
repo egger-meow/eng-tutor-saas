@@ -106,24 +106,46 @@ describe('completeCurriculumJob', () => {
     expect(state.uploads).toEqual([])
   })
 
-  it('does not block rendering solely because profile.weekly_minutes heuristic is underfilled', async () => {
+  it('rejects a forged 200-minute estimate when deterministic represented work is far under target', async () => {
     const state = setup()
     const render = vi.fn(async () => pdfs)
+    const forged = structuredClone(curriculumSample) as CurriculumPackage
+    forged.learningPlan.estimatedMinutes = 200
     const budgetContext: GenerationContext = {
       ...curriculumContext,
-      profile: { weekly_minutes: 300 },
+      profile: { weekly_minutes: 200 },
     }
 
     await expect(completeCurriculumJob({
       client: state.client,
       workerId: 'worker-1',
       context: budgetContext,
+      curriculumPackage: forged,
+      render,
+      inspect,
+    })).rejects.toThrow(/BUDGET_UNDERFILLED/u)
+    expect(render).not.toHaveBeenCalled()
+    expect(state.uploads).toEqual([])
+  })
+
+  it('rejects grade metadata that conflicts with the immutable claim snapshot', async () => {
+    const state = setup()
+    const render = vi.fn(async () => pdfs)
+    const mismatchedContext: GenerationContext = {
+      ...curriculumContext,
+      child: { grade: 8, gradeStage: 'grade_8' },
+    }
+
+    await expect(completeCurriculumJob({
+      client: state.client,
+      workerId: 'worker-1',
+      context: mismatchedContext,
       curriculumPackage: curriculumSample,
       render,
       inspect,
-    })).resolves.toBe('material-1')
-    expect(render).toHaveBeenCalledTimes(1)
-    expect(state.uploads).toEqual(['kobe/kobe-week-2-v2/student.pdf', 'kobe/kobe-week-2-v2/parent-answer.pdf'])
+    })).rejects.toThrow(/METADATA_GRADE_MISMATCH/u)
+    expect(render).not.toHaveBeenCalled()
+    expect(state.uploads).toEqual([])
   })
 
   it('rejects Kobe W6→W7 when coach, team, and practice are relabeled new', async () => {
