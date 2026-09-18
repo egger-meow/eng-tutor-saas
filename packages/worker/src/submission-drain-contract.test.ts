@@ -16,7 +16,7 @@ describe('Finisher drain contract', () => {
   })
 
   it('does not immediately reclaim a technical failure in the same drain run', async () => {
-    const migration = await source('supabase/migrations/20260918160000_drain_finisher_queue.sql')
+    const migration = await source('supabase/migrations/20260918082557_drain_finisher_queue.sql')
     expect(migration).toContain("submission.status = 'technical_failed'")
     expect(migration).toContain("submission.processor_id is distinct from $1")
     expect(migration).toContain('for update of submission skip locked')
