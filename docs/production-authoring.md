@@ -72,21 +72,28 @@ The bundle routing index uses a lossless dictionary table with explicit decoding
 
 ## 3. Queue & Lease Protocol (Collision Prevention)
 
-Normal production authoring must check active authoritative leases before claiming. The dedicated Week 1 Fast Lane is intentionally allowed to start while a normal batch is already in flight; its own advisory lock serializes fast-lane starts and row leases / `FOR UPDATE SKIP LOCKED` prevent duplicate job ownership.
+Normal production authoring supports multiple active workers. The short start/claim critical section is transaction-serialized, while row leases / `FOR UPDATE SKIP LOCKED` prevent duplicate job ownership. A worker that already owns an active unsubmitted batch must recover it instead of claiming again. Other worker identities do not block a new claim.
 
 ### Normal Lease Checking
 - **Helper CLI**: `pnpm worker production-authoring status [--worker <worker_id>]`
 - **Database RPC**: `public.worker_get_active_generation_leases()`
 - **Rules**:
-  - If an active normal lease is held by *another* normal worker (`canClaim: false`, `isOwnedByCaller: false`), the normal executor halts.
-  - If an active lease is already held by *this* worker, resume rather than claiming again.
-  - If no active normal leases exist, proceed to claim.
+  - If an active lease is already held by *this* worker, recover that batch rather than claiming again.
+  - Active leases owned by *other* worker/run identities do not block claiming.
+  - The claim transaction and row locks are the collision boundary; long-running authoring work is intentionally parallelizable.
 
 ### Normal Authoritative Batch Claim
 - **Helper CLI**: `pnpm worker production-authoring claim --worker <worker_id>`
 - **Database RPC**: `public.worker_claim_local_authoring_batch(worker_id)` (or `private_generation.chatgpt_claim_generation_batch(worker_id)`)
-- Claims at most 10 jobs per invocation across overdue and normal candidates. This is a batch limit, not a daily throughput limit.
+- Claims at most `operational_settings.authoring_batch_limit` jobs per invocation across overdue and normal candidates. This is the single configurable batch-size authority, not a daily throughput limit.
 - Generates and records an immutable `inputFingerprint` in the claim snapshot.
+
+### Online Manual Run Identity
+- Preferred start RPC: `public.worker_start_online_manual_authoring_batch()`. It takes no caller worker ID and returns a server-generated `runId` plus `workerId = chatgpt-online-manual:<runId>`.
+- The HTTP `POST /start` adapter delegates to that same RPC.
+- Parallel conversations therefore own separate batches and separate recovery contexts.
+- `GET /batch?run_id=<runId>` recovers only that manual run.
+- Direct database tooling must use the returned run-scoped `workerId` for recovery/submission rather than the legacy shared `chatgpt-online-manual` identity.
 
 ### Week 1 Fast Claim
 - **Authoring Bridge**: `POST /week1/start`

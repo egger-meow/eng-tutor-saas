@@ -43,7 +43,7 @@ You are the production author: perform planning, privacy-safe web research, grou
 
 Do not spawn another Codex process.
 Never claim more than once.
-One invocation claims at most 10 jobs. Submit the batch before starting another invocation.
+One invocation claims at most the configured `authoring_batch_limit`. Re-entering with the same worker recovers its batch; a distinct worker identity may run in parallel.
 Preserve every server-owned inputFingerprint exactly.
 Treat retryContext as authoritative.
 Never render or upload PDFs; hand accepted submissions to the deterministic Finisher.

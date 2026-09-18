@@ -66,20 +66,30 @@ export async function checkActiveLeaseState(client: WorkerClient, workerId?: str
     }
   }
 
-  const distinctClaimants = [...new Set(activeLeases.map((l) => l.claimed_by ?? l.workerId ?? 'unknown'))]
-  const primaryClaimant = distinctClaimants[0] ?? 'unknown'
-  const isOwned = Boolean(workerId && primaryClaimant === workerId)
-  const jobIds = activeLeases.map((l) => l.id ?? l.jobId ?? '')
+  const callerLeases = workerId
+    ? activeLeases.filter((l) => (l.claimed_by ?? l.workerId ?? 'unknown') === workerId)
+    : []
+  const callerJobIds = callerLeases.map((l) => l.id ?? l.jobId ?? '')
 
+  if (callerLeases.length > 0) {
+    return {
+      hasActiveClaim: true,
+      isOwnedByCaller: true,
+      claimedBy: workerId ?? null,
+      jobIds: callerJobIds,
+      canClaim: false,
+      message: `Active lease held by current worker: ${workerId} (${callerJobIds.length} jobs). Recover this batch instead of claiming again.`,
+    }
+  }
+
+  const primaryClaimant = activeLeases[0]?.claimed_by ?? activeLeases[0]?.workerId ?? 'unknown'
   return {
     hasActiveClaim: true,
-    isOwnedByCaller: isOwned,
+    isOwnedByCaller: false,
     claimedBy: primaryClaimant,
-    jobIds,
-    canClaim: false,
-    message: isOwned
-      ? `Active lease held by current worker: ${workerId} (${jobIds.length} jobs)`
-      : `Active lease held by another worker: ${primaryClaimant} (${jobIds.length} jobs)`,
+    jobIds: activeLeases.map((l) => l.id ?? l.jobId ?? ''),
+    canClaim: true,
+    message: `Other workers are active (${activeLeases.length} jobs); concurrent claiming is allowed and protected by atomic row claims.`,
   }
 }
 
@@ -93,12 +103,11 @@ export async function claimProductionBatch(
   }
 
   const leaseState = await checkActiveLeaseState(client, workerId)
-  if (leaseState.hasActiveClaim) {
-    if (!leaseState.isOwnedByCaller && !options?.force) {
-      throw new Error(`ACTIVE_LEASE_EXISTS: Active lease held by ${leaseState.claimedBy}`)
-    }
+  if (!leaseState.canClaim && !leaseState.isOwnedByCaller && !options?.force) {
+    throw new Error(`LEASE_STATE_UNVERIFIED: ${leaseState.message}`)
+  }
 
-    if (leaseState.isOwnedByCaller) {
+  if (leaseState.hasActiveClaim && leaseState.isOwnedByCaller) {
       // Recover existing active batch for this worker
       const recovery = await client.rpc('worker_recover_active_authoring_batch', { worker_id: workerId })
       if (!recovery.error && recovery.data) {
@@ -113,7 +122,6 @@ export async function claimProductionBatch(
           oldestOutstandingDeadline: typeof data.oldestOutstandingDeadline === 'string' ? data.oldestOutstandingDeadline : null,
         }
       }
-    }
   }
 
   const claimResult = unwrap(

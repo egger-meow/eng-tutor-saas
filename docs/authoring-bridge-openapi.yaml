@@ -6,7 +6,7 @@ info:
     Exposes only narrow, business-level operations with zero generic SQL
     or database access, removing generic database query capability and minimizing
     the externally exposed write surface.
-  version: 1.2.0
+  version: 1.3.0
 servers:
   - url: https://ykzszjrqynrhgdhoeovo.supabase.co/functions/v1/authoring-bridge
     description: Production Supabase Edge Functions Authoring Bridge
@@ -32,10 +32,10 @@ paths:
     post:
       summary: Start Authoritative Production Authoring Batch
       description: >
-        Atomically verifies that zero conflicting active authoring leases exist across
-        the entire production queue, then performs exactly one authoritative production
-        batch claim under the pinned online manual worker identity (chatgpt-online-manual).
-        Returns authoritative generation contexts with inputFingerprint and any retryContext.
+        Creates a server-owned manual run identity, then performs exactly one authoritative
+        production batch claim. Other active worker runs may continue in parallel; atomic
+        row claiming prevents duplicate job ownership. Returns runId, workerId, authoritative
+        generation contexts, inputFingerprint, and any retryContext.
       operationId: startAuthoringBatch
       responses:
         '200':
@@ -46,6 +46,11 @@ paths:
                 type: object
                 properties:
                   bridgeVersion:
+                    type: string
+                  runId:
+                    type: string
+                    format: uuid
+                  workerId:
                     type: string
                   claimedCount:
                     type: integer
@@ -80,8 +85,6 @@ paths:
                     type: string
         '401':
           description: Missing or invalid authorization token
-        '409':
-          description: Conflicting active authoring lease currently held by another worker
         '500':
           description: Server error
         '503':
@@ -91,10 +94,18 @@ paths:
     get:
       summary: Recover Active Staged Batch
       description: >
-        Recovers an already-claimed active batch of due curriculum generation jobs
-        without mutating database state or triggering a new claim.
-        Worker identity is pinned server-side.
+        Recovers an already-claimed active batch without mutating database state or
+        triggering a new claim. For parallel online-manual runs, pass the server-issued
+        run_id from /start so only that conversation's batch is recovered.
       operationId: recoverActiveBatch
+      parameters:
+        - name: run_id
+          in: query
+          required: false
+          description: Server-issued UUID returned by /start for an online manual run.
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: Active batch claimed jobs snapshot
