@@ -117,6 +117,13 @@ function isObjectiveFinisherFinding(finding: CurriculumAuditFinding, pkgInput?: 
     return startsWithAny(finding.message, OBJECTIVE_EVIDENCE_PREFIXES)
   }
 
+  if (finding.dimension === 'workload-calibration') {
+    return finding.message.startsWith('BUDGET_UNDERFILLED:')
+      || finding.message.startsWith('BUDGET_OVERFILLED:')
+      || finding.message.startsWith('workload-budget-exception requires')
+      || finding.message.startsWith('workload-budget-exception cannot bypass')
+  }
+
   if (finding.dimension === 'grounding-freshness') {
     return finding.message.startsWith('Current grounding cannot cite a publication timestamp later than researchedAt.')
   }
