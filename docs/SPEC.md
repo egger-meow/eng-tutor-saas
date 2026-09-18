@@ -4280,6 +4280,7 @@ The operator can:
 * inspect exact objective publication-integrity failures with structured stage diagnostics for Week 1, and exact normal Finisher rejection rules for Week 2+;
 * identify any production engine-version drift;
 * identify `delivered_with_quality_override` without treating it as a quality pass;
+* verify that one normal Finisher invocation drains eligible submissions in bounded claim batches until the queue is empty, while a technical failure is attempted at most once by that drain invocation and remains retryable by a later invocation;
 * explain from immutable planning/quality evidence why a fast-moving interest selected a current development or a principled evergreen fallback, without exposing that machinery in Student or Parent PDFs.
 
 Week 1 dispatch failure is recoverable because the durable job/submission and retryable outboxes remain authoritative. Duplicate wake or repository-dispatch events must not duplicate claims, artifacts, materials, or Week 2 scheduling.

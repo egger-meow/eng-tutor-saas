@@ -185,8 +185,10 @@ The normal Finisher is a universal submission processor. `public.worker_claim_cu
 
 - **Finisher Processor Command**:
   ```powershell
-  pnpm worker process-submissions --processor github-actions-finisher --limit 15
+  pnpm worker process-submissions --processor github-actions-finisher --limit 15 --drain
   ```
+- `--limit 15` is the per-claim batch size, not a whole-workflow cap. With `--drain`, one Finisher invocation repeatedly claims and processes batches until no eligible submission remains.
+- Each drain invocation uses a run-scoped processor identity. A `technical_failed` submission is not immediately reclaimed by the same drain run, so one persistent failure cannot create an infinite retry loop; it remains retryable by a later invocation.
 - It runs the current deterministic validation/audit contract, renders/uploads PDFs, creates materials, and completes normal submissions.
 
 ---

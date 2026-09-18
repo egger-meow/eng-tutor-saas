@@ -15,10 +15,10 @@ Use `pnpm generate:synthetic` to test this boundary without Supabase or private 
 The local authoring runner never renders PDFs. After it submits canonical JSON to `private_generation.curriculum_submissions`, GitHub Actions uses server-only repository secrets to run the deterministic finisher:
 
 ```powershell
-pnpm worker process-submissions --processor github-actions-finisher --limit 5
+pnpm worker process-submissions --processor github-actions-finisher --limit 15 --drain
 ```
 
-The finisher claims only packages already submitted by the local Codex runner. It validates all relationships and critical quality checks, renders and inspects both PDFs, uploads them under `weekly-materials/<child-id>/<job-id>/`, and calls the transactional completion RPC. A rendering, upload, or completion failure records a sanitized failure. A package that has not passed independent critique and repository-owned audit is never publishable.
+The Finisher drains the eligible submission queue in bounded claim batches. The batch limit controls how many rows are leased at once, not how many submissions one workflow may finish. A technical failure is processed at most once per drain invocation and remains retryable by a later invocation. It validates all relationships and critical quality checks, renders and inspects both PDFs, uploads them under `weekly-materials/<child-id>/<job-id>/`, and calls the transactional completion RPC. A rendering, upload, or completion failure records a sanitized failure. A package that has not passed independent critique and repository-owned audit is never publishable.
 
 ## Week 1 Initial Scheduling
 

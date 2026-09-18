@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { CurriculumQualityError, ReleaseMismatchError, isSoftQualityOverrideEligible } from './pipeline.js'
-import { processCurriculumSubmissions, type CurriculumSubmission } from './submission-processor.js'
+import { drainCurriculumSubmissions, processCurriculumSubmissions, type CurriculumSubmission } from './submission-processor.js'
 import type { WorkerClient } from './pipeline.js'
 
 function setup(submissions: CurriculumSubmission[]) {
@@ -85,6 +85,57 @@ describe('processCurriculumSubmissions', () => {
     const results = await processCurriculumSubmissions(state.client, 'github-actions-finisher', 5, complete)
     expect(results.map((result) => result.status)).toEqual(['technical_failed', 'completed'])
     expect(complete).toHaveBeenCalledTimes(2)
+  })
+})
+
+
+describe('drainCurriculumSubmissions', () => {
+  it('claims successive batches until empty with one run-scoped processor identity', async () => {
+    const second = { ...submission, job_id: '00000000-0000-0000-0000-000000000052' }
+    const third = { ...submission, job_id: '00000000-0000-0000-0000-000000000053' }
+    const claimBatches: CurriculumSubmission[][] = [[submission, second], [third], []]
+    const rpc = vi.fn<WorkerClient['rpc']>(async (name: string) => {
+      if (name === 'worker_claim_curriculum_submissions') {
+        return { data: claimBatches.shift() ?? [], error: null }
+      }
+      if (name === 'worker_finish_curriculum_submission') return { data: true, error: null }
+      return { data: null, error: { message: `unexpected RPC ${name}` } }
+    })
+    const client: WorkerClient = {
+      rpc,
+      storage: { from: () => ({
+        upload: async () => ({ data: {}, error: null }),
+        download: async () => ({ data: null, error: { message: 'not found' } }),
+        remove: async () => ({ data: {}, error: null }),
+      }) },
+    }
+    const complete = vi.fn(async (item: CurriculumSubmission) => item.job_id)
+
+    await expect(drainCurriculumSubmissions(
+      client,
+      'github-actions-finisher',
+      2,
+      complete,
+      'run-123',
+    )).resolves.toEqual({
+      processorId: 'github-actions-finisher:run-123',
+      batches: 2,
+      claimed: 3,
+      results: [
+        { jobId: submission.job_id, status: 'completed', materialId: submission.job_id },
+        { jobId: second.job_id, status: 'completed', materialId: second.job_id },
+        { jobId: third.job_id, status: 'completed', materialId: third.job_id },
+      ],
+    })
+
+    const claimCalls = rpc.mock.calls.filter(([name]) => name === 'worker_claim_curriculum_submissions')
+    expect(claimCalls).toHaveLength(3)
+    for (const [, args] of claimCalls) {
+      expect(args).toEqual(expect.objectContaining({
+        processor_id: 'github-actions-finisher:run-123',
+        claim_limit: 2,
+      }))
+    }
   })
 })
 
