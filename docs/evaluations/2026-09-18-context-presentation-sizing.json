@@ -1,0 +1,655 @@
+{
+  "measurement": "synthetic exact prompt-builder comparison",
+  "scope": "New JSON presentation only, after existing compaction. Each stage measured separately; repair is optional. UTF-16 chars and UTF-8 bytes, not tokens, live usage, or teaching-quality equivalence.",
+  "baselineBundle": {
+    "chars": 92547,
+    "bytes": 92863,
+    "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+  },
+  "implementation": {
+    "chars": 3850,
+    "bytes": 3850,
+    "sha256": "67a0e3e67dd7ea753c38f0eca75b3adc9a5b449a282684bfd4b0abae9541b169"
+  },
+  "rows": [
+    {
+      "id": "no-duplicates",
+      "calls": [
+        {
+          "stage": "packet-plan",
+          "before": {
+            "chars": 4922,
+            "bytes": 4930,
+            "sha256": "c2a348b0b6f79cdf0ddab6f03ec25c58d7da6df295e3e489018f5ee527951481"
+          },
+          "after": {
+            "chars": 4922,
+            "bytes": 4930,
+            "sha256": "c2a348b0b6f79cdf0ddab6f03ec25c58d7da6df295e3e489018f5ee527951481"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 1174,
+              "bytes": 1174,
+              "sha256": "fc88e872ac961a6e8d8bb5c70049ffc55199fe51c6e966d401b81bcdd268ddf9"
+            },
+            "after": {
+              "chars": 1174,
+              "bytes": 1174,
+              "sha256": "fc88e872ac961a6e8d8bb5c70049ffc55199fe51c6e966d401b81bcdd268ddf9"
+            }
+          }
+        },
+        {
+          "stage": "author",
+          "before": {
+            "chars": 90706,
+            "bytes": 91022,
+            "sha256": "afccf7b10d08a5f1c3827700143576091c89165061295df54086e8c4ee7745b8"
+          },
+          "after": {
+            "chars": 90706,
+            "bytes": 91022,
+            "sha256": "afccf7b10d08a5f1c3827700143576091c89165061295df54086e8c4ee7745b8"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 78,
+              "bytes": 78,
+              "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+            },
+            "after": {
+              "chars": 78,
+              "bytes": 78,
+              "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 78,
+                "bytes": 78,
+                "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+              },
+              "after": {
+                "chars": 78,
+                "bytes": 78,
+                "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+              },
+              "references": []
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "findings": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "prompt": {
+              "chars": 90706,
+              "bytes": 91022,
+              "sha256": "afccf7b10d08a5f1c3827700143576091c89165061295df54086e8c4ee7745b8"
+            }
+          }
+        },
+        {
+          "stage": "packet-plan-repair",
+          "before": {
+            "chars": 5249,
+            "bytes": 5257,
+            "sha256": "8186adf267be38784658711a98f9f261ac7fa23a1ae9495cfad5889fb1d3b3ac"
+          },
+          "after": {
+            "chars": 5249,
+            "bytes": 5257,
+            "sha256": "8186adf267be38784658711a98f9f261ac7fa23a1ae9495cfad5889fb1d3b3ac"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 1174,
+              "bytes": 1174,
+              "sha256": "fc88e872ac961a6e8d8bb5c70049ffc55199fe51c6e966d401b81bcdd268ddf9"
+            },
+            "after": {
+              "chars": 1174,
+              "bytes": 1174,
+              "sha256": "fc88e872ac961a6e8d8bb5c70049ffc55199fe51c6e966d401b81bcdd268ddf9"
+            }
+          }
+        },
+        {
+          "stage": "author-repair",
+          "before": {
+            "chars": 90912,
+            "bytes": 91228,
+            "sha256": "5164606d258171bcd343fdd6ca2ea5c40a5b52ab740868f2ae626484cdd28752"
+          },
+          "after": {
+            "chars": 90912,
+            "bytes": 91228,
+            "sha256": "5164606d258171bcd343fdd6ca2ea5c40a5b52ab740868f2ae626484cdd28752"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 78,
+              "bytes": 78,
+              "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+            },
+            "after": {
+              "chars": 78,
+              "bytes": 78,
+              "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 78,
+                "bytes": 78,
+                "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+              },
+              "after": {
+                "chars": 78,
+                "bytes": 78,
+                "sha256": "2417736d61f06bef52969195a8e7541367fc64f9641c5698ab8949f9451fc640"
+              },
+              "references": []
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 54,
+              "bytes": 54,
+              "sha256": "6e5a9043719f0237d3fe5455a4f18d3a0d7088244f53e59f858a9fa6a59f6956"
+            },
+            "findings": {
+              "chars": 52,
+              "bytes": 52,
+              "sha256": "f19252298530a75520e9484cb53eb11782d00f0f72c0382f4ddc6f6e30967aa1"
+            },
+            "prompt": {
+              "chars": 90912,
+              "bytes": 91228,
+              "sha256": "5164606d258171bcd343fdd6ca2ea5c40a5b52ab740868f2ae626484cdd28752"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "repeated-evidence",
+      "calls": [
+        {
+          "stage": "packet-plan",
+          "before": {
+            "chars": 6709,
+            "bytes": 6717,
+            "sha256": "70c3e8b77d40a11fa95d78103c6d6f15fcf184955524f5adb3791ea6d3fb92ad"
+          },
+          "after": {
+            "chars": 5902,
+            "bytes": 5910,
+            "sha256": "80c69cc75735d7f52f5e0014d812b4ce7915f34393ac0ba155ba0cb94e984e2e"
+          },
+          "savedChars": 807,
+          "reductionPercent": 12.03,
+          "learner": {
+            "before": {
+              "chars": 2961,
+              "bytes": 2961,
+              "sha256": "626115e023fc6f960c56e7dcb952dc1b4afa6679efffb59e5ac484db3c5a8ac6"
+            },
+            "after": {
+              "chars": 2154,
+              "bytes": 2154,
+              "sha256": "a6df884120831ad48b0812256a02943979b7a5351828430f6849b2e790831ed8"
+            }
+          }
+        },
+        {
+          "stage": "author",
+          "before": {
+            "chars": 92476,
+            "bytes": 92792,
+            "sha256": "739642f3770cfc36836a43ecafc87cf31efbaaa1168e1058da8cdcf3518a0043"
+          },
+          "after": {
+            "chars": 91669,
+            "bytes": 91985,
+            "sha256": "570d21eeab0c5698bd14411c548e8f7fc8f24e1d4980286672081789b75ff205"
+          },
+          "savedChars": 807,
+          "reductionPercent": 0.87,
+          "learner": {
+            "before": {
+              "chars": 1848,
+              "bytes": 1848,
+              "sha256": "4993b82a6caf1722968dfa176d34e2a45b83828cd40ce640eee831ed857dd244"
+            },
+            "after": {
+              "chars": 1041,
+              "bytes": 1041,
+              "sha256": "cd58eeb537d1dd2718d20fcb0f6057cdae6a979da928d20cda8f603ee568af38"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 1848,
+                "bytes": 1848,
+                "sha256": "4993b82a6caf1722968dfa176d34e2a45b83828cd40ce640eee831ed857dd244"
+              },
+              "after": {
+                "chars": 1041,
+                "bytes": 1041,
+                "sha256": "cd58eeb537d1dd2718d20fcb0f6057cdae6a979da928d20cda8f603ee568af38"
+              },
+              "references": [
+                {
+                  "path": "/learningMemory",
+                  "target": "/learningState"
+                },
+                {
+                  "path": "/sourceMaterial",
+                  "target": "/learningState"
+                }
+              ]
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "findings": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "prompt": {
+              "chars": 91669,
+              "bytes": 91985,
+              "sha256": "570d21eeab0c5698bd14411c548e8f7fc8f24e1d4980286672081789b75ff205"
+            }
+          }
+        },
+        {
+          "stage": "packet-plan-repair",
+          "before": {
+            "chars": 7036,
+            "bytes": 7044,
+            "sha256": "e4092cc1187bd1df38133e5ec019db7487a21b1529445b30ff25d1bdf7d9d4db"
+          },
+          "after": {
+            "chars": 6229,
+            "bytes": 6237,
+            "sha256": "01ce485115f5dfb386183c19be9eb7c1afd30dfdb683c470b399476f8d3eeb47"
+          },
+          "savedChars": 807,
+          "reductionPercent": 11.47,
+          "learner": {
+            "before": {
+              "chars": 2961,
+              "bytes": 2961,
+              "sha256": "626115e023fc6f960c56e7dcb952dc1b4afa6679efffb59e5ac484db3c5a8ac6"
+            },
+            "after": {
+              "chars": 2154,
+              "bytes": 2154,
+              "sha256": "a6df884120831ad48b0812256a02943979b7a5351828430f6849b2e790831ed8"
+            }
+          }
+        },
+        {
+          "stage": "author-repair",
+          "before": {
+            "chars": 92682,
+            "bytes": 92998,
+            "sha256": "85d712af66d8ffc12746fe03740dc1eac3b92025d1346b92044bd1d04b19838d"
+          },
+          "after": {
+            "chars": 91875,
+            "bytes": 92191,
+            "sha256": "75e412ed8839e80e47e2939f324d3d56cf80ffad7424ac1af4c67bd1f31c4962"
+          },
+          "savedChars": 807,
+          "reductionPercent": 0.87,
+          "learner": {
+            "before": {
+              "chars": 1848,
+              "bytes": 1848,
+              "sha256": "4993b82a6caf1722968dfa176d34e2a45b83828cd40ce640eee831ed857dd244"
+            },
+            "after": {
+              "chars": 1041,
+              "bytes": 1041,
+              "sha256": "cd58eeb537d1dd2718d20fcb0f6057cdae6a979da928d20cda8f603ee568af38"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 1848,
+                "bytes": 1848,
+                "sha256": "4993b82a6caf1722968dfa176d34e2a45b83828cd40ce640eee831ed857dd244"
+              },
+              "after": {
+                "chars": 1041,
+                "bytes": 1041,
+                "sha256": "cd58eeb537d1dd2718d20fcb0f6057cdae6a979da928d20cda8f603ee568af38"
+              },
+              "references": [
+                {
+                  "path": "/learningMemory",
+                  "target": "/learningState"
+                },
+                {
+                  "path": "/sourceMaterial",
+                  "target": "/learningState"
+                }
+              ]
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 54,
+              "bytes": 54,
+              "sha256": "6e5a9043719f0237d3fe5455a4f18d3a0d7088244f53e59f858a9fa6a59f6956"
+            },
+            "findings": {
+              "chars": 52,
+              "bytes": 52,
+              "sha256": "f19252298530a75520e9484cb53eb11782d00f0f72c0382f4ddc6f6e30967aa1"
+            },
+            "prompt": {
+              "chars": 91875,
+              "bytes": 92191,
+              "sha256": "75e412ed8839e80e47e2939f324d3d56cf80ffad7424ac1af4c67bd1f31c4962"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "distinct-feedback",
+      "calls": [
+        {
+          "stage": "packet-plan",
+          "before": {
+            "chars": 6072,
+            "bytes": 6080,
+            "sha256": "bb633410eabee0a03de82fa97a5a4d97dc8f596acbff1ba64d8040e09e7c5d9e"
+          },
+          "after": {
+            "chars": 6072,
+            "bytes": 6080,
+            "sha256": "bb633410eabee0a03de82fa97a5a4d97dc8f596acbff1ba64d8040e09e7c5d9e"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 2324,
+              "bytes": 2324,
+              "sha256": "99e22ac456d4e7ea17199d44f6ebf150fe1166ce0caa43aaacde18358529b432"
+            },
+            "after": {
+              "chars": 2324,
+              "bytes": 2324,
+              "sha256": "99e22ac456d4e7ea17199d44f6ebf150fe1166ce0caa43aaacde18358529b432"
+            }
+          }
+        },
+        {
+          "stage": "author",
+          "before": {
+            "chars": 91839,
+            "bytes": 92155,
+            "sha256": "ebdf885f6bbe2441c4a9a1bd46560c0ae0c79056f28bfa153993c6df03aa2a22"
+          },
+          "after": {
+            "chars": 91839,
+            "bytes": 92155,
+            "sha256": "ebdf885f6bbe2441c4a9a1bd46560c0ae0c79056f28bfa153993c6df03aa2a22"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 1211,
+              "bytes": 1211,
+              "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+            },
+            "after": {
+              "chars": 1211,
+              "bytes": 1211,
+              "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 1211,
+                "bytes": 1211,
+                "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+              },
+              "after": {
+                "chars": 1211,
+                "bytes": 1211,
+                "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+              },
+              "references": []
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "findings": {
+              "chars": 0,
+              "bytes": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "prompt": {
+              "chars": 91839,
+              "bytes": 92155,
+              "sha256": "ebdf885f6bbe2441c4a9a1bd46560c0ae0c79056f28bfa153993c6df03aa2a22"
+            }
+          }
+        },
+        {
+          "stage": "packet-plan-repair",
+          "before": {
+            "chars": 6399,
+            "bytes": 6407,
+            "sha256": "1826b793ae715a3e76360a043f98993e628457ae506478979c4973ab97319b6e"
+          },
+          "after": {
+            "chars": 6399,
+            "bytes": 6407,
+            "sha256": "1826b793ae715a3e76360a043f98993e628457ae506478979c4973ab97319b6e"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 2324,
+              "bytes": 2324,
+              "sha256": "99e22ac456d4e7ea17199d44f6ebf150fe1166ce0caa43aaacde18358529b432"
+            },
+            "after": {
+              "chars": 2324,
+              "bytes": 2324,
+              "sha256": "99e22ac456d4e7ea17199d44f6ebf150fe1166ce0caa43aaacde18358529b432"
+            }
+          }
+        },
+        {
+          "stage": "author-repair",
+          "before": {
+            "chars": 92045,
+            "bytes": 92361,
+            "sha256": "3cb2b487807b5f7cb4aa7f4c365fbfc6f1e5689e0bc68a8c896e4e8879f88c46"
+          },
+          "after": {
+            "chars": 92045,
+            "bytes": 92361,
+            "sha256": "3cb2b487807b5f7cb4aa7f4c365fbfc6f1e5689e0bc68a8c896e4e8879f88c46"
+          },
+          "savedChars": 0,
+          "reductionPercent": 0,
+          "learner": {
+            "before": {
+              "chars": 1211,
+              "bytes": 1211,
+              "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+            },
+            "after": {
+              "chars": 1211,
+              "bytes": 1211,
+              "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+            }
+          },
+          "components": {
+            "measurement": "model-input-presentation",
+            "scope": "chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence",
+            "sourceBundle": {
+              "chars": 92547,
+              "bytes": 92863,
+              "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+            },
+            "presentedBundle": {
+              "chars": 89607,
+              "bytes": 89923,
+              "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
+            },
+            "learner": {
+              "before": {
+                "chars": 1211,
+                "bytes": 1211,
+                "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+              },
+              "after": {
+                "chars": 1211,
+                "bytes": 1211,
+                "sha256": "82e6a2b12d06ec302540a3705704814fd34acc79391d15d8512bdb5080130acb"
+              },
+              "references": []
+            },
+            "grounding": {
+              "chars": 125,
+              "bytes": 125,
+              "sha256": "d36edd009c9b3b6ea843e2081eab17459907b5039e08655aa8661f08c27b34ce"
+            },
+            "candidate": {
+              "chars": 54,
+              "bytes": 54,
+              "sha256": "6e5a9043719f0237d3fe5455a4f18d3a0d7088244f53e59f858a9fa6a59f6956"
+            },
+            "findings": {
+              "chars": 52,
+              "bytes": 52,
+              "sha256": "f19252298530a75520e9484cb53eb11782d00f0f72c0382f4ddc6f6e30967aa1"
+            },
+            "prompt": {
+              "chars": 92045,
+              "bytes": 92361,
+              "sha256": "3cb2b487807b5f7cb4aa7f4c365fbfc6f1e5689e0bc68a8c896e4e8879f88c46"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

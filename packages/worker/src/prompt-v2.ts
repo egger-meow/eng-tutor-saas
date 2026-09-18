@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import type { GenerationContext } from './pipeline.js'
 import { compactAuthoringContext } from './authoring-context.js'
+import { serializeModelContext } from './model-context.js'
 import {
   assembleSelectiveAuthoringBundle,
   expandCapPrecedents,
@@ -65,7 +66,7 @@ export async function buildCurriculumPromptBundle(context: GenerationContext): P
   return [
     assembledBundle,
     '## Private claimed context',
-    JSON.stringify(compactAuthoringContext(context as unknown as Record<string, unknown>)),
+    serializeModelContext(compactAuthoringContext(context as unknown as Record<string, unknown>)).text,
     'Complete research, planning, Author/Critic review, targeted repair, and full canonical validation before immutable submission through the reviewed authoring bridge. Follow docs/production-authoring.md for claim/submit/status; this prompt does not authorize legacy complete-v2 publication.',
   ].join('\n\n')
 }

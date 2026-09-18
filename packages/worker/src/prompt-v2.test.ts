@@ -1,6 +1,18 @@
 import { readFile } from 'node:fs/promises'
 import { expect, it } from 'vitest'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
+import { restoreModelContext } from './model-context.js'
+
+it('makes duplicate context resolvable in the manual adapter without changing the claim', async () => {
+  const evidence = { uniqueQualifier: 'Synthetic original evidence with a condition and uncertainty. '.repeat(12) }
+  const context = { job: { id: 'synthetic', childId: 'synthetic', materialWeek: '2026-09-18', ruleVersion: 'curriculum/2.0.0' }, learningMemory: evidence, unknownEvidence: evidence }
+  const snapshot = JSON.stringify(context)
+  const prompt = await buildCurriculumPromptBundle(context)
+  const section = prompt.split('## Private claimed context\n\n')[1].split('\n\nComplete research')[0]
+  expect(section).toContain('Context encoding:')
+  expect(restoreModelContext(section.slice(section.indexOf('\n') + 1))).toEqual(context)
+  expect(JSON.stringify(context)).toBe(snapshot)
+})
 
 it('uses the exact current production bundle and preserves private claimed context', async () => {
   const canonical = await readFile(new URL('../../generator/bundles/production-authoring-bundle.md', import.meta.url), 'utf8')

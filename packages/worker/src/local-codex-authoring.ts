@@ -1,5 +1,6 @@
 import { claimAuthoringContract, readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import { compactAuthoringContext, compactAuthoringBundle } from './authoring-context.js'
+import { serializeModelContext, measureContextText } from './model-context.js'
 import { createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { hostname, tmpdir } from 'node:os'
@@ -77,6 +78,15 @@ const runProcess: ProcessRunner = (file, args, options = {}) => new Promise((res
   child.stdin.end(options.input ?? '')
 })
 
+type ContextPresentationMetric = {
+  claimBundleSha256: string
+  sourceBundleSha256: string
+  promptSha256: string
+  learnerBeforeChars: number
+  learnerAfterChars: number
+  referenceCount: number
+}
+
 export type LocalAuthoringSummary = {
   gitSha: string
   codexVersion: string
@@ -88,7 +98,7 @@ export type LocalAuthoringSummary = {
   failed: number
   mandatoryCapacityOverride: boolean
   oldestOutstandingDeadline: string | null
-  jobs: Array<{ jobId: string; status: string; errorCode?: string }>
+  jobs: Array<{ jobId: string; status: string; errorCode?: string; contextPresentations?: ContextPresentationMetric[] }>
 }
 
 function unwrap<T>(result: { data: T | null; error: { message: string } | null }, operation: string): T {
@@ -256,25 +266,39 @@ export function researchPrompt(brief: string, policy: string): string {
 }
 
 export function authoringPrompt(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string): string {
+  return buildAuthoringPresentation(bundle, context, grounding, previousOutput, issue).prompt
+}
+
+export function buildAuthoringPresentation(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string) {
   const contract = claimAuthoringContract(context)
+  const learner = serializeModelContext(compactAuthoringContext(context, Boolean(previousOutput)))
+  const presentedBundle = compactAuthoringBundle(bundle)
   const retry = previousOutput
     ? `This is a surgical repair round. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}\nPREVIOUS PACKAGE:\n${previousOutput}`
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
-  return [
+  const prompt = [
     'You are the private curriculum author inside a reviewed local runner. Do not access Supabase or mutate repository files.',
-    `AUTHORITATIVE PRODUCTION BUNDLE:\n${compactAuthoringBundle(bundle)}`,
-    `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${JSON.stringify(compactAuthoringContext(context, Boolean(previousOutput)))}`,
+    `AUTHORITATIVE PRODUCTION BUNDLE:\n${presentedBundle}`,
+    `PRIVATE CLAIMED CONTEXT (never quote or expose):\n${learner.text}`,
     `PUBLIC FACTUAL GROUNDING (web access is disabled in this private stage):\n${grounding}`,
     retry,
     `Set metadata.model exactly to ${LOCAL_CODEX_MODEL}, schemaVersion to ${contract.schemaVersion}, promptVersion to ${context.activeAuthoringContract ? contract.promptVersion : `prompt/${contract.promptVersion}`}, engineVersion to ${contract.engineVersion}, workerVersion to ${contract.workerVersion}, rendererVersion to ${contract.rendererVersion}, and copy the server inputFingerprint exactly.`,
     'Every translation, sentence-production, or short-response item without options must provide writingLines >= 1 or a valid non-empty responseLayout.',
     'Return only the complete canonical Curriculum Package JSON object. Do not use Markdown fences or commentary.',
   ].join('\n')
+  return { prompt, diagnostics: {
+    measurement: 'model-input-presentation',
+    scope: 'chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence',
+    sourceBundle: measureContextText(bundle), presentedBundle: measureContextText(presentedBundle),
+    learner: { before: learner.before, after: learner.after, references: learner.references },
+    grounding: measureContextText(grounding), candidate: measureContextText(previousOutput ?? ''),
+    findings: measureContextText(issue ?? ''), prompt: measureContextText(prompt),
+  } }
 }
 
 /** Count exact inputs; a byte/character count is not a provider token count. */
 export function measurePromptInput(input: string) {
-  const stage = input.includes('Private Packet Planner') ? 'packet-plan'
+  const stage = input.includes('Private Packet Planner') ? (input.includes('## 4. Plan Repair Required') ? 'packet-plan-repair' : 'packet-plan')
     : input.includes('bounded private topic capsule') ? 'topic-screen'
     : input.includes('privacy-screened public-interest research brief') ? 'public-research'
     : input.includes('PREVIOUS PACKAGE:') ? 'author-repair' : 'author'
@@ -413,6 +437,8 @@ async function authorOne(
   execute: ProcessRunner,
   client?: WorkerClient,
   workerId?: string,
+  sourceRevision?: string,
+  contextPresentations: ContextPresentationMetric[] = [],
 ): Promise<CurriculumPackage> {
   const { jobId, childId } = contextIdentity(context)
   const contract = claimAuthoringContract(context)
@@ -552,6 +578,16 @@ async function authorOne(
   let issue: string | undefined
   for (let round = 0; round <= MAX_REPAIR_ROUNDS; round += 1) {
     const outputPath = resolve(jobDir, `package-${round}.json`)
+    const presentation = buildAuthoringPresentation(activeBundle, context, grounding, previousPath ? await readFile(previousPath, 'utf8') : undefined, issue)
+    contextPresentations.push({
+      claimBundleSha256: measureContextText(rawBundle).sha256,
+      sourceBundleSha256: presentation.diagnostics.sourceBundle.sha256,
+      promptSha256: presentation.diagnostics.prompt.sha256,
+      learnerBeforeChars: presentation.diagnostics.learner.before.chars,
+      learnerAfterChars: presentation.diagnostics.learner.after.chars,
+      referenceCount: presentation.diagnostics.learner.references.length,
+    })
+    await writeFile(resolve(jobDir, `context-presentation-${round}.json`), JSON.stringify({ sourceRevision, claimBundle: measureContextText(rawBundle), ...presentation.diagnostics }), { encoding: 'utf8', mode: 0o600 })
     await run(codexExecutable, [
       'exec', '--ephemeral', '--model', LOCAL_CODEX_MODEL,
       '--config', `model_reasoning_effort="${LOCAL_CODEX_REASONING}"`,
@@ -561,7 +597,7 @@ async function authorOne(
       '-',
     ], {
       cwd: repoRoot,
-      input: authoringPrompt(activeBundle, context, grounding, previousPath ? await readFile(previousPath, 'utf8') : undefined, issue),
+      input: presentation.prompt,
     })
     const raw = parseCodexJson(await readFile(outputPath, 'utf8'))
     try {
@@ -614,8 +650,9 @@ export async function runLocalCodexAuthoringBatch(
   for (const context of claim.claimed) {
     const { jobId } = contextIdentity(context)
     const jobDir = resolve(runtimeRoot, jobId)
+    const contextPresentations: ContextPresentationMetric[] = []
     try {
-      const pkg = await authorOne(repoRoot, context, preflight.executable, run, client, workerId)
+      const pkg = await authorOne(repoRoot, context, preflight.executable, run, client, workerId, gitSha, contextPresentations)
       const payload = JSON.stringify(pkg)
       const submitted = await client.rpc('worker_submit_local_curriculum_package', {
         p_job_id: jobId, p_generation_worker_id: workerId, p_payload_text: payload,
@@ -623,14 +660,14 @@ export async function runLocalCodexAuthoringBatch(
       if (submitted.error) {
         if (await recoverSubmission(client, jobId, workerId)) {
           summary.recovered += 1
-          summary.jobs.push({ jobId, status: 'SUBMITTED_RECOVERED' })
+          summary.jobs.push({ jobId, status: 'SUBMITTED_RECOVERED', contextPresentations })
         } else {
           await releaseConfirmedUnsubmitted(client, jobId, workerId, 'SUBMIT_TRANSPORT_FAILED')
           throw new Error('SUBMIT_TRANSPORT_FAILED')
         }
       } else {
         summary.submitted += 1
-        summary.jobs.push({ jobId, status: 'SUBMITTED_AWAITING_FINISHER' })
+        summary.jobs.push({ jobId, status: 'SUBMITTED_AWAITING_FINISHER', contextPresentations })
       }
       await rm(jobDir, { recursive: true, force: true })
     } catch (error) {
@@ -639,7 +676,7 @@ export async function runLocalCodexAuthoringBatch(
         : 'LOCAL_AUTHORING_FAILED'
       try { await releaseConfirmedUnsubmitted(client, jobId, workerId, code) } catch {}
       summary.failed += 1
-      summary.jobs.push({ jobId, status: 'FAILED_RELEASED', errorCode: code })
+      summary.jobs.push({ jobId, status: 'FAILED_RELEASED', errorCode: code, contextPresentations })
       await rm(jobDir, { recursive: true, force: true })
     }
   }

@@ -1,4 +1,5 @@
 import { claimAuthoringContract } from './authoring-claim-contract.js'
+import { serializeModelContext } from './model-context.js'
 import {
   adaptAssessmentIntent,
   type RawAssessmentPlan,
@@ -118,7 +119,7 @@ export function buildPacketPlanningPrompt(
     'Do not write full student lesson prose or parent answers yet. Output only a structured JSON packet plan.',
     '',
     '## 1. Learner Context & Pedagogical Constraints',
-    JSON.stringify(planningContext),
+    serializeModelContext(planningContext).text,
     '',
     '## 2. Public Research Grounding',
     grounding,
