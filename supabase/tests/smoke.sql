@@ -445,12 +445,15 @@ begin
     raise exception 'mandatory jobs without feedback were not marked feedback_missing';
   end if;
 
-  if (
+  if coalesce((
     select integer_value
     from public.operational_settings
-    where key = 'daily_generation_limit'
-  ) <> 10 then
-    raise exception 'daily generation limit mismatch';
+    where key = 'authoring_batch_limit'
+  ), 0) < 1 then
+    raise exception 'authoring batch limit is missing or invalid';
+  end if;
+  if exists (select 1 from public.operational_settings where key = 'daily_generation_limit') then
+    raise exception 'legacy daily generation limit still exists';
   end if;
 
   update public.generation_jobs set status = 'canceled'
