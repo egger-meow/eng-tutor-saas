@@ -30,13 +30,13 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
     expect(edgeFunctionSource).toContain("ONLINE_MANUAL_WORKER_PREFIX = 'chatgpt-online-manual:'")
     expect(edgeFunctionSource).toContain("rpc('worker_start_online_manual_authoring_batch')")
 
-    const migration = await readFile(resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'), 'utf8')
+    const migration = await readFile(resolve(root, 'supabase/migrations/20260918074329_parallel_authoring_batches.sql'), 'utf8')
     expect(migration).toContain('perform pg_advisory_xact_lock(authoring_lock_id);')
     expect(migration).toContain('return private_generation.chatgpt_claim_generation_batch(worker_id);')
   })
 
   it('proves distinct manual runs may coexist while same-worker re-entry recovers', async () => {
-    const migration = await readFile(resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'), 'utf8')
+    const migration = await readFile(resolve(root, 'supabase/migrations/20260918074329_parallel_authoring_batches.sql'), 'utf8')
     expect(migration).toContain('job.claimed_by = worker_id')
     expect(migration).toContain('return private_generation.chatgpt_recover_claimed_generation_batch(worker_id);')
     expect(migration).not.toContain('ACTIVE_AUTHORING_LEASE_CONFLICT')
