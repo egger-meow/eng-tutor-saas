@@ -41,8 +41,9 @@ describe('Production Authoring Parallel Claim Invariants', () => {
     )
 
     expect(edgeFunction).toContain("ONLINE_MANUAL_WORKER_PREFIX = 'chatgpt-online-manual:'")
-    expect(edgeFunction).toContain('const runId = crypto.randomUUID()')
-    expect(edgeFunction).toContain('worker_id: workerId')
+    expect(migration).toContain('create or replace function public.worker_start_online_manual_authoring_batch()')
+    expect(migration).toContain("run_worker_id := 'chatgpt-online-manual:' || run_id::text")
+    expect(edgeFunction).toContain("rpc('worker_start_online_manual_authoring_batch')")
     expect(edgeFunction).toContain("url.searchParams.get('run_id')")
     expect(edgeFunction).toContain('worker_recover_active_authoring_batch')
   })
