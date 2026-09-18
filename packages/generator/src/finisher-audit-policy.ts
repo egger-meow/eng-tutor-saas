@@ -143,6 +143,9 @@ function isObjectiveFinisherFinding(finding: CurriculumAuditFinding, pkgInput?: 
 
 export function applyFinisherAuditPolicy(report: CurriculumAuditReport, pkgInput?: unknown): CurriculumAuditReport {
   const findings = report.findings.map((finding): CurriculumAuditFinding => {
+    if (finding.dimension === 'workload-calibration' && isObjectiveFinisherFinding(finding, pkgInput)) {
+      return { ...finding, severity: 'critical' }
+    }
     if (finding.severity === 'critical' && !isObjectiveFinisherFinding(finding, pkgInput)) {
       return { ...finding, severity: 'warning' }
     }
