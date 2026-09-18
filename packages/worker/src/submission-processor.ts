@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import {
   CurriculumQualityError,
   ReleaseMismatchError,
@@ -20,6 +22,13 @@ export type CurriculumSubmissionResult = {
   status: 'completed' | 'quality_rejected' | 'technical_failed' | 'delivered_with_quality_override'
   materialId?: string
   errorCode?: string
+}
+
+export type CurriculumSubmissionDrainResult = {
+  processorId: string
+  batches: number
+  claimed: number
+  results: CurriculumSubmissionResult[]
 }
 
 type CompleteSubmission = (submission: CurriculumSubmission) => Promise<string>
@@ -124,4 +133,30 @@ export async function processCurriculumSubmissions(
   }
 
   return results
+}
+
+export async function drainCurriculumSubmissions(
+  client: WorkerClient,
+  processorId: string,
+  claimLimit: number,
+  complete?: CompleteSubmission,
+  runId = randomUUID(),
+): Promise<CurriculumSubmissionDrainResult> {
+  const scopedProcessorId = `${processorId}:${runId}`
+  const results: CurriculumSubmissionResult[] = []
+  let batches = 0
+
+  while (true) {
+    const batch = await processCurriculumSubmissions(client, scopedProcessorId, claimLimit, complete)
+    if (batch.length === 0) break
+    batches += 1
+    results.push(...batch)
+  }
+
+  return {
+    processorId: scopedProcessorId,
+    batches,
+    claimed: results.length,
+    results,
+  }
 }
