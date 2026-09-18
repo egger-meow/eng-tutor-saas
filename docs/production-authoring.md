@@ -89,9 +89,11 @@ Normal production authoring supports multiple active workers. The short start/cl
 - Generates and records an immutable `inputFingerprint` in the claim snapshot.
 
 ### Online Manual Run Identity
-- Each manual `POST /start` receives a server-generated `runId` and worker identity `chatgpt-online-manual:<runId>`.
+- Preferred start RPC: `public.worker_start_online_manual_authoring_batch()`. It takes no caller worker ID and returns a server-generated `runId` plus `workerId = chatgpt-online-manual:<runId>`.
+- The HTTP `POST /start` adapter delegates to that same RPC.
 - Parallel conversations therefore own separate batches and separate recovery contexts.
 - `GET /batch?run_id=<runId>` recovers only that manual run.
+- Direct database tooling must use the returned run-scoped `workerId` for recovery/submission rather than the legacy shared `chatgpt-online-manual` identity.
 
 ### Week 1 Fast Claim
 - **Authoring Bridge**: `POST /week1/start`
