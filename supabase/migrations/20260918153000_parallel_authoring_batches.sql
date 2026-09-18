@@ -154,7 +154,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $manual$
 declare
   run_id uuid := gen_random_uuid();
   run_worker_id text;
@@ -167,7 +167,7 @@ begin
     'workerId', run_worker_id
   );
 end;
-$;
+$manual$;
 
 revoke all on function public.worker_start_online_manual_authoring_batch()
 from public, anon, authenticated;
