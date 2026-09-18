@@ -204,8 +204,8 @@ describe('Finisher audit authority boundary', () => {
       {
         tier: 'semantic-critical',
         dimension: 'workload-calibration',
-        severity: 'critical',
-        message: 'BUDGET_UNDERFILLED: fixed percentage band heuristic.',
+        severity: 'warning',
+        message: 'BUDGET_UNDERFILLED: deterministic workload is below the learner target band.',
       },
     ]))
 
