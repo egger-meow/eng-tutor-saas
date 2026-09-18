@@ -1,6 +1,6 @@
 # Pipeline Context Compaction Implementation Plan
 
-**Implementation update (2026-09-18):** 使用者已要求 Implement。已交付第一批的確定性 JSON 去重、逐次還原驗證、adapter 整合及前後量測；詳見 [實作與驗證紀錄](../../evaluations/2026-09-18-context-presentation.md)。下方「本次只規劃」描述原始規劃回合。Task 3 的規則／schema 改寫及 Task 4 的配對模型品質實驗未執行，不以資料可還原宣稱教學效果等價。
+**Implementation update (2026-09-18):** 使用者已要求 Implement。已交付第一批的確定性 JSON 去重、逐次還原驗證、adapter 整合及前後量測；詳見 [實作與驗證紀錄](../../evaluations/2026-09-18-context-presentation.md)。後續另完成 [stage-aware bundle 離線候選](../../evaluations/2026-09-18-stage-aware-bundle-candidate.md)：正常 Author 候選縮減 18.02%，repair 候選縮減 12.31%，保留完整 schema、共同規則、Author 與 Critic，且未接入 runtime。下方「本次只規劃」描述原始規劃回合。Task 4 的配對模型品質實驗仍未執行，不以決定性保留測試宣稱教學效果等價。
 
 **Goal:** 減少課程產生各階段的重複 context，同時保留全部重要教學語義、來源證據及修補能力。
 

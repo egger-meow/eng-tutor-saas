@@ -1,0 +1,59 @@
+{
+  "status": "offline-candidate-only",
+  "runtimeEnabled": false,
+  "scope": "Exact whole-stage omission after packet planning. Shared rules, rubric, CAP contract, schema, interest policy, Author, and Critic remain byte-identical. Repair remains in repair mode.",
+  "qualityBoundary": "Character/byte reduction and deterministic retention do not prove model teaching-quality equivalence. Paired model review is required before runtime adoption.",
+  "rows": [
+    {
+      "mode": "author",
+      "before": {
+        "chars": 92547,
+        "bytes": 92863,
+        "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+      },
+      "after": {
+        "chars": 75873,
+        "bytes": 75985,
+        "sha256": "923776d82e03fbb53f7c673d1ec96eeefa4d29e3f976eb2731d8e2fc3202a2b9"
+      },
+      "savedChars": 16674,
+      "savedBytes": 16878,
+      "reductionPercent": 18.02,
+      "omitted": [
+        {
+          "heading": "## 5. Prompt 01: Planning Engine",
+          "chars": 11392,
+          "reason": "The approved packet plan and learner evidence are supplied as runtime inputs; Planner actions are complete before authoring."
+        },
+        {
+          "heading": "## 8. Prompt 04: Repair Specialist",
+          "chars": 5281,
+          "reason": "Normal authoring has no repair findings or previous candidate; Repair actions apply only to repair mode."
+        }
+      ]
+    },
+    {
+      "mode": "repair",
+      "before": {
+        "chars": 92547,
+        "bytes": 92863,
+        "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+      },
+      "after": {
+        "chars": 81155,
+        "bytes": 81267,
+        "sha256": "a602a3b6741d723f5995dca26a06a358145b5462a5e6ca6d0452aa65c7d40796"
+      },
+      "savedChars": 11392,
+      "savedBytes": 11596,
+      "reductionPercent": 12.31,
+      "omitted": [
+        {
+          "heading": "## 5. Prompt 01: Planning Engine",
+          "chars": 11392,
+          "reason": "The approved packet plan and learner evidence are supplied as runtime inputs; Planner actions are complete before authoring."
+        }
+      ]
+    }
+  ]
+}
