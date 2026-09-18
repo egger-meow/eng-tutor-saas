@@ -147,6 +147,35 @@ revoke all on function public.worker_start_authoring_batch(text)
 from public, anon, authenticated;
 grant execute on function public.worker_start_authoring_batch(text) to service_role;
 
+-- Preferred online-manual entry point. The database creates a unique run identity so
+-- parallel conversations cannot accidentally share recovery context.
+create or replace function public.worker_start_online_manual_authoring_batch()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  run_id uuid := gen_random_uuid();
+  run_worker_id text;
+  result jsonb;
+begin
+  run_worker_id := 'chatgpt-online-manual:' || run_id::text;
+  result := public.worker_start_authoring_batch(run_worker_id);
+  return result || jsonb_build_object(
+    'runId', run_id,
+    'workerId', run_worker_id
+  );
+end;
+$;
+
+revoke all on function public.worker_start_online_manual_authoring_batch()
+from public, anon, authenticated;
+grant execute on function public.worker_start_online_manual_authoring_batch() to service_role;
+
+comment on function public.worker_start_online_manual_authoring_batch()
+is 'Starts one online-manual batch under a server-generated run-scoped worker identity and returns runId plus workerId.';
+
 comment on function public.worker_start_authoring_batch(text)
 is 'Serializes only the claim critical section. Different worker IDs may hold active authoring batches concurrently; same-worker re-entry recovers its owned batch.';
 
