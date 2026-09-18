@@ -67,18 +67,38 @@ it('retains different qualifiers and independently reconstructs repeated parent 
 it('preserves full grounding, findings and the newest candidate in real author and repair prompts', () => {
   const context = { profile: evidence, unknownCapsule: evidence, retryContext: { previousCanonicalPackage: { old: 'OLD_CANDIDATE' }, findings: ['keep this finding'] } }
   const original = JSON.stringify(context)
+  const bundle = [
+    'ALL_RULES_AND_SCHEMA',
+    '## 5. Prompt 01: Planning Engine',
+    'PLANNER_ONLY',
+    '## 6. Prompt 02: Authoring Engine',
+    'AUTHOR_RULES',
+    '## 7. Prompt 03: Critic Engine',
+    'CRITIC_RULES',
+    '## 8. Prompt 04: Repair Specialist',
+    'REPAIR_RULES',
+  ].join('\n')
   for (const candidate of [undefined, '{"latest":"NEW_CANDIDATE"}']) {
-    const result = buildAuthoringPresentation('ALL_RULES_AND_SCHEMA', context, 'EXACT_GROUNDING_WITH_QUALIFIERS', candidate, 'FULL_REPAIR_FINDINGS')
-    expect(result.prompt).toBe(authoringPrompt('ALL_RULES_AND_SCHEMA', context, 'EXACT_GROUNDING_WITH_QUALIFIERS', candidate, 'FULL_REPAIR_FINDINGS'))
+    const result = buildAuthoringPresentation(bundle, context, 'EXACT_GROUNDING_WITH_QUALIFIERS', candidate, 'FULL_REPAIR_FINDINGS')
+    expect(result.prompt).toBe(authoringPrompt(bundle, context, 'EXACT_GROUNDING_WITH_QUALIFIERS', candidate, 'FULL_REPAIR_FINDINGS'))
     expect(result.prompt).toContain('ALL_RULES_AND_SCHEMA')
+    expect(result.prompt).not.toContain('PLANNER_ONLY')
+    expect(result.prompt).toContain('AUTHOR_RULES')
+    expect(result.prompt).toContain('CRITIC_RULES')
     expect(result.prompt).toContain('EXACT_GROUNDING_WITH_QUALIFIERS')
     expect(result.prompt).toContain('keep this finding')
     expect(result.diagnostics.learner.references.length).toBeGreaterThan(0)
     if (candidate) {
+      expect(result.diagnostics.stageBundle.mode).toBe('repair')
+      expect(result.prompt).toContain('REPAIR_RULES')
       expect(result.prompt).not.toContain('OLD_CANDIDATE')
       expect(result.prompt.split(candidate)).toHaveLength(2)
       expect(result.prompt).toContain('FULL_REPAIR_FINDINGS')
-    } else expect(result.prompt).toContain('OLD_CANDIDATE')
+    } else {
+      expect(result.diagnostics.stageBundle.mode).toBe('author')
+      expect(result.prompt).not.toContain('REPAIR_RULES')
+      expect(result.prompt).toContain('OLD_CANDIDATE')
+    }
   }
   expect(JSON.stringify(context)).toBe(original)
 })

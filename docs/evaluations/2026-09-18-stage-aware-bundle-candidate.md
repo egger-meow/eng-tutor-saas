@@ -2,7 +2,7 @@
 
 Date: 2026-09-18
 
-Status: offline candidate only. Runtime remains unchanged and Prompt 2.14.1 remains immutable.
+Status: enabled in the local production-authoring runtime. Prompt 2.14.1 and every immutable claim bundle remain unchanged.
 
 ## Result
 
@@ -16,10 +16,10 @@ No kept section is rewritten or summarized. The selector requires each exact sta
 
 | Mode | Before chars | Candidate chars | Saved chars | Reduction |
 | --- | ---: | ---: | ---: | ---: |
-| Normal Author | 92,547 | 75,873 | 16,674 | 18.02% |
-| Repair Author | 92,547 | 81,155 | 11,392 | 12.31% |
+| Normal Author | 89,607 | 72,933 | 16,674 | 18.61% |
+| Repair Author | 89,607 | 78,215 | 11,392 | 12.71% |
 
-Full character, UTF-8 byte, hash, and omission measurements are in `2026-09-18-stage-aware-bundle-candidate.json`.
+These before/after values measure the actual runtime presentation after the pre-existing provenance/legacy-code compaction. The immutable source bundle remains 92,547 characters. Full character, UTF-8 byte, hash, and omission measurements are in `2026-09-18-stage-aware-bundle-candidate.json`.
 
 ## Semantic responsibility map
 
@@ -41,5 +41,5 @@ The omitted Planner instructions are operational planning actions. The runtime s
 - Worker typecheck passed.
 - Tests verify exact retained text, required semantic anchors, mode-specific inclusion, source immutability, and failure on missing, duplicate, or reordered boundaries.
 
-This evidence proves deterministic selection and context reduction. It does not prove model teaching-quality equivalence. Runtime adoption still requires the plan's paired-model comparison over age/level, time and feedback, specific interests, current/evergreen grounding, CAP depth, variation, self-study quality, answer integrity, and cross-field repair. Until that comparison passes, the candidate stays disconnected from `buildAuthoringPresentation`.
+This evidence proves deterministic selection and context reduction. It does not prove model teaching-quality equivalence. The user explicitly authorized runtime adoption on 2026-09-18; `buildAuthoringPresentation` now selects `author` or `repair` mode and records source, stage-view, presented-bundle, and final-prompt hashes plus omitted headings for every attempt. The paired-model comparison over age/level, time and feedback, specific interests, current/evergreen grounding, CAP depth, variation, self-study quality, answer integrity, and cross-field repair remains an explicit follow-up quality limitation.
 

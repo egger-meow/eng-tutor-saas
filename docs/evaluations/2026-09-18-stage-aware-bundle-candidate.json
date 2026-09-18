@@ -1,24 +1,29 @@
 {
-  "status": "offline-candidate-only",
-  "runtimeEnabled": false,
+  "status": "enabled-in-local-production-authoring-runtime",
+  "runtimeEnabled": true,
   "scope": "Exact whole-stage omission after packet planning. Shared rules, rubric, CAP contract, schema, interest policy, Author, and Critic remain byte-identical. Repair remains in repair mode.",
-  "qualityBoundary": "Character/byte reduction and deterministic retention do not prove model teaching-quality equivalence. Paired model review is required before runtime adoption.",
+  "qualityBoundary": "Character/byte reduction and deterministic retention do not prove model teaching-quality equivalence. Paired model review remains an explicit follow-up limitation.",
+  "immutableSourceBundle": {
+    "chars": 92547,
+    "bytes": 92863,
+    "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+  },
   "rows": [
     {
       "mode": "author",
       "before": {
-        "chars": 92547,
-        "bytes": 92863,
-        "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+        "chars": 89607,
+        "bytes": 89923,
+        "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
       },
       "after": {
-        "chars": 75873,
-        "bytes": 75985,
-        "sha256": "923776d82e03fbb53f7c673d1ec96eeefa4d29e3f976eb2731d8e2fc3202a2b9"
+        "chars": 72933,
+        "bytes": 73045,
+        "sha256": "6b0ee3eb15c9cb836a8f5d34d51e0e6adfd8c29aa4f65a0be0f7e420d3880b33"
       },
       "savedChars": 16674,
       "savedBytes": 16878,
-      "reductionPercent": 18.02,
+      "reductionPercent": 18.61,
       "omitted": [
         {
           "heading": "## 5. Prompt 01: Planning Engine",
@@ -35,18 +40,18 @@
     {
       "mode": "repair",
       "before": {
-        "chars": 92547,
-        "bytes": 92863,
-        "sha256": "d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211"
+        "chars": 89607,
+        "bytes": 89923,
+        "sha256": "542c65bf1dd63b369fd0292977ad0f809a8f6eef84198577fe29241d34ab733a"
       },
       "after": {
-        "chars": 81155,
-        "bytes": 81267,
-        "sha256": "a602a3b6741d723f5995dca26a06a358145b5462a5e6ca6d0452aa65c7d40796"
+        "chars": 78215,
+        "bytes": 78327,
+        "sha256": "c2c4cd4d0a30d1125393e454a3b26995e3c88dc9bf4a250826697df690b2d706"
       },
       "savedChars": 11392,
       "savedBytes": 11596,
-      "reductionPercent": 12.31,
+      "reductionPercent": 12.71,
       "omitted": [
         {
           "heading": "## 5. Prompt 01: Planning Engine",

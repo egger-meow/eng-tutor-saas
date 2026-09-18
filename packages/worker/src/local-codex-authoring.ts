@@ -1,5 +1,6 @@
 import { claimAuthoringContract, readClaimAuthoringBundle } from './authoring-claim-contract.js'
 import { compactAuthoringContext, compactAuthoringBundle } from './authoring-context.js'
+import { buildStageAwareAuthoringBundleCandidate, type AuthoringBundleCandidateMode } from './bundle-presentation-candidate.js'
 import { serializeModelContext, measureContextText } from './model-context.js'
 import { createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
@@ -81,6 +82,10 @@ const runProcess: ProcessRunner = (file, args, options = {}) => new Promise((res
 type ContextPresentationMetric = {
   claimBundleSha256: string
   sourceBundleSha256: string
+  stageBundleSha256: string
+  presentedBundleSha256: string
+  stageMode: AuthoringBundleCandidateMode
+  omittedStageHeadings: string[]
   promptSha256: string
   learnerBeforeChars: number
   learnerAfterChars: number
@@ -272,7 +277,9 @@ export function authoringPrompt(bundle: string, context: Record<string, unknown>
 export function buildAuthoringPresentation(bundle: string, context: Record<string, unknown>, grounding: string, previousOutput?: string, issue?: string) {
   const contract = claimAuthoringContract(context)
   const learner = serializeModelContext(compactAuthoringContext(context, Boolean(previousOutput)))
-  const presentedBundle = compactAuthoringBundle(bundle)
+  const stageMode: AuthoringBundleCandidateMode = previousOutput ? 'repair' : 'author'
+  const stageBundle = buildStageAwareAuthoringBundleCandidate(bundle, stageMode)
+  const presentedBundle = compactAuthoringBundle(stageBundle.content)
   const retry = previousOutput
     ? `This is a surgical repair round. Repair only the listed failures and dependent answer/tracking fragments while preserving valid content, stable question IDs, mappings, and metadata.inputFingerprint byte-for-byte. Failures: ${issue}\nPREVIOUS PACKAGE:\n${previousOutput}`
     : 'Author the claimed package. If retryContext exists, preserve the previous valid package and surgically repair only its deterministic findings.'
@@ -289,7 +296,15 @@ export function buildAuthoringPresentation(bundle: string, context: Record<strin
   return { prompt, diagnostics: {
     measurement: 'model-input-presentation',
     scope: 'chars are UTF-16 code units; bytes are UTF-8; not provider tokens or teaching-quality evidence',
-    sourceBundle: measureContextText(bundle), presentedBundle: measureContextText(presentedBundle),
+    sourceBundle: measureContextText(bundle),
+    stageBundle: {
+      mode: stageMode,
+      sourceSha256: stageBundle.sourceSha256,
+      candidateSha256: stageBundle.candidateSha256,
+      omitted: stageBundle.omitted,
+      measurement: measureContextText(stageBundle.content),
+    },
+    presentedBundle: measureContextText(presentedBundle),
     learner: { before: learner.before, after: learner.after, references: learner.references },
     grounding: measureContextText(grounding), candidate: measureContextText(previousOutput ?? ''),
     findings: measureContextText(issue ?? ''), prompt: measureContextText(prompt),
@@ -582,6 +597,10 @@ async function authorOne(
     contextPresentations.push({
       claimBundleSha256: measureContextText(rawBundle).sha256,
       sourceBundleSha256: presentation.diagnostics.sourceBundle.sha256,
+      stageBundleSha256: presentation.diagnostics.stageBundle.candidateSha256,
+      presentedBundleSha256: presentation.diagnostics.presentedBundle.sha256,
+      stageMode: presentation.diagnostics.stageBundle.mode,
+      omittedStageHeadings: presentation.diagnostics.stageBundle.omitted.map(({ heading }) => heading),
       promptSha256: presentation.diagnostics.prompt.sha256,
       learnerBeforeChars: presentation.diagnostics.learner.before.chars,
       learnerAfterChars: presentation.diagnostics.learner.after.chars,

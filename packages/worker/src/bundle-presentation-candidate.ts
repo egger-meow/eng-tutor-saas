@@ -33,7 +33,7 @@ function uniqueHeadingOffset(bundle: string, heading: string): number {
 }
 
 /**
- * Offline Task 3 candidate only. It never rewrites the immutable compiled bundle.
+ * Runtime model-input view. It never rewrites the immutable compiled bundle.
  * Kept sections remain byte-for-byte identical and parsing fails closed.
  */
 export function buildStageAwareAuthoringBundleCandidate(
