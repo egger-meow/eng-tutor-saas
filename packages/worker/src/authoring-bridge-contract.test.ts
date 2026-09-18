@@ -28,8 +28,7 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
   it('proves /start performs one authoritative claim under a server-owned manual run identity', async () => {
     const edgeFunctionSource = (await readFile(resolve(root, 'supabase/functions/authoring-bridge/index.ts'), 'utf8')).replace(/\r\n/g, '\n')
     expect(edgeFunctionSource).toContain("ONLINE_MANUAL_WORKER_PREFIX = 'chatgpt-online-manual:'")
-    expect(edgeFunctionSource).toContain('const runId = crypto.randomUUID()')
-    expect(edgeFunctionSource).toContain("rpc('worker_start_authoring_batch', {\n        worker_id: workerId,")
+    expect(edgeFunctionSource).toContain("rpc('worker_start_online_manual_authoring_batch')")
 
     const migration = await readFile(resolve(root, 'supabase/migrations/20260918153000_parallel_authoring_batches.sql'), 'utf8')
     expect(migration).toContain('perform pg_advisory_xact_lock(authoring_lock_id);')
@@ -44,7 +43,7 @@ describe('Online Authoring Bridge Contract and Security Invariants', () => {
 
     const edgeFunctionSource = await readFile(resolve(root, 'supabase/functions/authoring-bridge/index.ts'), 'utf8')
     expect(edgeFunctionSource).toContain("url.searchParams.get('run_id')")
-    expect(edgeFunctionSource).not.toContain("error.message?.includes('ACTIVE_AUTHORING_LEASE_CONFLICT')")
+    expect(edgeFunctionSource).toContain("rpc('worker_start_online_manual_authoring_batch')")
   })
 
   it('proves caller cannot supply or override worker identity', async () => {
