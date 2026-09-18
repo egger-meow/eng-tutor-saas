@@ -600,11 +600,13 @@ export async function completeCurriculumJob(input: CompleteCurriculumInput): Pro
       completionArgs.rejection_message = input.qualityOverride.rejectionMessage
     }
     const materialId = unwrap(await input.client.rpc(completionRpc, completionArgs), 'complete curriculum generation job') as string
-    try {
-      unwrap(await input.client.rpc('worker_record_curriculum_observations', { material_id: materialId, worker_id: input.workerId, canonical_source: pkg }), 'record curriculum observations')
-    } catch (observationError) {
-      const message = observationError instanceof Error ? observationError.message : 'Unknown observation error'
-      console.warn(`Curriculum observations were not recorded for ${materialId}: ${message}`)
+    if (!input.context.replacementContext) {
+      try {
+        unwrap(await input.client.rpc('worker_record_curriculum_observations', { material_id: materialId, worker_id: input.workerId, canonical_source: pkg }), 'record curriculum observations')
+      } catch (observationError) {
+        const message = observationError instanceof Error ? observationError.message : 'Unknown observation error'
+        console.warn(`Curriculum observations were not recorded for ${materialId}: ${message}`)
+      }
     }
     return materialId
   } catch (error) {
