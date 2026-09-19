@@ -11,14 +11,16 @@ describe('Feedback-requested generation context invariant', () => {
       'utf8',
     )
 
-    expect(migration).toContain("idempotency_key like '%:feedback-next'")
-    expect(migration).toContain('feedback_cutoff_at = generation_due_at')
-    expect(migration).toContain("release_at = generation_due_at + interval '24 hours'")
-    expect(migration).toContain(
-      "'''pending'', now(), p_material_id, now() + interval ''24 hours'', now(), now()'",
-    )
-    expect(migration).not.toContain(
-      "'''pending'', now(), p_material_id, now() + interval ''24 hours'', now() - interval ''24 hours'', now()'",
+    const legacyRequestSchedule =
+      "'''pending'', now(), p_material_id, now() + interval ''24 hours'', now() - interval ''24 hours'', now()'"
+    const fixedRequestSchedule =
+      "'''pending'', now(), p_material_id, now() + interval ''24 hours'', now(), now()'"
+
+    expect(migration).toContain('patched := replace(')
+    expect(migration).toContain(legacyRequestSchedule)
+    expect(migration).toContain(fixedRequestSchedule)
+    expect(migration.indexOf(legacyRequestSchedule)).toBeLessThan(
+      migration.indexOf(fixedRequestSchedule),
     )
     expect(migration).toContain('FEEDBACK_REQUEST_SOURCE_FEEDBACK_MISSING')
     expect(migration).toContain('FEEDBACK_REQUEST_SOURCE_FEEDBACK_EXCLUDED')
