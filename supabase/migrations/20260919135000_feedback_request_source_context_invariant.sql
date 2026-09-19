@@ -5,22 +5,6 @@
 alter table public.generation_jobs
 drop constraint generation_jobs_schedule_order_check;
 
-alter table public.generation_jobs
-add constraint generation_jobs_schedule_order_check
-check (
-  (
-    idempotency_key like '%:feedback-next'
-    and feedback_cutoff_at = generation_due_at
-    and release_at = generation_due_at + interval '24 hours'
-  )
-  or
-  (
-    idempotency_key not like '%:feedback-next'
-    and feedback_cutoff_at = release_at - interval '48 hours'
-    and generation_due_at = release_at - interval '24 hours'
-  )
-);
-
 do $migration$
 declare
   definition text;
@@ -125,6 +109,22 @@ where request.generation_job_id = job.id
     from private_generation.curriculum_submissions as submission
     where submission.job_id = job.id
   );
+
+alter table public.generation_jobs
+add constraint generation_jobs_schedule_order_check
+check (
+  (
+    idempotency_key like '%:feedback-next'
+    and feedback_cutoff_at = generation_due_at
+    and release_at = generation_due_at + interval '24 hours'
+  )
+  or
+  (
+    idempotency_key not like '%:feedback-next'
+    and feedback_cutoff_at = release_at - interval '48 hours'
+    and generation_due_at = release_at - interval '24 hours'
+  )
+);
 
 do $verify$
 begin
