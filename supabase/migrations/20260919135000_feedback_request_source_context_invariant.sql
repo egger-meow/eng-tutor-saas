@@ -1,6 +1,25 @@
 -- Ensure feedback-requested follow-up jobs can never exclude the feedback that created them.
--- Legacy cadence jobs keep their historical cutoff semantics; the request-driven lane snapshots
--- the source feedback at the request transaction time.
+-- Legacy cadence jobs keep their historical 48h/24h offsets. Request-driven jobs use an
+-- immediate feedback snapshot/due time and a +24h parent-visible release target.
+
+alter table public.generation_jobs
+drop constraint generation_jobs_schedule_order_check;
+
+alter table public.generation_jobs
+add constraint generation_jobs_schedule_order_check
+check (
+  (
+    idempotency_key like '%:feedback-next'
+    and feedback_cutoff_at = generation_due_at
+    and release_at = generation_due_at + interval '24 hours'
+  )
+  or
+  (
+    idempotency_key not like '%:feedback-next'
+    and feedback_cutoff_at = release_at - interval '48 hours'
+    and generation_due_at = release_at - interval '24 hours'
+  )
+);
 
 do $migration$
 declare
