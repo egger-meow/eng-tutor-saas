@@ -203,12 +203,15 @@ Secondary messages:
 
 ---
 
-# 8. Paper-First Philosophy
+# 8. Web-Primary Interactive Learning with Printable Paper Preserved
 
-The child should not be required to spend the entire learning session inside a website or app.
+The web interface is the child's primary reading and interactive answering surface, while paper remains fully preserved as a printable option.
 
-Digital systems should perform the tasks where software is strongest:
+Digital systems perform tasks where software is strongest:
 
+* interactive reading and comfortable on-screen self-study;
+* multi-device autosaved answer drafts;
+* accessible vocabulary pronunciation (TTS);
 * remembering;
 * analyzing;
 * adapting;
@@ -216,25 +219,19 @@ Digital systems should perform the tasks where software is strongest:
 * tracking;
 * organizing.
 
-The learning session should primarily involve:
+The printed medium remains fully supported for families who prefer physical worksheets:
 
-* printed paper;
-* a pen or pencil;
-* reading;
-* writing;
-* thinking;
-* marking mistakes;
-* taking notes.
+* home-printable A4 Student and Parent Answer PDFs;
+* clear typography legible in grayscale;
+* generous writing spaces for handwritten notes and mistakes.
 
 Preferred product philosophy:
 
-> **科技負責個人化，不負責讓孩子多看一個螢幕。**
-
-This is not a claim that all online learning is bad.
+> **網頁是學生主要閱讀及作答介面，紙本保留完整可列印。**
 
 The principle is:
 
-> digital where useful, paper where useful.
+> web-primary interactive engagement where convenient and effective, with deterministic printable paper always preserved.
 
 ---
 
@@ -266,9 +263,9 @@ Parent feedback is not merely an analytics survey.
 
 It directly becomes future generation context.
 
-## 9.4 Paper-First Learning
+## 9.4 Interactive Web Learning with Paper Preserved
 
-The child's main learning surface is paper.
+The web is the primary interactive reading and answering surface, with printable paper preserved for physical study.
 
 ## 9.5 CAP-Oriented Long-Term Direction
 
@@ -1968,11 +1965,19 @@ The Parent Answer PDF contains:
 
 ---
 
-# 83. Parent Answer PDF Is Not the Student PDF
+# 83. Parent Answer PDF and Answer Security
 
-Answers must not appear inside the normal Student PDF.
+Answers must not appear inside the normal Student PDF or the student web reading projection.
 
-The parent should separately access the answer file.
+The parent should separately access the answer file or parent summary.
+
+Student-visible data delivered to client browsers MUST NOT contain:
+* `answers`;
+* parent answer keys or parent explanations;
+* internal generation evidence (`grounding`, `qualityEvidence`, `trackingDelta`, `learnerSnapshot`, `learningPlan`);
+* inappropriate PII.
+
+Direct querying of complete `materials.canonical_source` by client applications in the browser is strictly forbidden. Student viewing must use a server-authorized, projection-scoped API or RPC (`get_student_material_projection`) that enforces ownership, release status, and minimum privilege.
 
 ---
 
@@ -2022,17 +2027,21 @@ Avoid design that looks good only on a screen.
 
 # 86. Canonical Material Source
 
-The system should maintain a canonical structured source for every generated packet before PDF rendering.
+The system maintains a canonical structured JSON document (`materials.canonical_source`) as the immutable master artifact for every generated packet.
 
-Possible forms:
+This canonical JSON contains:
+* complete authoritative lesson content;
+* parent answer keys and explanations;
+* generation metadata and curriculum targets;
+* audit trails and quality evidence.
 
-* structured JSON;
-* validated Markdown;
-* equivalent document model.
+Both deterministic PDF rendering and server-authorized student web reading projections are derived from this single source of truth.
 
-PDF should be a deterministic rendering step from that source.
-
-The exact format is an implementation decision.
+### Compatibility Principle for Existing Materials and In-Flight Submissions:
+Historical packets and in-flight submissions remain completely immutable:
+1. Past packets authored under legacy schemas (V2.0 through V2.5) are preserved in their exact historical form.
+2. The server-authorized projection layer safely adapts past schema variants into clean student projections without mutating historical database rows.
+3. No historical migration or retrofitting of `canonical_source` is permitted.
 
 ---
 
@@ -2040,7 +2049,9 @@ The exact format is an implementation decision.
 
 After a weekly packet is released:
 
-> edits to profile or feedback must not mutate that historical packet.
+> edits to profile, feedback, or student answer drafts must not mutate that historical canonical packet.
+
+Student interactive answers are stored in a dedicated, isolated draft table (`student_material_drafts`) keyed by stable question IDs and material IDs, keeping the canonical material source completely pristine and immutable.
 
 If regeneration is required:
 
@@ -3279,6 +3290,8 @@ Ownership protections apply to:
 * context notes;
 * feedback;
 * materials;
+* student material drafts (`student_material_drafts`);
+* student material projections (`get_student_material_projection` RPC);
 * subscriptions;
 * signed file access.
 

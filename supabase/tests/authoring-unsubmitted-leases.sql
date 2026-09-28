@@ -62,18 +62,10 @@ begin
     raise exception 'Expected claimedCount = 1 before submission, got: %', recovery_res;
   end if;
 
-  -- worker-test-B attempting to start must hit ACTIVE_AUTHORING_LEASE_CONFLICT
-  begin
-    perform public.worker_start_authoring_batch('worker-test-B');
-  exception when others then
-    if sqlerrm like '%ACTIVE_AUTHORING_LEASE_CONFLICT%' then
-      start_conflict_caught := true;
-    else
-      raise exception 'Expected ACTIVE_AUTHORING_LEASE_CONFLICT, got: %', sqlerrm;
-    end if;
-  end;
-  if not start_conflict_caught then
-    raise exception 'Expected ACTIVE_AUTHORING_LEASE_CONFLICT was not thrown before submission';
+  -- worker-test-B starting a batch does not conflict under parallel authoring, but claims 0 jobs
+  start_res := public.worker_start_authoring_batch('worker-test-B');
+  if (start_res->>'claimedCount')::integer <> 0 then
+    raise exception 'Expected claimedCount = 0 for worker-test-B, got: %', start_res;
   end if;
 
   -- -------------------------------------------------------------------------
@@ -118,19 +110,10 @@ begin
     raise exception 'Expected 1 active lease on attempt 2 before submission, got: %', leases_res;
   end if;
 
-  -- worker-test-B must conflict again
-  start_conflict_caught := false;
-  begin
-    perform public.worker_start_authoring_batch('worker-test-B');
-  exception when others then
-    if sqlerrm like '%ACTIVE_AUTHORING_LEASE_CONFLICT%' then
-      start_conflict_caught := true;
-    else
-      raise exception 'Expected ACTIVE_AUTHORING_LEASE_CONFLICT on retry, got: %', sqlerrm;
-    end if;
-  end;
-  if not start_conflict_caught then
-    raise exception 'Expected ACTIVE_AUTHORING_LEASE_CONFLICT was not thrown on attempt 2';
+  -- worker-test-B must not conflict on attempt 2, claiming 0 jobs
+  start_res := public.worker_start_authoring_batch('worker-test-B');
+  if (start_res->>'claimedCount')::integer <> 0 then
+    raise exception 'Expected claimedCount = 0 for worker-test-B on retry, got: %', start_res;
   end if;
 
   -- Now submit attempt 2

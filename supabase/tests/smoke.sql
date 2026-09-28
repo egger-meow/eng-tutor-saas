@@ -305,15 +305,6 @@ begin
     'migration-test/answer.pdf'
   );
 
-  insert into public.material_generation_requests (
-    child_id, source_material_id, service_period_start, service_period_end
-  ) values (
-    '00000000-0000-0000-0000-000000000002',
-    '00000000-0000-0000-0000-000000000003',
-    date_trunc('month', now()),
-    date_trunc('month', now()) + interval '1 month'
-  );
-
   insert into public.generation_jobs (
     child_id, material_week, rule_version, idempotency_key, scheduled_for,
     source_material_id, release_at, feedback_cutoff_at, generation_due_at
@@ -470,14 +461,6 @@ begin
     '{}'::jsonb,
     'materials/test/week-1.pdf',
     'materials/test/week-1-answers.pdf'
-  );
-
-  insert into public.material_generation_requests (
-    child_id, source_material_id, service_period_start, service_period_end
-  ) values (
-    '00000000-0000-0000-0000-000000000002',
-    '00000000-0000-0000-0000-000000000099',
-    date_trunc('month', now()), date_trunc('month', now()) + interval '1 month'
   );
 
   insert into public.generation_jobs (
@@ -786,13 +769,6 @@ begin
   end if;
   perform public.worker_finish_curriculum_submission(
     bridge_job_id, 2, 'smoke-finisher-2', 'completed', null, null, null
-  );
-
-  insert into public.material_generation_requests (
-    child_id, source_material_id, service_period_start, service_period_end
-  ) values (
-    bridge_child_id, completed_material_id,
-    date_trunc('month', now()), date_trunc('month', now()) + interval '1 month'
   );
 
   insert into public.generation_jobs (
@@ -2242,7 +2218,8 @@ begin
   )
   insert into public.generation_jobs (
     child_id, material_week, rule_version, idempotency_key, status,
-    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at
+    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at,
+    completed_at
   )
   select
     inserted_materials.child_id,
@@ -2254,7 +2231,8 @@ begin
     inserted_materials.id,
     now() - interval '1 day',
     now() - interval '3 days',
-    now() - interval '2 days'
+    now() - interval '2 days',
+    now() - interval '1 day'
   from inserted_materials;
 
   with future_material as (
@@ -2273,7 +2251,8 @@ begin
   )
   insert into public.generation_jobs (
     child_id, material_week, rule_version, idempotency_key, status,
-    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at
+    scheduled_for, material_id, release_at, feedback_cutoff_at, generation_due_at,
+    completed_at
   )
   select
     future_material.child_id,
@@ -2285,7 +2264,8 @@ begin
     future_material.id,
     now() + interval '7 days',
     now() + interval '5 days',
-    now() + interval '6 days'
+    now() + interval '6 days',
+    now()
   from future_material;
 
   if (
@@ -2335,6 +2315,12 @@ begin
 
   -- 16. Release-time material email delivery is independent, idempotent, and scoped.
   update auth.users set email = 'login-parent@example.com' where id = '00000000-0000-0000-0000-000000000001';
+  insert into public.material_email_deliveries (material_id, parent_id, child_id, recipient_email, status, sent_at)
+  select material.id, child.parent_id, child.id, 'login-parent@example.com', 'sent', now()
+  from public.materials material
+  join public.children child on child.id = material.child_id
+  where material.child_id = '00000000-0000-0000-0000-000000000099'
+  on conflict (material_id) do update set status = 'sent', sent_at = now();
   with released_material as (
     insert into public.materials (child_id, material_week, revision, rule_version, input_snapshot, student_pdf_path, parent_answer_pdf_path)
     values ('00000000-0000-0000-0000-000000000099', current_date + 100, 1, 'email-test', '{}', 'email-test/student.pdf', 'email-test/parent.pdf')

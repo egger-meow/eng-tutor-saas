@@ -56,7 +56,7 @@
 5. **Primary Target Market**
 6. **Academic Destination**
 7. **Product Positioning**
-8. **Paper-First Philosophy**
+8. **Web-Primary Interactive Learning with Printable Paper Preserved**
 9. **Core Product Advantages**
 10. **Founder-Led Brand**
 11. **Founder Profile**
@@ -131,7 +131,7 @@
 80. **Homework**
 81. **Vocabulary Homework**
 82. **Parent Answer PDF**
-83. **Parent Answer PDF Is Not the Student PDF**
+83. **Parent Answer PDF and Answer Security**
 84. **Parent Weekly Summary**
 85. **PDF Design Principles**
 86. **Canonical Material Source**
