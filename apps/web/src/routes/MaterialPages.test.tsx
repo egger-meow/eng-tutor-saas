@@ -291,24 +291,31 @@ describe('weekly material inline preview and page states', () => {
   })
 
   it('10. MaterialActions does not expose preview link when material is unreleased', () => {
-    const futureMaterial = {
-      id: 'mat-future-456',
-      child_id: 'child-1',
-      material_week: '2026-09-20',
-      revision: 1,
-      student_pdf_path: 'child-1/mat-future-456/student.pdf',
-      parent_answer_pdf_path: 'child-1/mat-future-456/answer.pdf',
-      generation_summary: {},
-      created_at: '2026-09-13T00:00:00Z',
-      release_at: '2026-09-20T00:00:00Z',
-      feedback: null,
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-19T00:00:00Z'))
+
+    try {
+      const futureMaterial = {
+        id: 'mat-future-456',
+        child_id: 'child-1',
+        material_week: '2026-09-20',
+        revision: 1,
+        student_pdf_path: 'child-1/mat-future-456/student.pdf',
+        parent_answer_pdf_path: 'child-1/mat-future-456/answer.pdf',
+        generation_summary: {},
+        created_at: '2026-09-13T00:00:00Z',
+        release_at: '2026-09-20T00:00:00Z',
+        feedback: null,
+      }
+
+      const html = renderToStaticMarkup(
+        <MaterialActions material={futureMaterial} childName="Jonathan" showPreviewLink={true} />
+      )
+
+      expect(html).not.toContain('線上預覽教材')
+      expect(html).toContain('尚未開放下載')
+    } finally {
+      vi.useRealTimers()
     }
-
-    const html = renderToStaticMarkup(
-      <MaterialActions material={futureMaterial} childName="Jonathan" showPreviewLink={true} />
-    )
-
-    expect(html).not.toContain('線上預覽教材')
-    expect(html).toContain('尚未開放下載')
   })
 })
