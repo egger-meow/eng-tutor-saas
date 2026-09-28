@@ -318,4 +318,54 @@ describe('weekly material inline preview and page states', () => {
       vi.useRealTimers()
     }
   })
+
+  it('11. when projection is provided, AuthenticatedMaterialContent defaults to interactive PaperReader', () => {
+    const mockProjection = {
+      id: 'mat-interactive-1',
+      child_id: 'child-1',
+      child_name: 'Jonathan',
+      material_week: '2026-09-28',
+      week_number: 4,
+      revision: 1,
+      title: 'Sound and Vibration in Video Games',
+      student_pdf_path: 'child-1/mat-interactive-1/student.pdf',
+      release_at: '2026-09-28T00:00:00Z',
+      student_lesson: {
+        vocabulary: [{ id: 'v1', word: 'vibration', partOfSpeech: 'n.', meaningZh: '振動' }],
+        reading: { title: 'How Games Place Sound' },
+      },
+    }
+
+    const html = renderToStaticMarkup(
+      <AuthenticatedMaterialContent
+        state={{
+          status: 'ready',
+          material: {
+            id: 'mat-interactive-1',
+            child_id: 'child-1',
+            child_name: 'Jonathan',
+            material_week: '2026-09-28',
+            week_number: 4,
+            revision: 1,
+            student_pdf_path: 'child-1/mat-interactive-1/student.pdf',
+            parent_answer_pdf_path: 'child-1/mat-interactive-1/answer.pdf',
+            generation_summary: {},
+            created_at: '2026-09-28T00:00:00Z',
+            feedback: null,
+          },
+          studentPdfUrl: 'https://example.com/student.pdf',
+          projection: mockProjection,
+        }}
+        onRetry={vi.fn()}
+      />
+    )
+
+    // Interactive paper reader is rendered as primary view
+    expect(html).toContain('paper-reader-container')
+    expect(html).toContain('How Games Place Sound')
+    expect(html).toContain('vibration')
+    expect(html).toContain('切換列印版 PDF')
+    expect(html).toContain('下載紙本 PDF')
+  })
 })
+

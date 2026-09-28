@@ -4,11 +4,20 @@ import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { MaterialActions } from '../components/materials/MaterialActions'
 import { MaterialPreview } from '../components/materials/MaterialPreview'
+import { PaperReader } from '../components/materials/renderer/PaperReader'
 import { PageTransition } from '../components/motion/PageTransition'
 import { getSupabaseClient } from '../lib/supabase'
 import { loadAuthenticatedMaterial, type MaterialLoadState } from '../lib/authenticated-material-loader'
 
-export function AuthenticatedMaterialContent({ state, onRetry }: { state: MaterialLoadState; onRetry: () => void }) {
+export function AuthenticatedMaterialContent({
+  state,
+  onRetry,
+}: {
+  state: MaterialLoadState
+  onRetry: () => void
+}) {
+  const [viewMode, setViewMode] = useState<'interactive' | 'pdf'>('interactive')
+
   if (state.status === 'loading') {
     return (
       <div className="loading-state scoped-material-loading-state" role="status">
@@ -42,6 +51,21 @@ export function AuthenticatedMaterialContent({ state, onRetry }: { state: Materi
       </section>
     )
   }
+
+  // 1. Interactive Online Reader Mode (Student primary interface)
+  if (state.projection && viewMode === 'interactive') {
+    return (
+      <div>
+        <PaperReader
+          projection={state.projection}
+          studentPdfUrl={state.studentPdfUrl}
+          onSwitchToPdf={() => setViewMode('pdf')}
+        />
+      </div>
+    )
+  }
+
+  // 2. Printable Paper PDF Mode (Preserved printable paper)
   const weekNumber = state.material.week_number ?? (typeof state.material.generation_summary?.weekNumber === 'number' ? state.material.generation_summary.weekNumber : null)
   const headerOverline = weekNumber
     ? `${state.material.child_name} · Week ${weekNumber}`
@@ -50,8 +74,22 @@ export function AuthenticatedMaterialContent({ state, onRetry }: { state: Materi
   return (
     <section className="surface-card scoped-material-card">
       <div className="scoped-material-header">
-        <p className="overline">{headerOverline}</p>
-        <h1>本週教材</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <p className="overline">{headerOverline}</p>
+            <h1>本週教材</h1>
+          </div>
+          {state.projection && (
+            <button
+              type="button"
+              className="button button-primary"
+              style={{ fontSize: '0.875rem' }}
+              onClick={() => setViewMode('interactive')}
+            >
+              📖 切換線上互動學習
+            </button>
+          )}
+        </div>
         <p className="scoped-material-subtitle">每週一份專屬英文教材已備妥，可直接在下方預覽學生教材，或下載列印。</p>
       </div>
       <MaterialPreview

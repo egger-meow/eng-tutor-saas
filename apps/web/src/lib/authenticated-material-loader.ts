@@ -1,4 +1,5 @@
 import type { Material } from './materials'
+import type { StudentMaterialProjection } from '../types/student-material'
 import { getSupabaseClient } from './supabase'
 
 export type OwnedMaterial = Material & { child_name: string }
@@ -6,11 +7,20 @@ export type MaterialLoadState =
   | { status: 'loading' }
   | { status: 'not-found' }
   | { status: 'error' }
-  | { status: 'ready'; material: OwnedMaterial; studentPdfUrl: string | null; previewError?: boolean }
+  | {
+      status: 'ready'
+      material: OwnedMaterial
+      studentPdfUrl: string | null
+      previewError?: boolean
+      projection?: StudentMaterialProjection | null
+    }
 
 export async function loadAuthenticatedMaterial(materialId: string, userId: string): Promise<MaterialLoadState> {
   try {
-    const { data, error } = await getSupabaseClient().rpc('get_owned_released_material', { p_material_id: materialId }).maybeSingle()
+    const { data, error } = await getSupabaseClient()
+      .rpc('get_owned_released_material', { p_material_id: materialId })
+      .maybeSingle()
+
     if (error) {
       console.error('Failed to load authenticated material', {
         materialId,
@@ -46,11 +56,25 @@ export async function loadAuthenticatedMaterial(materialId: string, userId: stri
       previewError = true
     }
 
+    let projection: StudentMaterialProjection | null = null
+    try {
+      const { data: projData, error: projError } = await getSupabaseClient()
+        .rpc('get_student_material_projection', { p_material_id: materialId })
+        .maybeSingle()
+
+      if (!projError && projData && typeof projData === 'object' && 'student_lesson' in projData && projData.student_lesson) {
+        projection = projData as StudentMaterialProjection
+      }
+    } catch {
+      // Graceful degradation when projection RPC is unavailable
+    }
+
     return {
       status: 'ready',
       material,
       studentPdfUrl,
       previewError,
+      projection,
     }
   } catch (error) {
     console.error('Authenticated material request failed', { materialId, userId, error })
