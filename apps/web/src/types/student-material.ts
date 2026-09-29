@@ -162,7 +162,7 @@ export interface StudentLesson {
 }
 
 export interface StudentMaterialProjection {
-  id: string
+  material_id: string
   child_id: string
   child_name: string
   material_week: string

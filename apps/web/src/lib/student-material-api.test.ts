@@ -25,7 +25,7 @@ describe('student-material-api client tests', () => {
 
   it('1. fetchStudentMaterialProjection successfully calls RPC and returns projection', async () => {
     const mockProjection = {
-      id: 'mat-1',
+      material_id: 'mat-1',
       child_id: 'child-1',
       child_name: 'Jonathan',
       material_week: '2026-09-28',
@@ -86,17 +86,15 @@ describe('student-material-api client tests', () => {
 
   it('4. saveMaterialDraft calls RPC and returns save or conflict status', async () => {
     const mockSaveResult = {
-      saved: true,
+      success: true,
       version: 2,
       updated_at: '2026-09-29T10:15:00Z',
       conflict: false,
-      server_answers: null,
-      server_self_check: null,
+      answers: null,
+      self_check: null,
     }
 
-    rpcMock.mockReturnValue({
-      single: vi.fn().mockResolvedValue({ data: mockSaveResult, error: null }),
-    })
+    rpcMock.mockResolvedValue({ data: mockSaveResult, error: null })
 
     const result = await saveMaterialDraft(
       'mat-1',
@@ -106,7 +104,14 @@ describe('student-material-api client tests', () => {
     )
 
     expect(result.error).toBeNull()
-    expect(result.data).toEqual(mockSaveResult)
+    expect(result.data).toEqual({
+      saved: true,
+      version: 2,
+      updated_at: '2026-09-29T10:15:00Z',
+      conflict: false,
+      server_answers: null,
+      server_self_check: null,
+    })
     expect(rpcMock).toHaveBeenCalledWith('save_material_draft', {
       p_material_id: 'mat-1',
       p_answers: { 'q-1': 'A' },

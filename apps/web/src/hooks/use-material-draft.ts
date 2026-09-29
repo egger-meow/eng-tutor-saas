@@ -59,6 +59,9 @@ export function useMaterialDraft({
   statusRef.current = status
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const saveRunningRef = useRef(false)
+  const saveQueuedRef = useRef(false)
+  const editRevisionRef = useRef(0)
 
   // 1. Initial Load of Draft
   useEffect(() => {
@@ -76,6 +79,9 @@ export function useMaterialDraft({
           setAnswers(data.answers ?? {})
           setSelfCheck(data.self_check ?? [])
           setVersion(data.version ?? 0)
+          answersRef.current = data.answers ?? {}
+          selfCheckRef.current = data.self_check ?? []
+          versionRef.current = data.version ?? 0
           setLastSavedAt(data.updated_at)
           setStatus('saved')
         }
@@ -105,12 +111,20 @@ export function useMaterialDraft({
       const currentSelfCheck = overrideSelfCheck ?? selfCheckRef.current
       const currentVersion = overrideVersion ?? versionRef.current
 
+      if (saveRunningRef.current) {
+        saveQueuedRef.current = true
+        return null
+      }
+
       // Check online status
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setStatus('error')
         return null
       }
 
+      saveRunningRef.current = true
+      const savedRevision = editRevisionRef.current
+      let conflicted = false
       setStatus('saving')
 
       try {
@@ -128,6 +142,8 @@ export function useMaterialDraft({
         }
 
         if (data.conflict) {
+          conflicted = true
+          saveQueuedRef.current = false
           setHasConflict(true)
           setServerConflictData({
             answers: data.server_answers ?? {},
@@ -139,16 +155,28 @@ export function useMaterialDraft({
         }
 
         // Successfully saved
+        versionRef.current = data.version
         setVersion(data.version)
         setLastSavedAt(data.updated_at)
         setHasConflict(false)
         setServerConflictData(null)
-        setStatus('saved')
+        if (editRevisionRef.current !== savedRevision) {
+          saveQueuedRef.current = true
+          setStatus('unsaved')
+        } else {
+          setStatus('saved')
+        }
         return data
       } catch (caught) {
         console.error('Save draft unexpected error', caught)
         setStatus('error')
         return null
+      } finally {
+        saveRunningRef.current = false
+        if (saveQueuedRef.current && !conflicted) {
+          saveQueuedRef.current = false
+          queueMicrotask(() => { void performSave() })
+        }
       }
     },
     [materialId],
@@ -157,6 +185,7 @@ export function useMaterialDraft({
   // 3. Update answer with debouncing
   const updateAnswer = useCallback(
     (key: string, value: string, immediate = false) => {
+      editRevisionRef.current += 1
       setAnswers((prev) => {
         const next = { ...prev, [key]: value }
         answersRef.current = next
@@ -184,6 +213,7 @@ export function useMaterialDraft({
   // 4. Toggle self-check
   const toggleSelfCheck = useCallback(
     (itemText: string) => {
+      editRevisionRef.current += 1
       setSelfCheck((prev) => {
         const next = prev.includes(itemText)
           ? prev.filter((t) => t !== itemText)
@@ -216,15 +246,20 @@ export function useMaterialDraft({
       if (!serverConflictData) return
 
       if (strategy === 'load-server') {
+        saveQueuedRef.current = false
         setAnswers(serverConflictData.answers)
         setSelfCheck(serverConflictData.selfCheck)
         setVersion(serverConflictData.version)
+        answersRef.current = serverConflictData.answers
+        selfCheckRef.current = serverConflictData.selfCheck
+        versionRef.current = serverConflictData.version
         setHasConflict(false)
         setServerConflictData(null)
         setStatus('saved')
       } else {
         // 'keep-mine': force save with server version as base version
         const nextVersion = serverConflictData.version
+        versionRef.current = nextVersion
         setVersion(nextVersion)
         setHasConflict(false)
         setServerConflictData(null)

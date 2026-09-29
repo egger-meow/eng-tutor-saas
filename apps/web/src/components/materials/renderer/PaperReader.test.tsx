@@ -26,7 +26,7 @@ vi.mock('../../../lib/supabase', () => ({
 
 describe('PaperReader Component Suite', () => {
   const sampleProjection: StudentMaterialProjection = {
-    id: 'mat-test-1',
+    material_id: 'mat-test-1',
     child_id: 'child-test-1',
     child_name: 'Jonathan',
     material_week: '2026-09-28',

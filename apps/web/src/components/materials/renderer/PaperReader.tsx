@@ -26,11 +26,12 @@ export function PaperReader({
     status,
     lastSavedAt,
     hasConflict,
+    isInitialLoading,
     updateAnswer,
     toggleSelfCheck,
     retrySave,
     resolveConflict,
-  } = useMaterialDraft({ materialId: projection.id })
+  } = useMaterialDraft({ materialId: projection.material_id })
 
   const [activeChapter, setActiveChapter] = useState<string>('opening')
 
@@ -53,7 +54,8 @@ export function PaperReader({
     : null
 
   return (
-    <div className="paper-reader-container">
+    <div className="paper-reader-container" inert={isInitialLoading} aria-busy={isInitialLoading}>
+      {isInitialLoading && <p role="status">正在載入作答草稿…</p>}
       {/* Sticky Top Toolbar with Save Status & Quick Navigation */}
       <header className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
         <div className="paper-reader-toolbar-left">

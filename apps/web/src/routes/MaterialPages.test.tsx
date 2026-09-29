@@ -321,7 +321,7 @@ describe('weekly material inline preview and page states', () => {
 
   it('11. when projection is provided, AuthenticatedMaterialContent defaults to interactive PaperReader', () => {
     const mockProjection = {
-      id: 'mat-interactive-1',
+      material_id: 'mat-interactive-1',
       child_id: 'child-1',
       child_name: 'Jonathan',
       material_week: '2026-09-28',

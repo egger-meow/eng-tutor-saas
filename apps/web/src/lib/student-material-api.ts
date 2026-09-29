@@ -86,32 +86,31 @@ export async function saveMaterialDraft(
         p_self_check: selfCheck,
         p_client_version: clientVersion,
       })
-      .single()
 
     if (error) {
       return { data: null, error: new Error(error.message) }
     }
 
     const row = data as {
-      saved: boolean
+      success: boolean
       version: number
       updated_at: string
       conflict: boolean
-      server_answers: unknown
-      server_self_check: unknown
+      answers: unknown
+      self_check: unknown
     }
 
     return {
       data: {
-        saved: row.saved,
+        saved: row.success,
         version: row.version,
         updated_at: row.updated_at,
         conflict: row.conflict,
-        server_answers: (row.server_answers && typeof row.server_answers === 'object'
-          ? row.server_answers
+        server_answers: (row.answers && typeof row.answers === 'object'
+          ? row.answers
           : null) as DraftAnswers | null,
-        server_self_check: (Array.isArray(row.server_self_check)
-          ? row.server_self_check
+        server_self_check: (Array.isArray(row.self_check)
+          ? row.self_check
           : null) as DraftSelfCheck | null,
       },
       error: null,

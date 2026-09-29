@@ -4,6 +4,17 @@
 
 begin;
 
+do $$
+begin
+  if has_column_privilege('authenticated', 'public.materials', 'canonical_source', 'select')
+    or has_column_privilege('authenticated', 'public.materials', 'input_snapshot', 'select')
+    or has_table_privilege('authenticated', 'public.student_material_drafts', 'insert')
+    or has_table_privilege('authenticated', 'public.student_material_drafts', 'update')
+    or has_table_privilege('authenticated', 'public.student_material_drafts', 'delete') then
+    raise exception 'Student projection or draft privileges bypass the scoped RPCs';
+  end if;
+end $$;
+
 -- 1. Setup fixture parents & children
 insert into auth.users (id, email)
 values
@@ -64,7 +75,7 @@ insert into public.materials (
           'id', 'sec-1',
           'titleZh', '精準練習',
           'questions', jsonb_build_array(
-            jsonb_build_object('id', 'q1', 'prompt', 'What did they hear?', 'itemType', 'inference', 'options', jsonb_build_array('A sound', 'Music', 'Silence', 'Nothing'))
+            jsonb_build_object('id', 'q1', 'prompt', 'What did they hear?', 'itemType', 'inference', 'options', jsonb_build_array('A sound', 'Music', 'Silence', 'Nothing'), 'correctAnswer', 'SECRET_NESTED_ANSWER')
           )
         )
       ),
@@ -139,6 +150,7 @@ insert into public.generation_jobs (
 -- ----------------------------------------------------------------------------
 -- Test 1: Parent A successfully reads released material projection
 -- ----------------------------------------------------------------------------
+set local role authenticated;
 set local "request.jwt.claims" = '{"sub": "c1111111-1111-1111-1111-111111111111"}';
 
 do $$
@@ -175,6 +187,9 @@ begin
   end if;
   if (v_rec.student_lesson::text) like '%秘密解答%' then
     raise exception 'LEAK: answer explanation leaked in projection body';
+  end if;
+  if (v_rec.student_lesson::text) like '%SECRET_NESTED_ANSWER%' then
+    raise exception 'LEAK: nested answer leaked in projection body';
   end if;
 end $$;
 
@@ -225,7 +240,7 @@ begin
     'e1111111-1111-1111-1111-111111111111'::uuid,
     '{"q1": "A sound", "open-1": "My reflection"}'::jsonb,
     '["chk-1"]'::jsonb,
-    null
+    0
   );
 
   if not (v_res->>'success')::boolean then
@@ -314,7 +329,7 @@ begin
     'e1111111-1111-1111-1111-111111111111'::uuid,
     '{"q1": "Hacked"}'::jsonb,
     '[]'::jsonb,
-    null
+    0
   );
   raise exception 'Parent B write to Parent A draft should have raised an exception';
 exception
@@ -324,4 +339,5 @@ exception
     end if;
 end $$;
 
+reset role;
 rollback;
