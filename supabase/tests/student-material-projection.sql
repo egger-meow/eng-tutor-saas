@@ -34,6 +34,10 @@ values
   ('d2222222-2222-2222-2222-222222222222', 'c2222222-2222-2222-2222-222222222222', 'Child B', 7, 'grade_7', true)
 on conflict (id) do nothing;
 
+insert into public.subscriptions(child_id, provider, status, current_period_end)
+values('d1111111-1111-1111-1111-111111111111', 'test', 'active', now()+interval '1 month')
+on conflict(child_id) do nothing;
+
 -- 2. Setup fixture materials (one released, one unreleased)
 -- Released material for Child A
 insert into public.materials (
@@ -75,14 +79,21 @@ insert into public.materials (
           'id', 'sec-1',
           'titleZh', '精準練習',
           'questions', jsonb_build_array(
-            jsonb_build_object('id', 'q1', 'prompt', 'What did they hear?', 'itemType', 'inference', 'options', jsonb_build_array('A sound', 'Music', 'Silence', 'Nothing'), 'correctAnswer', 'SECRET_NESTED_ANSWER')
+            jsonb_build_object('id', 'q1', 'prompt', 'What did they hear?', 'itemType', 'inference', 'options', jsonb_build_array('A sound', 'Music', 'Silence', 'Nothing'), 'correctAnswer', 'SECRET_NESTED_ANSWER'),
+            jsonb_build_object('id', 'q2', 'prompt', 'Write a sentence.', 'writingLines', 2),
+            jsonb_build_object('id', 'q3', 'prompt', 'Explain in your own words.', 'writingLines', 2),
+            jsonb_build_object('id', 'q4', 'prompt', 'Choose again.', 'options', jsonb_build_array('First', 'Second')),
+            jsonb_build_object('id', 'q5', 'prompt', 'Fill the table.', 'responseLayout',
+              jsonb_build_object('type','table','rows',jsonb_build_array(jsonb_build_object('cells',
+                jsonb_build_array(jsonb_build_object('responseUnitId','q5-cell'))))))
           )
         )
       ),
       'homework', jsonb_build_object('purposeZh', '延遲複習', 'estimatedMinutes', 15, 'questions', '[]'::jsonb)
     ),
     'answers', jsonb_build_array(
-      jsonb_build_object('questionId', 'q1', 'answer', 'A sound', 'explanationZh', '秘密解答')
+      jsonb_build_object('questionId', 'q1', 'answer', 'A sound', 'explanationZh', '秘密解答'),
+      jsonb_build_object('questionId', 'q4', 'answer', 'A. First', 'explanationZh', '另一個解答')
     ),
     'parentSummary', jsonb_build_object('focusZh', '家長專屬摘要'),
     'grounding', jsonb_build_object('facts', jsonb_build_array('內部事實')),
@@ -238,7 +249,7 @@ declare
 begin
   v_res := public.save_material_draft(
     'e1111111-1111-1111-1111-111111111111'::uuid,
-    '{"q1": "A sound", "open-1": "My reflection"}'::jsonb,
+    '{"q1": "A sound", "q3": "I noticed the sound.", "q4": "B", "q5-cell": "A table answer", "open-1": "My reflection"}'::jsonb,
     '["chk-1"]'::jsonb,
     0
   );
@@ -270,7 +281,7 @@ declare
 begin
   v_res := public.save_material_draft(
     'e1111111-1111-1111-1111-111111111111'::uuid,
-    '{"q1": "A sound", "open-1": "Updated reflection"}'::jsonb,
+    '{"q1": "A sound", "q3": "I noticed the sound.", "q4": "B", "q5-cell": "A table answer", "open-1": "Updated reflection"}'::jsonb,
     '["chk-1", "chk-2"]'::jsonb,
     1
   );
@@ -325,6 +336,9 @@ end $$;
 -- Parent B saving Parent A draft -> exception
 do $$
 begin
+  if public.can_open_parent_answer('e1111111-1111-1111-1111-111111111111'::uuid) then
+    raise exception 'Cross-family parent answer unlocked';
+  end if;
   perform public.save_material_draft(
     'e1111111-1111-1111-1111-111111111111'::uuid,
     '{"q1": "Hacked"}'::jsonb,
@@ -339,5 +353,67 @@ exception
     end if;
 end $$;
 
+-- S2: only the owner can submit; a stale version cannot close the packet.
+do $$
+begin
+  perform public.submit_student_material('e1111111-1111-1111-1111-111111111111'::uuid, 2);
+  raise exception 'Cross-family submission should fail';
+exception when others then
+  if sqlerrm not like '%MATERIAL_NOT_FOUND_OR_FORBIDDEN%' then raise; end if;
+end $$;
+
+set local "request.jwt.claims" = '{"sub": "c1111111-1111-1111-1111-111111111111"}';
+do $$
+declare v_result jsonb; v_repeated jsonb;
+begin
+  if public.can_open_parent_answer('e1111111-1111-1111-1111-111111111111'::uuid) then
+    raise exception 'Answer PDF unlocked before submission';
+  end if;
+  v_result := public.submit_student_material('e1111111-1111-1111-1111-111111111111'::uuid, 1);
+  if v_result->>'conflict' != 'true' then raise exception 'Stale submission version accepted'; end if;
+  v_result := public.submit_student_material('e1111111-1111-1111-1111-111111111111'::uuid, 2);
+  if v_result->'results'->0->>'status' != 'correct'
+    or v_result->'results'->1->>'status' != 'unanswered'
+    or v_result->'results'->2->>'status' != 'open_review'
+    or v_result->'results'->3->>'status' != 'incorrect'
+    or v_result->'results'->4->>'status' != 'open_review' then
+    raise exception 'Incorrect grading or unanswered classification: %', v_result;
+  end if;
+  if not public.can_open_parent_answer('e1111111-1111-1111-1111-111111111111'::uuid) then
+    raise exception 'Answer PDF did not unlock after submission';
+  end if;
+  v_repeated := public.submit_student_material('e1111111-1111-1111-1111-111111111111'::uuid, 2);
+  if v_repeated is distinct from v_result then raise exception 'Repeated submission changed snapshot'; end if;
+  begin
+    perform public.save_material_draft('e1111111-1111-1111-1111-111111111111'::uuid,
+      '{"q1":"Music"}'::jsonb, '[]'::jsonb, 2);
+    raise exception 'Submitted draft was editable';
+  exception when others then
+    if sqlerrm not like '%MATERIAL_ALREADY_SUBMITTED%' then raise; end if;
+  end;
+  if (select count(*) from public.feedback where material_id='e1111111-1111-1111-1111-111111111111'::uuid) <> 0 then
+    raise exception 'Parent feedback was fabricated';
+  end if;
+  v_result := public.request_next_after_student_submission('e1111111-1111-1111-1111-111111111111'::uuid);
+  if v_result->>'requested' != 'true' then raise exception 'Explicit request failed: %',v_result; end if;
+  v_repeated := public.request_next_after_student_submission('e1111111-1111-1111-1111-111111111111'::uuid);
+  if v_repeated->>'alreadyRequested' != 'true' then raise exception 'Repeated request not idempotent: %',v_repeated; end if;
+  if public.get_student_material_submission('e1111111-1111-1111-1111-111111111111'::uuid)->>'next_requested' != 'true' then
+    raise exception 'Reloaded submission omitted the requested state';
+  end if;
+  if not public.save_student_parent_feedback('e1111111-1111-1111-1111-111111111111'::uuid,
+    3::smallint, 75, 'reading', '', '', '需要再練閱讀') then
+    raise exception 'Optional feedback save failed';
+  end if;
+end $$;
+
 reset role;
+do $$ begin
+  if (select count(*) from public.material_generation_requests where source_material_id='e1111111-1111-1111-1111-111111111111'::uuid) <> 1 then
+    raise exception 'Duplicate next-material request';
+  end if;
+  if (select count(*) from public.feedback where material_id='e1111111-1111-1111-1111-111111111111'::uuid) <> 1 then
+    raise exception 'Optional feedback was not persisted';
+  end if;
+end $$;
 rollback;

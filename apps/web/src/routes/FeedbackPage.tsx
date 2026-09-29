@@ -17,7 +17,8 @@ export function FeedbackPage({ session, materialId }: { session: Session; materi
         {data.loading ? <div className="loading-state" role="status"><div className="loading-spinner" /><p>正在載入本週回饋…</p></div>
           : data.error ? <p className="notice notice-error" role="alert">{data.error}</p>
             : !material ? <section className="error-state"><h1>找不到這份教材</h1><p>這份教材可能不存在，或不屬於目前登入的家庭。</p></section>
-              : <section className="feedback-page narrow-page"><p className="overline">每週回饋</p><h1>{child?.display_name ?? '孩子'}的學習觀察</h1><p className="lede">幾個簡短訊號會成為下一週教材的調整依據。</p><FeedbackForm material={material} onSaved={() => void data.refresh()} /></section>}
+              : !material.feedback ? <section className="feedback-page narrow-page"><p className="overline">每週回饋</p><h1>先完成這份教材</h1><p className="lede">提交教材後可以選填回饋，再明確申請下一份。</p><a className="button" href={`/materials/${material.id}`}>開啟線上教材</a></section>
+                : <section className="feedback-page narrow-page"><p className="overline">每週回饋</p><h1>{child?.display_name ?? '孩子'}的學習觀察</h1><p className="lede">幾個簡短訊號會成為下一週教材的調整依據。</p><FeedbackForm material={material} onSaved={() => void data.refresh()} /></section>}
       </PageTransition>
     </AppShell>
   )

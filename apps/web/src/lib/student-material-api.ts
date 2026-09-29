@@ -7,6 +7,50 @@ import type {
   DraftSelfCheck,
 } from '../types/student-material'
 
+export type SubmissionResult = {
+  submitted_at: string
+  next_requested?: boolean
+  answers: DraftAnswers
+  self_check: DraftSelfCheck
+  results: Array<{ question_id: string; status: 'correct' | 'incorrect' | 'unanswered' | 'open_review'; correct_answer: string | null }>
+}
+
+export async function fetchStudentSubmission(materialId: string): Promise<SubmissionResult | null> {
+  const { data, error } = await getSupabaseClient().rpc('get_student_material_submission', { p_material_id: materialId })
+  if (error) throw error
+  return data as SubmissionResult | null
+}
+
+export async function submitStudentMaterial(materialId: string, version: number): Promise<SubmissionResult | { conflict: true; version: number }> {
+  const { data, error } = await getSupabaseClient().rpc('submit_student_material', { p_material_id: materialId, p_client_version: version })
+  if (error) throw error
+  return data as SubmissionResult | { conflict: true; version: number }
+}
+
+export async function saveStudentParentFeedback(materialId: string, input: {
+  difficulty: number; completionRate: number; weakArea: string | null; comments: string
+}): Promise<void> {
+  const { error } = await getSupabaseClient().rpc('save_student_parent_feedback', {
+    p_material_id: materialId, p_difficulty: input.difficulty, p_completion_rate: input.completionRate,
+    p_weak_area: input.weakArea, p_mistakes_text: '', p_child_comments: '', p_parent_comments: input.comments,
+  })
+  if (error) throw error
+}
+
+export async function requestNextAfterSubmission(materialId: string): Promise<{
+  requested: boolean; alreadyRequested?: boolean; reason?: string; used?: number; limit?: number
+}> {
+  const { data, error } = await getSupabaseClient().rpc('request_next_after_student_submission', { p_material_id: materialId })
+  if (error) throw error
+  return data as { requested: boolean; alreadyRequested?: boolean; reason?: string; used?: number; limit?: number }
+}
+
+export async function canOpenParentAnswer(materialId: string): Promise<boolean> {
+  const { data, error } = await getSupabaseClient().rpc('can_open_parent_answer', { p_material_id: materialId })
+  if (error) throw error
+  return data === true
+}
+
 export async function fetchStudentMaterialProjection(
   materialId: string,
 ): Promise<{ data: StudentMaterialProjection | null; error: Error | null }> {

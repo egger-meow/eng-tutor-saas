@@ -2053,6 +2053,8 @@ After a weekly packet is released:
 
 Student interactive answers are stored in a dedicated, isolated draft table (`student_material_drafts`) keyed by stable question IDs and material IDs, keeping the canonical material source completely pristine and immutable.
 
+The parent account submits one immutable student answer snapshot per released material. A submitted packet cannot return to editable draft state. The submission stores answers, self-check state, server-produced item statuses, and submission time independently of the canonical source.
+
 If regeneration is required:
 
 * create a new revision;
@@ -2526,6 +2528,10 @@ Feedback affects:
 > future materials only.
 
 The parent action is explicitly labeled `送出回饋並申請下一份`. It atomically saves feedback and requests one next packet. Editing or resubmitting the same material feedback remains idempotent and never creates another job or consumes another quota slot. A 0% completion report saves feedback only.
+
+For the interactive web path, the student first submits the whole packet, including any unanswered items. Objective single-choice items with an unambiguous canonical key receive a server-side correct/incorrect status; unanswered items are not counted wrong, and open or ambiguous answers remain ungraded. Correct answers appear in the student reading interface only after whole-packet submission. The parent then chooses whether to provide optional feedback and explicitly requests the next packet. Skipping feedback must not manufacture a feedback record. A request uses the immutable submission as its source evidence, preserves the four-per-service-month limit, and is idempotent for the source material. Historical paper feedback remains compatible.
+
+For packets created after this submission gate is deployed, the parent answer PDF is also unavailable through private storage until the packet has been submitted. Historical packets retain their prior parent answer access.
 
 Correct flow:
 
@@ -3291,6 +3297,7 @@ Ownership protections apply to:
 * feedback;
 * materials;
 * student material drafts (`student_material_drafts`);
+* immutable student submissions (`student_material_submissions`) and submission/request RPCs;
 * student material projections (`get_student_material_projection` RPC);
 * subscriptions;
 * signed file access.

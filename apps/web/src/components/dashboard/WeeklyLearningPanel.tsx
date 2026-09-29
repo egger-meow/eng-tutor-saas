@@ -35,10 +35,13 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
       <MaterialActions material={material} childName={childName} showPreviewLink={true} />
       <div className="weekly-feedback">
         <FeedbackSummary feedback={material.feedback} />
-        <button className="button-link text-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起' : material.feedback ? '修改回饋' : '填寫本週回饋'}</button>
+        {material.feedback ? (
+          <button className="button-link text-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起' : '修改回饋'}</button>
+        ) : (
+          <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
+        )}
       </div>
       {feedbackOpen && <FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} />}
     </section>
   )
 }
-

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { handleInternalLink } from '../../app/use-route'
 import { isMaterialReleased, materialDownloadFilename, openMaterialDownload, type Material } from '../../lib/materials'
+import { canOpenParentAnswer } from '../../lib/student-material-api'
 
 type MaterialActionsProps = {
   material: Material
@@ -11,7 +12,18 @@ type MaterialActionsProps = {
 export function MaterialActions({ material, childName, showPreviewLink = false }: MaterialActionsProps) {
   const [busy, setBusy] = useState<'student' | 'parent' | null>(null)
   const [error, setError] = useState('')
+  const [answerUnlocked, setAnswerUnlocked] = useState(false)
   const released = isMaterialReleased(material)
+
+  useEffect(() => {
+    let active = true
+    if (released) {
+      void canOpenParentAnswer(material.id).then((unlocked) => {
+        if (active) setAnswerUnlocked(unlocked)
+      }).catch(() => { if (active) setAnswerUnlocked(false) })
+    }
+    return () => { active = false }
+  }, [material.id, released])
 
   async function download(kind: 'student' | 'parent') {
     setBusy(kind)
@@ -51,10 +63,10 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
         <button
           className="button button-secondary"
           type="button"
-          disabled={!released || busy !== null}
+          disabled={!released || !answerUnlocked || busy !== null}
           onClick={() => void download('parent')}
         >
-          {busy === 'parent' ? '準備中…' : released ? '下載家長解答' : '尚未開放下載'}
+          {busy === 'parent' ? '準備中…' : released && answerUnlocked ? '下載家長解答' : released ? '提交教材後開放解答' : '尚未開放下載'}
         </button>
       </div>
       {error && <p className="notice notice-error" role="alert">{error}</p>}

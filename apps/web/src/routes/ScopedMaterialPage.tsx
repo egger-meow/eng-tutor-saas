@@ -19,7 +19,7 @@ export type ScopedMaterial = {
 export type AccessState =
   | { status: 'loading' }
   | { status: 'error' }
-  | { status: 'ready'; material: ScopedMaterial; studentPdfUrl: string; parentAnswerPdfUrl: string }
+  | { status: 'ready'; material: ScopedMaterial; studentPdfUrl: string; parentAnswerPdfUrl: string | null }
 
 export function ScopedMaterialLoadingState() {
   return (
@@ -86,7 +86,7 @@ export function ScopedMaterialContent({
         >
           下載學生教材
         </a>
-        <a
+        {state.parentAnswerPdfUrl ? <a
           className="button button-secondary"
           href={state.parentAnswerPdfUrl}
           download={materialDownloadFilename(state.material.childName, state.material.materialWeek, 'parent', state.material.weekNumber)}
@@ -94,7 +94,7 @@ export function ScopedMaterialContent({
           rel="noreferrer"
         >
           下載家長解答
-        </a>
+        </a> : <span className="button button-secondary" aria-disabled="true">提交教材後開放解答</span>}
       </div>
 
       <div className="scoped-material-footer">
@@ -133,7 +133,7 @@ export function ScopedMaterialPage({ session }: { session: Session | null }) {
           navigate(data.canonicalPath)
           return
         }
-        if (!data.material || !data.studentPdfUrl || !data.parentAnswerPdfUrl) {
+        if (!data.material || !data.studentPdfUrl) {
           setState({ status: 'error' })
           return
         }
@@ -141,7 +141,7 @@ export function ScopedMaterialPage({ session }: { session: Session | null }) {
           status: 'ready',
           material: data.material,
           studentPdfUrl: data.studentPdfUrl,
-          parentAnswerPdfUrl: data.parentAnswerPdfUrl,
+          parentAnswerPdfUrl: data.parentAnswerPdfUrl ?? null,
         })
       })
   }, [])

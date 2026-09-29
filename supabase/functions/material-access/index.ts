@@ -44,16 +44,27 @@ Deno.serve(async (request) => {
     if (data.owner_session_matches) {
       return json(200, { ownerSessionMatches: true, canonicalPath: `/materials/${encodeURIComponent(data.material_id)}` })
     }
-    const [student, parent] = await Promise.all([
-      client.storage.from('weekly-materials').createSignedUrl(data.student_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false }),
-      client.storage.from('weekly-materials').createSignedUrl(data.parent_answer_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false }),
-    ])
-    if (student.error || parent.error) throw student.error ?? parent.error
+    const { data: materialGate, error: gateError } = await client.from('materials')
+      .select('answer_unlock_requires_submission').eq('id', data.material_id).single()
+    if (gateError || !materialGate) throw gateError ?? new Error('material gate unavailable')
+    let parentUnlocked = !materialGate.answer_unlock_requires_submission
+    if (!parentUnlocked) {
+      const { data: submission, error: submissionError } = await client.from('student_material_submissions')
+        .select('material_id').eq('material_id', data.material_id).maybeSingle()
+      if (submissionError) throw submissionError
+      parentUnlocked = Boolean(submission)
+    }
+    const student = await client.storage.from('weekly-materials')
+      .createSignedUrl(data.student_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false })
+    if (student.error) throw student.error
+    const parent = parentUnlocked ? await client.storage.from('weekly-materials')
+      .createSignedUrl(data.parent_answer_pdf_path, PDF_SIGNED_URL_TTL_SECONDS, { download: false }) : null
+    if (parent?.error) throw parent.error
     return json(200, {
       ownerSessionMatches: false,
       material: { childName: data.child_name, materialWeek: data.material_week, weekNumber: Number(data.week_number) },
       studentPdfUrl: student.data.signedUrl,
-      parentAnswerPdfUrl: parent.data.signedUrl,
+      parentAnswerPdfUrl: parent?.data.signedUrl ?? null,
       loggedIn: sessionUserId !== null,
     })
   } catch (error) {

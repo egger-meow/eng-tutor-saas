@@ -65,6 +65,15 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('登入查看所有教材與學習紀錄')
   })
 
+  it('keeps a new scoped packet answer locked until the whole packet is submitted', () => {
+    const html = renderToStaticMarkup(<ScopedMaterialContent state={{
+      status: 'ready', material: { childName: 'Pax', materialWeek: '2026-W35', weekNumber: 1 },
+      studentPdfUrl: 'https://example.com/student.pdf', parentAnswerPdfUrl: null,
+    }} session={null} />)
+    expect(html).toContain('提交教材後開放解答')
+    expect(html).not.toContain('下載家長解答')
+  })
+
   it('2. valid email token, logged-in matching owner: canonical redirect and authenticated preview exist', async () => {
     // Authenticated material content renders preview for the canonical route
     const html = renderToStaticMarkup(
@@ -95,7 +104,7 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('學生學習版')
     expect(html).toContain('data="https://example.com/signed-student-preview.pdf#toolbar=0&amp;navpanes=0"')
     expect(html).toContain('下載學生教材')
-    expect(html).toContain('下載家長解答')
+    expect(html).toContain('提交教材後開放解答')
   })
 
   it('3. direct authenticated /materials/:id loads owned released material and creates temporary preview URL', async () => {
@@ -238,7 +247,7 @@ describe('weekly material inline preview and page states', () => {
 
     expect(html).toContain('教材預覽暫時無法載入')
     expect(html).toContain('下載學生教材')
-    expect(html).toContain('下載家長解答')
+    expect(html).toContain('提交教材後開放解答')
     consoleError.mockRestore()
   })
 
@@ -287,7 +296,7 @@ describe('weekly material inline preview and page states', () => {
 
     // Download buttons remain accessible
     expect(html).toContain('下載學生教材')
-    expect(html).toContain('下載家長解答')
+    expect(html).toContain('提交教材後開放解答')
   })
 
   it('10. MaterialActions does not expose preview link when material is unreleased', () => {
