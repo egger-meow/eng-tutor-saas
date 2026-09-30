@@ -30,8 +30,8 @@ const stages: StageInfo[] = [
   },
   {
     step: '04',
-    title: '雙份紙本交付',
-    desc: 'Student PDF 留給孩子思考動筆；Parent PDF 備好完整解答與導讀。',
+    title: '線上作答，也可列印',
+    desc: '孩子自行閱讀作答，整份提交後看答案；也提供空白學生 PDF。',
     highlight: 'delivery',
   },
 ]
@@ -138,10 +138,10 @@ export function PersonalizationStory() {
             <h3 className="story-headline">
               一個孩子的狀況，
               <br />
-              如何變成這一週的紙本教材？
+              如何變成這一份的專屬教材？
             </h3>
             <p className="story-lede">
-              不是在題庫裡隨機抽題。系統將上週的真實回饋，直接編織進這一週的專屬內容。
+              不是在題庫裡隨機抽題。系統將已提交表現與選填回饋，直接編織進這一週的專屬內容。
             </p>
 
             {/* Semantic Step Navigation */}
@@ -302,7 +302,7 @@ export function PersonalizationStory() {
                     </div>
                   </div>
                   <div className="paper-seal">
-                    <span>雙份紙本 · 每週一份</span>
+                    <span>線上讀與答 · 空白可列印</span>
                   </div>
                 </div>
               </motion.div>

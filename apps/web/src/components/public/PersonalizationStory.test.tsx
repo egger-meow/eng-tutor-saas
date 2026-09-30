@@ -31,13 +31,13 @@ describe('PersonalizationStory signature component', () => {
     expect(html).toContain('03')
     expect(html).toContain('承載真實新知')
     expect(html).toContain('04')
-    expect(html).toContain('雙份紙本交付')
+    expect(html).toContain('線上作答，也可列印')
   })
 
   it('keeps publication weekly without claiming a fixed weekday', () => {
     const html = renderToStaticMarkup(<PersonalizationStory />)
 
-    expect(html).toContain('雙份紙本 · 每週一份')
+    expect(html).toContain('線上讀與答 · 空白可列印')
     expect(html).not.toMatch(/週[一二三四五六日]出刊/)
     expect(html).not.toMatch(/星期[一二三四五六日]出刊/)
   })

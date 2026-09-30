@@ -30,20 +30,22 @@ const evolutionPillars = [
 ] as const
 
 const usageModes = [
-  ['自己完成', '孩子自己學', 'Student PDF 直接給孩子，照著閱讀、提示與練習一步一步完成。'],
-  ['一起使用', '家長陪著學', '搭配 Parent Answer PDF，不必先備課；有時間時一起讀、訂正、聊錯在哪裡。'],
+  ['自己完成', '孩子自己學', '用網頁閱讀、朗讀與輸入作答，草稿自動保存；也能下載空白 PDF 用紙筆完成。'],
+  ['一起使用', '家長陪著學', '整份提交後一起看結果、回到文章找證據；家長可選填觀察，不必先備課。'],
   ['交給老師', '搭配家教／老師使用', '直接當作每週教學內容、補充教材或回家作業，老師不用從零準備一整套。'],
 ] as const
 
 export const faqItems = [
+  ['一定要列印嗎？', '不用。網頁是主要閱讀與作答介面，支援文字輸入與裝置朗讀；空白學生 PDF 保留給喜歡紙筆的家庭。寫句子目前是文字輸入，並非手寫筆跡。'],
+  ['答案什麼時候出現？', '新教材需提交整份作答後才開放答案。可以部分完成，未答不算錯；開放題尚未評分。提交後作答鎖定，家長回饋選填，申請下一份是獨立動作，每服務月最多 4 份。'],
   ['這適合幾年級的孩子？', '目前主要為國小高年級到國中生設計，長期方向是國中英文與會考所需能力，不是高中英文產品。難度不按年級死切，而會依實際程度、作答表現與回饋調整。'],
   ['第一週怎麼判斷孩子程度？', '會先參考年級、課本版本與家長設定的起點程度。登入後，家長亦可自由選擇讓孩子做一段程度診斷（題數會依作答情況調整），讓系統直接掌握單字、文法與閱讀的具體能力輪廓；即使不進行診斷，第一週也會依年級基準出題，並在收到每週作答回饋後迅速微調難度。'],
   ['程度診斷一定要做嗎？', '不用，完全是選用的。如果不做診斷，系統會先依據年級與家長填寫的起點程度生成每週教材，並隨每週實際作答回饋逐步調整。若孩子願意做，自適應程度診斷（題數會依作答情況調整）能讓系統在第一時間掌握更具體的能力輪廓。'],
   ['多久可以重新做程度診斷？', '完成診斷後需間隔 90 天才能再次進行。這項設計是為了避免孩子產生頻繁測驗的壓力，同時給孩子足夠的時間透過每週教材與練習累積真實進步。在 90 天冷卻期間，系統會持續依據每週的作答回饋自動微調教材，不需要依賴頻繁重測。'],
-  ['多久可以拿到第一份教材？', '名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。'],
-  ['一定要讓孩子自己學嗎？', '不用。孩子可以自己完成，也可以由家長陪讀，或把 Student PDF 與 Parent Answer PDF 交給家教、老師當作每週教學內容與回家練習。教材準備好，怎麼使用由家庭決定。'],
+  ['多久可以拿到第一份教材？', '名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。提交本份作答後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份。'],
+  ['一定要讓孩子自己學嗎？', '不用。孩子可以在網頁自行閱讀作答，也可以由家長陪讀，或下載空白學生教材交給老師作為練習。新教材整份提交後才開放解答。教材準備好，怎麼使用由家庭決定。'],
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
-  ['可以直接把紙本教材寄到家嗎？', '目前教材以 PDF 提供，家長可以直接下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
+  ['可以直接把紙本教材寄到家嗎？', '目前教材可線上閱讀與作答，也提供空白學生 PDF 下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
   ['目前需要付費嗎？', '紙屬英文 Beta 期間，目前每週專屬教材為 NT$0，免填信用卡、免綁卡。Beta 階段以 100 位 14 天內活躍學習學員為目前邊界；首次達標後永久結束並恢復標準方案（月繳 NT$499 或年繳 NT$4,999），不會因為你填了孩子資料就自動訂閱或扣款。'],
   ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。Beta 期間目前每週教材雖為 NT$0，但若希望在 30 席額滿前鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
@@ -97,15 +99,15 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <p className="lede"><strong>從孩子真的有興趣的內容開始，但一路對齊學校進度、國中英文與會考能力。</strong>每週的程度、錯題與回饋會接到下一週，不是每次重新抽一篇文章。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
               <li>4 步驟約 2 分鐘基礎設定，免綁卡；登入後可隨時讓孩子做一段程度診斷，也可以直接開始學習</li>
-              <li>每週 Student PDF + Parent Answer PDF</li>
-              <li>孩子用紙筆閱讀、作答與思考</li>
+              <li>線上閱讀、裝置朗讀與作答；整份提交後看答案</li>
+              <li>也可下載空白 A4 學生教材，用紙筆學習</li>
             </ul>
 
             {isFreePilot ? (
               <div className="hero-beta-badge" aria-label="紙屬英文 Beta 免費說明">
                 <span className="hero-beta-kicker">🧪 紙屬英文 Beta</span>
                 <div className="hero-beta-price"><strong>NT$0</strong><span>目前每週專屬教材</span></div>
-                <p className="hero-beta-meta">免填信用卡・免綁卡。每週完成孩子作答回饋後，系統會繼續準備下一週。</p>
+                <p className="hero-beta-meta">免填信用卡・免綁卡。提交作答後可選填家長回饋，再主動申請下一份；每服務月最多 4 份。</p>
                 <span className="hero-beta-capacity">Beta 目前以 100 位孩子作為服務容量與階段邊界</span>
               </div>
             ) : foundingAvailable ? (
@@ -126,7 +128,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
             <div className="hero-actions">
               <a className="button hero-cta" href={cta.href} onClick={() => trackFreeTrialClick('hero')}>{cta.label}</a>
-              <a className="text-link" href="#samples" onClick={() => trackSampleClick('hero_samples_link')}>先看真實教材 ↓</a>
+              <a className="text-link" href="#samples" onClick={() => trackSampleClick('hero_samples_link')}>先試讀與作答 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
@@ -137,7 +139,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <p>不是買一份固定教材。</p>
             <strong><span>孩子這週的狀況，</span><span>會真的改變</span><span>下週拿到的內容。</span></strong>
             <div className="paper-rule" />
-            <small>技術留在背後，孩子面前還是紙、筆、閱讀與思考。</small>
+            <small>線上閱讀與作答，依真實表現調整；紙筆列印也完整保留。</small>
           </FadeInUp>
         </section>
 
@@ -152,58 +154,23 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
         <section className="public-section deliverables-section early-sample-section" id="samples">
           <div className="section-heading early-sample-intro">
-            <p className="overline">不用先相信我們，先看教材</p>
-            <h2>這就是孩子每週真的會拿到的兩份 PDF。</h2>
-            <p>Student PDF 給孩子直接做；Parent Answer PDF 分開放完整解答、理由與觀察重點。下面不是 mockup，是系統實際產出的第 3 週教材。</p>
-            <div className="early-sample-proof" aria-label="範例可信度說明"><span>真實產出</span><span>去識別化</span><span>可直接打開 PDF</span></div>
+            <p className="overline">不用先相信我們，先試教材</p>
+            <h2>先線上讀、試著答，也能印下來學。</h2>
+            <p>不用登入就能體驗選擇題、寫句子、裝置朗讀與提交結果。整份提交後才在畫面顯示參考答案；空白列印版不含作答與解答。</p>
+            <div className="early-sample-proof" aria-label="範例說明"><span>公開合成範例</span><span>只存本機</span><span>不耗教材配額</span></div>
           </div>
-
-          <div className="sample-personalization-explainer">
-            <div className="sample-context-card">
-              <div className="sample-context-header">
-                <span className="sample-context-badge">真實第 3 週範例</span>
-                <h3 className="sample-context-title">這不是為廣告另外做的展示教材</h3>
-              </div>
-              <p className="sample-context-meta"><strong>範例學生</strong>：國一 ｜ 第 3 週 ｜ 預計 94 分鐘 ｜ 目標：<strong>閱讀理解、證據整合與位置表達</strong></p>
-              <p className="sample-context-narrative">同一名內部測試學生連續使用到第 3 週後，系統實際產出的教材。公開版不公開學生身分、原始回饋或內部生成資料。</p>
-              <div className="sample-flow-strip" aria-label="個人化教材生成流程">
-                <div className="sample-flow-node"><span className="node-label">孩子的興趣</span><div className="node-tags"><span className="tag-pill tag-accent">遊戲</span><span className="tag-pill tag-accent">AI</span><span className="tag-pill tag-accent">音樂科技</span></div></div>
-                <span className="flow-plus" aria-hidden="true">＋</span>
-                <div className="sample-flow-node"><span className="node-label">目前程度</span><div className="node-tags"><span className="tag-pill">國一</span><span className="tag-pill">第 3 週</span></div></div>
-                <span className="flow-arrow" aria-hidden="true">→</span>
-                <div className="sample-flow-node node-output"><span className="node-label">本週教材</span><strong className="output-title">How Does a Game Place Sound Around You?</strong><span className="output-subtitle">spatial audio 閱讀＋at/on/in＋distance/direction/obstruction 推論</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="document-pair pdf-preview-grid">
-            <article className="pdf-preview-card">
-              <p className="document-label">Student PDF</p>
-              <h3>答案不會先出現，留給孩子真正思考</h3>
-              <a className="pdf-preview" href="/samples/sample-student.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看學生教材 PDF" onClick={() => trackSampleClick('student_pdf')}>
-                <img
-                  src="/samples/sample-student-preview.png"
-                  alt="Student PDF 學生教材第 1 頁預覽"
-                  width={595}
-                  height={842}
-                  loading="lazy"
-                />
-                <span>放大查看真實教材 ↗</span>
-              </a>
+          <div className="document-pair">
+            <article className="sample-context-card">
+              <p className="overline">Try the learning loop</p>
+              <h3>Two Places, One Question</h3>
+              <p>用屋頂花園的合成故事練習找證據、推論與 do / does。這份固定範例不是為你的孩子生成的個人化教材。</p>
+              <a className="button" href="/sample" onClick={() => trackSampleClick('interactive_demo')}>試讀與作答範例</a>
             </article>
-            <article className="pdf-preview-card">
-              <p className="document-label">Parent Answer PDF</p>
-              <h3>完整答案分開放，家長不用先備課</h3>
-              <a className="pdf-preview" href="/samples/sample-parent-answer.pdf" target="_blank" rel="noreferrer" aria-label="另開視窗查看家長解答 PDF" onClick={() => trackSampleClick('parent_pdf')}>
-                <img
-                  src="/samples/sample-parent-answer-preview.png"
-                  alt="Parent Answer PDF 家長解答第 1 頁預覽"
-                  width={595}
-                  height={842}
-                  loading="lazy"
-                />
-                <span>放大查看真實解答 ↗</span>
-              </a>
+            <article className="sample-context-card">
+              <p className="overline">Print when you prefer</p>
+              <h3>同一份內容，空白 A4 學生教材</h3>
+              <p>喜歡紙筆時下載列印，圈字、寫句子與做筆記。列印不會帶入這次試用的填答或參考答案。</p>
+              <a className="button secondary" href="/samples/demo-student.pdf" target="_blank" rel="noreferrer" onClick={() => trackSampleClick('demo_student_pdf')}>開啟空白列印版</a>
             </article>
           </div>
         </section>
@@ -240,7 +207,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <div className="section-heading">
             <p className="overline">這週的狀況，會改變下週</p>
             <h2>個人化不是換個故事主題。<br />是孩子下一步練什麼，真的會變。</h2>
-            <p>家長只要回報難度、完成度與卡住的地方，系統就把這些訊號放進下一週的教材設計。</p>
+            <p>已提交的客觀題表現與開放題作答會成為下一份設計的依據；未答不當成答錯，家長也可選填觀察。</p>
           </div>
           <PersonalizationStory />
           <div className="inline-objection">
@@ -270,7 +237,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 <h2>讓科技做它擅長的事，<br className="heading-break" />讓孩子完成不能外包的思考。</h2>
               </div>
               <div className="philosophy-detail">
-                <p>AI 負責記住進度、分析錯誤、調整難度；孩子面前只有紙、筆與題目。可以畫線、圈單字、留下錯誤痕跡，也少一個會跳出通知的螢幕。</p>
+                <p>網頁提供閱讀、作答草稿與裝置朗讀；喜歡紙筆時可下載空白教材，畫線、圈單字、留下思考痕跡。AI 在幕後協助教材設計，孩子仍要自己讀、自己答。</p>
               </div>
             </section>
 
@@ -299,12 +266,12 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                   <div className="comparison-col">
                     <div className="comparison-badge">通用對話 AI</div>
                     <h4>直接使用 ChatGPT</h4>
-                    <p>可以搜尋網路、解釋英文、產生文章與題目；但沒有系統化規劃，也沒有內容審核機制，容易無邊無際地發散亂想。通常仍要自己交代孩子程度、進度、錯誤、來源與難度，並在每次使用時維持這些教育規則。關掉視窗後，學習記憶就斷了。</p>
+                    <p>可以幫忙解釋英文、找資料與設計練習。自行使用時，家長仍需要維護孩子的程度、學校進度、歷次作答與教材安排，並確認內容和答案是否適合。</p>
                   </div>
                   <div className="comparison-col highlighted">
                     <div className="comparison-badge accent">專屬教材系統</div>
                     <h4>紙屬英文</h4>
-                    <p>把孩子的長期學習記憶、全網知識搜尋與可靠資訊篩選、會考命題大腦和每週品質檢查接成固定流程，持續每週交付可直接列印的完整教材。</p>
+                    <p>把孩子的長期學習記憶、全網知識搜尋與可靠資訊篩選、會考命題大腦和每週品質檢查接成固定流程，交付可線上閱讀作答、也能列印的完整教材。</p>
                   </div>
                 </div>
                 <p className="comparison-conclusion">差別不是我們用了另一個 AI，而是把 AI 變成一套專門替孩子持續做教材的系統。</p>
@@ -312,8 +279,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
               <div className="parent-role">
                 <p className="overline">家長每週要做什麼？</p>
-                <h2>列印、觀察、點幾下回饋。<br className="heading-break" />不用自己當英文老師。</h2>
-                <p>看看難度是否合適、完成了多少、哪一區反覆卡住。簡短回饋就能幫助下一週調整；家長不必找文章、出題、做答案或記住上週錯了什麼。</p>
+                <h2>一起看看結果，有觀察再補充。<br className="heading-break" />不用自己當英文老師。</h2>
+                <p>線上作答由系統保存，整份提交後可一起回顧。家長回饋是選填；準備好再申請下一份。紙本學習時，也可補充難度與卡住之處，不必自己找文章、出題或維護錯題紀錄。</p>
               </div>
             </section>
           </div>

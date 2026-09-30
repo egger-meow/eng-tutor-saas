@@ -49,19 +49,15 @@ describe('Landing Page — Trust-first information architecture', () => {
     expect(html).toContain('landing-section-nav')
     expect(sampleIndex).toBeGreaterThan(-1)
     expect(personalizationIndex).toBeGreaterThan(sampleIndex)
-    expect(html).toContain('不用先相信我們，先看教材')
+    expect(html).toContain('不用先相信我們，先試教材')
   })
 
-  it('presents the real Week 3 production sample with truthful de-identified claims', () => {
+  it('presents a clearly synthetic sample without claiming real learner output', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-    expect(html).toContain('How Does a Game Place Sound Around You?')
-    expect(html).toContain('真實第 3 週範例')
-    expect(html).toContain('這不是為廣告另外做的展示教材')
-    expect(html).toContain('國一 ｜ 第 3 週 ｜ 預計 94 分鐘')
-    expect(html).toContain('不公開學生身分、原始回饋或內部生成資料')
-    expect(html).toContain('samples/sample-student.pdf')
-    expect(html).toContain('samples/sample-parent-answer.pdf')
-    expect(html).not.toContain('developing')
+    expect(html).toContain('公開合成範例')
+    expect(html).toContain('Two Places, One Question')
+    expect(html).toContain('href="/sample"')
+    expect(html).not.toContain('真實第 3 週範例')
   })
 
   it('keeps deeper AI and system detail available without forcing it into the primary reading path', () => {
@@ -112,7 +108,7 @@ describe('Landing Page — Beta trust hierarchy', () => {
 
   it('clarifies that ChatGPT lacks systemization and content review, leading to unfocused output', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
-    expect(html).toContain('沒有系統化規劃，也沒有內容審核機制，容易無邊無際地發散亂想')
+    expect(html).toContain('家長仍需要維護孩子的程度、學校進度、歷次作答與教材安排')
   })
 })
 
@@ -129,7 +125,7 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
   it('includes a capacity-safe first material timing answer in FAQ', () => {
     const deliveryFaq = faqItems.find(([q]) => q === '多久可以拿到第一份教材？')
     expect(deliveryFaq).toBeDefined()
-    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。之後每週依固定節奏提供新的個人化教材。')
+    expect(deliveryFaq?.[1]).toBe('名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。提交本份作答後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份。')
   })
 
   it('does not make forbidden instantaneous-finish or fixed-hour promises', () => {
@@ -164,9 +160,9 @@ describe('Landing Page — Product explanation', () => {
     expect(html).toContain('搭配家教／老師使用')
   })
 
-  it('keeps the print-only delivery expectation', () => {
+  it('preserves optional printing without physical delivery', () => {
     const faq = faqItems.find(([q]) => q === '可以直接把紙本教材寄到家嗎？')
-    expect(faq?.[1]).toContain('目前教材以 PDF 提供')
+    expect(faq?.[1]).toContain('目前教材可線上閱讀與作答')
     expect(faq?.[1]).toContain('暫不提供實體郵寄服務')
   })
 })

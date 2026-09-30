@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
 import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
-import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
+import { StudentLessonRenderer } from './StudentLessonRenderer'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
-import { OpeningRenderer } from './OpeningRenderer'
-import { VocabularyRenderer } from './VocabularyRenderer'
-import { ReadingRenderer } from './ReadingRenderer'
-import { InstructionRenderer } from './InstructionRenderer'
-import { PracticeRenderer } from './PracticeRenderer'
-import { SelfCheckRenderer } from './SelfCheckRenderer'
-import { HomeworkRenderer } from './HomeworkRenderer'
 
 export interface PaperReaderProps {
   projection: StudentMaterialProjection
@@ -341,50 +334,10 @@ export function PaperReader({
         </div>
       )}
 
-      <AnswerReadOnlyContext.Provider value={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}>
-      {/* Chapter 1: Opening */}
-      <OpeningRenderer
-        opening={lesson.opening}
-        draftAnswers={submission?.answers ?? answers}
-        onAnswerChange={updateAnswer}
-      />
-
-      {/* Chapter 2: Vocabulary */}
-      <VocabularyRenderer vocabulary={lesson.vocabulary} />
-
-      {/* Chapter 3: Reading */}
-      <ReadingRenderer
-        reading={lesson.reading}
-        adaptiveExtension={lesson.adaptiveExtension}
-        draftAnswers={submission?.answers ?? answers}
-        onAnswerChange={updateAnswer}
-      />
-
-      {/* Chapter 4: Instruction / Grammar */}
-      <InstructionRenderer instruction={lesson.instruction} />
-
-      {/* Chapter 5: Practice */}
-      <PracticeRenderer
-        practice={lesson.practice}
-        adaptiveExtension={lesson.adaptiveExtension}
-        draftAnswers={submission?.answers ?? answers}
-        onAnswerChange={updateAnswer}
-      />
-
-      {/* Chapter 6: Self-Check */}
-      <SelfCheckRenderer
-        selfCheckZh={lesson.selfCheckZh}
-        draftSelfCheck={submission?.self_check ?? selfCheck}
-        onToggleSelfCheck={toggleSelfCheck}
-      />
-
-      {/* Chapter 7: Homework */}
-      <HomeworkRenderer
-        homework={lesson.homework}
-        draftAnswers={submission?.answers ?? answers}
-        onAnswerChange={updateAnswer}
-      />
-      </AnswerReadOnlyContext.Provider>
+      <StudentLessonRenderer lesson={lesson} answers={submission?.answers ?? answers}
+        selfCheck={submission?.self_check ?? selfCheck}
+        readOnly={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}
+        onAnswerChange={updateAnswer} onToggleSelfCheck={toggleSelfCheck} />
 
       <section className="paper-sheet paper-completion" aria-label="完成本週教材">
         <h2 className="paper-section-title">完成本週教材</h2>

@@ -62,11 +62,11 @@ Understand the child
 ↓
 Generate this week's personalized material
 ↓
-Child reads and writes on paper
+Child reads and answers online, or uses a blank printed worksheet
 ↓
-Parent observes
+Whole-packet submission reveals answers; unanswered is distinct from incorrect
 ↓
-Parent submits feedback
+Parent optionally adds observations and explicitly requests the next packet
 ↓
 Learning memory updates
 ↓
@@ -86,7 +86,7 @@ The central promise is:
 
 Supporting concept:
 
-> **AI 在幕後，學習回到紙上。**
+> **線上閱讀與作答，依真實表現調整，也可列印。**
 
 The product is not primarily:
 
@@ -197,7 +197,7 @@ Secondary messages:
 
 > 根據孩子的程度、學校進度、興趣與上週表現，每週重新調整。
 
-> AI 在幕後，孩子面前主要是紙、筆、閱讀與思考。
+> AI 在幕後，孩子自行閱讀與作答；網頁是主要介面，紙筆列印完整保留。
 
 > 不只是給答案，更讓孩子逐漸學會怎麼自己學。
 
@@ -355,7 +355,7 @@ Explain why the product matters
 ↓
 Show how personalization works
 ↓
-Explain paper-first learning
+Explain online reading and answering with optional blank printing
 ↓
 Explain AI-learning method
 ↓
@@ -405,7 +405,7 @@ Before / after feedback example
 ↓
 What the child receives
 ↓
-Paper-first philosophy
+Online learning and optional paper
 ↓
 Learning with AI
 ↓
@@ -441,8 +441,8 @@ Recommended concept:
 以及上週真的學得怎麼樣，
 每週重新調整。
 
-孩子不用再多開一個學習 App。
-印下來，拿起筆，開始學。
+直接在網頁閱讀、朗讀與作答。
+喜歡紙筆，也能下載空白教材列印。
 
 [免費產生第一週]
 ```
@@ -454,7 +454,7 @@ Possible supporting bullets:
 ✓ 每週依實際回饋調整
 ✓ 可列印學生教材
 ✓ 家長另有完整答案
-✓ 紙本學習 + 正確 AI 使用習慣
+✓ 線上作答與空白列印 + 正確 AI 使用習慣
 ```
 
 ---
@@ -3503,6 +3503,9 @@ Capacity-full state.
 
 Additional legal routes may be required before paid launch.
 
+`/sample` is an anonymous interactive experience using a clearly labelled public synthetic fixture and the same Student lesson rendering components as authenticated materials. Demo answers stay in a separately versioned browser-local key, never enter student RPCs, never consume quota, and never trigger generation. Submission reveals demo reference answers and locks the demo until an explicit reset. Open questions remain ungraded; unanswered is not incorrect. The matching downloadable blank A4 Student PDF comes from the same immutable synthetic source. Public demo answer keys are public fixture data, not an authorization boundary for real materials.
+
+
 ---
 
 # 160. Parent Dashboard
@@ -3631,11 +3634,13 @@ Parent responsibilities remain lightweight:
 ```text
 Tell us about the child
 ↓
-Print
+Open online material or print a blank worksheet
 ↓
-Observe
+Review submitted results
 ↓
-Give short feedback
+Optionally add observations
+↓
+Explicitly request the next packet (up to four per service month)
 ```
 
 ---
@@ -4609,7 +4614,7 @@ Next packet changes
 
 紙屬英文 should ultimately communicate:
 
-> **不是多一個叫孩子盯著螢幕的學習 App。**
+> **線上讀與答，也能印下來學。**
 
 > **也不是每週叫 AI 隨機出一份題目。**
 

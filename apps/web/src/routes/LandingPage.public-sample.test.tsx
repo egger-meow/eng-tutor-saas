@@ -1,21 +1,31 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { LandingPage } from './LandingPage'
+import { SamplePage } from './SamplePage'
+import { getDemoResults } from '../content/public-demo'
 
-describe('Landing Page — public Week 3 sample', () => {
-  it('shows the real Week 3 sample story and keeps the student/parent PDF pair aligned', () => {
+describe('Public interactive sample', () => {
+  it('labels synthetic content and links into an anonymous interactive experience', () => {
     const html = renderToStaticMarkup(<LandingPage />)
-
-    expect(html).toContain('真實第 3 週範例')
-    expect(html).toContain('這不是為廣告另外做的展示教材')
-    expect(html).toContain('How Does a Game Place Sound Around You?')
-    expect(html).toContain('預計 94 分鐘')
-    expect(html).toContain('spatial audio 閱讀＋at/on/in＋distance/direction/obstruction 推論')
-    expect(html).toContain('/samples/sample-student.pdf')
-    expect(html).toContain('/samples/sample-parent-answer.pdf')
-    expect(html).toContain('src="/samples/sample-student-preview.png"')
-    expect(html).toContain('src="/samples/sample-parent-answer-preview.png"')
-    expect(html).not.toContain('<iframe')
-    expect(html).not.toContain('The Signal Door Test')
+    expect(html).toContain('公開合成範例')
+    expect(html).toContain('href="/sample"')
+    expect(html).toContain('/samples/demo-student.pdf')
+    expect(html).not.toContain('真實第 3 週範例')
+  })
+  it('does not render sample answer keys before submission and explains isolation', () => {
+    const html = renderToStaticMarkup(<SamplePage />)
+    expect(html).toContain('不會送到伺服器')
+    expect(html).toContain('不是為你的孩子生成')
+    expect(html).not.toContain('B. To study how sunlight changes plant growth.')
+    expect(html).not.toContain('參考答案：')
+    expect(html).toContain('提交整份範例')
+    expect(html).toContain('/samples/demo-student.pdf')
+  })
+  it('distinguishes correct, incorrect, open and unanswered without grading open responses', () => {
+    const results = getDemoResults({ R1: 'B', R2: 'Same water.', R4: 'C', G1: ' ' })
+    expect(results.find((item) => item.questionId === 'R1')?.status).toBe('correct')
+    expect(results.find((item) => item.questionId === 'R2')?.status).toBe('open_review')
+    expect(results.find((item) => item.questionId === 'R4')?.status).toBe('incorrect')
+    expect(results.find((item) => item.questionId === 'G1')?.status).toBe('unanswered')
   })
 })

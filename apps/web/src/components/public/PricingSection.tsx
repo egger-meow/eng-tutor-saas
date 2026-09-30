@@ -49,7 +49,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
       <div className="pricing-value-proposition" aria-label="包含的持續價值">
         <span>{enrollment?.freePilotActive ? '每週專屬教材 NT$0' : '每週專屬教材'}</span>
         <span>{enrollment?.freePilotActive ? '免填信用卡・免綁卡' : '學習記憶持續累積'}</span>
-        <span>{enrollment?.freePilotActive ? '每週回饋・持續準備' : '同一訂閱・系統升級不加價'}</span>
+        <span>{enrollment?.freePilotActive ? '回饋選填・主動申請' : '同一訂閱・系統升級不加價'}</span>
       </div>
     </aside>
 
@@ -62,7 +62,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
           目前每週專屬教材 NT$0
         </h3>
         <p style={{ color: '#166534', margin: '0.35rem 0 0', fontSize: '0.95rem', lineHeight: '1.6' }}>
-          免填信用卡、免綁卡。每週完成孩子作答回饋後，系統會繼續為他準備下一週教材。<br />
+          免填信用卡、免綁卡。提交作答後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份。<br />
           Beta 目前以 100 位 14 天內活躍學習學員作為階段邊界；達標後永久結束並恢復標準方案，不會自動替你開啟付費訂閱。
         </p>
       </div>
@@ -91,7 +91,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
           </p>
           <p className="pricing-cadence">
             {enrollment?.freePilotActive
-              ? '目前每週專屬教材 NT$0・免填信用卡・每週填回饋後繼續準備下一週'
+              ? '目前每週專屬教材 NT$0・免填信用卡・每服務月最多 4 份・主動申請下一份'
               : '每月續訂'}
           </p>
         </div>
@@ -118,7 +118,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
           </p>
         </div>
       </div>
-      <ul className="pricing-includes"><li>Student PDF</li><li>Parent Answer PDF</li><li>依孩子程度與回饋持續調整</li><li>家長可管理多位孩子</li></ul>
+      <ul className="pricing-includes"><li>線上閱讀、作答與裝置朗讀</li><li>空白學生 PDF；提交後查看解答</li><li>依孩子程度、已提交表現與選填回饋調整</li><li>家長可管理多位孩子</li></ul>
       {foundingRemaining !== null && foundingRemaining > 0 && (
         <div className="founding-offer">
           <p className="status-label">創始 30・{enrollment?.freePilotActive ? '自願提前訂閱' : capacityOpen ? '月繳限定' : '名額保留中'}</p>
@@ -139,7 +139,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
       {capacityOpen && (
         <p className="pricing-delivery-note">
           {enrollment?.freePilotActive
-            ? '完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。Beta 期間目前每週教材 NT$0；每週填寫回饋後會繼續準備下一週。'
+            ? '完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。Beta 期間目前每週教材 NT$0；提交後可主動申請下一份，回饋選填，每服務月最多 4 份。'
             : '完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。'}
         </p>
       )}

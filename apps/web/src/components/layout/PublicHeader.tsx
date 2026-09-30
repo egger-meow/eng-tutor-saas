@@ -6,7 +6,7 @@ import { trackSampleClick, trackFreeTrialClick } from '../../lib/analytics'
 
 const links = [
   { href: '/#personalization', label: '如何調整' },
-  { href: '/#samples', label: '教材範例' },
+  { href: '/sample', label: '試讀與作答' },
   { href: '/#method', label: '學習方法' },
   { href: '/#pricing', label: '方案' },
 ]
@@ -49,7 +49,7 @@ export function PublicHeader() {
                 href={link.href}
                 className="nav-link"
                 onClick={(e) => {
-                  if (link.href.includes('samples')) {
+                  if (link.href === '/sample') {
                     trackSampleClick('nav_header')
                   }
                   setMobileMenuOpen(false)
@@ -91,4 +91,3 @@ export function PublicHeader() {
     </header>
   )
 }
-

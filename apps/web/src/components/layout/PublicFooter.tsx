@@ -10,14 +10,14 @@ export function PublicFooter() {
             <strong>紙屬英文</strong>
             <p>每週一份，只屬於你孩子的英文教材。</p>
           </div>
-          <p className="footer-philosophy">AI 在幕後，學習回到紙上。</p>
+          <p className="footer-philosophy">線上讀與答，紙筆也保留。</p>
         </div>
 
         <nav className="footer-nav" aria-label="產品導覽與法律條款連結">
           <div className="footer-nav-column">
             <span className="footer-nav-title">產品與介紹</span>
             <ul>
-              <li><a href="/#samples" onClick={handleInternalLink}>教材範例</a></li>
+              <li><a href="/sample" onClick={handleInternalLink}>試讀與作答範例</a></li>
               <li><a href="/#personalization" onClick={handleInternalLink}>如何調整</a></li>
               <li><a href="/#method" onClick={handleInternalLink}>學習方法與 AI 指引</a></li>
               <li><a href="/#pricing" onClick={handleInternalLink}>方案費用與容量</a></li>
