@@ -61,4 +61,16 @@ authenticated production learning loop, and the S3 next-packet pedagogical
 explanation. Viewport simulation and mocked speech/RPCs do not satisfy those
 gates. S5–S7 remain separate stages.
 
-Production web deployment read-back will be recorded after delivery.
+Production delivery read-back:
+
+- Source `23540c743052e0c079a8f05aa5ce9fdb5402ad4e` pushed to main.
+- GitHub CI run `36704974064`: `verify` and `deploy-production` both success.
+  https://github.com/egger-meow/eng-tutor-saas/actions/runs/36704974064
+- Public homepage and `/assets/index-B_uZ3GVA.js` both return HTTP 200. The
+  served asset contains the new primary entry, submission retry, unknown-format
+  fallback, optional-feedback preservation, speech failure and navigation guard.
+  This confirms deployed client code, not an authenticated learning-loop test.
+- Local read-only metadata confirms feedback RLS, authenticated feedback SELECT,
+  owned released-material lookup and the exact feedback-save RPC execution grant.
+- No migration or Edge Function changed in S4, so no additional Supabase
+  deployment is required. No real learner records were used for acceptance.
