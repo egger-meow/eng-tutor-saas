@@ -7,7 +7,7 @@ describe('Feedback-requested generation context invariant', () => {
 
   it('snapshots the triggering feedback and fails closed on an excluding cutoff', async () => {
     const migration = await readFile(
-      resolve(root, 'supabase/migrations/20260919135000_feedback_request_source_context_invariant.sql'),
+      resolve(root, 'supabase/migrations/20260919134227_feedback_request_source_context_invariant.sql'),
       'utf8',
     )
 
@@ -32,7 +32,7 @@ describe('Feedback-requested generation context invariant', () => {
 
   it('preserves the exact legacy schedule for non-request jobs', async () => {
     const migration = await readFile(
-      resolve(root, 'supabase/migrations/20260919135000_feedback_request_source_context_invariant.sql'),
+      resolve(root, 'supabase/migrations/20260919134227_feedback_request_source_context_invariant.sql'),
       'utf8',
     )
 

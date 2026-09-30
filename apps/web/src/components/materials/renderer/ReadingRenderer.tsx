@@ -56,6 +56,7 @@ export function ReadingRenderer({
   draftAnswers,
   onAnswerChange,
 }: ReadingRendererProps) {
+  const readOnly = useAnswerReadOnly()
   const { isSupported, isSpeaking, currentText, speak, stop } = useSpeechSynthesis()
 
   if (!reading) return null
@@ -195,6 +196,7 @@ export function ReadingRenderer({
                 ✍️ 延伸思考練習：{adaptiveExtension.taskZh}
               </p>
               <textarea
+                readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的延伸思考…"
                 value={draftAnswers[`adaptive-${adaptiveExtension.id}`] ?? ''}
@@ -208,3 +210,4 @@ export function ReadingRenderer({
     </section>
   )
 }
+import { useAnswerReadOnly } from './AnswerReadOnlyContext'

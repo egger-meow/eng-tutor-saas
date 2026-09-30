@@ -1,4 +1,5 @@
 import type { Question } from '../../../types/student-material'
+import { useAnswerReadOnly } from './AnswerReadOnlyContext'
 
 export interface QuestionRendererProps {
   question: Question
@@ -15,6 +16,7 @@ export function QuestionRenderer({
   draftAnswers,
   onAnswerChange,
 }: QuestionRendererProps) {
+  const readOnly = useAnswerReadOnly()
   const qId = question.id || question.questionId || `q-${index}`
   const selectedAnswer = draftAnswers[qId] ?? ''
 
@@ -41,11 +43,12 @@ export function QuestionRenderer({
                 key={optIdx}
                 className={`option-card ${isSelected ? 'selected' : ''}`}
                 role="button"
-                tabIndex={0}
+                tabIndex={readOnly ? -1 : 0}
+                aria-disabled={readOnly}
                 aria-pressed={isSelected}
-                onClick={() => onAnswerChange(qId, letter, true)}
+                onClick={() => { if (!readOnly) onAnswerChange(qId, letter, true) }}
                 onKeyDown={(e) => {
-                  if (e.key === ' ' || e.key === 'Enter') {
+                  if (!readOnly && (e.key === ' ' || e.key === 'Enter')) {
                     e.preventDefault()
                     onAnswerChange(qId, letter, true)
                   }
@@ -88,6 +91,7 @@ export function QuestionRenderer({
                           <td key={cIdx}>
                             {cell.responseUnitId ? (
                               <input
+                                readOnly={readOnly}
                                 type="text"
                                 className="response-grid-input"
                                 placeholder={cell.placeholder ?? '填寫作答…'}
@@ -120,6 +124,7 @@ export function QuestionRenderer({
                       {item.content && <span style={{ color: 'var(--color-text)' }}>{item.content}</span>}
                       {item.responseUnitId && (
                         <input
+                          readOnly={readOnly}
                           type="text"
                           className="response-grid-input"
                           placeholder={item.placeholder ?? '請輸入該步驟的作答…'}
@@ -137,6 +142,7 @@ export function QuestionRenderer({
           {/* Lines */}
           {layout.type === 'lines' && (
             <textarea
+              readOnly={readOnly}
               className="ruled-textarea"
               placeholder="在此輸入你的答案…"
               value={selectedAnswer}
@@ -150,6 +156,7 @@ export function QuestionRenderer({
       {/* 3. Written Response Default / Fallback */}
       {!hasOptions && !layout && (
         <textarea
+          readOnly={readOnly}
           className="ruled-textarea"
           placeholder="在此輸入你的答案…"
           value={selectedAnswer}

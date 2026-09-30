@@ -1,3 +1,5 @@
+import { useAnswerReadOnly } from './AnswerReadOnlyContext'
+
 export interface SelfCheckRendererProps {
   selfCheckZh?: string[]
   draftSelfCheck: string[]
@@ -9,6 +11,7 @@ export function SelfCheckRenderer({
   draftSelfCheck,
   onToggleSelfCheck,
 }: SelfCheckRendererProps) {
+  const readOnly = useAnswerReadOnly()
   if (!selfCheckZh || selfCheckZh.length === 0) return null
 
   const checkedCount = selfCheckZh.filter((item) => draftSelfCheck.includes(item)).length
@@ -49,18 +52,20 @@ export function SelfCheckRenderer({
             <li
               key={idx}
               className="self-check-item"
-              onClick={() => onToggleSelfCheck(item)}
+              onClick={() => { if (!readOnly) onToggleSelfCheck(item) }}
               role="checkbox"
               aria-checked={isChecked}
-              tabIndex={0}
+              tabIndex={readOnly ? -1 : 0}
+              aria-disabled={readOnly}
               onKeyDown={(e) => {
-                if (e.key === ' ' || e.key === 'Enter') {
+                if (!readOnly && (e.key === ' ' || e.key === 'Enter')) {
                   e.preventDefault()
                   onToggleSelfCheck(item)
                 }
               }}
             >
               <input
+                disabled={readOnly}
                 type="checkbox"
                 className="self-check-checkbox"
                 checked={isChecked}

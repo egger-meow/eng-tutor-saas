@@ -33,7 +33,7 @@ export function VocabularyRenderer({ vocabulary }: VocabularyRendererProps) {
           本週精選單字與例句
         </h2>
         <p className="paper-section-desc">
-          點擊發音按鈕聆聽自然真人語音，掌握詞性、精準中文意涵與真實語境用法。
+          點擊發音按鈕使用裝置語音朗讀，掌握詞性、中文意涵與語境用法。
         </p>
       </div>
 

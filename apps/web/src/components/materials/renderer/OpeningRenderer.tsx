@@ -1,4 +1,5 @@
 import type { OpeningSection } from '../../../types/student-material'
+import { useAnswerReadOnly } from './AnswerReadOnlyContext'
 
 export interface OpeningRendererProps {
   opening?: OpeningSection
@@ -11,6 +12,7 @@ export function OpeningRenderer({
   draftAnswers,
   onAnswerChange,
 }: OpeningRendererProps) {
+  const readOnly = useAnswerReadOnly()
   if (!opening) return null
 
   const activity = opening.activity
@@ -49,6 +51,7 @@ export function OpeningRenderer({
                 {activity.prompt}
               </p>
               <textarea
+                readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的課前想法（不計分，幫助進入學習情境）…"
                 value={draftAnswers[reflectionKey] ?? ''}

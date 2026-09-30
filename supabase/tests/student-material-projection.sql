@@ -366,6 +366,23 @@ set local "request.jwt.claims" = '{"sub": "c1111111-1111-1111-1111-111111111111"
 do $$
 declare v_result jsonb; v_repeated jsonb;
 begin
+  begin
+    perform public.submit_feedback_and_request_next_material(
+      'd1111111-1111-1111-1111-111111111111'::uuid,
+      'e1111111-1111-1111-1111-111111111111'::uuid,
+      3::smallint, 75, 'reading', '', '', '');
+    raise exception 'Legacy feedback bypassed submission gate';
+  exception when others then
+    if sqlerrm not like '%MATERIAL_SUBMISSION_REQUIRED%' then raise; end if;
+  end;
+  begin
+    insert into public.feedback(child_id,material_id,difficulty,completion_rate)
+    values('d1111111-1111-1111-1111-111111111111'::uuid,
+      'e1111111-1111-1111-1111-111111111111'::uuid,3,75);
+    raise exception 'Direct feedback bypassed submission gate';
+  exception when others then
+    if sqlerrm not like '%MATERIAL_SUBMISSION_REQUIRED%' then raise; end if;
+  end;
   if public.can_open_parent_answer('e1111111-1111-1111-1111-111111111111'::uuid) then
     raise exception 'Answer PDF unlocked before submission';
   end if;
@@ -409,6 +426,12 @@ end $$;
 
 reset role;
 do $$ begin
+  if private_generation.single_choice_letter('["One","Two"]', 'C') is not null
+    or private_generation.single_choice_letter('["One","One"]', 'One') is not null
+    or private_generation.single_choice_letter('["One","Two"]', 'A. Two') is not null
+    or private_generation.single_choice_letter('["One","Two"]', 'B. Two') <> 'B' then
+    raise exception 'Ambiguous single-choice grading';
+  end if;
   if (select count(*) from public.material_generation_requests where source_material_id='e1111111-1111-1111-1111-111111111111'::uuid) <> 1 then
     raise exception 'Duplicate next-material request';
   end if;

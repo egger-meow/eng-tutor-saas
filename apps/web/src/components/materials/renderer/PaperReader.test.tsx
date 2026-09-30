@@ -1,9 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { PaperReader } from './PaperReader'
+import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
+import { QuestionRenderer } from './QuestionRenderer'
+import { VocabularyRenderer } from './VocabularyRenderer'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 
 // Mock Supabase client to avoid network in static tests
+vi.mock('../../../hooks/use-speech-synthesis', () => ({
+  useSpeechSynthesis: () => ({ isSupported: true, isSpeaking: false, currentText: '', speak: vi.fn(), stop: vi.fn() }),
+}))
+
 vi.mock('../../../lib/supabase', () => ({
   getSupabaseClient: () => ({
     rpc: vi.fn().mockReturnValue({
@@ -25,6 +32,23 @@ vi.mock('../../../lib/supabase', () => ({
 }))
 
 describe('PaperReader Component Suite', () => {
+  it('locks submitted inputs while retaining enabled pronunciation controls', () => {
+    const html = renderToStaticMarkup(
+      <AnswerReadOnlyContext.Provider value={true}>
+        <QuestionRenderer question={{ id: 'written', prompt: 'Explain.' }} index={0}
+          draftAnswers={{ written: 'My immutable answer' }} onAnswerChange={vi.fn()} />
+        <QuestionRenderer question={{ id: 'choice', prompt: 'Choose.', options: ['One', 'Two'] }} index={1}
+          draftAnswers={{ choice: 'B' }} onAnswerChange={vi.fn()} />
+        <VocabularyRenderer vocabulary={[{ id: 'word', word: 'sound', partOfSpeech: 'n.', meaningZh: '聲音' }]} />
+      </AnswerReadOnlyContext.Provider>,
+    )
+    expect(html).toContain('readOnly=""')
+    expect(html).toContain('aria-disabled="true"')
+    expect(html).toContain('My immutable answer')
+    expect(html).toContain('<button')
+    expect(html).not.toContain('inert=')
+    expect(html).not.toContain('disabled=""')
+  })
   const sampleProjection: StudentMaterialProjection = {
     material_id: 'mat-test-1',
     child_id: 'child-test-1',

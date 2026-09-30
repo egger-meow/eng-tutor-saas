@@ -34,6 +34,7 @@ export function PracticeRenderer({
   draftAnswers,
   onAnswerChange,
 }: PracticeRendererProps) {
+  const readOnly = useAnswerReadOnly()
   if (!practice || practice.length === 0) return null
 
   const isExtensionAfterPractice = adaptiveExtension && adaptiveExtension.placement === 'after-practice'
@@ -114,6 +115,7 @@ export function PracticeRenderer({
                 ✍️ 延伸思考練習：{adaptiveExtension.taskZh}
               </p>
               <textarea
+                readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的延伸思考…"
                 value={draftAnswers[`adaptive-${adaptiveExtension.id}`] ?? ''}
@@ -127,3 +129,4 @@ export function PracticeRenderer({
     </section>
   )
 }
+import { useAnswerReadOnly } from './AnswerReadOnlyContext'

@@ -1,5 +1,9 @@
 begin;
 
+-- This suite exercises historical paper-feedback packets. S2 web submission
+-- gates are exercised separately in student-material-projection.sql.
+alter table public.materials alter column answer_unlock_requires_submission set default false;
+
 -- Successful bridge fixtures use the immutable claim contract, never guessed versions.
 create function pg_temp.smoke_claim_metadata(context jsonb)
 returns jsonb language plpgsql as $$
@@ -1464,6 +1468,7 @@ $$;
 rollback;
 
 begin;
+alter table public.materials alter column answer_unlock_requires_submission set default false;
 
 -- Successful bridge fixtures use the immutable claim contract, never guessed versions.
 create function pg_temp.smoke_claim_metadata(context jsonb)

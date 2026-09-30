@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
@@ -63,6 +64,7 @@ export function PaperReader({
   }, [projection.material_id])
 
   async function submitWholeMaterial() {
+    if (actionBusy || status !== 'saved' || hasConflict || submission) return
     if (!window.confirm('可提交部分完成的教材。提交後無法修改作答，現在要送出嗎？')) return
     setActionBusy(true)
     setActionError('')
@@ -289,11 +291,11 @@ export function PaperReader({
         </div>
       )}
 
-      <div inert={Boolean(submission)}>
+      <AnswerReadOnlyContext.Provider value={Boolean(submission) || actionBusy}>
       {/* Chapter 1: Opening */}
       <OpeningRenderer
         opening={lesson.opening}
-        draftAnswers={answers}
+        draftAnswers={submission?.answers ?? answers}
         onAnswerChange={updateAnswer}
       />
 
@@ -304,7 +306,7 @@ export function PaperReader({
       <ReadingRenderer
         reading={lesson.reading}
         adaptiveExtension={lesson.adaptiveExtension}
-        draftAnswers={answers}
+        draftAnswers={submission?.answers ?? answers}
         onAnswerChange={updateAnswer}
       />
 
@@ -315,24 +317,24 @@ export function PaperReader({
       <PracticeRenderer
         practice={lesson.practice}
         adaptiveExtension={lesson.adaptiveExtension}
-        draftAnswers={answers}
+        draftAnswers={submission?.answers ?? answers}
         onAnswerChange={updateAnswer}
       />
 
       {/* Chapter 6: Self-Check */}
       <SelfCheckRenderer
         selfCheckZh={lesson.selfCheckZh}
-        draftSelfCheck={selfCheck}
+        draftSelfCheck={submission?.self_check ?? selfCheck}
         onToggleSelfCheck={toggleSelfCheck}
       />
 
       {/* Chapter 7: Homework */}
       <HomeworkRenderer
         homework={lesson.homework}
-        draftAnswers={answers}
+        draftAnswers={submission?.answers ?? answers}
         onAnswerChange={updateAnswer}
       />
-      </div>
+      </AnswerReadOnlyContext.Provider>
 
       <section className="paper-sheet paper-completion" aria-label="完成本週教材">
         <h2 className="paper-section-title">完成本週教材</h2>
