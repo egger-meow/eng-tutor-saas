@@ -24,7 +24,12 @@
 
 ## 部署驗收
 
-待完成 source commit／push、CI verify／deploy-production 與正式 `/sample`、asset、PDF hash readback 後補列。尚不能把本機 PASS 當作正式網站已部署。
+- Source commit `94a60b39c0e840037eb2e83e9b6728255e673e15` 已正常 push `main`；推送前 fresh remote head `a37e4a9` 與本機一致。
+- [CI run 36764449374](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36764449374)：verify job `110054953142` SUCCESS；deploy-production job `110055666002` SUCCESS。
+- 正式 `https://paperbond.jjmowlab.com/sample` HTTP 200；部署 asset `/assets/index-p-Wc9t9r.js` HTTP 200，包含新提交確認與 demo storage key。
+- `https://paperbond.jjmowlab.com/samples/demo-student.pdf` HTTP 200；remote/local SHA-256 一致：`738423460b2f28aca90d6a5623a18bdcc29ac8df00ddbee55884f34aa8f29284`。
+- 正式網站匿名 browser smoke（390×844 模擬 viewport）PASS：選題、文字作答、刷新恢復、確認提交、11 題結果、鎖定、無橫向溢出及回到 existing-parent login。只使用合成範例，未建立真實帳號或送出登入郵件。觀察到的 Supabase requests 僅為 `get_enrollment_state`、首頁 `record_funnel_event`，範例作答文字不在 request body；無 page errors。
+- 無 migration／Edge Function 變更，generation release 未更動。git 最終只保留原有未追蹤交接文件；不把它誤加入提交。
 
 ## 待驗收與邊界
 
