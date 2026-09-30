@@ -35,4 +35,14 @@ The local end-to-end upload/completion measured 1,224 ms for the legacy artifact
 
 Inspect `material_pdf_artifacts` through trusted operator access. A missing or failed download can be retried by the parent; a live lease must expire before another processor can acquire it. Run `pnpm worker process-material-pdfs --limit 5` only in an authorized trusted runtime; it handles PDF cache work, not authoring/Finisher jobs. Do not manually change canonical packets or publication paths to recover downloads. Do not clean old objects until a separate retention policy is verified.
 
-Production evidence will be appended after source push, migration, function deployment and web readback. Physical printing and authenticated production recovery acceptance remain pending.
+## Production delivery evidence
+
+- Source `46ae7a32f0ff465f6198292d0cb9b1f9ba7b3298` committed and pushed to main.
+- Only pending migration `20260930170027_material_pdf_on_demand.sql` applied; remote migration history confirms it. Migration SHA-256: `633fbc19028f383a4dc0ea3c005cd0523f30712d50b1e7113d4dc371e3affabd`.
+- `material-pdf` deployed ACTIVE version 1, function ID `b25e54ea-864c-498d-b7a0-a2f19f18cf1d`, deployment bundle SHA-256 `0af81417adac225c05dba95dd346a707de52b39591004f8216d6e54117087b48`; source SHA-256 `aa18d11d28208bd11d1795518063ab4d29a50628ea86498877498aa5d20c516c`. Endpoint POST without authentication returns 401 `authentication_required`.
+- Remote RLS is enabled on both cache tables. Authenticated browser table reads/writes and queue claims are false, anonymous request execution is false, and authorized parent request execution is true. Security advisors report the intentional service-only tables without public policies and the ownership-checked authenticated SECURITY DEFINER request endpoint; no new anonymous trusted-worker authority is granted.
+- `supabase/tests/material-pdf-production-readback.sql` passes on production and locally: isolated synthetic family denial, repeated request identity, answer lock, legacy answer compatibility and future release denial. Entire transaction rolls back. No global queue claim, real learner mutation, upload or notification occurs.
+- Fresh active authoring contract before/after deployment remains `rel_1.9.1`, bundle `2.14.1-prod`, SHA-256 `d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211`; Engine 1.9.0, Prompt 2.14.1, Schema 2.6.0, Worker 1.8.0, Renderer 1.6.1. No new authoring release is activated.
+- [CI run 36752043782](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36752043782): verify and deploy-production both successful. Public homepage and `/assets/index-BHNqOowY.js` return HTTP 200; asset readback contains the new endpoint, pending state and user-facing PDF preparation message.
+
+Physical printing, authenticated production missing-object recovery and production invoice/wait-time distribution remain pending. Local measured behavior and deployment readback are not those acceptance results. Existing physical-device/audio/keyboard and S3 pedagogy acceptance gates remain open.
