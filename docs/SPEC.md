@@ -1387,6 +1387,8 @@ It should NOT normally load:
 
 Old full material should only be loaded when there is a specific reason.
 
+The `student-performance-v1` projection lives in claim-time `learningMemory.studentPerformanceEvidence`: at most three recent submissions, twelve incorrect or answered ungraded details, and 44,000 UTF-8 detail bytes. Preserve material/submission identity, stable question/response-unit IDs, server statuses and bounded necessary private prompt/answer/reading notes. Truncation, omitted and unresolved counts remain explicit. Correct and unanswered items contribute aggregate counts only; unanswered means completion, not weakness. Older counts are disjoint, never increment counters on reread or infer mastery. An existing claim, including absence of evidence, remains authoritative after later changes. Private notes must never enter public research queries.
+
 Compact history is bounded working memory, not the permanent record. Targeted lifetime retrieval may include due, weak, prerequisite-relevant, uncertain, mastered, or regressed target IDs and a bounded set of older evidence without loading all historical packets.
 
 ---
@@ -2790,7 +2792,7 @@ Every authoring invocation is bounded by the single operational setting `authori
 * unused capacity never causes a job that is still waiting for feedback to run early;
 * different worker/run identities may hold active batches concurrently; row claims remain atomic so the same job cannot be claimed twice.
 
-Week 1 is enqueued automatically. A successful delivery does not schedule a later packet. Week 2+ begins only when the parent submits valid feedback for the latest canonical material and explicitly requests the next packet. Each child may receive at most four packets per service month, including Week 1; unused quota does not roll over. Accepted requests enter authoring immediately and become available when publication finishes, without a fabricated fixed delivery date.
+Week 1 is enqueued automatically. A successful delivery does not schedule a later packet. The interactive path requires whole-packet student submission and an explicit next-packet request; parent feedback is optional. Historical paper packets retain valid feedback plus an explicit request. Each child may receive at most four packets per service month, including Week 1; unused quota does not roll over. Accepted requests enter authoring immediately and become available when publication finishes, without a fabricated fixed delivery date.
 
 ---
 
@@ -2798,7 +2800,7 @@ Week 1 is enqueued automatically. A successful delivery does not schedule a late
 
 A worker must claim a job before processing it.
 
-A job with a preceding `source_material_id` exists only after the owner-scoped feedback/request transaction has saved valid feedback, verified entitlement and reserved monthly quota. Passing time never substitutes for feedback. A 0% completion report is saved but does not request a packet.
+A job with a preceding `source_material_id` requires an owner-scoped explicit request, entitlement and quota, supported by an immutable student submission or historical paper feedback. Passing time never substitutes for that request. A 0% historical paper report saves feedback only. Interactive submissions may be partial or empty; unanswered items are not wrong and no minimum completion threshold is imposed.
 
 Claim priority is mandatory work first, then earliest `generation_due_at`, then oldest creation time. Claiming must remain atomic under concurrent workers.
 
@@ -4180,14 +4182,14 @@ Week 1 speed must come from wake-up and publication routing, never from skipping
 
 After Week 1:
 
-1. parent reports difficulty;
-2. parent reports completion;
-3. parent reports mistakes;
-4. parent optionally reports child comment;
-5. parent changes current interest;
-6. Week 2 is scheduled;
-7. Week 2 uses relevant new state;
-8. personalization summary makes the change visible.
+1. student submits an immutable packet, including partial completion;
+2. parent feedback is optional and skip creates no feedback record;
+3. the owner explicitly requests the next packet under entitlement and quota;
+4. the claim freezes bounded student evidence and any available parent feedback;
+5. incorrect and answered ungraded items retain private evidence; correct items are aggregated and unanswered items are not wrong;
+6. unknown skill attribution remains unknown and open answers are not automatically incorrect;
+7. the next packet explains relevant adjustments;
+8. historical paper-feedback-only and no-evidence inputs remain compatible.
 
 ---
 

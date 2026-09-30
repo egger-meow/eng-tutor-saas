@@ -30,4 +30,13 @@ Verification so far:
   output quality and virtual keyboard behavior remain unverified on real devices.
 - Fresh GitHub remote main was 840ea882e654aed1969f10c9db06eaa163efa731.
 - Production dry-run lists the S1 projection, S1 draft hardening, S2 submission,
-  and S2 boundary migrations. Deployment read-back will be recorded below.
+  and S2 boundary migrations.
+
+Production delivery read-back:
+
+- Source commit `757398ee081cf22ca470e6909d737b18b5954baf`, pushed to main.
+- Remote history confirms `20260929100000`, `20260929110000`, `20260929181512`, `20260930050620` applied.
+- `material-access` ACTIVE v17; artifact SHA-256 `3527fe5fcfc1e8d4bf41e4055a5e5f6c6cb386b8cc401b2f1354556b9fe2f22d`.
+- GitHub run `36673076388`: verify and deploy-production jobs all success.
+- Final full suite: 182 files / 1,614 tests pass; typecheck/build pass; lint has no errors.
+- Physical device/audio/keyboard acceptance and a production authenticated learning-loop test remain unverified.

@@ -28,6 +28,10 @@ begin
   claimed:=case when lane=2 then private_generation.claim_week1_fast_generation_batch(w) else private_generation.chatgpt_claim_generation_batch(w) end;
   select item into ctx from jsonb_array_elements(claimed->'claimed') item where item#>>'{job,id}'=j::text;
   assert ctx is not null,'Actual claim path did not return fixture';
+  assert ctx#>>'{learningMemory,studentPerformanceEvidence,projectionVersion}'='student-performance-v1',
+    'Normal/Week1 claim lost the additive performance adapter';
+  assert ctx#>'{learningMemory,studentPerformanceEvidence,recentSubmissions}'='[]'::jsonb,
+    'No-submission claim invented learner evidence';
   assert ctx->'activeAuthoringContract'=ct,'Claim contract drift';
   assert ctx->>'targetReleaseId'=ct->>'releaseId','Claim target drift';
   if lane=0 then

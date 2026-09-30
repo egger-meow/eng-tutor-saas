@@ -439,4 +439,97 @@ do $$ begin
     raise exception 'Optional feedback was not persisted';
   end if;
 end $$;
+-- S3 real context/normal claim boundaries, using the synthetic packet above.
+do $$
+declare capsule jsonb; batch jsonb; context jsonb; replay jsonb; v_job_id uuid; fingerprint text;
+begin
+  capsule := private_generation.student_performance_capsule(
+    'd1111111-1111-1111-1111-111111111111',now(),'e1111111-1111-1111-1111-111111111111');
+  if capsule->>'projectionVersion'<>'student-performance-v1'
+    or capsule#>>'{recentSubmissions,0,counts,correct}'<>'1'
+    or capsule#>>'{recentSubmissions,0,counts,incorrect}'<>'1'
+    or capsule#>>'{recentSubmissions,0,counts,unanswered}'<>'1'
+    or capsule#>>'{recentSubmissions,0,counts,ungraded}'<>'2'
+    or jsonb_array_length(capsule->'items')<>3 then
+    raise exception 'S3 status/context mismatch: %',capsule;
+  end if;
+  if capsule->'items' @> '[{"questionId":"q1"}]'
+    or capsule->'items' @> '[{"questionId":"q2"}]'
+    or not capsule->'items' @> '[{"questionId":"q5","responseUnitNotes":[{"responseUnitId":"q5-cell","responseNote":"A table answer"}],"status":"open_review"}]'
+    or capsule->>'skillAttribution'<>'unknown_without_verified_mapping' then
+    raise exception 'S3 fabricated weakness or lost structured response';
+  end if;
+  if capsule is distinct from private_generation.student_performance_capsule(
+      'd1111111-1111-1111-1111-111111111111',now(),'e1111111-1111-1111-1111-111111111111') then
+    raise exception 'S3 duplicate reading changes evidence';
+  end if;
+  if jsonb_array_length(private_generation.student_performance_capsule(
+    'd2222222-2222-2222-2222-222222222222',now(),null)->'recentSubmissions')<>0
+    or jsonb_array_length(private_generation.student_performance_capsule(
+      'd1111111-1111-1111-1111-111111111111',now()-interval '1 second',null)->'recentSubmissions')<>0 then
+    raise exception 'S3 crossed family or cutoff';
+  end if;
+  select r.generation_job_id into v_job_id from public.material_generation_requests r
+    where r.source_material_id='e1111111-1111-1111-1111-111111111111';
+  update public.profiles set last_active_at=now()
+    where id='c1111111-1111-1111-1111-111111111111';
+  batch := public.worker_claim_local_authoring_batch('synthetic-s3-normal');
+  select s.generation_context,s.input_fingerprint into context,fingerprint
+    from private_generation.generation_claim_snapshots s where s.job_id=v_job_id;
+  if context is null or context#>'{learningMemory,studentPerformanceEvidence}' is distinct from capsule then
+    raise exception 'S3 real normal claim did not freeze evidence: %',batch;
+  end if;
+  update public.feedback set parent_comments='Edited after claim'
+    where material_id='e1111111-1111-1111-1111-111111111111';
+  replay := public.worker_generation_context(v_job_id,'synthetic-s3-normal');
+  if replay is distinct from context or fingerprint is distinct from
+      'sha256:'||encode(extensions.digest(convert_to(context::text,'UTF8'),'sha256'),'hex') then
+    raise exception 'S3 replay changed frozen feedback/evidence/fingerprint';
+  end if;
+  update private_generation.generation_claim_snapshots set generation_context=context-'learningMemory'
+    where generation_claim_snapshots.job_id=v_job_id;
+  replay := public.worker_generation_context(v_job_id,'synthetic-s3-normal');
+  if replay ? 'learningMemory' then raise exception 'S3 injected into old in-flight claim'; end if;
+  if has_function_privilege('authenticated','public.worker_generation_context(uuid,text)','execute')
+    or has_function_privilege('anon','private_generation.student_performance_capsule(uuid,timestamptz,uuid)','execute') then
+    raise exception 'S3 private evidence is browser callable';
+  end if;
+end $$;
+-- Bounded detail and disjoint older aggregates; every fixture is rolled back.
+do $$
+declare packet_id uuid; questions jsonb; answers jsonb; results jsonb; capsule jsonb;
+begin
+  select jsonb_agg(jsonb_build_object('id','bounded-'||n,'prompt',repeat('長',1000),'itemType','single_choice','options',jsonb_build_array('One','Two'))),
+    jsonb_object_agg('bounded-'||n,repeat('答',1000)),
+    jsonb_agg(jsonb_build_object('question_id','bounded-'||n,'status','incorrect','correct_answer','One'))
+    into questions,answers,results from generate_series(1,15) n;
+  for i in 1..4 loop
+    packet_id := extensions.gen_random_uuid();
+    insert into public.materials(id,child_id,material_week,revision,rule_version,input_snapshot,
+      student_pdf_path,parent_answer_pdf_path,canonical_source,generation_summary)
+    values(packet_id,'d2222222-2222-2222-2222-222222222222',current_date-i,1,'synthetic-s3','{}',
+      'synthetic/student.pdf','synthetic/answer.pdf',jsonb_build_object('studentLesson',jsonb_build_object(
+        'practice',jsonb_build_array(jsonb_build_object('questions',questions)),
+        'opening',jsonb_build_object('activity',jsonb_build_object('type','question','prompt','Reflect')))), '{}');
+    insert into public.student_material_submissions(material_id,child_id,answers,self_check,results,submitted_at)
+    values(packet_id,'d2222222-2222-2222-2222-222222222222',answers||'{"opening-reflection":"My reflection"}',
+      '[]',results,now()-i*interval '1 hour');
+  end loop;
+  capsule := private_generation.student_performance_capsule('d2222222-2222-2222-2222-222222222222',now(),null);
+  if jsonb_array_length(capsule->'recentSubmissions')<>3
+    or jsonb_array_length(capsule->'items')>12
+    or octet_length((capsule->'items')::text)>44000
+    or (capsule->>'omittedDetailCount')::int<1
+    or capsule#>>'{olderCounts,submissions}'<>'1'
+    or capsule#>>'{olderCounts,incorrect}'<>'15' then
+    raise exception 'S3 bounds or older aggregation failed';
+  end if;
+  -- Isolate answered opening reflection without inventing automatic grading.
+  update public.student_material_submissions set results='[]',answers='{"opening-reflection":"My reflection"}'
+    where material_id=packet_id;
+  capsule := private_generation.student_performance_capsule('d2222222-2222-2222-2222-222222222222',now(),packet_id);
+  if not capsule->'items' @> '[{"questionId":"opening-reflection","status":"open_review","responseNote":"My reflection","gradingBasis":"ungraded"}]' then
+    raise exception 'S3 opening reflection evidence lost';
+  end if;
+end $$;
 rollback;
