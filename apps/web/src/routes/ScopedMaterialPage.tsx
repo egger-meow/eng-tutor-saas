@@ -72,6 +72,7 @@ export function ScopedMaterialContent({
         <p className="scoped-material-subtitle">
           每週一份專屬英文教材已備妥，可直接在下方預覽學生教材，或下載列印。
         </p>
+        <p className="muted">這個連結只開啟本份教材。線上作答與保存進度，請使用教材所屬的家長帳號登入。</p>
       </div>
 
       <MaterialPreview pdfUrl={state.studentPdfUrl} />

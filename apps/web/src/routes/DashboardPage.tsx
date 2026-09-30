@@ -58,7 +58,7 @@ export function DashboardPage({ session }: { session: Session }) {
               {capacityFull
                 ? '建立資料不會收費，也不需綁定信用卡。有名額釋出時我們會寄 Email 通知你，再決定是否開始。'
                 : enrollment?.freePilotActive
-                  ? 'Beta 期間目前每週專屬教材 NT$0，免填信用卡、免綁卡。每週完成回饋後，系統會接著準備下一週教材。'
+                  ? 'Beta 期間目前每週專屬教材 NT$0，免填信用卡、免綁卡。提交教材後可選填回饋，再明確申請下一份教材。'
                   : '完全免費生成第一週專屬學習包（含學生教材與家長解答），不需綁定信用卡，2 分鐘即可完成。'}
             </p>
 
@@ -78,7 +78,7 @@ export function DashboardPage({ session }: { session: Session }) {
               <div>
                 <p className="eyebrow">本週教材</p>
                 <h1 style={{ maxWidth: '40rem' }}>每個孩子，都有自己的下一步。</h1>
-                <p className="dashboard-subtitle">查看本週交付、完成回饋，讓下一份教材接著成長。</p>
+                <p className="dashboard-subtitle">繼續閱讀與作答；提交後可選填回饋，再申請下一份。</p>
               </div>
               <button className="button button-secondary" type="button" onClick={() => navigate('/children/new')}>
                 ＋ 新增孩子

@@ -28,11 +28,12 @@ export async function submitStudentMaterial(materialId: string, version: number)
 }
 
 export async function saveStudentParentFeedback(materialId: string, input: {
-  difficulty: number; completionRate: number; weakArea: string | null; comments: string
+  difficulty: number; completionRate: number; weakArea: string | null; comments: string;
+  mistakesText?: string; childComments?: string
 }): Promise<void> {
   const { error } = await getSupabaseClient().rpc('save_student_parent_feedback', {
     p_material_id: materialId, p_difficulty: input.difficulty, p_completion_rate: input.completionRate,
-    p_weak_area: input.weakArea, p_mistakes_text: '', p_child_comments: '', p_parent_comments: input.comments,
+    p_weak_area: input.weakArea, p_mistakes_text: input.mistakesText ?? '', p_child_comments: input.childComments ?? '', p_parent_comments: input.comments,
   })
   if (error) throw error
 }

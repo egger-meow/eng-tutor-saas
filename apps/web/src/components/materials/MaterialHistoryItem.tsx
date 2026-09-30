@@ -36,11 +36,11 @@ export function MaterialHistoryItem({ material, childName, onFeedbackSaved }: Ma
       {summary.learningAdjustmentSummary && <p className="muted">{summary.learningAdjustmentSummary}</p>}
       <MaterialActions material={material} childName={childName} showPreviewLink={true} />
       <FeedbackSummary feedback={material.feedback} />
-      {material.feedback ? (
+      {released && material.feedback ? (
         <button className="text-link button-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起回饋' : '修改回饋'}</button>
-      ) : (
+      ) : released ? (
         <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
-      )}
+      ) : null}
       {feedbackOpen && <FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} />}
     </article>
   )

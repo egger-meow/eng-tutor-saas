@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { handleInternalLink } from '../../../app/use-route'
+import { getSupabaseClient } from '../../../lib/supabase'
 import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
@@ -39,6 +41,8 @@ export function PaperReader({
   const [activeChapter, setActiveChapter] = useState<string>('opening')
   const [submission, setSubmission] = useState<SubmissionResult | null>(null)
   const [submissionLoading, setSubmissionLoading] = useState(true)
+  const [submissionFailed, setSubmissionFailed] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [actionBusy, setActionBusy] = useState(false)
   const [actionError, setActionError] = useState('')
   const [feedbackChoice, setFeedbackChoice] = useState<'ask' | 'form' | 'skip' | 'saved'>('ask')
@@ -46,10 +50,34 @@ export function PaperReader({
   const [difficulty, setDifficulty] = useState(3)
   const [weakArea, setWeakArea] = useState('')
   const [comments, setComments] = useState('')
+  const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const [feedbackReady, setFeedbackReady] = useState(false)
+  const [feedbackDetails, setFeedbackDetails] = useState({ mistakesText: '', childComments: '' })
+
+  async function openFeedback() {
+    setFeedbackChoice('form')
+    setFeedbackLoading(true)
+    setFeedbackReady(false)
+    setActionError('')
+    try {
+      const { data, error } = await getSupabaseClient().from('feedback')
+        .select('difficulty, weak_area, parent_comments, mistakes_text, child_comments').eq('material_id', projection.material_id).maybeSingle()
+      if (error) throw error
+      if (data) {
+        setDifficulty(data.difficulty ?? 3)
+        setWeakArea(data.weak_area ?? '')
+        setComments(data.parent_comments ?? '')
+        setFeedbackDetails({ mistakesText: data.mistakes_text ?? '', childComments: data.child_comments ?? '' })
+      }
+      setFeedbackReady(true)
+    } catch { setActionError('既有回饋無法載入，請重試後再儲存。') }
+    finally { setFeedbackLoading(false) }
+  }
 
   useEffect(() => {
     let active = true
     setSubmissionLoading(true)
+    setSubmissionFailed(false)
     void fetchStudentSubmission(projection.material_id).then((result) => {
       if (active) {
         setSubmission(result)
@@ -58,13 +86,13 @@ export function PaperReader({
           setRequestMessage('已收到下一份申請。')
         }
       }
-    }).catch(() => { if (active) setActionError('提交狀態暫時無法載入，請重新整理。') })
+    }).catch(() => { if (active) setSubmissionFailed(true) })
       .finally(() => { if (active) setSubmissionLoading(false) })
     return () => { active = false }
-  }, [projection.material_id])
+  }, [projection.material_id, loadAttempt])
 
   async function submitWholeMaterial() {
-    if (actionBusy || status !== 'saved' || hasConflict || submission) return
+    if (actionBusy || submissionFailed || status !== 'saved' || hasConflict || submission) return
     if (!window.confirm('可提交部分完成的教材。提交後無法修改作答，現在要送出嗎？')) return
     setActionBusy(true)
     setActionError('')
@@ -81,6 +109,7 @@ export function PaperReader({
   }
 
   async function saveOptionalFeedback() {
+    if (actionBusy || !feedbackReady) return
     setActionBusy(true)
     setActionError('')
     try {
@@ -88,7 +117,7 @@ export function PaperReader({
       const total = submission?.results.length ?? 0
       await saveStudentParentFeedback(projection.material_id, {
         difficulty, completionRate: total ? Math.round(answered * 4 / total) * 25 : 0,
-        weakArea: weakArea || null, comments,
+        weakArea: weakArea || null, comments, ...feedbackDetails,
       })
       setFeedbackChoice('saved')
     } catch { setActionError('回饋未儲存，請再試一次。') }
@@ -96,6 +125,7 @@ export function PaperReader({
   }
 
   async function requestNext() {
+    if (actionBusy) return
     setActionBusy(true)
     setActionError('')
     try {
@@ -108,12 +138,26 @@ export function PaperReader({
   }
 
   const lesson = projection.student_lesson ?? {}
+  const questionDescriptions = new Map([
+    ...(lesson.practice?.flatMap((stage) => stage.questions) ?? []),
+    ...(lesson.homework?.questions ?? []),
+  ].map((question) => [question.id || question.questionId, question.prompt]))
+
+  function jumpToQuestion(questionId: string) {
+    const card = document.getElementById(`q-card-${questionId}`)
+    if (!card) return
+    card.tabIndex = -1
+    card.scrollIntoView({ block: 'center' })
+    card.focus({ preventScroll: true })
+  }
 
   function handleChapterClick(id: string) {
     setActiveChapter(id)
     const element = document.getElementById(`chapter-${id}`)
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      element.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
+      element.tabIndex = -1
+      element.focus({ preventScroll: true })
     }
   }
 
@@ -127,7 +171,9 @@ export function PaperReader({
 
   return (
     <div className="paper-reader-container" inert={isInitialLoading || submissionLoading} aria-busy={isInitialLoading || submissionLoading}>
-      {isInitialLoading && <p role="status">正在載入作答草稿…</p>}
+      {(isInitialLoading || submissionLoading) && <p role="status">正在載入作答與提交狀態…</p>}
+      {submissionFailed && <div role="alert"><p>提交狀態暫時無法載入。確認前先保留閱讀，避免重複提交。</p><button type="button" className="button" onClick={() => setLoadAttempt((n) => n + 1)}>重試提交狀態</button></div>}
+      {status === 'idle' && !isInitialLoading && !submission && <div role="alert"><p>草稿尚未載入，請重新整理再作答。</p><button className="button" type="button" onClick={() => window.location.reload()}>重新載入草稿</button></div>}
       {/* Sticky Top Toolbar with Save Status & Quick Navigation */}
       <header className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
         <div className="paper-reader-toolbar-left">
@@ -138,7 +184,9 @@ export function PaperReader({
           </div>
 
           {/* Save Status Badge */}
-          <div className={`paper-save-status status-${status}`} role="status">
+          <div className={`paper-save-status status-${submission ? 'saved' : status}`} role="status" aria-live="polite">
+            {submission && <span>✓ 已提交 · {submission.next_requested || requestMessage === '已收到下一份申請。' ? '已申請下一份' : '作答已鎖定'}</span>}
+            {!submission && <>
             {status === 'saving' && <span>⏳ 儲存中…</span>}
             {status === 'saved' && (
               <span>✓ 草稿已保存 {formattedSavedTime ? `(${formattedSavedTime})` : ''}</span>
@@ -165,6 +213,7 @@ export function PaperReader({
               </span>
             )}
             {status === 'conflict' && <span>⚠️ 發現新版本衝突</span>}
+            </>}
           </div>
         </div>
 
@@ -173,10 +222,11 @@ export function PaperReader({
             <button
               type="button"
               className="button button-secondary"
+              disabled={!submission && status !== 'saved'}
               style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
               onClick={onSwitchToPdf}
             >
-              📄 切換列印版 PDF
+              📄 空白列印版 PDF
             </button>
           )}
 
@@ -188,7 +238,7 @@ export function PaperReader({
               className="button button-secondary"
               style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
             >
-              ⬇ 下載紙本 PDF
+              ⬇ 下載空白學生教材
             </a>
           )}
         </div>
@@ -262,7 +312,7 @@ export function PaperReader({
       </header>
 
       {/* Conflict Resolution Banner */}
-      {hasConflict && (
+      {hasConflict && !submission && (
         <div className="paper-conflict-banner" role="alert">
           <div>
             <strong>⚠️ 偵測到版本衝突</strong>
@@ -291,7 +341,7 @@ export function PaperReader({
         </div>
       )}
 
-      <AnswerReadOnlyContext.Provider value={Boolean(submission) || actionBusy}>
+      <AnswerReadOnlyContext.Provider value={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}>
       {/* Chapter 1: Opening */}
       <OpeningRenderer
         opening={lesson.opening}
@@ -342,29 +392,36 @@ export function PaperReader({
           <>
             <p>可以只完成一部分。未作答的題目會標為「未作答」，不算答錯；整份提交後才能查看客觀題正解。</p>
             <button className="button button-primary" type="button" onClick={() => void submitWholeMaterial()}
-              disabled={actionBusy || isInitialLoading || submissionLoading || status !== 'saved' || hasConflict}>
+              disabled={actionBusy || isInitialLoading || submissionLoading || submissionFailed || status !== 'saved' || hasConflict}>
               {actionBusy ? '提交中…' : '提交整份教材'}
             </button>
             {status !== 'saved' && <p className="muted">請等待草稿完成儲存後再提交。</p>}
+            {['unsaved', 'saving', 'error', 'conflict'].includes(status) && <p role="status">離開教材前，請先完成儲存或處理衝突。</p>}
           </>
         )}
         {submission && (
           <>
             <p role="status">已於 {new Date(submission.submitted_at).toLocaleString('zh-TW')} 提交。本次作答已鎖定。</p>
+            <p>未作答不算答錯；開放題尚未評分，可參考答案自行回顧。</p>
             <ul>
-              {submission.results.map((result) => (
+              {submission.results.map((result, index) => (
                 <li key={result.question_id}>
-                  {result.question_id}：{{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
+                  <a href={`#q-card-${result.question_id}`} onClick={(event) => { event.preventDefault(); jumpToQuestion(result.question_id) }}>
+                    {questionDescriptions.get(result.question_id) ?? `第 ${index + 1} 題`}
+                  </a>：{{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
                   {result.correct_answer && <> · 正解：{result.correct_answer}</>}
                 </li>
               ))}
             </ul>
             {feedbackChoice === 'ask' && <div className="form-actions">
               <p>要補充家長回饋嗎？這是選填。</p>
-              <button className="button button-secondary" type="button" onClick={() => setFeedbackChoice('form')}>填寫回饋</button>
+              <button className="button button-secondary" type="button" onClick={() => void openFeedback()}>填寫回饋</button>
               <button className="button button-secondary" type="button" onClick={() => setFeedbackChoice('skip')}>略過回饋</button>
             </div>}
-            {feedbackChoice === 'form' && <div className="feedback-form">
+            {feedbackChoice === 'form' && <div className="feedback-form" aria-busy={feedbackLoading}>
+              {feedbackLoading && <p role="status">正在載入家長回饋…</p>}
+              {!feedbackReady && !feedbackLoading && <button type="button" className="button" onClick={() => void openFeedback()}>重試載入回饋</button>}
+              <fieldset disabled={!feedbackReady || actionBusy} className="paper-feedback-fields">
               <label>整體難度
                 <select value={difficulty} onChange={(event) => setDifficulty(Number(event.target.value))}>
                   <option value={1}>太簡單</option><option value={3}>剛剛好</option><option value={5}>太難</option>
@@ -380,8 +437,9 @@ export function PaperReader({
               <label>其他觀察（選填）
                 <textarea maxLength={2000} value={comments} onChange={(event) => setComments(event.target.value)} />
               </label>
-              <button className="button button-secondary" type="button" disabled={actionBusy} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
-              <button className="button button-link" type="button" onClick={() => setFeedbackChoice('skip')}>略過</button>
+              <button className="button button-secondary" type="button" disabled={actionBusy || !feedbackReady} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
+              </fieldset>
+              <button className="button button-link" type="button" disabled={actionBusy} onClick={() => setFeedbackChoice('skip')}>略過</button>
             </div>}
             {(feedbackChoice === 'saved' || feedbackChoice === 'skip') && !requestMessage && (
               <div className="form-actions">
@@ -399,7 +457,7 @@ export function PaperReader({
 
       {/* Footer Navigation */}
       <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
-        <a className="text-link button-link scoped-material-nav-link" href="/dashboard">
+        <a className="text-link button-link scoped-material-nav-link" href="/dashboard" onClick={handleInternalLink}>
           ← 查看所有教材與學習紀錄
         </a>
       </div>

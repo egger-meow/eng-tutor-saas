@@ -115,6 +115,7 @@ export function PracticeRenderer({
                 ✍️ 延伸思考練習：{adaptiveExtension.taskZh}
               </p>
               <textarea
+                aria-label={adaptiveExtension.taskZh}
                 readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的延伸思考…"

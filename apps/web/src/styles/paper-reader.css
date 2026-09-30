@@ -1,5 +1,29 @@
 /* Paper-like Interactive Reader Styling */
 
+.paper-reader-container { overflow-wrap: anywhere; }
+.paper-reader-container :is(button, select, input) { min-height: 44px; }
+.paper-reader-container :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--color-action); outline-offset: 3px;
+}
+.paper-reader-container :is(input, textarea) { font-size: 16px; scroll-margin-block: 12rem 4rem; }
+.paper-reader-container :is(.paper-sheet, .question-card) { scroll-margin-top: 12rem; min-width: 0; }
+.paper-reader-toolbar-left, .paper-reader-toolbar-right { flex-wrap: wrap; min-width: 0; }
+.paper-chapter-nav { max-width: 100%; }
+.speech-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
+.speech-controls select { max-width: 100%; font: inherit; }
+.speech-controls label { min-width: 0; }
+.projected-content { white-space: pre-wrap; overflow-wrap: anywhere; }
+.paper-reader-container:has(:is(input, textarea, select):focus) .paper-reader-toolbar { position: static; }
+@media (max-width: 640px) {
+  .paper-reader-toolbar { position: static !important; }
+  .paper-reader-container :is(.paper-sheet, .question-card) { scroll-margin-top: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .paper-reader-container *, .paper-reader-container *::before, .paper-reader-container *::after {
+    animation: none !important; transition: none !important; scroll-behavior: auto !important;
+  }
+}
+
 .paper-reader-container {
   max-width: 52rem;
   margin: 0 auto;
@@ -878,3 +902,7 @@
     min-height: 2.75rem;
   }
 }
+
+.paper-reader-container .tts-button { min-width: 44px; min-height: 44px; flex-shrink: 0; }
+.paper-reader-container :is(.ruled-textarea, .response-grid-input) { font-size: 16px; }
+.paper-feedback-fields { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: var(--space-3); }

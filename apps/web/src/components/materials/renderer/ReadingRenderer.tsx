@@ -4,6 +4,8 @@ import type {
   ReadingGenre,
 } from '../../../types/student-material'
 import { useSpeechSynthesis } from '../../../hooks/use-speech-synthesis'
+import { ProjectedContent } from './ProjectedContent'
+import { SpeechControls } from './SpeechControls'
 
 export interface ReadingRendererProps {
   reading?: ReadingSection
@@ -57,7 +59,8 @@ export function ReadingRenderer({
   onAnswerChange,
 }: ReadingRendererProps) {
   const readOnly = useAnswerReadOnly()
-  const { isSupported, isSpeaking, currentText, speak, stop } = useSpeechSynthesis()
+  const speech = useSpeechSynthesis()
+  const { isSupported, isSpeaking, currentText, speak, stop } = speech
 
   if (!reading) return null
 
@@ -68,7 +71,7 @@ export function ReadingRenderer({
   // Extract all english text for speech readout
   const allEnglishText = reading.blocks
     ? reading.blocks
-        .map((b) => (b.type === 'paragraph' ? b.text : b.type === 'dialogue' ? `${b.speaker}: ${b.text}` : ''))
+        .map((b) => (b.type === 'schedule-row' ? `${b.timeOrStep}: ${b.event}. ${b.detail ?? ''}` : b.type === 'dialogue' ? `${b.speaker}: ${b.text}` : b.text))
         .filter(Boolean)
         .join(' ')
     : reading.passage ?? ''
@@ -90,7 +93,7 @@ export function ReadingRenderer({
               type="button"
               className={`tts-button ${isReadingSpeaking ? 'speaking' : ''}`}
               title={isReadingSpeaking ? '停止朗讀' : '朗讀整篇文章'}
-              aria-label="朗讀整篇文章"
+              aria-label={isReadingSpeaking ? '停止朗讀整篇文章' : '朗讀整篇文章'}
               onClick={() => {
                 if (isReadingSpeaking) {
                   stop()
@@ -124,6 +127,7 @@ export function ReadingRenderer({
         </div>
       )}
 
+      <SpeechControls speech={speech} />
       {/* Reading Body */}
       <div className="reading-passage-body">
         {reading.blocks && reading.blocks.length > 0 ? (
@@ -159,7 +163,7 @@ export function ReadingRenderer({
                 </div>
               )
             }
-            return null
+            return <ProjectedContent key={index} value={block} />
           })
         ) : reading.passage ? (
           <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.85 }}>
@@ -196,6 +200,7 @@ export function ReadingRenderer({
                 ✍️ 延伸思考練習：{adaptiveExtension.taskZh}
               </p>
               <textarea
+                aria-label={adaptiveExtension.taskZh}
                 readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的延伸思考…"

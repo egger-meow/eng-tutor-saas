@@ -1,5 +1,6 @@
 import type { OpeningSection } from '../../../types/student-material'
 import { useAnswerReadOnly } from './AnswerReadOnlyContext'
+import { ProjectedContent } from './ProjectedContent'
 
 export interface OpeningRendererProps {
   opening?: OpeningSection
@@ -51,6 +52,7 @@ export function OpeningRenderer({
                 {activity.prompt}
               </p>
               <textarea
+                aria-label={activity.prompt}
                 readOnly={readOnly}
                 className="ruled-textarea"
                 placeholder="寫下你的課前想法（不計分，幫助進入學習情境）…"
@@ -87,6 +89,7 @@ export function OpeningRenderer({
             </div>
           )}
 
+          {!['question', 'observation', 'reading-purpose', 'direct-reading'].includes(activity.type) && <ProjectedContent value={activity} />}
           {activity.type === 'direct-reading' && (
             <p style={{ color: 'var(--color-muted)', fontStyle: 'italic', margin: 0 }}>
               請直接瀏覽本週精選單字，接著進入主文章閱讀。

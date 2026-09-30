@@ -5,6 +5,7 @@ const routeChangeEvent = 'paper-english:route-change'
 
 export function navigate(path: string) {
   if (typeof window === 'undefined') return
+  if (!window.dispatchEvent(new Event('paper-english:before-navigate', { cancelable: true }))) return
   const browserPath = path.startsWith('/') ? path : `/${path}`
   const nextUrl = new URL(browserPath, window.location.origin)
   const currentUrl = new URL(window.location.href)

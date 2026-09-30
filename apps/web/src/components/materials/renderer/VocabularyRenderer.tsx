@@ -1,5 +1,6 @@
 import type { VocabularyItem, VocabularyStatus } from '../../../types/student-material'
 import { useSpeechSynthesis } from '../../../hooks/use-speech-synthesis'
+import { SpeechControls } from './SpeechControls'
 
 export interface VocabularyRendererProps {
   vocabulary?: VocabularyItem[]
@@ -21,7 +22,8 @@ function getStatusBadgeLabel(status?: VocabularyStatus): { label: string; classN
 }
 
 export function VocabularyRenderer({ vocabulary }: VocabularyRendererProps) {
-  const { isSupported, isSpeaking, currentText, speak, stop } = useSpeechSynthesis()
+  const speech = useSpeechSynthesis()
+  const { isSupported, isSpeaking, currentText, speak, stop } = speech
 
   if (!vocabulary || vocabulary.length === 0) return null
 
@@ -37,6 +39,7 @@ export function VocabularyRenderer({ vocabulary }: VocabularyRendererProps) {
         </p>
       </div>
 
+      <SpeechControls speech={speech} />
       <div className="vocab-grid">
         {vocabulary.map((item) => {
           const statusBadge = getStatusBadgeLabel(item.status)
@@ -64,7 +67,7 @@ export function VocabularyRenderer({ vocabulary }: VocabularyRendererProps) {
                     type="button"
                     className={`tts-button ${isItemSpeaking ? 'speaking' : ''}`}
                     title={isItemSpeaking ? '停止播放' : `聆聽 ${item.word} 發音`}
-                    aria-label={`聆聽 ${item.word} 發音`}
+                    aria-label={isItemSpeaking ? `停止 ${item.word} 發音` : `聆聽 ${item.word} 發音`}
                     onClick={() => {
                       if (isItemSpeaking) {
                         stop()

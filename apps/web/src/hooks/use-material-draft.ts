@@ -62,6 +62,7 @@ export function useMaterialDraft({
   const saveRunningRef = useRef(false)
   const saveQueuedRef = useRef(false)
   const editRevisionRef = useRef(0)
+  const flushRef = useRef<(() => Promise<SaveDraftResult | null>) | null>(null)
 
   // 1. Initial Load of Draft
   useEffect(() => {
@@ -97,6 +98,7 @@ export function useMaterialDraft({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current)
       }
+      if (['unsaved', 'saving'].includes(statusRef.current)) void flushRef.current?.()
     }
   }, [materialId])
 
@@ -181,6 +183,24 @@ export function useMaterialDraft({
     },
     [materialId],
   )
+
+  flushRef.current = performSave
+
+  useEffect(() => {
+    function preventUnsavedExit(event: Event) {
+      if (['unsaved', 'saving', 'error', 'conflict'].includes(statusRef.current)) event.preventDefault()
+    }
+    function beforeUnload(event: BeforeUnloadEvent) {
+      preventUnsavedExit(event)
+      if (event.defaultPrevented) event.returnValue = ''
+    }
+    window.addEventListener('paper-english:before-navigate', preventUnsavedExit)
+    window.addEventListener('beforeunload', beforeUnload)
+    return () => {
+      window.removeEventListener('paper-english:before-navigate', preventUnsavedExit)
+      window.removeEventListener('beforeunload', beforeUnload)
+    }
+  }, [])
 
   // 3. Update answer with debouncing
   const updateAnswer = useCallback(

@@ -1,4 +1,5 @@
 import type { Question } from '../../../types/student-material'
+import { ProjectedContent } from './ProjectedContent'
 import { useAnswerReadOnly } from './AnswerReadOnlyContext'
 
 export interface QuestionRendererProps {
@@ -27,7 +28,7 @@ export function QuestionRenderer({
     <div className="question-card" id={`q-card-${qId}`}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)' }}>
         <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>Q{index + 1}.</span>
-        <p className="question-prompt">{question.prompt}</p>
+        <p id={`prompt-${qId}`} className="question-prompt">{question.prompt}</p>
       </div>
 
       {/* 1. Multiple Choice Questions */}
@@ -91,6 +92,7 @@ export function QuestionRenderer({
                           <td key={cIdx}>
                             {cell.responseUnitId ? (
                               <input
+                                aria-label={`${question.prompt} · ${row.label ?? `第 ${rIdx + 1} 列`} · ${layout.headers?.[cIdx] ?? `欄 ${cIdx + 1}`}`}
                                 readOnly={readOnly}
                                 type="text"
                                 className="response-grid-input"
@@ -124,6 +126,7 @@ export function QuestionRenderer({
                       {item.content && <span style={{ color: 'var(--color-text)' }}>{item.content}</span>}
                       {item.responseUnitId && (
                         <input
+                          aria-label={`${question.prompt} · ${item.label ?? `步驟 ${sIdx + 1}`}`}
                           readOnly={readOnly}
                           type="text"
                           className="response-grid-input"
@@ -139,9 +142,11 @@ export function QuestionRenderer({
             </div>
           )}
 
+          {!['table', 'organizer', 'sequence', 'lines'].includes(layout.type) && <ProjectedContent value={layout} />}
           {/* Lines */}
           {layout.type === 'lines' && (
             <textarea
+              aria-labelledby={`prompt-${qId}`}
               readOnly={readOnly}
               className="ruled-textarea"
               placeholder="在此輸入你的答案…"
@@ -154,8 +159,9 @@ export function QuestionRenderer({
       )}
 
       {/* 3. Written Response Default / Fallback */}
-      {!hasOptions && !layout && (
+      {!hasOptions && (!layout || !['table', 'organizer', 'sequence', 'lines'].includes(layout.type)) && (
         <textarea
+          aria-labelledby={`prompt-${qId}`}
           readOnly={readOnly}
           className="ruled-textarea"
           placeholder="在此輸入你的答案…"

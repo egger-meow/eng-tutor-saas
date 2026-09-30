@@ -2,6 +2,7 @@ import type {
   InstructionTopic,
   InstructionBlock,
 } from '../../../types/student-material'
+import { ProjectedContent } from './ProjectedContent'
 
 export interface InstructionRendererProps {
   instruction?: InstructionTopic[]
@@ -118,7 +119,7 @@ function renderBlock(block: InstructionBlock, key: number | string) {
     )
   }
 
-  return null
+  return <ProjectedContent key={key} value={block} />
 }
 
 export function InstructionRenderer({ instruction }: InstructionRendererProps) {

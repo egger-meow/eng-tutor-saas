@@ -13,10 +13,10 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
   const summary = readGenerationSummary(material.generation_summary)
   const released = isMaterialReleased(material)
   return (
-    <section className="weekly-panel" aria-labelledby="weekly-title">
+    <section className="weekly-panel" aria-labelledby={`weekly-title-${material.id}`}>
       <div className="weekly-copy">
         <p className="overline">本週學習 · {material.material_week}</p>
-        <h2 id="weekly-title">
+        <h2 id={`weekly-title-${material.id}`}>
           {released ? (
             <a
               href={`/materials/${material.id}`}
@@ -35,11 +35,11 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
       <MaterialActions material={material} childName={childName} showPreviewLink={true} />
       <div className="weekly-feedback">
         <FeedbackSummary feedback={material.feedback} />
-        {material.feedback ? (
+        {released && material.feedback ? (
           <button className="button-link text-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起' : '修改回饋'}</button>
-        ) : (
+        ) : released ? (
           <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
-        )}
+        ) : null}
       </div>
       {feedbackOpen && <FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} />}
     </section>

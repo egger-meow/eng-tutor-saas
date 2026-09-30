@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { saveFeedback, type FeedbackInput, type Material } from '../../lib/materials'
+import { fetchStudentSubmission, saveStudentParentFeedback } from '../../lib/student-material-api'
 
 type FeedbackFormProps = { material: Material; onSaved: () => void }
 
@@ -18,12 +19,28 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [detailsOpen, setDetailsOpen] = useState(hasExistingDetails)
+  const [submitted, setSubmitted] = useState<boolean | null>(null)
+  const [attempt, setAttempt] = useState(0)
+  useEffect(() => {
+    let active = true
+    setSubmitted(null)
+    void fetchStudentSubmission(material.id).then((result) => { if (active) setSubmitted(Boolean(result)) })
+      .catch(() => { if (active) setError('無法確認提交狀態，請重試。') })
+    return () => { active = false }
+  }, [material.id, attempt])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (busy || submitted === null) return
     setBusy(true)
     setError('')
     try {
+      if (submitted) {
+        await saveStudentParentFeedback(material.id, { difficulty: input.difficulty, completionRate: input.completion_rate,
+          weakArea: input.weak_area, comments: input.parent_comments, mistakesText: input.mistakes_text, childComments: input.child_comments })
+        onSaved()
+        return
+      }
       const result = await saveFeedback(material.child_id, material.id, input)
       if (result.reason === 'MONTHLY_LIMIT') {
         setNotice(`回饋已儲存。本服務月已使用 ${result.used ?? 4}/${result.limit ?? 4} 份，下一個服務月可再次申請。`)
@@ -111,8 +128,9 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
       )}
 
       <div className="feedback-submit field-wide">
-        <button className="button" type="submit" disabled={busy}>{busy ? '送出中…' : input.completion_rate === 0 ? '儲存回饋' : '送出回饋並申請下一份'}</button>
-        <p className="muted">完成一些內容後送出，就會開始製作下一份教材；完成即開放。每位孩子每個服務月最多 4 份。</p>
+        <button className="button" type="submit" disabled={busy || submitted === null}>{busy ? '送出中…' : submitted || input.completion_rate === 0 ? '儲存回饋' : '送出回饋並申請下一份'}</button>
+        {submitted ? <a className="text-link" href={`/materials/${material.id}`}>返回教材查看結果／申請下一份</a> : <p className="muted">紙本回饋完成一些內容後送出，就會申請下一份。每位孩子每個服務月最多 4 份。</p>}
+        {submitted === null && error && <button className="button button-secondary" type="button" onClick={() => { setError(''); setAttempt((n) => n + 1) }}>重試提交狀態</button>}
       </div>
       {error && <p className="field-wide notice notice-error" role="alert">{error}</p>}
       {notice && <p className="field-wide notice" role="status">{notice}</p>}

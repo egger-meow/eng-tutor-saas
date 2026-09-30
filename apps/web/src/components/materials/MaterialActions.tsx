@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { handleInternalLink } from '../../app/use-route'
 import { isMaterialReleased, materialDownloadFilename, openMaterialDownload, type Material } from '../../lib/materials'
 import { canOpenParentAnswer } from '../../lib/student-material-api'
+import { MaterialLearningStatus } from './MaterialLearningStatus'
 
 type MaterialActionsProps = {
   material: Material
@@ -17,6 +18,7 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
 
   useEffect(() => {
     let active = true
+    setAnswerUnlocked(false)
     if (released) {
       void canOpenParentAnswer(material.id).then((unlocked) => {
         if (active) setAnswerUnlocked(unlocked)
@@ -42,6 +44,7 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
   return (
     <div>
       {!released && material.release_at && <p className="muted">教材已準備完成，於 {new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(material.release_at))} 開放下載。</p>}
+      {showPreviewLink && released && <MaterialLearningStatus key={material.id} materialId={material.id} />}
       <div className="material-actions">
         {showPreviewLink && released && (
           <a
@@ -49,7 +52,7 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
             href={`/materials/${material.id}`}
             onClick={handleInternalLink}
           >
-            線上預覽教材
+            查看／繼續本週教材
           </a>
         )}
         <button

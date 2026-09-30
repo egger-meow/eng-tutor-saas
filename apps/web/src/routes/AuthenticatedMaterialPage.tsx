@@ -57,6 +57,7 @@ export function AuthenticatedMaterialContent({
     return (
       <div>
         <PaperReader
+          key={state.projection.material_id}
           projection={state.projection}
           studentPdfUrl={state.studentPdfUrl}
           onSwitchToPdf={() => setViewMode('pdf')}

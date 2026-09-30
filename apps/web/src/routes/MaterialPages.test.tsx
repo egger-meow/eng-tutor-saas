@@ -288,7 +288,7 @@ describe('weekly material inline preview and page states', () => {
     )
 
     // Direct preview button linking to /materials/:id
-    expect(html).toContain('線上預覽教材')
+    expect(html).toContain('查看／繼續本週教材')
     expect(html).toContain('href="/materials/mat-released-123"')
 
     // Title links to preview route as well
@@ -321,7 +321,7 @@ describe('weekly material inline preview and page states', () => {
         <MaterialActions material={futureMaterial} childName="Jonathan" showPreviewLink={true} />
       )
 
-      expect(html).not.toContain('線上預覽教材')
+      expect(html).not.toContain('查看／繼續本週教材')
       expect(html).toContain('尚未開放下載')
     } finally {
       vi.useRealTimers()
@@ -373,8 +373,8 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('paper-reader-container')
     expect(html).toContain('How Games Place Sound')
     expect(html).toContain('vibration')
-    expect(html).toContain('切換列印版 PDF')
-    expect(html).toContain('下載紙本 PDF')
+    expect(html).toContain('空白列印版 PDF')
+    expect(html).toContain('下載空白學生教材')
   })
 })
 

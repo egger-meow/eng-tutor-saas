@@ -3505,6 +3505,23 @@ Additional legal routes may be required before paid launch.
 
 Main dashboard should be child-centric.
 
+The primary released-material action is `查看／繼續本週教材`. Its progress is
+read from the authorized draft/submission APIs: ready to answer, saved draft,
+submitted, or next packet requested. A failed progress read must show uncertainty
+and a retry, without blocking entry to the material. Prepared and generating
+states retain the single immediate-next-delivery surface below.
+
+The interactive reader keeps answer controls read-only after submission while
+reading and device TTS remain available. Submission status failures block answer
+editing and submission until retry succeeds. Pending saves block in-app navigation
+and switching to the printable view; browser document exits show an unsaved-work
+warning. Optional feedback editing saves only feedback for submitted packets;
+the next-packet request remains a separate action. Historical paper feedback keeps
+its established atomic request path. Direct feedback links resolve the specific
+owned released material independently of history pagination and offer a return
+to that material and the dashboard. Text inputs are typed responses, not stored
+pen strokes.
+
 The authenticated material area states that each finished weekly package appears there and a notification is sent to the login email. Email failure never removes or rolls back a released material. A valid email token used by its matching authenticated parent redirects to the canonical material area with the token removed from the visible URL; another signed-in account remains in narrow scoped-token mode and receives no access to the token owner's Dashboard.
 
 The dashboard may include a compact Student Library summary and sequence-cursor timeline. It must use parent-safe, evidence-backed language: targets without explicit assessment remain learning/uncertain, and mastery is labelled as supported by spaced results rather than inferred from completion. It must not expose canonical source, prompts, model reasoning, mastery scores, confidence jargon, or internal curriculum machinery.
