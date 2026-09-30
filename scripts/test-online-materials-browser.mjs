@@ -60,10 +60,25 @@ try {
     let quota = false
     let failSubmissionRead = true
     let savedFeedback = null
+    let pdfRequests = 0
     await context.route('http://127.0.0.1:54321/**', async (route) => {
       const name = new URL(route.request().url()).pathname.split('/').at(-1)
       const body = route.request().method() === 'POST' ? route.request().postDataJSON() : null
       let response
+      if (name === 'material-pdf') {
+        assert.equal(body.materialId, 'synthetic-material')
+        assert.equal(body.kind, 'student')
+        assert.equal(body.path, undefined, 'browser cannot select a storage object')
+        pdfRequests++
+        await new Promise((done) => setTimeout(done, 400))
+        response = pdfRequests === 1 ? { state: 'queued' } : { state: 'ready', url: 'http://127.0.0.1:54321/synthetic.pdf' }
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) })
+        return
+      }
+      if (name === 'synthetic.pdf') {
+        await route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-synthetic-download-fixture' })
+        return
+      }
       if (name === 'feedback') {
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ difficulty: 3, weak_area: 'reading', parent_comments: 'Existing observation', mistakes_text: 'Preserved mistakes', child_comments: 'Preserved child voice' }) })
         return
@@ -100,6 +115,15 @@ try {
     await page.goto(url)
     const submit = page.getByRole('button', { name: '提交整份教材', exact: true })
     await submit.waitFor()
+    await page.getByRole('button', { name: '下載學生教材', exact: true }).click()
+    await page.getByRole('button', { name: '準備中…', exact: true }).waitFor()
+    assert.equal(await page.getByRole('button', { name: '準備中…', exact: true }).isDisabled(), true)
+    await page.getByText('PDF 正在準備', { exact: false }).waitFor()
+    const downloadEvent = page.waitForEvent('download')
+    await page.getByRole('button', { name: '下載學生教材', exact: true }).click()
+    const downloaded = await downloadEvent
+    assert.match(downloaded.suggestedFilename(), /學生教材\.pdf$/)
+    assert.equal(pdfRequests, 2)
     await page.waitForFunction(() => !document.querySelector('.paper-reader-container')?.inert)
     await page.getByRole('button', { name: '重試提交狀態', exact: true }).waitFor()
     assert.equal(await submit.isDisabled(), true)

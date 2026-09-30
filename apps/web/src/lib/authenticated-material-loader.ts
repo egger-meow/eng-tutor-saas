@@ -45,8 +45,14 @@ export async function loadAuthenticatedMaterial(materialId: string, userId: stri
           .from('weekly-materials')
           .createSignedUrl(material.student_pdf_path, 1800)
         if (signedError || !signedData?.signedUrl) {
-          console.error('Failed to create student PDF preview signed URL', signedError)
-          previewError = true
+          const recovered = await getSupabaseClient().functions.invoke('material-pdf', {
+            body: { materialId, kind: 'student' },
+          })
+          if (!recovered.error && recovered.data?.state === 'ready' && typeof recovered.data.url === 'string') {
+            studentPdfUrl = recovered.data.url
+          } else {
+            previewError = true
+          }
         } else {
           studentPdfUrl = signedData.signedUrl
         }

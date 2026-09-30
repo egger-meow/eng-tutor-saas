@@ -400,6 +400,9 @@ verify_jwt = true
 [functions.material-access]
 verify_jwt = false
 
+[functions.material-pdf]
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

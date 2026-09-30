@@ -30,12 +30,13 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
   async function download(kind: 'student' | 'parent') {
     setBusy(kind)
     setError('')
-    const path = kind === 'student' ? material.student_pdf_path : material.parent_answer_pdf_path
     try {
-      await openMaterialDownload(path, materialDownloadFilename(childName, material.material_week, kind, material.week_number ?? null))
+      await openMaterialDownload(material.id, kind, materialDownloadFilename(childName, material.material_week, kind, material.week_number ?? null))
     } catch (caught) {
-      console.error('Material download failed', caught)
-      setError('目前無法下載教材，請稍後再試。')
+      if (!(caught instanceof Error && caught.message === 'PDF_PENDING')) console.error('Material download failed', caught)
+      setError(caught instanceof Error && caught.message === 'PDF_PENDING'
+        ? 'PDF 正在準備，可能需要數分鐘。請稍後再按下載；重複按下載不會重複產生工作。'
+        : '目前無法下載教材，請稍後再按下載重試。')
     } finally {
       setBusy(null)
     }
@@ -59,16 +60,20 @@ export function MaterialActions({ material, childName, showPreviewLink = false }
           className={`button ${showPreviewLink ? 'button-secondary' : ''}`}
           type="button"
           disabled={!released || busy !== null}
+          aria-busy={busy === 'student'}
           onClick={() => void download('student')}
         >
+          {busy === 'student' && <span className="loading-spinner" aria-hidden="true" style={{ display: 'inline-block', width: 16, height: 16, marginRight: 8 }} />}
           {busy === 'student' ? '準備中…' : released ? '下載學生教材' : '尚未開放下載'}
         </button>
         <button
           className="button button-secondary"
           type="button"
           disabled={!released || !answerUnlocked || busy !== null}
+          aria-busy={busy === 'parent'}
           onClick={() => void download('parent')}
         >
+          {busy === 'parent' && <span className="loading-spinner" aria-hidden="true" style={{ display: 'inline-block', width: 16, height: 16, marginRight: 8 }} />}
           {busy === 'parent' ? '準備中…' : released && answerUnlocked ? '下載家長解答' : released ? '提交教材後開放解答' : '尚未開放下載'}
         </button>
       </div>

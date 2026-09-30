@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { createWorkerClient } from './client.js'
+import { processMaterialPdfs } from './material-pdf.js'
 import { claimJobs, completeCurriculumJob, completeJob, failClaimedJob, loadGenerationContext } from './pipeline.js'
 import { buildCurriculumPromptBundle } from './prompt-v2.js'
 import { drainCurriculumSubmissions, processCurriculumSubmissions } from './submission-processor.js'
@@ -32,6 +33,13 @@ function option(name: string, required = true): string | undefined {
 async function main(): Promise<void> {
   const command = process.argv[2]
   const client = createWorkerClient()
+
+  if (command === 'process-material-pdfs') {
+    const result = await processMaterialPdfs(client, Number(option('limit', false) ?? 5))
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    if (result.failed > 0) process.exitCode = 1
+    return
+  }
 
   if (command === 'production-authoring') {
     const action = process.argv[3]

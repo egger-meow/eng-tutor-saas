@@ -74,3 +74,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: pnpm --filter @paper-english/worker publish-week1-fast -- --processor github-actions-week1-fast --limit 10
+
+      - name: Recover requested PDF artifacts
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: pnpm worker process-material-pdfs --limit 5

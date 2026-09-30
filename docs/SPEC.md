@@ -3413,6 +3413,10 @@ Requirements:
 
 The exact execution environment should be chosen during implementation based on Chromium / rendering support.
 
+Authenticated PDF downloads use a scoped `material-pdf` endpoint. Existing inspected publication PDFs are reused; missing objects and expired derived caches enter a separate, idempotent artifact queue keyed by material, revision, renderer version, and output kind. Trusted Node/Playwright execution on the existing GitHub Actions runner processes this queue, with one active ten-minute lease, stale-worker rejection, and explicit retry after failure. Student exports replay only the immutable canonical Student projection, never drafts or submissions. Generated caches are reusable for thirty days and signed download URLs last sixty seconds. Cache expiry does not delete an object; historical publication files are preserved.
+
+This additive recovery strategy retains the existing publication contract: Week 1 Publisher and normal Finisher still render, inspect, and privately store both PDFs before completion. It does not claim reduced initial publication cost. Decoupling publication from PDFs or deleting historical objects requires a separately verified contract change. No browser-rendering cloud service is assumed or newly purchased.
+
 ---
 
 # 159. Public Routes

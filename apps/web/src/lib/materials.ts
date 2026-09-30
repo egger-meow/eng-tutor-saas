@@ -395,13 +395,16 @@ export function materialDownloadFilename(childName: string, materialWeek: string
   return `${safeChildName}-${weekLabel}-${materialWeek}-${label}.pdf`
 }
 
-export async function openMaterialDownload(path: string, filename: string): Promise<void> {
-  const { data, error } = await getSupabaseClient().storage
-    .from('weekly-materials')
-    .createSignedUrl(path, 60)
+export async function openMaterialDownload(materialId: string, kind: 'student' | 'parent', filename: string): Promise<void> {
+  const { data, error } = await getSupabaseClient().functions.invoke('material-pdf', {
+    body: { materialId, kind, retry: true },
+  })
   if (error) throw error
+  if (data.state === 'failed') throw new Error('PDF_FAILED')
+  if (data.state !== 'ready') throw new Error('PDF_PENDING')
+  if (typeof data.url !== 'string') throw new Error('PDF_UNAVAILABLE')
 
-  const response = await fetch(data.signedUrl)
+  const response = await fetch(data.url)
   if (!response.ok) throw new Error(`Material download failed (${response.status})`)
 
   void touchParentActivity()
