@@ -38,6 +38,18 @@ Verification uses explicitly synthetic fixtures:
   the next package and its parent-facing adjustment explanation. This stage
   proves evidence delivery, not a newly generated production packet's pedagogy.
 
+Production delivery read-back:
+
+- Source `a9d5e685d202a516755a9e7ce5f15a1bb777fb35` pushed to main.
+- Remote migration history confirms `20260930052407` applied.
+- Active contract after delivery equals the contract above; no new release was
+  activated. Browser roles cannot execute the private evidence/context functions.
+- `supabase/tests/student-performance-production-readback.sql` passes both
+  locally and against production: isolated synthetic mixed-status evidence,
+  submission without parent feedback, claimed-context loading, snapshot replay
+  and wrong-worker denial. Transaction rolled back; no queue claim or publication.
+- GitHub run `36675424508`: verify and deploy-production jobs both success.
+
 Remaining acceptance: observe an authorized next production packet using this
 evidence and review its actual adjustment explanation. Physical device/audio/
 virtual-keyboard and authenticated production learning-loop acceptance from S2
