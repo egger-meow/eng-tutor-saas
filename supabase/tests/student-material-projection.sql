@@ -532,4 +532,48 @@ begin
     raise exception 'S3 opening reflection evidence lost';
   end if;
 end $$;
+-- S7: strict instrumentation boundary and transactional authoritative transitions.
+set local role authenticated;
+set local "request.jwt.claims" = '{"sub":"c1111111-1111-1111-1111-111111111111"}';
+select public.record_material_learning_event('e1111111-1111-1111-1111-111111111111','material_opened');
+select public.record_material_learning_event('e1111111-1111-1111-1111-111111111111','material_opened');
+select public.record_material_learning_event('e1111111-1111-1111-1111-111111111111','answer_started');
+do $$ begin
+  begin
+    perform public.record_material_learning_event('e1111111-1111-1111-1111-111111111111','material_submitted');
+    raise exception 'browser forged server transition';
+  exception when others then if sqlerrm <> 'INVALID_EVENT_NAME' then raise; end if; end;
+  begin
+    perform public.record_material_learning_event('e2222222-2222-2222-2222-222222222222','material_opened');
+    raise exception 'unreleased analytics accepted';
+  exception when others then if sqlerrm <> 'MATERIAL_NOT_AVAILABLE' then raise; end if; end;
+end $$;
+set local "request.jwt.claims" = '{"sub":"c2222222-2222-2222-2222-222222222222"}';
+do $$ begin
+  begin
+    perform public.record_material_learning_event('e1111111-1111-1111-1111-111111111111','material_opened');
+    raise exception 'cross family analytics accepted';
+  exception when others then if sqlerrm <> 'MATERIAL_NOT_AVAILABLE' then raise; end if; end;
+end $$;
+reset role;
+do $$ begin
+  if has_table_privilege('authenticated','public.material_learning_events','select')
+    or has_table_privilege('anon','public.material_learning_events','insert')
+    or has_function_privilege('anon','public.record_material_learning_event(uuid,text)','execute')
+    or has_function_privilege('authenticated','public.purge_expired_material_learning_events()','execute') then
+    raise exception 'learning analytics privileges exposed'; end if;
+  if (select count(*) from public.material_learning_events where material_id='e1111111-1111-1111-1111-111111111111'
+    and event_name='material_opened') <> 1 then raise exception 'learning event dedupe failed'; end if;
+  if (select count(*) from public.material_learning_events where material_id='e1111111-1111-1111-1111-111111111111'
+    and event_name in ('material_submitted','feedback_saved','next_requested') and origin='server') <> 3 then
+    raise exception 'missing authoritative learning transitions'; end if;
+end $$;
+update public.material_learning_events set created_at=now()-interval '91 days'
+  where material_id='e1111111-1111-1111-1111-111111111111' and event_name='answer_started';
+select public.purge_expired_material_learning_events();
+do $$ begin
+  if exists(select 1 from public.material_learning_events where created_at<now()-interval '90 days')
+    or not exists(select 1 from public.material_learning_events where material_id='e1111111-1111-1111-1111-111111111111'
+      and event_name='material_submitted') then raise exception 'retention removed wrong event'; end if;
+end $$;
 rollback;

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { touchParentActivity } from './parent-activity'
 import { getSupabaseClient } from './supabase'
+import { recordMaterialLearningEvent } from './material-learning-analytics'
 
 export type MaterialFeedback = {
   difficulty: number | null
@@ -416,6 +417,7 @@ export async function openMaterialDownload(materialId: string, kind: 'student' |
   link.style.display = 'none'
   document.body.append(link)
   link.click()
+  void recordMaterialLearningEvent(materialId, kind === 'student' ? 'student_downloaded' : 'parent_downloaded')
   link.remove()
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
 }

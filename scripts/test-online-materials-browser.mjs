@@ -61,6 +61,7 @@ try {
     let failSubmissionRead = true
     let savedFeedback = null
     let pdfRequests = 0
+    const learningEvents = []
     await context.route('http://127.0.0.1:54321/**', async (route) => {
       const name = new URL(route.request().url()).pathname.split('/').at(-1)
       const body = route.request().method() === 'POST' ? route.request().postDataJSON() : null
@@ -107,6 +108,11 @@ try {
       else if (name === 'request_next_after_student_submission') {
         if (quota) response = { requested: false, reason: 'MONTHLY_LIMIT', used: 4, limit: 4 }
         else { requests++; submission.next_requested = true; response = { requested: true } }
+      } else if (name === 'record_material_learning_event') {
+        assert.deepEqual(Object.keys(body).sort(), ['p_event_name', 'p_material_id'])
+        assert.equal(body.p_material_id, 'synthetic-material')
+        learningEvents.push(body.p_event_name)
+        response = null
       } else throw new Error(`Unexpected fixture RPC: ${name}`)
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response), headers: { 'access-control-allow-origin': '*' } })
     })
@@ -197,6 +203,10 @@ try {
     await page.getByRole('button', { name: '儲存回饋', exact: true }).click()
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).waitFor()
     assert.equal(requests, 1, 'saving optional feedback never requests next')
+    assert.ok(learningEvents.includes('material_opened'))
+    assert.ok(learningEvents.includes('answer_started'))
+    assert.ok(learningEvents.includes('student_downloaded'))
+    assert.ok(!learningEvents.includes('material_submitted'), 'authoritative events are not sent by browser')
     assert.equal(feedback, 1)
     assert.equal(savedFeedback.p_mistakes_text, 'Preserved mistakes')
     assert.equal(savedFeedback.p_child_comments, 'Preserved child voice')

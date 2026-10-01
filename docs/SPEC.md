@@ -3335,6 +3335,8 @@ Not from pretending client configuration is secret.
 
 # 153. Logging Privacy
 
+Learning event rows are private operational data, retained for 90 days and purged by a service-only worker command in the existing scheduled workflow. They are not anonymous because an authorized operator can resolve the opaque material ID. Browser roles have no direct table access; the narrow event RPC checks ownership, completed/released state and parent-answer submission gates. Retention cleanup deletes event rows only, preserving historical curriculum and student state. Scheduler execution and expired-row counts must be verified operationally.
+
 Operational logs should prefer opaque IDs.
 
 Avoid logging:
@@ -3706,6 +3708,10 @@ landing view
 
 After acquisition, downstream lifecycle signals continue to include Week 1 generated, Student PDF downloaded, feedback submitted, paid conversion, and month-2 retention. Analytics must preserve first-party attribution across the Magic Link without putting child data or parent Email in analytics metadata.
 
+Interactive learning uses a separate private `material_learning_events` stream: material opened, first answer input, save failure, whole-packet submission, optional feedback saved, explicit next request, and Student/Parent PDF download. Browser observations are best effort; submission, feedback and next request are recorded by server triggers in the same transaction as the authoritative state change. Browser RPCs cannot assert server transitions. Public synthetic demos and internal-test children are excluded. Events accept no arbitrary metadata, answer text, lesson content, personal identifiers, URL or access token; only an opaque material ID, fixed event name, origin and first timestamp are stored. Deduplicate per material/event. Do not backfill pre-instrumentation history.
+
+Second-packet usage joins the canonical weekly snapshot sequence number 2. Missing sequence remains unknown. Counts over the rolling retention window are descriptive signals, not a clean cohort conversion rate or proof of learning. Downloads mean bytes obtained and browser download initiated, not confirmed printing.
+
 Existing-parent direct login and the explicit additional-child confirmation/discard branch are separate valid paths and must not be misrepresented as first-time acquisition.
 
 ---
@@ -3780,6 +3786,8 @@ Engine Inspector displays the active engine specification as green 規格已全�
 ---
 
 # 173. Manual Recovery
+
+The online-materials runbook is `docs/operations/online-materials.md`, with service/operator-only queries in `docs/operations/material-learning-signals.sql`. Preserve drafts and immutable submissions during recovery; inspect uncertain RPC outcomes before repeating actions. Observe PDF queue state and actual scheduler steps without treating configured cron intervals as a delivery SLA. Initial monitoring uses existing workflow failures and targeted inspection, with no repeated no-change messages or new external notification service.
 
 Operator needs the ability to:
 

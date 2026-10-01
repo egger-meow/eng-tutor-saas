@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
 import { StudentLessonRenderer } from './StudentLessonRenderer'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
+import { recordMaterialLearningEvent } from '../../../lib/material-learning-analytics'
 
 export interface PaperReaderProps {
   projection: StudentMaterialProjection
@@ -46,6 +47,15 @@ export function PaperReader({
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [feedbackReady, setFeedbackReady] = useState(false)
   const [feedbackDetails, setFeedbackDetails] = useState({ mistakesText: '', childComments: '' })
+  const startedMaterial = useRef<string | null>(null)
+
+  useEffect(() => {
+    void recordMaterialLearningEvent(projection.material_id, 'material_opened')
+  }, [projection.material_id])
+
+  useEffect(() => {
+    if (status === 'error') void recordMaterialLearningEvent(projection.material_id, 'save_failed')
+  }, [projection.material_id, status])
 
   async function openFeedback() {
     setFeedbackChoice('form')
@@ -337,7 +347,13 @@ export function PaperReader({
       <StudentLessonRenderer lesson={lesson} answers={submission?.answers ?? answers}
         selfCheck={submission?.self_check ?? selfCheck}
         readOnly={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}
-        onAnswerChange={updateAnswer} onToggleSelfCheck={toggleSelfCheck} />
+        onAnswerChange={(key, value, immediate) => {
+          if (value.trim() && startedMaterial.current !== projection.material_id) {
+            startedMaterial.current = projection.material_id
+            void recordMaterialLearningEvent(projection.material_id, 'answer_started')
+          }
+          updateAnswer(key, value, immediate)
+        }} onToggleSelfCheck={toggleSelfCheck} />
 
       <section className="paper-sheet paper-completion" aria-label="完成本週教材">
         <h2 className="paper-section-title">完成本週教材</h2>

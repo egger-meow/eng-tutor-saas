@@ -34,6 +34,13 @@ async function main(): Promise<void> {
   const command = process.argv[2]
   const client = createWorkerClient()
 
+  if (command === 'purge-learning-events') {
+    const { data, error } = await client.rpc('purge_expired_material_learning_events', {})
+    if (error) throw new Error('Learning event retention cleanup failed')
+    if (Number(data) > 0) process.stdout.write(`${JSON.stringify({ expiredLearningEventsRemoved: data })}\n`)
+    return
+  }
+
   if (command === 'process-material-pdfs') {
     const result = await processMaterialPdfs(client, Number(option('limit', false) ?? 5))
     process.stdout.write(`${JSON.stringify(result)}\n`)
