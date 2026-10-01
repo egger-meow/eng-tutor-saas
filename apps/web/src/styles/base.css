@@ -1,6 +1,6 @@
 * { box-sizing: border-box; }
-html { min-width: 20rem; scroll-behavior: smooth; }
-body { min-width: 20rem; min-height: 100vh; margin: 0; background: var(--color-canvas); color: var(--color-text); }
+html { min-width: 320px; scroll-behavior: smooth; }
+body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--color-canvas); color: var(--color-text); }
 body, button, input, select, textarea { font-family: var(--font-body); }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -13,5 +13,6 @@ h1 { font-size: clamp(2.65rem, 6vw, 5.5rem); letter-spacing: -.045em; }
 h2 { font-size: clamp(1.65rem, 3vw, 2.5rem); }
 h3 { font-size: 1.25rem; }
 p { line-height: 1.65; }
-:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.footer-operator-info { min-width: 0; overflow-wrap: anywhere; }
+:focus-visible { outline: 2px solid var(--color-action); outline-offset: 3px; box-shadow: var(--focus-ring); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }

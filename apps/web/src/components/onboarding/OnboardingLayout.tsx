@@ -10,10 +10,12 @@ type OnboardingLayoutProps = {
   description: string
   children: ReactNode
   actions: ReactNode
+  headingLevel?: 1 | 2
 }
 
-export function OnboardingLayout({ step, totalSteps, title, description, children, actions }: OnboardingLayoutProps) {
+export function OnboardingLayout({ step, totalSteps, title, description, children, actions, headingLevel = 2 }: OnboardingLayoutProps) {
   const reduceMotion = useReducedMotion()
+  const Heading = headingLevel === 1 ? 'h1' : 'h2'
 
   return (
     <section className="onboarding-layout">
@@ -27,7 +29,7 @@ export function OnboardingLayout({ step, totalSteps, title, description, childre
           transition={{ duration: 0.24, ease: easings.paperSettle }}
         >
           <div className="onboarding-heading">
-            <h1>{title}</h1>
+            <Heading>{title}</Heading>
             <p>{description}</p>
           </div>
           <div className="onboarding-fields">{children}</div>

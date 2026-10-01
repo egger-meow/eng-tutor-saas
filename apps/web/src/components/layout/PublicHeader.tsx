@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useNavigationMenu } from '../../hooks/use-navigation-menu'
 import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
 import { getEnrollmentCta, useEnrollmentState } from '../../lib/enrollment'
@@ -12,13 +12,13 @@ const links = [
 ]
 
 export function PublicHeader() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { mobileMenuOpen, setMobileMenuOpen, toggleRef, handleMenuKeyDown } = useNavigationMenu()
   const navVisible = useScrollNavVisibility()
   const { state } = useEnrollmentState()
   const cta = getEnrollmentCta(state)
 
   return (
-    <header className={`site-header public-header ${navVisible ? '' : 'site-header-hidden'}`}>
+    <header onKeyDown={handleMenuKeyDown} className={`site-header public-header ${mobileMenuOpen ? 'menu-open' : ''} ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/" onClick={handleInternalLink}>
           <img
@@ -33,6 +33,8 @@ export function PublicHeader() {
 
         <button
           className="mobile-menu-toggle"
+          ref={toggleRef}
+          aria-controls="public-navigation"
           type="button"
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? '關閉導覽選單' : '開啟導覽選單'}
@@ -41,7 +43,7 @@ export function PublicHeader() {
           <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />
         </button>
 
-        <nav className={`site-nav ${mobileMenuOpen ? 'mobile-open' : ''}`} aria-label="主要導覽">
+        <nav id="public-navigation" className={`site-nav ${mobileMenuOpen ? 'mobile-open' : ''}`} aria-label="主要導覽">
           {links.map((link) => {
             return (
               <a
@@ -68,7 +70,7 @@ export function PublicHeader() {
               handleInternalLink(event)
               window.requestAnimationFrame(() => {
                 const loginEl = document.getElementById('login')
-                loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                loginEl?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
                 loginEl?.querySelector('input')?.focus()
               })
             }}

@@ -52,6 +52,7 @@ export function RoutineStep({ draft, errors, update }: OnboardingStepProps) {
                 type="button"
                 className={`minute-card ${isSelected ? 'selected' : ''}`}
                 onClick={() => update({ weeklyMinutes: preset.value })}
+                aria-pressed={isSelected}
               >
                 <strong>{preset.label}</strong>
                 <small>{preset.hint}</small>
@@ -63,6 +64,7 @@ export function RoutineStep({ draft, errors, update }: OnboardingStepProps) {
           <summary>想自訂其他分鐘數 <span>選填</span></summary>
           <div className="optional-details-body minute-custom-row">
             <input
+              aria-label="每週自訂英文學習分鐘數"
               type="number"
               min={MIN_WEEKLY_MINUTES}
               max={MAX_WEEKLY_MINUTES}
@@ -100,6 +102,7 @@ export function RoutineStep({ draft, errors, update }: OnboardingStepProps) {
           <summary>還有其他希望，也可以補充 <span>選填</span></summary>
           <div className="optional-details-body">
             <textarea
+              aria-label="其他學習目標（選填）"
               rows={3}
               maxLength={400}
               placeholder="例如：希望孩子比較不怕長篇閱讀，或多累積生活單字"
@@ -110,7 +113,7 @@ export function RoutineStep({ draft, errors, update }: OnboardingStepProps) {
         </details>
       </div>
 
-      <p className="onboarding-finish-note">這只是第一週的起點，之後會依每週回饋繼續調整。</p>
+      <p className="onboarding-finish-note">這只是第一份教材的起點，之後會依已提交作答與選填回饋調整。</p>
     </div>
   )
 }

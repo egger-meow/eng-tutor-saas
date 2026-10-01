@@ -248,6 +248,8 @@ try {
     await page.goto(url)
     await page.getByRole('button', { name: '填寫回饋', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
+    assert.equal(await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).isVisible(), false, 'optional comments start collapsed')
+    await page.locator('summary').filter({hasText:'補充其他觀察'}).click()
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).fill('Updated observation')
     await page.getByRole('button', { name: '儲存回饋', exact: true }).click()
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).waitFor()

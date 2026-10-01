@@ -49,32 +49,21 @@ export function SelfCheckRenderer({
           const isChecked = draftSelfCheck.includes(item)
 
           return (
-            <li
-              key={idx}
+            <li key={idx}>
+            <label
               className="self-check-item"
-              onClick={() => { if (!readOnly) onToggleSelfCheck(item) }}
-              role="checkbox"
-              aria-checked={isChecked}
-              tabIndex={readOnly ? -1 : 0}
-              aria-disabled={readOnly}
-              onKeyDown={(e) => {
-                if (!readOnly && (e.key === ' ' || e.key === 'Enter')) {
-                  e.preventDefault()
-                  onToggleSelfCheck(item)
-                }
-              }}
             >
               <input
                 disabled={readOnly}
                 type="checkbox"
                 className="self-check-checkbox"
                 checked={isChecked}
-                onChange={() => {}} // handled by parent onClick
-                tabIndex={-1}
+                onChange={() => onToggleSelfCheck(item)}
               />
               <span className={`self-check-text ${isChecked ? 'checked' : ''}`}>
                 {item}
               </span>
+            </label>
             </li>
           )
         })}

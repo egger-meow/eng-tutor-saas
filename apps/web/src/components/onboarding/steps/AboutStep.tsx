@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react'
 import type { OnboardingStepProps } from '../step-types'
 import { levels } from '../step-types'
 
@@ -16,13 +17,25 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
     })
   }
 
-  function selectBaselineLevel(levelValue: string) {
+  function selectBaselineLevel(levelValue: string, advance = true) {
     update({ baselineLevel: levelValue })
-    if (onAutoAdvance && draft.displayName.trim().length > 0) {
+    if (advance && onAutoAdvance && draft.displayName.trim().length > 0) {
       window.setTimeout(() => {
         onAutoAdvance()
       }, 220)
     }
+  }
+
+  function selectWithArrow(event: KeyboardEvent<HTMLDivElement>, select: (index: number) => void) {
+    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')]
+    const index = buttons.indexOf(event.target as HTMLButtonElement)
+    if (index < 0) return
+    const offset = {ArrowRight:1, ArrowDown:1, ArrowLeft:-1, ArrowUp:-1}[event.key]
+    if (offset === undefined && event.key !== 'Home' && event.key !== 'End') return
+    event.preventDefault()
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (index + (offset ?? 0) + buttons.length) % buttons.length
+    buttons[next]?.focus()
+    select(next)
   }
 
   function handleNameKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -51,7 +64,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
 
       <div className="field-group">
         <span className="field-title">目前就學階段</span>
-        <div className="pill-selector onboarding-grade-grid" role="radiogroup" aria-label="目前就學階段">
+        <div className="pill-selector onboarding-grade-grid" role="radiogroup" aria-label="目前就學階段" onKeyDown={(event) => selectWithArrow(event, index => selectGradeStage(gradeStages[index]!.value))}>
           {gradeStages.map((stage) => {
             const isSelected = draft.gradeStage === stage.value
             return (
@@ -62,6 +75,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
                 onClick={() => selectGradeStage(stage.value)}
                 role="radio"
                 aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
               >
                 {stage.label}
               </button>
@@ -73,7 +87,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
 
       <div className="field-group">
         <span className="field-title">孩子目前的英文，大概在哪裡？ <small className="field-hint">憑印象選即可，不用先考試</small></span>
-        <div className="level-card-grid" role="radiogroup" aria-label="整體英文程度">
+        <div className="level-card-grid" role="radiogroup" aria-label="整體英文程度" onKeyDown={(event) => selectWithArrow(event, index => selectBaselineLevel(levels[index]!.value, false))}>
           {levels.map((lvl) => {
             const isSelected = draft.baselineLevel === lvl.value
             return (
@@ -84,6 +98,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
                 onClick={() => selectBaselineLevel(lvl.value)}
                 role="radio"
                 aria-checked={isSelected}
+                tabIndex={isSelected || (!draft.baselineLevel && lvl === levels[0]) ? 0 : -1}
               >
                 <strong className="level-label">{lvl.label}</strong>
               </button>

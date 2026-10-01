@@ -32,6 +32,15 @@ vi.mock('../../../lib/supabase', () => ({
 }))
 
 describe('PaperReader Component Suite', () => {
+  it('allows historical structured questions without response-unit IDs to answer under their stable question ID', () => {
+    const html = renderToStaticMarkup(<QuestionRenderer
+      question={{id:'legacy-organizer',prompt:'Compare the two scenes.',responseLayout:{type:'organizer',headers:['Scene','Evidence'],rows:[{label:'First scene'}]}}}
+      index={0} draftAnswers={{'legacy-organizer':'My comparison'}} onAnswerChange={vi.fn()} />)
+    expect(html).toContain('<table')
+    expect(html).toContain('<textarea')
+    expect(html).toContain('My comparison')
+    expect(html).toContain('aria-labelledby="prompt-legacy-organizer"')
+  })
   it('locks submitted inputs while retaining enabled pronunciation controls', () => {
     const html = renderToStaticMarkup(
       <AnswerReadOnlyContext.Provider value={true}>

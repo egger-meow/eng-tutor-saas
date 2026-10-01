@@ -32,7 +32,7 @@
   margin-block: clamp(1.5rem, 3vw, 2.25rem);
 }
 
-.onboarding-container .onboarding-heading h1 {
+.onboarding-container .onboarding-heading :is(h1, h2) {
   max-width: 46rem;
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.28;
@@ -316,7 +316,7 @@
     font-size: 1.65rem;
   }
 
-  .onboarding-container .onboarding-heading h1 {
+  .onboarding-container .onboarding-heading :is(h1, h2) {
     font-size: clamp(1.75rem, 8vw, 2.35rem);
   }
 
@@ -346,7 +346,8 @@
     backdrop-filter: blur(10px);
   }
 
-  .onboarding-container .onboarding-actions .button {
+  .onboarding-container .onboarding-actions .button,
+  .onboarding-container .onboarding-actions .button:last-child {
     flex: 1;
     min-width: 0;
   }

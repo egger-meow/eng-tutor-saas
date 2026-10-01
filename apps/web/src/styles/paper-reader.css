@@ -1,11 +1,14 @@
 /* Paper-like Interactive Reader Styling */
 
 .paper-reader-container { overflow-wrap: anywhere; }
+.paper-material-heading { margin-bottom: var(--space-5); }
+.paper-material-heading h1 { font-size: clamp(1.65rem, 3vw, 2.5rem); line-height: 1.4; }
+.paper-feedback-details summary, .personalization-more summary { cursor: pointer; min-height: 44px; padding-block: var(--space-3); }
 .paper-reader-container :is(button, select, input) { min-height: 44px; }
 .paper-reader-container :is(button, a, input, textarea, select):focus-visible {
   outline: 3px solid var(--color-action); outline-offset: 3px;
 }
-.paper-reader-container :is(input, textarea) { font-size: 16px; scroll-margin-block: 12rem 4rem; }
+.paper-reader-container :is(input, textarea) { font-size: max(16px, 1rem); scroll-margin-block: 12rem 4rem; }
 .paper-reader-container :is(.paper-sheet, .question-card) { scroll-margin-top: 12rem; min-width: 0; }
 .paper-reader-toolbar-left, .paper-reader-toolbar-right { flex-wrap: wrap; min-width: 0; }
 .paper-chapter-nav { max-width: 100%; }
@@ -755,7 +758,8 @@
 }
 
 .ruled-textarea:focus {
-  outline: none;
+  outline: 2px solid var(--color-action);
+  outline-offset: 3px;
   border-color: var(--color-action);
   box-shadow: var(--focus-ring);
 }
@@ -924,5 +928,5 @@
 }
 
 .paper-reader-container .tts-button { min-width: 44px; min-height: 44px; flex-shrink: 0; }
-.paper-reader-container :is(.ruled-textarea, .response-grid-input) { font-size: 16px; }
+.paper-reader-container :is(.ruled-textarea, .response-grid-input) { font-size: max(16px, 1rem); }
 .paper-feedback-fields { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: var(--space-3); }

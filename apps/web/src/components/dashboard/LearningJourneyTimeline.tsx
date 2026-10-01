@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback, type KeyboardEvent } from 'react'
 import type { LearningTimelineItem } from '../../lib/learning-library'
+import { hasForbiddenPersonalizationJargon } from '../../lib/materials'
 
 interface LearningJourneyTimelineProps {
   items: LearningTimelineItem[]
@@ -31,7 +32,11 @@ export function LearningJourneyTimeline({
 }: LearningJourneyTimelineProps) {
   // Sort items chronologically (oldest to newest: Week 1 -> Week N)
   const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+    return items.map(item => ({ ...item,
+      improvements: item.improvements.filter(text => !hasForbiddenPersonalizationJargon(text)),
+      nextReviewReasons: item.nextReviewReasons.filter(text => !hasForbiddenPersonalizationJargon(text)),
+      readingTrajectory: hasForbiddenPersonalizationJargon(item.readingTrajectory) ? '' : item.readingTrajectory,
+    })).sort((a, b) => a.sequenceNumber - b.sequenceNumber)
   }, [items])
 
   // Default to the latest week or specified initial sequence number

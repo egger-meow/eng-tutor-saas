@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useNavigationMenu } from '../../hooks/use-navigation-menu'
 import { motion } from 'framer-motion'
 import { handleInternalLink, useRoute } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
@@ -11,7 +11,7 @@ type ParentNavigationProps = {
 
 export function ParentNavigation({ email, childHref = '/children', onSignOut }: ParentNavigationProps) {
   const route = useRoute()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { mobileMenuOpen, setMobileMenuOpen, toggleRef, handleMenuKeyDown } = useNavigationMenu()
   const navVisible = useScrollNavVisibility()
 
   const navItems = [
@@ -24,7 +24,7 @@ export function ParentNavigation({ email, childHref = '/children', onSignOut }: 
   ]
 
   return (
-    <header className={`site-header parent-header ${navVisible ? '' : 'site-header-hidden'}`}>
+    <header onKeyDown={handleMenuKeyDown} className={`site-header parent-header ${mobileMenuOpen ? 'menu-open' : ''} ${navVisible ? '' : 'site-header-hidden'}`}>
       <div className="header-inner">
         <a className="wordmark" href="/dashboard" onClick={handleInternalLink}>
           <img
@@ -39,6 +39,8 @@ export function ParentNavigation({ email, childHref = '/children', onSignOut }: 
 
         <button
           className="mobile-menu-toggle"
+          ref={toggleRef}
+          aria-controls="parent-navigation"
           type="button"
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? '關閉家長選單' : '開啟家長選單'}
@@ -47,12 +49,13 @@ export function ParentNavigation({ email, childHref = '/children', onSignOut }: 
           <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`} />
         </button>
 
-        <div className={`parent-nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div id="parent-navigation" className={`parent-nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <nav aria-label="家長功能" className="site-nav">
             {navItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
+                aria-current={item.isActive ? 'page' : undefined}
                 className={`nav-link ${item.isActive ? 'active' : ''}`}
                 onClick={(e) => {
                   setMobileMenuOpen(false)

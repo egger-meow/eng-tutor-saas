@@ -343,7 +343,7 @@
 .progress-track { height: .25rem; overflow: hidden; background: var(--color-rule); }
 .progress-track span { display: block; height: 100%; background: var(--color-action); transition: width var(--transition-fast); }
 .onboarding-heading { margin-block: var(--space-6); }
-.onboarding-heading h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.onboarding-heading :is(h1, h2) { font-size: clamp(1.8rem, 4vw, 2.5rem); }
 .onboarding-heading p { max-width: 38rem; color: var(--color-muted); font-size: 1.0625rem; }
 .onboarding-fields { display: grid; gap: var(--space-6); padding-block: var(--space-6); border-block: 1px solid var(--color-rule); }
 .onboarding-fields label, .onboarding-fields fieldset, .field-group { display: grid; gap: var(--space-2); margin: 0; padding: 0; border: 0; color: var(--color-ink); font-weight: 700; }
@@ -527,6 +527,8 @@
   flex: 1;
   min-width: 0;
 }
+
+.site-header:focus-within, .site-header.menu-open { transform: none; }
 .parent-header .nav-link { white-space: nowrap; padding-inline: .5rem; font-size: .875rem; }
 .parent-header .user-email { max-width: 8rem; }
 
@@ -859,6 +861,8 @@
 .motion-cascade[data-revealed='true'] > :nth-child(n + 6) { transition-delay: 225ms; }
 
 @media (max-width: 80rem) {
+  .header-inner { flex-wrap: wrap; gap: var(--space-3); }
+  .wordmark { max-width: 100%; white-space: normal; }
   .dashboard-top-header {
     flex-direction: column;
     align-items: flex-start;
@@ -881,6 +885,7 @@
   }
 
   .public-header .site-nav {
+    visibility: hidden;
     position: absolute;
     top: 100%;
     right: 0;
@@ -898,6 +903,7 @@
   }
 
   .public-header .site-nav.mobile-open {
+    visibility: visible;
     max-height: calc(100dvh - 4.5rem);
     overflow-y: auto;
     padding-block: var(--space-4);
@@ -911,6 +917,7 @@
   .public-header .nav-primary-cta { justify-content: center; margin-top: var(--space-2); }
 
   .parent-header .parent-nav-container {
+    visibility: hidden;
     display: flex;
     position: absolute;
     top: 100%;
@@ -929,6 +936,7 @@
   }
 
   .parent-header .parent-nav-container.mobile-open {
+    visibility: visible;
     max-height: calc(100dvh - 4.5rem);
     overflow-y: auto;
     opacity: 1;
@@ -983,6 +991,8 @@
 }
 
 .legal-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: grid;
   gap: var(--space-8);
   line-height: 1.75;
@@ -990,6 +1000,7 @@
 }
 
 .legal-content section {
+  min-width: 0;
   display: grid;
   gap: var(--space-3);
 }

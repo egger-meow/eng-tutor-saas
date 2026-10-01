@@ -43,6 +43,15 @@ const sampleTimeline: LearningTimelineItem[] = [
 ]
 
 describe('LearningJourneyTimeline Component', () => {
+  it('keeps readable learning notes while withholding internal curriculum machinery', () => {
+    const html = renderToStaticMarkup(<LearningJourneyTimeline
+      items={[{...sampleTimeline[0],improvements:['I1 使用 Schema 2.4.0 organizer','能比較文章中的不同觀點'],nextReviewReasons:['g7-time-place-prepositions at/on/in','時間與位置介系詞']}]}
+      loadingMore={false} onLoadMore={vi.fn()} />)
+    expect(html).not.toContain('Schema')
+    expect(html).not.toContain('g7-time-place-prepositions')
+    expect(html).toContain('能比較文章中的不同觀點')
+    expect(html).toContain('時間與位置介系詞')
+  })
   it('1. renders empty state when no items exist', () => {
     const html = renderToStaticMarkup(
       <LearningJourneyTimeline items={[]} loadingMore={false} onLoadMore={vi.fn()} />

@@ -66,6 +66,7 @@ export function SchoolStep({ draft, update }: OnboardingStepProps) {
         </div>
         <small className="interest-category-hint">先選大類，點一下會在下方加上分類開頭，再直接補具體內容。</small>
         <textarea
+          aria-label="孩子最近喜歡的作品、遊戲或事物"
           ref={interestTextareaRef}
           rows={5}
           maxLength={600}
@@ -88,6 +89,7 @@ export function SchoolStep({ draft, update }: OnboardingStepProps) {
                   type="button"
                   className={`pill-option ${isSelected ? 'selected' : ''}`}
                   onClick={() => update({ textbookVersion: isSelected ? '' : opt })}
+                  aria-pressed={isSelected}
                 >
                   {opt}
                 </button>
@@ -95,6 +97,7 @@ export function SchoolStep({ draft, update }: OnboardingStepProps) {
             })}
           </div>
           <input
+            aria-label="其他學校課本版本（選填）"
             placeholder="其他版本（例如：佳音、自編）"
             value={otherTextbookVersion}
             onChange={(event) => update({ textbookVersion: event.target.value })}
@@ -106,6 +109,7 @@ export function SchoolStep({ draft, update }: OnboardingStepProps) {
         <summary>有想避開的內容再填 <span>選填</span></summary>
         <div className="optional-details-body">
           <input
+            aria-label="想避開的內容（選填）"
             maxLength={300}
             placeholder="例如：避免恐怖內容、暫時不想讀昆蟲主題"
             value={draft.dislikedTopics}

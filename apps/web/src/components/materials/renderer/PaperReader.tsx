@@ -194,6 +194,9 @@ export function PaperReader({
 
   return (
     <div className="paper-reader-container" inert={isInitialLoading || submissionLoading} aria-busy={isInitialLoading || submissionLoading}>
+      <header className="paper-material-heading">
+        <h1>{projection.title || '本週英文教材'}</h1>
+      </header>
       {(isInitialLoading || submissionLoading) && <p role="status">正在載入作答與提交狀態…</p>}
       {submissionFailed && <div role="alert"><p>提交狀態暫時無法載入。確認前先保留閱讀，避免重複提交。</p><button type="button" className="button" onClick={() => setLoadAttempt((n) => n + 1)}>重試提交狀態</button></div>}
       {status === 'idle' && !isInitialLoading && !submission && <div role="alert"><p>草稿尚未載入，請重新整理再作答。</p><button className="button" type="button" onClick={() => window.location.reload()}>重新載入草稿</button></div>}
@@ -423,9 +426,12 @@ export function PaperReader({
                   <option value="writing">寫作</option><option value="mixed">多個部分</option>
                 </select>
               </label>
+              <details className="paper-feedback-details">
+              <summary>補充其他觀察（選填）</summary>
               <label>其他觀察（選填）
                 <textarea maxLength={2000} value={comments} onChange={(event) => setComments(event.target.value)} />
               </label>
+              </details>
               <button className="button button-secondary" type="button" disabled={actionBusy || !feedbackReady} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
               </fieldset>
               <button className="button button-link" type="button" disabled={actionBusy} onClick={() => setFeedbackChoice('skip')}>略過</button>

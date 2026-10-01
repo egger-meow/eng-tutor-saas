@@ -23,6 +23,10 @@ export function QuestionRenderer({
 
   const hasOptions = Array.isArray(question.options) && question.options.length > 0
   const layout = question.responseLayout
+  const needsLegacyResponse = !hasOptions && layout && (
+    ((layout.type === 'table' || layout.type === 'organizer') && !layout.rows?.some(row => row.cells?.some(cell => cell.responseUnitId)))
+    || (layout.type === 'sequence' && !layout.items?.some(item => item.responseUnitId))
+  )
 
   return (
     <div className="question-card" id={`q-card-${qId}`}>
@@ -159,7 +163,8 @@ export function QuestionRenderer({
       )}
 
       {/* 3. Written Response Default / Fallback */}
-      {!hasOptions && (!layout || !['table', 'organizer', 'sequence', 'lines'].includes(layout.type)) && (
+      {needsLegacyResponse && <p className="muted">參照上方表格或步驟，在下方依序寫下各部分的答案。</p>}
+      {!hasOptions && (!layout || needsLegacyResponse || !['table', 'organizer', 'sequence', 'lines'].includes(layout.type)) && (
         <textarea
           aria-labelledby={`prompt-${qId}`}
           readOnly={readOnly}

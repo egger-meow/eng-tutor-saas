@@ -143,6 +143,7 @@ export const FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS = [
 
 export function hasForbiddenPersonalizationJargon(text: string): boolean {
   return FORBIDDEN_PERSONALIZATION_JARGON_PATTERNS.some((pattern) => pattern.test(text))
+    || /\b(?:schema|canonical|evidence-backed|retrieval|review cards)\b|\bg[789]-[a-z][a-z0-9-]*/i.test(text)
 }
 
 export function readGenerationSummary(
@@ -167,9 +168,10 @@ export function readGenerationSummary(
     : null
 
   const title = stringOrNull(summary.title)
-  const learningFocus = stringOrNull(summary.learningFocus) ??
+  const rawFocus = stringOrNull(summary.learningFocus) ??
     (parentSummary ? stringOrNull(parentSummary.focusZh) : null) ??
     stringOrNull(summary.theme)
+  const learningFocus = rawFocus && !hasForbiddenPersonalizationJargon(rawFocus) ? rawFocus : null
 
   // 1. Canonical source of truth: parentSummary.personalizationZh or top-level personalizationZh
   const canonicalPersonalization = cleanArray(summary.personalizationZh).length > 0

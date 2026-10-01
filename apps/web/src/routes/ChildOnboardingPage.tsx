@@ -121,13 +121,14 @@ export function ChildOnboardingPage({
                 {capacityFull
                   ? '不用考試、不綁卡，大概填就可以。完成後先保留候補資格，有名額時再通知您。'
                   : enrollment?.freePilotActive
-                    ? '不用考試、不綁卡。Beta 期間目前每週專屬教材 NT$0；大概填就可以，之後每週都還會依實際使用狀況繼續調整。'
-                    : '不用考試、不綁卡，大概填就可以；之後每週都還會依實際使用狀況繼續調整。'}
+                    ? '不用考試、不綁卡。Beta 期間目前專屬教材 NT$0；完成作答後可選填回饋，再主動申請下一份，每服務月最多 4 份。'
+                    : '不用考試、不綁卡，大概填就可以。之後的教材會依已提交作答與選填回饋調整，由家長主動申請下一份。'}
               </p>
             </header>
           )}
 
           <OnboardingLayout
+            headingLevel={isNewChild ? 2 : 1}
             step={step}
             title={title}
             description={description}

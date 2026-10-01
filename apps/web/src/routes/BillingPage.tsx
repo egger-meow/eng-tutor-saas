@@ -284,7 +284,7 @@ export function BillingPage({
         <header className="page-heading">
           <p className="eyebrow">帳戶設定</p>
           <h1>每位孩子的訂閱</h1>
-          <p>方案與交付週期彼此獨立。此頁目前只顯示由後端確認的狀態，不會在瀏覽器直接變更付款。</p>
+          <p>每位孩子的方案與交付週期彼此獨立。查看目前方案，或選擇適合孩子的訂閱方式。</p>
         </header>
 
         {loading && (
