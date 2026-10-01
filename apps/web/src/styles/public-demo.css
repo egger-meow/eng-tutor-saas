@@ -1,5 +1,6 @@
 .public-demo { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-3); }
-.public-demo .sample-intro { max-width: 760px; margin: 0 auto var(--space-5); }
+.public-demo .sample-intro { max-width: 760px; margin: 0 auto var(--space-5); padding-block: clamp(2rem, 4vw, 3.5rem); }
+.public-demo .sample-intro h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem); }
 .public-demo .sample-disclaimer { border-left: 3px solid var(--color-accent); padding-left: var(--space-3); }
 .demo-toolbar { position: static; display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); }
 .demo-toolbar .form-actions { flex-wrap: wrap; }

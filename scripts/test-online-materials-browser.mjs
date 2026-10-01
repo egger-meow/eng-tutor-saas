@@ -18,8 +18,11 @@ await writeFile(resolve(fixtureDir, 'online-reader.tsx'), `
 import React from 'react'; import {createRoot} from 'react-dom/client';
 import {PaperReader} from '../src/components/materials/renderer/PaperReader';
 import {MaterialActions} from '../src/components/materials/MaterialActions';
+import {AppShell} from '../src/components/layout/AppShell';
+import {ParentNavigation} from '../src/components/layout/ParentNavigation';
+import {useRoute,navigate} from '../src/app/use-route';
 import '../src/index.css'; import '../src/App.css';
-createRoot(document.getElementById('root')).render(<><MaterialActions childName="合成驗收教材" showPreviewLink material={{id:'synthetic-material',child_id:'synthetic-child',material_week:'2026-09-30',revision:1,student_pdf_path:'',parent_answer_pdf_path:'',generation_summary:{},created_at:'2026-09-30',release_at:'2026-09-30',feedback:null}}/><PaperReader projection={{
+function Fixture(){const route=useRoute();window.__readerNavigate=navigate;return <AppShell header={<ParentNavigation email="synthetic@example.invalid" onSignOut={()=>{}}/>}><div className="container scoped-material-page">{route.name==='dashboard'?<h1>Synthetic dashboard</h1>:<><MaterialActions childName="合成驗收教材" showPreviewLink material={{id:'synthetic-material',child_id:'synthetic-child',material_week:'2026-09-30',revision:1,student_pdf_path:'',parent_answer_pdf_path:'',generation_summary:{},created_at:'2026-09-30',release_at:'2026-09-30',feedback:null}}/><PaperReader studentPdfUrl="https://expired.invalid/old-signed.pdf" projection={{
  material_id:'synthetic-material',child_id:'synthetic-child',child_name:'合成驗收教材',
  material_week:'2026-09-30',week_number:1,revision:1,title:'Synthetic UI fixture',
  student_pdf_path:'',release_at:'2026-09-30',student_lesson:{
@@ -30,14 +33,14 @@ createRoot(document.getElementById('root')).render(<><MaterialActions childName=
  {id:'q2',prompt:'Write a sentence.'},
  {id:'q3',prompt:'Complete a table.',responseLayout:{type:'table',headers:['Clue','Response'],rows:[{label:'Sound',cells:[{responseUnitId:'q3-cell',placeholder:'Your observation'}]}]}},
  {id:'q4',prompt:'Explain a new format.',responseLayout:{type:'custom',title:'Compare these observations',items:['A long unfamiliar lesson description']}}]}],selfCheckZh:['已閱讀']
- }}}/></>);
+ }}}/></>}</div></AppShell>};createRoot(document.getElementById('root')).render(<Fixture/>);
 `)
 const server = await createServer({ root: resolve('apps/web'), server: { host: '127.0.0.1', port: 5178, strictPort: true } })
 await server.listen()
 const browser = await chromium.launch({ headless: true })
 const evidence = []
 try {
-  for (const [device, viewport] of [['phone', { width: 390, height: 844 }], ['tablet', { width: 820, height: 1180 }], ['desktop', { width: 1440, height: 1000 }]]) {
+  for (const [device, viewport] of [['small-phone', { width: 320, height: 844 }], ['phone', { width: 390, height: 844 }], ['tablet', { width: 820, height: 1180 }], ['desktop', { width: 1440, height: 1000 }]]) {
     const context = await browser.newContext({ viewport })
     await context.addInitScript(() => {
       class Utterance { constructor(text) { this.text = text } }
@@ -58,6 +61,7 @@ try {
     let feedback = 0
     let delaySave = false
     let quota = false
+    let temporarilyUnavailable = false
     let failSubmissionRead = true
     let savedFeedback = null
     let pdfRequests = 0
@@ -88,7 +92,9 @@ try {
         await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'synthetic read failure' }) })
         return
       }
-      if (name === 'get_material_draft') response = [draft]
+      if (name === 'get_enrollment_state') response = [{ status: 'open', capacity: 100, active_count: 1, remaining: 99, founding_limit: 30, founding_count: 0, free_pilot_active: true }]
+      else if (name === 'record_funnel_event') response = null
+      else if (name === 'get_material_draft') response = [draft]
       else if (name === 'can_open_parent_answer') response = false
       else if (name === 'get_student_material_submission') response = submission
       else if (name === 'save_material_draft') {
@@ -106,7 +112,8 @@ try {
         response = submission
       } else if (name === 'save_student_parent_feedback') { feedback++; savedFeedback = body; response = true }
       else if (name === 'request_next_after_student_submission') {
-        if (quota) response = { requested: false, reason: 'MONTHLY_LIMIT', used: 4, limit: 4 }
+        if (temporarilyUnavailable) response = { requested: false }
+        else if (quota) response = { requested: false, reason: 'MONTHLY_LIMIT', used: 4, limit: 4 }
         else { requests++; submission.next_requested = true; response = { requested: true } }
       } else if (name === 'record_material_learning_event') {
         assert.deepEqual(Object.keys(body).sort(), ['p_event_name', 'p_material_id'])
@@ -139,6 +146,16 @@ try {
     await page.waitForFunction(() => !document.querySelector('.paper-reader-container')?.inert)
     await page.getByRole('button', { name: '重試進度', exact: true }).click()
     await page.getByText('可開始閱讀與作答', { exact: false }).waitFor()
+    await page.evaluate(() => window.__readerNavigate('/materials/synthetic-material'))
+    // Reader download must obtain a fresh URL rather than opening the stale prop.
+    const readerDownload = page.waitForEvent('download')
+    await page.getByRole('button', { name: '⬇ 下載空白學生教材', exact: true }).click()
+    await readerDownload
+    assert.equal(pdfRequests, 3)
+    await mkdir(resolve('.runtime/layout-review/after'), { recursive: true })
+    await page.screenshot({ path: resolve(`.runtime/layout-review/after/${device}-reader-top.png`) })
+    await page.locator('#q-card-q3').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: resolve(`.runtime/layout-review/after/${device}-reader-practice.png`) })
     await page.getByRole('button', { name: '朗讀整篇文章', exact: true }).click()
     await page.getByRole('button', { name: '停止朗讀整篇文章', exact: true }).waitFor()
     await page.getByRole('button', { name: '聆聽 sound 發音', exact: true }).click()
@@ -157,6 +174,7 @@ try {
     await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
     delaySave = false
     assert.equal(draft.answers.q2, 'My saved sentence.', 'in-flight edits persist')
+    assert.equal(draft.answers.q1, 'A', 'immediate selection saves the new answer')
     // A second tab writes the same server draft; the first must resolve conflict.
     const tab = await context.newPage(); await tab.goto(url)
     await tab.waitForFunction(() => !document.querySelector('.paper-reader-container')?.inert)
@@ -168,6 +186,33 @@ try {
     await context.setOffline(true)
     await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).fill('Offline pending sentence.')
     await page.getByText('儲存失敗', { exact: false }).waitFor()
+    await page.evaluate(() => new Promise((done, reject) => {
+      let events = 0
+      const timeout = setTimeout(() => reject(new Error('history restoration timed out')), 5000)
+      const listen = () => { if (++events === 2) { removeEventListener('popstate', listen); clearTimeout(timeout); done() } }
+      addEventListener('popstate', listen)
+      history.back()
+    }))
+    assert.equal(new URL(page.url()).pathname, '/materials/synthetic-material')
+    assert.equal(await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).inputValue(), 'Offline pending sentence.')
+    await context.setOffline(false)
+    await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
+    await page.evaluate(() => window.__readerNavigate('/dashboard'))
+    await page.getByRole('heading', { name: 'Synthetic dashboard' }).waitFor()
+    await page.goBack()
+    await page.waitForFunction(() => !document.querySelector('.paper-reader-container')?.inert)
+    await context.setOffline(true)
+    await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).fill('Forward pending sentence.')
+    await page.getByText('儲存失敗', { exact: false }).waitFor()
+    await page.evaluate(() => new Promise((done, reject) => {
+      let events = 0
+      const timeout = setTimeout(() => reject(new Error('forward restoration timed out')), 5000)
+      const listen = () => { if (++events === 2) { removeEventListener('popstate', listen); clearTimeout(timeout); done() } }
+      addEventListener('popstate', listen)
+      history.forward()
+    }))
+    assert.equal(new URL(page.url()).pathname, '/materials/synthetic-material')
+    assert.equal(await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).inputValue(), 'Forward pending sentence.')
     await context.setOffline(false)
     await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
     page.on('dialog', (dialog) => dialog.accept())
@@ -178,15 +223,19 @@ try {
     assert.equal(submission.answers.q4, 'Fallback observation')
     assert.equal(await page.locator('.tts-button').first().isEnabled(), true)
     await page.getByRole('button', { name: '略過回饋', exact: true }).click()
+    temporarilyUnavailable = true
+    await page.getByRole('button', { name: '申請下一份教材', exact: true }).click()
+    await page.getByText('目前無法申請下一份，請稍後再試。', { exact:true }).waitFor()
+    assert.equal(await page.getByRole('button', { name: '申請下一份教材', exact: true }).isEnabled(), true)
+    temporarilyUnavailable = false
     quota = true
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).click()
     await page.getByText('本服務月已使用', { exact: false }).waitFor()
     quota = false
-    await page.reload()
-    await page.getByRole('button', { name: '略過回饋', exact: true }).click()
+    assert.equal(await page.getByRole('button', { name: '申請下一份教材', exact: true }).isEnabled(), true)
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).click()
     await page.getByText('已收到下一份申請。', { exact: true }).waitFor()
-    await page.reload()
+    await page.goto(url)
     await page.getByText('已收到下一份申請。', { exact: true }).waitFor()
     await page.getByText('已提交 · 已申請下一份', { exact: true }).waitFor()
     assert.equal(requests, 1)
@@ -196,7 +245,7 @@ try {
     await mkdir(resolve('.runtime/online-materials'), { recursive: true })
     await page.screenshot({ path: resolve(`.runtime/online-materials/${device}.png`), fullPage: true })
     submission.next_requested = false
-    await page.reload()
+    await page.goto(url)
     await page.getByRole('button', { name: '填寫回饋', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).fill('Updated observation')

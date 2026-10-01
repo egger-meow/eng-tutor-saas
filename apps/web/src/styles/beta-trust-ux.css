@@ -444,10 +444,10 @@
   .landing-section-nav {
     justify-content: flex-start;
     overflow-x: auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     width: 100%;
     max-width: 100%;
-    border-radius: 999px;
+    border-radius: 1rem;
     padding: 0.35rem 0.5rem;
     margin: 1.5rem 0 2rem;
     scrollbar-width: none;

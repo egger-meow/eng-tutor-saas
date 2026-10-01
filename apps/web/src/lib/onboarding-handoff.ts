@@ -1,4 +1,5 @@
 import { getSupabaseClient } from './supabase'
+import { replaceRouteUrl } from '../app/use-route'
 
 const MAX_HANDOFF_TOKEN_LENGTH = 256
 const ADDITIONAL_CHILD_CONFIRMATION_REQUIRED = 'ADDITIONAL_CHILD_CONFIRMATION_REQUIRED'
@@ -59,5 +60,5 @@ export function clearOnboardingTokenFromUrl(): void {
   const url = new URL(window.location.href)
   if (!url.searchParams.has('onboarding')) return
   url.searchParams.delete('onboarding')
-  window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
+  replaceRouteUrl(`${url.pathname}${url.search}${url.hash}`)
 }

@@ -2,17 +2,65 @@ import { useEffect, useState, type MouseEvent } from 'react'
 import { parseRoute, type Route } from './routes'
 
 const routeChangeEvent = 'paper-english:route-change'
+const historyIndexKey = 'paperEnglishRouteIndex'
+let historyIndex = 0
+let restoringHistory = false
+let currentHistoryUrl = ''
+const routeSubscribers = new Set<() => void>()
+
+function allowNavigation() {
+  return window.dispatchEvent(new Event('paper-english:before-navigate', { cancelable: true }))
+}
+
+function initializeHistory() {
+  const existing = window.history.state?.[historyIndexKey]
+  historyIndex = typeof existing === 'number' ? existing : 0
+  window.history.replaceState({ ...window.history.state, [historyIndexKey]: historyIndex }, '')
+  currentHistoryUrl = window.location.href
+}
+
+export function replaceRouteUrl(path: string) {
+  window.history.replaceState(window.history.state, '', path)
+  currentHistoryUrl = window.location.href
+}
+
+function handleHistoryNavigation(event: PopStateEvent) {
+  const nextIndex = event.state?.[historyIndexKey]
+  if (restoringHistory) {
+    restoringHistory = false
+    return
+  }
+  // A traversal has already changed the URL. Restore the original entry before
+  // allowing the reader to unmount when a save is pending or has failed.
+  if (window.location.href !== currentHistoryUrl && !allowNavigation()) {
+    if (typeof nextIndex === 'number' && nextIndex !== historyIndex) {
+      restoringHistory = true
+      window.history.go(historyIndex - nextIndex)
+    } else {
+      // Older sessions and native hash entries may have no managed index.
+      // Keep the mounted draft and restore its URL without guessing direction.
+      window.history.replaceState({ ...window.history.state, [historyIndexKey]: historyIndex }, '', currentHistoryUrl)
+    }
+    return
+  }
+  if (typeof nextIndex === 'number') historyIndex = nextIndex
+  currentHistoryUrl = window.location.href
+  routeSubscribers.forEach(update => update())
+}
 
 export function navigate(path: string) {
   if (typeof window === 'undefined') return
-  if (!window.dispatchEvent(new Event('paper-english:before-navigate', { cancelable: true }))) return
+  if (restoringHistory || !allowNavigation()) return
+  if (typeof window.history.state?.[historyIndexKey] !== 'number') initializeHistory()
   const browserPath = path.startsWith('/') ? path : `/${path}`
   const nextUrl = new URL(browserPath, window.location.origin)
   const currentUrl = new URL(window.location.href)
   const sameDocument = currentUrl.pathname === nextUrl.pathname && currentUrl.search === nextUrl.search
 
   if (currentUrl.pathname + currentUrl.search + currentUrl.hash !== nextUrl.pathname + nextUrl.search + nextUrl.hash) {
-    window.history.pushState({}, '', browserPath)
+    historyIndex += 1
+    window.history.pushState({ [historyIndexKey]: historyIndex }, '', browserPath)
+    currentHistoryUrl = window.location.href
     window.dispatchEvent(new Event(routeChangeEvent))
   }
 
@@ -30,10 +78,15 @@ export function useRoute(): Route {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const update = () => setRoute(readRoute())
-    window.addEventListener('popstate', update)
+    if (routeSubscribers.size === 0) {
+      initializeHistory()
+      window.addEventListener('popstate', handleHistoryNavigation)
+    }
+    routeSubscribers.add(update)
     window.addEventListener(routeChangeEvent, update)
     return () => {
-      window.removeEventListener('popstate', update)
+      routeSubscribers.delete(update)
+      if (routeSubscribers.size === 0) window.removeEventListener('popstate', handleHistoryNavigation)
       window.removeEventListener(routeChangeEvent, update)
     }
   }, [])

@@ -26,8 +26,8 @@ export function QuestionRenderer({
 
   return (
     <div className="question-card" id={`q-card-${qId}`}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)' }}>
-        <span style={{ fontWeight: 700, color: 'var(--color-accent)' }}>Q{index + 1}.</span>
+      <div className="question-heading">
+        <span className="question-number">Q{index + 1}.</span>
         <p id={`prompt-${qId}`} className="question-prompt">{question.prompt}</p>
       </div>
 

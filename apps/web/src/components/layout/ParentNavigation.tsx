@@ -51,7 +51,7 @@ export function ParentNavigation({ email, childHref = '/children', onSignOut }: 
           <nav aria-label="家長功能" className="site-nav">
             {navItems.map((item) => (
               <a
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 className={`nav-link ${item.isActive ? 'active' : ''}`}
                 onClick={(e) => {

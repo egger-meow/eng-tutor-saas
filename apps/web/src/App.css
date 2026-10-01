@@ -223,7 +223,10 @@
 .pricing-heading { display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(2rem, 6vw, 6rem); align-items: end; }
 .pricing-heading > p { margin-bottom: 0; color: var(--color-muted); }
 .pricing-card { display: grid; grid-template-columns: .8fr 1.2fr; gap: var(--space-8) clamp(2rem, 6vw, 6rem); margin-top: var(--space-12); padding: clamp(1.75rem, 5vw, 3.5rem); border: 1px solid var(--color-action); background: var(--color-paper); box-shadow: 1rem 1rem 0 rgb(40 79 62 / 8%); }
-.pricing-plan-grid { display: grid; gap: var(--space-6); }
+.pricing-plan-grid { display: grid; gap: var(--space-6); min-width: 0; }
+.pricing-card > *, .pricing-offer, .price { min-width: 0; overflow-wrap: anywhere; }
+.founding-copy { min-width: 0; }
+.founding-remaining { white-space: normal !important; }
 .pricing-offer { align-self: center; }
 .pricing-offer-annual { padding-top: var(--space-6); border-top: 1px solid var(--color-rule); }
 .price { display: grid; margin: 0; color: var(--color-ink); font-family: var(--font-display); font-size: clamp(2.25rem, 5vw, 4rem); font-weight: 700; line-height: 1.1; }
@@ -522,7 +525,10 @@
   align-items: center;
   gap: var(--space-6);
   flex: 1;
+  min-width: 0;
 }
+.parent-header .nav-link { white-space: nowrap; padding-inline: .5rem; font-size: .875rem; }
+.parent-header .user-email { max-width: 8rem; }
 
 .site-nav {
   display: flex;
@@ -852,7 +858,7 @@
 .motion-cascade[data-revealed='true'] > :nth-child(5) { transition-delay: 180ms; }
 .motion-cascade[data-revealed='true'] > :nth-child(n + 6) { transition-delay: 225ms; }
 
-@media (max-width: 48rem) {
+@media (max-width: 80rem) {
   .dashboard-top-header {
     flex-direction: column;
     align-items: flex-start;
@@ -923,7 +929,8 @@
   }
 
   .parent-header .parent-nav-container.mobile-open {
-    max-height: 30rem;
+    max-height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
     opacity: 1;
     pointer-events: auto;
   }
@@ -1260,6 +1267,7 @@
 .scoped-material-loading-state p { margin: 0; color: var(--color-muted); font-size: 1.05rem; }
 .scoped-material-card { display: flex; flex-direction: column; gap: var(--space-6); }
 .scoped-material-header { display: flex; flex-direction: column; gap: var(--space-2); }
+.scoped-material-mode-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .scoped-material-header .overline { margin: 0; }
 .scoped-material-header h1 { margin: 0; font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.22; }
 .scoped-material-subtitle { margin: 0; color: var(--color-muted); font-size: 0.95rem; line-height: 1.6; }

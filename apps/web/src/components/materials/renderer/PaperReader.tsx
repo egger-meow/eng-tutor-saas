@@ -6,6 +6,7 @@ import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
 import { recordMaterialLearningEvent } from '../../../lib/material-learning-analytics'
+import { materialDownloadFilename, openMaterialDownload } from '../../../lib/materials'
 
 export interface PaperReaderProps {
   projection: StudentMaterialProjection
@@ -15,7 +16,6 @@ export interface PaperReaderProps {
 
 export function PaperReader({
   projection,
-  studentPdfUrl,
   onSwitchToPdf,
 }: PaperReaderProps) {
   const {
@@ -41,6 +41,8 @@ export function PaperReader({
   const [actionError, setActionError] = useState('')
   const [feedbackChoice, setFeedbackChoice] = useState<'ask' | 'form' | 'skip' | 'saved'>('ask')
   const [requestMessage, setRequestMessage] = useState('')
+  const [downloadBusy, setDownloadBusy] = useState(false)
+  const [downloadMessage, setDownloadMessage] = useState('')
   const [difficulty, setDifficulty] = useState(3)
   const [weakArea, setWeakArea] = useState('')
   const [comments, setComments] = useState('')
@@ -133,11 +135,29 @@ export function PaperReader({
     setActionError('')
     try {
       const result = await requestNextAfterSubmission(projection.material_id)
-      if (result.requested) setRequestMessage('已收到下一份申請。')
+      if (result.requested) {
+        setSubmission(current => current ? { ...current, next_requested: true } : current)
+        setRequestMessage('已收到下一份申請。')
+      }
       else if (result.reason === 'MONTHLY_LIMIT') setRequestMessage(`本服務月已使用 ${result.used ?? 4}/${result.limit ?? 4} 份，下個服務月可再申請。`)
       else setRequestMessage('目前無法申請下一份，請稍後再試。')
     } catch { setActionError('下一份申請失敗，請稍後重試。') }
     finally { setActionBusy(false) }
+  }
+
+  async function downloadStudent() {
+    if (downloadBusy) return
+    setDownloadBusy(true)
+    setDownloadMessage('')
+    try {
+      await openMaterialDownload(projection.material_id, 'student', materialDownloadFilename(
+        projection.child_name, projection.material_week, 'student', projection.week_number,
+      ))
+    } catch (error) {
+      setDownloadMessage(error instanceof Error && error.message === 'PDF_PENDING'
+        ? 'PDF 正在準備，請稍後再按下載。'
+        : '目前無法下載，請稍後再按下載重試。')
+    } finally { setDownloadBusy(false) }
   }
 
   const lesson = projection.student_lesson ?? {}
@@ -233,17 +253,16 @@ export function PaperReader({
             </button>
           )}
 
-          {studentPdfUrl && (
-            <a
-              href={studentPdfUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="button button-secondary"
-              style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
-            >
-              ⬇ 下載空白學生教材
-            </a>
-          )}
+          <button
+            type="button"
+            disabled={downloadBusy}
+            aria-busy={downloadBusy}
+            onClick={() => void downloadStudent()}
+            className="button button-secondary"
+            style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
+          >
+            {downloadBusy ? '準備下載中…' : '⬇ 下載空白學生教材'}
+          </button>
         </div>
 
         {/* Chapter Jump Navigation */}
@@ -313,6 +332,7 @@ export function PaperReader({
           )}
         </nav>
       </header>
+      {downloadMessage && <p className="notice" role="status">{downloadMessage}</p>}
 
       {/* Conflict Resolution Banner */}
       {hasConflict && !submission && (
@@ -410,7 +430,7 @@ export function PaperReader({
               </fieldset>
               <button className="button button-link" type="button" disabled={actionBusy} onClick={() => setFeedbackChoice('skip')}>略過</button>
             </div>}
-            {(feedbackChoice === 'saved' || feedbackChoice === 'skip') && !requestMessage && (
+            {(feedbackChoice === 'saved' || feedbackChoice === 'skip') && !submission.next_requested && (
               <div className="form-actions">
                 <p>本週教材已結束。準備好時，明確申請下一份。</p>
                 <button className="button button-primary" type="button" disabled={actionBusy} onClick={() => void requestNext()}>

@@ -25,7 +25,7 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
       </div>
       <p>
         {enrollment?.freePilotActive
-          ? '免填信用卡、免綁卡。每週回報孩子作答狀況後，系統會繼續準備下一週教材。'
+          ? '免填信用卡、免綁卡。提交教材後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份。'
           : '每個孩子都有獨立的學習記憶、教材、回饋與生成節奏。'}
       </p>
     </div>

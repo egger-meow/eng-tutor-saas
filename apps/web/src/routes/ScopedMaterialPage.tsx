@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { navigate } from '../app/use-route'
+import { navigate, replaceRouteUrl } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { PublicHeader } from '../components/layout/PublicHeader'
 import { PublicFooter } from '../components/layout/PublicFooter'
@@ -116,7 +116,7 @@ export function ScopedMaterialPage({ session }: { session: Session | null }) {
 
   useEffect(() => {
     const token = captureScopedMaterialToken(window.location.search, window.sessionStorage, () => {
-      window.history.replaceState({}, '', '/material')
+      replaceRouteUrl('/material')
     })
     if (!token) {
       setState({ status: 'error' })

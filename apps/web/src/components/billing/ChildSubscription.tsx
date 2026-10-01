@@ -218,7 +218,7 @@ export function ChildSubscription({
           <h2>{child.display_name}</h2>
           <p>
             {freePilotActive
-              ? '紙屬英文 Beta 目前每週教材 NT$0。完成孩子資料後，每週填寫回饋即可持續準備下一週；不需要先訂閱或綁卡。'
+              ? '紙屬英文 Beta 目前每週教材 NT$0。提交教材後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份，不需要先訂閱或綁卡。'
               : '尚未建立訂閱。完成第一週體驗後，我們會再引導你確認方案。'}
           </p>
         </div>
@@ -234,7 +234,7 @@ export function ChildSubscription({
   const [title, description] = isCanceledAutoRenew
     ? ['已取消自動續訂', `目前方案仍可使用至 ${periodEnd ?? '本期結束'}。到期後可以重新選擇月繳或年繳方案。`]
     : isFreePilotActiveChild
-      ? ['紙屬英文 Beta · 每週教材 NT$0', '目前免填信用卡、免綁卡，現在不訂閱也能持續使用。每週完成孩子回饋後，系統會繼續準備下一週教材；100 位只是目前服務容量與 Beta 階段邊界。']
+      ? ['紙屬英文 Beta · 每週教材 NT$0', '目前免填信用卡、免綁卡，現在不訂閱也能持續使用。提交教材後可選填家長回饋，再主動申請下一份，每服務月最多 4 份；100 位只是目前服務容量與 Beta 階段邊界。']
       : isPilotEndedChild
         ? ['初期免費階段已結束', '已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。']
         : labels[subscription.status]

@@ -206,11 +206,9 @@ export function useMaterialDraft({
   const updateAnswer = useCallback(
     (key: string, value: string, immediate = false) => {
       editRevisionRef.current += 1
-      setAnswers((prev) => {
-        const next = { ...prev, [key]: value }
-        answersRef.current = next
-        return next
-      })
+      const next = { ...answersRef.current, [key]: value }
+      answersRef.current = next
+      setAnswers(next)
 
       setStatus('unsaved')
 
@@ -234,13 +232,12 @@ export function useMaterialDraft({
   const toggleSelfCheck = useCallback(
     (itemText: string) => {
       editRevisionRef.current += 1
-      setSelfCheck((prev) => {
-        const next = prev.includes(itemText)
-          ? prev.filter((t) => t !== itemText)
-          : [...prev, itemText]
-        selfCheckRef.current = next
-        return next
-      })
+      const previous = selfCheckRef.current
+      const next = previous.includes(itemText)
+        ? previous.filter((t) => t !== itemText)
+        : [...previous, itemText]
+      selfCheckRef.current = next
+      setSelfCheck(next)
 
       setStatus('unsaved')
 
@@ -264,6 +261,10 @@ export function useMaterialDraft({
   const resolveConflict = useCallback(
     async (strategy: 'keep-mine' | 'load-server') => {
       if (!serverConflictData) return
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+        debounceTimerRef.current = null
+      }
 
       if (strategy === 'load-server') {
         saveQueuedRef.current = false

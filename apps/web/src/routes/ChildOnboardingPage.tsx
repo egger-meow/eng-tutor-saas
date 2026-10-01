@@ -106,7 +106,7 @@ export function ChildOnboardingPage({
   const [title, description] = stepMeta[step - 1] ?? stepMeta[0]
 
   return (
-    <AppShell header={<ParentNavigation email={session.user.email} childHref={childId ? `/children/${childId}` : '/dashboard'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
+    <AppShell header={<ParentNavigation email={session.user.email} childHref={childId ? `/children/${childId}` : '/children'} onSignOut={() => void getSupabaseClient().auth.signOut()} />}>
       {loading ? <p className="loading-state" role="status">正在載入學習資料…</p> : error && !draft.displayName && childId ? <p className="notice notice-error">{error}</p> : (
         <div className="onboarding-container">
           {isNewChild && (

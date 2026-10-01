@@ -19,7 +19,7 @@ export function SamplePage() {
     update(emptyDemoState()); setConfirmSubmit(false)
   }
   return <AppShell header={<PublicHeader />}>
-    <main className="sample-page public-demo">
+    <div className="sample-page public-demo">
       <header className="sample-intro">
         <p className="overline">不用登入，先試一份</p>
         <h1>讀一篇、試著答，再看結果。</h1>
@@ -66,7 +66,7 @@ export function SamplePage() {
           <a className="button secondary" href="/#login" onClick={handleInternalLink}>已有帳號，登入看教材</a>
         </div>
       </section>
-    </main>
+    </div>
     <PublicFooter />
   </AppShell>
 }

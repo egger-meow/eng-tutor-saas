@@ -60,7 +60,7 @@ export function AuthenticatedMaterialContent({
           key={state.projection.material_id}
           projection={state.projection}
           studentPdfUrl={state.studentPdfUrl}
-          onSwitchToPdf={() => setViewMode('pdf')}
+          onSwitchToPdf={() => { setViewMode('pdf'); onRetry() }}
         />
       </div>
     )
@@ -75,7 +75,7 @@ export function AuthenticatedMaterialContent({
   return (
     <section className="surface-card scoped-material-card">
       <div className="scoped-material-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="scoped-material-mode-header">
           <div>
             <p className="overline">{headerOverline}</p>
             <h1>本週教材</h1>
