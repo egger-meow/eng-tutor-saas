@@ -60,6 +60,13 @@ describe('PaperReader Component Suite', () => {
     expect(html.match(/<button[^>]*class="tts-button[^>]*>/)?.[0]).not.toContain('disabled')
     expect(html).toMatch(/<button[^>]*speech-stop[^>]*disabled=""/)
   })
+  it('renders complete legacy organizer columns and mobile column labels', () => {
+    const html = renderToStaticMarkup(<QuestionRenderer index={0} question={{ id: 'organizer', prompt: 'Compare.', responseLayout: { type: 'organizer', headers: ['Relationship', 'Action that changes it', 'Reading-supported effect / response'], rows: [{ label: 'distance' }, { label: 'direction/orientation' }, { label: 'obstruction' }] } }} draftAnswers={{ organizer: 'Preserved answer' }} onAnswerChange={vi.fn()} />)
+    expect(html.match(/scope="row"/g)).toHaveLength(3)
+    expect(html.match(/<td /g)).toHaveLength(6)
+    expect(html).toContain('data-column="Reading-supported effect / response"')
+    expect(html).toContain('Preserved answer')
+  })
   const sampleProjection: StudentMaterialProjection = {
     material_id: 'mat-test-1',
     child_id: 'child-test-1',

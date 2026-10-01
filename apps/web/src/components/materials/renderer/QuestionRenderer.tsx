@@ -72,13 +72,13 @@ export function QuestionRenderer({
         <div>
           {/* Table or Organizer */}
           {(layout.type === 'table' || layout.type === 'organizer') && (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="response-table-wrapper">
               <table className="response-grid-table">
                 {layout.headers && (
                   <thead>
                     <tr>
                       {layout.headers.map((h: string, hIdx: number) => (
-                        <th key={hIdx}>{h}</th>
+                        <th key={hIdx} scope="col">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -86,17 +86,17 @@ export function QuestionRenderer({
                 <tbody>
                   {layout.rows?.map((row, rIdx: number) => (
                     <tr key={rIdx}>
-                      {row.label && <td><strong>{row.label}</strong></td>}
+                      {row.label && <th scope="row" data-column={layout.headers?.[0]}>{row.label}</th>}
                       {row.values?.map((v: string, vIdx: number) => (
-                        <td key={vIdx}>{v}</td>
+                        <td key={vIdx} data-column={layout.headers?.[vIdx + (row.label ? 1 : 0)]}>{v}</td>
                       ))}
                       {row.cells?.map((cell, cIdx: number) => {
                         const cellKey = cell.responseUnitId ?? `${qId}-cell-${rIdx}-${cIdx}`
                         return (
-                          <td key={cIdx}>
+                          <td key={cIdx} data-column={layout.headers?.[cIdx + (row.label ? 1 : 0)]}>
                             {cell.responseUnitId ? (
                               <input
-                                aria-label={`${question.prompt} · ${row.label ?? `第 ${rIdx + 1} 列`} · ${layout.headers?.[cIdx] ?? `欄 ${cIdx + 1}`}`}
+                                aria-label={`${question.prompt} · ${row.label ?? `第 ${rIdx + 1} 列`} · ${layout.headers?.[cIdx + (row.label ? 1 : 0)] ?? `欄 ${cIdx + 1}`}`}
                                 readOnly={readOnly}
                                 type="text"
                                 className="response-grid-input"
@@ -109,6 +109,10 @@ export function QuestionRenderer({
                             )}
                           </td>
                         )
+                      })}
+                      {Array.from({ length: Math.max(0, (layout.headers?.length ?? 0) - (row.label ? 1 : 0) - (row.values?.length ?? 0) - (row.cells?.length ?? 0)) }, (_, offset) => {
+                        const column = (row.label ? 1 : 0) + (row.values?.length ?? 0) + (row.cells?.length ?? 0) + offset
+                        return <td key={`blank-${column}`} data-column={layout.headers?.[column]}><span className="response-empty-cell">寫在下方作答區</span></td>
                       })}
                     </tr>
                   ))}
