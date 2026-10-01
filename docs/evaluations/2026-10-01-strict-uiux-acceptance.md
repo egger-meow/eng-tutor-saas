@@ -37,4 +37,8 @@ Date: 2026-10-01. Continuation of the overall layout review. Acceptance remains 
 
 ## Delivery
 
-Source commit, CI deployment and post-deploy public/authenticated readback will be recorded after delivery. No migrations, Edge Functions or generation-release versions changed in this task.
+- Delivered source commits: `560415135a9bafe80d9b8371217d15b22908bd66` and `16eaa50c2a32a3870a88c92c34672e5b041d4b34`, pushed to `main`.
+- Final [CI run 36835447707](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36835447707) completed successfully for the exact latter source commit. Both `verify` (job 110281636250: lint, workspace tests, typecheck, build) and `deploy-production` (job 110282160653) passed. The additional Beta regression passed all 19 delivery-view-model tests locally.
+- Production public readback passed at 320, 390, 820 and 1440 CSS pixels on landing/sample pages, with eight screenshots under `.runtime/layout-review/production/`. Served assets were `/assets/index-6kCXgpn0.js` and `/assets/index-ClXGyqPA.css`.
+- Post-deployment authenticated read-only checks confirmed: child level uses its Chinese label; mobile menu Escape closes it and returns toggle focus; 390px has no document overflow; dashboard contains the explicit Beta request guidance and no filtered internal jargon; reader has one main h1 and the historical organizer has one response textarea with explanatory guidance. Existing real drafts were not edited. The temporary browser viewport was reset and the original dashboard restored.
+- Overall acceptance remains conditional on the open gates above. No migrations, Edge Functions or generation-release versions changed in this task.
