@@ -329,8 +329,8 @@ describe('PaperReader Component Suite', () => {
       />
     )
 
-    expect(html).toContain('空白列印版 PDF')
-    expect(html).toContain('下載空白學生教材')
+    expect(html).toContain('檢視學生教材 PDF')
+    expect(html).toContain('下載學生教材')
     expect(html).not.toContain('href="https://example.com/student.pdf"')
     expect(html).toContain('aria-busy="false"')
   })

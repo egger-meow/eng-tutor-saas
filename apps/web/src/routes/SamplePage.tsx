@@ -23,7 +23,7 @@ export function SamplePage() {
       <header className="sample-intro">
         <p className="overline">不用登入，先試一份</p>
         <h1>讀一篇、試著答，再看結果。</h1>
-        <p className="lede">線上閱讀與作答，也能下載空白教材列印。正式教材會依孩子的程度、學校進度、興趣與已提交表現調整。</p>
+        <p className="lede">線上閱讀與作答，也能下載學生教材列印。正式教材會依孩子的程度、學校進度、興趣與已提交表現調整。</p>
         <p className="sample-disclaimer">公開合成範例：故事與學習設定都是示範，不含真實孩子資料，也不是為你的孩子生成的個人化教材。範例答案屬公開內容；正式教材由伺服器管控，整份提交後才開放答案。</p>
         <p>體驗作答只留在這個瀏覽器，不會送到伺服器，不耗教材配額，也不會啟動生成。裝置朗讀使用瀏覽器可用語音；這裡的寫作是文字輸入。</p>
       </header>
@@ -31,7 +31,7 @@ export function SamplePage() {
         <div className="paper-reader-toolbar demo-toolbar" role="region" aria-label="範例工具列">
           <p role="status">{!saved ? '瀏覽器無法保存；目前作答只留在此頁，重新整理會遺失本次變更。' : state.submitted ? '已提交範例 · 作答已鎖定 · 只存本機' : '範例草稿自動保存在此瀏覽器'}</p>
           <div className="form-actions">
-            <a className="button secondary" href="/samples/demo-student.pdf" target="_blank" rel="noreferrer">空白列印版 PDF</a>
+            <a className="button secondary" href="/samples/demo-student.pdf" target="_blank" rel="noreferrer">檢視學生教材 PDF</a>
             <button className="button secondary" type="button" onClick={reset}>清除並重新體驗</button>
           </div>
         </div>

@@ -11,5 +11,5 @@ function projectedText(value: unknown): string[] {
 
 export function ProjectedContent({ value }: { value: unknown }) {
   const texts = projectedText(value)
-  return <div className="projected-content">{texts.length ? texts.map((text, index) => <p key={index}>{text}</p>) : <p>這個版型請搭配空白列印版閱讀。</p>}</div>
+  return <div className="projected-content">{texts.length ? texts.map((text, index) => <p key={index}>{text}</p>) : <p>這個版型請搭配學生教材 PDF 閱讀。</p>}</div>
 }

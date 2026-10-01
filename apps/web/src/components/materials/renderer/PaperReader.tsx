@@ -252,7 +252,7 @@ export function PaperReader({
               style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
               onClick={onSwitchToPdf}
             >
-              📄 空白列印版 PDF
+              📄 檢視學生教材 PDF
             </button>
           )}
 
@@ -264,7 +264,7 @@ export function PaperReader({
             className="button button-secondary"
             style={{ fontSize: '0.8125rem', padding: '0.3rem 0.75rem' }}
           >
-            {downloadBusy ? '準備下載中…' : '⬇ 下載空白學生教材'}
+            {downloadBusy ? '準備下載中…' : '⬇ 下載學生教材'}
           </button>
         </div>
 

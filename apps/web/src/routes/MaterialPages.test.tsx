@@ -373,8 +373,8 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('paper-reader-container')
     expect(html).toContain('How Games Place Sound')
     expect(html).toContain('vibration')
-    expect(html).toContain('空白列印版 PDF')
-    expect(html).toContain('下載空白學生教材')
+    expect(html).toContain('檢視學生教材 PDF')
+    expect(html).toContain('下載學生教材')
   })
 })
 

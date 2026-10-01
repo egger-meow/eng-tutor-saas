@@ -86,7 +86,7 @@ try {
     const pdf = await page.request.get('http://127.0.0.1:5179/samples/demo-student.pdf')
     assert.equal(pdf.status(), 200)
     assert.equal((await pdf.body()).subarray(0, 4).toString(), '%PDF')
-    assert.equal(await page.getByRole('link', { name: '空白列印版 PDF', exact: true }).getAttribute('href'), '/samples/demo-student.pdf')
+    assert.equal(await page.getByRole('link', { name: '檢視學生教材 PDF', exact: true }).getAttribute('href'), '/samples/demo-student.pdf')
     page.once('dialog', (dialog) => dialog.accept())
     await page.getByRole('button', { name: '清除並重新體驗', exact: true }).click()
     assert.equal(await page.locator('#q-card-R2 textarea').inputValue(), '')

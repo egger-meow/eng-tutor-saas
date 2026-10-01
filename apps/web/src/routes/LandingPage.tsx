@@ -30,7 +30,7 @@ const evolutionPillars = [
 ] as const
 
 const usageModes = [
-  ['自己完成', '孩子自己學', '用網頁閱讀、朗讀與輸入作答，草稿自動保存；也能下載空白 PDF 用紙筆完成。'],
+  ['自己完成', '孩子自己學', '用網頁閱讀、朗讀與輸入作答，草稿自動保存；也能下載學生教材 PDF 用紙筆完成。'],
   ['一起使用', '家長陪著學', '整份提交後一起看結果、回到文章找證據；家長可選填觀察，不必先備課。'],
   ['交給老師', '搭配家教／老師使用', '直接當作每週教學內容、補充教材或回家作業，老師不用從零準備一整套。'],
 ] as const
@@ -43,7 +43,7 @@ export const faqItems = [
   ['程度診斷一定要做嗎？', '不用，完全是選用的。如果不做診斷，系統會先依據年級與家長填寫的起點程度生成每週教材，並隨每週實際作答回饋逐步調整。若孩子願意做，自適應程度診斷（題數會依作答情況調整）能讓系統在第一時間掌握更具體的能力輪廓。'],
   ['多久可以重新做程度診斷？', '完成診斷後需間隔 90 天才能再次進行。這項設計是為了避免孩子產生頻繁測驗的壓力，同時給孩子足夠的時間透過每週教材與練習累積真實進步。在 90 天冷卻期間，系統會持續依據每週的作答回饋自動微調教材，不需要依賴頻繁重測。'],
   ['多久可以拿到第一份教材？', '名額開放時，完成孩子資料後會立即開始製作第一份專屬教材；完成後直接開放下載。若目前額滿，會先進入候補且不收費，有名額時再通知你。提交本份作答後，可選填家長回饋，再主動申請下一份；每服務月最多 4 份。'],
-  ['一定要讓孩子自己學嗎？', '不用。孩子可以在網頁自行閱讀作答，也可以由家長陪讀，或下載空白學生教材交給老師作為練習。新教材整份提交後才開放解答。教材準備好，怎麼使用由家庭決定。'],
+  ['一定要讓孩子自己學嗎？', '不用。孩子可以在網頁自行閱讀作答，也可以由家長陪讀，或下載學生教材交給老師作為練習。新教材整份提交後才開放解答。教材準備好，怎麼使用由家庭決定。'],
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材可線上閱讀與作答，也提供空白學生 PDF 下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
@@ -100,7 +100,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <ul className="hero-benefits" aria-label="紙屬英文重點">
               <li>4 步驟約 2 分鐘基礎設定，免綁卡；登入後可隨時讓孩子做一段程度診斷，也可以直接開始學習</li>
               <li>線上閱讀、裝置朗讀與作答；整份提交後看答案</li>
-              <li>也可下載空白 A4 學生教材，用紙筆學習</li>
+              <li>也可下載A4 學生教材，用紙筆學習</li>
             </ul>
 
             {isFreePilot ? (
@@ -156,7 +156,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           <div className="section-heading early-sample-intro">
             <p className="overline">不用先相信我們，先試教材</p>
             <h2>先線上讀、試著答，也能印下來學。</h2>
-            <p>不用登入就能體驗選擇題、寫句子、裝置朗讀與提交結果。整份提交後才在畫面顯示參考答案；空白列印版不含作答與解答。</p>
+            <p>不用登入就能體驗選擇題、寫句子、裝置朗讀與提交結果。整份提交後才在畫面顯示參考答案；下載的教材不包含線上作答與解答。</p>
             <div className="early-sample-proof" aria-label="範例說明"><span>公開合成範例</span><span>只存本機</span><span>不耗教材配額</span></div>
           </div>
           <div className="document-pair">
@@ -168,9 +168,9 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             </article>
             <article className="sample-context-card">
               <p className="overline">Print when you prefer</p>
-              <h3>同一份內容，空白 A4 學生教材</h3>
+              <h3>同一份內容，A4 學生教材</h3>
               <p>喜歡紙筆時下載列印，圈字、寫句子與做筆記。列印不會帶入這次試用的填答或參考答案。</p>
-              <a className="button secondary" href="/samples/demo-student.pdf" target="_blank" rel="noreferrer" onClick={() => trackSampleClick('demo_student_pdf')}>開啟空白列印版</a>
+              <a className="button secondary" href="/samples/demo-student.pdf" target="_blank" rel="noreferrer" onClick={() => trackSampleClick('demo_student_pdf')}>檢視學生教材 PDF</a>
             </article>
           </div>
         </section>
@@ -237,7 +237,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 <h2>讓科技做它擅長的事，<br className="heading-break" />讓孩子完成不能外包的思考。</h2>
               </div>
               <div className="philosophy-detail">
-                <p>網頁提供閱讀、作答草稿與裝置朗讀；喜歡紙筆時可下載空白教材，畫線、圈單字、留下思考痕跡。AI 在幕後協助教材設計，孩子仍要自己讀、自己答。</p>
+                <p>網頁提供閱讀、作答草稿與裝置朗讀；喜歡紙筆時可下載學生教材，畫線、圈單字、留下思考痕跡。AI 在幕後協助教材設計，孩子仍要自己讀、自己答。</p>
               </div>
             </section>
 

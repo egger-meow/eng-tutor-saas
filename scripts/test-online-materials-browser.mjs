@@ -149,7 +149,7 @@ try {
     await page.evaluate(() => window.__readerNavigate('/materials/synthetic-material'))
     // Reader download must obtain a fresh URL rather than opening the stale prop.
     const readerDownload = page.waitForEvent('download')
-    await page.getByRole('button', { name: '⬇ 下載空白學生教材', exact: true }).click()
+    await page.getByRole('button', { name: '⬇ 下載學生教材', exact: true }).click()
     await readerDownload
     assert.equal(pdfRequests, 3)
     await mkdir(resolve('.runtime/layout-review/after'), { recursive: true })
