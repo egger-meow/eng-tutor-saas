@@ -26,6 +26,13 @@ Screenshot evidence is local and ignored under `.runtime/layout-review/before/` 
 
 ## Production delivery
 
-Source push, CI deployment and production asset/screenshot read-back are recorded below after delivery. This change has no pending Supabase migration or Edge deployment.
+- Source commit `68758607327593e60671dd639b5aecdeb1f838ee` pushed normally to `origin/main`.
+- [CI run 36827830350](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36827830350): verification job `110257401493` and production deployment job `110258011724` both succeeded. Linux CI ran the final lint, complete tests, typecheck and build.
+- Fresh production `/sample` returned HTTP 200 with `/assets/index-CfuOSdrx.js` and `/assets/index-BJsRHrEr.css`. Read-back confirmed the history guard marker, corrected optional-feedback/request copy and question-number styles.
+- Live anonymous landing/sample screenshots at 320, 390, 820 and 1,440px passed document-overflow assertions. Evidence: `.runtime/layout-review/production/` (eight screenshots). These contain public pages only.
+- Existing anonymous production demo smoke passed at 390×844: answer retention after reload, partial submission/results, read-only answers and return to login. Observed service calls were limited to enrollment state and public funnel events, with no student-answer traffic.
+- Final local screenshot review completed 44 page/viewport combinations, plus the additional profile steps and reader screenshots, with no uncaught page errors or document-level overflow. Files and synthetic fixtures remain ignored; the repeatable review script is committed.
+
+This change has no pending Supabase migration or Edge deployment.
 
 The previously recorded physical-device, real-family learning loop, next-packet adaptation, actual missing-PDF reconstruction and first retention-scheduler acceptance gates remain separate. They are verification gates and are not claimed complete by layout screenshots.
