@@ -25,7 +25,14 @@
 - 部署前 remote main `8f4869deaa96e6f41398fc47fde1ec1c0a69e19b` 與本機一致。
 - S5 scheduler 待辦已有新證據：[run 36797067259](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36797067259)，head `8f4869d`、created `2026-10-01T00:37:04Z`，整體 SUCCESS；`Recover requested PDF artifacts` step SUCCESS。正式 PDF artifact table 為空，這證明新版 recovery step 已跑，仍不證明真實 missing-object rebuild。
 - Edge fresh readback：`material-access` ACTIVE v17，ID `8f370c7c-e937-49a0-86d8-0b86b186b2de`；`material-pdf` ACTIVE v1，ID `b25e54ea-864c-498d-b7a0-a2f19f18cf1d`。S7 沒有 Edge 更新。
-- S7 migration／CI／web readback：待 source push 後補入本記錄。
+- Source `1291f1eaf64cd01856e2345392b46a9754a616f6` 正常 push main。Linked CLI dry-run 只列一個 pending migration；套用 `20261001051703_material_learning_observability.sql` 成功，remote history 同名／同版本讀回。
+- [CI run 36820100839](https://github.com/egger-meow/eng-tutor-saas/actions/runs/36820100839)：verify job `110233622727` SUCCESS；deploy-production job `110234179724` SUCCESS。
+- 正式 `/sample` HTTP 200；asset `/assets/index-CHJKSmC4.js` HTTP 200，包含 `record_material_learning_event`。正式匿名 sample 390×844 browser smoke PASS；只見 enrollment 與 public funnel RPC，沒有 learning event／作答傳送。
+- Remote RLS true；四欄精確為 material_id／event_name／origin／created_at。Authenticated direct SELECT、anon event RPC、browser purge 都為 false；三項 transition trigger 存在。
+- 正式 rollback 合成 fixture PASS：ownership、release、parent-answer submission gate、server-event browser forgery、duplicate open dedupe、server submission／feedback／next transitions、internal-test exclusion。Rollback 後 synthetic users／materials count 都為 0，沒有留下帳號、教材、提交或事件。沒有 production authoring claim。
+- Fresh active contract 仍為 rel_1.9.1／bundle 2.14.1-prod／SHA d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211，engine 1.9.0／prompt 2.14.1／schema 2.6.0／worker 1.8.0／renderer 1.6.1。
+- Security advisors：新表的 [RLS no policy](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) INFO 與 [authenticated SECURITY DEFINER](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) WARN 符合窄 RPC／拒絕 direct access 的設計，已用行為驗證。其他既有 notices 沒有在 S7 修改；assessment_client_items view 的 browser SELECT fresh readback=false，不把 advisor 清單宣稱全站 security PASS。
+- 手動執行正式 `purge_expired_material_learning_events()` 被自動審核拒絕：永久廣泛刪除未獲立即執行的明確授權。未執行、未繞過。改用唯讀 expired count，結果為 0；實際 worker retention execution 仍待首次新版排程。此額外手動操作不是部署步驟。
 
 ## 仍待驗收
 
