@@ -40,6 +40,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
     undefined,
     child.has_past_due_job,
     child.has_active_generation_failure,
+    enrollment?.freePilotActive,
   )
 
   const reduceMotion = useReducedMotion()

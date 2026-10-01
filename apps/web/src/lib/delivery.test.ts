@@ -45,6 +45,17 @@ const buildMaterial = (options: {
 })
 
 describe('getDeliveryViewModel — released weekly cadence', () => {
+  it('does not require a paid subscription while the free-pilot phase is active', () => {
+    const current = buildMaterial({id:'current',week:'2026-09-30'})
+    for (const subscription of [null, {status:'trialing'}, {status:'canceled'}]) {
+      const view = getDeliveryViewModel({...baseChild,subscription} as Child,current,null,null,new Date('2026-10-01'),false,false,true)
+      expect(view.headline).toBe('準備好時，再申請下一份教材')
+      expect(view.detail).toContain('使用資格')
+      expect(view.detail).toContain('4 份')
+      expect(view.action?.href).toBe('/materials/current')
+      expect(view.action?.href).not.toBe('/billing')
+    }
+  })
   it('uses a prepared next material before any later job date', () => {
     const currentWeek1 = buildMaterial({ id: 'm-1', week: '2026-08-12', releaseAt: '2026-08-12T01:00:00Z', withFeedback: true })
     const preparedWeek2 = buildMaterial({ id: 'm-2', week: '2026-08-19', releaseAt: '2026-08-19T01:00:00Z' })
@@ -92,8 +103,9 @@ describe('getDeliveryViewModel — released weekly cadence', () => {
     const view = getDeliveryViewModel(baseChild, currentWeek1, null, null, new Date('2026-08-15T00:00:00Z'))
 
     expect(view.nextDeliveryAt).toBeNull()
-    expect(view.headline).toBe('下一份教材排程確認中')
-    expect(view.detail).toContain('排程確認後')
+    expect(view.headline).toBe('準備好時，再申請下一份教材')
+    expect(view.detail).toContain('主動申請下一份')
+    expect(view.action?.href).toBe('/materials/m-1')
   })
 
   it('keeps feedback acknowledgement factual after cutoff or submission', () => {

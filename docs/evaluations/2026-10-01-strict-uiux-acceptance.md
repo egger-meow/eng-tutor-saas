@@ -12,6 +12,7 @@ Date: 2026-10-01. Continuation of the overall layout review. Acceptance remains 
 6. A historical production organizer had row labels but no response-unit IDs, making it impossible to answer online. Keep the original table and add a question-level written response with the immutable question ID. The existing submission RPC reads that ID before response-unit aggregation; no canonical content, grading or schema changes are needed.
 7. The authenticated production dashboard showed internal skill IDs, Schema versions and internal rationale. Extend the existing parent-facing filter and apply it to timeline prose. Show three personalization notes initially, with the remainder available on demand. Use a unique summary heading ID for each child. Do not mutate stored summaries.
 8. Actual child overview displayed the enum “developing”. Reuse the onboarding label “基礎正在建立”. Billing and onboarding descriptions now explain the user-facing flow and separate submission, optional feedback and an explicit next request.
+9. During the active free-pilot phase, delivery guidance ignored that phase and could incorrectly demand a paid subscription for a canceled/trial subscription. Pass the enrollment phase into the existing delivery view model; keep scheduled-material/job dates authoritative. Without a next schedule, direct the parent to the current material for an explicit request, with qualification/quota checked by the server. This display repair does not grant entitlement or infer a child's historical pilot admission.
 
 ## Verification evidence
 

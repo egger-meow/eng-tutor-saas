@@ -35,6 +35,7 @@ export function getDeliveryViewModel(
   nowInput?: Date,
   hasPastDueJobInput?: boolean,
   hasActiveGenerationFailureInput?: boolean,
+  freePilotActiveInput = false,
 ): DeliveryViewModel {
   let nextPrepared: Material | null = null
   let nextJobReleaseAt: string | null = null
@@ -63,7 +64,7 @@ export function getDeliveryViewModel(
 
   const subscription = (child as { subscription?: SubscriptionView | null } | null)?.subscription
 
-  if (currentMaterial && subscription !== undefined) {
+  if (currentMaterial && subscription !== undefined && !freePilotActiveInput) {
     const isUnsubscribed = !subscription || subscription.status === 'trialing'
     const isCanceled = subscription?.status === 'canceled'
     const isPastDue = subscription?.status === 'past_due'
@@ -229,11 +230,14 @@ export function getDeliveryViewModel(
     nextDeliveryAt: null,
     feedbackCutoffAt: null,
     feedbackState: currentMaterial?.feedback ? 'received' : 'waiting',
-    headline: currentMaterial ? '下一份教材排程確認中' : '第一份教材準備中',
+    headline: currentMaterial ? '準備好時，再申請下一份教材' : '第一份教材準備中',
     detail: currentMaterial
-      ? '排程確認後會在這裡顯示下一次交付日期。'
+      ? freePilotActiveInput
+        ? '目前為 Beta 免費階段。完成本份作答後，可選填回饋，再到教材頁申請下一份；使用資格與每服務月 4 份配額會由系統確認。'
+        : '完成本份作答後，可選填回饋，再到教材頁主動申請下一份。申請後會在這裡顯示下一次交付狀態。'
       : hasPastDueJob
         ? '第一份教材仍在製作中；完成後會直接開放下載。'
         : '完成孩子資料後就會立即開始製作第一份教材。',
+    action: currentMaterial ? { label: '回到本份教材', href: `/materials/${currentMaterial.id}` } : null,
   }
 }
