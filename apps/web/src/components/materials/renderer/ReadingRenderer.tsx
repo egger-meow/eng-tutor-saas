@@ -2,16 +2,34 @@ import type {
   ReadingSection,
   AdaptiveExtension,
   ReadingGenre,
+  VocabularyItem,
 } from '../../../types/student-material'
 import { useSpeechSynthesis } from '../../../hooks/use-speech-synthesis'
 import { ProjectedContent } from './ProjectedContent'
 import { SpeechControls } from './SpeechControls'
 
 export interface ReadingRendererProps {
+  vocabulary?: VocabularyItem[]
   reading?: ReadingSection
   adaptiveExtension?: AdaptiveExtension | null
   draftAnswers: Record<string, string>
   onAnswerChange: (key: string, value: string) => void
+}
+
+export function highlightVocabulary(text: string, vocabulary: VocabularyItem[]) {
+  const words = [...new Set(vocabulary.map(({ word }) => word.trim()).filter(Boolean))].sort((a, b) => b.length - a.length)
+  if (!words.length) return text
+  const escaped = words.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}_])(${escaped.join('|')})(?![\\p{L}\\p{N}_])`, 'giu')
+  const parts = []
+  let start = 0
+  for (const match of text.matchAll(pattern)) {
+    parts.push(text.slice(start, match.index))
+    parts.push(<strong key={match.index} className="reading-target-word">{match[0]}</strong>)
+    start = match.index! + match[0].length
+  }
+  parts.push(text.slice(start))
+  return parts
 }
 
 function getGenreLabel(genre?: ReadingGenre): string {
@@ -54,10 +72,12 @@ function getAdaptivePurposeLabel(purpose: string): string {
 
 export function ReadingRenderer({
   reading,
+  vocabulary,
   adaptiveExtension,
   draftAnswers,
   onAnswerChange,
 }: ReadingRendererProps) {
+  const highlight = (text: string) => highlightVocabulary(text, vocabulary ?? [])
   const readOnly = useAnswerReadOnly()
   const speech = useSpeechSynthesis()
   const { isSupported, isSpeaking, currentText, speak, stop } = speech
@@ -135,7 +155,7 @@ export function ReadingRenderer({
             if (block.type === 'paragraph') {
               return (
                 <p key={index} className="reading-paragraph">
-                  {block.text}
+                  {highlight(block.text)}
                 </p>
               )
             }
@@ -143,7 +163,7 @@ export function ReadingRenderer({
               return (
                 <div key={index} className="reading-dialogue-row">
                   <span className="reading-speaker-tag">{block.speaker}</span>
-                  <div style={{ flex: 1, lineHeight: 1.7 }}>{block.text}</div>
+                  <div style={{ flex: 1, lineHeight: 1.7 }}>{highlight(block.text)}</div>
                 </div>
               )
             }
@@ -151,7 +171,7 @@ export function ReadingRenderer({
               return (
                 <div key={index} className="reading-notice-box">
                   {block.heading && <h5>📌 {block.heading}</h5>}
-                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{block.text}</div>
+                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{highlight(block.text)}</div>
                 </div>
               )
             }
@@ -167,7 +187,7 @@ export function ReadingRenderer({
           })
         ) : reading.passage ? (
           <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.85 }}>
-            {reading.passage}
+            {highlight(reading.passage)}
           </div>
         ) : null}
       </div>

@@ -16,7 +16,7 @@ export function StudentLessonRenderer({ lesson, answers, selfCheck, readOnly, on
   return <AnswerReadOnlyContext.Provider value={readOnly}>
     <OpeningRenderer opening={lesson.opening} draftAnswers={answers} onAnswerChange={onAnswerChange} />
     <VocabularyRenderer vocabulary={lesson.vocabulary} />
-    <ReadingRenderer reading={lesson.reading} adaptiveExtension={lesson.adaptiveExtension} draftAnswers={answers} onAnswerChange={onAnswerChange} />
+    <ReadingRenderer vocabulary={lesson.vocabulary} reading={lesson.reading} adaptiveExtension={lesson.adaptiveExtension} draftAnswers={answers} onAnswerChange={onAnswerChange} />
     <InstructionRenderer instruction={lesson.instruction} />
     <PracticeRenderer practice={lesson.practice} adaptiveExtension={lesson.adaptiveExtension} draftAnswers={answers} onAnswerChange={onAnswerChange} />
     <SelfCheckRenderer selfCheckZh={lesson.selfCheckZh} draftSelfCheck={selfCheck} onToggleSelfCheck={onToggleSelfCheck} />
