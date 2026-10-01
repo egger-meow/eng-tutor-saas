@@ -56,7 +56,9 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('My immutable answer')
     expect(html).toContain('<button')
     expect(html).not.toContain('inert=')
-    expect(html).not.toContain('disabled=""')
+    expect(html).toMatch(/<button[^>]*class="tts-button[^>]*aria-label="聆聽 sound 發音"/)
+    expect(html.match(/<button[^>]*class="tts-button[^>]*>/)?.[0]).not.toContain('disabled')
+    expect(html).toMatch(/<button[^>]*speech-stop[^>]*disabled=""/)
   })
   const sampleProjection: StudentMaterialProjection = {
     material_id: 'mat-test-1',
