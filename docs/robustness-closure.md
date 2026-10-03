@@ -15,6 +15,7 @@ This record covers the identified P1–P3 engineering findings. It is not a guar
 | P3 failed next packet | Durable terminal job status reaches parent reader; saved answers remain accessible and operator recovery is explicit | SQL owner isolation and responsive browser fixture |
 | P3 PDF retention | Lease-specific render paths tracked; abandoned cache objects deleted after 24 hours only when neither canonical nor active | Cleanup unit tests and SQL exclusion tests |
 | P3 database performance | Covering indexes for 21 repository-owned FK findings and five equivalent ownership-policy init-plan improvements | Fresh migration replay; production advisors checked after delivery |
+| P3 function context | Fixed two mutable search paths and removed browser grants on three internal trigger entrypoints | All SQL suites pass, including normalization and trigger ACL assertions |
 | P3 CI | Pinned CLI, clean database regression job, responsive browser fixtures and same-branch concurrency cancellation | CI workflow and remote run after push |
 | P3 bootstrap/recovery | Historical authoring-limit patch accepts both reviewed literal and parameterized claim shapes; default remains ten | Entire migration chain replay from an empty isolated database |
 
@@ -25,7 +26,7 @@ This record covers the identified P1–P3 engineering findings. It is not a guar
 - Web, admin and worker builds passed; the existing large web bundle warning remains.
 - Seventeen SQL suites run against `supabase_db_eng-tutor-robustness-replay`, after a fresh complete migration reset.
 - Synthetic browser checks cover responsive reader/public demo, save conflicts, offline navigation, answer unlock, optional feedback and terminal request failure. RPCs and speech are mocked; these are not physical-device evidence.
-- Synthetic application SQL backup restored successfully into a separate database with `ON_ERROR_STOP`. Required schemas are `public`, `private`, `private_generation`, `auth`, `storage`; restore prerequisites include `extensions`, `pgcrypto` and `uuid-ossp`. This does not verify hosted backup retention or storage-object recovery.
+- Synthetic application SQL backup restored successfully into a separate database with `ON_ERROR_STOP`; source and restore both contain 90 application/Auth/storage tables and 117 assessment items, with normalization behavior preserved. Required schemas are `public`, `private`, `private_generation`, `auth`, `storage`; restore prerequisites include `extensions`, `pgcrypto` and `uuid-ossp`. This does not verify hosted backup retention or storage-object recovery.
 
 ## Operations
 
@@ -45,4 +46,10 @@ Hosted backup retention and storage recovery, real iOS/Android accessibility/aud
 
 ## Production delivery
 
-Pending exact-commit migration, function, CI and health read-back evidence. Update this section after verification; local success alone is not production completion.
+Repair commit: `ad65bc2080cebec5026973023ed81691f052614e`.
+
+Production `ykzszjrqynrhgdhoeovo` read-back confirms migrations `20261004120000` and `20261004120001`, retired assessment view absent, no pending/claimed jobs, no public tables without RLS, browser denial on admission/cleanup RPCs, all 21 covering indexes, and Week 1 exclusion from normal submission claims. Five RLS init-plan warnings are gone; only two FK findings remain on the external `marketing_posts` table ([advisor reference](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys)).
+
+Onboarding function is ACTIVE version 7, JWT verification remains intentionally disabled for public onboarding, deployed bundle SHA-256 `7b538b525d7f9741511c78fba1d49b4a98126ab0c4736508f7173cbdcf568ce8`. A malformed-body production probe returns 400 without invoking Auth. Generation contract remains `rel_1.9.1`, bundle SHA-256 `d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211`.
+
+Final internal-function migration and exact-commit remote CI/deployment evidence are recorded after verification. Password breach protection is disabled in hosted Auth ([advisor reference](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)); the current parent product uses email OTP. Password-based access and backup-retention configuration need a separate infrastructure acceptance check. Intended enrollment/telemetry and authenticated ownership RPCs remain security-definer entrypoints; deny-client private tables intentionally have no client RLS policies.

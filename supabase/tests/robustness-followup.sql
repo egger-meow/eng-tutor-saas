@@ -1,5 +1,12 @@
 -- LOCAL ONLY. Synthetic fixtures and admission charges roll back.
 begin;
+do $$ begin
+  if public.normalize_short_answer('  SOUND! ') <> 'sound' then raise exception 'Normalization context changed'; end if;
+  if has_function_privilege('anon','public.protect_used_assessment_item()','execute')
+     or has_function_privilege('authenticated','public.prevent_pilot_reopening()','execute') then
+    raise exception 'Internal trigger entrypoints remain client callable';
+  end if;
+end $$;
 do $$ declare k text := repeat('a',64); i integer;
 begin
   delete from private_generation.onboarding_admission_buckets;
