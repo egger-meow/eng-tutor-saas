@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { withSubmissionLeaseHeartbeat } from './submission-lease.js'
 
 import {
   CurriculumQualityError,
@@ -51,6 +52,16 @@ function classifyFailure(error: unknown): Pick<CurriculumSubmissionResult, 'stat
 }
 
 export async function processCurriculumSubmissions(
+  client: WorkerClient,
+  processorId: string,
+  claimLimit: number,
+  complete?: CompleteSubmission,
+): Promise<CurriculumSubmissionResult[]> {
+  return withSubmissionLeaseHeartbeat(client, processorId,
+    () => processClaimedCurriculumSubmissions(client, processorId, claimLimit, complete))
+}
+
+async function processClaimedCurriculumSubmissions(
   client: WorkerClient,
   processorId: string,
   claimLimit: number,

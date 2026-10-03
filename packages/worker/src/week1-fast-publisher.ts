@@ -1,4 +1,5 @@
 import { validateConsumerRelease } from './consumer-release-policy.js'
+import { withSubmissionLeaseHeartbeat } from './submission-lease.js'
 import {
   CURRENT_PDF_RENDERER_VERSION,
   CURRENT_WORKER_VERSION,
@@ -329,6 +330,16 @@ async function reconcileUncertainCompletion(
 }
 
 export async function processWeek1FastSubmissions(
+  client: WorkerClient,
+  processorId: string,
+  claimLimit: number,
+  deps: { render?: Render; inspect?: Inspect } = {},
+): Promise<Week1FastPublishResult[]> {
+  return withSubmissionLeaseHeartbeat(client, processorId,
+    () => processClaimedWeek1FastSubmissions(client, processorId, claimLimit, deps))
+}
+
+async function processClaimedWeek1FastSubmissions(
   client: WorkerClient,
   processorId: string,
   claimLimit: number,

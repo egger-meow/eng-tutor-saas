@@ -244,6 +244,10 @@ try {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'no horizontal overflow')
     await mkdir(resolve('.runtime/online-materials'), { recursive: true })
     await page.screenshot({ path: resolve(`.runtime/online-materials/${device}.png`), fullPage: true })
+    submission.next_request_status = 'failed'
+    await page.goto(url)
+    await page.getByText('下一份教材未完成，請聯絡我們協助恢復；已提交的作答仍會保留。', { exact: true }).waitFor()
+    submission.next_request_status = null
     submission.next_requested = false
     await page.goto(url)
     await page.getByRole('button', { name: '填寫回饋', exact: true }).click()

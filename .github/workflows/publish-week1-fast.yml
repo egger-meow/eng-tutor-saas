@@ -82,6 +82,13 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: pnpm worker process-material-pdfs --limit 5
 
+      - name: Remove abandoned PDF cache artifacts
+        if: ${{ !cancelled() }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: pnpm worker purge-material-pdf-cache
+
       - name: Enforce learning event retention
         if: ${{ !cancelled() }}
         env:

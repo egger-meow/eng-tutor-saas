@@ -4,6 +4,24 @@ import type { WorkerClient } from './pipeline.js'
 
 type PdfClaim = { id: string; leaseToken: string; path: string; kind: 'student' | 'parent'; canonicalSource: unknown }
 
+export async function purgeMaterialPdfGarbage(client: WorkerClient, limit = 20): Promise<{ deleted: number }> {
+  const listed = await client.rpc('list_material_pdf_garbage', { p_limit: limit })
+  if (listed.error) throw new Error('PDF cleanup listing failed')
+  let deleted = 0
+  for (const item of (listed.data ?? []) as Array<{ storage_path: string }>) {
+    // Only lease-specific cache objects are eligible. Never delete canonical publication paths.
+    if (!/^[0-9a-f-]{36}\/pdf-cache\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.pdf$/.test(item.storage_path)) {
+      throw new Error('Unsafe PDF cleanup path')
+    }
+    const removed = await client.storage.from('weekly-materials').remove([item.storage_path])
+    if (removed.error) throw new Error('PDF cleanup removal failed')
+    const acknowledged = await client.rpc('acknowledge_material_pdf_garbage', { p_path: item.storage_path })
+    if (acknowledged.error) throw new Error('PDF cleanup acknowledgement failed')
+    deleted += 1
+  }
+  return { deleted }
+}
+
 export async function renderMaterialPdf(source: unknown, kind: 'student' | 'parent'): Promise<Uint8Array> {
   // Read-only replay of already-published source; never rerun today's authoring quality gates against history.
   const isCurriculum = source !== null && typeof source === 'object' && 'studentLesson' in source

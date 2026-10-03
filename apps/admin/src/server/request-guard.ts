@@ -41,12 +41,13 @@ export function extractHostname(hostHeader: string | undefined): string | null {
   return trimmed
 }
 
-export function isAllowedOrigin(originHeader: string | undefined, allowedHosts: Set<string>): boolean {
+export function isAllowedOrigin(originHeader: string | undefined, allowedHosts: Set<string>, hostHeader?: string): boolean {
   if (!originHeader) return false
   try {
     const parsed = new URL(originHeader)
     const hostname = parsed.hostname.toLowerCase()
-    return allowedHosts.has(hostname)
+    return ['http:', 'https:'].includes(parsed.protocol) && allowedHosts.has(hostname)
+      && (!hostHeader || parsed.host.toLowerCase() === hostHeader.toLowerCase())
   } catch {
     return false
   }
@@ -73,7 +74,7 @@ export function validateAdminApiRequest(
   // 2. Origin validation & CORS response headers
   const origin = req.headers.origin
   if (origin) {
-    if (!isAllowedOrigin(origin, allowedHosts)) {
+    if (!isAllowedOrigin(origin, allowedHosts, host)) {
       res.statusCode = 403
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({
@@ -133,7 +134,8 @@ export function readRequestBody(req: IncomingMessage, maxBytes = MAX_BODY_BYTES)
       bytesReceived += typeof chunk === 'string' ? Buffer.byteLength(chunk) : chunk.length
       if (bytesReceived > maxBytes) {
         req.removeListener('data', onData)
-        req.destroy()
+        // Drain without accumulating; destroying the socket prevents the caller receiving 413.
+        req.resume()
         reject(new PayloadTooLargeError(`Request payload exceeds maximum allowed size of ${maxBytes} bytes`))
         return
       }

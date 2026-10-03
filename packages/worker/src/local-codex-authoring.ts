@@ -63,8 +63,19 @@ type ClaimBatch = {
 
 type ProcessRunner = (file: string, args: string[], options?: { cwd?: string; input?: string }) => Promise<{ stdout: string; stderr: string }>
 
+/** Runtime/authentication paths only. Authoring subprocesses never inherit worker credentials. */
+export function codexProcessEnvironment(environment: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  const allowed = new Set([
+    'PATH', 'PATHEXT', 'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'HOME', 'USERPROFILE',
+    'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP', 'TMPDIR', 'CODEX_HOME',
+    'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY',
+    'SSL_CERT_FILE', 'SSL_CERT_DIR', 'NODE_EXTRA_CA_CERTS', 'LANG', 'LC_ALL', 'TERM',
+  ])
+  return Object.fromEntries(Object.entries(environment).filter(([key]) => allowed.has(key.toUpperCase())))
+}
+
 const runProcess: ProcessRunner = (file, args, options = {}) => new Promise((resolvePromise, reject) => {
-  const child = spawn(file, args, { cwd: options.cwd, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+  const child = spawn(file, args, { cwd: options.cwd, env: codexProcessEnvironment(), stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
   let stdout = ''
   let stderr = ''
   child.stdout.setEncoding('utf8')

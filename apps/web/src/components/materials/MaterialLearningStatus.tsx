@@ -11,7 +11,12 @@ export function MaterialLearningStatus({ materialId }: { materialId: string }) {
     setLabel('正在確認學習進度…')
     void (async () => {
       const submission = await fetchStudentSubmission(materialId)
-      if (submission) return submission.next_requested ? '已提交 · 已申請下一份' : '已提交 · 可查看結果及申請下一份'
+      if (submission) {
+        if (submission.next_request_status === 'failed' || submission.next_request_status === 'canceled') {
+          return '已提交 · 下一份未完成，請聯絡我們協助恢復'
+        }
+        return submission.next_requested ? '已提交 · 已申請下一份' : '已提交 · 可查看結果及申請下一份'
+      }
       const { data, error } = await fetchMaterialDraft(materialId)
       if (error) throw error
       return data?.updated_at ? '草稿已保存 · 繼續作答' : '可開始閱讀與作答'

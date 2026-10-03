@@ -2,6 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 import { startLandingOnboarding } from '../_shared/landing-onboarding-start.ts'
 import { dispatchWeek1WakeDoorbells } from '../_shared/week1-fast-dispatch.ts'
+import { onboardingAdmissionKey, readOnboardingBody, OnboardingPayloadTooLarge } from '../_shared/onboarding-admission.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -46,7 +47,8 @@ Deno.serve(async (request) => {
   if (!supabaseUrl || !serviceRoleKey) return json(503, { error: 'server_not_configured' })
 
   try {
-    const body = await request.json() as Record<string, unknown>
+    if (Number(request.headers.get('content-length') ?? 0) > 64 * 1024) return json(413, { error: 'invalid_request' })
+    const body = await readOnboardingBody(request)
     const draft = body.draft
     if (!draft || typeof draft !== 'object' || Array.isArray(draft)) {
       return json(400, { error: 'invalid_request' })
@@ -56,8 +58,16 @@ Deno.serve(async (request) => {
       auth: { persistSession: false, autoRefreshToken: false },
     })
 
+    const email = requiredString(body.email, 'email', 320)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(400, { error: 'invalid_request' })
+    const admission = await client.rpc('consume_onboarding_admission', {
+      p_email_hash: await onboardingAdmissionKey(email, serviceRoleKey),
+    })
+    if (admission.error) throw new Error('admission_unavailable')
+    if (admission.data !== true) return json(429, { error: 'temporarily_unavailable' })
+
     const result = await startLandingOnboarding({
-      email: requiredString(body.email, 'email', 320),
+      email,
       draft: draft as Record<string, unknown>,
       termsVersion: requiredString(body.termsVersion, 'terms_version', 100),
       privacyVersion: requiredString(body.privacyVersion, 'privacy_version', 100),
@@ -124,8 +134,9 @@ Deno.serve(async (request) => {
 
     return json(200, result)
   } catch (error) {
+    if (error instanceof OnboardingPayloadTooLarge) return json(413, { error: 'invalid_request' })
     const message = error instanceof Error ? error.message : String(error)
-    const clientError = message.startsWith('invalid_') || message.includes('Invalid ')
+    const clientError = error instanceof SyntaxError || message.startsWith('invalid_') || message.includes('Invalid ')
     if (!clientError) console.error('Landing onboarding start failed')
     return json(clientError ? 400 : 503, { error: clientError ? 'invalid_request' : 'temporarily_unavailable' })
   }

@@ -10,6 +10,7 @@ import type {
 export type SubmissionResult = {
   submitted_at: string
   next_requested?: boolean
+  next_request_status?: 'pending' | 'claimed' | 'completed' | 'failed' | 'canceled' | null
   answers: DraftAnswers
   self_check: DraftSelfCheck
   results: Array<{ question_id: string; status: 'correct' | 'incorrect' | 'unanswered' | 'open_review'; correct_answer: string | null }>

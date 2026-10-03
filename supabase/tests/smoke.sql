@@ -4956,33 +4956,13 @@ begin
     ));
     perform private_generation.chatgpt_submit_curriculum_package(uf_job_w1_a, 'chatgpt-online-manual', uf_pkg);
 
-    -- 1. Verify Universal Finisher claims Week 1 submission (worker_claim_curriculum_submissions)
+    -- Normal Finisher cannot acquire a pending Week 1 submission.
     select count(*) into uf_claimed_count
-    from public.worker_claim_curriculum_submissions('universal-finisher-1', 5)
+    from public.worker_claim_curriculum_submissions('normal-finisher-1', 5)
     where job_id = uf_job_w1_a;
-    if uf_claimed_count <> 1 then
-      raise exception 'Universal finisher failed to claim Week 1 submission';
-    end if;
-
-    -- Verify submission is marked processing with universal-finisher-1 and publication_path is normal_finisher
-    if not exists (
-      select 1 from private_generation.curriculum_submissions
-      where job_id = uf_job_w1_a and processor_id = 'universal-finisher-1'
-        and publication_path = 'normal_finisher' and status = 'processing'
-    ) then
-      raise exception 'Claimed Week 1 submission did not stamp processor_id or publication_path = normal_finisher';
-    end if;
-
-    -- Universal Finisher completes the Week 1 submission
-    perform public.worker_finish_curriculum_submission(
-      uf_job_w1_a, 1, 'universal-finisher-1', 'completed', null, null, null
-    );
-    if not exists (
-      select 1 from private_generation.curriculum_submissions
-      where job_id = uf_job_w1_a and status = 'completed'
-    ) then
-      raise exception 'Universal finisher failed to complete Week 1 submission';
-    end if;
+    if uf_claimed_count <> 0 then raise exception 'Normal Finisher acquired Week 1'; end if;
+    if not exists(select 1 from private_generation.curriculum_submissions
+      where job_id=uf_job_w1_a and status='pending') then raise exception 'Week 1 submission changed'; end if;
 
     -- Job W1-B: Week 1 job for mutual exclusion race & Fast Publisher completion
     insert into public.generation_jobs (
@@ -5108,12 +5088,12 @@ begin
         processor_lease_expires_at = now() - interval '5 minutes'
     where job_id = uf_job_w1_c;
 
-    -- Universal Finisher claims the stale leased Week 1 submission
+    -- Fast Publisher exclusively recovers stale Week 1 leases.
     select count(*) into uf_claimed_count
-    from public.worker_claim_curriculum_submissions('universal-finisher-recovery', 5)
+    from public.worker_claim_week1_fast_submissions('fast-publisher-recovery', 5)
     where job_id = uf_job_w1_c;
     if uf_claimed_count <> 1 then
-      raise exception 'Universal finisher failed to recover stale-leased Week 1 submission';
+      raise exception 'Fast publisher failed to recover stale-leased Week 1 submission';
     end if;
 
     -- 6. Verify admin_get_curriculum_submissions returns publication_path, processor_lease_expires_at, and material_id

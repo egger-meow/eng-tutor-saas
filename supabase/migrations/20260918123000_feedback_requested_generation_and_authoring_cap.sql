@@ -3,7 +3,7 @@ update public.operational_settings
 set integer_value = 10,
     description = 'Maximum jobs claimed by one authoring invocation.',
     updated_at = now()
-where key = 'daily_generation_limit';
+where key in ('daily_generation_limit', 'authoring_batch_limit');
 
 do $migration$
 declare definition text; patched text;
@@ -17,8 +17,13 @@ begin
 
   definition := pg_get_functiondef('private_generation.claim_week1_fast_generation_jobs(text)'::regprocedure);
   patched := replace(definition, '    limit 15', '    limit 10');
-  if patched = definition then raise exception 'Week 1 authoring claim definition drifted'; end if;
-  execute patched;
+  if patched <> definition then
+    execute patched;
+  elsif position('limit claim_limit' in definition) = 0 then
+    -- The preceding parallel-batches migration already uses the bounded operational limit.
+    -- Accept that reviewed successor shape, but fail closed on an unknown definition.
+    raise exception 'Week 1 authoring claim definition drifted';
+  end if;
 end
 $migration$;
 

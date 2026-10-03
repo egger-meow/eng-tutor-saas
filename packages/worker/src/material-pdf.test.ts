@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { processMaterialPdfs } from './material-pdf.js'
+import { processMaterialPdfs, purgeMaterialPdfGarbage } from './material-pdf.js'
 import type { WorkerClient } from './pipeline.js'
 
 function fixture(completion: boolean = true) {
@@ -19,6 +19,28 @@ function fixture(completion: boolean = true) {
 }
 
 describe('on-demand PDF trusted processor', () => {
+  it('removes only reviewed cache paths and acknowledges successful deletion', async () => {
+    const path = '11111111-1111-4111-8111-111111111111/pdf-cache/22222222-2222-4222-8222-222222222222/33333333-3333-4333-8333-333333333333.pdf'
+    const rpc = vi.fn(async (name: string) => ({ data: name === 'list_material_pdf_garbage' ? [{ storage_path: path }] : null, error: null }))
+    const remove = vi.fn(async () => ({ data: {}, error: null }))
+    const client = { rpc, storage: { from: () => ({ remove }) } } as unknown as WorkerClient
+    await expect(purgeMaterialPdfGarbage(client)).resolves.toEqual({ deleted: 1 })
+    expect(remove).toHaveBeenCalledWith([path])
+    expect(rpc).toHaveBeenCalledWith('acknowledge_material_pdf_garbage', { p_path: path })
+  })
+  it('rejects a canonical publication path even if returned by cleanup listing', async () => {
+    const rpc = vi.fn(async () => ({ data: [{ storage_path: 'child/job/student.pdf' }], error: null }))
+    const remove = vi.fn()
+    await expect(purgeMaterialPdfGarbage({ rpc, storage: { from: () => ({ remove }) } } as unknown as WorkerClient)).rejects.toThrow('Unsafe PDF cleanup path')
+    expect(remove).not.toHaveBeenCalled()
+  })
+  it('retains cleanup intent after storage failure for an idempotent later retry', async () => {
+    const path = '11111111-1111-4111-8111-111111111111/pdf-cache/22222222-2222-4222-8222-222222222222/33333333-3333-4333-8333-333333333333.pdf'
+    const rpc = vi.fn(async () => ({ data: [{ storage_path: path }], error: null }))
+    const remove = vi.fn(async () => ({ data: null, error: { message: 'offline' } }))
+    await expect(purgeMaterialPdfGarbage({ rpc, storage: { from: () => ({ remove }) } } as unknown as WorkerClient)).rejects.toThrow('PDF cleanup removal failed')
+    expect(rpc).toHaveBeenCalledTimes(1)
+  })
   it('renders only immutable source and stores lease-bound bytes without overwriting history', async () => {
     const { client, rpc, upload } = fixture()
     const render = vi.fn(async () => new Uint8Array(2000))

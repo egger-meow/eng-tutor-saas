@@ -54,6 +54,19 @@ do $$ declare a public.material_pdf_artifacts; c jsonb; c2 jsonb; begin
   perform public.fail_material_pdf(a.id,(c->>'leaseToken')::uuid);
   if (select state from public.material_pdf_artifacts where id=a.id)<>'rendering' then raise exception 'stale worker changed state'; end if;
   if not public.finish_material_pdf(a.id,(c2->>'leaseToken')::uuid,c2->>'path',2000,100) then raise exception 'valid completion rejected'; end if;
+  if (select expires_at from public.material_pdf_artifacts where id=a.id) is not null then
+    raise exception 'immutable repaired PDF still expires'; end if;
+  if not exists(select 1 from private_generation.material_pdf_garbage where storage_path=c->>'path') then
+    raise exception 'stale lease upload lost its cleanup intent'; end if;
+  insert into private_generation.material_pdf_garbage(storage_path) values(c2->>'path') on conflict do nothing;
+  update private_generation.material_pdf_garbage set eligible_at=now()-interval '1 minute';
+  if not exists(select 1 from public.list_material_pdf_garbage(100) g where g.storage_path=c->>'path') then
+    raise exception 'abandoned cache missing from cleanup'; end if;
+  if exists(select 1 from public.list_material_pdf_garbage(100) g where g.storage_path=c2->>'path') then
+    raise exception 'ready cache selected for deletion'; end if;
+  perform public.acknowledge_material_pdf_garbage(c->>'path');
+  if exists(select 1 from private_generation.material_pdf_garbage where storage_path=c->>'path') then
+    raise exception 'cleanup acknowledgement failed'; end if;
  end if;
  update public.material_pdf_artifacts set state='ready',expires_at=now()-interval '1 second' where id=a.id;
 end $$;

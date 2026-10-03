@@ -88,7 +88,9 @@ export function PaperReader({
         setSubmission(result)
         if (result?.next_requested) {
           setFeedbackChoice('skip')
-          setRequestMessage('已收到下一份申請。')
+          setRequestMessage(result.next_request_status === 'failed' || result.next_request_status === 'canceled'
+            ? '下一份教材未完成，請聯絡我們協助恢復；已提交的作答仍會保留。'
+            : '已收到下一份申請。')
         }
       }
     }).catch(() => { if (active) setSubmissionFailed(true) })

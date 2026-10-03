@@ -36,8 +36,8 @@ Local / Scheduled / Manual             chatgpt-week1-fast
                            │
                ┌───────────┴───────────┐
                ▼                       ▼
-      Week 1 Fast Publisher       Universal Finisher
-    (Week 1 prioritized,       (All weeks: Week 1 & 2+,
+      Week 1 Fast Publisher       Normal Finisher
+    (Week 1 only,       (Week 2+ only,
      objective integrity)       full audit & recovery)
                │                       │
                └───────────┬───────────┘
@@ -179,9 +179,9 @@ The Fast Publisher:
 
 GitHub `repository_dispatch` is only a wake signal. Supabase is the authoritative queue. A five-minute workflow schedule is a publication fallback if the immediate publish doorbell is lost.
 
-### 7.2 Universal Deterministic Finisher (Week 1 and Week 2+)
+### 7.2 Normal Deterministic Finisher (Week 2+)
 
-The normal Finisher is a universal submission processor. `public.worker_claim_curriculum_submissions` claims pending submissions across all weeks (Week 1 and Week 2+), as well as stale-leased submissions from interrupted Fast Publisher runs (`SKIP LOCKED` ensures zero duplicate processing).
+The normal Finisher claims Week 2+ submissions through `public.worker_claim_curriculum_submissions`. Week 1 is exclusively claimed and recovered by the objective-integrity Fast Publisher. Atomic ownership and lease checks prevent duplicate processing across both lanes.
 
 - **Finisher Processor Command**:
   ```powershell

@@ -196,10 +196,15 @@ describe('Admin API Request Guard & CSRF/Rebinding Protections', () => {
     expect(res.headers['access-control-allow-origin']).toBe(origin)
   })
 
+  it('rejects another loopback port as a browser origin', async () => {
+    const res = await rawRequest({ method: 'GET', path: '/api/export/ai-dataset',
+      host: '127.0.0.1:3000', origin: 'http://127.0.0.1:9999' })
+    expect(res.status).toBe(403)
+  })
+
   it('rejects oversized request payload with 413 Payload Too Large', async () => {
     const hugePayload = { data: 'x'.repeat(70 * 1024) } // 70 KiB > 64 KiB
-    try {
-      const res = await rawRequest({
+    const res = await rawRequest({
         method: 'POST',
         path: '/api/announcements/create',
         host: `127.0.0.1:${port}`,
@@ -213,9 +218,6 @@ describe('Admin API Request Guard & CSRF/Rebinding Protections', () => {
       expect(res.status).toBe(413)
       const json = JSON.parse(res.text)
       expect(json.error).toBe('PAYLOAD_TOO_LARGE')
-    } catch (err: any) {
-      // Connection might be destroyed immediately on overflow
-      expect(err).toBeDefined()
-    }
+
   })
 })

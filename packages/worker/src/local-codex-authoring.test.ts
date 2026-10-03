@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import {
   buildPrivatePlanningCapsule,
+  codexProcessEnvironment,
   defaultRepoRoot,
   extractTargetIdsForHistory,
   prepareAuthoringBundleWithPrecedents,
@@ -15,6 +16,14 @@ import { buildPacketPlanningPrompt, validatePacketPlan } from './packet-planning
 import type { WorkerClient } from './pipeline.js'
 
 describe('local Codex authoring preflight', () => {
+  it('passes runtime paths but excludes service, bridge, billing, email and API-key credentials', () => {
+    expect(codexProcessEnvironment({
+      Path: 'runtime-path', USERPROFILE: 'profile', CODEX_HOME: 'auth-directory',
+      SUPABASE_SECRET_KEY: 'private', SUPABASE_SERVICE_ROLE_KEY: 'private',
+      AUTHORING_BRIDGE_SECRET: 'private', SMTP_PASS: 'private', GITHUB_TOKEN: 'private',
+      PADDLE_API_KEY: 'private', OPENAI_API_KEY: 'private', CODEX_API_KEY: 'private',
+    })).toEqual({ Path: 'runtime-path', USERPROFILE: 'profile', CODEX_HOME: 'auth-directory' })
+  })
   it('requires the intended model-independent ChatGPT-authenticated Codex CLI contract', async () => {
     const calls: Array<{ file: string; args: string[] }> = []
     const run = async (file: string, args: string[]) => {
