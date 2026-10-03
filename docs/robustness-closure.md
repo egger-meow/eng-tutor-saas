@@ -42,7 +42,7 @@ Generation release activation still follows `production-release-policy.md`: comp
 
 ## Remaining external acceptance
 
-Hosted backup retention and storage recovery, real iOS/Android accessibility/audio/download behavior, and the real paid-account golden journey have not been proven by synthetic tests. The two advisor FK findings on `marketing_posts` are outside the repository-owned schema. Unused indexes are not removed without workload evidence.
+Hosted backup retention and storage recovery, real iOS/Android accessibility/audio/download behavior, the real paid-account golden journey, and real-parent adaptive next-packet acceptance have not been proven by synthetic tests. Deterministic content validation does not establish educational quality; sampled author/critic review and resulting learning behavior remain acceptance evidence. The two advisor FK findings on `marketing_posts` are outside the repository-owned schema. Unused indexes are not removed without workload evidence.
 
 ## Production delivery
 
@@ -52,4 +52,8 @@ Production `ykzszjrqynrhgdhoeovo` read-back confirms migrations `20261004120000`
 
 Onboarding function is ACTIVE version 7, JWT verification remains intentionally disabled for public onboarding, deployed bundle SHA-256 `7b538b525d7f9741511c78fba1d49b4a98126ab0c4736508f7173cbdcf568ce8`. A malformed-body production probe returns 400 without invoking Auth. Generation contract remains `rel_1.9.1`, bundle SHA-256 `d72ca08a83b41c34f64d703541f34d6120d629bc2b0d4919037a749808591211`.
 
-Final internal-function migration and exact-commit remote CI/deployment evidence are recorded after verification. Password breach protection is disabled in hosted Auth ([advisor reference](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)); the current parent product uses email OTP. Password-based access and backup-retention configuration need a separate infrastructure acceptance check. Intended enrollment/telemetry and authenticated ownership RPCs remain security-definer entrypoints; deny-client private tables intentionally have no client RLS policies.
+Internal-function repair commit `3ace7410778efb3df35ee8e787a3e2bab8e472bd` and migration `20261004120002` are deployed. Production recheck confirms trigger-role denial, normalization unchanged, zero garbage backlog and no mutable-search-path warnings. The deployed onboarding source matches all four local source files after newline normalization. The existing `emergency-chatgpt-claim` version 7 source is a 410 Gone tombstone, resolving the original source-exposure uncertainty.
+
+Remote CI verification and Cloudflare deployment must succeed on the final branch head; inspect the matching commit in [repository Actions](https://github.com/egger-meow/eng-tutor-saas/actions). Earlier runs canceled by the concurrency guard are superseded, not delivery evidence.
+
+Password breach protection is disabled in hosted Auth ([advisor reference](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)); the current parent product uses email OTP. Password-based access and backup-retention configuration need a separate infrastructure acceptance check. Intended enrollment/telemetry and authenticated ownership RPCs remain security-definer entrypoints; deny-client private tables intentionally have no client RLS policies.
