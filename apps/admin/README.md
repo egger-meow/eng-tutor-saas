@@ -100,6 +100,10 @@ corepack pnpm --filter @paper-english/admin dev
 ## 安全防護原則 (Security Guardrails)
 
 * **純本地使用 (Localhost Only)**：不部署於公開公網，不對外開放端口。
+* **Host 與 Origin 邊界防護 (DNS Rebinding & CSRF 防護)**：
+  - API 路由嚴格驗證 `Host` header（僅允許 `localhost`、`127.0.0.1`、`[::1]` 及環境變數 `ADMIN_ALLOWED_HOSTS` 或信任的 Tailscale 節點），非允許網域直接回傳 `421 Misdirected Request`，防止惡意網頁發動 DNS Rebinding 竊取資料。
+  - 狀態變更（POST 請求）強制要求 `Origin` 匹配信任網域、`Content-Type: application/json` 以及自訂標頭 `X-Paper-Admin: 1`，並阻擋未授權的跨來源簡單請求與預檢請求，阻斷 CSRF 攻擊。
+  - API 請求主體大小上限為 64 KiB，超額即拒絕 (`413 Payload Too Large`)。
 * **金鑰隔離**：`SUPABASE_SECRET_KEY` 僅在 Node.js API 伺服器端讀取，前端 React 程式碼中無任何 Privileged Credentials。
 * **安全去識別化**：所有孩子名稱在展示與匯出時自動脫敏（如 `林*豪`、`Child #c12a`）。
 * **唯讀與防破壞**：V1 嚴格限制為 Observability 與 Intelligence，不開放任意 SQL 執行。

@@ -47,7 +47,10 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body: Record<string, unknown>): Promise<T> {
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Paper-Admin': '1',
+    },
     body: JSON.stringify(body),
   })
   const text = await res.text()
