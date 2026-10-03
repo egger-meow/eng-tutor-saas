@@ -38,6 +38,8 @@ export type Week1FastPublishResult = {
   errorCode?: string
   errorMessage?: string
   stage?: Week1FastPublishStage
+  /** True when the completion response was uncertain and the committed outcome was confirmed from durable state. */
+  reconciled?: boolean
 }
 
 export type Week1FastFailureClassification = {
@@ -219,6 +221,113 @@ async function recordFailure(
   }
 }
 
+type DurableReadResult<T> = PromiseLike<{ data: T | null; error: { message: string } | null }>
+type DurableReadClient = {
+  from(table: string): {
+    select(columns: string): {
+      eq(column: string, value: string): { maybeSingle<T = Record<string, unknown>>(): DurableReadResult<T> }
+    }
+  }
+}
+
+function hasDurableRead(client: WorkerClient): client is WorkerClient & DurableReadClient {
+  return typeof (client as Partial<DurableReadClient>).from === 'function'
+}
+
+async function recordObservations(client: WorkerClient, submission: Week1FastSubmission, materialId: string): Promise<void> {
+  // Idempotent server-side via materials.observations_recorded_at; failures never affect publication.
+  try {
+    const result = await client.rpc('worker_record_curriculum_observations', {
+      material_id: materialId,
+      worker_id: submission.generation_worker_id,
+      canonical_source: submission.canonical_source,
+    })
+    if (result.error) throw new Error(result.error.message)
+  } catch {
+    console.warn('[week1-fast] curriculum observations were not recorded', { jobId: submission.job_id })
+  }
+}
+
+async function readCommittedMaterial(
+  client: WorkerClient,
+  jobId: string,
+): Promise<{ materialId: string; studentPath: string | null; parentPath: string | null } | null> {
+  if (!hasDurableRead(client)) throw new Error('worker client cannot read durable completion state')
+  const job = await client.from('generation_jobs').select('status, material_id').eq('id', jobId)
+    .maybeSingle<{ status: string; material_id: string | null }>()
+  if (job.error) throw new Error(`read generation job: ${job.error.message}`)
+  if (!job.data || job.data.status !== 'completed' || !job.data.material_id) return null
+  const material = await client.from('materials').select('id, student_pdf_path, parent_answer_pdf_path').eq('id', job.data.material_id)
+    .maybeSingle<{ id: string; student_pdf_path: string | null; parent_answer_pdf_path: string | null }>()
+  if (material.error) throw new Error(`read material: ${material.error.message}`)
+  if (!material.data) return null
+  return { materialId: material.data.id, studentPath: material.data.student_pdf_path, parentPath: material.data.parent_answer_pdf_path }
+}
+
+/**
+ * Resolves a completion RPC whose outcome is uncertain (error or lost response after the call was issued).
+ * Never deletes artifacts: a committed material may reference them, and a retry reuses the deterministic paths.
+ * The lease-guarded fail RPC is the atomic arbiter; durable read-back confirms a committed completion.
+ */
+async function reconcileUncertainCompletion(
+  client: WorkerClient,
+  submission: Week1FastSubmission,
+  processorId: string,
+  paths: { student: string; parent: string },
+  error: unknown,
+): Promise<Week1FastPublishResult> {
+  const stage: Week1FastPublishStage = 'db_completion'
+  const originalMessage = error instanceof Error ? error.message : String(error)
+  const classified = classifyWeek1FastFailure(stage, error)
+  const unknown = (reason: string): Week1FastPublishResult => {
+    process.stderr.write(`[week1-fast] completion outcome unknown: ${JSON.stringify({ jobId: submission.job_id, authoringAttempt: submission.authoring_attempt, processorId, reason })}\n`)
+    return { jobId: submission.job_id, status: 'technical_failed', errorCode: 'COMPLETION_OUTCOME_UNKNOWN', errorMessage: `${originalMessage} | ${reason}`, stage }
+  }
+
+  let failureRecorded: boolean
+  try {
+    const result = await client.rpc('worker_fail_week1_fast_submission', {
+      p_job_id: submission.job_id,
+      p_authoring_attempt: submission.authoring_attempt,
+      p_processor_id: processorId,
+      p_error_code: classified.errorCode,
+      p_error_message: originalMessage.slice(0, 2000),
+      p_failure_evidence: { stage, publicationPath: 'week1_fast', processorId, originalMessage: originalMessage.slice(0, 2000) },
+      p_outcome: classified.outcome,
+    })
+    if (result.error) return unknown(`failure arbiter error: ${result.error.message}`)
+    failureRecorded = result.data === true
+  } catch (arbiterError) {
+    return unknown(`failure arbiter threw: ${arbiterError instanceof Error ? arbiterError.message : String(arbiterError)}`)
+  }
+
+  if (failureRecorded) {
+    process.stderr.write(`[week1-fast] publication failure: ${JSON.stringify({ jobId: submission.job_id, authoringAttempt: submission.authoring_attempt, processorId, publicationPath: 'week1_fast', stage, errorCode: classified.errorCode, originalMessage })}\n`)
+    return { jobId: submission.job_id, status: classified.outcome, errorCode: classified.errorCode, errorMessage: originalMessage, stage }
+  }
+
+  let committed: Awaited<ReturnType<typeof readCommittedMaterial>>
+  try {
+    committed = await readCommittedMaterial(client, submission.job_id)
+  } catch (readError) {
+    return unknown(`durable read-back failed: ${readError instanceof Error ? readError.message : String(readError)}`)
+  }
+
+  if (committed && committed.studentPath === paths.student && committed.parentPath === paths.parent) {
+    process.stderr.write(`[week1-fast] reconciled committed completion after uncertain response: ${JSON.stringify({ jobId: submission.job_id, authoringAttempt: submission.authoring_attempt, processorId, materialId: committed.materialId })}\n`)
+    await recordObservations(client, submission, committed.materialId)
+    return { jobId: submission.job_id, status: 'completed', materialId: committed.materialId, reconciled: true }
+  }
+
+  return {
+    jobId: submission.job_id,
+    status: 'technical_failed',
+    errorCode: 'COMPLETION_OUTCOME_CONFLICT',
+    errorMessage: `${originalMessage} | lease no longer held and no matching committed material`,
+    stage,
+  }
+}
+
 export async function processWeek1FastSubmissions(
   client: WorkerClient,
   processorId: string,
@@ -242,6 +351,8 @@ export async function processWeek1FastSubmissions(
   for (const submission of submissions) {
     const createdPaths: string[] = []
     let stage: Week1FastPublishStage = 'context_loading'
+    let completionStarted = false
+    let completionPaths: { student: string; parent: string } | null = null
     try {
       if (!submission.generation_worker_id || submission.generation_worker_id.length < 3) {
         throw new Error('Week 1 submission is missing its authoring worker identity')
@@ -305,6 +416,10 @@ export async function processWeek1FastSubmissions(
       assertMatchingPdfPair(expectedInspection, actualInspection)
 
       stage = 'db_completion'
+      completionPaths = paths
+      // From here the database may commit even if the response is lost. Artifacts are never
+      // deleted after this point; uncertain outcomes are reconciled from durable state.
+      completionStarted = true
       const materialId = unwrap(await client.rpc('worker_complete_week1_fast_submission', {
         p_job_id: submission.job_id,
         p_authoring_attempt: submission.authoring_attempt,
@@ -318,18 +433,13 @@ export async function processWeek1FastSubmissions(
         p_model_name: pkg.metadata.model,
       }), 'complete Week 1 fast submission') as string
 
-      try {
-        await client.rpc('worker_record_curriculum_observations', {
-          material_id: materialId,
-          worker_id: submission.generation_worker_id,
-          canonical_source: pkg,
-        })
-      } catch {
-        console.warn('[week1-fast] curriculum observations were not recorded', { jobId: submission.job_id })
-      }
-
+      await recordObservations(client, submission, materialId)
       results.push({ jobId: submission.job_id, status: 'completed', materialId })
     } catch (error) {
+      if (completionStarted && completionPaths) {
+        results.push(await reconcileUncertainCompletion(client, submission, processorId, completionPaths, error))
+        continue
+      }
       if (createdPaths.length > 0) {
         try { await client.storage.from(BUCKET).remove(createdPaths) } catch { /* best effort cleanup */ }
       }

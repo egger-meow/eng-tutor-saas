@@ -5036,6 +5036,21 @@ begin
       raise exception 'worker_complete_week1_fast_submission failed to return material id';
     end if;
 
+    -- Atomic arbiter verification: worker_fail_week1_fast_submission returns false on already completed submission
+    if public.worker_fail_week1_fast_submission(
+      uf_job_w1_b, 1, 'fast-publisher-1', 'COMPLETION_RPC_FAILED', 'Network lost after commit',
+      jsonb_build_object('stage', 'db_completion'), 'technical_failed'
+    ) then
+      raise exception 'worker_fail_week1_fast_submission should return false when submission is already completed';
+    end if;
+
+    -- Verify job and material remain completed
+    if not exists (
+      select 1 from public.generation_jobs where id = uf_job_w1_b and status = 'completed' and material_id = uf_mat_id
+    ) then
+      raise exception 'Generation job status was modified by failed arbiter call';
+    end if;
+
     -- Job W1-C: Stale lease recovery & worker_fail_week1_fast_submission with non-pinned worker ID
     insert into public.generation_jobs (
       id, child_id, material_week, rule_version, idempotency_key, status,
