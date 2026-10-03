@@ -202,13 +202,15 @@ exception when insufficient_privilege then
   -- Expected: direct select revoked
 end $$;
 
--- 5b. Authenticated CANNOT read question bank projection (broad enumeration revoked in Phase 3)
+-- 5b. Authenticated and Anonymous CANNOT read question bank projection (view retired and dropped)
 do $$
 begin
-  perform id from public.assessment_client_items;
-  raise exception 'Authenticated user should NOT be able to select from assessment_client_items';
+  if exists (select 1 from pg_views where schemaname = 'public' and viewname = 'assessment_client_items') then
+    perform id from public.assessment_client_items;
+    raise exception 'assessment_client_items view should be retired';
+  end if;
 exception when insufficient_privilege then
-  -- Expected: broad enumeration revoked
+  -- Expected: broad enumeration revoked if view exists
 end $$;
 
 -- 5c. Authenticated CANNOT forge response outcomes (direct insert into assessment_responses revoked)
@@ -364,10 +366,10 @@ begin
     raise exception 'Found reading items without valid passage link';
   end if;
 
-  -- 6f. Verify client projection contains all active items
-  select count(*) into client_cnt from public.assessment_client_items where id not like 'test_%';
+  -- 6f. Verify question bank contains all active items
+  select count(*) into client_cnt from public.assessment_items where status = 'active' and id not like 'test_%';
   if client_cnt < 108 then
-    raise exception 'Expected at least 108 items in assessment_client_items view, got %', client_cnt;
+    raise exception 'Expected at least 108 items in assessment_items, got %', client_cnt;
   end if;
 end $$;
 
