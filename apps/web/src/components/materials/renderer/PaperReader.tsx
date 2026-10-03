@@ -200,7 +200,7 @@ export function PaperReader({
       {(isInitialLoading || submissionLoading) && <p role="status">正在載入作答與提交狀態…</p>}
       {submissionFailed && <div role="alert"><p>提交狀態暫時無法載入。確認前先保留閱讀，避免重複提交。</p><button type="button" className="button" onClick={() => setLoadAttempt((n) => n + 1)}>重試提交狀態</button></div>}
       {status === 'idle' && !isInitialLoading && !submission && <div role="alert"><p>草稿尚未載入，請重新整理再作答。</p><button className="button" type="button" onClick={() => window.location.reload()}>重新載入草稿</button></div>}
-      {/* Sticky Top Toolbar with Save Status & Quick Navigation */}
+      {/* In-flow toolbar with save status and chapter navigation */}
       <header className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
         <div className="paper-reader-toolbar-left">
           <div className="paper-reader-title-badge">
