@@ -18,7 +18,7 @@
 
 每教材每事件只保留一次，重載／雙分頁／重複 RPC 不灌高次數；90 天清除後再次觀測可形成新紀錄。Browser 事件是 best effort、可被家長端申報，不能當計費、配額、評分或教學成效依據。離線／阻擋請求／舊頁面可能漏記，不推斷零事件等於沒學習。Server 事件隨原交易一起成功或回滾，瀏覽器不能偽造。新回饋編輯的首次時間不是最後更新時間。
 
-執行 [material-learning-signals.sql](./material-learning-signals.sql) 看最近 90 天描述統計及第二份教材使用。第二份以 `child_weekly_learning_snapshots.sequence_number=2` 為準，缺少序號不猜測。分母／時間窗不同的數量不直接算轉換率，不把開啟當完成。實際下一份是否更適合，仍需檢視受權教學證據。
+執行 [material-learning-signals.sql](./material-learning-signals.sql) 看最近 90 天描述統計、48小時啟動、跨日作答接續、阻礙回報分佈及第二份教材使用。第二份以 `child_weekly_learning_snapshots.sequence_number=2` 為準，缺少序號不猜測。分母／時間窗不同的數量不直接算轉換率，不把開啟當完成。實際下一份是否更適合，仍需檢視受權教學證據。
 
 ## RLS 與保留
 

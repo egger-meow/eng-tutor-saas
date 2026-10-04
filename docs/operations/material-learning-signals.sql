@@ -31,3 +31,46 @@ from public.material_pdf_artifacts group by state order by state;
 
 select count(*) as expired_learning_events from public.material_learning_events
 where created_at < now()-interval '90 days';
+
+-- 48-hour activation signal: answer_started within 48h of release_at, or paper_started self-report.
+-- Excludes internal tests; descriptive signal only.
+select
+  count(distinct m.id) as released_materials,
+  count(distinct case when e.event_name = 'answer_started' and e.created_at <= coalesce(m.release_at, m.created_at) + interval '48 hours' then m.id end) as online_started_within_48h,
+  count(distinct case when chk.paper_started_at is not null and chk.paper_started_at <= coalesce(m.release_at, m.created_at) + interval '48 hours' then m.id end) as paper_self_reported_within_48h
+from public.materials m
+join public.children c on c.id = m.child_id and not c.is_internal_test
+left join public.material_learning_events e on e.material_id = m.id and e.event_name = 'answer_started'
+left join public.material_learning_checkins chk on chk.material_id = m.id
+where coalesce(m.release_at, m.created_at) >= now() - interval '90 days';
+
+-- 7-day multi-day answer activity signals: at least 2 distinct UTC dates with answer_changed within 7 days of release.
+select
+  count(distinct m.id) as materials_with_multi_day_activity,
+  count(distinct c.id) as children_with_multi_day_activity
+from public.materials m
+join public.children c on c.id = m.child_id and not c.is_internal_test
+join (
+  select material_id
+  from public.material_learning_day_signals
+  where signal = 'answer_changed'
+  group by material_id
+  having count(distinct activity_date) >= 2
+) s on s.material_id = m.id
+where coalesce(m.release_at, m.created_at) >= now() - interval '90 days';
+
+-- Learning barriers reported by parents: distribution by reason.
+-- Purely for parent support analysis; not fed into prompt generation.
+select
+  barrier,
+  count(*) as reported_count
+from public.material_learning_checkins chk
+join public.materials m on m.id = chk.material_id
+join public.children c on c.id = m.child_id and not c.is_internal_test
+where barrier is not null
+group by barrier
+order by reported_count desc;
+
+select count(*) as expired_day_signals from public.material_learning_day_signals
+where activity_date < (current_date - interval '90 days')::date;
+
