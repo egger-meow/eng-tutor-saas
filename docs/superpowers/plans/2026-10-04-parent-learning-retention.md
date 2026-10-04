@@ -58,11 +58,11 @@
 - `docs/SPEC.md` 相關舊cadence與學習歷程文字。
 
 **決定：**
-- [ ] 移除程度radio選取後自動前進，統一透過現有「選好了，繼續」驗證最新draft；選取後仍可鍵盤操作。這比timer依賴舊closure穩定，也讓選擇可反悔。
-- [ ] 用material的權威answer gate分流：歷史paper path可直接開原FeedbackForm，無feedback也可；submission path導向結果/選填回饋。0%歷史回報只保存，不建立下一份；修改原feedback冪等。
-- [ ] 將snapshot `totalWeeks` 顯示為「已記錄X份教材設計」，先不宣稱是已完成或所有歷史教材總數；`improvements`改標「本份教材調整」。日期明確標「設計記錄日期」，不冒稱學習日期。
-- [ ] 指引分「線上」與「紙筆」短流程，說清楚暫存、不可變提交、未答、解答、選填回饋及主動申請。
-- [ ] 校正terms與SPEC相關產品描述：網頁與PDF、主動申請、每服务月4份、rolling14day100位及永久pilot cutover。法律效果不在此計畫宣稱。
+- [x] 移除程度radio選取後自動前進，統一透過現有「選好了，繼續」驗證最新draft；選取後仍可鍵盤操作。這比timer依賴舊closure穩定，也讓選擇可反悔。
+- [x] 用material的權威answer gate分流：歷史paper path可直接開原FeedbackForm，無feedback也可；submission path導向結果/選填回饋。0%歷史回報只保存，不建立下一份；修改原feedback冪等。
+- [x] 將snapshot `totalWeeks` 顯示為「已記錄X份教材設計」，先不宣稱是已完成或所有歷史教材總數；`improvements`改標「本份教材調整」。日期明確標「設計記錄日期」，不冒稱學習日期。
+- [x] 指引分「線上」與「紙筆」短流程，說清楚暫存、不可變提交、未答、解答、選填回饋及主動申請。
+- [x] 校正terms與SPEC相關產品描述：網頁與PDF、主動申請、每服务月4份、rolling14day100位及永久pilot cutover。法律效果不在此計畫宣稱。
 
 **驗證（實作後）：**
 - 擴充 `LandingOnboardingPanel.test.tsx`：第一次選程度再按繼續能到第二步，空白暱稱仍被擋，radio可改選。
@@ -88,11 +88,11 @@
 返回的是導航順序，沒有答案、分數、生成配額或精熟判定。
 
 **決定：**
-- [ ] 建立最多三個建議階段：①先讀／先試，②理解與練習，③複習與作業。只引用既有章節與stable question IDs，缺少某章節時省略，沒有reading時落到現有opening/practice。
-- [ ] 首次panel文案：「今天先安排約10分鐘。先讀這一段，再試前兩題；時間到了可以先停，之後繼續。」只有一題則只引導一題；若沒有題目，只引導閱讀並不記錄作答。
-- [ ] 「先讀這一段」跳現有reading；「試前兩題」引用practice中前兩個現存question ID。第一版不判斷兩題足夠診斷、不裁切文章生成新內容。
-- [ ] 「先停，之後繼續」只確認草稿保存並離開／返回dashboard；未保存、衝突時沿用retry/conflict流程，不直接離開。
-- [ ] 提交按鈕保留明確文案「確認提交這次整份作答」，確認對話列已答/未答數與不可修改說明；不以完成第一階段觸發提交。
+- [x] 建立最多三個建議階段：①先讀／先試，②理解與練習，③複習與作業。只引用既有章節與stable question IDs，缺少某章節時省略，沒有reading時落到現有opening/practice。
+- [x] 首次panel文案：「今天先安排約10分鐘。先讀這一段，再試前兩題；時間到了可以先停，之後繼續。」只有一題則只引導一題；若沒有題目，只引導閱讀並不記錄作答。
+- [x] 「先讀這一段」跳現有reading；「試前兩題」引用practice中前兩個現存question ID。第一版不判斷兩題足夠診斷、不裁切文章生成新內容。
+- [x] 「先停，之後繼續」只確認草稿保存並離開／返回dashboard；未保存、衝突時沿用retry/conflict流程，不直接離開。
+- [x] 提交按鈕保留明確文案「確認提交這次整份作答」，確認對話列已答/未答數與不可修改說明；不以完成第一階段觸發提交。
 
 **驗證：** `material-session-plan.test.ts`涵蓋完整/缺reading/無題目/只有一題/不明章節；`PaperReader.test.tsx`驗證暫停無submit RPC、保存error不能說已保存、提交後可閱讀/TTS。
 
@@ -116,12 +116,12 @@
 - `material_learning_day_signals`：material_id、UTC date、固定 signal `answer_changed`，三者PK；由成功draft-save的transaction／trigger在answer實際改變時寫入。排除internal_test；不存答案、IP、URL；90日保留且沿用既有purge入口清理。
 
 **決定：**
-- [ ] 只有明確章節跳轉／题目操作保存接續位置，不記每次scroll。位置儲存失敗不阻塞閱讀或answer save，但不得假稱跨裝置已保存。
-- [ ] 重入顯示「接續上次位置」按鈕，由家長/孩子點擊後跳轉，不自動把頁面拉到深處；找不到舊question時落到章節，找不到章節時回opening/read。
-- [ ] 導航冲突採最新server位置並提示可重新選擇，不覆蓋其他裝置的新位置；answer冲突仍按既有流程處理。
-- [ ] 已submit只能導航、閱讀、TTS，不開answer controls；siblings/material ID切換清空本地navigation state。
-- [ ] dashboard主要CTA沿用「查看／繼續本週教材」；下方以「草稿已保存」「已提交」「已申請」等權威狀態說明，不顯示虛構完成率。
-- [ ] 新day signal只度量不同日期有answer變動，命名「跨日作答接續」；不冒稱session數、閱讀時數或有效學習。reading-only使用先由觀察訪談驗證。
+- [x] 只有明確章節跳轉／题目操作保存接續位置，不記每次scroll。位置儲存失敗不阻塞閱讀或answer save，但不得假稱跨裝置已保存。
+- [x] 重入顯示「接續上次位置」按鈕，由家長/孩子點擊後跳轉，不自動把頁面拉到深處；找不到舊question時落到章節，找不到章節時回opening/read。
+- [x] 導航冲突採最新server位置並提示可重新選擇，不覆蓋其他裝置的新位置；answer冲突仍按既有流程處理。
+- [x] 已submit只能導航、閱讀、TTS，不開answer controls；siblings/material ID切換清空本地navigation state。
+- [x] dashboard主要CTA沿用「查看／繼續本週教材」；下方以「草稿已保存」「已提交」「已申請」等權威狀態說明，不顯示虛構完成率。
+- [x] 新day signal只度量不同日期有answer變動，命名「跨日作答接續」；不冒稱session數、閱讀時數或有效學習。reading-only使用先由觀察訪談驗證。
 
 **驗證：** DB owner/sibling/anon/unreleased拒絕、valid/invalid question、版本衝突；相同answer重存不新增day signal、跨日保存獨立計數、internal排除；UI重入/位置fallback/submit後navigation/網路失敗。
 
@@ -145,11 +145,11 @@
 - `targets: Array<{ label: string; state: 'needs_review' | 'observed_correct' | 'ungraded' }>`：只有existing權威skill attribution已知時才顯示；unknown不猜，不從prompt文字推skill。缺少可靠關聯時只顯示題目/總數與「尚無足夠能力證據」。
 
 **決定：**
-- [ ] UI分「這次的作答／家長回報」與「這份教材為什麼調整」。未產生下一份時標「申請後依這次證據設計」，不能預告已調整或保證效果。
-- [ ] 未答獨立、開放題未評分；不使用總題數當正確率分母，不宣稱完成即可精熟。
-- [ ] 無證據顯示「目前只有教材設計記錄，尚無提交作答或家長回報」，給回到教材/紙本回報CTA。
-- [ ] submission與feedback並存時以submission客觀結果為主，家長觀察另標來源，不覆蓋結果。
-- [ ] task1保留的snapshot設計歷程與這張實際證據卡分開呈現；不回填或修改historical snapshots。
+- [x] UI分「這次的作答／家長回報」與「這份教材為什麼調整」。未產生下一份時標「申請後依這次證據設計」，不能預告已調整或保證效果。
+- [x] 未答獨立、開放題未評分；不使用總題數當正確率分母，不宣稱完成即可精熟。
+- [x] 無證據顯示「目前只有教材設計記錄，尚無提交作答或家長回報」，給回到教材/紙本回報CTA。
+- [x] submission與feedback並存時以submission客觀結果為主，家長觀察另標來源，不覆蓋結果。
+- [x] task1保留的snapshot設計歷程與這張實際證據卡分開呈現；不回填或修改historical snapshots。
 
 **驗證：** submitted部分完成/全部未答/open_review/unknown skill、paper report/0%、無資料、owner與sibling isolation。UI用實際DTO測試，不靠字串猜測私有內容。
 
@@ -185,11 +185,11 @@
 | quota/entitlement拒絕 | 顯示server拒絕原因 | 保留閱讀與結果；不自動導入付費 |
 
 **決定：**
-- [ ] 將next-step panel放在提交結果摘要頂端，逐題清單可展開；維持伺服器冪等與quota，不新建另一個request實作。
-- [ ] 站內阻礙卡僅對ready後48小時、無answer_started/submission/paper_started之材料顯示；有已存草稿時改為「接續」，完成後改為「下一步」。過去48小時已存在的歷史材料不推斷未學，只用「還沒開始／已用紙筆開始」讓家長確認。
-- [ ] barrier對應動作：沒時間→10分鐘；不能印→線上閱讀；太難→先讀/TTS＋可修改未來profile；不喜歡→編輯未來興趣；没看到信→直接開教材。無強制填答。
-- [ ] 一張目前教材卡最多一個支持提示，可略過；dismiss後7日不重現，不跨不同孩子套用。既有started/submitted狀態更新後立即撤掉錯誤提示。
-- [ ] 既有ready Email加入「今天先安排約10分鐘，可分次完成」與单一查看教材CTA；重用既有scope token、recipient與delivery冪等機制，不增加寄送頻率。不把紙本自報描述成線上完成。
+- [x] 將next-step panel放在提交結果摘要頂端，逐題清單可展開；維持伺服器冪等與quota，不新建另一個request實作。
+- [x] 站內阻礙卡僅對ready後48小時、無answer_started/submission/paper_started之材料顯示；有已存草稿時改為「接續」，完成後改為「下一步」。過去48小時已存在的歷史材料不推斷未學，只用「還沒開始／已用紙筆開始」讓家長確認。
+- [x] barrier對應動作：沒時間→10分鐘；不能印→線上閱讀；太難→先讀/TTS＋可修改未來profile；不喜歡→編輯未來興趣；没看到信→直接開教材。無強制填答。
+- [x] 一張目前教材卡最多一個支持提示，可略過；dismiss後7日不重現，不跨不同孩子套用。既有started/submitted狀態更新後立即撤掉錯誤提示。
+- [x] 既有ready Email加入「今天先安排約10分鐘，可分次完成」與单一查看教材CTA；重用既有scope token、recipient與delivery冪等機制，不增加寄送頻率。不把紙本自報描述成線上完成。
 
 **驗證：** 未submit不能request、skip不造feedback、双click只一份、quota4與entitlement拒絕；feedback保存失敗不request；checkin owner/released/gatefalse限制、paper自報來源、dismiss server時間；worker HTML安全escaping與既有重試/冪等測試。
 
@@ -197,13 +197,13 @@
 
 ## Task 6 — 驗證、發布與留存觀測
 
-- [ ] 更新SPEC §§160、168描述navigation、paper self-report、day signals與source標示；learning events既有首次去重不改成sessions，新的day signals單獨呈現。TOC只有標題新增/更名才改。
-- [ ] 各task實作後跑指定Vitest檔案：`pnpm exec vitest run <相關.test.ts/.tsx>`；DB變更跑`pnpm test:db`，最後跑`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`及相關`pnpm test:e2e`。expected：exit0；若環境限制需具體記錄，不能稱已驗證。
-- [ ] E2E使用本地/明確合成資料，不對真實家庭提交、申請、付款；涵蓋新客首次10分鐘→暫存→接續→部分提交→略過回饋→明確request，另測歷史paper flow。
-- [ ] 截圖驗收360/390/768/desktop寬度；實體iPhone Safari與Android Chrome人工驗收另列，含鍵盤、長文、TTS、網路中斷與跨裝置衝突。工具縮放異常不能當產品證據。
-- [ ] 每階段commit/push當前remote branch；migration依專案流程apply production並核對remote history、RPC權限和schema，worker改動按既有部署路徑發布與fresh read-back。先相容backend再deploy consumer，最後启用新UI。
-- [ ] 新migration使用additive tables/RPC。若需要回退，先回退/關閉新增UI，保留已寫入資料；不用刪表、改歷史submission或重開job恢復。
-- [ ] production讀回只用唯讀聚合與自有合成驗收帳號；正式舊家長寫入留给家長操作。记录commit、部署身份、screenshots及device邊界。
+- [x] 更新SPEC §§160、168描述navigation、paper self-report、day signals與source標示；learning events既有首次去重不改成sessions，新的day signals單獨呈現。TOC只有標題新增/更名才改。
+- [x] 各task實作後跑指定Vitest檔案：`pnpm exec vitest run <相關.test.ts/.tsx>`；DB變更跑`pnpm test:db`，最後跑`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`及相關`pnpm test:e2e`。expected：exit0；若環境限制需具體記錄，不能稱已驗證。
+- [x] E2E使用本地/明確合成資料，不對真實家庭提交、申請、付款；涵蓋新客首次10分鐘→暫存→接續→部分提交→略過回饋→明確request，另測歷史paper flow。
+- [x] 截圖驗收360/390/768/desktop寬度；實體iPhone Safari與Android Chrome人工驗收另列，含鍵盤、長文、TTS、網路中斷與跨裝置衝突。工具縮放異常不能當產品證據。
+- [x] 每階段commit/push當前remote branch；migration依專案流程apply production並核對remote history、RPC權限和schema，worker改動按既有部署路徑發布與fresh read-back。先相容backend再deploy consumer，最後启用新UI。
+- [x] 新migration使用additive tables/RPC。若需要回退，先回退/關閉新增UI，保留已寫入資料；不用刪表、改歷史submission或重開job恢復。
+- [x] production讀回只用唯讀聚合與自有合成驗收帳號；正式舊家長寫入留给家長操作。记录commit、部署身份、screenshots及device邊界。
 
 ## 衡量方式
 

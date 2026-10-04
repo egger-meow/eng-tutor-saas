@@ -3522,16 +3522,37 @@ submitted, or next packet requested. A failed progress read must show uncertaint
 and a retry, without blocking entry to the material. Prepared and generating
 states retain the single immediate-next-delivery surface below.
 
+The interactive reader provides a 10-minute starter guide and a 3-stage learning plan
+(Stage 1: 先讀先試約 10 分鐘; Stage 2: 理解與練習; Stage 3: 複習與作業), with clear
+stage badges and an unhurried "pause and leave" capability that records the resume cursor
+(chapter and question ID) across devices. Draft answers auto-save to cloud storage without
+imposing a rigid time limit or promising that the entire packet completes in 10 minutes.
+
 The interactive reader keeps answer controls read-only after submission while
 reading and device TTS remain available. Submission status failures block answer
 editing and submission until retry succeeds. Pending saves block in-app navigation
 and switching to the printable view; browser document exits show an unsaved-work
-warning. Optional feedback editing saves only feedback for submitted packets;
-the next-packet request remains a separate action. Historical paper feedback keeps
-its established atomic request path. Direct feedback links resolve the specific
+warning. Submitted packets place a clear Next-Step Panel (`MaterialNextStepPanel`) at
+the top of the completion summary, allowing the parent to request the next packet immediately,
+view monthly limit status, or optionally provide learning observations, while detailed
+per-question answer keys are housed in a collapsible details section. Optional feedback
+editing saves only feedback for submitted packets; the next-packet request remains an
+independent, explicit action. Historical paper feedback (`answer_unlock_requires_submission=false`)
+keeps its established atomic request path. Direct feedback links resolve the specific
 owned released material independently of history pagination and offer a return
 to that material and the dashboard. Text inputs are typed responses, not stored
 pen strokes.
+
+On the dashboard, released materials display an objective Parent Evidence Card
+(`MaterialEvidenceCard`) summarizing completed items, correct/incorrect/unanswered counts,
+and curriculum adjustment reasons based solely on verified data. Unanswered items are not
+marked incorrect, and open review items are clearly labelled as self-check references rather
+than scored. For materials released more than 48 hours without online activity or paper
+reporting, a low-frequency, optional Learning Barrier Card (`LearningBarrierCard`) offers
+practical starting recommendations (no time, cannot print, too hard, not interested, missed email)
+or historical paper self-reporting (`paper_started`), and provides a server-enforced 7-day dismissal.
+Barrier check-ins never create unverified feedback records, alter difficulty automatically, or
+trigger generation jobs.
 
 The authenticated material area states that each finished weekly package appears there and a notification is sent to the login email. Email failure never removes or rolls back a released material. A valid email token used by its matching authenticated parent redirects to the canonical material area with the token removed from the visible URL; another signed-in account remains in narrow scoped-token mode and receives no access to the token owner's Dashboard.
 
@@ -3711,6 +3732,10 @@ landing view
 After acquisition, downstream lifecycle signals continue to include Week 1 generated, Student PDF downloaded, feedback submitted, paid conversion, and month-2 retention. Analytics must preserve first-party attribution across the Magic Link without putting child data or parent Email in analytics metadata.
 
 Interactive learning uses a separate private `material_learning_events` stream: material opened, first answer input, save failure, whole-packet submission, optional feedback saved, explicit next request, and Student/Parent PDF download. Browser observations are best effort; submission, feedback and next request are recorded by server triggers in the same transaction as the authoritative state change. Browser RPCs cannot assert server transitions. Public synthetic demos and internal-test children are excluded. Events accept no arbitrary metadata, answer text, lesson content, personal identifiers, URL or access token; only an opaque material ID, fixed event name, origin and first timestamp are stored. Deduplicate per material/event. Do not backfill pre-instrumentation history.
+
+Active learning day signals are derived from recorded answer modification timestamps across distinct calendar UTC dates (`active_days_count`, `active_dates`). These represent actual distinct days of student activity rather than artificial session counts or continuous engagement hours.
+
+Support and barrier signals use an additive `material_learning_checkins` record per material. It stores fixed barrier values (`no_time`, `cannot_print`, `too_hard`, `child_not_interested`, `missed_email`), a self-reported paper start timestamp (`paper_started_at`) for historical paper materials (`answer_unlock_requires_submission=false`), and a server-governed dismissal timestamp (`dismissed_until`). Checkins are accessible only by the owning parent via authoritative RPCs. Check-in actions do not alter the student's mastery profile or automatically trigger next-packet generation jobs.
 
 Second-packet usage joins the canonical weekly snapshot sequence number 2. Missing sequence remains unknown. Counts over the rolling retention window are descriptive signals, not a clean cohort conversion rate or proof of learning. Downloads mean bytes obtained and browser download initiated, not confirmed printing.
 
