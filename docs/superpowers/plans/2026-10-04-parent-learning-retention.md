@@ -1,6 +1,6 @@
 # 家長學習啟動與續用 Implementation Plan
 
-**狀態：** 計畫，尚未實作。2026-10-04。
+**狀態：** A–D 實作提交已存在；E 的發布與裝置驗收證據尚未完整核實。2026-10-05 收尾核對。
 
 **Goal:** 修復首次使用與歷史紙本續用，讓家庭可以短時間開始、分次接續、看見可信證據，再明確申請下一份。
 
@@ -10,7 +10,11 @@
 
 **Spec:** `docs/SPEC.md` §§8,24,26,44,72–73,80,83–84,87,109–113,116,160,168–171,179,183–184,194,200,204–205,210。
 
-**執行方式：** 依本計畫逐項直接實作，之後補必要回歸測試並驗證；依使用者規則不採TDD。本次只交付計畫，不授權執行產品變更。
+**執行方式：** 依本計畫逐項直接實作，之後補必要回歸測試並驗證；依使用者規則不採TDD。實作已依後續使用者授權執行；勾選不取代可追溯的驗收證據。
+
+**收尾邊界（2026-10-05）：** A–D commits 已存在。先前回報的全量測試數、production migrations 與發布成功尚未在本輪獨立核實；本地 tracking ref 相同不代表即時遠端相同。360/390/768/desktop 新版截圖、實體 iPhone/Android 驗收、Web/通知信執行端部署身份及 production RPC/schema read-back 仍待補證，不應宣稱 Phase E 全部完成。`.runtime/online-materials/` 既有截圖時間早於本輪功能提交，不能作新版驗收證據。家庭觀察需另有14–21日觀察期；S3 與 Email return-to 維持範圍外。
+
+**本輪修正與驗證：** 營運 SQL 改用 generation_jobs 的 completed/release 權威時間與實際 signal_date/signal_name 欄位。7日指標以 ready 起算半開窗口、只計觀察滿7日的材料；日訊號僅保存首次日期時間，並非每次作答時間。整份查詢在本地 PostgreSQL 執行成功；從實際7日查詢建立合成 fixture，確認窗口內兩日計入、第30日及第7日截止時間排除、internal child 排除。未執行本輪 production 查詢或完整 app 測試；本次僅修改只讀營運 SQL 與文件，無 migration、runtime 或 generation release 變更。
 
 ## 決定與範圍
 
@@ -200,10 +204,10 @@
 - [x] 更新SPEC §§160、168描述navigation、paper self-report、day signals與source標示；learning events既有首次去重不改成sessions，新的day signals單獨呈現。TOC只有標題新增/更名才改。
 - [x] 各task實作後跑指定Vitest檔案：`pnpm exec vitest run <相關.test.ts/.tsx>`；DB變更跑`pnpm test:db`，最後跑`pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm build`及相關`pnpm test:e2e`。expected：exit0；若環境限制需具體記錄，不能稱已驗證。
 - [x] E2E使用本地/明確合成資料，不對真實家庭提交、申請、付款；涵蓋新客首次10分鐘→暫存→接續→部分提交→略過回饋→明確request，另測歷史paper flow。
-- [x] 截圖驗收360/390/768/desktop寬度；實體iPhone Safari與Android Chrome人工驗收另列，含鍵盤、長文、TTS、網路中斷與跨裝置衝突。工具縮放異常不能當產品證據。
-- [x] 每階段commit/push當前remote branch；migration依專案流程apply production並核對remote history、RPC權限和schema，worker改動按既有部署路徑發布與fresh read-back。先相容backend再deploy consumer，最後启用新UI。
+- [ ] 截圖驗收360/390/768/desktop寬度；實體iPhone Safari與Android Chrome人工驗收另列，含鍵盤、長文、TTS、網路中斷與跨裝置衝突。工具縮放異常不能當產品證據。
+- [ ] 每階段commit/push當前remote branch；migration依專案流程apply production並核對remote history、RPC權限和schema，worker改動按既有部署路徑發布與fresh read-back。先相容backend再deploy consumer，最後启用新UI。
 - [x] 新migration使用additive tables/RPC。若需要回退，先回退/關閉新增UI，保留已寫入資料；不用刪表、改歷史submission或重開job恢復。
-- [x] production讀回只用唯讀聚合與自有合成驗收帳號；正式舊家長寫入留给家長操作。记录commit、部署身份、screenshots及device邊界。
+- [ ] production讀回只用唯讀聚合與自有合成驗收帳號；正式舊家長寫入留给家長操作。记录commit、部署身份、screenshots及device邊界。
 
 ## 衡量方式
 
