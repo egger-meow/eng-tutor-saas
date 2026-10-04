@@ -371,4 +371,13 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('提交整份教材')
     expect(html).toContain('可以只完成一部分。未作答的題目會標為「未作答」，不算答錯')
   })
+
+  it('11. includes session navigation and chapter toolbar integration', () => {
+    const html = renderToStaticMarkup(
+      <PaperReader projection={sampleProjection} studentPdfUrl="https://example.com/student.pdf" />
+    )
+
+    expect(html).toContain('paper-reader-toolbar')
+    expect(html).toContain('paper-chapter-nav')
+  })
 })

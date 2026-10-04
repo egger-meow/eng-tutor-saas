@@ -1028,3 +1028,43 @@
   color: var(--color-muted, #64748b);
 }
 
+/* Session Navigation Continuation Banner */
+.paper-session-nav-banner {
+  background: var(--color-paper-warm, #fefce8);
+  border: 1px solid var(--color-warning-soft, #fef08a);
+  border-left: 4px solid var(--color-accent-amber, #ca8a04);
+  border-radius: var(--radius-surface);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  box-shadow: 0 1px 4px rgba(24, 38, 31, 0.04);
+}
+
+.session-nav-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.session-nav-icon {
+  font-size: 1.1rem;
+}
+
+.session-nav-text {
+  flex: 1 1 16rem;
+}
+
+.session-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.session-nav-conflict,
+.session-nav-error {
+  font-size: 0.8125rem;
+  color: var(--color-warning-dark, #854d0e);
+}
+
+

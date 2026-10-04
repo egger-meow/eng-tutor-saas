@@ -3,6 +3,8 @@ import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
 import { StudentLessonRenderer } from './StudentLessonRenderer'
 import { LearningStartPanel } from './LearningStartPanel'
+import { LearningSessionNav } from './LearningSessionNav'
+import { useMaterialLearningNavigation } from '../../../hooks/use-material-learning-navigation'
 import { buildMaterialSessionPlan } from '../../../lib/material-session-plan'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
@@ -52,6 +54,17 @@ export function PaperReader({
   const [feedbackReady, setFeedbackReady] = useState(false)
   const [feedbackDetails, setFeedbackDetails] = useState({ mistakesText: '', childComments: '' })
   const startedMaterial = useRef<string | null>(null)
+
+  const {
+    savedPosition,
+    hasConflict: navConflict,
+    saveError: navSaveError,
+    recordPosition,
+    dismissResumePrompt,
+  } = useMaterialLearningNavigation({
+    materialId: projection.material_id,
+    enabled: !submission,
+  })
 
   useEffect(() => {
     void recordMaterialLearningEvent(projection.material_id, 'material_opened')
@@ -205,12 +218,32 @@ export function PaperReader({
     ...(lesson.homework?.questions ?? []),
   ].map((question) => [question.id || question.questionId, question.prompt]))
 
+  function getChapterForQuestion(questionId: string): string {
+    const isPractice = (lesson?.practice ?? []).some((s) =>
+      (s.questions ?? []).some((q) => (q.id || q.questionId) === questionId)
+    )
+    if (isPractice) return 'practice'
+    const isHomework = (lesson?.homework?.questions ?? []).some(
+      (q) => (q.id || q.questionId) === questionId
+    )
+    if (isHomework) return 'homework'
+    return 'practice'
+  }
+
   function jumpToQuestion(questionId: string) {
     const card = document.getElementById(`q-card-${questionId}`)
-    if (!card) return
+    if (!card) {
+      const fallbackChapter = getChapterForQuestion(questionId)
+      handleChapterClick(fallbackChapter)
+      return
+    }
     card.tabIndex = -1
     card.scrollIntoView({ block: 'center' })
     card.focus({ preventScroll: true })
+    if (!submission) {
+      const chapterId = getChapterForQuestion(questionId)
+      void recordPosition(chapterId, questionId)
+    }
   }
 
   function handleChapterClick(id: string) {
@@ -220,6 +253,25 @@ export function PaperReader({
       element.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
       element.tabIndex = -1
       element.focus({ preventScroll: true })
+    } else {
+      const fallback = document.getElementById('chapter-reading') || document.getElementById('chapter-opening')
+      if (fallback) {
+        fallback.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        fallback.tabIndex = -1
+        fallback.focus({ preventScroll: true })
+      }
+    }
+    if (!submission) {
+      void recordPosition(id, null)
+    }
+  }
+
+  function handleResume(chapterId: string, questionId?: string | null) {
+    dismissResumePrompt()
+    if (questionId) {
+      jumpToQuestion(questionId)
+    } else {
+      handleChapterClick(chapterId)
     }
   }
 
@@ -239,6 +291,15 @@ export function PaperReader({
       {(isInitialLoading || submissionLoading) && <p role="status">正在載入作答與提交狀態…</p>}
       {submissionFailed && <div role="alert"><p>提交狀態暫時無法載入。確認前先保留閱讀，避免重複提交。</p><button type="button" className="button" onClick={() => setLoadAttempt((n) => n + 1)}>重試提交狀態</button></div>}
       {status === 'idle' && !isInitialLoading && !submission && <div role="alert"><p>草稿尚未載入，請重新整理再作答。</p><button className="button" type="button" onClick={() => window.location.reload()}>重新載入草稿</button></div>}
+      {/* Session resume and multi-device navigation prompt */}
+      <LearningSessionNav
+        savedPosition={savedPosition}
+        hasConflict={navConflict}
+        saveError={navSaveError}
+        onResume={handleResume}
+        onDismiss={dismissResumePrompt}
+      />
+
       {/* In-flow toolbar with save status and chapter navigation */}
       <header className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
         <div className="paper-reader-toolbar-left">
