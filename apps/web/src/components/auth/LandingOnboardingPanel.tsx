@@ -271,7 +271,7 @@ export function LandingOnboardingPanel() {
               </button>
             ) : (
               <button className="button" type="button" onClick={next}>
-                {step === 1 ? '繼續' : step === 2 ? '選好了，繼續' : '下一步：收件 Email (最後一步)'}
+                {step === 1 ? '選好了，繼續' : step === 2 ? '選好了，繼續' : '下一步：收件 Email (最後一步)'}
               </button>
             )}
           </>

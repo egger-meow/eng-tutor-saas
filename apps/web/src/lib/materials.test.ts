@@ -68,6 +68,7 @@ describe('listMaterialsWithClient - Service Time Week Numbering', () => {
                   }),
                 }),
               }),
+              in: () => Promise.resolve({ data: [], error: null }),
             }),
           }
         }

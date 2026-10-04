@@ -22,11 +22,28 @@ export function FeedbackPage({ session, materialId }: { session: Session; materi
       const { data, error } = await client.rpc('get_owned_released_material', { p_material_id: materialId }).maybeSingle()
       if (error) throw error
       if (!data) return null
+      let answerUnlock = true
+      try {
+        if (typeof client.from === 'function') {
+          const { data: matGate } = await client.from('materials')
+            .select('answer_unlock_requires_submission')
+            .eq('id', materialId).maybeSingle()
+          if (matGate && typeof matGate.answer_unlock_requires_submission === 'boolean') {
+            answerUnlock = matGate.answer_unlock_requires_submission
+          }
+        }
+      } catch {
+        // Non-fatal fallback
+      }
       const { data: feedback, error: feedbackError } = await client.from('feedback')
         .select('difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at')
         .eq('material_id', materialId).maybeSingle()
       if (feedbackError) throw feedbackError
-      return { ...data, feedback } as OwnedMaterial
+      return {
+        ...data,
+        feedback,
+        answer_unlock_requires_submission: answerUnlock,
+      } as OwnedMaterial
     })().then((next) => { if (active) setMaterial(next) }).catch(() => { if (active) setFailed(true) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -37,9 +54,14 @@ export function FeedbackPage({ session, materialId }: { session: Session; materi
         {loading ? <p role="status">正在載入本週回饋…</p> : failed ? <div role="alert"><h1>回饋暫時無法載入</h1><button className="button" type="button" onClick={() => setAttempt((n) => n + 1)}>再試一次</button></div>
           : !material ? <><h1>找不到這份教材</h1><p>教材尚未開放，或不屬於目前登入的家庭。</p></>
             : <><p className="overline">家長回饋（選填）</p><h1>{material.child_name}的學習觀察</h1>
-              <a className="button" href={`/materials/${material.id}`} onClick={handleInternalLink}>返回教材／查看結果／申請下一份</a>
-              {material.feedback ? <FeedbackForm key={material.id} material={material} onSaved={() => setAttempt((n) => n + 1)} />
-                : <p className="lede">請從教材提交頁選擇填寫或略過回饋，再申請下一份。</p>}</>}
+              <a className="button" href={`/materials/${material.id}`} onClick={handleInternalLink}>
+                {material.answer_unlock_requires_submission === false ? '返回教材' : '返回教材／查看結果／申請下一份'}
+              </a>
+              {material.feedback || material.answer_unlock_requires_submission === false ? (
+                <FeedbackForm key={material.id} material={material} onSaved={() => setAttempt((n) => n + 1)} />
+              ) : (
+                <p className="lede">請從教材提交頁選擇填寫或略過回饋，再申請下一份。</p>
+              )}</>}
         <p><a className="text-link" href="/dashboard" onClick={handleInternalLink}>返回所有教材與學習紀錄</a></p>
       </section>
     </PageTransition>

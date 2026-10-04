@@ -222,7 +222,7 @@ export function LearningJourneyTimeline({
                   aria-selected={isSelected}
                   aria-controls="constellation-detail-panel"
                   tabIndex={isSelected ? 0 : -1}
-                  aria-label={`Week ${item.sequenceNumber}，${formatDate(item.recordedAt)}`}
+                  aria-label={`Week ${item.sequenceNumber}，設計記錄日期：${formatDate(item.recordedAt)}`}
                   className={`constellation-node ${isSelected ? 'is-selected' : ''} ${isLatest ? 'is-latest' : ''}`}
                   style={{ left: `${x}px`, top: `${y}px` }}
                   onClick={() => setSelectedSeq(item.sequenceNumber)}
@@ -251,7 +251,7 @@ export function LearningJourneyTimeline({
             <div className="detail-header-left">
               <span className="detail-week-pill">Week {selectedItem.sequenceNumber}</span>
               <time className="detail-date" dateTime={selectedItem.recordedAt}>
-                {formatDate(selectedItem.recordedAt)}
+                設計記錄日期：{formatDate(selectedItem.recordedAt)}
               </time>
             </div>
             <div className="detail-reading-status">
@@ -275,7 +275,7 @@ export function LearningJourneyTimeline({
               <div className="detail-section detail-improvements">
                 <div className="detail-section-title">
                   <span className="detail-section-icon" aria-hidden="true">🌱</span>
-                  <strong>看見進步：</strong>
+                  <strong>本份教材調整：</strong>
                 </div>
                 <p className="detail-section-content">{selectedItem.improvements.join('、')}</p>
               </div>

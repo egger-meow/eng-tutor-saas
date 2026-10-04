@@ -71,7 +71,8 @@ describe('LearningJourneyPanel Component', () => {
 
     const html = renderToStaticMarkup(<LearningJourneyPanel childId="c1" />)
     expect(html).toContain('持續累積的學習歷程')
-    expect(html).toContain('已完成')
+    expect(html).toContain('已記錄')
+    expect(html).toContain('份教材設計')
     expect(html).toContain('1')
     expect(html).toContain('學習軌跡')
     expect(html).toContain('W1')

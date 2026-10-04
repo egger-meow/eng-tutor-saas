@@ -680,13 +680,15 @@ Magic Link authentication / account access
 ↓
 Child management / Dashboard
 ↓
-Download Week 1 when released
+Read and answer online or download printable PDF
 ↓
-Use at home
+Complete packet (partial or full)
 ↓
-Provide weekly feedback
+Whole-packet submission (immutable) or historical paper completion
 ↓
-Week 2 scheduled and generated for free while pilot remains active
+Optional parent feedback
+↓
+Explicitly request next material (up to 4 per service month)
 ```
 
 For a genuinely new Email, successful trusted Magic Link dispatch is sufficient to begin first-child provisioning before the parent clicks the Magic Link. Supabase Auth may create or resolve the Auth identity as part of that trusted dispatch, and the service-only activation path may then create the canonical child + profile and reuse the existing child-insert capacity/pilot and explicit initial generation job path. The browser is not trusted to claim that dispatch succeeded.
@@ -2615,7 +2617,7 @@ The system should distribute generation workload rather than accidentally schedu
 
 `next_generation_at` is an operational state representing an internal generation deadline. It is not automatically a parent-facing delivery date; its meaning must be interpreted according to the current material and job state. If an unreleased prepared material already exists, that material's `release_at` is the authoritative parent-visible delivery date rather than an advanced generation deadline for a subsequent cycle.
 
-For the first packet only, successful Week 1 Fast Publisher completion sets the actual Week 1 `release_at` to publication time. The Week 2 release and generation deadlines are then derived from that actual Week 1 release anchor plus seven days. The normal Finisher is not a Week 1 publication path.
+For the first packet only, successful Week 1 Fast Publisher completion sets the actual Week 1 `release_at` to publication time and opens the material immediately. Subsequent packets are requested explicitly by the parent upon whole-packet submission (or paper feedback) under Section 113, with up to 4 materials allowed per service month. Accepted Week 2+ requests begin generation immediately upon request and use the normal Author/Critic → deterministic Finisher lifecycle.
 
 ### Free Pilot Rolling Cadence & Subscription Pause Clock
 
@@ -2623,7 +2625,7 @@ Material delivery cadence operates strictly on **service time**, not wall-clock 
 
 > **訂多久（或公測免費用多久），就往前走多久。沒權益的日子不存在。**
 
-During the **Free Pilot** phase, all historically admitted real children hold continuous active service entitlement. The rolling weekly cadence advances week after week (Week 1 → Week 2 → Week 3, etc.) as long as the Free Pilot remains active. Voluntary early subscribers also advance continuously.
+During the **Free Pilot** phase, all historically admitted real children hold continuous active service entitlement (up to 4 materials per service month upon request) as long as the Free Pilot remains active. Voluntary early subscribers also advance continuously.
 
 When the Free Pilot ends, or during periods without entitlement (unpaid lapse post-pilot, paused, canceled, past-due):
 the generation clock is paused and does NOT advance curriculum weeks or accumulate overdue releases.

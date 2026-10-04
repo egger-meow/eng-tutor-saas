@@ -17,13 +17,8 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
     })
   }
 
-  function selectBaselineLevel(levelValue: string, advance = true) {
+  function selectBaselineLevel(levelValue: string) {
     update({ baselineLevel: levelValue })
-    if (advance && onAutoAdvance && draft.displayName.trim().length > 0) {
-      window.setTimeout(() => {
-        onAutoAdvance()
-      }, 220)
-    }
   }
 
   function selectWithArrow(event: KeyboardEvent<HTMLDivElement>, select: (index: number) => void) {
@@ -87,7 +82,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
 
       <div className="field-group">
         <span className="field-title">孩子目前的英文，大概在哪裡？ <small className="field-hint">憑印象選即可，不用先考試</small></span>
-        <div className="level-card-grid" role="radiogroup" aria-label="整體英文程度" onKeyDown={(event) => selectWithArrow(event, index => selectBaselineLevel(levels[index]!.value, false))}>
+        <div className="level-card-grid" role="radiogroup" aria-label="整體英文程度" onKeyDown={(event) => selectWithArrow(event, index => selectBaselineLevel(levels[index]!.value))}>
           {levels.map((lvl) => {
             const isSelected = draft.baselineLevel === lvl.value
             return (

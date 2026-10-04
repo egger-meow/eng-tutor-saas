@@ -34,7 +34,27 @@ export async function loadAuthenticatedMaterial(materialId: string, userId: stri
     }
     if (!data) return { status: 'not-found' }
 
-    const material = data as OwnedMaterial
+    let answerUnlockRequiresSubmission = true
+    try {
+      const client = getSupabaseClient()
+      if (typeof client.from === 'function') {
+        const { data: matGate } = await client
+          .from('materials')
+          .select('answer_unlock_requires_submission')
+          .eq('id', materialId)
+          .maybeSingle()
+        if (matGate && typeof matGate.answer_unlock_requires_submission === 'boolean') {
+          answerUnlockRequiresSubmission = matGate.answer_unlock_requires_submission
+        }
+      }
+    } catch {
+      // Non-fatal fallback
+    }
+
+    const material: OwnedMaterial = {
+      ...(data as OwnedMaterial),
+      answer_unlock_requires_submission: answerUnlockRequiresSubmission,
+    }
     let studentPdfUrl: string | null = null
     let previewError = false
 

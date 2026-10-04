@@ -42,6 +42,10 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
         return
       }
       const result = await saveFeedback(material.child_id, material.id, input)
+      if (result.reason === 'NOT_STARTED') {
+        setNotice('已儲存學習觀察。這份教材尚未開始作答，系統不會自動安排下一份。')
+        return
+      }
       if (result.reason === 'MONTHLY_LIMIT') {
         setNotice(`回饋已儲存。本服務月已使用 ${result.used ?? 4}/${result.limit ?? 4} 份，下一個服務月可再次申請。`)
         return

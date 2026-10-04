@@ -376,5 +376,82 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('檢視學生教材 PDF')
     expect(html).toContain('下載學生教材')
   })
+
+  it('12. WeeklyLearningPanel renders paper feedback button when answer_unlock_requires_submission is false and no feedback exists', () => {
+    const historicalPaperMaterial = {
+      id: 'mat-paper-1',
+      child_id: 'child-1',
+      material_week: '2026-08-15',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-paper-1/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-paper-1/answer.pdf',
+      generation_summary: { title: 'Historical Paper Package' },
+      created_at: '2026-08-15T00:00:00Z',
+      release_at: '2026-08-15T00:00:00Z',
+      feedback: null,
+      answer_unlock_requires_submission: false,
+    }
+
+    const html = renderToStaticMarkup(
+      <WeeklyLearningPanel material={historicalPaperMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
+    )
+
+    expect(html).toContain('紙筆做過了，填寫學習觀察')
+    expect(html).not.toContain('閱讀並提交教材後，可選填回饋')
+  })
+
+  it('13. WeeklyLearningPanel renders submission guidance when answer_unlock_requires_submission is true and no feedback exists', () => {
+    const onlineSubmissionMaterial = {
+      id: 'mat-online-2',
+      child_id: 'child-1',
+      material_week: '2026-09-30',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-online-2/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-online-2/answer.pdf',
+      generation_summary: { title: 'Online Submission Package' },
+      created_at: '2026-09-30T00:00:00Z',
+      release_at: '2026-09-30T00:00:00Z',
+      feedback: null,
+      answer_unlock_requires_submission: true,
+    }
+
+    const html = renderToStaticMarkup(
+      <WeeklyLearningPanel material={onlineSubmissionMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
+    )
+
+    expect(html).toContain('閱讀並提交教材後，可選填回饋')
+    expect(html).toContain('href="/materials/mat-online-2"')
+    expect(html).not.toContain('紙筆做過了，填寫學習觀察')
+  })
+
+  it('14. WeeklyLearningPanel renders edit feedback button when feedback already exists', () => {
+    const materialWithFeedback = {
+      id: 'mat-with-fb',
+      child_id: 'child-1',
+      material_week: '2026-09-15',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-with-fb/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-with-fb/answer.pdf',
+      generation_summary: { title: 'Package with Feedback' },
+      created_at: '2026-09-15T00:00:00Z',
+      release_at: '2026-09-15T00:00:00Z',
+      feedback: {
+        difficulty: 3,
+        completion_rate: 100,
+        weak_area: null,
+        mistakes_text: null,
+        child_comments: null,
+        parent_comments: 'Good work',
+        created_at: '2026-09-16T00:00:00Z',
+      },
+      answer_unlock_requires_submission: true,
+    }
+
+    const html = renderToStaticMarkup(
+      <WeeklyLearningPanel material={materialWithFeedback} childName="Jonathan" onFeedbackSaved={vi.fn()} />
+    )
+
+    expect(html).toContain('修改回饋')
+  })
 })
 

@@ -21,7 +21,7 @@ export function LearningJourneySummary({ summary }: { summary: LearningLibrarySu
         <div className="learning-summary-title-group">
           <p className="overline">持續累積的學習歷程</p>
           <h3 id="learning-journey-title" className="learning-journey-heading">
-            已完成 <span className="highlight-number">{summary.totalWeeks}</span> 週
+            已記錄 <span className="highlight-number">{summary.totalWeeks}</span> 份教材設計
           </h3>
         </div>
         <div className="reading-trajectory-box">

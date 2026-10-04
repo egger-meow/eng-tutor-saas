@@ -33,6 +33,7 @@ export type Material = {
   release_at?: string | null
   week_number?: number | null
   feedback: MaterialFeedback | null
+  answer_unlock_requires_submission?: boolean
 }
 
 export type MaterialPage = {
@@ -328,13 +329,30 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
     }
   }))
   const materials = pages.flatMap((page) => [...page.futureRows, ...page.releasedRows])
-  const materialIds = materials.map((material) => material.id)
-  const { data: feedback, error: feedbackError } = materialIds.length === 0
-    ? { data: [], error: null }
-    : await client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds)
-  if (feedbackError) throw feedbackError
+  const materialIds = materials.map((m) => m.id)
+  const [feedbackResult, gatesResult] = await Promise.all([
+    materialIds.length === 0
+      ? Promise.resolve({ data: [] as any[], error: null })
+      : client.from('feedback').select('material_id, difficulty, completion_rate, weak_area, mistakes_text, child_comments, parent_comments, created_at, updated_at').in('child_id', childIds).in('material_id', materialIds),
+    materialIds.length === 0
+      ? Promise.resolve({ data: [] as Array<{ id: string; answer_unlock_requires_submission: boolean }>, error: null })
+      : (async (): Promise<{ data: Array<{ id: string; answer_unlock_requires_submission: boolean }> | null; error: any }> => {
+          try {
+            const query = client.from('materials')?.select('id, answer_unlock_requires_submission')
+            if (typeof query?.in === 'function') {
+              const res = await query.in('id', materialIds)
+              return { data: (res.data ?? []) as Array<{ id: string; answer_unlock_requires_submission: boolean }>, error: res.error }
+            }
+          } catch {
+            // non-fatal fallback
+          }
+          return { data: [], error: null }
+        })(),
+  ])
+  if (feedbackResult.error) throw feedbackResult.error
 
-  const feedbackByMaterial = new Map((feedback ?? []).map((item) => [item.material_id, item]))
+  const feedbackByMaterial = new Map((feedbackResult.data ?? []).map((item) => [item.material_id, item]))
+  const gatesByMaterial = new Map((gatesResult.data ?? []).map((item) => [item.id, item.answer_unlock_requires_submission]))
   const firstMaterialWeekByChild = new Map(pages.map((page) => [page.childId, page.firstMaterialWeek]))
 
   const nextJobReleaseAtByChild: Record<string, string | null> = {}
@@ -365,6 +383,7 @@ export async function listMaterialsWithClient(client: SupabaseClient, childIds: 
         ? material.week_number
         : materialWeekNumber(firstMaterialWeekByChild.get(material.child_id) ?? null, material.material_week),
       feedback: feedbackByMaterial.get(material.id) ?? null,
+      answer_unlock_requires_submission: gatesByMaterial.get(material.id) ?? Boolean((material as { answer_unlock_requires_submission?: boolean }).answer_unlock_requires_submission ?? true),
     })) as Material[],
     hasMoreByChild: Object.fromEntries(pages.map((page) => [page.childId, offset + page.releasedRows.length < page.totalReleased])),
     releasedCountByChild: Object.fromEntries(pages.map((page) => [page.childId, page.totalReleased])),

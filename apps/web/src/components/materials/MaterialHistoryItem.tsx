@@ -39,7 +39,13 @@ export function MaterialHistoryItem({ material, childName, onFeedbackSaved }: Ma
       {released && material.feedback ? (
         <button className="text-link button-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起回饋' : '修改回饋'}</button>
       ) : released ? (
-        <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
+        material.answer_unlock_requires_submission === false ? (
+          <button className="text-link button-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>
+            {feedbackOpen ? '收起回饋' : '紙筆做過了，填寫學習觀察'}
+          </button>
+        ) : (
+          <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
+        )
       ) : null}
       {feedbackOpen && <FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} />}
     </article>
