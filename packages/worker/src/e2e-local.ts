@@ -27,6 +27,12 @@ try {
   userId = value(created.data.user, created.error, 'create user').id
   const insertedChild = await service.from('children').insert({ parent_id: userId, display_name: 'Synthetic E2E Learner', grade: 7 }).select('id').single()
   const childId = value(insertedChild.data, insertedChild.error, 'create child').id as string
+  const updatedSub = await service.from('subscriptions').update({
+    provider: 'paddle',
+    status: 'active',
+    current_period_end: new Date(Date.now() + 30 * 86400000).toISOString(),
+  }).eq('child_id', childId)
+  value(updatedSub.data ?? true, updatedSub.error, 'update subscription')
   const materialWeek = new Date().toISOString().slice(0, 10)
   const releaseAt = new Date(Date.now() - 60_000)
   const feedbackCutoffAt = new Date(releaseAt.getTime() - 48 * 3600_000)
@@ -63,11 +69,17 @@ try {
   const downloaded = await fetch(signedUrl)
   if (!downloaded.ok || (await downloaded.arrayBuffer()).byteLength < 100) throw new Error('signed Student PDF download failed')
 
+  const submitted = await browser.rpc('submit_student_material', { p_material_id: materialId, p_client_version: 0 })
+  value(submitted.data, submitted.error, 'submit student material')
+
   const savedFeedback = await browser.from('feedback').insert({
     child_id: childId, material_id: materialId, difficulty: 4, completion_rate: 75, weak_area: 'grammar',
     mistakes_text: 'Synthetic learner needs more practice with do and does.', child_comments: 'The garden story was interesting.',
   })
   if (savedFeedback.error) throw new Error(`save feedback: ${savedFeedback.error.message}`)
+
+  const nextRequested = await browser.rpc('request_next_after_student_submission', { p_material_id: materialId })
+  value(nextRequested.data, nextRequested.error, 'request next material')
 
   const weekTwo = await claimJobs(workerClient, 'local-e2e-week-2')
   const nextJob = weekTwo.find((job) => job.child_id === childId)
