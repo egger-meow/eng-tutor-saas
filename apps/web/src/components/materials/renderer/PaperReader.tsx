@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
 import { StudentLessonRenderer } from './StudentLessonRenderer'
+import { LearningStartPanel } from './LearningStartPanel'
+import { buildMaterialSessionPlan } from '../../../lib/material-session-plan'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
@@ -98,9 +100,45 @@ export function PaperReader({
     return () => { active = false }
   }, [projection.material_id, loadAttempt])
 
+  const lesson = projection.student_lesson
+  const sessionPlan = useMemo(() => buildMaterialSessionPlan(projection.student_lesson), [projection.student_lesson])
+
+  function handlePauseAndLeave() {
+    if (status === 'saving') {
+      window.alert('草稿正在雲端儲存中，請稍候片刻再離開。')
+      return
+    }
+    if (status === 'unsaved') {
+      window.alert('有正在編輯的作答尚未儲存，請稍候幾秒自動儲存後再離開。')
+      return
+    }
+    if (status === 'conflict') {
+      window.alert('偵測到版本衝突，請先選擇如何處理衝突後再離開。')
+      return
+    }
+    if (status === 'error') {
+      window.alert('草稿儲存失敗，請先點擊工具列上的「重試」以防作答遺失。')
+      return
+    }
+    if (window.confirm('已為您保存草稿，換手機或電腦也能接續。確定要先暫停返回總覽嗎？')) {
+      window.location.assign('/dashboard')
+    }
+  }
+
   async function submitWholeMaterial() {
     if (actionBusy || submissionFailed || status !== 'saved' || hasConflict || submission) return
-    if (!window.confirm('可提交部分完成的教材。提交後無法修改作答，現在要送出嗎？')) return
+    const allQuestions = [
+      ...(lesson.practice?.flatMap((stage) => stage.questions) ?? []),
+      ...(lesson.homework?.questions ?? []),
+    ]
+    const totalCount = allQuestions.length
+    const answeredCount = allQuestions.filter((q) => {
+      const qId = q.id || q.questionId
+      return qId && typeof answers[qId] === 'string' && answers[qId].trim().length > 0
+    }).length
+    const unansweredCount = Math.max(0, totalCount - answeredCount)
+
+    if (!window.confirm(`確認提交這次整份作答？\n\n・已作答：${answeredCount} 題\n・未作答：${unansweredCount} 題（未答不算答錯）\n\n提交後本次作答將正式鎖定，無法再修改作答內容。`)) return
     setActionBusy(true)
     setActionError('')
     try {
@@ -162,7 +200,6 @@ export function PaperReader({
     } finally { setDownloadBusy(false) }
   }
 
-  const lesson = projection.student_lesson ?? {}
   const questionDescriptions = new Map([
     ...(lesson.practice?.flatMap((stage) => stage.questions) ?? []),
     ...(lesson.homework?.questions ?? []),
@@ -369,7 +406,17 @@ export function PaperReader({
         </div>
       )}
 
-      <StudentLessonRenderer lesson={lesson} answers={submission?.answers ?? answers}
+      <LearningStartPanel
+        plan={sessionPlan}
+        answers={submission?.answers ?? answers}
+        saveStatus={status}
+        isReadOnly={Boolean(submission)}
+        onJumpToChapter={handleChapterClick}
+        onJumpToQuestion={jumpToQuestion}
+        onPauseAndLeave={handlePauseAndLeave}
+      />
+
+      <StudentLessonRenderer lesson={lesson ?? {}} answers={submission?.answers ?? answers}
         selfCheck={submission?.self_check ?? selfCheck}
         readOnly={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}
         onAnswerChange={(key, value, immediate) => {

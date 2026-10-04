@@ -19,7 +19,7 @@ export function MaterialLearningStatus({ materialId }: { materialId: string }) {
       }
       const { data, error } = await fetchMaterialDraft(materialId)
       if (error) throw error
-      return data?.updated_at ? '草稿已保存 · 繼續作答' : '可開始閱讀與作答'
+      return data?.updated_at ? '草稿已保存 · 繼續作答' : '可開始閱讀與作答（今天先 10 分鐘）'
     })().then((next) => { if (active) setLabel(next) }).catch(() => {
       if (active) { setLabel('進度暫時無法確認，仍可開啟教材'); setFailed(true) }
     })

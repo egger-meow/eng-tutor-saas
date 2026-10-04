@@ -346,4 +346,29 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('self-check-checkbox')
     expect(html).toContain('進度：0 / 3')
   })
+
+  it('9. renders LearningStartPanel with 10-minute starter, stage chips, and pause action', () => {
+    const html = renderToStaticMarkup(
+      <PaperReader projection={sampleProjection} studentPdfUrl="https://example.com/student.pdf" />
+    )
+
+    expect(html).toContain('今天先安排約 10 分鐘')
+    expect(html).toContain('先讀這一段，再試前兩題；時間到了可以先停，之後繼續。')
+    expect(html).toContain('先讀這一段')
+    expect(html).toContain('試試前兩題')
+    expect(html).toContain('先停，之後繼續')
+    expect(html).toContain('草稿會自動同步至雲端')
+    expect(html).toContain('① 先讀先試 (約 10 分鐘)')
+    expect(html).toContain('② 理解與練習')
+    expect(html).toContain('③ 複習與作業')
+  })
+
+  it('10. preserves explicit submit button with unhurried whole-material submission flow', () => {
+    const html = renderToStaticMarkup(
+      <PaperReader projection={sampleProjection} studentPdfUrl="https://example.com/student.pdf" />
+    )
+
+    expect(html).toContain('提交整份教材')
+    expect(html).toContain('可以只完成一部分。未作答的題目會標為「未作答」，不算答錯')
+  })
 })
