@@ -453,5 +453,28 @@ describe('weekly material inline preview and page states', () => {
 
     expect(html).toContain('修改回饋')
   })
+
+  it('15. WeeklyLearningPanel renders MaterialEvidenceCard and supports LearningBarrierCard for unstarted materials', () => {
+    const olderMaterial = {
+      id: 'mat-older-1',
+      child_id: 'child-1',
+      material_week: '2026-09-01',
+      revision: 1,
+      student_pdf_path: 'child-1/mat-older-1/student.pdf',
+      parent_answer_pdf_path: 'child-1/mat-older-1/answer.pdf',
+      generation_summary: { title: 'Older Material' },
+      created_at: '2026-09-01T00:00:00Z',
+      release_at: '2026-09-01T00:00:00Z',
+      feedback: null,
+      answer_unlock_requires_submission: true,
+    }
+
+    const html = renderToStaticMarkup(
+      <WeeklyLearningPanel material={olderMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
+    )
+
+    expect(html).toContain('material-evidence-card')
+    expect(html).toContain('正在整理學習證據與調整記錄…')
+  })
 })
 

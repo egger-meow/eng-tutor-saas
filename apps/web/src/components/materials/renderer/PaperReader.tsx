@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
 import { StudentLessonRenderer } from './StudentLessonRenderer'
+import { MaterialNextStepPanel } from './MaterialNextStepPanel'
 import { LearningStartPanel } from './LearningStartPanel'
 import { LearningSessionNav } from './LearningSessionNav'
 import { useMaterialLearningNavigation } from '../../../hooks/use-material-learning-navigation'
@@ -505,21 +506,32 @@ export function PaperReader({
           <>
             <p role="status">已於 {new Date(submission.submitted_at).toLocaleString('zh-TW')} 提交。本次作答已鎖定。</p>
             <p>未作答不算答錯；開放題尚未評分，可參考答案自行回顧。</p>
-            <ul>
-              {submission.results.map((result, index) => (
-                <li key={result.question_id}>
-                  <a href={`#q-card-${result.question_id}`} onClick={(event) => { event.preventDefault(); jumpToQuestion(result.question_id) }}>
-                    {questionDescriptions.get(result.question_id) ?? `第 ${index + 1} 題`}
-                  </a>：{{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
-                  {result.correct_answer && <> · 正解：{result.correct_answer}</>}
-                </li>
-              ))}
-            </ul>
-            {feedbackChoice === 'ask' && <div className="form-actions">
-              <p>要補充家長回饋嗎？這是選填。</p>
-              <button className="button button-secondary" type="button" onClick={() => void openFeedback()}>填寫回饋</button>
-              <button className="button button-secondary" type="button" onClick={() => setFeedbackChoice('skip')}>略過回饋</button>
-            </div>}
+
+            <MaterialNextStepPanel
+              materialId={projection.material_id}
+              nextRequested={Boolean(submission.next_requested)}
+              requestMessage={requestMessage}
+              actionBusy={actionBusy}
+              onRequestNext={() => void requestNext()}
+              feedbackChoice={feedbackChoice}
+              onOpenFeedback={() => void openFeedback()}
+              onSkipFeedback={() => setFeedbackChoice('skip')}
+            />
+
+            <details className="paper-results-details">
+              <summary>查看逐題作答與正解（共 {submission.results.length} 題）</summary>
+              <ul className="paper-results-list">
+                {submission.results.map((result, index) => (
+                  <li key={result.question_id}>
+                    <a href={`#q-card-${result.question_id}`} onClick={(event) => { event.preventDefault(); jumpToQuestion(result.question_id) }}>
+                      {questionDescriptions.get(result.question_id) ?? `第 ${index + 1} 題`}
+                    </a>：{{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
+                    {result.correct_answer && <> · 正解：{result.correct_answer}</>}
+                  </li>
+                ))}
+              </ul>
+            </details>
+
             {feedbackChoice === 'form' && <div className="feedback-form" aria-busy={feedbackLoading}>
               {feedbackLoading && <p role="status">正在載入家長回饋…</p>}
               {!feedbackReady && !feedbackLoading && <button type="button" className="button" onClick={() => void openFeedback()}>重試載入回饋</button>}
@@ -546,15 +558,6 @@ export function PaperReader({
               </fieldset>
               <button className="button button-link" type="button" disabled={actionBusy} onClick={() => setFeedbackChoice('skip')}>略過</button>
             </div>}
-            {(feedbackChoice === 'saved' || feedbackChoice === 'skip') && !submission.next_requested && (
-              <div className="form-actions">
-                <p>本週教材已結束。準備好時，明確申請下一份。</p>
-                <button className="button button-primary" type="button" disabled={actionBusy} onClick={() => void requestNext()}>
-                  {actionBusy ? '申請中…' : '申請下一份教材'}
-                </button>
-              </div>
-            )}
-            {requestMessage && <p role="status">{requestMessage}</p>}
           </>
         )}
         {actionError && <p className="notice notice-error" role="alert">{actionError}</p>}

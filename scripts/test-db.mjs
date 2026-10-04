@@ -13,7 +13,7 @@ function run(command, args) {
 run('docker', ['cp', resolve('supabase/tests/material-pdf.sql'), `${container}:/tmp/eng-tutor-material-pdf.sql`])
 run('docker', ['exec', container, 'psql', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', 'postgres', '-f', '/tmp/eng-tutor-material-pdf.sql'])
 
-for (const file of ['robustness-followup.sql', 'smoke.sql', 'p2-robustness-repairs.sql', 'diversity-format-memory.sql', 'diversity-release-compatibility.sql', 'prompt-patch-release-compatibility.sql', 'assessment-foundation.sql', 'assessment-conformance.sql', 'assessment-curated-rpcs.sql', 'assessment-projection.sql', 'assessment-generation-context.sql', 'assessment-retake-lifecycle.sql', 'assessment-single-active-and-concurrency.sql', 'authoring-unsubmitted-leases.sql', 'authoring-batch-cap.sql', 'student-material-projection.sql', 'material-learning-navigation.sql', 'parent-material-evidence-summary.sql']) {
+for (const file of ['robustness-followup.sql', 'smoke.sql', 'p2-robustness-repairs.sql', 'diversity-format-memory.sql', 'diversity-release-compatibility.sql', 'prompt-patch-release-compatibility.sql', 'assessment-foundation.sql', 'assessment-conformance.sql', 'assessment-curated-rpcs.sql', 'assessment-projection.sql', 'assessment-generation-context.sql', 'assessment-retake-lifecycle.sql', 'assessment-single-active-and-concurrency.sql', 'authoring-unsubmitted-leases.sql', 'authoring-batch-cap.sql', 'student-material-projection.sql', 'material-learning-navigation.sql', 'parent-material-evidence-summary.sql', 'material-learning-checkins.sql']) {
   const source = resolve('supabase/tests', file)
   const destination = `/tmp/eng-tutor-${file}`
   run('docker', ['cp', source, `${container}:${destination}`])

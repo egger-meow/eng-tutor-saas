@@ -6,6 +6,7 @@ import { FeedbackForm } from '../feedback/FeedbackForm'
 import { FeedbackSummary } from '../feedback/FeedbackSummary'
 import { MaterialActions } from '../materials/MaterialActions'
 import { MaterialEvidenceCard } from './MaterialEvidenceCard'
+import { LearningBarrierCard } from './LearningBarrierCard'
 
 type WeeklyLearningPanelProps = { material: Material; childName: string; onFeedbackSaved: () => void }
 
@@ -39,6 +40,16 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
           materialId={material.id}
           answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
           onOpenFeedback={() => setFeedbackOpen(true)}
+        />
+      )}
+      {released && (
+        <LearningBarrierCard
+          materialId={material.id}
+          childId={material.child_id}
+          releasedAt={material.release_at ?? material.created_at}
+          hasSubmission={Boolean(material.feedback)}
+          hasPaperStarted={Boolean(material.feedback && !material.answer_unlock_requires_submission)}
+          answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
         />
       )}
       <div className="weekly-feedback">

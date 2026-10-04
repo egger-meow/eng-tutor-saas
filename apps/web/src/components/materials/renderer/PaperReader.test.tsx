@@ -380,4 +380,22 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('paper-reader-toolbar')
     expect(html).toContain('paper-chapter-nav')
   })
+
+  it('12. integrates MaterialNextStepPanel and collapsible results pattern', async () => {
+    const { MaterialNextStepPanel } = await import('./MaterialNextStepPanel')
+    const panelHtml = renderToStaticMarkup(
+      <MaterialNextStepPanel
+        materialId="mat-test-1"
+        nextRequested={false}
+        actionBusy={false}
+        onRequestNext={vi.fn()}
+        feedbackChoice="ask"
+        onOpenFeedback={vi.fn()}
+        onSkipFeedback={vi.fn()}
+      />
+    )
+    expect(panelHtml).toContain('下一步：接續學習與教材安排')
+    expect(panelHtml).toContain('申請下一份教材')
+    expect(panelHtml).toContain('補充學習回饋（選填）')
+  })
 })

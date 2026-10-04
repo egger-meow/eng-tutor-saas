@@ -31,6 +31,7 @@ describe('material release email dispatcher', () => {
     }))
     expect(message).not.toHaveProperty('attachments')
     expect(message?.html).toContain('查看本週教材')
+    expect(message?.html).toContain('今天先安排約 10 分鐘，可分次完成')
     expect(message?.html).not.toContain('.pdf')
     expect(client.rpc).toHaveBeenCalledWith('worker_complete_material_email_delivery', expect.objectContaining({ p_provider_message_id: 'smtp-message-1' }))
   })
