@@ -5,6 +5,7 @@ import { isMaterialReleased, readGenerationSummary } from '../../lib/materials'
 import { FeedbackForm } from '../feedback/FeedbackForm'
 import { FeedbackSummary } from '../feedback/FeedbackSummary'
 import { MaterialActions } from '../materials/MaterialActions'
+import { MaterialEvidenceCard } from './MaterialEvidenceCard'
 
 type WeeklyLearningPanelProps = { material: Material; childName: string; onFeedbackSaved: () => void }
 
@@ -33,6 +34,13 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
         <p className="weekly-focus">{summary.learningFocus ?? '從自然閱讀開始，再練習單字、文法與理解。'}</p>
       </div>
       <MaterialActions material={material} childName={childName} showPreviewLink={true} />
+      {released && (
+        <MaterialEvidenceCard
+          materialId={material.id}
+          answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
+          onOpenFeedback={() => setFeedbackOpen(true)}
+        />
+      )}
       <div className="weekly-feedback">
         <FeedbackSummary feedback={material.feedback} />
         {released && material.feedback ? (

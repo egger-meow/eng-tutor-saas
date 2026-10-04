@@ -495,8 +495,217 @@
 .announcements-loading, .announcements-empty { text-align: center; padding: var(--space-10); }
 .announcements-empty .empty-icon { font-size: 2.25rem; margin-bottom: var(--space-2); }
 .announcements-empty h2 { margin: 0 0 var(--space-2); font-size: 1.25rem; }
-.announcements-empty p { margin-bottom: var(--space-4); }
 .announcements-error { margin-top: var(--space-6); }
+
+/* Material Evidence Card Styles */
+.material-evidence-card {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-surface);
+  background: var(--color-paper);
+}
+
+.evidence-section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.performance-section {
+  padding-bottom: var(--space-5);
+  border-bottom: 1px dashed var(--color-rule);
+}
+
+.evidence-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.evidence-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.evidence-timestamp {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.objective-counts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+}
+
+.count-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--color-canvas) 70%, var(--color-paper));
+  border: 1px solid var(--color-rule);
+}
+
+.count-number {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.count-label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-top: 0.15rem;
+}
+
+.count-card.count-correct .count-number {
+  color: var(--color-action);
+}
+
+.count-card.count-incorrect .count-number {
+  color: #b91c1c;
+}
+
+.count-card.count-unanswered .count-number {
+  color: #6b7280;
+}
+
+.count-card.count-open .count-number {
+  color: #b45309;
+}
+
+.supplementary-feedback-note {
+  font-size: 0.8125rem;
+  margin: var(--space-1) 0 0;
+}
+
+.evidence-targets-group {
+  margin-top: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.targets-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.targets-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.target-badge-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.2rem 0.6rem;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
+.target-label {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.no-targets-note {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.paper-rate-box {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-canvas) 60%, var(--color-paper));
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-rule);
+}
+
+.paper-rate-label {
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.paper-rate-value {
+  font-size: 1.25rem;
+  color: var(--color-action);
+  font-weight: 700;
+}
+
+.paper-rate-hint {
+  font-size: 0.8125rem;
+}
+
+.none-evidence-body {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.none-evidence-text {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+.none-evidence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.adjustment-notes-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.adjustment-note-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.adjustment-bullet {
+  flex-shrink: 0;
+}
+
+.next-design-commitment {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-rule);
+}
+
+.commitment-text {
+  font-size: 0.8125rem;
+  margin: 0;
+  font-weight: 500;
+}
 
 @media (max-width: 43rem) {
   .site-header { min-height: 4rem; gap: var(--space-4); }
