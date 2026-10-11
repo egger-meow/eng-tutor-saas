@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { PaperReader } from './PaperReader'
 import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
 import { QuestionRenderer } from './QuestionRenderer'
+import { SubmissionResultsContext } from './SubmissionResultsContext'
 import { VocabularyRenderer } from './VocabularyRenderer'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 
@@ -32,6 +33,34 @@ vi.mock('../../../lib/supabase', () => ({
 }))
 
 describe('PaperReader Component Suite', () => {
+  it('shows submitted correctness at the original question and marks the correct option', () => {
+    const html = renderToStaticMarkup(<SubmissionResultsContext.Provider value={[
+      { question_id: 'choice', status: 'incorrect', correct_answer: 'A' },
+      { question_id: 'written', status: 'open_review', correct_answer: 'A sample response.' },
+      { question_id: 'blank', status: 'unanswered', correct_answer: 'B' },
+    ]}>
+      <QuestionRenderer question={{ id: 'choice', prompt: 'Choose.', options: ['One', 'Two'] }} index={0}
+        draftAnswers={{ choice: 'B' }} onAnswerChange={vi.fn()} />
+      <QuestionRenderer question={{ id: 'written', prompt: 'Explain.' }} index={1}
+        draftAnswers={{ written: 'My original response' }} onAnswerChange={vi.fn()} />
+      <QuestionRenderer question={{ id: 'blank', prompt: 'Unanswered.', options: ['One', 'Two'] }} index={2}
+        draftAnswers={{}} onAnswerChange={vi.fn()} />
+    </SubmissionResultsContext.Provider>)
+    expect(html).toContain('option-correct')
+    expect(html).toContain('option-incorrect')
+    expect(html).toContain('答錯')
+    expect(html).toContain('未作答')
+    expect(html).toContain('參考答案')
+    expect(html).toContain('A sample response.')
+    expect(html).toContain('My original response')
+    expect(html).not.toContain('paper-results-list')
+  })
+  it('does not show answer review before a submission has been loaded', () => {
+    const html = renderToStaticMarkup(<QuestionRenderer question={{ id: 'choice', prompt: 'Choose.', options: ['One', 'Two'] }}
+      index={0} draftAnswers={{ choice: 'B' }} onAnswerChange={vi.fn()} />)
+    expect(html).not.toContain('paper-result-answer')
+    expect(html).not.toContain('option-correct')
+  })
   it('allows historical structured questions without response-unit IDs to answer under their stable question ID', () => {
     const html = renderToStaticMarkup(<QuestionRenderer
       question={{id:'legacy-organizer',prompt:'Compare the two scenes.',responseLayout:{type:'organizer',headers:['Scene','Evidence'],rows:[{label:'First scene'}]}}}

@@ -195,7 +195,14 @@ export function PaperReader({
       }
       else if (result.reason === 'MONTHLY_LIMIT') setRequestMessage(`本服務月已使用 ${result.used ?? 4}/${result.limit ?? 4} 份，下個服務月可再申請。`)
       else setRequestMessage('目前無法申請下一份，請稍後再試。')
-    } catch { setActionError('下一份申請失敗，請稍後重試。') }
+    } catch (error) {
+      const message = error && typeof error === 'object' && 'message' in error ? String(error.message) : ''
+      setActionError(message.includes('ACTIVE_ENTITLEMENT_REQUIRED')
+        ? '目前沒有有效的教材服務資格，請回首頁確認服務狀態。'
+        : message.includes('SUBMISSION_NOT_FOUND')
+          ? '找不到已提交的作答，請重新整理後再試。'
+          : '下一份申請失敗，請稍後重試。')
+    }
     finally { setActionBusy(false) }
   }
 
@@ -213,11 +220,6 @@ export function PaperReader({
         : '目前無法下載，請稍後再按下載重試。')
     } finally { setDownloadBusy(false) }
   }
-
-  const questionDescriptions = new Map([
-    ...(lesson.practice?.flatMap((stage) => stage.questions) ?? []),
-    ...(lesson.homework?.questions ?? []),
-  ].map((question) => [question.id || question.questionId, question.prompt]))
 
   function getChapterForQuestion(questionId: string): string {
     const isPractice = (lesson?.practice ?? []).some((s) =>
@@ -479,6 +481,7 @@ export function PaperReader({
       />
 
       <StudentLessonRenderer lesson={lesson ?? {}} answers={submission?.answers ?? answers}
+        results={submission?.results}
         selfCheck={submission?.self_check ?? selfCheck}
         readOnly={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}
         onAnswerChange={(key, value, immediate) => {
@@ -517,20 +520,6 @@ export function PaperReader({
               onOpenFeedback={() => void openFeedback()}
               onSkipFeedback={() => setFeedbackChoice('skip')}
             />
-
-            <details className="paper-results-details">
-              <summary>查看逐題作答與正解（共 {submission.results.length} 題）</summary>
-              <ul className="paper-results-list">
-                {submission.results.map((result, index) => (
-                  <li key={result.question_id}>
-                    <a href={`#q-card-${result.question_id}`} onClick={(event) => { event.preventDefault(); jumpToQuestion(result.question_id) }}>
-                      {questionDescriptions.get(result.question_id) ?? `第 ${index + 1} 題`}
-                    </a>：{{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
-                    {result.correct_answer && <> · 正解：{result.correct_answer}</>}
-                  </li>
-                ))}
-              </ul>
-            </details>
 
             {feedbackChoice === 'form' && <div className="feedback-form" aria-busy={feedbackLoading}>
               {feedbackLoading && <p role="status">正在載入家長回饋…</p>}

@@ -1,6 +1,8 @@
 import type { Question } from '../../../types/student-material'
 import { ProjectedContent } from './ProjectedContent'
 import { useAnswerReadOnly } from './AnswerReadOnlyContext'
+import { useContext } from 'react'
+import { SubmissionResultsContext } from './SubmissionResultsContext'
 
 export interface QuestionRendererProps {
   question: Question
@@ -19,6 +21,7 @@ export function QuestionRenderer({
 }: QuestionRendererProps) {
   const readOnly = useAnswerReadOnly()
   const qId = question.id || question.questionId || `q-${index}`
+  const result = useContext(SubmissionResultsContext).find(item => item.question_id === qId)
   const selectedAnswer = draftAnswers[qId] ?? ''
 
   const hasOptions = Array.isArray(question.options) && question.options.length > 0
@@ -29,12 +32,16 @@ export function QuestionRenderer({
   )
 
   return (
-    <div className="question-card" id={`q-card-${qId}`}>
+    <div className={`question-card ${result && !hasOptions ? 'question-card-reviewed' : ''}`} id={`q-card-${qId}`}>
       <div className="question-heading">
         <span className="question-number">Q{index + 1}.</span>
         <p id={`prompt-${qId}`} className="question-prompt">{question.prompt}</p>
+        {result && <span className={`paper-result-status paper-result-status--${result.status}`}>
+          {{ correct: '答對', incorrect: '答錯', unanswered: '未作答', open_review: '開放題待參考' }[result.status]}
+        </span>}
       </div>
 
+      <div className="question-response">
       {/* 1. Multiple Choice Questions */}
       {hasOptions && (
         <div className="options-grid">
@@ -42,11 +49,12 @@ export function QuestionRenderer({
             const letter = OPTION_LETTERS[optIdx] ?? String(optIdx + 1)
             // Support matching either the letter 'A' or the full text
             const isSelected = selectedAnswer === letter || selectedAnswer === opt
+            const isCorrect = result?.correct_answer === letter || result?.correct_answer === opt
 
             return (
               <div
                 key={optIdx}
-                className={`option-card ${isSelected ? 'selected' : ''}`}
+                className={`option-card ${isSelected ? 'selected' : ''} ${isCorrect ? 'option-correct' : ''} ${result?.status === 'incorrect' && isSelected ? 'option-incorrect' : ''}`}
                 role="button"
                 tabIndex={readOnly ? -1 : 0}
                 aria-disabled={readOnly}
@@ -60,7 +68,7 @@ export function QuestionRenderer({
                 }}
               >
                 <div className="option-badge">{letter}</div>
-                <div className="option-text">{opt}</div>
+                <div className="option-text">{opt}{isCorrect && <span className="option-result-label">✓ 正解</span>}</div>
               </div>
             )
           })}
@@ -179,6 +187,11 @@ export function QuestionRenderer({
           rows={question.writingLines && question.writingLines > 0 ? question.writingLines : 2}
         />
       )}
+      </div>
+      {result?.correct_answer && (!hasOptions || !question.options?.some((option, i) => result.correct_answer === option || result.correct_answer === OPTION_LETTERS[i])) && <div className="paper-result-answer">
+        <span className="paper-result-answer-label">{result.status === 'open_review' ? '參考答案' : '正解'}</span>
+        <p>{result.correct_answer}</p>
+      </div>}
     </div>
   )
 }

@@ -1,5 +1,7 @@
 import type { StudentLesson, DraftAnswers, DraftSelfCheck } from '../../../types/student-material'
 import { AnswerReadOnlyContext } from './AnswerReadOnlyContext'
+import { SubmissionResultsContext } from './SubmissionResultsContext'
+import type { SubmissionResult } from '../../../lib/student-material-api'
 import { OpeningRenderer } from './OpeningRenderer'
 import { VocabularyRenderer } from './VocabularyRenderer'
 import { ReadingRenderer } from './ReadingRenderer'
@@ -8,12 +10,14 @@ import { PracticeRenderer } from './PracticeRenderer'
 import { SelfCheckRenderer } from './SelfCheckRenderer'
 import { HomeworkRenderer } from './HomeworkRenderer'
 
-export function StudentLessonRenderer({ lesson, answers, selfCheck, readOnly, onAnswerChange, onToggleSelfCheck }: {
+export function StudentLessonRenderer({ lesson, answers, selfCheck, readOnly, results, onAnswerChange, onToggleSelfCheck }: {
   lesson: StudentLesson; answers: DraftAnswers; selfCheck: DraftSelfCheck; readOnly: boolean
+  results?: SubmissionResult['results']
   onAnswerChange: (key: string, value: string, immediate?: boolean) => void
   onToggleSelfCheck: (key: string) => void
 }) {
   return <AnswerReadOnlyContext.Provider value={readOnly}>
+    <SubmissionResultsContext.Provider value={results ?? []}>
     <OpeningRenderer opening={lesson.opening} draftAnswers={answers} onAnswerChange={onAnswerChange} />
     <VocabularyRenderer vocabulary={lesson.vocabulary} />
     <ReadingRenderer vocabulary={lesson.vocabulary} reading={lesson.reading} adaptiveExtension={lesson.adaptiveExtension} draftAnswers={answers} onAnswerChange={onAnswerChange} />
@@ -21,5 +25,6 @@ export function StudentLessonRenderer({ lesson, answers, selfCheck, readOnly, on
     <PracticeRenderer practice={lesson.practice} adaptiveExtension={lesson.adaptiveExtension} draftAnswers={answers} onAnswerChange={onAnswerChange} />
     <SelfCheckRenderer selfCheckZh={lesson.selfCheckZh} draftSelfCheck={selfCheck} onToggleSelfCheck={onToggleSelfCheck} />
     <HomeworkRenderer homework={lesson.homework} draftAnswers={answers} onAnswerChange={onAnswerChange} />
+    </SubmissionResultsContext.Provider>
   </AnswerReadOnlyContext.Provider>
 }
