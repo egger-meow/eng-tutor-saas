@@ -8,7 +8,7 @@ declare
   result jsonb;
 begin
   insert into auth.users(id,email) values(v_parent,'next-material-test@example.com');
-  insert into public.profiles(id,display_name) values(v_parent,'Synthetic parent');
+  insert into public.profiles(id,display_name) values(v_parent,'Synthetic parent') on conflict (id) do nothing;
   insert into public.children(id,parent_id,display_name,grade,grade_stage,is_active,is_internal_test)
   values(v_child,v_parent,'Synthetic child',7,'grade_7',true,true);
   update public.subscriptions set status='canceled' where child_id=v_child;
