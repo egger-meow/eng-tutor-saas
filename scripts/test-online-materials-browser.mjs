@@ -94,6 +94,8 @@ try {
       }
       if (name === 'get_enrollment_state') response = [{ status: 'open', capacity: 100, active_count: 1, remaining: 99, founding_limit: 30, founding_count: 0, free_pilot_active: true }]
       else if (name === 'record_funnel_event') response = null
+      else if (name === 'get_material_learning_navigation') response = null
+      else if (name === 'save_material_learning_navigation') response = { success: true, version: body.p_client_version + 1, chapter_id: body.p_chapter_id, question_id: body.p_question_id }
       else if (name === 'get_material_draft') response = [draft]
       else if (name === 'can_open_parent_answer') response = false
       else if (name === 'get_student_material_submission') response = submission
@@ -217,7 +219,9 @@ try {
     await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
     page.on('dialog', (dialog) => dialog.accept())
     await submit.click()
-    await page.getByText('正解：Music', { exact: false }).waitFor()
+    await page.locator('#q-card-q1 .option-correct').getByText('✓ 正解', { exact: true }).waitFor()
+    await page.locator('#q-card-q2 .paper-result-answer').getByText('Sample sentence.', { exact: true }).waitFor()
+    assert.equal(await page.locator('.paper-results-list').count(), 0, 'review stays beside the original answer')
     assert.equal(await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).getAttribute('readonly'), '')
     assert.equal(submission.answers['q3-cell'], 'Structured observation')
     assert.equal(submission.answers.q4, 'Fallback observation')
@@ -231,12 +235,14 @@ try {
     quota = true
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).click()
     await page.getByText('本服務月已使用', { exact: false }).waitFor()
+    assert.equal(await page.getByRole('button', { name: '申請下一份教材', exact: true }).count(), 0, 'quota state does not offer a futile request')
     quota = false
+    await page.goto(url)
     assert.equal(await page.getByRole('button', { name: '申請下一份教材', exact: true }).isEnabled(), true)
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).click()
-    await page.getByText('已收到下一份申請。', { exact: true }).waitFor()
+    await page.getByText('已收到下一份教材申請', { exact: true }).waitFor()
     await page.goto(url)
-    await page.getByText('已收到下一份申請。', { exact: true }).waitFor()
+    await page.getByText('已收到下一份教材申請', { exact: true }).waitFor()
     await page.getByText('已提交 · 已申請下一份', { exact: true }).waitFor()
     assert.equal(requests, 1)
     assert.equal(feedback, 0, 'skip does not fabricate feedback')
@@ -250,7 +256,7 @@ try {
     submission.next_request_status = null
     submission.next_requested = false
     await page.goto(url)
-    await page.getByRole('button', { name: '填寫回饋', exact: true }).click()
+    await page.getByRole('button', { name: '補充學習回饋（選填）', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
     assert.equal(await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).isVisible(), false, 'optional comments start collapsed')
     await page.locator('summary').filter({hasText:'補充其他觀察'}).click()

@@ -1,6 +1,7 @@
 export interface MaterialNextStepPanelProps {
   materialId: string
   nextRequested: boolean
+  nextRequestStatus?: 'pending' | 'claimed' | 'completed' | 'failed' | 'canceled' | null
   requestMessage?: string | null
   actionBusy: boolean
   onRequestNext: () => void
@@ -11,6 +12,7 @@ export interface MaterialNextStepPanelProps {
 
 export function MaterialNextStepPanel({
   nextRequested,
+  nextRequestStatus,
   requestMessage,
   actionBusy,
   onRequestNext,
@@ -27,7 +29,9 @@ export function MaterialNextStepPanel({
         <h3 className="next-step-title">下一步：接續學習與教材安排</h3>
       </div>
 
-      {isAlreadyRequested ? (
+      {nextRequestStatus === 'failed' || nextRequestStatus === 'canceled' ? (
+        <p className="notice notice-error" role="status">下一份教材未完成，請聯絡我們協助恢復；已提交的作答仍會保留。</p>
+      ) : isAlreadyRequested ? (
         <div className="next-step-status status-requested">
           <p className="next-step-message">
             ✓ <strong>已收到下一份教材申請</strong>

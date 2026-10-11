@@ -410,7 +410,7 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('paper-chapter-nav')
   })
 
-  it('12. integrates MaterialNextStepPanel and collapsible results pattern', async () => {
+  it('12. integrates MaterialNextStepPanel for optional feedback and explicit requests', async () => {
     const { MaterialNextStepPanel } = await import('./MaterialNextStepPanel')
     const panelHtml = renderToStaticMarkup(
       <MaterialNextStepPanel

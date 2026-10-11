@@ -513,6 +513,7 @@ export function PaperReader({
             <MaterialNextStepPanel
               materialId={projection.material_id}
               nextRequested={Boolean(submission.next_requested)}
+              nextRequestStatus={submission.next_request_status}
               requestMessage={requestMessage}
               actionBusy={actionBusy}
               onRequestNext={() => void requestNext()}

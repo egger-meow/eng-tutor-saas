@@ -3,6 +3,14 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { MaterialNextStepPanel } from './MaterialNextStepPanel'
 
 describe('MaterialNextStepPanel', () => {
+  it.each(['failed', 'canceled'] as const)('reports %s requests without promising preparation', (nextRequestStatus) => {
+    const html = renderToStaticMarkup(<MaterialNextStepPanel materialId="m1" nextRequested
+      nextRequestStatus={nextRequestStatus} actionBusy={false} onRequestNext={vi.fn()}
+      feedbackChoice="skip" onOpenFeedback={vi.fn()} onSkipFeedback={vi.fn()} />)
+    expect(html).toContain('下一份教材未完成')
+    expect(html).not.toContain('系統正在為孩子')
+    expect(html).not.toContain('button-primary')
+  })
   it('renders primary request button and optional feedback button when unrequested', () => {
     const html = renderToStaticMarkup(
       <MaterialNextStepPanel
