@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { OnboardingLayout } from '../onboarding/OnboardingLayout'
 import { AboutStep } from '../onboarding/steps/AboutStep'
-import { SchoolStep } from '../onboarding/steps/SchoolStep'
-import { RoutineStep } from '../onboarding/steps/RoutineStep'
 import { EmailAuthPanel } from './EmailAuthPanel'
 import { Week1FastProgress } from '../materials/Week1FastProgress'
 import { getAnonymousId, trackChildFormStart } from '../../lib/analytics'
 import { startLandingOnboarding, type LandingOnboardingStartStatus } from '../../lib/landing-onboarding-start'
-import { emptyProfileDraft, profileStepCount, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
+import { emptyProfileDraft, MIN_WEEKLY_MINUTES, MAX_WEEKLY_MINUTES, readDraft, saveDraft, validateProfileStep, type ProfileDraft } from '../../lib/profile-form'
 import { useEnrollmentState } from '../../lib/enrollment'
+import { levels } from '../onboarding/step-types'
 import {
   clearWeek1ProgressToken,
   readAnonymousWeek1Progress,
@@ -21,13 +20,11 @@ import '../../styles/landing-onboarding.css'
 
 const LANDING_DRAFT_KEY = 'paper-english:landing-profile-draft'
 
-export const LANDING_TOTAL_STEPS = 4
+export const LANDING_TOTAL_STEPS = 2
 
 const stepMeta = [
-  ['先抓孩子現在的大概位置', '暱稱、年級、英文程度，憑印象選就可以。'],
-  ['孩子最近真的喜歡什麼？', '先選興趣大類，再補幾個他最近真的在看的、玩的或著迷的東西。'],
-  ['設定每週節奏與加強目標', '選一個做得到的時間，再告訴我們最希望先加強什麼。'],
-  ['最後留下 Email，我們就開始準備第一週', '名額可用時立即排入第一週專屬教材製作，完成後寄信通知。'],
+  ['先抓孩子起點與熱門興趣', '暱稱、年級、英文程度與興趣，一鍵點選約 45 秒完成。'],
+  ['最後留下 Email，我們就開始準備第一週', '不用等收信！按下後畫面立即現場排版專屬教材（約 90 秒完成可預覽下載）。'],
 ] as const
 
 type PanelMode = 'profile' | 'email' | 'existing' | 'submitted'
@@ -144,8 +141,11 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
 
   function next() {
     markStarted()
-    if (step <= profileStepCount) {
-      const nextErrors = validateProfileStep(step, draft)
+    if (step === 1) {
+      const nextErrors = validateProfileStep(1, draft)
+      if (draft.weeklyMinutes < MIN_WEEKLY_MINUTES || draft.weeklyMinutes > MAX_WEEKLY_MINUTES) {
+        nextErrors.weeklyMinutes = '每週時間請填 30 到 240 分鐘。'
+      }
       setErrors(nextErrors)
       if (Object.keys(nextErrors).length > 0) return
     }
@@ -211,12 +211,12 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
       <div className="onboarding-container landing-onboarding-panel">
         <section className="onboarding-success-card" role="status" aria-live="polite">
           <div className="onboarding-badge">🧪 紙屬英文 Beta</div>
-          <p className="overline">{waitlisted ? '候補已完成' : '資料已安全送出'}</p>
+          <p className="overline">{waitlisted ? '候補已完成' : '⚡ 現場排版中'}</p>
           <h2>{waitlisted ? '候補已登記，登入信已寄出' : '第一週教材已排入製作'}</h2>
           <p>
             {waitlisted
               ? '目前名額已滿，已幫你登記候補。輪到你時我們會寄 Email 通知，不會先開始產生教材。'
-              : '孩子資料已收到，我們會盡快幫你把第一週教材做好。你不用留在這頁等；完成後也會寄 Email 通知你，再回來下載就好。'}
+              : '孩子資料已收到，我們會盡快幫你把第一週教材做好。請留在原畫面，系統正在為孩子結合所選興趣與會考考點即時編寫排版，約 60–90 秒完成後可直接在此預覽與下載；完成後也會寄 Email 通知你。'}
           </p>
           {waitlisted ? (
             <div className="onboarding-progress-list" aria-label="候補處理進度">
@@ -226,7 +226,9 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
           ) : (
             <Week1FastProgress progress={week1Progress} />
           )}
-          <p className="muted">登入信只用來安全登入，不需要重複送出。若收件匣沒看到，請先檢查垃圾郵件或促銷分類。</p>
+          <p className="muted" style={{ fontSize: '0.875rem', marginTop: 'var(--space-3)' }}>
+            登入信只用來安全登入，不需要重複送出。若收件匣沒看到，請先檢查垃圾郵件或促銷分類。
+          </p>
           <div className="onboarding-actions">
             <button className="button button-secondary" type="button" onClick={() => setMode('existing')}>已有信？前往登入</button>
           </div>
@@ -235,7 +237,6 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
     )
   }
 
-  const StepComponent = [AboutStep, SchoolStep, RoutineStep][step - 1] ?? AboutStep
   const [title, description] = stepMeta[step - 1] ?? stepMeta[0]
 
   return (
@@ -243,7 +244,7 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
       <header className="onboarding-welcome-header">
         <div className="onboarding-badge">{enrollment?.freePilotActive ? '🧪 紙屬英文 Beta · 目前 NT$0' : '第一週免費'}</div>
         <h2 className="onboarding-main-title">第一次使用？先填孩子資料</h2>
-        <p className="onboarding-main-desc">免考試・免綁卡・4 步驟約 2 分鐘快速完成。先填寫年級、興趣、每週時間與收件 Email；名額可用時立即排入第一週專屬教材製作。</p>
+        <p className="onboarding-main-desc">免考試・免綁卡・2 步驟約 60 秒快速完成。先填寫年級、程度、熱門興趣與收件 Email；按下後立即在畫面現場排版第一週專屬教材。</p>
       </header>
       <OnboardingLayout
         step={step}
@@ -264,16 +265,16 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
             )}
             {step === LANDING_TOTAL_STEPS ? (
               <button
-                className="button"
+                className="button button-primary"
                 type="submit"
                 form="landing-email-form"
                 disabled={busy}
               >
-                {busy ? '送出中…' : '開始準備第一週教材'}
+                {busy ? '正在準備排版中…' : '開始準備第一週教材'}
               </button>
             ) : (
-              <button className="button" type="button" onClick={next}>
-                {step === 1 ? '選好了，繼續' : step === 2 ? '選好了，繼續' : '下一步：收件 Email (最後一步)'}
+              <button className="button button-primary" type="button" onClick={next}>
+                下一步：輸入 Email 立即製作教材 →
               </button>
             )}
           </>
@@ -281,6 +282,22 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
       >
         {step === LANDING_TOTAL_STEPS ? (
           <div className="onboarding-step-content">
+            <div className="landing-draft-summary-pill" style={{
+              background: 'var(--surface-sunken, #f8fafc)',
+              border: '1px solid var(--border-subtle, #e2e8f0)',
+              borderRadius: 'var(--radius-md, 8px)',
+              padding: '12px 16px',
+              marginBottom: '16px',
+            }}>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                ✨ 即將為 {draft.displayName || '孩子'} 製作專屬教材
+              </div>
+              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                {draft.gradeStage === 'incoming_grade_7' ? '即將升國一' : `國中 ${draft.gradeStage.replace('grade_', '')} 年級`} ·{' '}
+                {draft.baselineLevel ? levels.find((l) => l.value === draft.baselineLevel)?.label : '自適應起點'} ·{' '}
+                主題：{draft.favoriteStories || (draft.interests && draft.interests.length > 0 ? draft.interests.join('、') : '綜合探索')}
+              </div>
+            </div>
             <form id="landing-email-form" onSubmit={submitEmail} className="landing-email-step-form">
               <label className="field-group" htmlFor="landing-onboarding-email">
                 <span className="field-title">家長 Email <small className="field-hint">接收每週教材與安全登入連結</small></span>
@@ -303,11 +320,12 @@ export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPan
             {notice && <p className={`notice notice-${notice.kind}`} role="status">{notice.text}</p>}
           </div>
         ) : (
-          <StepComponent
+          <AboutStep
             draft={draft}
             errors={errors}
             update={update}
-            onAutoAdvance={step === 1 ? next : undefined}
+            showExpressInterests={true}
+            onAutoAdvance={next}
           />
         )}
       </OnboardingLayout>

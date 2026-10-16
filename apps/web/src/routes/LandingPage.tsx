@@ -185,8 +185,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && (
               <ul className="login-expectations">
                 <li>填寫一位孩子的學習狀況</li>
-                <li>4 個步驟快速完成（程度 ➔ 興趣 ➔ 節奏 ➔ Email）</li>
-                <li>送出後立即開始製作，完成後直接開放下載</li>
+                <li>2 個步驟 60 秒極速完成（起點與熱門興趣 ➔ Email 現場排版）</li>
+                <li>送出後立即現場製作，約 90 秒完成直接開放預覽下載</li>
               </ul>
             )}
           </div>

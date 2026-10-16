@@ -22,17 +22,18 @@ vi.mock('../../lib/enrollment', () => ({
 }))
 
 describe('LandingOnboardingPanel', () => {
-  it('starts with the 4-step child learning form instead of an email gate', () => {
+  it('starts with the 2-step child learning express form instead of an email gate', () => {
     mockEnrollmentState = null
     const html = renderToStaticMarkup(<LandingOnboardingPanel />)
 
-    expect(html).toContain('步驟 1 / 4')
-    expect(html).toContain('4 步驟約 2 分鐘快速完成')
-    expect(html).toContain('先抓孩子現在的大概位置')
+    expect(html).toContain('步驟 1 / 2')
+    expect(html).toContain('2 步驟約 60 秒快速完成')
+    expect(html).toContain('先抓孩子起點與熱門興趣')
     expect(html).toContain('孩子怎麼稱呼？')
+    expect(html).toContain('🏀 籃球與運動')
     expect(html).not.toContain('type="email"')
-    expect(html).toContain('已有帳號')
-    expect(html).toContain('繼續')
+    expect(html).toContain('已經幫孩子建立過檔案？')
+    expect(html).toContain('下一步：輸入 Email 立即製作教材 →')
     expect(html).toContain('第一週免費')
   })
 
@@ -73,9 +74,9 @@ describe('LandingOnboardingPanel', () => {
     expect(Object.keys(validErrors).length).toBe(0)
   })
 
-  it('renders step 1 with explicit continue button "選好了，繼續" instead of auto-timer', () => {
+  it('renders step 1 with explicit continue button "下一步：輸入 Email 立即製作教材 →" instead of auto-timer', () => {
     const html = renderToStaticMarkup(<LandingOnboardingPanel />)
-    expect(html).toContain('選好了，繼續')
+    expect(html).toContain('下一步：輸入 Email 立即製作教材 →')
   })
 
   it('allows AboutStep level radio selection and re-selection without timer auto-advance', () => {
@@ -97,5 +98,20 @@ describe('LandingOnboardingPanel', () => {
     expect(html).toContain('aria-checked="true"')
     // Timer auto advance is NOT triggered synchronously or automatically on render
     expect(autoAdvance).not.toHaveBeenCalled()
+  })
+
+  it('renders 1-tap interest chips when showExpressInterests is true in AboutStep', () => {
+    const update = vi.fn()
+    const html = renderToStaticMarkup(
+      <AboutStep
+        draft={{ ...emptyProfileDraft, displayName: '翔翔', baselineLevel: 'developing' }}
+        errors={{}}
+        update={update}
+        showExpressInterests={true}
+      />
+    )
+    expect(html).toContain('🏀 籃球與運動')
+    expect(html).toContain('🎮 電玩與遊戲')
+    expect(html).toContain('選填：指定學校課本版本或調整每週時間')
   })
 })

@@ -9,7 +9,17 @@ const gradeStages = [
   { value: 'grade_9', label: '國三' },
 ] as const
 
-export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingStepProps) {
+export const POPULAR_INTEREST_CHIPS = [
+  '🏀 籃球與運動',
+  '🎮 電玩與遊戲',
+  '🎬 動漫與故事',
+  '🐾 動物與自然',
+  '🚀 太空與科學',
+  '🎵 音樂與流行',
+  '🍰 美食與生活',
+] as const
+
+export function AboutStep({ draft, errors, update, onAutoAdvance, showExpressInterests = false }: OnboardingStepProps) {
   function selectGradeStage(gradeStage: typeof draft.gradeStage) {
     update({
       gradeStage,
@@ -102,6 +112,93 @@ export function AboutStep({ draft, errors, update, onAutoAdvance }: OnboardingSt
         </div>
         {errors.baselineLevel && <span className="field-error">{errors.baselineLevel}</span>}
       </div>
+
+      {showExpressInterests && (
+        <>
+          <div className="field-group express-interest-group" style={{ marginTop: 'var(--space-4)' }}>
+            <span className="field-title">
+              孩子最近最喜歡什麼？ <small className="field-hint">點選 1~3 項熱門主題，教材將圍繞孩子興趣編寫</small>
+            </span>
+            <div className="interest-chips-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '8px 0' }}>
+              {POPULAR_INTEREST_CHIPS.map((chip) => {
+                const isSelected = (draft.interests || []).includes(chip)
+                return (
+                  <button
+                    key={chip}
+                    type="button"
+                    className={`pill-option ${isSelected ? 'selected' : ''}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      const current = draft.interests || []
+                      const nextInterests = isSelected
+                        ? current.filter((item) => item !== chip)
+                        : [...current, chip]
+                      update({
+                        interests: nextInterests,
+                        favoriteStories: nextInterests.join('、'),
+                      })
+                    }}
+                    aria-pressed={isSelected}
+                  >
+                    {chip}
+                  </button>
+                )
+              })}
+            </div>
+            <input
+              type="text"
+              placeholder="或者補充孩子的具體喜好（例如：NBA 勇士隊、寶可夢、排球少年）"
+              value={draft.favoriteStories || ''}
+              onChange={(e) => {
+                const text = e.target.value
+                update({
+                  favoriteStories: text,
+                  interests: text ? [text] : [],
+                })
+              }}
+              style={{ marginTop: '6px' }}
+            />
+          </div>
+
+          <details className="landing-express-advanced" style={{ marginTop: '12px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            <summary style={{ cursor: 'pointer', fontWeight: 500, padding: '4px 0' }}>
+              ⚙️ 選填：指定學校課本版本或調整每週時間（預設 90 分鐘）
+            </summary>
+            <div style={{ padding: '8px 0 0 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>學校版本（選填）：</span>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                  {['康軒', '翰林', '南一'].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      className={`pill-option ${draft.textbookVersion === v ? 'selected' : ''}`}
+                      onClick={() => update({ textbookVersion: draft.textbookVersion === v ? '' : v })}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>每週學習時間：</span>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                  {[60, 90, 120].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      className={`pill-option ${draft.weeklyMinutes === mins ? 'selected' : ''}`}
+                      onClick={() => update({ weeklyMinutes: mins })}
+                    >
+                      {mins} 分鐘
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </details>
+        </>
+      )}
     </div>
   )
 }

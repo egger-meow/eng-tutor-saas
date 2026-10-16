@@ -5,6 +5,7 @@ export type OnboardingStepProps = {
   errors: Record<string, string>
   update: (patch: Partial<ProfileDraft>) => void
   onAutoAdvance?: () => void
+  showExpressInterests?: boolean
 }
 
 export const levels = [

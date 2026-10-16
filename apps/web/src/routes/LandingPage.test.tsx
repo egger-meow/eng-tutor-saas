@@ -207,20 +207,24 @@ describe('Landing Page — Onboarding & Direct Login', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it.each(['/', '/dashboard', '/children/new', '/unknown-page'])(
-    'renders child-first onboarding and direct login when LandingPage is shown at %s',
+    'renders child-first onboarding without side-by-side login card when LandingPage is shown at %s',
     (pathname) => {
-      vi.stubGlobal('window', { location: { pathname }, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+      vi.stubGlobal('window', { location: { pathname, hash: '' }, addEventListener: vi.fn(), removeEventListener: vi.fn() })
       const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
       const onboardingIndex = html.indexOf('id="onboarding"')
-      const loginIndex = html.indexOf('id="login"')
-      expect(html).toContain('landing-auth-grid')
       expect(onboardingIndex).toBeGreaterThan(-1)
-      expect(loginIndex).toBeGreaterThan(onboardingIndex)
-      expect(html.slice(onboardingIndex, loginIndex)).toContain('孩子怎麼稱呼？')
-      expect(html.slice(onboardingIndex, loginIndex)).not.toContain('type="email"')
-      expect(html.slice(loginIndex)).toContain('id="login-email"')
+      expect(html).toContain('孩子怎麼稱呼？')
+      expect(html).not.toContain('id="login-email"')
+      expect(html).toContain('點此登入查看教材 →')
     },
   )
+
+  it('renders direct login when hash targets #login', () => {
+    vi.stubGlobal('window', { location: { pathname: '/', hash: '#login' }, addEventListener: vi.fn(), removeEventListener: vi.fn() })
+    const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
+    expect(html).toContain('id="login"')
+    expect(html).toContain('id="login-email"')
+  })
 
   it('targets navbar login directly to #login and primary CTA to #onboarding', () => {
     const headerHtml = renderToStaticMarkup(<PublicHeader />)
@@ -232,8 +236,8 @@ describe('Landing Page — Onboarding & Direct Login', () => {
   it('keeps child-first instructions and avoids autofocus jumps', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('填寫一位孩子的學習狀況')
-    expect(html).toContain('4 個步驟快速完成（程度 ➔ 興趣 ➔ 節奏 ➔ Email）')
-    expect(html).toContain('送出後立即開始製作，完成後直接開放下載')
+    expect(html).toContain('2 個步驟 60 秒極速完成（起點與熱門興趣 ➔ Email 現場排版）')
+    expect(html).toContain('送出後立即現場製作，約 90 秒完成直接開放預覽下載')
     expect(html).not.toContain('第一份專屬教材預計隔天開放下載')
     expect(html).not.toContain('從家長 Email 建立帳號')
     expect(html).not.toContain('建立家長帳號或登入')
