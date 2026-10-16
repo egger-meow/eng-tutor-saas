@@ -399,6 +399,8 @@ describe('PaperReader Component Suite', () => {
 
     expect(html).toContain('提交整份教材')
     expect(html).toContain('可以只完成一部分。未作答的題目會標為「未作答」，不算答錯')
+    expect(html).toContain('孩子已用紙筆在 A4 紙本上完成？')
+    expect(html).toContain('已在紙本完成：直接看解答並安排下週 →')
   })
 
   it('11. includes session navigation and chapter toolbar integration', () => {

@@ -139,8 +139,11 @@ export function PaperReader({
     }
   }
 
-  async function submitWholeMaterial() {
-    if (actionBusy || submissionFailed || status !== 'saved' || hasConflict || submission) return
+  async function submitWholeMaterial(isPaperFastTrack = false) {
+    if (actionBusy || submissionFailed || hasConflict || submission) return
+    if (!isPaperFastTrack && status !== 'saved') return
+    if (['saving', 'error', 'conflict'].includes(status)) return
+
     const allQuestions = [
       ...(lesson.practice?.flatMap((stage) => stage.questions) ?? []),
       ...(lesson.homework?.questions ?? []),
@@ -152,7 +155,11 @@ export function PaperReader({
     }).length
     const unansweredCount = Math.max(0, totalCount - answeredCount)
 
-    if (!window.confirm(`確認提交這次整份作答？\n\n・已作答：${answeredCount} 題\n・未作答：${unansweredCount} 題（未答不算答錯）\n\n提交後本次作答將正式鎖定，無法再修改作答內容。`)) return
+    const confirmMsg = isPaperFastTrack
+      ? '確認孩子已在列印的紙本上完成作答？\n\n提交後將直接鎖定並解鎖解答指引，方便家長與孩子核對，並可立即安排下週教材。'
+      : `確認提交這次整份作答？\n\n・已作答：${answeredCount} 題\n・未作答：${unansweredCount} 題（未答不算答錯）\n\n提交後本次作答將正式鎖定，無法再修改作答內容。`
+
+    if (!window.confirm(confirmMsg)) return
     setActionBusy(true)
     setActionError('')
     try {
@@ -497,12 +504,47 @@ export function PaperReader({
         {!submission && (
           <>
             <p>可以只完成一部分。未作答的題目會標為「未作答」，不算答錯；整份提交後才能查看客觀題正解。</p>
-            <button className="button button-primary" type="button" onClick={() => void submitWholeMaterial()}
-              disabled={actionBusy || isInitialLoading || submissionLoading || submissionFailed || status !== 'saved' || hasConflict}>
-              {actionBusy ? '提交中…' : '提交整份教材'}
-            </button>
-            {status !== 'saved' && <p className="muted">請等待草稿完成儲存後再提交。</p>}
-            {['unsaved', 'saving', 'error', 'conflict'].includes(status) && <p role="status">離開教材前，請先完成儲存或處理衝突。</p>}
+            <div className="completion-options-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem' }}>
+              <div className="completion-web-option">
+                <button
+                  className="button button-primary"
+                  type="button"
+                  onClick={() => void submitWholeMaterial(false)}
+                  disabled={actionBusy || isInitialLoading || submissionLoading || submissionFailed || status !== 'saved' || hasConflict}
+                >
+                  {actionBusy ? '提交中…' : '提交整份教材'}
+                </button>
+                {status !== 'saved' && <p className="muted" style={{ margin: '0.4rem 0 0', fontSize: '0.84rem' }}>請等待草稿完成儲存後再提交。</p>}
+                {['unsaved', 'saving', 'error', 'conflict'].includes(status) && <p role="status">離開教材前，請先完成儲存或處理衝突。</p>}
+              </div>
+
+              <div
+                className="paper-fast-track-box"
+                style={{
+                  padding: '1.1rem 1.25rem',
+                  border: '1.5px dashed var(--color-rule-strong)',
+                  borderRadius: 'var(--radius-control)',
+                  background: 'rgba(40, 79, 62, 0.03)',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>📄</span>
+                  <strong style={{ fontSize: '0.95rem', color: 'var(--color-ink)' }}>孩子已用紙筆在 A4 紙本上完成？</strong>
+                </div>
+                <p style={{ margin: '0 0 0.85rem', fontSize: '0.86rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
+                  不用辛苦把答案重新打上網頁！直接點擊下方按鈕即可核對答案、查看家長解答指引，並安排下週新教材：
+                </p>
+                <button
+                  className="button button-secondary"
+                  type="button"
+                  onClick={() => void submitWholeMaterial(true)}
+                  disabled={actionBusy || isInitialLoading || submissionLoading || submissionFailed || ['saving', 'error', 'conflict'].includes(status)}
+                >
+                  {actionBusy ? '處理中…' : '已在紙本完成：直接看解答並安排下週 →'}
+                </button>
+              </div>
+            </div>
           </>
         )}
         {submission && (

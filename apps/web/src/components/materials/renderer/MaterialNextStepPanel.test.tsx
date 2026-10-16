@@ -44,6 +44,8 @@ describe('MaterialNextStepPanel', () => {
     )
 
     expect(html).toContain('已收到下一份教材申請')
+    expect(html).toContain('為孩子預備的下一個進步方向')
+    expect(html).toContain('下週教材已排入客製序列')
     expect(html).not.toContain('button-primary')
   })
 
