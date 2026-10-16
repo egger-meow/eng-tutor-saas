@@ -32,7 +32,11 @@ const stepMeta = [
 
 type PanelMode = 'profile' | 'email' | 'existing' | 'submitted'
 
-export function LandingOnboardingPanel() {
+export type LandingOnboardingPanelProps = {
+  onSwitchToLogin?: () => void
+}
+
+export function LandingOnboardingPanel({ onSwitchToLogin }: LandingOnboardingPanelProps = {}) {
   const { state: enrollment } = useEnrollmentState()
   const [mode, setMode] = useState<PanelMode>('profile')
   const [step, setStep] = useState(1)
@@ -154,11 +158,7 @@ export function LandingOnboardingPanel() {
   }
 
   function prev() {
-    if (step === 1) {
-      const loginEl = document.getElementById('login')
-      loginEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      loginEl?.querySelector('input')?.focus()
-    } else {
+    if (step > 1) {
       const prevStep = step - 1
       setStep(prevStep)
       if (prevStep < LANDING_TOTAL_STEPS) setMode('profile')
@@ -252,14 +252,16 @@ export function LandingOnboardingPanel() {
         description={description}
         actions={
           <>
-            <button
-              className="button button-secondary"
-              type="button"
-              disabled={busy}
-              onClick={prev}
-            >
-              {step === 1 ? '已有帳號？直接登入' : '上一步'}
-            </button>
+            {step > 1 && (
+              <button
+                className="button button-secondary"
+                type="button"
+                disabled={busy}
+                onClick={prev}
+              >
+                上一步
+              </button>
+            )}
             {step === LANDING_TOTAL_STEPS ? (
               <button
                 className="button"
@@ -309,6 +311,17 @@ export function LandingOnboardingPanel() {
           />
         )}
       </OnboardingLayout>
+      <div className="landing-onboarding-returning-hint" style={{ marginTop: 'var(--space-4)', textAlign: 'center' }}>
+        <span className="muted" style={{ fontSize: '0.875rem' }}>已經幫孩子建立過檔案？</span>{' '}
+        <button
+          type="button"
+          className="button-link text-link"
+          style={{ fontSize: '0.875rem' }}
+          onClick={onSwitchToLogin || (() => setMode('existing'))}
+        >
+          點此登入查看教材 →
+        </button>
+      </div>
     </div>
   )
 }

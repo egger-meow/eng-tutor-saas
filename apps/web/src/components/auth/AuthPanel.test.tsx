@@ -20,4 +20,15 @@ describe('AuthPanel legal consent markup', () => {
     expect(html).toContain('服務條款')
     expect(html).toContain('隱私權政策')
   })
+
+  it('focuses exclusively on child onboarding in public landing mode by default without side-by-side login card', () => {
+    const html = renderToStaticMarkup(<AuthPanel isPublicLanding={true} />)
+
+    expect(html).toContain('landing-onboarding-card')
+    expect(html).not.toContain('landing-login-card')
+    expect(html).toContain('第一次使用？先填孩子資料')
+    expect(html).toContain('已經幫孩子建立過檔案？')
+    expect(html).toContain('點此登入查看教材 →')
+  })
 })
+
