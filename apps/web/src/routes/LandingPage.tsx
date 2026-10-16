@@ -12,6 +12,7 @@ import { DisclosureItem } from '../components/motion/Disclosure'
 import { AnimatedDetails } from '../components/motion/AnimatedDetails'
 import { PersonalizationStory } from '../components/public/PersonalizationStory'
 import { AssessmentSellingSection } from '../components/public/AssessmentSellingSection'
+import { HeroLivePreviewCard } from '../components/public/HeroLivePreviewCard'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
@@ -134,12 +135,8 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
           </FadeInUp>
 
-          <FadeInUp delay={0.14} duration={0.48} reveal="paper" className="hero-editorial" aria-label="每週教材內容示意">
-            <span className="edition-mark">THIS WEEK · FOR ONE CHILD</span>
-            <p>不是買一份固定教材。</p>
-            <strong><span>孩子這週的狀況，</span><span>會真的改變</span><span>下週拿到的內容。</span></strong>
-            <div className="paper-rule" />
-            <small>線上閱讀與作答，依真實表現調整；紙筆列印也完整保留。</small>
+          <FadeInUp delay={0.14} duration={0.48} reveal="paper">
+            <HeroLivePreviewCard />
           </FadeInUp>
         </section>
 
