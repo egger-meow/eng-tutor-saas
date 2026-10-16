@@ -13,6 +13,7 @@ import { AnimatedDetails } from '../components/motion/AnimatedDetails'
 import { PersonalizationStory } from '../components/public/PersonalizationStory'
 import { AssessmentSellingSection } from '../components/public/AssessmentSellingSection'
 import { HeroLivePreviewCard } from '../components/public/HeroLivePreviewCard'
+import { InlineSampleChallenge } from '../components/public/InlineSampleChallenge'
 import { getEnrollmentCta, useEnrollmentState, type EnrollmentState } from '../lib/enrollment'
 import { trackLandingView, trackSampleClick, trackFreeTrialClick } from '../lib/analytics'
 import '../landing-evolution.css'
@@ -156,6 +157,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <p>不用登入就能體驗選擇題、寫句子、裝置朗讀與提交結果。整份提交後才在畫面顯示參考答案；下載的教材不包含線上作答與解答。</p>
             <div className="early-sample-proof" aria-label="範例說明"><span>公開合成範例</span><span>只存本機</span><span>不耗教材配額</span></div>
           </div>
+          <InlineSampleChallenge />
           <div className="document-pair">
             <article className="sample-context-card">
               <p className="overline">Try the learning loop</p>
