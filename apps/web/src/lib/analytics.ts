@@ -29,6 +29,7 @@ export interface AttributionContext {
 
 const AID_STORAGE_KEY = 'paper_analytics_aid'
 const INITIAL_ATTRIBUTION_KEY = 'paper_analytics_initial_attribution'
+const AUTH_COMPLETE_SESSION_KEY = 'paper_analytics_auth_complete_uid'
 const RECENT_EVENTS_WINDOW_MS = 2500
 
 const inMemoryStore = new Map<string, string>()
@@ -37,6 +38,11 @@ const recentEvents = new Map<string, number>()
 export function clearInMemoryAnalyticsStore(): void {
   inMemoryStore.clear()
   recentEvents.clear()
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(AUTH_COMPLETE_SESSION_KEY)
+    }
+  } catch {}
 }
 
 function getStorageSafe(): { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void } {
@@ -44,6 +50,22 @@ function getStorageSafe(): { getItem: (k: string) => string | null; setItem: (k:
     if (typeof window !== 'undefined' && window.localStorage) {
       const storage = window.localStorage
       const testKey = '__test_local_storage__'
+      storage.setItem(testKey, '1')
+      storage.removeItem(testKey)
+      return storage
+    }
+  } catch {}
+  return {
+    getItem: (k: string) => inMemoryStore.get(k) ?? null,
+    setItem: (k: string, v: string) => { inMemoryStore.set(k, v) },
+  }
+}
+
+function getSessionStorageSafe(): { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void } {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const storage = window.sessionStorage
+      const testKey = '__test_session_storage__'
       storage.setItem(testKey, '1')
       storage.removeItem(testKey)
       return storage
@@ -269,6 +291,14 @@ export function trackEmailSubmit(metadata?: Record<string, unknown>): void {
 }
 
 export function trackAuthComplete(metadata?: Record<string, unknown>): void {
+  const uid = typeof metadata?.user_id === 'string' ? metadata.user_id.trim() : ''
+  if (uid) {
+    const storage = getSessionStorageSafe()
+    if (storage.getItem(AUTH_COMPLETE_SESSION_KEY) === uid) {
+      return
+    }
+    storage.setItem(AUTH_COMPLETE_SESSION_KEY, uid)
+  }
   void trackFunnelEvent('auth_complete', { metadata })
 }
 

@@ -94,15 +94,49 @@ function buildStepMetrics(events: any[]): { steps: FunnelStepMetric[]; uniqueLan
 
   const landingEvents = byStep.get('landing_view') || []
   const uniqueLandingVisitors = new Set(landingEvents.map(visitorId).filter(Boolean)).size
-  let previousUnique = 0
-  const steps = STEP_DEFS.map((definition, index) => {
+
+  const uniqueByStep = new Map<FunnelStepName, number>()
+  for (const def of STEP_DEFS) {
+    const stepEvents = byStep.get(def.name) || []
+    uniqueByStep.set(def.name, new Set(stepEvents.map(visitorId).filter(Boolean)).size)
+  }
+
+  const steps = STEP_DEFS.map((definition) => {
     const stepEvents = byStep.get(definition.name) || []
-    const uniqueVisitors = new Set(stepEvents.map(visitorId).filter(Boolean)).size
-    const conversionFromPrevPercent = index === 0 ? 100 : previousUnique > 0 ? round1((uniqueVisitors / previousUnique) * 100) : 0
-    const conversionFromLandingPercent = uniqueLandingVisitors > 0 ? round1((uniqueVisitors / uniqueLandingVisitors) * 100) : 0
-    const dropOffCount = index === 0 ? 0 : Math.max(0, previousUnique - uniqueVisitors)
-    const dropOffPercent = index === 0 || previousUnique === 0 ? 0 : round1((dropOffCount / previousUnique) * 100)
-    previousUnique = uniqueVisitors
+    const uniqueVisitors = uniqueByStep.get(definition.name) || 0
+
+    let previousUnique = 0
+    if (definition.name === 'landing_view') {
+      previousUnique = 0
+    } else if (definition.name === 'sample_click') {
+      previousUnique = uniqueLandingVisitors
+    } else if (definition.name === 'free_trial_click') {
+      previousUnique = uniqueLandingVisitors
+    } else if (definition.name === 'child_form_start') {
+      previousUnique = uniqueByStep.get('free_trial_click') || 0
+    } else if (definition.name === 'email_submit') {
+      previousUnique = uniqueByStep.get('child_form_start') || 0
+    } else if (definition.name === 'child_created') {
+      previousUnique = uniqueByStep.get('email_submit') || 0
+    } else if (definition.name === 'onboarding_complete') {
+      previousUnique = uniqueByStep.get('child_created') || 0
+    }
+
+    const conversionFromPrevPercent = definition.name === 'landing_view'
+      ? 100
+      : previousUnique > 0
+        ? round1((uniqueVisitors / previousUnique) * 100)
+        : 0
+    const conversionFromLandingPercent = uniqueLandingVisitors > 0
+      ? round1((uniqueVisitors / uniqueLandingVisitors) * 100)
+      : 0
+    const dropOffCount = definition.name === 'landing_view'
+      ? 0
+      : Math.max(0, previousUnique - uniqueVisitors)
+    const dropOffPercent = definition.name === 'landing_view' || previousUnique === 0
+      ? 0
+      : round1((dropOffCount / previousUnique) * 100)
+
     return {
       ...definition,
       count: stepEvents.length,
@@ -114,20 +148,38 @@ function buildStepMetrics(events: any[]): { steps: FunnelStepMetric[]; uniqueLan
     }
   })
 
+  // Core linear pipeline for real drop-off analysis:
+  // landing_view -> free_trial_click -> child_form_start -> email_submit -> child_created -> onboarding_complete
+  const coreStepNames: FunnelStepName[] = [
+    'landing_view',
+    'free_trial_click',
+    'child_form_start',
+    'email_submit',
+    'child_created',
+    'onboarding_complete',
+  ]
+
   let biggestDropOff: ConversionFunnelData['biggestDropOff'] = null
   let maxDropCount = -1
-  for (let index = 1; index < steps.length; index += 1) {
-    const previous = steps[index - 1]!
-    const current = steps[index]!
-    if (current.dropOffCount > maxDropCount && previous.uniqueVisitors > 0) {
-      maxDropCount = current.dropOffCount
+
+  for (let i = 1; i < coreStepNames.length; i++) {
+    const prevName = coreStepNames[i - 1]!
+    const currName = coreStepNames[i]!
+    const prevStep = steps.find((s) => s.name === prevName)!
+    const currStep = steps.find((s) => s.name === currName)!
+
+    const dropCount = Math.max(0, prevStep.uniqueVisitors - currStep.uniqueVisitors)
+    const dropPercent = prevStep.uniqueVisitors > 0 ? round1((dropCount / prevStep.uniqueVisitors) * 100) : 0
+
+    if (dropCount > maxDropCount && prevStep.uniqueVisitors > 0) {
+      maxDropCount = dropCount
       biggestDropOff = {
-        fromStep: previous.name,
-        fromLabel: previous.label,
-        toStep: current.name,
-        toLabel: current.label,
-        dropCount: current.dropOffCount,
-        dropPercent: current.dropOffPercent,
+        fromStep: prevStep.name,
+        fromLabel: prevStep.label,
+        toStep: currStep.name,
+        toLabel: currStep.label,
+        dropCount,
+        dropPercent,
       }
     }
   }
@@ -216,10 +268,42 @@ export class LandingFunnelAdminService extends AdminService {
       }
     }
 
-    const [{ data: rawEvents, error: eventError }, { data: rawChildren, error: childError }] = await Promise.all([
-      client.from('funnel_events').select('*').gte('created_at', base.startDate).order('created_at', { ascending: true }).limit(50000),
-      client.from('children').select('id, parent_id, is_internal_test'),
-    ])
+    const PAGE_SIZE = 1000
+    const rawEvents: any[] = []
+    let offset = 0
+    let eventError: any = null
+
+    while (offset < 50000) {
+      const query = client
+        .from('funnel_events')
+        .select('*')
+        .gte('created_at', base.startDate)
+        .order('created_at', { ascending: true })
+
+      if (typeof query.range === 'function') {
+        const { data: batch, error } = await query.range(offset, offset + PAGE_SIZE - 1)
+        if (error) {
+          eventError = error
+          break
+        }
+        const rows = (batch || []) as any[]
+        rawEvents.push(...rows)
+        if (rows.length < PAGE_SIZE) break
+        offset += PAGE_SIZE
+      } else {
+        const { data: batch, error } = await query.limit(50000)
+        if (error) {
+          eventError = error
+        } else {
+          rawEvents.push(...(batch || []))
+        }
+        break
+      }
+    }
+
+    const { data: rawChildren, error: childError } = await client
+      .from('children')
+      .select('id, parent_id, is_internal_test')
     if (eventError || childError) {
       return {
         ...base,

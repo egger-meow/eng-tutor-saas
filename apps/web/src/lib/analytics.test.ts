@@ -4,6 +4,7 @@ import {
   deriveDeviceClass,
   getAttributionContext,
   trackFunnelEvent,
+  trackAuthComplete,
   clearInMemoryAnalyticsStore,
 } from './analytics'
 import * as supabaseModule from './supabase'
@@ -76,4 +77,21 @@ describe('analytics client', () => {
     const threwEvent = await trackFunnelEvent('email_submit', { force: true })
     expect(threwEvent).toBeNull()
   })
+
+  it('deduplicates trackAuthComplete calls for the same user within the same browser session', async () => {
+    const rpcMock = vi.fn().mockResolvedValue({ data: 'mock-event-uuid', error: null })
+    vi.spyOn(supabaseModule, 'getSupabaseClient').mockReturnValue({
+      rpc: rpcMock,
+    } as any)
+
+    trackAuthComplete({ user_id: 'user-123' })
+    trackAuthComplete({ user_id: 'user-123' })
+
+    await new Promise((r) => setTimeout(r, 10))
+    const authCalls = rpcMock.mock.calls.filter(
+      (call: any[]) => call[0] === 'record_funnel_event' && call[1]?.p_event_name === 'auth_complete'
+    )
+    expect(authCalls).toHaveLength(1)
+  })
 })
+
