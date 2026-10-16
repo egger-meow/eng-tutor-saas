@@ -38,7 +38,7 @@ export function ChildOnboardingPage({
 }: ChildOnboardingPageProps) {
   const storageKey = `paper-english:profile-draft:${childId ?? 'new'}`
   const [step, setStep] = useState(1)
-  const [draft, setDraft] = useState<ProfileDraft>(() => initialDraft ?? readDraft(storageKey) ?? emptyProfileDraft)
+  const [draft, setDraft] = useState<ProfileDraft>(() => initialDraft ?? readDraft(storageKey) ?? (!childId ? readDraft('paper-english:landing-profile-draft') : null) ?? emptyProfileDraft)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(initialLoading ?? (Boolean(childId) && !initialDraft && !readDraft(storageKey)))
   const [busy, setBusy] = useState(false)
@@ -94,7 +94,7 @@ export function ChildOnboardingPage({
       if (childId) await updateChild(childId, childInput)
       await saveChildProfile(id, toChildProfileInput(draft))
       if (!childId) trackOnboardingComplete(id)
-      window.sessionStorage.removeItem(storageKey)
+      try { window.sessionStorage.removeItem(storageKey); window.sessionStorage.removeItem('paper-english:landing-profile-draft') } catch {}
       navigate(`/children/${id}`)
     } catch (caught) {
       console.error('Child profile save failed', caught)

@@ -121,6 +121,7 @@ export function toChildProfileInput(draft: ProfileDraft): ChildProfileInput {
 
 export function readDraft(key: string): ProfileDraft | null {
   try {
+    if (typeof window === 'undefined' || !window.sessionStorage) return null
     const value = window.sessionStorage.getItem(key)
     if (!value) return null
     return { ...emptyProfileDraft, ...JSON.parse(value) } as ProfileDraft
@@ -128,5 +129,9 @@ export function readDraft(key: string): ProfileDraft | null {
 }
 
 export function saveDraft(key: string, draft: ProfileDraft) {
-  window.sessionStorage.setItem(key, JSON.stringify(draft))
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(key, JSON.stringify(draft))
+    }
+  } catch {}
 }
