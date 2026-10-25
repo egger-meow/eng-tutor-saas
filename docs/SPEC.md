@@ -3543,6 +3543,17 @@ owned released material independently of history pagination and offer a return
 to that material and the dashboard. Text inputs are typed responses, not stored
 pen strokes.
 
+The dashboard and history use the same authorized progress state for status and inline
+feedback entry. Missing parent feedback must never imply that a submitted packet is
+unstarted. After submission, parents may add or edit observations inline without
+returning to the reader. Request acceptance, quota exhaustion, and failed or canceled
+requests never remove the reader's optional feedback entry; saving and skipping also
+leave a way to reopen it. Observation editing preserves prior parent-reported fields.
+Feedback remains available for later planning, without promising inclusion in an
+already-frozen generation snapshot. Request confirmations must not invent delivery
+dates or personalized teaching directions. Evidence details use progressive disclosure,
+and online counts explicitly exclude paper answers that were not entered online.
+
 On the dashboard, released materials display an objective Parent Evidence Card
 (`MaterialEvidenceCard`) summarizing completed items, correct/incorrect/unanswered counts,
 and curriculum adjustment reasons based solely on verified data. Unanswered items are not

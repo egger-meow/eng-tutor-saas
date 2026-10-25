@@ -24,10 +24,18 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
   useEffect(() => {
     let active = true
     setSubmitted(null)
-    void fetchStudentSubmission(material.id).then((result) => { if (active) setSubmitted(Boolean(result)) })
+    void fetchStudentSubmission(material.id).then((result) => {
+      if (!active) return
+      setSubmitted(Boolean(result))
+      if (result && !existing) {
+        const answered = result.results.filter((item) => item.status !== 'unanswered').length
+        const completion_rate = result.results.length ? Math.round(answered * 4 / result.results.length) * 25 : 0
+        setInput((current) => ({ ...current, completion_rate }))
+      }
+    })
       .catch(() => { if (active) setError('無法確認提交狀態，請重試。') })
     return () => { active = false }
-  }, [material.id, attempt])
+  }, [material.id, attempt, existing])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -64,13 +72,14 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
       <div className="feedback-intro field-wide">
         <h3>用幾個選項告訴我們這週的狀況</h3>
         <p className="muted">不用寫文字也可以送出，大約十幾秒就能完成。</p>
+        {submitted && <p className="muted">觀察可隨時補充，供後續教材規劃參考；已進入製作的教材不會因此重新製作。儲存回饋不會另行申請教材。</p>}
       </div>
 
       <FeedbackChoice
         legend="這週完成多少？"
         name={`completion-${material.id}`}
         value={input.completion_rate}
-        options={[[0, '還沒開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]}
+        options={[[0, '還沒開始'], [25, '剛開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]}
         onChange={(completion_rate) => setInput({ ...input, completion_rate })}
       />
       <FeedbackChoice
@@ -124,7 +133,7 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
             <span>例如：這篇很好看、文章太簡單、文法看不懂。</span>
             <textarea maxLength={2000} placeholder="可以記下孩子的原話" value={input.child_comments} onChange={(event) => setInput({ ...input, child_comments: event.target.value })} />
           </label>
-          <label>還有什麼想讓下週教材知道？
+          <label>還有什麼學習觀察想補充？
             <span>例如：學校開始教現在進行式，或最近迷上新的動漫。</span>
             <textarea maxLength={2000} placeholder="學校進度、考試、興趣變化或其他觀察" value={input.parent_comments} onChange={(event) => setInput({ ...input, parent_comments: event.target.value })} />
           </label>

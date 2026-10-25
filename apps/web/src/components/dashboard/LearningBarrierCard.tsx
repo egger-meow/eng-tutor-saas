@@ -78,6 +78,7 @@ export function LearningBarrierCard({
     hasPaperStarted || Boolean(initialCheckin?.paper_started_at)
   )
   const [dismissed, setDismissed] = useState(isCheckinDismissed(initialCheckin ?? null))
+  const [readFailed, setReadFailed] = useState(false)
   const [saving, setSaving] = useState(false)
 
   // Released older than 48 hours check
@@ -102,6 +103,8 @@ export function LearningBarrierCard({
     }
 
     let active = true
+    setLoading(true)
+    setReadFailed(false)
     const client = getSupabaseClient()
     fetchMaterialLearningCheckin(client, materialId)
       .then((res) => {
@@ -114,6 +117,7 @@ export function LearningBarrierCard({
       })
       .catch(() => {
         if (!active) return
+        setReadFailed(true)
         setLoading(false)
       })
 
@@ -125,6 +129,7 @@ export function LearningBarrierCard({
   // Don't show if already submitted, started online, reported paper, dismissed, or < 48 hours
   if (
     loading ||
+    readFailed ||
     hasSubmission ||
     hasAnswerStarted ||
     isPaperReported ||

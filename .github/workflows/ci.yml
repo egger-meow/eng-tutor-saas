@@ -67,6 +67,7 @@ jobs:
       - name: Verify responsive material and public demo flows
         run: |
           node scripts/test-online-materials-browser.mjs
+          node scripts/test-feedback-flow-browser.mjs
           node scripts/test-public-demo-browser.mjs
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1

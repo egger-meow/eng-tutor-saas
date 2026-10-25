@@ -28,7 +28,7 @@ describe('MaterialEvidenceCard', () => {
     )
 
     expect(html).toContain('這次的作答／家長回報')
-    expect(html).toContain('學生線上作答')
+    expect(html).toContain('線上提交記錄')
 
     // Counts
     expect(html).toContain('>3<')
@@ -37,7 +37,7 @@ describe('MaterialEvidenceCard', () => {
     expect(html).toContain('待複習')
     expect(html).toContain('>2<')
     expect(html).toContain('未作答')
-    expect(html).toContain('開放題（待評閱）')
+    expect(html).toContain('開放題・未自動評分')
 
     // Targets
     expect(html).toContain('past-participle')
@@ -49,7 +49,7 @@ describe('MaterialEvidenceCard', () => {
     expect(html).toContain('這份教材為什麼調整')
     expect(html).toContain('加強過去分詞')
     expect(html).toContain('擴展科普閱讀情境')
-    expect(html).toContain('申請後依這次證據設計下一份教材')
+    expect(html).toContain('申請下一份教材時，將以本次作答記錄作為規劃參考。')
   })
 
   it('renders parent paper report without fabricating accuracy percentage', () => {
@@ -130,7 +130,7 @@ describe('MaterialEvidenceCard', () => {
       />
     )
 
-    expect(html).toContain('學生線上作答')
+    expect(html).toContain('線上提交記錄')
     expect(html).toContain('家長觀察回報進度：100%（家長觀察記錄，未覆蓋客觀答題結果）')
     expect(html).toContain('尚無足夠能力證據')
   })

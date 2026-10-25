@@ -377,7 +377,7 @@ describe('weekly material inline preview and page states', () => {
     expect(html).toContain('下載學生教材')
   })
 
-  it('12. WeeklyLearningPanel renders paper feedback button when answer_unlock_requires_submission is false and no feedback exists', () => {
+  it('12. WeeklyLearningPanel waits for authorized progress before offering paper feedback', () => {
     const historicalPaperMaterial = {
       id: 'mat-paper-1',
       child_id: 'child-1',
@@ -396,11 +396,11 @@ describe('weekly material inline preview and page states', () => {
       <WeeklyLearningPanel material={historicalPaperMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
     )
 
-    expect(html).toContain('紙筆做過了，填寫學習觀察')
+    expect(html).toContain('正在確認學習進度')
     expect(html).not.toContain('閱讀並提交教材後，可選填回饋')
   })
 
-  it('13. WeeklyLearningPanel renders submission guidance when answer_unlock_requires_submission is true and no feedback exists', () => {
+  it('13. WeeklyLearningPanel does not assume an online packet is unsubmitted while loading', () => {
     const onlineSubmissionMaterial = {
       id: 'mat-online-2',
       child_id: 'child-1',
@@ -419,7 +419,8 @@ describe('weekly material inline preview and page states', () => {
       <WeeklyLearningPanel material={onlineSubmissionMaterial} childName="Jonathan" onFeedbackSaved={vi.fn()} />
     )
 
-    expect(html).toContain('閱讀並提交教材後，可選填回饋')
+    expect(html).toContain('正在確認學習進度')
+    expect(html).not.toContain('閱讀並提交教材後，可選填回饋')
     expect(html).toContain('href="/materials/mat-online-2"')
     expect(html).not.toContain('紙筆做過了，填寫學習觀察')
   })
@@ -451,7 +452,8 @@ describe('weekly material inline preview and page states', () => {
       <WeeklyLearningPanel material={materialWithFeedback} childName="Jonathan" onFeedbackSaved={vi.fn()} />
     )
 
-    expect(html).toContain('修改回饋')
+    expect(html).toContain('正在確認學習進度')
+    expect(html).not.toContain('閱讀並提交教材後，可選填回饋')
   })
 
   it('15. WeeklyLearningPanel renders MaterialEvidenceCard and supports LearningBarrierCard for unstarted materials', () => {

@@ -10,6 +10,7 @@ describe('MaterialNextStepPanel', () => {
     expect(html).toContain('下一份教材未完成')
     expect(html).not.toContain('系統正在為孩子')
     expect(html).not.toContain('button-primary')
+    expect(html).toContain('家長觀察')
   })
   it('renders primary request button and optional feedback button when unrequested', () => {
     const html = renderToStaticMarkup(
@@ -26,7 +27,7 @@ describe('MaterialNextStepPanel', () => {
 
     expect(html).toContain('申請下一份教材')
     expect(html).toContain('回饋為選填；若無特別觀察，可直接申請下一份。')
-    expect(html).toContain('補充學習回饋（選填）')
+    expect(html).toContain('新增／修改家長觀察（選填）')
     expect(html).toContain('略過回饋')
   })
 
@@ -44,9 +45,18 @@ describe('MaterialNextStepPanel', () => {
     )
 
     expect(html).toContain('已收到下一份教材申請')
-    expect(html).toContain('為孩子預備的下一個進步方向')
-    expect(html).toContain('下週教材已排入客製序列')
+    expect(html).toContain('新增／修改家長觀察（選填）')
+    expect(html).not.toContain('預計 7 天後完成')
+    expect(html).not.toContain('第 2 週')
     expect(html).not.toContain('button-primary')
+    expect(html).toContain('家長觀察')
+  })
+
+  it('keeps editing available after saving', () => {
+    const html = renderToStaticMarkup(<MaterialNextStepPanel materialId="m1" nextRequested actionBusy={false} onRequestNext={vi.fn()} feedbackChoice="saved" onOpenFeedback={vi.fn()} onSkipFeedback={vi.fn()} />)
+    expect(html).toContain('修改家長觀察／回饋')
+    expect(html).toContain('家長回饋已儲存')
+    expect(html).not.toContain('一併納入下一份')
   })
 
   it('renders monthly quota limit notice when limit reached', () => {

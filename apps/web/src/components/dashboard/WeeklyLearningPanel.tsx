@@ -6,11 +6,18 @@ import { FeedbackForm } from '../feedback/FeedbackForm'
 import { FeedbackSummary } from '../feedback/FeedbackSummary'
 import { MaterialActions } from '../materials/MaterialActions'
 import { MaterialEvidenceCard } from './MaterialEvidenceCard'
+import { MaterialProgressProvider, useMaterialProgress } from '../materials/MaterialProgress'
+import { MaterialFeedbackAction } from '../materials/MaterialFeedbackAction'
 import { LearningBarrierCard } from './LearningBarrierCard'
 
 type WeeklyLearningPanelProps = { material: Material; childName: string; onFeedbackSaved: () => void }
 
 export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: WeeklyLearningPanelProps) {
+  return <MaterialProgressProvider key={material.id} materialId={material.id}><WeeklyLearningContent material={material} childName={childName} onFeedbackSaved={onFeedbackSaved} /></MaterialProgressProvider>
+}
+
+function WeeklyLearningContent({ material, childName, onFeedbackSaved }: WeeklyLearningPanelProps) {
+  const progress = useMaterialProgress(material.id)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const summary = readGenerationSummary(material.generation_summary)
   const released = isMaterialReleased(material)
@@ -39,34 +46,27 @@ export function WeeklyLearningPanel({ material, childName, onFeedbackSaved }: We
         <MaterialEvidenceCard
           materialId={material.id}
           answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
+          nextRequested={Boolean(progress.submission?.next_requested)}
+          nextRequestStatus={progress.submission?.next_request_status}
           onOpenFeedback={() => setFeedbackOpen(true)}
         />
       )}
-      {released && (
+      {released && !progress.loading && !progress.failed && (
         <LearningBarrierCard
           materialId={material.id}
           childId={material.child_id}
           releasedAt={material.release_at ?? material.created_at}
-          hasSubmission={Boolean(material.feedback)}
+          hasSubmission={Boolean(progress.submission)}
+          hasAnswerStarted={progress.started}
           hasPaperStarted={Boolean(material.feedback && !material.answer_unlock_requires_submission)}
           answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
         />
       )}
       <div className="weekly-feedback">
         <FeedbackSummary feedback={material.feedback} />
-        {released && material.feedback ? (
-          <button className="button-link text-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>{feedbackOpen ? '收起' : '修改回饋'}</button>
-        ) : released ? (
-          material.answer_unlock_requires_submission === false ? (
-            <button className="button-link text-link" type="button" onClick={() => setFeedbackOpen((open) => !open)}>
-              {feedbackOpen ? '收起' : '紙筆做過了，填寫學習觀察'}
-            </button>
-          ) : (
-            <a className="text-link" href={`/materials/${material.id}`} onClick={handleInternalLink}>閱讀並提交教材後，可選填回饋</a>
-          )
-        ) : null}
+        {released && <MaterialFeedbackAction material={material} open={feedbackOpen} onToggle={() => setFeedbackOpen((open) => !open)} />}
       </div>
-      {feedbackOpen && <FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} />}
+      {feedbackOpen && <div id={`feedback-${material.id}`}><FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} /></div>}
     </section>
   )
 }

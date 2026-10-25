@@ -49,9 +49,11 @@ export function PaperReader({
   const [downloadBusy, setDownloadBusy] = useState(false)
   const [downloadMessage, setDownloadMessage] = useState('')
   const [difficulty, setDifficulty] = useState(3)
+  const [reportedCompletion, setReportedCompletion] = useState<number | null>(null)
   const [weakArea, setWeakArea] = useState('')
   const [comments, setComments] = useState('')
   const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const [feedbackDetailsOpen, setFeedbackDetailsOpen] = useState(false)
   const [feedbackReady, setFeedbackReady] = useState(false)
   const [feedbackDetails, setFeedbackDetails] = useState({ mistakesText: '', childComments: '' })
   const startedMaterial = useRef<string | null>(null)
@@ -82,12 +84,14 @@ export function PaperReader({
     setActionError('')
     try {
       const { data, error } = await getSupabaseClient().from('feedback')
-        .select('difficulty, weak_area, parent_comments, mistakes_text, child_comments').eq('material_id', projection.material_id).maybeSingle()
+        .select('difficulty, completion_rate, weak_area, parent_comments, mistakes_text, child_comments').eq('material_id', projection.material_id).maybeSingle()
       if (error) throw error
       if (data) {
+        setReportedCompletion(data.completion_rate ?? null)
         setDifficulty(data.difficulty ?? 3)
         setWeakArea(data.weak_area ?? '')
         setComments(data.parent_comments ?? '')
+        setFeedbackDetailsOpen(Boolean(data.parent_comments))
         setFeedbackDetails({ mistakesText: data.mistakes_text ?? '', childComments: data.child_comments ?? '' })
       }
       setFeedbackReady(true)
@@ -156,7 +160,7 @@ export function PaperReader({
     const unansweredCount = Math.max(0, totalCount - answeredCount)
 
     const confirmMsg = isPaperFastTrack
-      ? '確認孩子已在列印的紙本上完成作答？\n\n提交後將直接鎖定並解鎖解答指引，方便家長與孩子核對，並可立即安排下週教材。'
+      ? '確認提交目前的線上作答記錄？\n\n紙本答案不會自動轉為線上作答。未填入的題目會保留為未作答，不算答錯。提交後無法修改線上作答，可查看解答，再另外申請下一份教材。'
       : `確認提交這次整份作答？\n\n・已作答：${answeredCount} 題\n・未作答：${unansweredCount} 題（未答不算答錯）\n\n提交後本次作答將正式鎖定，無法再修改作答內容。`
 
     if (!window.confirm(confirmMsg)) return
@@ -182,7 +186,7 @@ export function PaperReader({
       const answered = submission?.results.filter((result) => result.status !== 'unanswered').length ?? 0
       const total = submission?.results.length ?? 0
       await saveStudentParentFeedback(projection.material_id, {
-        difficulty, completionRate: total ? Math.round(answered * 4 / total) * 25 : 0,
+        difficulty, completionRate: reportedCompletion ?? (total ? Math.round(answered * 4 / total) * 25 : 0),
         weakArea: weakArea || null, comments, ...feedbackDetails,
       })
       setFeedbackChoice('saved')
@@ -533,7 +537,7 @@ export function PaperReader({
                   <strong style={{ fontSize: '0.95rem', color: 'var(--color-ink)' }}>孩子已用紙筆在 A4 紙本上完成？</strong>
                 </div>
                 <p style={{ margin: '0 0 0.85rem', fontSize: '0.86rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
-                  不用辛苦把答案重新打上網頁！直接點擊下方按鈕即可核對答案、查看家長解答指引，並安排下週新教材：
+                  不必重打紙本答案。提交目前的線上記錄後即可核對解答；未輸入的題目會保留為未作答，不算答錯。下一份教材需另外申請。
                 </p>
                 <button
                   className="button button-secondary"
@@ -541,7 +545,7 @@ export function PaperReader({
                   onClick={() => void submitWholeMaterial(true)}
                   disabled={actionBusy || isInitialLoading || submissionLoading || submissionFailed || ['saving', 'error', 'conflict'].includes(status)}
                 >
-                  {actionBusy ? '處理中…' : '已在紙本完成：直接看解答並安排下週 →'}
+                  {actionBusy ? '處理中…' : '已在紙本作答：提交目前記錄並看解答 →'}
                 </button>
               </div>
             </div>
@@ -580,7 +584,7 @@ export function PaperReader({
                   <option value="writing">寫作</option><option value="mixed">多個部分</option>
                 </select>
               </label>
-              <details className="paper-feedback-details">
+              <details className="paper-feedback-details" open={feedbackDetailsOpen} onToggle={(event) => setFeedbackDetailsOpen(event.currentTarget.open)}>
               <summary>補充其他觀察（選填）</summary>
               <label>其他觀察（選填）
                 <textarea maxLength={2000} value={comments} onChange={(event) => setComments(event.target.value)} />

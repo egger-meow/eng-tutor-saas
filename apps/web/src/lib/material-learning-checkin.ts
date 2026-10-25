@@ -62,7 +62,8 @@ export async function fetchMaterialLearningCheckin(
   const { data, error } = await supabase.rpc('get_material_learning_checkin', {
     p_material_id: materialId,
   })
-  if (error || !data) return null
+  if (error) throw error
+  if (!data) return null
   return parseMaterialLearningCheckin(data)
 }
 

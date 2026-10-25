@@ -400,7 +400,7 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('提交整份教材')
     expect(html).toContain('可以只完成一部分。未作答的題目會標為「未作答」，不算答錯')
     expect(html).toContain('孩子已用紙筆在 A4 紙本上完成？')
-    expect(html).toContain('已在紙本完成：直接看解答並安排下週 →')
+    expect(html).toContain('已在紙本作答：提交目前記錄並看解答 →')
   })
 
   it('11. includes session navigation and chapter toolbar integration', () => {
@@ -427,6 +427,6 @@ describe('PaperReader Component Suite', () => {
     )
     expect(panelHtml).toContain('下一步：接續學習與教材安排')
     expect(panelHtml).toContain('申請下一份教材')
-    expect(panelHtml).toContain('補充學習回饋（選填）')
+    expect(panelHtml).toContain('新增／修改家長觀察（選填）')
   })
 })

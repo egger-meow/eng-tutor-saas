@@ -80,3 +80,12 @@ describe('fetchMaterialLearningCheckin & saveMaterialLearningCheckin', () => {
     expect(res?.paper_started_at).toBe('2026-10-04T08:00:00Z')
   })
 })
+
+
+describe('checkin read uncertainty', () => {
+  it('preserves RPC errors instead of treating them as no prior paper activity', async () => {
+    const failure = new Error('unavailable')
+    const client = { rpc: async () => ({ data: null, error: failure }) } as unknown as Parameters<typeof fetchMaterialLearningCheckin>[0]
+    await expect(fetchMaterialLearningCheckin(client, 'mat-1')).rejects.toBe(failure)
+  })
+})

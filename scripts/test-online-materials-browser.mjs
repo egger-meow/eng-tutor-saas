@@ -256,10 +256,9 @@ try {
     submission.next_request_status = null
     submission.next_requested = false
     await page.goto(url)
-    await page.getByRole('button', { name: '補充學習回饋（選填）', exact: true }).click()
+    await page.getByRole('button', { name: '新增／修改家長觀察（選填）', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
-    assert.equal(await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).isVisible(), false, 'optional comments start collapsed')
-    await page.locator('summary').filter({hasText:'補充其他觀察'}).click()
+    assert.equal(await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).isVisible(), true, 'existing observations expand for editing')
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).fill('Updated observation')
     await page.getByRole('button', { name: '儲存回饋', exact: true }).click()
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).waitFor()
