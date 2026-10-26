@@ -1,0 +1,84 @@
+/* Learning surfaces: visible affordances, restrained movement, and persistent edits. */
+.interaction-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows 240ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease, visibility 240ms; }
+.interaction-reveal[data-open="true"] { grid-template-rows: 1fr; opacity: 1; visibility: visible; }
+.interaction-reveal-clip { min-height: 0; overflow: hidden; }
+.learning-disclosure { border: 1px solid var(--color-rule); border-radius: var(--radius-control); background: var(--color-paper); overflow: hidden; }
+.learning-disclosure-trigger { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; min-height: 3.5rem; padding: .8rem 1rem; border: 0; background: transparent; color: var(--color-ink); text-align: left; cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.learning-disclosure-trigger:hover { background: var(--color-success-soft); }
+.learning-disclosure-trigger:active { background: color-mix(in srgb, var(--color-action) 14%, var(--color-paper)); }
+.learning-disclosure-trigger:focus-visible { outline-offset: -4px; }
+.learning-disclosure[data-open="true"] > .learning-disclosure-trigger { background: color-mix(in srgb, var(--color-success-soft) 60%, var(--color-paper)); }
+.learning-disclosure-label { display: grid; gap: .15rem; font-size: .9375rem; font-weight: 700; }
+.learning-disclosure-hint { color: var(--color-muted); font-size: .8125rem; font-weight: 400; }
+.learning-disclosure-state { display: inline-flex; align-items: center; gap: .35rem; flex-shrink: 0; color: var(--color-action); font-size: .8125rem; font-weight: 500; }
+.learning-disclosure-state svg { transition: transform 220ms cubic-bezier(.2,.9,.3,1); }
+.learning-disclosure[data-open="true"] .learning-disclosure-state svg { transform: rotate(180deg); }
+.learning-disclosure-content { padding: 1rem; border-top: 1px solid var(--color-rule); }
+.material-evidence-card { gap: .75rem; }
+.material-evidence-card .performance-section { padding-bottom: 0; border-bottom: 0; }
+.material-evidence-card .evidence-targets-group { display: block; margin-top: 1rem; }
+.material-evidence-card .no-targets-note { line-height: 1.7; }
+.material-evidence-card .adjustment-notes-list { gap: .9rem; }
+.material-evidence-card .adjustment-note-item { gap: .75rem; line-height: 1.75; }
+.adjustment-bullet { padding-top: .1rem; color: var(--color-accent); font-variant-numeric: tabular-nums; font-size: .75rem; font-weight: 700; }
+.material-evidence-card .next-design-commitment { border: 0; padding-top: .25rem; }
+.evidence-review-link { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; font-weight: 600; font-size: .875rem; text-decoration: none; }
+.evidence-review-link:hover { text-decoration: underline; }
+.material-feedback-panel { margin-top: 1.25rem; padding: clamp(1rem, 2.5vw, 1.5rem); border: 1px solid var(--color-rule); border-radius: var(--radius-surface); background: color-mix(in srgb, var(--color-success-soft) 24%, var(--color-paper)); }
+.feedback-entry-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.feedback-entry-copy { min-width: 0; }
+.feedback-entry-copy h3 { display: flex; align-items: baseline; flex-wrap: wrap; gap: .6rem; font-family: var(--font-body); font-size: 1rem; font-weight: 700; }
+.feedback-entry-copy h3 > span { color: var(--color-muted); font-size: .75rem; font-weight: 400; }
+.feedback-entry-copy > p { margin: .4rem 0 0; font-size: .875rem; }
+.feedback-entry-copy .feedback-summary { margin: .5rem 0 0; }
+.feedback-entry-copy .feedback-summary p { margin-top: .35rem; font-size: .8125rem; }
+.feedback-entry-action { flex-shrink: 0; gap: .5rem; min-width: 8rem; background: var(--color-paper); }
+.feedback-entry-action > span { font-size: 1.2rem; font-weight: 400; line-height: 1; }
+.feedback-entry-action[aria-expanded="true"] { background: var(--color-success-soft); border-color: var(--color-action); }
+.feedback-start-link { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; color: var(--color-action); font-size: .875rem; font-weight: 600; text-decoration: none; }
+.feedback-start-link:hover { text-decoration: underline; }
+.feedback-progress-hint { font-size: .8125rem; }
+.feedback-save-status { color: var(--color-action); font-size: .875rem; line-height: 1.6; }
+.feedback-save-status:not(:empty) { margin-top: .75rem; }
+.material-feedback-panel .feedback-form { margin-top: 1.25rem; padding: 1.25rem 0 0; border: 0; border-top: 1px solid var(--color-rule); border-radius: 0; background: transparent; gap: 1.5rem; }
+.material-feedback-panel .feedback-intro h3 { font-size: 1rem; font-family: var(--font-body); }
+.material-feedback-panel .feedback-intro p { font-size: .8125rem; }
+/* The old label and its child both had pill borders/padding, creating double shells. */
+.feedback-form .choice-chip { position: relative; display: inline-flex; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.feedback-form .choice-chip span { min-height: 2.75rem; gap: .4rem; padding: .6rem .9rem; border-color: var(--color-rule-strong); transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease, box-shadow 150ms ease; }
+.feedback-form .choice-chip span::before { content: ''; width: .8rem; height: .8rem; flex-shrink: 0; border: 1px solid currentColor; border-radius: 50%; opacity: .5; }
+.feedback-form .choice-chip:hover span { border-color: var(--color-action); background: var(--color-success-soft); }
+.feedback-form .choice-chip:active span { box-shadow: inset 0 0 0 1px var(--color-action); }
+.feedback-form .choice-chip input:checked + span { border-color: var(--color-action); background: var(--color-action); color: white; }
+.feedback-form .choice-chip input:checked + span::before { opacity: 1; border-color: transparent; background: white; box-shadow: inset 0 0 0 3px var(--color-action); }
+.feedback-form .choice-chip input:focus-visible + span { outline: 2px solid var(--color-action); outline-offset: 3px; box-shadow: none; }
+.feedback-form .feedback-details-toggle { padding-top: 0; border: 0; }
+.feedback-detail-trigger { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; min-height: 3rem; padding: .75rem 1rem; border: 1px solid var(--color-rule); border-radius: var(--radius-control); background: var(--color-paper); color: var(--color-action); text-align: left; cursor: pointer; }
+.feedback-detail-trigger > span:first-child { color: var(--color-ink); font-size: .875rem; font-weight: 600; }
+.feedback-detail-trigger:hover, .feedback-detail-trigger[aria-expanded="true"] { border-color: var(--color-action); background: var(--color-success-soft); }
+.feedback-form .feedback-details { padding: 1rem 0 0; border: 0; background: transparent; }
+.feedback-form .feedback-submit { flex-wrap: wrap; }
+.feedback-form .feedback-submit .button { gap: .5rem; }
+.feedback-form textarea { transition: border-color 150ms ease, box-shadow 150ms ease; }
+.feedback-form textarea:focus { border-color: var(--color-action); box-shadow: var(--focus-ring); }
+@media (max-width: 600px) {
+  .feedback-entry-header { align-items: stretch; flex-direction: column; gap: .85rem; }
+  .feedback-entry-action { width: 100%; }
+  .feedback-detail-trigger { align-items: flex-start; }
+  .feedback-detail-trigger > span:last-child { white-space: nowrap; }
+  .material-evidence-card { padding: 1rem; }
+  .learning-disclosure-trigger { padding: .8rem; }
+  .learning-disclosure-content { padding: .85rem; }
+  .feedback-form .choice-group { gap: .5rem; }
+  .feedback-form .choice-chip span { font-size: .8125rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .interaction-reveal, .learning-disclosure-state svg { transition: none; }
+}
+
+.feedback-fields { display: grid; gap: 1.5rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+.feedback-fields:disabled { opacity: .65; }
+.material-evidence-card .count-card.count-incorrect .count-number { color: var(--color-accent); }
+
+.paper-completion .material-next-step-panel { margin-bottom: 0; }
+.paper-completion .feedback-form { margin-top: 1rem; }

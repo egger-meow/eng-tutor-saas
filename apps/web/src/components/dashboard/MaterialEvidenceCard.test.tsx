@@ -27,7 +27,7 @@ describe('MaterialEvidenceCard', () => {
       />
     )
 
-    expect(html).toContain('這次的作答／家長回報')
+    expect(html).toContain('這次的學習記錄')
     expect(html).toContain('線上提交記錄')
 
     // Counts
@@ -40,9 +40,9 @@ describe('MaterialEvidenceCard', () => {
     expect(html).toContain('開放題・未自動評分')
 
     // Targets
-    expect(html).toContain('past-participle')
+    expect(html).toContain('過去分詞')
     expect(html).toContain('需再複習')
-    expect(html).toContain('reading-inference')
+    expect(html).toContain('閱讀推論')
     expect(html).toContain('作答正確')
 
     // Adjustment rationale
@@ -132,6 +132,6 @@ describe('MaterialEvidenceCard', () => {
 
     expect(html).toContain('線上提交記錄')
     expect(html).toContain('家長觀察回報進度：100%（家長觀察記錄，未覆蓋客觀答題結果）')
-    expect(html).toContain('尚無足夠能力證據')
+    expect(html).toContain('目前尚無足夠資料整理能力指標。')
   })
 })

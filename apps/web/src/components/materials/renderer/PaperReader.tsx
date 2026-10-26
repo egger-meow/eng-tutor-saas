@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { handleInternalLink } from '../../../app/use-route'
 import { getSupabaseClient } from '../../../lib/supabase'
 import { StudentLessonRenderer } from './StudentLessonRenderer'
+import { Reveal } from '../../layout/Disclosure'
+import { FeedbackChoice } from '../../feedback/FeedbackForm'
 import { MaterialNextStepPanel } from './MaterialNextStepPanel'
 import { LearningStartPanel } from './LearningStartPanel'
 import { LearningSessionNav } from './LearningSessionNav'
@@ -44,6 +46,8 @@ export function PaperReader({
   const [loadAttempt, setLoadAttempt] = useState(0)
   const [actionBusy, setActionBusy] = useState(false)
   const [actionError, setActionError] = useState('')
+  const feedbackTrigger = useRef<HTMLButtonElement>(null)
+  const [feedbackActivated, setFeedbackActivated] = useState(false)
   const [feedbackChoice, setFeedbackChoice] = useState<'ask' | 'form' | 'skip' | 'saved'>('ask')
   const [requestMessage, setRequestMessage] = useState('')
   const [downloadBusy, setDownloadBusy] = useState(false)
@@ -79,6 +83,8 @@ export function PaperReader({
 
   async function openFeedback() {
     setFeedbackChoice('form')
+    setFeedbackActivated(true)
+    if (feedbackReady) return
     setFeedbackLoading(true)
     setFeedbackReady(false)
     setActionError('')
@@ -190,6 +196,8 @@ export function PaperReader({
         weakArea: weakArea || null, comments, ...feedbackDetails,
       })
       setFeedbackChoice('saved')
+      setFeedbackReady(false)
+      requestAnimationFrame(() => feedbackTrigger.current?.focus({ preventScroll: true }))
     } catch { setActionError('回饋未儲存，請再試一次。') }
     finally { setActionBusy(false) }
   }
@@ -557,6 +565,7 @@ export function PaperReader({
             <p>未作答不算答錯；開放題尚未評分，可參考答案自行回顧。</p>
 
             <MaterialNextStepPanel
+              feedbackButtonRef={feedbackTrigger}
               materialId={projection.material_id}
               nextRequested={Boolean(submission.next_requested)}
               nextRequestStatus={submission.next_request_status}
@@ -565,35 +574,29 @@ export function PaperReader({
               onRequestNext={() => void requestNext()}
               feedbackChoice={feedbackChoice}
               onOpenFeedback={() => void openFeedback()}
-              onSkipFeedback={() => setFeedbackChoice('skip')}
+              onSkipFeedback={() => { setFeedbackChoice('skip'); requestAnimationFrame(() => feedbackTrigger.current?.focus({ preventScroll: true })) }}
             />
 
-            {feedbackChoice === 'form' && <div className="feedback-form" aria-busy={feedbackLoading}>
+            <Reveal open={feedbackChoice === 'form'} id={`reader-feedback-${projection.material_id}`}>
+            {feedbackActivated && <div className="feedback-form" aria-busy={feedbackLoading}>
               {feedbackLoading && <p role="status">正在載入家長回饋…</p>}
               {!feedbackReady && !feedbackLoading && <button type="button" className="button" onClick={() => void openFeedback()}>重試載入回饋</button>}
               <fieldset disabled={!feedbackReady || actionBusy} className="paper-feedback-fields">
-              <label>整體難度
-                <select value={difficulty} onChange={(event) => setDifficulty(Number(event.target.value))}>
-                  <option value={1}>太簡單</option><option value={3}>剛剛好</option><option value={5}>太難</option>
-                </select>
-              </label>
-              <label>最需要加強
-                <select value={weakArea} onChange={(event) => setWeakArea(event.target.value)}>
-                  <option value="">沒有特別</option><option value="vocabulary">單字</option>
-                  <option value="grammar">文法</option><option value="reading">閱讀</option>
-                  <option value="writing">寫作</option><option value="mixed">多個部分</option>
-                </select>
-              </label>
-              <details className="paper-feedback-details" open={feedbackDetailsOpen} onToggle={(event) => setFeedbackDetailsOpen(event.currentTarget.open)}>
-              <summary>補充其他觀察（選填）</summary>
+              <FeedbackChoice legend="整體難度" name={`reader-difficulty-${projection.material_id}`} value={difficulty} options={[[1, '太簡單'], [3, '剛剛好'], [5, '太難']]} onChange={setDifficulty} />
+              <fieldset className="feedback-question"><legend>最需要加強</legend><div className="choice-group">
+                {[[ '', '沒有特別'], ['vocabulary', '單字'], ['grammar', '文法'], ['reading', '閱讀'], ['writing', '寫作'], ['mixed', '多個部分']].map(([value, label]) => <label className="choice-chip" key={value}><input type="radio" name={`reader-weak-area-${projection.material_id}`} value={value} checked={weakArea === value} onChange={() => setWeakArea(value)} /><span>{label}</span></label>)}
+              </div></fieldset>
+              <button className="feedback-detail-trigger" type="button" aria-expanded={feedbackDetailsOpen} aria-controls={`reader-observations-${projection.material_id}`} onClick={() => setFeedbackDetailsOpen((open) => !open)}>補充其他觀察（選填）<span aria-hidden="true">{feedbackDetailsOpen ? '收起 ⌃' : '展開 ⌄'}</span></button>
+              <Reveal open={feedbackDetailsOpen} id={`reader-observations-${projection.material_id}`}>
               <label>其他觀察（選填）
                 <textarea maxLength={2000} value={comments} onChange={(event) => setComments(event.target.value)} />
               </label>
-              </details>
+              </Reveal>
               <button className="button button-secondary" type="button" disabled={actionBusy || !feedbackReady} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
               </fieldset>
-              <button className="button button-link" type="button" disabled={actionBusy} onClick={() => setFeedbackChoice('skip')}>略過</button>
+              <button className="button button-quiet" type="button" disabled={actionBusy} onClick={() => { setFeedbackChoice('skip'); requestAnimationFrame(() => feedbackTrigger.current?.focus({ preventScroll: true })) }}>稍後再填</button>
             </div>}
+            </Reveal>
           </>
         )}
         {actionError && <p className="notice notice-error" role="alert">{actionError}</p>}

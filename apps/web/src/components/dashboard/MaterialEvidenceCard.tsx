@@ -1,3 +1,5 @@
+import { Disclosure } from '../layout/Disclosure'
+import { parentLearningCopy } from '../../lib/parent-learning-copy'
 import { useState, useEffect } from 'react'
 import { handleInternalLink } from '../../app/use-route'
 import { getSupabaseClient } from '../../lib/supabase'
@@ -95,10 +97,10 @@ export function MaterialEvidenceCard({
 
   return (
     <section className="material-evidence-card" aria-label="學習證據與調整記錄">
-      {/* 區塊一：這次的作答／家長回報 */}
+      {/* 區塊一：這次的學習記錄 */}
       <div className="evidence-section performance-section">
         <div className="evidence-header-row">
-          <h3 className="evidence-title">這次的作答／家長回報</h3>
+          <h3 className="evidence-title">這次的學習記錄</h3>
           {source === 'student_submission' && (
             <span className="status-badge status-badge-mastered">線上提交記錄</span>
           )}
@@ -119,7 +121,7 @@ export function MaterialEvidenceCard({
             )}
 
             <p className="muted">僅統計已填入網頁的作答；紙本答案未自動評分。</p>
-            <div className="objective-counts-grid" role="group" aria-label="客觀答題統計">
+            <div className="objective-counts-grid" role="group" aria-label="本次作答統計">
               <div className="count-card count-correct">
                 <span className="count-number">{objectiveCorrect}</span>
                 <span className="count-label">答對</span>
@@ -138,19 +140,20 @@ export function MaterialEvidenceCard({
               </div>
             </div>
 
+            <a className="evidence-review-link" href={`/materials/${materialId}`} onClick={handleInternalLink}>回教材複習 <span aria-hidden="true">→</span></a>
+
             {reportedCompletionRate !== null && (
               <p className="supplementary-feedback-note muted">
                 家長觀察回報進度：{reportedCompletionRate}%（家長觀察記錄，未覆蓋客觀答題結果）
               </p>
             )}
 
-            <details className="evidence-targets-group">
-              <summary className="targets-title">查看能力指標</summary>
+            <Disclosure className="evidence-targets-group" title="查看能力指標" hint="依本次作答整理">
               {targets.length > 0 ? (
                 <ul className="targets-badge-list">
                   {targets.map((target, idx) => (
                     <li key={`${target.label}-${idx}`} className="target-badge-item">
-                      <span className="target-label">{target.label}</span>
+                      <span className="target-label">{parentLearningCopy(target.label)}</span>
                       <span
                         className={`status-badge ${
                           target.state === 'observed_correct'
@@ -171,10 +174,10 @@ export function MaterialEvidenceCard({
                 </ul>
               ) : (
                 <p className="no-targets-note muted">
-                  尚無足夠能力證據（以實際答題為準，不隨意猜測能力指標）
+                  目前尚無足夠資料整理能力指標。
                 </p>
               )}
-            </details>
+            </Disclosure>
           </div>
         )}
 
@@ -191,12 +194,11 @@ export function MaterialEvidenceCard({
               <span className="paper-rate-hint muted">（由家長回報之紙筆進度，未經線上評分）</span>
             </div>
             {targets.length > 0 ? (
-              <details className="evidence-targets-group">
-                <summary className="targets-title">查看觀察能力指標</summary>
+              <Disclosure className="evidence-targets-group" title="查看觀察能力指標">
                 <ul className="targets-badge-list">
                   {targets.map((target, idx) => (
                     <li key={`${target.label}-${idx}`} className="target-badge-item">
-                      <span className="target-label">{target.label}</span>
+                      <span className="target-label">{parentLearningCopy(target.label)}</span>
                       <span
                         className={`status-badge ${
                           target.state === 'observed_correct'
@@ -215,7 +217,7 @@ export function MaterialEvidenceCard({
                     </li>
                   ))}
                 </ul>
-              </details>
+              </Disclosure>
             ) : (
               <p className="no-targets-note muted">尚無足夠能力指標證據</p>
             )}
@@ -251,14 +253,13 @@ export function MaterialEvidenceCard({
 
       {/* 區塊二：這份教材為什麼調整 */}
       <div className="evidence-section rationale-section">
-        <details>
-          <summary className="evidence-title">這份教材為什麼調整</summary>
+        <Disclosure title="這份教材為什麼調整" hint="閱讀重點與複習安排">
           {adjustmentNotes.length > 0 ? (
             <ul className="adjustment-notes-list">
               {adjustmentNotes.map((note, index) => (
                 <li key={index} className="adjustment-note-item">
-                  <span className="adjustment-bullet" aria-hidden="true">🌱</span>
-                  <span>{note}</span>
+                  <span className="adjustment-bullet" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                  <span>{parentLearningCopy(note)}</span>
                 </li>
               ))}
             </ul>
@@ -266,7 +267,7 @@ export function MaterialEvidenceCard({
             <p className="muted">依設定之年級程度與學習進度規劃。</p>
           )}
 
-        </details>
+        </Disclosure>
         <footer className="next-design-commitment">
           <p className="commitment-text muted">
             {nextRequestStatus === 'failed' || nextRequestStatus === 'canceled' ? '下一份教材未完成，已提交的作答仍會保留。' : nextRequested ? '✓ 已收到下一份教材申請，本次作答記錄已保留供後續規劃參考。' : '申請下一份教材時，將以本次作答記錄作為規劃參考。'}

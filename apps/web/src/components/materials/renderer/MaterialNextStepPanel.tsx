@@ -1,4 +1,7 @@
+import type { RefObject } from 'react'
+
 export interface MaterialNextStepPanelProps {
+  feedbackButtonRef?: RefObject<HTMLButtonElement | null>
   materialId: string
   nextRequested: boolean
   nextRequestStatus?: 'pending' | 'claimed' | 'completed' | 'failed' | 'canceled' | null
@@ -11,6 +14,8 @@ export interface MaterialNextStepPanelProps {
 }
 
 export function MaterialNextStepPanel({
+  materialId,
+  feedbackButtonRef,
   nextRequested,
   nextRequestStatus,
   requestMessage,
@@ -68,9 +73,9 @@ export function MaterialNextStepPanel({
 
       <div className="next-step-secondary-group" aria-label="家長觀察">
         {feedbackChoice === 'form' ? (
-          <p className="muted">正在下方編輯家長觀察；儲存回饋不會另行申請教材。</p>
+          <button ref={feedbackButtonRef} type="button" className="button button-secondary" disabled={actionBusy} aria-expanded={true} aria-controls={`reader-feedback-${materialId}`} onClick={onSkipFeedback}>收起回饋</button>
         ) : (
-          <button type="button" className="button button-secondary" disabled={actionBusy} onClick={onOpenFeedback}>
+          <button ref={feedbackButtonRef} type="button" className="button button-secondary" disabled={actionBusy} aria-expanded={false} aria-controls={`reader-feedback-${materialId}`} onClick={onOpenFeedback}>
             {feedbackChoice === 'saved' ? '修改家長觀察／回饋' : '新增／修改家長觀察（選填）'}
           </button>
         )}

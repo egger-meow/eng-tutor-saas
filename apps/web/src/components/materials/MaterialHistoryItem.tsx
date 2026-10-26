@@ -1,9 +1,7 @@
-import { useState } from 'react'
+import { parentLearningCopy } from '../../lib/parent-learning-copy'
 import { handleInternalLink } from '../../app/use-route'
-import { FeedbackForm } from '../feedback/FeedbackForm'
-import { FeedbackSummary } from '../feedback/FeedbackSummary'
+import { MaterialFeedbackPanel } from '../feedback/MaterialFeedbackPanel'
 import { MaterialProgressProvider } from './MaterialProgress'
-import { MaterialFeedbackAction } from './MaterialFeedbackAction'
 import { MaterialActions } from './MaterialActions'
 import { isMaterialReleased, readGenerationSummary, type Material } from '../../lib/materials'
 
@@ -14,7 +12,6 @@ export function MaterialHistoryItem({ material, childName, onFeedbackSaved }: Ma
 }
 
 function MaterialHistoryContent({ material, childName, onFeedbackSaved }: MaterialHistoryItemProps) {
-  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const summary = readGenerationSummary(material.generation_summary)
   const released = isMaterialReleased(material)
   return (
@@ -39,11 +36,9 @@ function MaterialHistoryContent({ material, childName, onFeedbackSaved }: Materi
         </div>
         <span className="revision">第 {material.revision} 版</span>
       </div>
-      {summary.learningAdjustmentSummary && <p className="muted">{summary.learningAdjustmentSummary}</p>}
+      {summary.learningAdjustmentSummary && <p className="muted">{parentLearningCopy(summary.learningAdjustmentSummary)}</p>}
       <MaterialActions material={material} childName={childName} showPreviewLink={true} />
-      <FeedbackSummary feedback={material.feedback} />
-      {released && <MaterialFeedbackAction material={material} open={feedbackOpen} onToggle={() => setFeedbackOpen((open) => !open)} />}
-      {feedbackOpen && <div id={`feedback-${material.id}`}><FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} /></div>}
+      {released && <MaterialFeedbackPanel material={material} onSaved={onFeedbackSaved} />}
     </article>
   )
 }

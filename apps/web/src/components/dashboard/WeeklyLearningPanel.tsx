@@ -2,12 +2,10 @@ import { useState } from 'react'
 import { handleInternalLink } from '../../app/use-route'
 import type { Material } from '../../lib/materials'
 import { isMaterialReleased, readGenerationSummary } from '../../lib/materials'
-import { FeedbackForm } from '../feedback/FeedbackForm'
-import { FeedbackSummary } from '../feedback/FeedbackSummary'
+import { MaterialFeedbackPanel } from '../feedback/MaterialFeedbackPanel'
 import { MaterialActions } from '../materials/MaterialActions'
 import { MaterialEvidenceCard } from './MaterialEvidenceCard'
 import { MaterialProgressProvider, useMaterialProgress } from '../materials/MaterialProgress'
-import { MaterialFeedbackAction } from '../materials/MaterialFeedbackAction'
 import { LearningBarrierCard } from './LearningBarrierCard'
 
 type WeeklyLearningPanelProps = { material: Material; childName: string; onFeedbackSaved: () => void }
@@ -62,11 +60,7 @@ function WeeklyLearningContent({ material, childName, onFeedbackSaved }: WeeklyL
           answerUnlockRequiresSubmission={material.answer_unlock_requires_submission}
         />
       )}
-      <div className="weekly-feedback">
-        <FeedbackSummary feedback={material.feedback} />
-        {released && <MaterialFeedbackAction material={material} open={feedbackOpen} onToggle={() => setFeedbackOpen((open) => !open)} />}
-      </div>
-      {feedbackOpen && <div id={`feedback-${material.id}`}><FeedbackForm material={material} onSaved={() => { setFeedbackOpen(false); onFeedbackSaved() }} /></div>}
+      {released && <MaterialFeedbackPanel material={material} open={feedbackOpen} onOpenChange={setFeedbackOpen} onSaved={onFeedbackSaved} />}
     </section>
   )
 }

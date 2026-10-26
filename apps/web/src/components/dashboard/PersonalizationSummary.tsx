@@ -1,3 +1,5 @@
+import { Disclosure } from '../layout/Disclosure'
+import { parentLearningCopy } from '../../lib/parent-learning-copy'
 import { useId } from 'react'
 import { readGenerationSummary, type Material } from '../../lib/materials'
 
@@ -21,16 +23,15 @@ export function PersonalizationSummary({ material }: { material: Material }) {
       {reasons.length > 1 ? (
         <ul className="personalization-reasons-list">
           {reasons.slice(0, 3).map((reason, index) => (
-            <li key={index}>{reason}</li>
+            <li key={index}>{parentLearningCopy(reason)}</li>
           ))}
         </ul>
       ) : (
-        <p>{reasons[0] ?? defaultSingleMessage}</p>
+        <p>{parentLearningCopy(reasons[0] ?? defaultSingleMessage)}</p>
       )}
-      {reasons.length > 3 && <details className="personalization-more">
-        <summary>查看其他調整重點</summary>
-        <ul>{reasons.slice(3).map(reason => <li key={reason}>{reason}</li>)}</ul>
-      </details>}
+      {reasons.length > 3 && <Disclosure className="personalization-more" title="查看其他調整重點">
+        <ul>{reasons.slice(3).map(reason => <li key={reason}>{parentLearningCopy(reason)}</li>)}</ul>
+      </Disclosure>}
     </section>
   )
 }

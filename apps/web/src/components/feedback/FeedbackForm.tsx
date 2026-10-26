@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { saveFeedback, type FeedbackInput, type Material } from '../../lib/materials'
+import { Reveal } from '../layout/Disclosure'
 import { fetchStudentSubmission, saveStudentParentFeedback } from '../../lib/student-material-api'
 
-type FeedbackFormProps = { material: Material; onSaved: () => void }
+type FeedbackFormProps = { material: Material; onSaved: () => void; onClose?: () => void }
 
-export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
+export function FeedbackForm({ material, onSaved, onClose }: FeedbackFormProps) {
   const existing = material.feedback
   const hasExistingDetails = Boolean(existing?.mistakes_text || existing?.child_comments || existing?.parent_comments)
   const [input, setInput] = useState<FeedbackInput>({
@@ -70,79 +71,83 @@ export function FeedbackForm({ material, onSaved }: FeedbackFormProps) {
   return (
     <form className="feedback-form" onSubmit={submit}>
       <div className="feedback-intro field-wide">
-        <h3>用幾個選項告訴我們這週的狀況</h3>
-        <p className="muted">不用寫文字也可以送出，大約十幾秒就能完成。</p>
+        <h3>記下這週的學習感受</h3>
+        <p className="muted">點選幾個選項就能儲存，其他細節有需要再補充。</p>
         {submitted && <p className="muted">觀察可隨時補充，供後續教材規劃參考；已進入製作的教材不會因此重新製作。儲存回饋不會另行申請教材。</p>}
       </div>
 
-      <FeedbackChoice
-        legend="這週完成多少？"
-        name={`completion-${material.id}`}
-        value={input.completion_rate}
-        options={[[0, '還沒開始'], [25, '剛開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]}
-        onChange={(completion_rate) => setInput({ ...input, completion_rate })}
-      />
-      <FeedbackChoice
-        legend="整體難度如何？"
-        name={`difficulty-${material.id}`}
-        value={input.difficulty}
-        options={[[1, '太簡單'], [3, '剛剛好'], [5, '太難']]}
-        onChange={(difficulty) => setInput({ ...input, difficulty })}
-      />
-      <fieldset className="feedback-question field-wide">
-        <legend>最需要加強哪裡？</legend>
-        <div className="choice-group">
-          {[
-            ['', '沒有特別'], ['vocabulary', '單字'], ['grammar', '文法'],
-            ['reading', '閱讀'], ['writing', '寫作'], ['mixed', '不只一項'],
-          ].map(([value, label]) => (
-            <label className="choice-chip" key={value}>
-              <input
-                type="radio"
-                name={`weak-area-${material.id}`}
-                value={value}
-                checked={(input.weak_area ?? '') === value}
-                onChange={() => setInput({ ...input, weak_area: value || null })}
-              />
-              <span>{label}</span>
+      <fieldset className="feedback-fields field-wide" disabled={busy || submitted === null}>
+        <FeedbackChoice
+          legend="這週完成多少？"
+          name={`completion-${material.id}`}
+          value={input.completion_rate}
+          options={[[0, '還沒開始'], [25, '剛開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]}
+          onChange={(completion_rate) => setInput({ ...input, completion_rate })}
+        />
+        <FeedbackChoice
+          legend="整體難度如何？"
+          name={`difficulty-${material.id}`}
+          value={input.difficulty}
+          options={[[1, '太簡單'], [3, '剛剛好'], [5, '太難']]}
+          onChange={(difficulty) => setInput({ ...input, difficulty })}
+        />
+        <fieldset className="feedback-question field-wide">
+          <legend>最需要加強哪裡？</legend>
+          <div className="choice-group">
+            {[
+              ['', '沒有特別'], ['vocabulary', '單字'], ['grammar', '文法'],
+              ['reading', '閱讀'], ['writing', '寫作'], ['mixed', '不只一項'],
+            ].map(([value, label]) => (
+              <label className="choice-chip" key={value}>
+                <input
+                  type="radio"
+                  name={`weak-area-${material.id}`}
+                  value={value}
+                  checked={(input.weak_area ?? '') === value}
+                  onChange={() => setInput({ ...input, weak_area: value || null })}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="feedback-details-toggle field-wide">
+          <button
+            className="feedback-detail-trigger"
+            type="button"
+            aria-label={detailsOpen ? '－ 收起選填細節' : '＋ 有錯題或其他觀察想補充'}
+            aria-expanded={detailsOpen}
+            aria-controls={`feedback-details-${material.id}`}
+            onClick={() => setDetailsOpen((open) => !open)}
+          >
+            <span>錯題與其他觀察</span><span aria-hidden="true">{detailsOpen ? '收起 ⌃' : '展開 ⌄'}</span>
+          </button>
+
+        </div>
+
+        <div className="field-wide"><Reveal open={detailsOpen} id={`feedback-details-${material.id}`}>
+          <div className="feedback-details">
+            <label>哪裡容易錯、哪些內容還不熟？
+              <span>例如：do / does 常分不清，或第 3 題看不懂。</span>
+              <textarea maxLength={4000} placeholder="有觀察到再填就好" value={input.mistakes_text} onChange={(event) => setInput({ ...input, mistakes_text: event.target.value })} />
             </label>
-          ))}
-        </div>
+            <label>孩子怎麼說？
+              <span>例如：這篇很好看、文章太簡單、文法看不懂。</span>
+              <textarea maxLength={2000} placeholder="可以記下孩子的原話" value={input.child_comments} onChange={(event) => setInput({ ...input, child_comments: event.target.value })} />
+            </label>
+            <label>還有什麼學習觀察想補充？
+              <span>例如：學校開始教現在進行式，或最近迷上新的動漫。</span>
+              <textarea maxLength={2000} placeholder="學校進度、考試、興趣變化或其他觀察" value={input.parent_comments} onChange={(event) => setInput({ ...input, parent_comments: event.target.value })} />
+            </label>
+          </div>
+        </Reveal></div>
+
       </fieldset>
-
-      <div className="feedback-details-toggle field-wide">
-        <button
-          className="button-link text-link"
-          type="button"
-          aria-expanded={detailsOpen}
-          aria-controls={`feedback-details-${material.id}`}
-          onClick={() => setDetailsOpen((open) => !open)}
-        >
-          {detailsOpen ? '－ 收起選填細節' : '＋ 有錯題或其他觀察想補充'}
-        </button>
-        <span>選填，不影響送出</span>
-      </div>
-
-      {detailsOpen && (
-        <div className="feedback-details field-wide" id={`feedback-details-${material.id}`}>
-          <label>哪裡容易錯、哪些內容還不熟？
-            <span>例如：do / does 常分不清，或第 3 題看不懂。</span>
-            <textarea maxLength={4000} placeholder="有觀察到再填就好" value={input.mistakes_text} onChange={(event) => setInput({ ...input, mistakes_text: event.target.value })} />
-          </label>
-          <label>孩子怎麼說？
-            <span>例如：這篇很好看、文章太簡單、文法看不懂。</span>
-            <textarea maxLength={2000} placeholder="可以記下孩子的原話" value={input.child_comments} onChange={(event) => setInput({ ...input, child_comments: event.target.value })} />
-          </label>
-          <label>還有什麼學習觀察想補充？
-            <span>例如：學校開始教現在進行式，或最近迷上新的動漫。</span>
-            <textarea maxLength={2000} placeholder="學校進度、考試、興趣變化或其他觀察" value={input.parent_comments} onChange={(event) => setInput({ ...input, parent_comments: event.target.value })} />
-          </label>
-        </div>
-      )}
-
       <div className="feedback-submit field-wide">
-        <button className="button" type="submit" disabled={busy || submitted === null}>{busy ? '送出中…' : submitted || input.completion_rate === 0 ? '儲存回饋' : '送出回饋並申請下一份'}</button>
-        {submitted ? <a className="text-link" href={`/materials/${material.id}`}>返回教材查看結果／申請下一份</a> : <p className="muted">紙本回饋完成一些內容後送出，就會申請下一份。每位孩子每個服務月最多 4 份。</p>}
+        <button className="button" type="submit" aria-busy={busy} disabled={busy || submitted === null}>{busy ? '儲存中…' : submitted || input.completion_rate === 0 ? '儲存回饋' : '送出回饋並申請下一份'}</button>
+        {onClose ? <button type="button" className="button button-quiet" disabled={busy} onClick={onClose}>稍後再填</button> : submitted ? <a className="text-link" href={`/materials/${material.id}`}>返回教材查看結果／申請下一份</a> : null}
+        {!submitted && submitted !== null && <p className="muted">紙本回饋完成一些內容後送出，就會申請下一份。每位孩子每個服務月最多 4 份。</p>}
         {submitted === null && error && <button className="button button-secondary" type="button" onClick={() => { setError(''); setAttempt((n) => n + 1) }}>重試提交狀態</button>}
       </div>
       {error && <p className="field-wide notice notice-error" role="alert">{error}</p>}
@@ -159,7 +164,7 @@ type FeedbackChoiceProps = {
   onChange: (value: number) => void
 }
 
-function FeedbackChoice({ legend, name, value, options, onChange }: FeedbackChoiceProps) {
+export function FeedbackChoice({ legend, name, value, options, onChange }: FeedbackChoiceProps) {
   return (
     <fieldset className="feedback-question field-wide">
       <legend>{legend}</legend>

@@ -3549,6 +3549,13 @@ unstarted. After submission, parents may add or edit observations inline without
 returning to the reader. Request acceptance, quota exhaustion, and failed or canceled
 requests never remove the reader's optional feedback entry; saving and skipping also
 leave a way to reopen it. Observation editing preserves prior parent-reported fields.
+Expandable learning details must have full-row, keyboard-accessible controls with
+visible open/closed states and restrained, reduced-motion-aware transitions. Closing
+optional feedback preserves unsaved edits within the mounted material; closed content
+is inert and excluded from keyboard navigation. Saving gives an in-place confirmation
+and restores focus to the feedback entry. Save-only feedback remains independent of
+next-material requests. Parent-facing summaries translate known curriculum identifiers
+and technical terms without changing source evidence or inventing skill attribution.
 Feedback remains available for later planning, without promising inclusion in an
 already-frozen generation snapshot. Request confirmations must not invent delivery
 dates or personalized teaching directions. Evidence details use progressive disclosure,
