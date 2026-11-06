@@ -7,6 +7,21 @@ import {
 import type { StudentLesson } from '../types/student-material'
 
 describe('material-session-plan', () => {
+  it('does not claim reading-only completion without evidence', () => {
+    const plan = buildMaterialSessionPlan({ reading: { passage: 'Read this.' } })
+    expect(isStepCompleted(plan.steps[0], {})).toBe(false)
+  })
+
+  it('requires every structured response unit rather than a parent question answer', () => {
+    const plan = buildMaterialSessionPlan({ practice: [{ id: 'p', titleZh: '練習', questions: [{
+      id: 'q', prompt: 'Compare', responseLayout: { type: 'table', headers: ['Answer'], rows: [
+        { cells: [{ responseUnitId: 'u1' }, { responseUnitId: 'u2' }] },
+      ] },
+    }] }] })
+    expect(isStepCompleted(plan.steps[0], { q: 'legacy', u1: 'one', u2: ' ' })).toBe(false)
+    expect(isStepCompleted(plan.steps[0], { u1: 'one', u2: 'two' })).toBe(true)
+  })
+
   it('handles empty or null lesson gracefully', () => {
     const emptyPlan = buildMaterialSessionPlan(null)
     expect(emptyPlan.firstStep).toBe('')
@@ -147,9 +162,9 @@ describe('material-session-plan', () => {
     expect(isStepCompleted(plan.steps[0], s1Complete)).toBe(true)
     expect(getCurrentStep(plan, s1Complete)?.id).toBe('stage-2')
 
-    // Answer all -> returns last step
+    // Answer all -> no unanswered practice remains
     const allComplete = { q1: 'ans1', q2: 'ans2', q3: 'ans3' }
     expect(isStepCompleted(plan.steps[1], allComplete)).toBe(true)
-    expect(getCurrentStep(plan, allComplete)?.id).toBe('stage-2')
+    expect(getCurrentStep(plan, allComplete)).toBeNull()
   })
 })

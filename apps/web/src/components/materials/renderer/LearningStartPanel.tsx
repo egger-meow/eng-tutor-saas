@@ -1,5 +1,5 @@
 import type { MaterialSessionPlan } from '../../../lib/material-session-plan'
-import { isStepCompleted } from '../../../lib/material-session-plan'
+import { getCurrentStep, isStepCompleted } from '../../../lib/material-session-plan'
 
 export interface LearningStartPanelProps {
   plan: MaterialSessionPlan
@@ -24,7 +24,9 @@ export function LearningStartPanel({
     return null
   }
 
-  const stage1 = plan.steps[0]
+  const currentStep = getCurrentStep(plan, answers)
+  const stage1 = currentStep ?? plan.steps[0]
+  const returning = Object.values(answers ?? {}).some(value => value.trim().length > 0)
   const hasStage1Questions = stage1.questionIds.length > 0
   const firstQuestionId = stage1.questionIds[0]
 
@@ -36,10 +38,10 @@ export function LearningStartPanel({
       <div className="learning-start-header">
         <div className="learning-start-badge">
           <span className="learning-start-icon" aria-hidden="true">⏱️</span>
-          <strong>今天先安排約 10 分鐘</strong>
+          <strong>{returning ? currentStep ? '接著完成這一段' : '作答已填寫，可以回顧檢查' : '今天先安排約 10 分鐘'}</strong>
         </div>
         <p className="learning-start-desc">
-          {stage1.descriptionZh}
+          {returning && !currentStep ? '填寫完成不代表答對或學會；仍可回看閱讀與講解，確認後再自行提交整份教材。' : stage1.descriptionZh}
         </p>
       </div>
 
@@ -68,16 +70,16 @@ export function LearningStartPanel({
           className="button button-primary"
           onClick={() => onJumpToChapter(stage1.chapterId)}
         >
-          先讀這一段
+          {returning ? '回看這一段' : '先讀這一段'}
         </button>
 
-        {hasStage1Questions && (
+        {hasStage1Questions && currentStep && (
           <button
             type="button"
             className="button button-secondary"
             onClick={() => onJumpToQuestion(firstQuestionId)}
           >
-            {stage1.questionIds.length === 1 ? '試第 1 題' : '試試前兩題'}
+            {returning ? '接著作答' : stage1.questionIds.length === 1 ? '試第 1 題' : '試試前兩題'}
           </button>
         )}
 
@@ -96,7 +98,7 @@ export function LearningStartPanel({
       </div>
 
       <div className="learning-start-footnote">
-        <span>💡 草稿會自動同步至雲端，換手機或電腦也能接續；時間到了隨時可停。</span>
+        <span>{saveStatus === 'saved' ? '草稿已同步，可在其他裝置接續。' : '請確認草稿儲存成功後再離開或換裝置；尚未同步的內容可能無法接續。'}</span>
       </div>
     </section>
   )

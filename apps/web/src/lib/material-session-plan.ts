@@ -1,10 +1,11 @@
-import type { StudentLesson } from '../types/student-material'
+import type { Question, StudentLesson } from '../types/student-material'
 
 export interface SessionPlanStep {
   id: string
   label: string
   chapterId: string
   questionIds: string[]
+  answerKeys?: string[]
   descriptionZh: string
   targetMinutes?: number
 }
@@ -111,6 +112,24 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
     })
   }
 
+  const questions = [...practiceQuestions, ...(lesson.homework?.questions ?? [])]
+  const answerKeysFor = (question: Question): string[] => {
+    if (question.options?.length) return extractQuestionIds([question])
+    const layout = question.responseLayout
+    const units = layout?.type === 'table' || layout?.type === 'organizer'
+      ? layout.rows.flatMap(row => (row.cells ?? []).flatMap(cell => cell.responseUnitId ? [cell.responseUnitId] : []))
+      : layout?.type === 'sequence'
+        ? layout.items.flatMap(item => item.responseUnitId ? [item.responseUnitId] : [])
+        : []
+    return units.length ? units : extractQuestionIds([question])
+  }
+  for (const step of steps) {
+    step.answerKeys = step.questionIds.flatMap(id => {
+      const question = questions.find(q => (q.id || q.questionId) === id)
+      return question ? answerKeysFor(question) : [id]
+    })
+  }
+
   return {
     firstStep: steps[0]?.id ?? '',
     steps,
@@ -119,22 +138,24 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
 
 /**
  * Checks if a session plan step has all its questions answered in the draft answers.
- * If the step has no questions (e.g. reading only), returns true.
+ * Reading-only steps have no tracked completion evidence.
  */
 export function isStepCompleted(step: SessionPlanStep, answers?: Record<string, string> | null): boolean {
-  if (step.questionIds.length === 0) return true
+  if (step.questionIds.length === 0) return false
   if (!answers) return false
-  return step.questionIds.every((id) => {
+  return (step.answerKeys ?? step.questionIds).every((id) => {
     const val = answers[id]
     return typeof val === 'string' && val.trim().length > 0
   })
 }
 
 /**
- * Returns the current active step (the first incomplete step, or the last step if all complete).
+ * Prefer unanswered practice on return; untracked reading remains available for review.
  */
 export function getCurrentStep(plan: MaterialSessionPlan, answers?: Record<string, string> | null): SessionPlanStep | null {
   if (plan.steps.length === 0) return null
-  const incomplete = plan.steps.find((step) => !isStepCompleted(step, answers))
-  return incomplete ?? plan.steps[plan.steps.length - 1] ?? null
+  const hasAnswers = Object.values(answers ?? {}).some(value => value.trim().length > 0)
+  if (!hasAnswers) return plan.steps[0]
+  const incomplete = plan.steps.find((step) => step.questionIds.length > 0 && !isStepCompleted(step, answers))
+  return incomplete ?? null
 }

@@ -386,7 +386,7 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('先讀這一段')
     expect(html).toContain('試試前兩題')
     expect(html).toContain('先停，之後繼續')
-    expect(html).toContain('草稿會自動同步至雲端')
+    expect(html).toContain('請確認草稿儲存成功後再離開或換裝置')
     expect(html).toContain('① 先讀先試 (約 10 分鐘)')
     expect(html).toContain('② 理解與練習')
     expect(html).toContain('③ 複習與作業')

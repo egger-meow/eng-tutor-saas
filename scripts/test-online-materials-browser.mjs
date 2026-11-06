@@ -258,7 +258,9 @@ try {
     await page.goto(url)
     await page.getByRole('button', { name: '新增／修改家長觀察（選填）', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
-    assert.equal(await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).isVisible(), true, 'existing observations expand for editing')
+    // Reveal animates after the form mounts; wait for visibility rather than
+    // sampling the first animation frame synchronously.
+    await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).waitFor({ state: 'visible' })
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).fill('Updated observation')
     await page.getByRole('button', { name: '儲存回饋', exact: true }).click()
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).waitFor()
