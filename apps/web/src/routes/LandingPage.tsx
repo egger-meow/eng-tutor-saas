@@ -93,16 +93,21 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
     <AppShell className="landing-page" header={<PublicHeader />}>
       <PageTransition>
         <section className="landing-hero">
+          <FadeInUp duration={0.4} reveal="text" className="hero-founder-slot">
+            <a className="hero-founder" href="#founder" aria-label="認識 JJmow 老師，陽明交大數據所碩士班、管科與資工雙主修">
+              <div className="hero-founder-copy">
+                <div className="hero-founder-head">
+                  <strong>JJmow 老師</strong>
+                  <span className="hero-founder-role">英文家教 × 系統開發</span>
+                </div>
+                <p className="hero-founder-edu">陽明交大數據所碩士班｜管科 × 資工雙主修</p>
+                <p className="hero-founder-motto">我可以，你也可以。<span className="hero-founder-more">認識老師 ↓</span></p>
+              </div>
+              <img src="/founder/jjmow-portrait-cutout.png" alt="JJmow 老師" width="1024" height="1536" fetchPriority="high" />
+            </a>
+          </FadeInUp>
+
           <FadeInUp duration={0.44} reveal="text" className="hero-copy">
-                      <a className="hero-founder" href="#founder" aria-label="認識 JJmow 老師，英文家教與系統開發者">
-            <img src="/founder/jjmow-portrait-cutout.png" alt="JJmow 老師" width="1024" height="1536" fetchPriority="high" />
-            <div className="hero-founder-copy">
-              <span>英文家教 × 系統開發</span>
-              <strong>JJmow <small>老師</small></strong>
-              <p>我可以，你也可以。</p>
-              <span className="hero-founder-link">認識我與紙屬英文 ↗</span>
-            </div>
-          </a>
             <p className="eyebrow">🧪 紙屬英文 Beta · 給國小高年級到國中生</p>
             <h1 className="hero-title">
               <span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>
@@ -142,14 +147,10 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <a className="text-link" href="#samples" onClick={() => trackSampleClick('hero_samples_link')}>先試讀與作答 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
-            <a className="founder-signature" href="#founder">
-
-              <span><strong>JJmow 老師｜紙屬英文創作者</strong><span>從孩子卡住的地方，開始設計練習。</span></span>
-            </a>
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
           </FadeInUp>
 
-          <FadeInUp delay={0.14} duration={0.48} reveal="paper"><HeroLivePreviewCard /></FadeInUp>
+          <FadeInUp delay={0.14} duration={0.48} reveal="paper" className="hero-preview-slot"><HeroLivePreviewCard /></FadeInUp>
         </section>
 
         <nav className="landing-section-nav" aria-label="首頁快速導覽">
