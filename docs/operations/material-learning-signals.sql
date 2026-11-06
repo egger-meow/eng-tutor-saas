@@ -50,7 +50,12 @@ where greatest(j.release_at, j.completed_at) >= now() - interval '90 days'
 -- cannot multiply the denominator. This is NOT a signup-to-delivery cohort.
 -- answer_started is best-effort first-input evidence, not confirmed saved work.
 -- UTC-day changes are activity proxies, not independent sessions or mastery.
-with ready_packets as (
+-- Set this only from verified deployment/collection evidence for BOTH event and
+-- day-signal streams. The first observed event does not prove collection began.
+-- NULL deliberately withholds rates until coverage is established.
+with coverage as (
+  select null::timestamptz as verified_tracking_started_at
+), ready_packets as (
   select m.child_id, m.id as material_id, s.sequence_number,
     min(greatest(j.release_at, j.completed_at)) as ready_at
   from public.materials m
@@ -76,9 +81,16 @@ with ready_packets as (
       where p.child_id=f.child_id and p.sequence_number=2 and e.event_name='answer_started'
         and e.created_at>=p.ready_at and e.created_at>=f.ready_at
         and e.created_at<f.ready_at+interval '28 days') as second_started_28d
-  from first_packets f where f.ready_at>=now()-interval '60 days'
+  from first_packets f cross join coverage c
+  where f.ready_at>=now()-interval '60 days'
+    and f.ready_at>=c.verified_tracking_started_at
 )
-select count(*) as first_packet_ready_children,
+select (select verified_tracking_started_at from coverage) as verified_tracking_started_at,
+  (select count(*) from first_packets f where f.ready_at>=now()-interval '60 days') as candidate_children,
+  (select count(*) from first_packets f cross join coverage c
+    where f.ready_at>=now()-interval '60 days'
+      and (c.verified_tracking_started_at is null or f.ready_at<c.verified_tracking_started_at)) as coverage_unverified_or_pretracking_children,
+  count(*) as first_packet_ready_children,
   count(*) filter(where ready_at+interval '48 hours'<=now()) as mature_48h,
   count(*) filter(where ready_at+interval '48 hours'>now()) as pending_48h,
   count(*) filter(where ready_at+interval '48 hours'<=now() and started_48h) as started_48h,

@@ -1,12 +1,14 @@
 # 留存觀察執行紀錄
 
-狀態：基線查詢準備中；尚未取得正式資料，尚未招募家庭。
+狀態：已執行正式唯讀彙總查詢；追蹤覆蓋尚未確認，尚未招募家庭。私人彙總數值不寫入本文件。
 
 使用 `material-learning-signals.sql` 的 first-packet readiness cohort。以孩子為單位；48 小時、7 日、28 日各報成熟分母、分子及 pending。第二份尚未請求或交付者仍留在第一份 cohort 的分母。查詢只輸出彙總。
 
 目前 `answer_started` 是首次輸入訊號，不能稱為已保存有效作答。不同 UTC 日期是活動代理，不能稱為獨立學習次數。紙本自述另報，不與線上事件混合。查詢限制最近 60 日，避免超過事件保留期；正式解讀仍須核對各訊號啟用日期與缺漏。未交付或缺少 canonical sequence 的孩子不在此 cohort，必須另報，不能當作不存在。
 
 每批開始前填寫：
+
+查詢的 `coverage.verified_tracking_started_at` 預設 NULL，表示尚不能產生合格 cohort。先核對事件與跨日訊號兩者的實際部署／收集證據，再填入共同可用起點；不得直接採最早一筆事件時間。輸出的 `candidate_children` 與 `coverage_unverified_or_pretracking_children` 用於揭露排除範圍。`first_packet_ready_children=0` 且覆蓋時間為 NULL 代表證據不足，不代表沒有使用者。若兩種訊號起始時間不同，使用較晚者或另分 cohort。
 
 | 欄位 | 紀錄 |
 |---|---|
