@@ -53,7 +53,8 @@
 .landing-page [id] { scroll-margin-top: 6rem; }
 .landing-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.14fr) minmax(25rem, .86fr); gap: clamp(3rem, 6vw, 7rem); align-items: center; min-height: min(48rem, calc(100svh - 5.25rem)); padding-block: clamp(3.5rem, 6vw, 6rem); }
 .landing-hero::before { content: ''; position: absolute; z-index: -1; top: 8%; left: -12vw; width: clamp(16rem, 34vw, 34rem); aspect-ratio: 1; border: 1px solid rgb(154 89 56 / 10%); border-radius: 50%; background: radial-gradient(circle, rgb(154 89 56 / 7%), transparent 68%); pointer-events: none; }
-.hero-copy { max-width: 48rem; }
+.hero-copy { min-width: 0; max-width: 48rem; }
+.landing-hero > * { min-width: 0; }
 .hero-founder { display: flex; align-items: center; gap: .8rem; width: fit-content; max-width: 100%; margin-bottom: 1.25rem; color: var(--color-ink); text-decoration: none; }
 .hero-founder > img { display: block; width: 68px; height: 88px; object-fit: cover; object-position: center 30%; mask-image: linear-gradient(to bottom, #000 86%, transparent 100%); }
 .hero-founder-copy { display: flex; flex-direction: column; gap: .15rem; }
@@ -457,7 +458,7 @@
   .profile-header { align-items: start; flex-direction: column; }
   .child-profile-heading { align-items: start; flex-direction: column; }
   .landing-hero, .feature-grid, .split-section, .statement-section, .pricing-grid, .login-section, .memory-section, .philosophy-section, .founder-summary, .sample-profile, .sample-downloads, .pricing-heading, .pricing-card { grid-template-columns: 1fr; }
-  .landing-hero { min-height: auto; }
+  .landing-hero { min-height: auto; grid-template-columns: minmax(0, 1fr); }
   .hero-editorial { width: 100%; justify-self: stretch; box-shadow: .75rem .75rem 0 rgb(40 79 62 / 10%); transform: none; }
   .hero-editorial:hover { transform: translateY(-3px); }
   .comparison-layout, .week-flow, .document-pair { grid-template-columns: 1fr; }
