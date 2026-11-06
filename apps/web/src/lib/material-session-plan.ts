@@ -6,6 +6,7 @@ export interface SessionPlanStep {
   chapterId: string
   questionIds: string[]
   answerKeys?: string[]
+  questionAnswerKeys?: Record<string, string[]>
   descriptionZh: string
   targetMinutes?: number
 }
@@ -124,16 +125,22 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
     return units.length ? units : extractQuestionIds([question])
   }
   for (const step of steps) {
-    step.answerKeys = step.questionIds.flatMap(id => {
+    step.questionAnswerKeys = Object.fromEntries(step.questionIds.map(id => {
       const question = questions.find(q => (q.id || q.questionId) === id)
-      return question ? answerKeysFor(question) : [id]
-    })
+      return [id, question ? answerKeysFor(question) : [id]]
+    }))
+    step.answerKeys = Object.values(step.questionAnswerKeys).flat()
   }
 
   return {
     firstStep: steps[0]?.id ?? '',
     steps,
   }
+}
+
+export function getNextQuestionId(step: SessionPlanStep, answers?: Record<string, string> | null): string | undefined {
+  return step.questionIds.find(id => (step.questionAnswerKeys?.[id] ?? [id])
+    .some(key => !answers?.[key]?.trim()))
 }
 
 /**

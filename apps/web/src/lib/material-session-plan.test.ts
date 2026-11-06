@@ -3,6 +3,7 @@ import {
   buildMaterialSessionPlan,
   isStepCompleted,
   getCurrentStep,
+  getNextQuestionId,
 } from './material-session-plan'
 import type { StudentLesson } from '../types/student-material'
 
@@ -19,6 +20,7 @@ describe('material-session-plan', () => {
       ] },
     }] }] })
     expect(isStepCompleted(plan.steps[0], { q: 'legacy', u1: 'one', u2: ' ' })).toBe(false)
+    expect(getNextQuestionId(plan.steps[0], { u1: 'one', u2: ' ' })).toBe('q')
     expect(isStepCompleted(plan.steps[0], { u1: 'one', u2: 'two' })).toBe(true)
   })
 
@@ -156,6 +158,7 @@ describe('material-session-plan', () => {
     // Answer q1 only -> still stage-1
     expect(getCurrentStep(plan, { q1: 'ans1' })?.id).toBe('stage-1')
     expect(isStepCompleted(plan.steps[0], { q1: 'ans1' })).toBe(false)
+    expect(getNextQuestionId(plan.steps[0], { q1: 'ans1' })).toBe('q2')
 
     // Answer q1 and q2 -> stage-1 completed, moves to stage-2
     const s1Complete = { q1: 'ans1', q2: 'ans2' }

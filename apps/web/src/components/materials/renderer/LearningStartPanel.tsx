@@ -1,5 +1,5 @@
 import type { MaterialSessionPlan } from '../../../lib/material-session-plan'
-import { getCurrentStep, isStepCompleted } from '../../../lib/material-session-plan'
+import { getCurrentStep, getNextQuestionId, isStepCompleted } from '../../../lib/material-session-plan'
 
 export interface LearningStartPanelProps {
   plan: MaterialSessionPlan
@@ -28,7 +28,7 @@ export function LearningStartPanel({
   const stage1 = currentStep ?? plan.steps[0]
   const returning = Object.values(answers ?? {}).some(value => value.trim().length > 0)
   const hasStage1Questions = stage1.questionIds.length > 0
-  const firstQuestionId = stage1.questionIds[0]
+  const firstQuestionId = getNextQuestionId(stage1, answers)
 
   return (
     <section
@@ -73,7 +73,7 @@ export function LearningStartPanel({
           {returning ? '回看這一段' : '先讀這一段'}
         </button>
 
-        {hasStage1Questions && currentStep && (
+        {hasStage1Questions && currentStep && firstQuestionId && (
           <button
             type="button"
             className="button button-secondary"
