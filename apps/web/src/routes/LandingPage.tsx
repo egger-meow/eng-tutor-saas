@@ -140,9 +140,15 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
           </FadeInUp>
 
-          <FadeInUp delay={0.14} duration={0.48} reveal="paper">
-            <HeroLivePreviewCard />
-          </FadeInUp>
+          <a className="hero-founder" href="#founder" aria-label="認識 JJmow 老師，英文家教與系統開發者">
+            <img src="/founder/jjmow-portrait-cutout.png" alt="JJmow 老師" width="1024" height="1536" fetchPriority="high" />
+            <div className="hero-founder-copy">
+              <span>英文家教 × 系統開發</span>
+              <strong>JJmow <small>老師</small></strong>
+              <p>我可以，<br />你也可以。</p>
+              <span className="hero-founder-link">認識我與紙屬英文 ↗</span>
+            </div>
+          </a>
         </section>
 
         <nav className="landing-section-nav" aria-label="首頁快速導覽">
@@ -162,6 +168,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <div className="early-sample-proof" aria-label="範例說明"><span>公開合成範例</span><span>只存本機</span><span>不耗教材配額</span></div>
           </div>
           <InlineSampleChallenge />
+          <div className="founder-relocated-preview"><HeroLivePreviewCard /></div>
           <div className="document-pair">
             <article className="sample-context-card">
               <p className="overline">Try the learning loop</p>
