@@ -9,6 +9,7 @@ const links = [
   { href: '/sample', label: '試讀與作答' },
   { href: '/#method', label: '學習方法' },
   { href: '/#pricing', label: '方案' },
+  { href: '/about', label: 'JJmow 老師' },
 ]
 
 export function PublicHeader() {

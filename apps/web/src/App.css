@@ -214,6 +214,19 @@
 .statement-section { display: grid; grid-template-columns: 1.3fr .7fr; gap: var(--space-12); }
 .founder-summary { display: grid; grid-template-columns: minmax(16rem, .7fr) minmax(0, 1.3fr); gap: clamp(2rem, 5vw, 5rem); }
 .founder-heading h2 { margin-bottom: 0; }
+.founder-composed { display: flex; flex-direction: column; gap: 2rem; }
+.founder-brand-art { display: block; width: 100%; height: auto; margin-bottom: 2rem; }
+.founder-composed .founder-story { max-width: 48rem; }
+.founder-summary .overline { text-transform: none; }
+.founder-portrait { display: block; width: min(100%, 22rem); height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 38%; border-radius: var(--radius-surface); margin-bottom: 1.5rem; }
+.founder-signature { display: flex; align-items: center; gap: .8rem; margin-top: 1.5rem; color: var(--color-ink); text-decoration: none; }
+.founder-signature img { flex: 0 0 52px; border-radius: 50%; object-fit: cover; object-position: center 36%; }
+.founder-signature > span { display: grid; gap: .25rem; font-size: .875rem; }
+.founder-signature > span > span { color: var(--color-muted); }
+.founder-profile { padding-block: var(--space-8); }
+.founder-teaching-note { max-width: 48rem; margin: 1rem auto 3rem; padding: 1.25rem 1.5rem; border-left: 3px solid var(--color-ink); }
+.founder-teaching-note p { margin: 0 0 .65rem; }
+.founder-teaching-note a { display: inline-block; padding-block: .5rem; font-size: .875rem; }
 .founder-story { display: grid; align-content: start; gap: var(--space-4); }
 .founder-story p { max-width: 52rem; margin: 0; }
 .founder-story a { display: inline-flex; min-height: 2.75rem; align-items: center; justify-self: start; margin-top: var(--space-2); font-weight: 700; }

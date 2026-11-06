@@ -133,6 +133,10 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
               <a className="text-link" href="#samples" onClick={() => trackSampleClick('hero_samples_link')}>先試讀與作答 ↓</a>
             </div>
             {heroNote && <p className="hero-note">{heroNote}</p>}
+            <a className="founder-signature" href="#founder">
+
+              <span><strong>JJmow 老師｜紙屬英文創作者</strong><span>從孩子卡住的地方，開始設計練習。</span></span>
+            </a>
             {capacityOpen && <p className="hero-delivery-note">完成孩子資料後立即開始製作；第一週完成後直接開放下載。</p>}
           </FadeInUp>
 
@@ -174,6 +178,11 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
           </div>
         </section>
 
+        <aside className="founder-teaching-note" aria-label="JJmow 老師的教學想法">
+          <p><strong>先看孩子怎麼想，再決定下一步練什麼。</strong></p>
+          <p>我希望練習能回應孩子的程度、作答與回饋，讓下一份教材有調整的依據。</p>
+          <a href="/about">JJmow 老師 · 紙屬英文創作者 →</a>
+        </aside>
         <AssessmentSellingSection />
 
         <section className="public-section onboarding-login-section" aria-labelledby="onboarding-section-title">
