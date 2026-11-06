@@ -208,7 +208,7 @@ export const ConversionFunnelView: React.FC<Props> = ({ data, rangeDays, onRange
                     <td>
                       <div className="step-label-cell">
                         <strong className="step-name">{step.label}</strong>
-                        <span className="step-desc">{step.description}</span>
+                        <span className="step-desc">{step.description}{step.name === 'sample_click' ? '（可選分支，不計入主路徑流失）' : step.name === 'free_trial_click' ? '（以首頁訪客為分母）' : ''}</span>
                       </div>
                     </td>
                     <td><span className="step-unique-badge">{step.uniqueVisitors.toLocaleString()} 人</span></td>

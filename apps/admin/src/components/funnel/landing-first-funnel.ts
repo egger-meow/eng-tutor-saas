@@ -35,8 +35,9 @@ export function normalizeLandingFirstFunnel(input: FunnelStepMetric[]): {
   const landingUnique = ordered.find((step) => step.name === 'landing_view')?.uniqueVisitors ?? 0
 
   const steps = ordered.map((step, index) => {
-    const previousUnique = index === 0 ? 0 : ordered[index - 1]?.uniqueVisitors ?? 0
-    const dropOffCount = index === 0 ? 0 : Math.max(0, previousUnique - step.uniqueVisitors)
+    const previousUnique = step.name === 'sample_click' || step.name === 'free_trial_click'
+      ? landingUnique : index === 0 ? 0 : ordered[index - 1]?.uniqueVisitors ?? 0
+    const dropOffCount = index === 0 || step.name === 'sample_click' ? 0 : Math.max(0, previousUnique - step.uniqueVisitors)
     const conversionFromPrevPercent = index === 0
       ? 100
       : previousUnique === 0
@@ -59,9 +60,10 @@ export function normalizeLandingFirstFunnel(input: FunnelStepMetric[]): {
   })
 
   let biggestDropOff: LandingFirstDropOff = null
-  for (let index = 1; index < steps.length; index += 1) {
-    const current = steps[index]
-    const previous = steps[index - 1]
+  const requiredSteps = steps.filter(step => step.name !== 'sample_click')
+  for (let index = 1; index < requiredSteps.length; index += 1) {
+    const current = requiredSteps[index]
+    const previous = requiredSteps[index - 1]
     if (!current || !previous || current.dropOffCount <= 0) continue
     if (!biggestDropOff || current.dropOffCount > biggestDropOff.count) {
       biggestDropOff = {

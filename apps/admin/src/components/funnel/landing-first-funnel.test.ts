@@ -44,6 +44,17 @@ describe('landing-first admin funnel', () => {
     expect(result.steps[6]?.conversionFromPrevPercent).toBe(100)
     expect(result.steps.some((item) => item.name === 'auth_complete')).toBe(false)
     expect(result.biggestDropOff?.fromName).toBe('landing_view')
-    expect(result.biggestDropOff?.toName).toBe('sample_click')
+    expect(result.biggestDropOff?.toName).toBe('free_trial_click')
+  })
+
+  it('treats optional sample usage as a branch rather than a CTA denominator', () => {
+    const result = normalizeLandingFirstFunnel([
+      step('landing_view', 100), step('sample_click', 10),
+      step('free_trial_click', 80), step('child_form_start', 70), step('email_submit', 30),
+    ])
+    expect(result.steps.find(item => item.name === 'free_trial_click')?.conversionFromPrevPercent).toBe(80)
+    expect(result.steps.find(item => item.name === 'sample_click')?.dropOffCount).toBe(0)
+    expect(result.biggestDropOff?.fromName).toBe('child_form_start')
+    expect(result.biggestDropOff?.toName).toBe('email_submit')
   })
 })
