@@ -61,6 +61,7 @@ export function PaperReader({
   const [feedbackReady, setFeedbackReady] = useState(false)
   const [feedbackDetails, setFeedbackDetails] = useState({ mistakesText: '', childComments: '' })
   const startedMaterial = useRef<string | null>(null)
+  const lastAnswerPosition = useRef<{ materialId: string; chapterId: string; questionId: string } | null>(null)
 
   const {
     savedPosition,
@@ -127,7 +128,8 @@ export function PaperReader({
   const lesson = projection.student_lesson
   const sessionPlan = useMemo(() => buildMaterialSessionPlan(projection.student_lesson), [projection.student_lesson])
 
-  function handlePauseAndLeave() {
+  async function handlePauseAndLeave() {
+    if (status === 'idle' || isInitialLoading || submissionLoading) return
     if (status === 'saving') {
       window.alert('草稿正在雲端儲存中，請稍候片刻再離開。')
       return
@@ -144,7 +146,11 @@ export function PaperReader({
       window.alert('草稿儲存失敗，請先點擊工具列上的「重試」以防作答遺失。')
       return
     }
-    if (window.confirm('已為您保存草稿，換手機或電腦也能接續。確定要先暫停返回總覽嗎？')) {
+    if (window.confirm('確定要先暫停返回總覽嗎？已同步的草稿會保留。')) {
+      const latest = lastAnswerPosition.current
+      if (latest?.materialId === projection.material_id && !submission) {
+        await recordPosition(latest.chapterId, latest.questionId)
+      }
       window.location.assign('/dashboard')
     }
   }
@@ -504,6 +510,15 @@ export function PaperReader({
         selfCheck={submission?.self_check ?? selfCheck}
         readOnly={Boolean(submission) || actionBusy || submissionFailed || status === 'idle'}
         onAnswerChange={(key, value, immediate) => {
+          const question = [...(lesson.practice ?? []).flatMap(stage => stage.questions ?? []), ...(lesson.homework?.questions ?? [])]
+            .find(question => {
+              const id = question.id || question.questionId
+              return Boolean(id && (id === key || sessionPlan.steps.some(step => step.questionAnswerKeys?.[id]?.includes(key))))
+            })
+          const questionId = question && (question.id || question.questionId)
+          if (questionId) lastAnswerPosition.current = {
+            materialId: projection.material_id, chapterId: getChapterForQuestion(questionId), questionId,
+          }
           if (value.trim() && startedMaterial.current !== projection.material_id) {
             startedMaterial.current = projection.material_id
             void recordMaterialLearningEvent(projection.material_id, 'answer_started')
