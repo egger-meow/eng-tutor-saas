@@ -8,6 +8,13 @@ import {
 import type { StudentLesson } from '../types/student-material'
 
 describe('material-session-plan', () => {
+  it('assigns homework-only questions once and navigates to an existing chapter', () => {
+    const plan = buildMaterialSessionPlan({ homework: { purposeZh: '練習', questions: [
+      { id: 'h1', prompt: 'One' }, { id: 'h2', prompt: 'Two' }, { id: 'h3', prompt: 'Three' },
+    ] } })
+    expect(plan.steps.map(step => step.chapterId)).toEqual(['homework', 'homework'])
+    expect(plan.steps.flatMap(step => step.questionIds)).toEqual(['h1', 'h2', 'h3'])
+  })
   it('does not claim reading-only completion without evidence', () => {
     const plan = buildMaterialSessionPlan({ reading: { passage: 'Read this.' } })
     expect(isStepCompleted(plan.steps[0], {})).toBe(false)

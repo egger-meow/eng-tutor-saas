@@ -64,7 +64,7 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
     : allQuestionIds.slice(2)
 
   // 1. Stage 1: 先讀先試 (約 10 分鐘)
-  const stage1ChapterId = hasReading ? 'reading' : hasOpening ? 'opening' : 'practice'
+  const stage1ChapterId = hasReading ? 'reading' : hasOpening ? 'opening' : practiceQuestionIds.length ? 'practice' : hasHomework ? 'homework' : 'opening'
   let stage1Desc = '今天先安排約10分鐘。先讀這一段，再試前兩題；時間到了可以先停，之後繼續。'
   if (firstPracticeQuestionIds.length === 1) {
     stage1Desc = '今天先安排約10分鐘。先讀這一段，再試第1題；時間到了可以先停，之後繼續。'
@@ -86,7 +86,7 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
   // 2. Stage 2: 理解與練習
   // Include Stage 2 if there is instruction or remaining practice questions
   if (hasInstruction || remainingPracticeQuestionIds.length > 0) {
-    const stage2ChapterId = hasInstruction ? 'instruction' : 'practice'
+    const stage2ChapterId = hasInstruction ? 'instruction' : practiceQuestionIds.length ? 'practice' : 'homework'
     steps.push({
       id: 'stage-2',
       label: '② 理解與練習',
@@ -100,14 +100,15 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
 
   // 3. Stage 3: 複習與作業
   // Include Stage 3 if there is homework or self-check
-  if (hasHomework || hasSelfCheck) {
-    const stage3ChapterId = hasHomework ? 'homework' : 'selfcheck'
+  const separateHomeworkIds = practiceQuestionIds.length ? homeworkQuestionIds : []
+  if (separateHomeworkIds.length || hasSelfCheck) {
+    const stage3ChapterId = separateHomeworkIds.length ? 'homework' : 'selfcheck'
     steps.push({
       id: 'stage-3',
       label: '③ 複習與作業',
       chapterId: stage3ChapterId,
-      questionIds: homeworkQuestionIds,
-      descriptionZh: hasHomework
+      questionIds: separateHomeworkIds,
+      descriptionZh: separateHomeworkIds.length
         ? `課後自主複習與延遲提取作業（${homeworkQuestionIds.length} 題）。`
         : '本週自我學習檢核。',
     })
