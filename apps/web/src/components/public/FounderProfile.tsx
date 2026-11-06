@@ -5,7 +5,7 @@ export function FounderProfile() {
   return <div className="container founder-profile">
     <section className="public-section founder-summary founder-composed">
       <div>
-        <img className="founder-brand-art" src="/founder/jjmow-brand.png" alt="紙屬英文・JJmow 老師：先理解，再練習。從孩子卡住的地方，開始。" width="1536" height="1024" />
+        <img className="founder-brand-art" src="/founder/jjmow-brand.png" alt="紙屬英文創作者 JJmow 老師，英文家教 × 系統開發。我可以，你也可以。把學習的方法，做成陪你進步的系統。陽明交大數據所碩士班，管科與資工雙主修。" width="1536" height="1024" />
         <p className="overline">{founderContent.name} · {founderContent.shortBio}</p>
       </div>
       <div className="founder-story">
