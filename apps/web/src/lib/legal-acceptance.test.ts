@@ -123,7 +123,7 @@ describe('Legal Acceptance Event Architecture', () => {
     await acceptCurrentTermsVersion()
 
     expect(rpcMock).toHaveBeenCalledWith('accept_current_terms', {
-      p_terms_version: '2026-08-26-v2',
+      p_terms_version: '2026-11-07-v1',
     })
     expect(rpcMock).not.toHaveBeenCalledWith(
       'accept_legal_terms',

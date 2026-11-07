@@ -3,9 +3,9 @@ import type { Child } from '../../lib/children'
 import { gradeStageLabel } from '../../lib/grade-stage'
 import type { SubscriptionView } from '../../lib/subscriptions'
 import type { OwnedWaitlistEntry } from '../../lib/waitlist'
-import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
+import { annualMonthlyEquivalentTwd, annualSavingsTwd, billingPlans, effectiveSubscriptionPrice, formatPrice, planForSubscription, type BillingPlan } from '../../lib/billing-plans'
 
-export const founderCancellationWarning = '本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。'
+export const founderCancellationWarning = '本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$99/月資格將永久失效。到期前恢復續訂即可保留。'
 
 const labels = {
   trialing: ['體驗期', '目前可以使用體驗內容，之後再決定是否開始訂閱。'],
@@ -87,7 +87,7 @@ export function ChildSubscription({
               <strong className="plan-price-line">
                 {isFounderEligible ? (
                   <>
-                    <ins className="highlight-price">月繳 NT$349</ins>
+                    <ins className="highlight-price">月繳 NT$99</ins>
                     <del className="strike-price">NT${formatPrice(billingPlans.monthly.priceTwd)}</del>
                     <span className="badge badge-discount">創始 30 限定</span>
                   </>
@@ -98,8 +98,8 @@ export function ChildSubscription({
               <small>
                 {isFounderEligible ? (
                   <>
-                    <strong>持續訂閱期間，NT$349 創始價固定保留。</strong>
-                    若中途取消訂閱且到期未恢復，日後重新訂閱將以當時標準定價（NT$499/月）計算。
+                    <strong>持續訂閱期間，NT$99 創始價固定保留。</strong>
+                    若中途取消訂閱且到期未恢復，日後重新訂閱將以當時標準定價（NT$149/月）計算。
                   </>
                 ) : (
                   '每月自動續訂；可隨時取消下一期續訂'
@@ -130,7 +130,7 @@ export function ChildSubscription({
               🧪 紙屬英文 Beta · 目前每週教材 NT$0
             </p>
             <p style={{ margin: '0.375rem 0 0', color: '#166534', fontSize: '0.8125rem' }}>
-              Beta 期間現在不訂閱也能正常使用，免填信用卡、免綁卡。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。若希望鎖定創始 NT$349/月，可自願提前訂閱；<strong>自願訂閱會立即開始扣款計費</strong>。
+              Beta 期間現在不訂閱也能正常使用，免填信用卡、免綁卡。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。若希望鎖定創始 NT$99/月，可自願提前訂閱；<strong>自願訂閱會立即開始扣款計費</strong>。
             </p>
           </div>
         )}
@@ -145,10 +145,10 @@ export function ChildSubscription({
             ? '正在準備安全付款…'
             : freePilotActive
               ? selectedPlan === 'monthly' && isFounderEligible
-                ? '自願訂閱並鎖定 NT$349 創始價（立即扣款）'
+                ? '自願訂閱並鎖定 NT$99 創始價（立即扣款）'
                 : `自願${selectedPlan === 'annual' ? '年繳' : '月繳'}訂閱（立即扣款）`
               : selectedPlan === 'monthly' && isFounderEligible
-                ? '鎖定 NT$349 創始價'
+                ? '鎖定 NT$99 創始價'
                 : `選擇${selectedPlan === 'annual' ? '年繳' : '月繳'}並開始訂閱`}
         </button>
       </div>
@@ -244,7 +244,7 @@ export function ChildSubscription({
   const canResume = isCanceledAutoRenew
   const currentPlan = planForSubscription(subscription.planCode, subscription.billingInterval)
   const isRedeemedFounder = subscription.foundingStatus === 'redeemed'
-  const displayedPriceTwd = isRedeemedFounder && currentPlan.key === 'monthly' ? 349 : subscription.priceTwd
+  const displayedPriceTwd = effectiveSubscriptionPrice(subscription.priceTwd, isRedeemedFounder && currentPlan.key === 'monthly')
 
   return (
     <article className="subscription-card">

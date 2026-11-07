@@ -27,7 +27,7 @@ describe('Founder scheduled cancellation persistent truth', () => {
           status: 'active',
           planCode: 'standard_monthly',
           billingInterval: 'month',
-          priceTwd: 499,
+          priceTwd: 149,
           currentPeriodEnd: '2026-09-27T00:00:00Z',
           cancelAtPeriodEnd: true,
           foundingStatus: 'redeemed',
@@ -40,7 +40,7 @@ describe('Founder scheduled cancellation persistent truth', () => {
     )
 
     expect(html).toContain('已取消自動續訂')
-    expect(html).toContain('月繳方案・每月 NT$349')
+    expect(html).toContain('月繳方案・每月 NT$99')
     expect(html).toContain(founderCancellationWarning)
     expect(html).toContain('恢復自動續訂')
   })

@@ -117,7 +117,16 @@ Deno.serve(async (request) => {
     if (founderClaimId !== undefined && typeof founderClaimId !== 'string') {
       throw new Error('Invalid custom_data.founder_claim_id')
     }
-    const plan = getWebhookPlan(subscription?.items, { monthly: monthlyPriceId, annual: annualPriceId })
+    const plan = getWebhookPlan(subscription?.items, {
+      monthly: monthlyPriceId,
+      annual: annualPriceId,
+      legacyMonthly: Deno.env.get('PADDLE_LEGACY_STANDARD_PRICE_ID'),
+      legacyAnnual: Deno.env.get('PADDLE_LEGACY_ANNUAL_PRICE_ID'),
+    })
+    const expectedFoundingDiscountId = plan.legacy
+      ? Deno.env.get('PADDLE_LEGACY_FOUNDING_DISCOUNT_ID')
+      : foundingDiscountId
+    if (!expectedFoundingDiscountId) throw new Error('Missing discount configuration for price version')
     const foundingDiscount = getWebhookFoundingDiscount(subscription?.discount)
 
     const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -137,7 +146,7 @@ Deno.serve(async (request) => {
       p_current_period_start: subscription?.current_billing_period?.starts_at ?? null,
       p_current_period_end: subscription?.current_billing_period?.ends_at ?? null,
       p_cancel_at_period_end: subscription?.scheduled_change?.action === 'cancel',
-      p_expected_founding_discount_id: foundingDiscountId,
+      p_expected_founding_discount_id: expectedFoundingDiscountId,
       p_discount_id: foundingDiscount.id,
       p_discount_status: foundingDiscount.status,
       p_discount_type: foundingDiscount.type,

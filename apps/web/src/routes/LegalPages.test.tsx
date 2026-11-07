@@ -96,7 +96,7 @@ describe('Legal & Compliance Pages Rendering', () => {
       expect(html).toContain('退款政策 / Refund Policy')
       expect(html).toContain('當期一旦開始製作並交付教材，當期費用不予退還')
       expect(html).toContain('取消操作自次月起生效')
-      expect(html).toContain('標準月費 NT$499／月')
+      expect(html).toContain('合約成立時的標準月費（現行 NT$149／月；舊合約依原約定）')
       expect(html).toContain('尚未開始履約之全月份費用將無息按比例退還')
     })
 

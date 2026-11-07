@@ -32,24 +32,20 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
 
     <aside className="pricing-anchor-banner" aria-label="價值說明">
       <span className="pricing-anchor-kicker">
-        {enrollment?.freePilotActive ? 'Beta 現行方案' : '一個月，不只一小時'}
+        持續追蹤・專屬客製・學習累積
       </span>
       <div>
         <strong>
-          {enrollment?.freePilotActive
-            ? '每週專屬教材 NT$0・免填信用卡'
-            : '比許多一對一家教一小時更低的月費'}
+          每月{productConfig.standardPrice}元，約一個便當的預算，讓每一次學習都成為下一份專屬教材的起點。
         </strong>
         <p>
-          {enrollment?.freePilotActive
-            ? '目前不用綁卡，也不會因為建立孩子資料就自動訂閱。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。'
-            : '得到的不是一小時的課，而是一整個月持續為孩子準備、追蹤與調整的專屬教材系統。'}
+          持續追蹤單字、文法、閱讀與錯題，累積孩子的學習記憶；每份教材都依程度、進度、興趣與作答回饋客製調整。{enrollment?.freePilotActive && 'Beta 期間目前免費，免綁卡，不會自動轉為付費訂閱。'}
         </p>
       </div>
       <div className="pricing-value-proposition" aria-label="包含的持續價值">
-        <span>{enrollment?.freePilotActive ? '每週專屬教材 NT$0' : '每週專屬教材'}</span>
-        <span>{enrollment?.freePilotActive ? '免填信用卡・免綁卡' : '學習記憶持續累積'}</span>
-        <span>{enrollment?.freePilotActive ? '回饋選填・主動申請' : '同一訂閱・系統升級不加價'}</span>
+        <span>追蹤學習表現</span>
+        <span>每份專屬客製</span>
+        <span>學習記憶持續累積</span>
       </div>
     </aside>
 
@@ -126,10 +122,10 @@ export function PricingSection({ enrollment: propEnrollment }: { enrollment?: En
             <strong>前 30 位持續訂閱期間固定 NT${formatPrice(productConfig.foundingPrice)}／月</strong>
             <span>
               {enrollment?.freePilotActive
-                ? 'Beta 期間目前每週教材 NT$0。如果希望在 30 席額滿前鎖定未來 NT$349/月優惠，可自願提前啟用月繳訂閱；這個選項會立即開始計費。若不需要鎖定席次，繼續使用目前 Beta 免費方案即可。'
+                ? 'Beta 期間目前每週教材 NT$0。如果希望在 30 席額滿前鎖定未來 NT$99/月優惠，可自願提前啟用月繳訂閱；這個選項會立即開始計費。若不需要鎖定席次，繼續使用目前 Beta 免費方案即可。'
                 : capacityOpen
-                  ? '第一週免費。標準月費 NT$' + formatPrice(productConfig.standardPrice) + '；創始 30 每月省 NT$150。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。'
-                  : '創始 NT$349/月優惠目前仍有名額。新學員目前先登記候補，名額開放後即可選擇訂閱鎖定優惠價格。'}
+                  ? '第一週免費。標準月費 NT$' + formatPrice(productConfig.standardPrice) + '；創始 30 每月省 NT$50。只要訂閱不中斷，創始價格持續保留；取消後若重新加入，依當時標準方案價格計費。'
+                  : '創始 NT$99/月優惠目前仍有名額。新學員目前先登記候補，名額開放後即可選擇訂閱鎖定優惠價格。'}
             </span>
           </div>
           <p className="founding-remaining">🎟️ 創始 30 優惠目前仍有名額（剩餘 {foundingRemaining} 席）</p>

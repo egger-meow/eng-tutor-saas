@@ -1,12 +1,23 @@
 export type BillingPlan = 'monthly' | 'annual'
 export type BillingInterval = 'month' | 'year'
 
+export const foundingPriceTwd = 99
+
+// Stored price_twd is the catalog price; Founder subscriptions apply a recurring discount.
+// Keep historical invoices/subscriptions truthful after the November price change.
+export function effectiveSubscriptionPrice(priceTwd: number | null, isFounderMonthly: boolean): number | null {
+  if (!isFounderMonthly || priceTwd === null) return priceTwd
+  if (priceTwd === 499) return 349
+  if (priceTwd === 149) return foundingPriceTwd
+  return priceTwd
+}
+
 export const billingPlans = {
   monthly: {
     key: 'monthly',
     planCode: 'standard_monthly',
     label: '月繳方案',
-    priceTwd: 499,
+    priceTwd: 149,
     cadenceLabel: '每月',
     interval: 'month',
   },
@@ -14,7 +25,7 @@ export const billingPlans = {
     key: 'annual',
     planCode: 'standard_annual',
     label: '年繳方案',
-    priceTwd: 4999,
+    priceTwd: 1499,
     cadenceLabel: '每年',
     interval: 'year',
   },

@@ -1,10 +1,10 @@
-import { billingPlans } from '../lib/billing-plans'
+import { billingPlans, foundingPriceTwd } from '../lib/billing-plans'
 
 export const productConfig = {
   name: '紙屬英文',
   standardPrice: billingPlans.monthly.priceTwd,
   annualPrice: billingPlans.annual.priceTwd,
-  foundingPrice: 349,
+  foundingPrice: foundingPriceTwd,
   foundingLimit: 30,
   capacity: 100,
 } as const

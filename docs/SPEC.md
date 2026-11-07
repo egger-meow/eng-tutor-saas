@@ -6,7 +6,7 @@
 > Primary customer: Parents of junior-high students
 > Primary learner: Junior-high students, with optional entry from Grade 6 before junior high
 > Long-term academic target: Taiwan junior-high English and CAP / 國中教育會考 capability
-> Standard prices: **NT$499 / child / month** or **NT$4,999 / child / year**
+> Standard prices: **NT$149 / child / month** or **NT$1,499 / child / year**
 
 ---
 
@@ -561,16 +561,16 @@ Billing is per child.
 
 Standard pricing:
 
-> **NT$499 / month / child** or **NT$4,999 / child / year**
+> **NT$149 / month / child** or **NT$1,499 / child / year**
 
 Example:
 
 ```text
 Parent
 ├── Jonathan
-│   └── NT$499/month
+│   └── NT$149/month
 └── Emily
-    └── NT$4,999/year
+    └── NT$1,499/year
 ```
 
 Do not model the entire family as one generic subscription in MVP.
@@ -604,16 +604,18 @@ Optional early subscription during Free Pilot (or required subscription after pi
 ↓
 30-minute checkout hold at qualifying monthly Paddle checkout
 ↓
-Verified monthly activation with the configured recurring-forever flat TWD 150 discount
+Verified monthly activation with the configured recurring-forever flat TWD 50 discount
 ↓
-NT$349/month while that same monthly subscription remains continuously active
+NT$99/month while that same monthly subscription remains continuously active
 ```
 
-The standard monthly catalog price remains NT$499 and annual remains NT$4,999. Founder pricing is produced by a recurring flat TWD 150 Paddle discount (amount 15000), not by changing the catalog price.
+The standard monthly catalog price remains NT$149 and annual remains NT$1,499. Founder pricing is produced by a recurring flat TWD 50 Paddle discount (amount 5000), not by changing the catalog price.
+
+The November 7, 2026 price revision uses new Paddle catalog prices and a new discount. Previous 499/4,999 prices and the TWD 150 discount remain webhook-only allowlisted history; they are never selected for a new checkout. Price and discount versions must be reconciled together. Completed transactions and consumed Founder seats are never rewritten or reset by a price change.
 
 Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Admitting a child into the Free Pilot does NOT allocate or consume a Founder seat. All admitted children have equal access to the free weekly service while the Free Pilot is active without needing to subscribe.
 
-However, a parent may voluntarily subscribe early during the Free Pilot to lock the continuous NT$349/month Founder price before all 30 seats are taken. An early subscription is a REAL paid Paddle subscription that begins charging immediately; clicking subscribe is never free or $0.
+However, a parent may voluntarily subscribe early during the Free Pilot to lock the continuous NT$99/month Founder price before all 30 seats are taken. An early subscription is a REAL paid Paddle subscription that begins charging immediately; clicking subscribe is never free or $0.
 
 Founder lifecycle is `none`, `eligible`, `redeemed`, `expired`, or `forfeited`. At monthly checkout preparation, if `founding_seat_count() < 30`, a 30-minute checkout hold is atomically acquired. `redeemed` remains through ordinary updates, past due, pause, and scheduled cancellation. Only a verified, non-stale actual `canceled` event changes `redeemed` to `forfeited`.
 
@@ -626,9 +628,9 @@ Creating a Founder-discounted Paddle transaction durably binds the 30-minute che
 ---
 # 23. Founder Price Requires Continuous Subscription
 
-The contractual Founder price is fixed at NT$349/month only while the same redeemed monthly subscription remains continuous.
+The contractual Founder price is fixed at NT$99/month only while the same redeemed monthly subscription remains continuous.
 
-Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$349/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
+Scheduling cancellation does not immediately remove Founder status. If the customer resumes before the subscription actually ends, NT$99/month is preserved. Once Paddle reports the subscription as actually `canceled`, the benefit is permanently forfeited. Any later subscription uses the then-current standard price; Founder eligibility cannot be reacquired.
 
 Referral codes and rewards are out of scope.
 
@@ -3108,6 +3110,8 @@ Exact legal/refund language must be displayed appropriately before paid launch.
 
 Do not scatter price numbers across components.
 
+Public pricing copy leads with continuous learning tracking, personalized materials, and accumulated learning memory: 「持續追蹤學習，為孩子客製教材，讓每一次練習都累積下來。」The NT$149 monthly price may be explained as approximately one lunchbox budget. During Free Pilot, always make current free access and immediately charged voluntary Founder subscriptions clear. Never imply tracking activity that the family has not submitted.
+
 Maintain centralized product configuration for:
 
 * standard monthly price;
@@ -3119,9 +3123,9 @@ Maintain centralized product configuration for:
 Initial values:
 
 ```text
-standard_monthly_price = 499 TWD
-standard_annual_price = 4999 TWD
-founder_continuous_monthly_price = 349 TWD
+standard_monthly_price = 149 TWD
+standard_annual_price = 1499 TWD
+founder_continuous_monthly_price = 99 TWD
 founding_child_limit = 30
 service_child_capacity = 100
 ```
@@ -4302,9 +4306,9 @@ Optional early subscription during pilot (or required subscription after pilot e
 ↓
 30-minute checkout hold at qualifying monthly checkout
 ↓
-Verified monthly activation with the configured forever-recurring flat TWD 150 discount
+Verified monthly activation with the configured forever-recurring flat TWD 50 discount
 ↓
-NT$349/month while the same subscription remains continuous
+NT$99/month while the same subscription remains continuous
 ```
 
 Scheduling cancellation, past due, pause, and resuming before the actual end preserve a redeemed Founder seat and price. A verified actual cancellation changes `redeemed` to `forfeited` exactly once; the seat remains permanently consumed and the child can never receive Founder pricing again.
@@ -4328,7 +4332,7 @@ While the Free Pilot is active (rolling 14-day active service children has not r
 * Week 2+ generation jobs for dormant Beta children are paused until the parent visits or logs in, at which point activity is touched and generation immediately resumes;
 * onboarding follows canonical enrollment-settings-first lock ordering to prevent concurrency deadlocks;
 * admin waitlist releases strictly preserve existing Paddle subscriptions;
-* parents may voluntarily subscribe early via Paddle to lock the Founder NT$349/month price; early subscription begins charging immediately;
+* parents may voluntarily subscribe early via Paddle to lock the Founder NT$99/month price; early subscription begins charging immediately;
 * voluntary paid subscribers who cancel while the Free Pilot is still active do not lose free service during the active pilot.
 
 When rolling 14-day active service children reaches 100 for the first time:
@@ -4603,8 +4607,8 @@ Post-pilot future weekly service requires active paid subscription
 Pricing & Plans:
 
 ```text
-499 TWD / month / child
-or 4,999 TWD / year / child
+149 TWD / month / child
+or 1,499 TWD / year / child
 ```
 
 Founder cohort:
@@ -4612,9 +4616,9 @@ Founder cohort:
 ```text
 First 30 monthly subscribing children
 ↓
-30-minute checkout hold + flat TWD 150 discount
+30-minute checkout hold + flat TWD 50 discount
 ↓
-349/month while the same subscription remains continuous
+99/month while the same subscription remains continuous
 ↓
 Actual cancellation permanently forfeits pricing; consumed seat never returns
 ```

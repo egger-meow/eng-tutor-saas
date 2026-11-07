@@ -21,13 +21,13 @@ It is intentionally not a feature backlog. Launch work should remove real produc
 - [ ] Paddle Live account approval is complete.
 - [ ] Production checkout domain is approved by Paddle.
 - [ ] Paddle production default payment link is configured.
-- [ ] Live monthly price exists: TWD 499 / month.
-- [ ] Live annual price exists: TWD 4,999 / year.
-- [ ] Live Founder 30 discount exists: active flat TWD 150, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 499 monthly price.
+- [ ] Live monthly price exists: TWD 149 / month.
+- [ ] Live annual price exists: TWD 1,499 / year.
+- [ ] Live Founder 30 discount exists: active flat TWD 50, recurring forever (`maximum_recurring_intervals = null`), restricted only to the standard TWD 149 monthly price.
 - [ ] Live API key is created and stored only as a server secret.
 - [ ] Live client-side token is configured for the production web build.
 - [ ] Live webhook destination points to the production `paddle-webhook` Edge Function.
-- [ ] `REQUIRED_TERMS_VERSION=2026-08-26-v2` is installed for `paddle-checkout`; Terms v2 is effective immediately upon publication and acceptance.
+- [ ] `REQUIRED_TERMS_VERSION=2026-11-07-v1` is installed for `paddle-checkout`; Terms v2 is effective immediately upon publication and acceptance.
 - [ ] `paddle-founder-claim-cleanup` is deployed and invoked with the service-role bearer credential on a five-minute schedule. It may release an expired claim only after Paddle returns `canceled`, accepts removal of the Founder discount from a draft transaction, or accepts cancellation of a ready/billed transaction.
 - [ ] Live webhook secret is installed in Supabase Edge Function secrets.
 - [ ] Production browser config uses `VITE_PADDLE_ENV=production`.
@@ -42,7 +42,7 @@ Never record API keys, webhook secrets, SMTP passwords, or other credentials in 
 
 1. Deploy the web build with Terms v2 immediately effective upon publication and acceptance.
 2. Apply database migrations including Founder lifetime pricing and capacity authority.
-3. Deploy `paddle-webhook`, then `paddle-checkout`, then `paddle-founder-claim-cleanup`. Install `REQUIRED_TERMS_VERSION=2026-08-26-v2` and retain the verified Founder discount ID.
+3. Deploy `paddle-webhook`, then `paddle-checkout`, then `paddle-founder-claim-cleanup`. Install `REQUIRED_TERMS_VERSION=2026-11-07-v1` and retain the verified Founder discount ID.
 4. Configure the service-role invocation of `paddle-founder-claim-cleanup` every five minutes.
 5. Verify Terms-only reacceptance, a standard annual checkout without discount, a Founder monthly claim/bind/activation, and claim cleanup in Paddle/Supabase logs before normal traffic.
 
@@ -61,7 +61,7 @@ The test should behave exactly like a real customer journey:
 7. [ ] Checkout completes and Paddle creates the expected subscription lifecycle.
 8. [ ] Production webhook signature verification succeeds.
 9. [ ] Exactly one local subscription state is reconciled for that child.
-10. [ ] Founder pricing is NT$349 every month while the same monthly subscription remains continuous; annual activation never receives the discount.
+10. [ ] Founder pricing is NT$99 every month while the same monthly subscription remains continuous; annual activation never receives the discount.
 11. [ ] A Founder checkout opened immediately before reservation expiry remains counted until its transaction completes or is safely neutralized; a concurrent child cannot become seat 31.
 12. [ ] An account that accepted an older Terms version cannot start checkout until it explicitly accepts v2; unchanged Privacy v1 is not reaccepted.
 13. [ ] The child receives generation entitlement without manual SQL or admin state repair.

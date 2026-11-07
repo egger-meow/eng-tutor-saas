@@ -1,6 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
-import { getCheckoutPlan, getPaddleApiBaseUrl, validateFoundingDiscount } from '../_shared/paddle-plans.ts'
+import { foundingPriceTwd, getCheckoutPlan, getPaddleApiBaseUrl, getWebhookPlan, validateFoundingDiscount } from '../_shared/paddle-plans.ts'
 
 const corsHeaders = {
   'access-control-allow-origin': '*',
@@ -29,7 +29,7 @@ Deno.serve(async (request) => {
   const monthlyPriceId = Deno.env.get('PADDLE_STANDARD_PRICE_ID')
   const annualPriceId = Deno.env.get('PADDLE_ANNUAL_PRICE_ID')
   const foundingDiscountId = Deno.env.get('PADDLE_FOUNDING_DISCOUNT_ID')
-  const requiredTermsVersion = Deno.env.get('REQUIRED_TERMS_VERSION') || '2026-08-26-v2'
+  const requiredTermsVersion = Deno.env.get('REQUIRED_TERMS_VERSION') || '2026-11-07-v1'
 
   let paddleApiBaseUrl: string
   try {
@@ -148,13 +148,17 @@ Deno.serve(async (request) => {
         console.error('Existing Founder transaction is not safely reusable', existingResponse.status, transaction?.status)
         return jsonResponse(409, { error: 'founder_checkout_reconciliation_required' })
       }
+      const existingPlan = getWebhookPlan(transaction.items, { monthly: monthlyPriceId, annual: annualPriceId })
+      if (existingPlan.key !== plan.key) {
+        return jsonResponse(409, { error: 'founder_checkout_reconciliation_required' })
+      }
       return jsonResponse(200, {
         transaction_id: existingTransactionId,
         plan: plan.key,
         billing_interval: plan.billingInterval,
         price_twd: plan.priceTwd,
         founding_applies: true,
-        checkout_price_twd: 349,
+        checkout_price_twd: foundingPriceTwd,
       })
     }
 
@@ -165,6 +169,10 @@ Deno.serve(async (request) => {
       const existingBody = await existingResponse.json()
       const transaction = existingBody?.data
       if (existingResponse.ok && ['draft', 'ready'].includes(transaction?.status)) {
+        const existingPlan = getWebhookPlan(transaction.items, { monthly: monthlyPriceId, annual: annualPriceId })
+        if (existingPlan.key !== plan.key || transaction.discount_id) {
+          return jsonResponse(409, { error: 'checkout_reconciliation_required' })
+        }
         return jsonResponse(200, {
           transaction_id: existingCapacityTransactionId,
           plan: plan.key,
@@ -363,7 +371,7 @@ Deno.serve(async (request) => {
       billing_interval: plan.billingInterval,
       price_twd: plan.priceTwd,
       founding_applies: foundingApplies,
-      checkout_price_twd: foundingApplies ? 349 : plan.priceTwd,
+      checkout_price_twd: foundingApplies ? foundingPriceTwd : plan.priceTwd,
     })
   } catch (error) {
     console.error('Paddle checkout preparation failed', errorMessage(error))

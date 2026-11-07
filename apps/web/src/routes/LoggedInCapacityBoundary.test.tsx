@@ -71,7 +71,7 @@ describe('logged-in 100+ capacity boundary', () => {
         initialChildren={[]}
         initialSubscriptions={[]}
         initialWaitlist={[]}
-        initialAcceptedTermsVersion="2026-08-26-v2"
+        initialAcceptedTermsVersion="2026-11-07-v1"
         initialLegalLoaded={true}
       />
     )

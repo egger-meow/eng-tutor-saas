@@ -25,7 +25,7 @@ describe('ChildSubscription Component', () => {
       status: 'active',
       planCode: 'standard_monthly',
       billingInterval: 'month',
-      priceTwd: 499,
+      priceTwd: 149,
       currentPeriodEnd: '2026-09-16T00:00:00Z',
       cancelAtPeriodEnd: false,
       foundingStatus: 'none',
@@ -37,7 +37,7 @@ describe('ChildSubscription Component', () => {
 
     expect(html).toContain('訂閱中')
     expect(html).toContain('目前方案：')
-    expect(html).toContain('月繳方案・每月 NT$499')
+    expect(html).toContain('月繳方案・每月 NT$149')
     expect(html).toContain('本期至：')
     expect(html).toContain('取消續訂')
     expect(html).not.toContain('變更方案')
@@ -50,7 +50,7 @@ describe('ChildSubscription Component', () => {
   it('2. active + cancelAtPeriodEnd: shows canceled renewal status, resume button, and explanation that plan can be re-selected upon expiry', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1', childId: 'child-123', status: 'active', planCode: 'standard_monthly', billingInterval: 'month',
-      priceTwd: 499, currentPeriodEnd: '2026-09-16T00:00:00Z', cancelAtPeriodEnd: true, foundingStatus: 'none',
+      priceTwd: 149, currentPeriodEnd: '2026-09-16T00:00:00Z', cancelAtPeriodEnd: true, foundingStatus: 'none',
     }
     const html = renderToStaticMarkup(
       <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
@@ -67,49 +67,49 @@ describe('ChildSubscription Component', () => {
   it('3. canceled status: re-displays the billing interval selector (monthly / annual)', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1', childId: 'child-123', status: 'canceled', planCode: 'standard_monthly', billingInterval: 'month',
-      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'none',
+      priceTwd: 149, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'none',
     }
     const html = renderToStaticMarkup(
       <ChildSubscription child={mockChild} subscription={subscription} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
     expect(html).toContain('訂閱已到期')
     expect(html).toContain('選擇付款週期')
-    expect(html).toContain('年繳 NT$4,999')
-    expect(html).toContain('省 NT$989')
-    expect(html).toContain('月繳 NT$499')
+    expect(html).toContain('年繳 NT$1,499')
+    expect(html).toContain('省 NT$289')
+    expect(html).toContain('月繳 NT$149')
     expect(html).toContain('並開始訂閱')
   })
 
   it('4. founding_status = eligible on trialing subscription: displays continuous Founder reservation and lock CTA without exposing live seat count', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1', childId: 'child-123', status: 'trialing', planCode: 'standard_monthly', billingInterval: 'month',
-      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'eligible',
+      priceTwd: 149, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'eligible',
     }
     const html = renderToStaticMarkup(
       <ChildSubscription child={mockChild} subscription={subscription} foundingAvailable={true} foundingRemaining={7} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
     expect(html).toContain('strike-price')
-    expect(html).toContain('NT$499')
-    expect(html).toContain('NT$349')
+    expect(html).toContain('NT$149')
+    expect(html).toContain('NT$99')
     expect(html).toContain('創始 30 名限定')
     expect(html).toContain('目前仍有創始優惠名額')
     expect(html).not.toContain('目前只剩 7 個創始優惠席次')
-    expect(html).toContain('持續訂閱期間，NT$349 創始價固定保留')
-    expect(html).toContain('鎖定 NT$349 創始價')
+    expect(html).toContain('持續訂閱期間，NT$99 創始價固定保留')
+    expect(html).toContain('鎖定 NT$99 創始價')
     expect(html).toMatch(/checked="" value="monthly"/)
   })
 
-  it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$349 discount again', () => {
+  it('5. founding_status = forfeited on canceled subscription: does NOT offer NT$99 discount again', () => {
     const subscription: SubscriptionView = {
       id: 'sub-1', childId: 'child-123', status: 'canceled', planCode: 'standard_monthly', billingInterval: 'month',
-      priceTwd: 499, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'forfeited',
+      priceTwd: 149, currentPeriodEnd: '2026-08-16T00:00:00Z', cancelAtPeriodEnd: false, foundingStatus: 'forfeited',
     }
     const html = renderToStaticMarkup(
       <ChildSubscription child={mockChild} subscription={subscription} foundingAvailable={true} onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()} />
     )
-    expect(html).toContain('月繳 NT$499')
+    expect(html).toContain('月繳 NT$149')
     expect(html).not.toContain('strike-price')
-    expect(html).not.toContain('NT$349')
+    expect(html).not.toContain('NT$99')
     expect(html).not.toContain('創始早鳥優惠')
     expect(html).toMatch(/checked="" value="annual"/)
   })
@@ -151,8 +151,8 @@ describe('ChildSubscription Component', () => {
     expect(html).toContain('名額已開放')
     expect(html).toContain('🎉 學習名額已為孩子開放！請選擇訂閱方案以啟用每週教材生成。')
     expect(html).toContain('選擇付款週期')
-    expect(html).toContain('年繳 NT$4,999')
-    expect(html).toContain('月繳 NT$499')
+    expect(html).toContain('年繳 NT$1,499')
+    expect(html).toContain('月繳 NT$149')
     expect(html).toContain('選擇年繳並開始訂閱')
   })
 
@@ -166,31 +166,31 @@ describe('ChildSubscription Component', () => {
       />
     )
     expect(html).toContain('名額已開放')
-    expect(html).toContain('月繳 NT$349')
+    expect(html).toContain('月繳 NT$99')
     expect(html).toContain('創始 30 限定')
-    expect(html).toContain('NT$499')
-    expect(html).toContain('鎖定 NT$349 創始價')
+    expect(html).toContain('NT$149')
+    expect(html).toContain('鎖定 NT$99 創始價')
   })
 
-  it('9. active redeemed Founder shows effective NT$349 price and Founder badge', () => {
+  it('9. active redeemed Founder shows effective NT$99 price and Founder badge', () => {
     const html = renderToStaticMarkup(
       <ChildSubscription
         child={mockChild}
         subscription={{
           id: 'sub-founder', childId: 'child-123', status: 'active', planCode: 'standard_monthly',
-          billingInterval: 'month', priceTwd: 499, currentPeriodEnd: '2026-09-16T00:00:00Z',
+          billingInterval: 'month', priceTwd: 149, currentPeriodEnd: '2026-09-16T00:00:00Z',
           cancelAtPeriodEnd: false, foundingStatus: 'redeemed', foundingRedeemedAt: '2026-08-16T00:00:00Z',
         }}
         onSubscribe={vi.fn()} onCancel={vi.fn()} onResume={vi.fn()}
       />
     )
     expect(html).toContain('創始 30')
-    expect(html).toContain('月繳方案・每月 NT$349')
-    expect(html).not.toContain('月繳方案・每月 NT$499')
+    expect(html).toContain('月繳方案・每月 NT$99')
+    expect(html).not.toContain('月繳方案・每月 NT$149')
   })
 
   it('10. exports the exact permanent-loss cancellation warning', () => {
-    expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$349/月資格將永久失效。到期前恢復續訂即可保留。')
+    expect(founderCancellationWarning).toBe('本期結束前仍保留創始價格；若訂閱於期末真正終止，創始 NT$99/月資格將永久失效。到期前恢復續訂即可保留。')
   })
 
   it('11. trialing with freePilotActive=true: uses calm Beta/NT$0 copy and keeps voluntary paid Founder choice explicit', () => {
@@ -213,7 +213,7 @@ describe('ChildSubscription Component', () => {
     expect(html).not.toContain('前 100 位學員')
     expect(html).not.toContain('🔥')
     expect(html).toContain('自願訂閱會立即開始扣款計費')
-    expect(html).toContain('自願訂閱並鎖定 NT$349 創始價（立即扣款）')
+    expect(html).toContain('自願訂閱並鎖定 NT$99 創始價（立即扣款）')
   })
 
   it('12. post-pilot with freePilotActive=false and currentPeriodEnd=null: displays 初期免費階段已結束 and guides to paid plans', () => {
@@ -229,8 +229,8 @@ describe('ChildSubscription Component', () => {
     )
     expect(html).toContain('初期免費階段已結束')
     expect(html).toContain('已完成的教材都會保留。若要繼續每週產生新教材，請選擇月繳或年繳方案。')
-    expect(html).toContain('月繳 NT$349')
-    expect(html).toContain('年繳 NT$4,999')
-    expect(html).toContain('鎖定 NT$349 創始價')
+    expect(html).toContain('月繳 NT$99')
+    expect(html).toContain('年繳 NT$1,499')
+    expect(html).toContain('鎖定 NT$99 創始價')
   })
 })

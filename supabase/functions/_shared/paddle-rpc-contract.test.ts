@@ -63,7 +63,7 @@ describe('Paddle RPC Contract & Webhook Integration Tests', () => {
       id: 'dsc_founder_150',
       status: 'active',
       type: 'flat',
-      amount: '15000',
+      amount: '5000',
       currency_code: 'TWD',
       recur: true,
       maximum_recurring_intervals: null,

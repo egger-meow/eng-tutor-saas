@@ -40,9 +40,9 @@ export function getCheckoutPriceDescription(
     return '正在確認這次月繳的實際付款金額與創始 30 優惠。'
   }
   if (foundingApplies) {
-    return '創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$349／月。稅額由 Paddle 依付款資料計算。'
+    return '創始 30 優惠已套用：只要同一月繳訂閱不中斷，固定 NT$99／月。稅額由 Paddle 依付款資料計算。'
   }
-  return '每月 NT$499 自動續訂。稅額由 Paddle 依付款資料計算。'
+  return '每月 NT$149 自動續訂。稅額由 Paddle 依付款資料計算。'
 }
 
 export function BillingPage({
@@ -181,7 +181,7 @@ export function BillingPage({
     try {
       const result = await cancelSubscription(childId, reason)
       setSubscriptions((current) => current.map((sub) => sub.childId === childId ? { ...sub, cancelAtPeriodEnd: result.cancelAtPeriodEnd } : sub))
-      setCheckoutNotice('已取消續訂。本期結束前仍保留目前方案；創始 30 若在到期前恢復續訂，NT$349／月價格也會保留。')
+      setCheckoutNotice('已取消續訂。本期結束前仍保留目前方案；創始 30 若在到期前恢復續訂，NT$99／月價格也會保留。')
       if (result.reconciliationPending) {
         void waitForSubscriptionReconciliation(childId, result.cancelAtPeriodEnd).catch(() => {})
       } else {
@@ -302,7 +302,7 @@ export function BillingPage({
             <strong style={{ fontSize: '1rem' }}>🧪 紙屬英文 Beta · 目前每週專屬教材 NT$0</strong>
             <p style={{ margin: '0.35rem 0 0', fontSize: '0.875rem', color: '#166534', lineHeight: '1.6' }}>
               免填信用卡、免綁卡，現在不訂閱也能正常使用。100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。<br />
-              若希望鎖定未來的創始 NT$349/月優惠，可自願提前訂閱；這個選項會立即開始計費。
+              若希望鎖定未來的創始 NT$99/月優惠，可自願提前訂閱；這個選項會立即開始計費。
             </p>
           </aside>
         )}

@@ -6,9 +6,9 @@ describe('Legal & Compliance Configuration & Invariants', () => {
     expect(legalConfig.reviewPeriodDays).toBeGreaterThanOrEqual(3)
   })
 
-  it('keeps Terms v2 immediately effective upon publication', () => {
+  it('keeps the current pricing Terms immediately effective upon publication', () => {
     expect(isCurrentTermsEffective()).toBe(true)
-    expect(legalConfig.termsEffectiveAt).toBe('2026-08-26')
+    expect(legalConfig.termsEffectiveAt).toBe('2026-11-07')
   })
 
   it('has semantic legal version strings for audit tracking', () => {

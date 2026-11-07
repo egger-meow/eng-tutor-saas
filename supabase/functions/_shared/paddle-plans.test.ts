@@ -15,8 +15,8 @@ describe('Paddle plan allowlist', () => {
     expect(getFounderClaimNeutralizationAction('completed', 'dsc_founder', 'dsc_founder')).toBe('retain')
   })
   it('maps semantic checkout plans to canonical server plans', () => {
-    expect(getCheckoutPlan('monthly', priceIds)).toMatchObject({ planCode: 'standard_monthly', billingInterval: 'month', priceTwd: 499 })
-    expect(getCheckoutPlan('annual', priceIds)).toMatchObject({ planCode: 'standard_annual', billingInterval: 'year', priceTwd: 4999 })
+    expect(getCheckoutPlan('monthly', priceIds)).toMatchObject({ planCode: 'standard_monthly', billingInterval: 'month', priceTwd: 149 })
+    expect(getCheckoutPlan('annual', priceIds)).toMatchObject({ planCode: 'standard_annual', billingInterval: 'year', priceTwd: 1499 })
     expect(() => getCheckoutPlan('pri_attacker', priceIds)).toThrow('Unsupported billing plan')
   })
 
@@ -25,10 +25,10 @@ describe('Paddle plan allowlist', () => {
       quantity: 1,
       price: {
         id: 'pri_annual',
-        unit_price: { amount: '499900', currency_code: 'TWD' },
+        unit_price: { amount: '149900', currency_code: 'TWD' },
         billing_cycle: { interval: 'year', frequency: 1 },
       },
-    }], priceIds)).toMatchObject({ key: 'annual', planCode: 'standard_annual', priceTwd: 4999 })
+    }], priceIds)).toMatchObject({ key: 'annual', planCode: 'standard_annual', priceTwd: 1499 })
   })
 
   it('rejects unknown prices and mismatched amounts or intervals', () => {
@@ -37,23 +37,42 @@ describe('Paddle plan allowlist', () => {
       quantity: 1,
       price: {
         id: 'pri_annual',
-        unit_price: { amount: '49900', currency_code: 'TWD' },
+        unit_price: { amount: '14900', currency_code: 'TWD' },
         billing_cycle: { interval: 'month', frequency: 1 },
       },
     }], priceIds)).toThrow('do not match')
   })
 
-  it('accepts only a forever-recurring TWD 150 founding discount restricted to monthly', () => {
+  it('accepts explicitly configured historical prices without making them available to new checkout', () => {
+    const ids = { ...priceIds, legacyMonthly: 'pri_old_monthly', legacyAnnual: 'pri_old_annual' }
+    for (const [id, amount, interval, priceTwd] of [
+      ['pri_old_monthly', '49900', 'month', 499],
+      ['pri_old_annual', '499900', 'year', 4999],
+    ] as const) {
+      const items = [{ quantity: 1, price: { id, unit_price: { amount, currency_code: 'TWD' }, billing_cycle: { interval, frequency: 1 } } }]
+      expect(getWebhookPlan(items, ids)).toMatchObject({ priceTwd, legacy: true })
+      expect(() => getWebhookPlan(items, priceIds)).toThrow('Unknown')
+      expect(() => getWebhookPlan([{ ...items[0], price: { ...items[0].price, unit_price: { amount: '14900', currency_code: 'TWD' } } }], ids)).toThrow('do not match')
+    }
+    expect(getCheckoutPlan('monthly', ids).priceTwd).toBe(149)
+    expect(getCheckoutPlan('annual', ids).priceTwd).toBe(1499)
+  })
+
+  it('rejects the former TWD 150 discount for new Founder checkout', () => {
+    expect(() => validateFoundingDiscount({ status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD', recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_monthly'] }, 'pri_monthly')).toThrow()
+  })
+
+  it('accepts only a forever-recurring TWD 50 founding discount restricted to monthly', () => {
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '5000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_monthly'],
     }, 'pri_monthly')).not.toThrow()
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '5000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: 1, restrict_to: ['pri_monthly'],
     }, 'pri_monthly')).toThrow('forever-recurring')
     expect(() => validateFoundingDiscount({
-      status: 'active', type: 'flat', amount: '15000', currency_code: 'TWD',
+      status: 'active', type: 'flat', amount: '5000', currency_code: 'TWD',
       recur: true, maximum_recurring_intervals: null, restrict_to: ['pri_annual'],
     }, 'pri_monthly')).toThrow('standard monthly price')
   })

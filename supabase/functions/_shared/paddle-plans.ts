@@ -1,12 +1,23 @@
 export type BillingPlan = 'monthly' | 'annual'
 export type BillingInterval = 'month' | 'year'
 
+export const foundingPriceTwd = 99
+export const foundingDiscountMinorAmount = '5000'
+
+export type PaddlePriceIds = {
+  monthly: string
+  annual: string
+  legacyMonthly?: string
+  legacyAnnual?: string
+}
+
 export type PaddlePlan = {
   key: BillingPlan
   planCode: 'standard_monthly' | 'standard_annual'
   billingInterval: BillingInterval
-  priceTwd: 499 | 4999
+  priceTwd: number
   priceId: string
+  legacy?: boolean
 }
 
 export type PaddleSubscriptionItem = {
@@ -55,17 +66,17 @@ export function getCheckoutPlan(
   priceIds: { monthly: string; annual: string },
 ): PaddlePlan {
   if (key === 'monthly') {
-    return { key, planCode: 'standard_monthly', billingInterval: 'month', priceTwd: 499, priceId: priceIds.monthly }
+    return { key, planCode: 'standard_monthly', billingInterval: 'month', priceTwd: 149, priceId: priceIds.monthly }
   }
   if (key === 'annual') {
-    return { key, planCode: 'standard_annual', billingInterval: 'year', priceTwd: 4999, priceId: priceIds.annual }
+    return { key, planCode: 'standard_annual', billingInterval: 'year', priceTwd: 1499, priceId: priceIds.annual }
   }
   throw new Error('Unsupported billing plan')
 }
 
 export function getWebhookPlan(
   items: PaddleSubscriptionItem[] | undefined,
-  priceIds: { monthly: string; annual: string },
+  priceIds: PaddlePriceIds,
 ): PaddlePlan {
   if (!items || items.length !== 1) throw new Error('Expected exactly one Paddle subscription item')
   const item = items[0]
@@ -73,7 +84,11 @@ export function getWebhookPlan(
     ? getCheckoutPlan('monthly', priceIds)
     : item.price?.id === priceIds.annual
       ? getCheckoutPlan('annual', priceIds)
-      : null
+      : priceIds.legacyMonthly && item.price?.id === priceIds.legacyMonthly
+        ? { ...getCheckoutPlan('monthly', priceIds), priceId: priceIds.legacyMonthly, priceTwd: 499, legacy: true }
+        : priceIds.legacyAnnual && item.price?.id === priceIds.legacyAnnual
+          ? { ...getCheckoutPlan('annual', priceIds), priceId: priceIds.legacyAnnual, priceTwd: 4999, legacy: true }
+          : null
   if (!plan) throw new Error('Unknown Paddle subscription price')
 
   const amount = item.price?.unit_price?.amount
@@ -99,14 +114,14 @@ export function getPaddleApiBaseUrl(envValue: string | undefined): string {
 export function validateFoundingDiscount(discount: PaddleDiscount | undefined, monthlyPriceId: string): void {
   if (discount?.status !== 'active'
     || discount.type !== 'flat'
-    || discount.amount !== '15000'
+    || discount.amount !== foundingDiscountMinorAmount
     || discount.currency_code !== 'TWD'
     || discount.recur !== true
     || discount.maximum_recurring_intervals !== null
     || !Array.isArray(discount.restrict_to)
     || discount.restrict_to.length !== 1
     || discount.restrict_to[0] !== monthlyPriceId) {
-    throw new Error('Founding discount must be an active forever-recurring TWD 150 flat discount restricted to the standard monthly price')
+    throw new Error('Founding discount must be an active forever-recurring TWD 50 flat discount restricted to the standard monthly price')
   }
 }
 

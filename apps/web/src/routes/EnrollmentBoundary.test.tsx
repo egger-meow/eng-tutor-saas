@@ -21,7 +21,7 @@ describe('public enrollment boundary matrix', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={enrollment} />)
 
     expect(html).toContain('創始 30 名限定')
-    expect(html).toContain('月繳 NT$349')
+    expect(html).toContain('月繳 NT$99')
     expect(html).toContain('免費取得第一週教材')
     expect(html).not.toContain('登記候補')
   })
@@ -34,7 +34,7 @@ describe('public enrollment boundary matrix', () => {
     expect(landing).toContain('免費取得第一週教材')
     expect(landing).not.toContain('hero-founding-badge')
     expect(pricing).not.toContain('創始 30・月繳限定')
-    expect(pricing).toContain('NT$499')
+    expect(pricing).toContain('NT$149')
   })
 
   it('100+: capacity full retains Founder availability disclosure while hiding direct checkout and delivery promises', () => {
@@ -44,7 +44,7 @@ describe('public enrollment boundary matrix', () => {
 
     expect(landing).toContain('登記候補')
     expect(landing).toContain('hero-founding-badge')
-    expect(landing).toContain('月繳 NT$349（目前仍有名額）')
+    expect(landing).toContain('月繳 NT$99（目前仍有名額）')
     expect(landing).not.toContain('<p class="hero-delivery-note">完成孩子資料後，第一份專屬教材預計隔天開放下載。</p>')
     expect(pricing).not.toContain('創始 30・月繳限定')
     expect(pricing).toContain('創始 30・名額保留中')

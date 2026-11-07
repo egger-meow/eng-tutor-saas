@@ -142,6 +142,17 @@ describe('Landing Page — First Delivery Timing Disclosure', () => {
 })
 
 describe('Landing Page — Product explanation', () => {
+  it('leads with tracking, customization and accumulated learning while keeping the free pilot clear', () => {
+    const html = renderToStaticMarkup(<LandingPage enrollment={freePilotEnrollment} />)
+    expect(html).toContain('持續追蹤學習，為孩子客製教材，讓每一次練習都累積下來。')
+    expect(html).toContain('每月149元，約一個便當的預算')
+    expect(html).toContain('累積單字、文法、閱讀與錯題紀錄')
+    expect(html).toContain('Beta 期間目前免費，免綁卡，不會自動轉為付費訂閱。')
+    expect(html).toContain('NT$99')
+    expect(html).toContain('NT$1,499')
+    expect(html).not.toContain('NT$499')
+    expect(html).not.toContain('NT$349')
+  })
   it('makes clear that interest leads into worthwhile content', () => {
     const html = renderToStaticMarkup(<LandingPage />)
     expect(html).toContain('興趣是入口，孩子也真的會讀到新東西。')
@@ -198,8 +209,8 @@ describe('Founder 30 and Service Capacity CTA Rules', () => {
     const html = renderToStaticMarkup(<LandingPage enrollment={confirmedOpenEnrollment} />)
     expect(html).toContain('hero-founding-badge')
     expect(html).toContain('創始 30 名限定')
-    expect(html).toContain('月繳 NT$349，持續訂閱期間價格固定不變')
-    expect(html).toContain('標準價 NT$499/月 · 第一週免費')
+    expect(html).toContain('月繳 NT$99，持續訂閱期間價格固定不變')
+    expect(html).toContain('標準價 NT$149/月 · 第一週免費')
   })
 })
 
@@ -257,7 +268,7 @@ describe('Landing Page — Onboarding & Direct Login', () => {
       freePilotLimit: 100,
     }} />)
     expect(html).toContain('創始 30 名限定')
-    expect(html).toContain('月繳 NT$349（目前仍有名額）')
+    expect(html).toContain('月繳 NT$99（目前仍有名額）')
     expect(html).toContain('登記候補')
   })
 })
@@ -304,4 +315,4 @@ describe('Landing Page — Direct Assessment Positioning & Marketing Boundaries'
     expect(html).not.toContain('10–15 題')
     expect(html).not.toContain('10-15 題')
   })
-})
+})

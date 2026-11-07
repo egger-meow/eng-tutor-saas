@@ -49,8 +49,8 @@ export const faqItems = [
   ['教材之後也會持續變好嗎？', '會。除了孩子自己的學習記憶會持續累積，紙屬英文也會持續改善教材架構、題型、課程對齊與使用的 AI 能力。這些系統升級會直接反映在之後產生的教材，不需要家長另外設定。'],
   ['可以直接把紙本教材寄到家嗎？', '目前教材可線上閱讀與作答，也提供空白學生 PDF 下載列印。我們目前專注在每週教材內容的個人化調整，暫不提供實體郵寄服務。'],
   ['一定要讓孩子使用 AI 嗎？', '不用。AI 使用是選擇性的；核心仍是孩子先閱讀、作答、對答案與找錯因。只有需要更多解釋或類題時才使用外部 AI 工具。'],
-  ['目前需要付費嗎？', '紙屬英文 Beta 期間，目前每週專屬教材為 NT$0，免填信用卡、免綁卡。Beta 階段以 100 位 14 天內活躍學習學員為目前邊界；首次達標後永久結束並恢復標準方案（月繳 NT$499 或年繳 NT$4,999），不會因為你填了孩子資料就自動訂閱或扣款。'],
-  ['創始 30 的 NT$349 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。Beta 期間目前每週教材雖為 NT$0，但若希望在 30 席額滿前鎖定未來的 NT$349/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$349／月就會永久保留。年繳不適用創始價格。'],
+  ['目前需要付費嗎？', '紙屬英文 Beta 期間，目前每週專屬教材為 NT$0，免填信用卡、免綁卡。Beta 階段以 100 位 14 天內活躍學習學員為目前邊界；首次達標後永久結束並恢復標準方案（月繳 NT$149 或年繳 NT$1,499），不會因為你填了孩子資料就自動訂閱或扣款。'],
+  ['創始 30 的 NT$99 是什麼？', '這是為首批支持者提供的終身優惠（限額前 30 個月繳訂閱）。Beta 期間目前每週教材雖為 NT$0，但若希望在 30 席額滿前鎖定未來的 NT$99/月優惠，可自願提前訂閱（會立即開始計費）。只要同一月繳訂閱持續有效，NT$99／月就會永久保留。年繳不適用創始價格。'],
   ['100 位是什麼意思？', '100 位是目前服務容量與 Beta 階段的邊界，不是倒數促銷。服務達容量時，新加入者會先進入候補；Beta 免費階段結束後，後續每週服務依當時方案繼續，已完成與正在準備中的教材不受影響。'],
 ] as const
 
@@ -68,10 +68,10 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
     : isFreePilot
       ? 'Beta 期間目前每週專屬教材 NT$0。免填信用卡、免綁卡；100 位是目前服務容量與 Beta 階段邊界，不是倒數促銷。'
       : cta.isWaitlist
-        ? (foundingAvailable ? '目前服務名額已滿，候補不會先收費；創始 NT$349/月優惠目前仍有名額。' : '目前服務名額已滿；候補不會先收費。')
+        ? (foundingAvailable ? '目前服務名額已滿，候補不會先收費；創始 NT$99/月優惠目前仍有名額。' : '目前服務名額已滿；候補不會先收費。')
         : foundingAvailable
           ? null
-          : '第一週免費；之後可選月繳 NT$499 或年繳 NT$4,999。'
+          : '第一週免費；之後可選月繳 NT$149 或年繳 NT$1,499。'
 
   useEffect(() => {
     trackLandingView()
@@ -112,7 +112,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
             <h1 className="hero-title">
               <span>每週一份，</span><span><em>只屬</em>於你孩子的</span><span>英文教材。</span>
             </h1>
-            <p className="lede"><strong>從孩子真的有興趣的內容開始，但一路對齊學校進度、國中英文與會考能力。</strong>每週的程度、錯題與回饋會接到下一週，不是每次重新抽一篇文章。</p>
+            <p className="lede"><strong>持續追蹤學習，為孩子客製教材，讓每一次練習都累積下來。</strong>從程度、學校進度與興趣出發，累積單字、文法、閱讀與錯題紀錄，再依作答與回饋調整下一份教材。</p>
             <ul className="hero-benefits" aria-label="紙屬英文重點">
               <li>4 步驟約 2 分鐘基礎設定，免綁卡；登入後可隨時讓孩子做一段程度診斷，也可以直接開始學習</li>
               <li>線上閱讀、裝置朗讀與作答；整份提交後看答案</li>
@@ -131,13 +131,13 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
                 <div className="hero-founding-badge-main">
                   <span className="hero-founding-tag">創始 30 名限定</span>
                   <strong className="hero-founding-price">
-                    {capacityOpen ? '月繳 NT$349，持續訂閱期間價格固定不變' : '月繳 NT$349（目前仍有名額）'}
+                    {capacityOpen ? '月繳 NT$99，持續訂閱期間價格固定不變' : '月繳 NT$99（目前仍有名額）'}
                   </strong>
                 </div>
                 <span className="hero-founding-sub">
                   {capacityOpen
-                    ? '標準價 NT$499/月 · 第一週免費'
-                    : '目前服務名額已滿候補中 · 開放名額後即可選擇訂閱鎖定 NT$349/月'}
+                    ? '標準價 NT$149/月 · 第一週免費'
+                    : '目前服務名額已滿候補中 · 開放名額後即可選擇訂閱鎖定 NT$99/月'}
                 </span>
               </div>
             ) : null}
