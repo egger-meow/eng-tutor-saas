@@ -4,20 +4,12 @@ export type BillingInterval = 'month' | 'year'
 export const foundingPriceTwd = 99
 export const foundingDiscountMinorAmount = '5000'
 
-export type PaddlePriceIds = {
-  monthly: string
-  annual: string
-  legacyMonthly?: string
-  legacyAnnual?: string
-}
-
 export type PaddlePlan = {
   key: BillingPlan
   planCode: 'standard_monthly' | 'standard_annual'
   billingInterval: BillingInterval
   priceTwd: number
   priceId: string
-  legacy?: boolean
 }
 
 export type PaddleSubscriptionItem = {
@@ -76,7 +68,7 @@ export function getCheckoutPlan(
 
 export function getWebhookPlan(
   items: PaddleSubscriptionItem[] | undefined,
-  priceIds: PaddlePriceIds,
+  priceIds: { monthly: string; annual: string },
 ): PaddlePlan {
   if (!items || items.length !== 1) throw new Error('Expected exactly one Paddle subscription item')
   const item = items[0]
@@ -84,14 +76,14 @@ export function getWebhookPlan(
     ? getCheckoutPlan('monthly', priceIds)
     : item.price?.id === priceIds.annual
       ? getCheckoutPlan('annual', priceIds)
-      : priceIds.legacyMonthly && item.price?.id === priceIds.legacyMonthly
-        ? { ...getCheckoutPlan('monthly', priceIds), priceId: priceIds.legacyMonthly, priceTwd: 499, legacy: true }
-        : priceIds.legacyAnnual && item.price?.id === priceIds.legacyAnnual
-          ? { ...getCheckoutPlan('annual', priceIds), priceId: priceIds.legacyAnnual, priceTwd: 4999, legacy: true }
-          : null
+      : null
   if (!plan) throw new Error('Unknown Paddle subscription price')
 
   const amount = item.price?.unit_price?.amount
+  // Paddle keeps the original price snapshot on existing subscriptions after
+  // an in-place catalog edit. Only the known old amount on the same ID is valid.
+  const historicalPriceTwd = plan.key === 'monthly' ? 499 : 4999
+  if (amount === String(historicalPriceTwd * 100)) plan.priceTwd = historicalPriceTwd
   const expectedMinorAmount = String(plan.priceTwd * 100)
   if (item.quantity !== 1
     || item.price?.billing_cycle?.interval !== plan.billingInterval

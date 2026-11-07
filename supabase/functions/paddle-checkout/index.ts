@@ -149,7 +149,7 @@ Deno.serve(async (request) => {
         return jsonResponse(409, { error: 'founder_checkout_reconciliation_required' })
       }
       const existingPlan = getWebhookPlan(transaction.items, { monthly: monthlyPriceId, annual: annualPriceId })
-      if (existingPlan.key !== plan.key) {
+      if (existingPlan.key !== plan.key || existingPlan.priceTwd !== plan.priceTwd) {
         return jsonResponse(409, { error: 'founder_checkout_reconciliation_required' })
       }
       return jsonResponse(200, {
@@ -170,7 +170,7 @@ Deno.serve(async (request) => {
       const transaction = existingBody?.data
       if (existingResponse.ok && ['draft', 'ready'].includes(transaction?.status)) {
         const existingPlan = getWebhookPlan(transaction.items, { monthly: monthlyPriceId, annual: annualPriceId })
-        if (existingPlan.key !== plan.key || transaction.discount_id) {
+        if (existingPlan.key !== plan.key || existingPlan.priceTwd !== plan.priceTwd || transaction.discount_id) {
           return jsonResponse(409, { error: 'checkout_reconciliation_required' })
         }
         return jsonResponse(200, {

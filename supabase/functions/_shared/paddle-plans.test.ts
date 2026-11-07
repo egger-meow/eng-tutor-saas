@@ -43,19 +43,18 @@ describe('Paddle plan allowlist', () => {
     }], priceIds)).toThrow('do not match')
   })
 
-  it('accepts explicitly configured historical prices without making them available to new checkout', () => {
-    const ids = { ...priceIds, legacyMonthly: 'pri_old_monthly', legacyAnnual: 'pri_old_annual' }
+  it('accepts historical snapshots on the original IDs after an in-place price edit', () => {
     for (const [id, amount, interval, priceTwd] of [
-      ['pri_old_monthly', '49900', 'month', 499],
-      ['pri_old_annual', '499900', 'year', 4999],
+      ['pri_monthly', '49900', 'month', 499],
+      ['pri_annual', '499900', 'year', 4999],
     ] as const) {
       const items = [{ quantity: 1, price: { id, unit_price: { amount, currency_code: 'TWD' }, billing_cycle: { interval, frequency: 1 } } }]
-      expect(getWebhookPlan(items, ids)).toMatchObject({ priceTwd, legacy: true })
-      expect(() => getWebhookPlan(items, priceIds)).toThrow('Unknown')
-      expect(() => getWebhookPlan([{ ...items[0], price: { ...items[0].price, unit_price: { amount: '14900', currency_code: 'TWD' } } }], ids)).toThrow('do not match')
+      expect(getWebhookPlan(items, priceIds)).toMatchObject({ priceTwd, priceId: id })
+      expect(() => getWebhookPlan([{ ...items[0], price: { ...items[0].price, id: 'pri_duplicate' } }], priceIds)).toThrow('Unknown')
+      expect(() => getWebhookPlan([{ ...items[0], price: { ...items[0].price, unit_price: { amount: '12300', currency_code: 'TWD' } } }], priceIds)).toThrow('do not match')
     }
-    expect(getCheckoutPlan('monthly', ids).priceTwd).toBe(149)
-    expect(getCheckoutPlan('annual', ids).priceTwd).toBe(1499)
+    expect(getCheckoutPlan('monthly', priceIds)).toMatchObject({ priceTwd: 149, priceId: 'pri_monthly' })
+    expect(getCheckoutPlan('annual', priceIds)).toMatchObject({ priceTwd: 1499, priceId: 'pri_annual' })
   })
 
   it('rejects the former TWD 150 discount for new Founder checkout', () => {

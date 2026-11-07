@@ -7,8 +7,8 @@
 在 Paddle Sandbox 進入 **Catalog > Products**：
 
 1. 開啟現有「紙屬英文」product；不要為年繳另建 product。
-2. 建立新的月繳 price，確認 currency 是 `TWD`、billing period 是每 1 `month`、金額是 `149`、quantity 最小與最大都為 `1`，Sales tax 選 Includes tax（`internal`）。舊 price 保留作為歷史訂閱來源，不再用於新結帳。
-3. 在同一 product 按 **New price**，建立年繳 price：currency `TWD`、金額 `1499`、billing period 每 1 `year`、quantity `1`、Sales tax 為 Includes tax（`internal`），不設定 trial，也不要套 Founding discount。
+2. 直接編輯現有月繳 price，保留原 ID，確認 currency 是 `TWD`、billing period 是每 1 `month`、金額是 `149`、quantity 最小與最大都為 `1`，Sales tax 選 Includes tax（`internal`）。
+3. 直接編輯同一 product 的現有年繳 price，保留原 ID：currency `TWD`、金額 `1499`、billing period 每 1 `year`、quantity `1`、Sales tax 為 Includes tax（`internal`），不設定 trial，也不要套 Founding discount。只有全新尚無設定的帳戶才需要 New price。
 4. 從兩個 price 的動作選單複製 `pri_...` ID。
 
 需要保存：

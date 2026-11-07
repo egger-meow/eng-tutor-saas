@@ -611,7 +611,7 @@ NT$99/month while that same monthly subscription remains continuously active
 
 The standard monthly catalog price remains NT$149 and annual remains NT$1,499. Founder pricing is produced by a recurring flat TWD 50 Paddle discount (amount 5000), not by changing the catalog price.
 
-The November 7, 2026 price revision uses new Paddle catalog prices and a new discount. Previous 499/4,999 prices and the TWD 150 discount remain webhook-only allowlisted history; they are never selected for a new checkout. Price and discount versions must be reconciled together. Completed transactions and consumed Founder seats are never rewritten or reset by a price change.
+The November 7, 2026 price revision updates the existing Paddle monthly price, annual price and Founder discount in place, retaining all three original IDs. Paddle's historical subscription snapshots at 499/4,999 remain valid on those same IDs for webhook processing; new checkout uses 149/1,499. Completed transactions and consumed Founder seats are never rewritten or reset by a price change.
 
 Founder status is awarded only to the first 30 children who successfully start a qualifying monthly Paddle subscription. Admitting a child into the Free Pilot does NOT allocate or consume a Founder seat. All admitted children have equal access to the free weekly service while the Free Pilot is active without needing to subscribe.
 
