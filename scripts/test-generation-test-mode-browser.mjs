@@ -10,7 +10,7 @@ const {createServer}=await import(pathToFileURL(requireAdmin.resolve('vite')).hr
 await mkdir('apps/admin/.runtime',{recursive:true});await mkdir('.runtime/test-mode-ui',{recursive:true})
 await writeFile('apps/admin/.runtime/test-mode.html','<div id="root"></div><script type="module" src="/.runtime/test-mode.tsx"></script>')
 await writeFile('apps/admin/.runtime/test-mode.tsx',`import React from 'react';import {createRoot} from 'react-dom/client';import {GenerationTestModePanel} from '../src/components/timeline/GenerationTestModePanel';import '../src/index.css';import '../src/styles/cockpit.css';createRoot(document.getElementById('root')).render(<main style={{padding:12}}><GenerationTestModePanel childId="synthetic-child" onRefreshTimeline={()=>{}}/></main>);`)
-const server=await createServer({configFile:false,root:resolve('apps/admin'),server:{host:'127.0.0.1',port:5184,strictPort:true}})
+const server=await createServer({configFile:false,root:resolve('apps/admin'),cacheDir:resolve('apps/admin/.runtime/test-mode-vite-cache'),server:{host:'127.0.0.1',port:5184,strictPort:true}})
 await server.listen();const browser=await chromium.launch({headless:true});const evidence=[]
 try{
 for(const width of [320,390,820,1440]){
