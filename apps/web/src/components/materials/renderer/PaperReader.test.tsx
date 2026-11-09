@@ -61,6 +61,15 @@ describe('PaperReader Component Suite', () => {
     expect(html).not.toContain('paper-result-answer')
     expect(html).not.toContain('option-correct')
   })
+  it('keeps historical responses without a reference answer at full width', () => {
+    const html = renderToStaticMarkup(<SubmissionResultsContext.Provider value={[
+      { question_id: 'legacy', status: 'open_review', correct_answer: null },
+    ]}><QuestionRenderer question={{ id: 'legacy', prompt: 'Explain.' }} index={0}
+      draftAnswers={{ legacy: 'Preserved response' }} onAnswerChange={vi.fn()} /></SubmissionResultsContext.Provider>)
+    expect(html).toContain('Preserved response')
+    expect(html).not.toContain('question-card-reviewed')
+    expect(html).not.toContain('paper-result-answer')
+  })
   it('allows historical structured questions without response-unit IDs to answer under their stable question ID', () => {
     const html = renderToStaticMarkup(<QuestionRenderer
       question={{id:'legacy-organizer',prompt:'Compare the two scenes.',responseLayout:{type:'organizer',headers:['Scene','Evidence'],rows:[{label:'First scene'}]}}}

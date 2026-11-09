@@ -591,6 +591,7 @@ export class AdminService {
         .select('*')
         .eq('child_id', childId)
         .neq('status', 'completed')
+        .neq('status', 'canceled')
         .order('scheduled_for', { ascending: true })
 
       const nextJob = jobs && jobs.length > 0 ? jobs[0] : null
@@ -819,6 +820,7 @@ export class AdminService {
         .select('*')
         .eq('child_id', childId)
         .neq('status', 'completed')
+        .neq('status', 'canceled')
 
       if (!jobs || jobs.length === 0) {
         return { success: false, error: 'NEXT_JOB_NOT_FOUND', message: 'No pending generation job found for next week' }

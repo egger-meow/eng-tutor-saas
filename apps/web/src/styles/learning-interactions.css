@@ -33,7 +33,7 @@
 .feedback-entry-copy .feedback-summary { margin: .5rem 0 0; }
 .feedback-entry-copy .feedback-summary p { margin-top: .35rem; font-size: .8125rem; }
 .feedback-entry-action { flex-shrink: 0; gap: .5rem; min-width: 8rem; background: var(--color-paper); }
-.feedback-entry-action > span { font-size: 1.2rem; font-weight: 400; line-height: 1; }
+.feedback-entry-icon { display: block; flex: 0 0 1.125rem; }
 .feedback-entry-action[aria-expanded="true"] { background: var(--color-success-soft); border-color: var(--color-action); }
 .feedback-start-link { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; color: var(--color-action); font-size: .875rem; font-weight: 600; text-decoration: none; }
 .feedback-start-link:hover { text-decoration: underline; }

@@ -895,6 +895,24 @@ describe('AdminService Authoritative Truth Layer', () => {
     const testChildId = '11111111-1111-4111-8111-111111111111'
     const normalChildId = '22222222-2222-4222-8222-222222222222'
 
+    it('ignores canceled historical jobs when selecting the next test job', async () => {
+      const service = new AdminService({ client: createMockSupabaseClient({
+        children: [{ id: testChildId, display_name: 'Synthetic tester', is_active: true }],
+        generation_test_mode_sessions: [{ child_id: testChildId, is_enabled: true, target_week: 9 }],
+        generation_jobs: [
+          { id: 'historical-canceled', child_id: testChildId, status: 'canceled', material_week: '2026-09-20' },
+          { id: 'current-pending', child_id: testChildId, status: 'pending', material_week: '2026-10-15', attempt_count: 0, max_attempts: 5 },
+        ],
+        materials: [],
+      }) })
+      const status = await service.getTestModeStatus(testChildId)
+      expect(status.nextJob?.id).toBe('current-pending')
+      expect(status.advanceEligibility.canAdvance).toBe(true)
+      const advanced = await service.advanceTestWeek(testChildId)
+      expect(advanced.success).toBe(true)
+      expect(advanced.jobId).toBe('current-pending')
+    })
+
     it('returns fail-closed disabled status for ordinary non-test children', async () => {
       const mockClient = createMockSupabaseClient({
         children: [{ id: normalChildId, display_name: '一般學員', is_active: true }],

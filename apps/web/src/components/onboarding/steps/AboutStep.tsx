@@ -147,6 +147,7 @@ export function AboutStep({ draft, errors, update, onAutoAdvance, showExpressInt
             </div>
             <input
               type="text"
+              aria-label="補充孩子的具體喜好"
               placeholder="或者補充孩子的具體喜好（例如：NBA 勇士隊、寶可夢、排球少年）"
               value={draft.favoriteStories || ''}
               onChange={(e) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import type {
   GenerationTestModeStatus,
   AdminTestFeedbackInput,
@@ -21,6 +21,8 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
   )
   const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [statusError, setStatusError] = useState<string | null>(null)
+  const statusRequest = useRef(0)
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Feedback Modal state
@@ -58,24 +60,35 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
 
   const fetchStatus = useCallback(async (silent = false) => {
     if (!childId) return
+    const request = ++statusRequest.current
     if (!silent) setLoading(true)
     try {
       const res = await adminApi.getTestModeStatus(childId)
+      if (request !== statusRequest.current) return
+      if (!res.success) throw new Error(res.message || '無法確認測試模式狀態')
       setStatus(res)
+      setStatusError(null)
       if (res.targetWeek) {
         setTargetWeekInput(res.targetWeek)
       }
     } catch (err) {
-      console.error('Failed to load test mode status:', err)
+      if (request === statusRequest.current) setStatusError('無法確認最新測試狀態，請重試後再操作。')
     } finally {
-      setLoading(false)
+      if (request === statusRequest.current) setLoading(false)
     }
   }, [childId])
 
   useEffect(() => {
     const hasInitial = Boolean(initialStatus || adminApi.getCachedTestModeStatus(childId))
     fetchStatus(hasInitial)
+    return () => { statusRequest.current++ }
   }, [childId, fetchStatus])
+
+  useEffect(() => {
+    setShowFeedbackModal(false)
+    setShowResetModal(false)
+    setActionMessage(null)
+  }, [childId])
 
   const handleEnableTestMode = async () => {
     setActionLoading(true)
@@ -220,10 +233,11 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
     )
   }
 
-  const isEnabled = Boolean(status?.isEnabled)
-  const canAdvance = Boolean(status?.advanceEligibility?.canAdvance)
+  const statusReady = status?.childId === childId && status.success && !statusError && !loading
+  const isEnabled = Boolean(status?.childId === childId && status?.isEnabled)
+  const canAdvance = Boolean(statusReady && status?.advanceEligibility?.canAdvance)
   const advanceBlockingReason = status?.advanceEligibility?.blockingReason
-  const canReset = Boolean(status?.resetEligibility?.canReset)
+  const canReset = Boolean(statusReady && status?.resetEligibility?.canReset)
 
   return (
     <div
@@ -276,7 +290,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               className="refresh-btn"
               style={{ background: '#7c3aed', color: '#fff', borderColor: '#8b5cf6', fontWeight: 600, padding: '6px 14px', fontSize: '12px' }}
               onClick={handleEnableTestMode}
-              disabled={actionLoading}
+              disabled={actionLoading || !statusReady}
             >
               {actionLoading ? '啟用中...' : '啟用測試模式'}
             </button>
@@ -288,7 +302,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
               className="refresh-btn"
               style={{ background: 'transparent', color: '#94a3b8', borderColor: '#475569', fontSize: '12px', padding: '5px 12px' }}
               onClick={handleDisableTestMode}
-              disabled={actionLoading}
+              disabled={actionLoading || !statusReady}
             >
               {actionLoading ? '處理中...' : '結束測試模式'}
             </button>
@@ -297,6 +311,9 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
       </div>
 
       {/* Action Result / Feedback Message */}
+      {statusError && <div role="alert" style={{ marginBottom: '16px', color: '#fca5a5' }}>
+        {statusError} <button type="button" className="refresh-btn" onClick={() => void fetchStatus()}>重試狀態</button>
+      </div>}
       {actionMessage && (
         <div
           style={{
@@ -367,6 +384,7 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
           )}
 
           {/* Action Buttons Toolbar */}
+          {!canReset && status.resetEligibility?.blockingReason && <p style={{ color: '#94a3b8', fontSize: '12px' }}>重設受阻原因：{status.resetEligibility.blockingReason}</p>}
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <button
               type="button"
@@ -392,8 +410,19 @@ export const GenerationTestModePanel: React.FC<GenerationTestModePanelProps> = (
                   type="button"
                   className="refresh-btn"
                   style={{ background: '#1e293b', color: '#f8fafc', borderColor: '#475569', fontSize: '12px', padding: '8px 14px' }}
-                  onClick={() => setShowFeedbackModal(true)}
-                  disabled={actionLoading}
+                  onClick={() => {
+                    const feedback = status.latestFeedback
+                    setFeedbackDifficulty(feedback?.difficulty ?? 3)
+                    setFeedbackCompletion(feedback?.completionRate ?? 100)
+                    setFeedbackWeakArea(feedback?.weakArea ?? 'mixed')
+                    setFeedbackMistakes(feedback?.mistakesText ?? '')
+                    setFeedbackChildComments(feedback?.childComments ?? '')
+                    setFeedbackParentComments(feedback?.parentComments ?? '')
+                    setFeedbackSchoolProgress(feedback?.schoolProgressUpdate ?? '')
+                    setFeedbackInterestUpdate(feedback?.interestUpdate ?? '')
+                    setShowFeedbackModal(true)
+                  }}
+                  disabled={actionLoading || !statusReady}
                 >
                   📝 填寫測試回饋
                 </button>

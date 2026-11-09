@@ -25,6 +25,7 @@ export function QuestionRenderer({
   const selectedAnswer = draftAnswers[qId] ?? ''
 
   const hasOptions = Array.isArray(question.options) && question.options.length > 0
+  const hasReferenceAnswer = Boolean(result?.correct_answer && (!hasOptions || !question.options?.some((option, i) => result.correct_answer === option || result.correct_answer === OPTION_LETTERS[i])))
   const layout = question.responseLayout
   const needsLegacyResponse = !hasOptions && layout && (
     ((layout.type === 'table' || layout.type === 'organizer') && !layout.rows?.some(row => row.cells?.some(cell => cell.responseUnitId)))
@@ -32,7 +33,7 @@ export function QuestionRenderer({
   )
 
   return (
-    <div className={`question-card ${result && !hasOptions ? 'question-card-reviewed' : ''}`} id={`q-card-${qId}`}>
+    <div className={`question-card ${hasReferenceAnswer ? 'question-card-reviewed' : ''}`} id={`q-card-${qId}`}>
       <div className="question-heading">
         <span className="question-number">Q{index + 1}.</span>
         <p id={`prompt-${qId}`} className="question-prompt">{question.prompt}</p>
@@ -42,6 +43,7 @@ export function QuestionRenderer({
       </div>
 
       <div className="question-response">
+      {hasReferenceAnswer && <p className="paper-response-label">你的作答</p>}
       {/* 1. Multiple Choice Questions */}
       {hasOptions && (
         <div className="options-grid">
@@ -188,9 +190,9 @@ export function QuestionRenderer({
         />
       )}
       </div>
-      {result?.correct_answer && (!hasOptions || !question.options?.some((option, i) => result.correct_answer === option || result.correct_answer === OPTION_LETTERS[i])) && <div className="paper-result-answer">
-        <span className="paper-result-answer-label">{result.status === 'open_review' ? '參考答案' : '正解'}</span>
-        <p>{result.correct_answer}</p>
+      {hasReferenceAnswer && <div className="paper-result-answer">
+        <span className="paper-result-answer-label">{result?.status === 'open_review' ? '參考答案' : '正解'}</span>
+        <p>{result?.correct_answer}</p>
       </div>}
     </div>
   )
