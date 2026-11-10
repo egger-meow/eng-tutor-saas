@@ -53,8 +53,10 @@ try {
     assert.ok(await page.locator('.reading-target-word').count() > 0, 'reading highlights packet vocabulary')
     await page.locator('#chapter-reading').scrollIntoViewIfNeeded()
     await page.getByRole('button', { name: '朗讀整篇文章', exact: true }).focus()
-    const readingTop = await page.locator('.reading-passage-body').evaluate(el => el.getBoundingClientRect().top + scrollY)
     await page.screenshot({ path: `.runtime/s6/${device}-reading-idle.png` })
+    // Screenshots await web fonts; measure afterward so font loading is not
+    // mistaken for a layout shift caused by the speech state transition.
+    const readingTop = await page.locator('.reading-passage-body').evaluate(el => el.getBoundingClientRect().top + scrollY)
     await page.getByRole('button', { name: '朗讀整篇文章', exact: true }).click()
     const speakingTop = await page.locator('.reading-passage-body').evaluate(el => el.getBoundingClientRect().top + scrollY)
     assert.ok(Math.abs(readingTop - speakingTop) < 1, `speech state must not move the reading content: ${readingTop} -> ${speakingTop}`)
