@@ -84,7 +84,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
               </span>
             )}
             {child.subscription?.status === 'canceled' && (
-              <span className="status-label status-canceled">已到期</span>
+              <span className={`status-label ${enrollment?.freePilotActive ? 'status-trialing' : 'status-canceled'}`}>{enrollment?.freePilotActive ? 'Beta 免費中（訂閱已到期）' : '已到期'}</span>
             )}
             {child.subscription?.status === 'active' && child.subscription.cancelAtPeriodEnd && (
               <span className="status-label status-paused">已取消續訂</span>

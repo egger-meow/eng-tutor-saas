@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildMaterialSessionPlan,
+  countAnsweredQuestions,
   isStepCompleted,
   getCurrentStep,
   getNextQuestionId,
@@ -176,5 +177,19 @@ describe('material-session-plan', () => {
     const allComplete = { q1: 'ans1', q2: 'ans2', q3: 'ans3' }
     expect(isStepCompleted(plan.steps[1], allComplete)).toBe(true)
     expect(getCurrentStep(plan, allComplete)).toBeNull()
+  })
+})
+
+
+describe('submission confirmation counts', () => {
+  it('counts a started structured question once and ignores unrelated or blank responses', () => {
+    const questions = [
+      { id: 'choice', prompt: 'Choose', options: ['one', 'two'] },
+      { id: 'table', prompt: 'Explain', responseLayout: { type: 'table' as const, headers: ['Proof', 'Inference'], rows: [{ cells: [{ responseUnitId: 'proof' }, { responseUnitId: 'inference' }] }] } },
+      { id: 'text', prompt: 'Write' },
+    ]
+    expect(countAnsweredQuestions(questions, { choice: 'A', proof: 'Evidence', inference: 'Conclusion', text: ' ', unrelated: 'ignored' })).toBe(2)
+    expect(countAnsweredQuestions(questions, { proof: 'Evidence' })).toBe(1)
+    expect(countAnsweredQuestions(questions, { proof: ' ', table: 'legacy parent key' })).toBe(0)
   })
 })

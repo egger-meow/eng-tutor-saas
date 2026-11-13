@@ -20,6 +20,7 @@ export interface UseMaterialDraftReturn {
   version: number
   isInitialLoading: boolean
   hasConflict: boolean
+  navigationBlocked: boolean
   serverConflictData: {
     answers: DraftAnswers
     selfCheck: DraftSelfCheck
@@ -42,6 +43,8 @@ export function useMaterialDraft({
   const [version, setVersion] = useState<number>(0)
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true)
   const [hasConflict, setHasConflict] = useState<boolean>(false)
+  const [navigationBlocked, setNavigationBlocked] = useState(false)
+  useEffect(() => { if (status === 'saved') setNavigationBlocked(false) }, [status])
   const [serverConflictData, setServerConflictData] = useState<{
     answers: DraftAnswers
     selfCheck: DraftSelfCheck
@@ -188,7 +191,10 @@ export function useMaterialDraft({
 
   useEffect(() => {
     function preventUnsavedExit(event: Event) {
-      if (['unsaved', 'saving', 'error', 'conflict'].includes(statusRef.current)) event.preventDefault()
+      if (['unsaved', 'saving', 'error', 'conflict'].includes(statusRef.current)) {
+        event.preventDefault()
+        setNavigationBlocked(true)
+      }
     }
     function beforeUnload(event: BeforeUnloadEvent) {
       preventUnsavedExit(event)
@@ -314,6 +320,7 @@ export function useMaterialDraft({
     version,
     isInitialLoading,
     hasConflict,
+    navigationBlocked,
     serverConflictData,
     updateAnswer,
     toggleSelfCheck,

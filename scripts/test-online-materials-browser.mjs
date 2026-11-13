@@ -173,6 +173,8 @@ try {
     await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).fill('My saved sentence.')
     assert.equal(await submit.isDisabled(), true, 'cannot submit while saving')
     assert.equal(await page.evaluate(() => window.dispatchEvent(new Event('paper-english:before-navigate', { cancelable: true }))), false, 'pending saves block internal navigation')
+    await page.locator('.paper-navigation-notice').waitFor({ state: 'visible' })
+    await page.screenshot({ path: resolve(`.runtime/layout-review/after/${device}-navigation-save-notice.png`) })
     await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
     delaySave = false
     assert.equal(draft.answers.q2, 'My saved sentence.', 'in-flight edits persist')
@@ -217,8 +219,11 @@ try {
     assert.equal(await page.getByRole('textbox', { name: 'Write a sentence.', exact: true }).inputValue(), 'Forward pending sentence.')
     await context.setOffline(false)
     await page.waitForFunction(() => document.querySelector('.paper-save-status')?.classList.contains('status-saved'))
-    page.on('dialog', (dialog) => dialog.accept())
+    let confirmationMessage = ''
+    page.on('dialog', (dialog) => { confirmationMessage = dialog.message(); return dialog.accept() })
     await submit.click()
+    assert.match(confirmationMessage, /已作答：4 題/, 'confirmation includes the structured table response')
+    assert.match(confirmationMessage, /未作答：0 題/)
     await page.locator('#q-card-q1 .option-correct').getByText('✓ 正解', { exact: true }).waitFor()
     await page.locator('#q-card-q2 .paper-result-answer').getByText('Sample sentence.', { exact: true }).waitFor()
     assert.equal(await page.locator('.paper-results-list').count(), 0, 'review stays beside the original answer')

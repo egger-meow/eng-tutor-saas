@@ -2,6 +2,7 @@ import type { MaterialNavigationPosition } from '../../../lib/material-learning-
 
 export interface LearningSessionNavProps {
   savedPosition: MaterialNavigationPosition | null
+  questionNumber?: number
   hasConflict?: boolean
   saveError?: boolean
   onResume: (chapterId: string, questionId?: string | null) => void
@@ -20,6 +21,7 @@ const CHAPTER_LABELS: Record<string, string> = {
 
 export function LearningSessionNav({
   savedPosition,
+  questionNumber,
   hasConflict,
   saveError,
   onResume,
@@ -38,7 +40,7 @@ export function LearningSessionNav({
           <span className="session-nav-icon" aria-hidden="true">📍</span>
           <span className="session-nav-text">
             上次停在「<strong>{chapterLabel}</strong>」
-            {savedPosition.question_id ? ` (題目 ${savedPosition.question_id})` : ''}
+            {questionNumber ? `（第 ${questionNumber} 題）` : ''}
           </span>
           <div className="session-nav-actions">
             <button

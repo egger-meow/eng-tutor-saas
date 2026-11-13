@@ -36,13 +36,31 @@ export function AuthPanel({ isPublicLanding = false }: { isPublicLanding?: boole
 
   useEffect(() => {
     if (!isPublicLanding || navigationRequest === 0) return
-    // Position only after the new card has replaced the taller questionnaire.
-    const frame = window.requestAnimationFrame(() => {
-      const card = document.getElementById(mode)
-      card?.scrollIntoView({ behavior: 'instant', block: 'start' })
-      card?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
-    })
-    return () => window.cancelAnimationFrame(frame)
+    // Keep the entry aligned through font/image/enrollment layout changes on
+    // cross-route entry. Stop as soon as the user interacts or scrolls.
+    let active = true
+    let frame = 0
+    const align = () => {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        if (!active) return
+        const card = document.getElementById(mode)
+        card?.scrollIntoView({ behavior: 'instant', block: 'start' })
+        card?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
+      })
+    }
+    const observer = new ResizeObserver(align)
+    const main = document.getElementById('main-content')
+    if (main) observer.observe(main)
+    const stop = () => { active = false; observer.disconnect(); window.cancelAnimationFrame(frame) }
+    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const
+    events.forEach(event => window.addEventListener(event, stop, { passive: true, once: true }))
+    align()
+    void document.fonts.ready.then(() => { if (active) align() })
+    return () => {
+      stop()
+      events.forEach(event => window.removeEventListener(event, stop))
+    }
   }, [isPublicLanding, mode, navigationRequest])
 
   if (!isPublicLanding) {

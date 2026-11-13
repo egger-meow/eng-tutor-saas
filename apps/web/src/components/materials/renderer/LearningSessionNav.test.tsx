@@ -31,7 +31,7 @@ describe('LearningSessionNav', () => {
     expect(html).toContain('略過')
   })
 
-  it('renders question ID detail when present', () => {
+  it('renders a learner-facing question number without internal IDs', () => {
     const html = renderToStaticMarkup(
       <LearningSessionNav
         savedPosition={{
@@ -39,11 +39,13 @@ describe('LearningSessionNav', () => {
           question_id: 'q-mc-1',
           version: 2,
         }}
+        questionNumber={8}
         onResume={vi.fn()}
         onDismiss={vi.fn()}
       />
     )
-    expect(html).toContain('上次停在「<strong>課堂練習</strong>」 (題目 q-mc-1)')
+    expect(html).toContain('上次停在「<strong>課堂練習</strong>」（第 8 題）')
+    expect(html).not.toContain('q-mc-1')
   })
 
   it('renders conflict notice when hasConflict is true', () => {

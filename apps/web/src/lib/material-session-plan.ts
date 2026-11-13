@@ -115,20 +115,11 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
   }
 
   const questions = [...practiceQuestions, ...(lesson.homework?.questions ?? [])]
-  const answerKeysFor = (question: Question): string[] => {
-    if (question.options?.length) return extractQuestionIds([question])
-    const layout = question.responseLayout
-    const units = layout?.type === 'table' || layout?.type === 'organizer'
-      ? layout.rows.flatMap(row => (row.cells ?? []).flatMap(cell => cell.responseUnitId ? [cell.responseUnitId] : []))
-      : layout?.type === 'sequence'
-        ? layout.items.flatMap(item => item.responseUnitId ? [item.responseUnitId] : [])
-        : []
-    return units.length ? units : extractQuestionIds([question])
-  }
+
   for (const step of steps) {
     step.questionAnswerKeys = Object.fromEntries(step.questionIds.map(id => {
       const question = questions.find(q => (q.id || q.questionId) === id)
-      return [id, question ? answerKeysFor(question) : [id]]
+      return [id, question ? questionAnswerKeys(question) : [id]]
     }))
     step.answerKeys = Object.values(step.questionAnswerKeys).flat()
   }
@@ -166,4 +157,19 @@ export function getCurrentStep(plan: MaterialSessionPlan, answers?: Record<strin
   if (!hasAnswers) return plan.steps[0]
   const incomplete = plan.steps.find((step) => step.questionIds.length > 0 && !isStepCompleted(step, answers))
   return incomplete ?? null
+}
+
+export function questionAnswerKeys(question: Question): string[] {
+  if (question.options?.length) return extractQuestionIds([question])
+  const layout = question.responseLayout
+  const units = layout?.type === 'table' || layout?.type === 'organizer'
+    ? layout.rows.flatMap(row => (row.cells ?? []).flatMap(cell => cell.responseUnitId ? [cell.responseUnitId] : []))
+    : layout?.type === 'sequence'
+      ? layout.items.flatMap(item => item.responseUnitId ? [item.responseUnitId] : [])
+      : []
+  return units.length ? units : extractQuestionIds([question])
+}
+
+export function countAnsweredQuestions(questions: Question[], answers: Record<string, string>): number {
+  return questions.filter(question => questionAnswerKeys(question).some(key => Boolean(answers[key]?.trim()))).length
 }

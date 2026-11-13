@@ -105,10 +105,10 @@ export function QuestionRenderer({
                         return (
                           <td key={cIdx} data-column={layout.headers?.[cIdx + (row.label ? 1 : 0)]}>
                             {cell.responseUnitId ? (
-                              <input
+                              readOnly ? <p className="response-grid-answer">{draftAnswers[cellKey]?.trim() || '未作答'}</p> : <textarea
+                                rows={3}
                                 aria-label={`${question.prompt} · ${row.label ?? `第 ${rIdx + 1} 列`} · ${layout.headers?.[cIdx + (row.label ? 1 : 0)] ?? `欄 ${cIdx + 1}`}`}
                                 readOnly={readOnly}
-                                type="text"
                                 className="response-grid-input"
                                 placeholder={cell.placeholder ?? '填寫作答…'}
                                 value={draftAnswers[cellKey] ?? ''}

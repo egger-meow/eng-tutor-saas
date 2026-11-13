@@ -8,7 +8,7 @@ import { MaterialNextStepPanel } from './MaterialNextStepPanel'
 import { LearningStartPanel } from './LearningStartPanel'
 import { LearningSessionNav } from './LearningSessionNav'
 import { useMaterialLearningNavigation } from '../../../hooks/use-material-learning-navigation'
-import { buildMaterialSessionPlan } from '../../../lib/material-session-plan'
+import { buildMaterialSessionPlan, countAnsweredQuestions } from '../../../lib/material-session-plan'
 import type { StudentMaterialProjection } from '../../../types/student-material'
 import { fetchStudentSubmission, submitStudentMaterial, saveStudentParentFeedback, requestNextAfterSubmission, type SubmissionResult } from '../../../lib/student-material-api'
 import { useMaterialDraft } from '../../../hooks/use-material-draft'
@@ -31,6 +31,7 @@ export function PaperReader({
     status,
     lastSavedAt,
     hasConflict,
+    navigationBlocked,
     isInitialLoading,
     version,
     updateAnswer,
@@ -126,6 +127,10 @@ export function PaperReader({
   }, [projection.material_id, loadAttempt])
 
   const lesson = projection.student_lesson
+  const resumeQuestions = savedPosition?.chapter_id === 'homework'
+    ? lesson.homework?.questions ?? []
+    : lesson.practice?.flatMap(stage => stage.questions) ?? []
+  const resumeIndex = resumeQuestions.findIndex(question => (question.id || question.questionId) === savedPosition?.question_id)
   const sessionPlan = useMemo(() => buildMaterialSessionPlan(projection.student_lesson), [projection.student_lesson])
 
   async function handlePauseAndLeave() {
@@ -165,10 +170,7 @@ export function PaperReader({
       ...(lesson.homework?.questions ?? []),
     ]
     const totalCount = allQuestions.length
-    const answeredCount = allQuestions.filter((q) => {
-      const qId = q.id || q.questionId
-      return qId && typeof answers[qId] === 'string' && answers[qId].trim().length > 0
-    }).length
+    const answeredCount = countAnsweredQuestions(allQuestions, answers)
     const unansweredCount = Math.max(0, totalCount - answeredCount)
 
     const confirmMsg = isPaperFastTrack
@@ -313,6 +315,7 @@ export function PaperReader({
 
   return (
     <div className="paper-reader-container" inert={isInitialLoading || submissionLoading} aria-busy={isInitialLoading || submissionLoading}>
+      {navigationBlocked && <div className="paper-navigation-notice" role="alert">作答尚未儲存，已暫停離開。請等待儲存完成；若儲存失敗，請點「重試」。</div>}
       <header className="paper-material-heading">
         <h1>{projection.title || '本週英文教材'}</h1>
       </header>
@@ -322,6 +325,7 @@ export function PaperReader({
       {/* Session resume and multi-device navigation prompt */}
       <LearningSessionNav
         savedPosition={savedPosition}
+        questionNumber={resumeIndex >= 0 ? resumeIndex + 1 : undefined}
         hasConflict={navConflict}
         saveError={navSaveError}
         onResume={handleResume}

@@ -65,6 +65,9 @@ export function navigate(path: string) {
   }
 
   if (nextUrl.hash) {
+    // A local form switch can leave the URL on the same hash. Notify mounted
+    // panels even when history does not change so repeated entry links work.
+    if (currentUrl.href === nextUrl.href) window.dispatchEvent(new Event(routeChangeEvent))
     window.requestAnimationFrame(() => document.getElementById(decodeURIComponent(nextUrl.hash.slice(1)))?.scrollIntoView({ block: 'start' }))
   } else if (!sameDocument) {
     window.scrollTo({ top: 0, behavior: 'auto' })

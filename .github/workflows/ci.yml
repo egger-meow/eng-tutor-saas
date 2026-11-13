@@ -66,6 +66,7 @@ jobs:
       - run: pnpm build
       - name: Verify responsive material and public demo flows
         run: |
+          node scripts/test-landing-auth-browser.mjs
           node scripts/test-online-materials-browser.mjs
           node scripts/test-feedback-flow-browser.mjs
           node scripts/test-public-demo-browser.mjs
