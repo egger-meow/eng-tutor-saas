@@ -12,6 +12,7 @@ export type MaterialLoadState =
       material: OwnedMaterial
       studentPdfUrl: string | null
       previewError?: boolean
+      projectionError?: boolean
       projection?: StudentMaterialProjection | null
     }
 
@@ -83,16 +84,19 @@ export async function loadAuthenticatedMaterial(materialId: string, userId: stri
     }
 
     let projection: StudentMaterialProjection | null = null
+    let projectionError = false
     try {
       const { data: projData, error: projError } = await getSupabaseClient()
         .rpc('get_student_material_projection', { p_material_id: materialId })
         .maybeSingle()
 
+      projectionError = Boolean(projError)
       if (!projError && projData && typeof projData === 'object' && 'student_lesson' in projData && projData.student_lesson) {
         projection = projData as StudentMaterialProjection
       }
     } catch {
-      // Graceful degradation when projection RPC is unavailable
+      projectionError = true
+      // Preserve the PDF while exposing a retry for online answering.
     }
 
     return {
@@ -100,6 +104,7 @@ export async function loadAuthenticatedMaterial(materialId: string, userId: stri
       material,
       studentPdfUrl,
       previewError,
+      projectionError,
       projection,
     }
   } catch (error) {

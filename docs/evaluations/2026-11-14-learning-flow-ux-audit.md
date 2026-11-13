@@ -4,6 +4,8 @@ An authorized internal test child was used on the production site for dashboard 
 
 ## Repairs
 
+- Interactive-projection transport failures preserve the PDF fallback while exposing an explicit retry for online answering.
+- Anonymous material-link login buttons now enter `/#login` directly, including expired or unavailable-link fallback pages.
 - Repeated same-hash entry links notify the mounted auth panel even when the URL does not change.
 - Cross-route login positioning follows initial layout/font changes until the user's first interaction; it then releases scroll control.
 - Submission confirmation counts nonempty structured response units once per question, matching server statuses.

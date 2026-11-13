@@ -74,6 +74,10 @@ export function AuthenticatedMaterialContent({
 
   return (
     <section className="surface-card scoped-material-card">
+      {state.projectionError && <div className="notice notice-error" role="alert">
+        <p>線上作答暫時無法載入。可以先看下方學生教材 PDF，或重試開啟線上作答。</p>
+        <button type="button" className="button button-secondary" onClick={onRetry}>重試線上作答</button>
+      </div>}
       <div className="scoped-material-header">
         <div className="scoped-material-mode-header">
           <div>

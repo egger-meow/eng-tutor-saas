@@ -480,3 +480,27 @@ describe('weekly material inline preview and page states', () => {
   })
 })
 
+
+describe('interactive projection recovery', () => {
+  it('keeps the PDF available and exposes online retry after a projection transport failure', async () => {
+    const owned = {
+      id: 'material-projection-retry', child_id: 'test-child', child_name: '合成驗收',
+      material_week: '2026-11-14', revision: 1, student_pdf_path: 'test/student.pdf',
+      parent_answer_pdf_path: 'test/parent.pdf', generation_summary: {},
+      created_at: '2026-11-14T00:00:00Z', release_at: '2026-11-14T00:00:00Z', feedback: null,
+    }
+    rpcMock.mockImplementation((name: string) => ({ maybeSingle: vi.fn().mockResolvedValue(
+      name === 'get_owned_released_material' ? { data: owned, error: null } : { data: null, error: { message: 'transport failure' } },
+    ) }))
+    createSignedUrlMock.mockResolvedValue({ data: { signedUrl: 'https://example.invalid/student.pdf' }, error: null })
+    const state = await loadAuthenticatedMaterial(owned.id, 'test-parent')
+    expect(state.status).toBe('ready')
+    if (state.status !== 'ready') throw new Error('Expected preserved PDF fallback')
+    expect(state.projection).toBeNull()
+    expect(state.projectionError).toBe(true)
+    const html = renderToStaticMarkup(<AuthenticatedMaterialContent state={state} onRetry={vi.fn()} />)
+    expect(html).toContain('線上作答暫時無法載入')
+    expect(html).toContain('重試線上作答')
+    expect(html).toContain('https://example.invalid/student.pdf')
+  })
+})

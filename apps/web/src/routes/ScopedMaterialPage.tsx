@@ -53,7 +53,7 @@ export function ScopedMaterialContent({
           <button
             className="button"
             type="button"
-            onClick={() => navigate(session ? '/dashboard' : '/')}
+            onClick={() => navigate(session ? '/dashboard' : '/#login')}
           >
             {session ? '返回我的 Dashboard' : '登入紙屬英文'}
           </button>
@@ -102,7 +102,7 @@ export function ScopedMaterialContent({
         <button
           className="text-link button-link scoped-material-nav-link"
           type="button"
-          onClick={() => navigate(session ? '/dashboard' : '/')}
+          onClick={() => navigate(session ? '/dashboard' : '/#login')}
         >
           {session ? '← 返回我的 Dashboard' : '登入查看所有教材與學習紀錄 →'}
         </button>
