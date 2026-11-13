@@ -336,6 +336,8 @@ The website should support:
 
 The founder page may link to the founder's existing personal website or portfolio.
 
+Public teacher navigation and landing-page teacher links must open the founder's tutoring page directly at `https://egger-meow.github.io/tutor-page/` in a new tab. Keep `/about` available for existing links; do not make it an intermediate step for teacher navigation.
+
 The landing page should provide enough information to establish trust without becoming a full résumé.
 
 Any claim displayed publicly must be accurate and verifiable.

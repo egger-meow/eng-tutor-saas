@@ -1,3 +1,4 @@
+import { founderContent } from '../../content/site'
 import { useNavigationMenu } from '../../hooks/use-navigation-menu'
 import { handleInternalLink } from '../../app/use-route'
 import { useScrollNavVisibility } from '../../hooks/use-scroll-nav-visibility'
@@ -9,7 +10,7 @@ const links = [
   { href: '/sample', label: '試讀與作答' },
   { href: '/#method', label: '學習方法' },
   { href: '/#pricing', label: '方案' },
-  { href: '/about', label: 'JJmow 老師' },
+  { href: founderContent.tutoringWebsite, label: 'JJmow 老師 ↗' },
 ]
 
 export function PublicHeader() {
@@ -51,6 +52,8 @@ export function PublicHeader() {
                 key={link.href}
                 href={link.href}
                 className="nav-link"
+                target={link.href.startsWith('https://') ? '_blank' : undefined}
+                rel={link.href.startsWith('https://') ? 'noreferrer' : undefined}
                 onClick={(e) => {
                   if (link.href === '/sample') {
                     trackSampleClick('nav_header')

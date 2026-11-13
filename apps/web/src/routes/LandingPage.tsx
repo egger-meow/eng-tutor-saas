@@ -1,3 +1,4 @@
+import { founderContent } from '../content/site'
 import { useEffect, useState } from 'react'
 import { AuthPanel } from '../components/auth/AuthPanel'
 import { AppShell } from '../components/layout/AppShell'
@@ -190,7 +191,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
         <aside className="founder-teaching-note" aria-label="JJmow 老師的教學想法">
           <p><strong>先看孩子怎麼想，再決定下一步練什麼。</strong></p>
           <p>我希望練習能回應孩子的程度、作答與回饋，讓下一份教材有調整的依據。</p>
-          <a href="/about">JJmow 老師 · 紙屬英文創作者 →</a>
+          <a href={founderContent.tutoringWebsite} target="_blank" rel="noreferrer">認識 JJmow 老師的教學方式 ↗</a>
         </aside>
         <AssessmentSellingSection />
 

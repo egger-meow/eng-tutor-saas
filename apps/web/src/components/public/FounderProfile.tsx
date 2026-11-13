@@ -17,7 +17,7 @@ export function FounderProfile() {
         <p>我把教學經驗與軟體開發結合，做成紙屬英文。孩子可以在線上讀與答，也能把教材印下來；作答與回饋則成為後續教材調整的依據。</p>
         <p className="founder-belief">{founderContent.philosophy}</p>
         <h2>我的教學與作品</h2>
-        <a href="https://egger-meow.github.io/tutor-page/" target="_blank" rel="noreferrer">教學方式與背景證明 ↗</a>
+        <a href={founderContent.tutoringWebsite} target="_blank" rel="noreferrer">教學方式與背景證明 ↗</a>
         <a href={founderContent.website} target="_blank" rel="noreferrer">完整背景與作品集 ↗</a>
         <a className="button button-primary" href="/#samples">看看紙屬英文的教材</a>
       </div>

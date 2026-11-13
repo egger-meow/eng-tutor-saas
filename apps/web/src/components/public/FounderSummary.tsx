@@ -1,3 +1,5 @@
+import { founderContent } from '../../content/site'
+
 export function FounderSummary() {
   return (
     <section className="public-section founder-summary founder-composed" id="founder" aria-labelledby="founder-summary-title">
@@ -10,8 +12,7 @@ export function FounderSummary() {
         <p>你好，我是 JJmow 老師，侯均頲。我有國小英文一對一與國中數學教學經驗，大學完成管理科學與資訊工程雙主修，目前就讀陽明交通大學數據科學與工程研究所碩士班。</p>
         <p>我的背景橫跨英文教學、軟體工程與 AI 應用。每週教材背後的規則，也會隨著實際使用中看見的難度、錯誤與家長困惑持續改善。</p>
         <p className="founder-belief">我相信 AI 最有價值的位置，不是替孩子完成作業，而是記住學習軌跡、協助做出更好的教材，讓孩子把真正的能力練起來。</p>
-        <a href="/about">認識 JJmow 老師與紙屬英文 →</a>
-        <a href="https://egger-meow.github.io/tutor-page/" target="_blank" rel="noreferrer">看看我的教學方式與背景證明 ↗</a>
+        <a href={founderContent.tutoringWebsite} target="_blank" rel="noreferrer">看看我的教學方式與背景證明 ↗</a>
       </div>
     </section>
   )
