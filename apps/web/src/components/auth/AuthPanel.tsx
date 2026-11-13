@@ -10,18 +10,40 @@ export function AuthPanel({ isPublicLanding = false }: { isPublicLanding?: boole
     return 'onboarding'
   })
 
+  const [navigationRequest, setNavigationRequest] = useState(0)
+  const switchMode = (next: 'onboarding' | 'login') => {
+    setMode(next)
+    setNavigationRequest(value => value + 1)
+  }
+
   useEffect(() => {
     if (!isPublicLanding) return
     const handleHash = () => {
       if (typeof window !== 'undefined' && window.location.hash === '#login') {
-        setMode('login')
+        switchMode('login')
       } else if (typeof window !== 'undefined' && window.location.hash === '#onboarding') {
-        setMode('onboarding')
+        switchMode('onboarding')
       }
     }
+    handleHash()
     window.addEventListener('hashchange', handleHash)
-    return () => window.removeEventListener('hashchange', handleHash)
+    window.addEventListener('paper-english:route-change', handleHash)
+    return () => {
+      window.removeEventListener('hashchange', handleHash)
+      window.removeEventListener('paper-english:route-change', handleHash)
+    }
   }, [isPublicLanding])
+
+  useEffect(() => {
+    if (!isPublicLanding || navigationRequest === 0) return
+    // Position only after the new card has replaced the taller questionnaire.
+    const frame = window.requestAnimationFrame(() => {
+      const card = document.getElementById(mode)
+      card?.scrollIntoView({ behavior: 'instant', block: 'start' })
+      card?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [isPublicLanding, mode, navigationRequest])
 
   if (!isPublicLanding) {
     return <EmailAuthPanel />
@@ -31,7 +53,7 @@ export function AuthPanel({ isPublicLanding = false }: { isPublicLanding?: boole
     <div className="landing-auth-single-track">
       {mode === 'onboarding' ? (
         <div className="landing-auth-card landing-onboarding-card" id="onboarding">
-          <LandingOnboardingPanel onSwitchToLogin={() => setMode('login')} />
+          <LandingOnboardingPanel onSwitchToLogin={() => switchMode('login')} />
         </div>
       ) : (
         <div className="landing-auth-card landing-login-card" id="login">
@@ -46,7 +68,7 @@ export function AuthPanel({ isPublicLanding = false }: { isPublicLanding?: boole
             <button
               type="button"
               className="button-link text-link"
-              onClick={() => setMode('onboarding')}
+              onClick={() => switchMode('onboarding')}
             >
               ← 首次使用？點此返回為孩子建立檔案並領取免費教材
             </button>

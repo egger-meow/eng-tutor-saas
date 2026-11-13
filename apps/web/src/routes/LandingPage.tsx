@@ -76,18 +76,7 @@ export function LandingPage({ enrollment: propEnrollment }: { enrollment?: Enrol
 
   useEffect(() => {
     trackLandingView()
-    const handleHash = () => {
-      if (typeof window !== 'undefined' && window.location.hash === '#login') {
-        window.requestAnimationFrame(() => {
-          const loginEl = document.getElementById('login')
-          loginEl?.scrollIntoView({ block: 'start' })
-          loginEl?.querySelector('input')?.focus()
-        })
-      }
-    }
-    handleHash()
-    window.addEventListener('hashchange', handleHash)
-    return () => window.removeEventListener('hashchange', handleHash)
+
   }, [])
 
   return (

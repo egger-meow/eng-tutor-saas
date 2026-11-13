@@ -72,11 +72,7 @@ export function PublicHeader() {
             onClick={(event) => {
               setMobileMenuOpen(false)
               handleInternalLink(event)
-              window.requestAnimationFrame(() => {
-                const loginEl = document.getElementById('login')
-                loginEl?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
-                loginEl?.querySelector('input')?.focus()
-              })
+
             }}
           >
             <span className="nav-link-text">已有帳號？登入</span>
