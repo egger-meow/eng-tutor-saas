@@ -31,7 +31,7 @@ export function DashboardPage({ session }: { session: Session }) {
             <div className="loading-spinner" />
             <p>正在整理孩子的本週學習…</p>
           </div>
-        ) : data.error ? (
+        ) : data.error && data.children.length === 0 ? (
           <section className="error-state">
             <h1>目前無法載入</h1>
             <p>{data.error}</p>
@@ -141,6 +141,7 @@ export function DashboardPage({ session }: { session: Session }) {
 
         ) : (
           <div className="dashboard-container">
+            {data.error && <div className="notice notice-error" role="alert"><p>{data.error}</p><button className="button button-secondary" type="button" onClick={() => void data.refresh()}>重試更新</button></div>}
             <header className="dashboard-top-header">
               <div>
                 <p className="eyebrow">本週教材</p>

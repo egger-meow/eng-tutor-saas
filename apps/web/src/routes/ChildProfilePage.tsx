@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { navigate } from '../app/use-route'
+import { handleInternalLink, navigate } from '../app/use-route'
 import { AppShell } from '../components/layout/AppShell'
 import { ParentNavigation } from '../components/layout/ParentNavigation'
 import { PageTransition } from '../components/motion/PageTransition'
@@ -45,6 +45,7 @@ export function ChildProfilePage({ session, childId }: { session: Session; child
         <div className="all-child-profiles">{data.children.map((child, index) => <section className="child-profile-section" key={child.id}>
           <header className="child-profile-heading"><div><p className="overline">孩子資料</p><h2>{child.display_name}</h2><p>{gradeStageLabel(child)}</p></div><button className="button" type="button" onClick={() => navigate(`/children/${child.id}/edit`)}>編輯 {child.display_name} 資料</button></header>
           <ProfileSummary child={child} />
+          <a className="text-link" href={`/children/${child.id}/materials`} onClick={handleInternalLink}>查看 {child.display_name} 的所有教材 →</a>
           <ChildArchiveControl
             childName={child.display_name}
             confirming={archiveConfirmId === child.id}

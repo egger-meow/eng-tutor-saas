@@ -264,7 +264,7 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('Step 3 · 主題閱讀')
     expect(html).toContain('How Games Place Sound in 3D Space')
     expect(html).toContain('Step 4 · 文法與句構焦點')
-    expect(html).toContain('核心語言規則精析')
+    expect(html).toContain('看懂句型，試著自己用')
     expect(html).toContain('Step 5 · 綜合演練')
     expect(html).toContain('課堂實戰與理解檢核')
     expect(html).toContain('Step 6 · 學習檢核')
@@ -396,9 +396,9 @@ describe('PaperReader Component Suite', () => {
     expect(html).toContain('試試前兩題')
     expect(html).toContain('先停，之後繼續')
     expect(html).toContain('請確認草稿儲存成功後再離開或換裝置')
-    expect(html).toContain('① 先讀先試 (約 10 分鐘)')
-    expect(html).toContain('② 理解與練習')
-    expect(html).toContain('③ 複習與作業')
+    expect(html).toContain('先讀先試 (約 10 分鐘)')
+    expect(html).toContain('理解與練習')
+    expect(html).toContain('複習與作業')
   })
 
   it('10. preserves explicit submit button with unhurried whole-material submission flow', () => {

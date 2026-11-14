@@ -22,6 +22,7 @@ export function FeedbackForm({ material, onSaved, onClose }: FeedbackFormProps) 
   const [detailsOpen, setDetailsOpen] = useState(hasExistingDetails)
   const [submitted, setSubmitted] = useState<boolean | null>(null)
   const [attempt, setAttempt] = useState(0)
+  const [onlineCompletionHint, setOnlineCompletionHint] = useState('')
   useEffect(() => {
     let active = true
     setSubmitted(null)
@@ -32,6 +33,7 @@ export function FeedbackForm({ material, onSaved, onClose }: FeedbackFormProps) 
         const answered = result.results.filter((item) => item.status !== 'unanswered').length
         const completion_rate = result.results.length ? Math.round(answered * 4 / result.results.length) * 25 : 0
         setInput((current) => ({ ...current, completion_rate }))
+        setOnlineCompletionHint(`線上已作答 ${answered}/${result.results.length} 題，先帶入最接近的選項。請依實際完成情況確認，包含未輸入線上的紙本作答。`)
       }
     })
       .catch(() => { if (active) setError('無法確認提交狀態，請重試。') })
@@ -84,6 +86,7 @@ export function FeedbackForm({ material, onSaved, onClose }: FeedbackFormProps) 
           options={[[0, '還沒開始'], [25, '剛開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]}
           onChange={(completion_rate) => setInput({ ...input, completion_rate })}
         />
+        {onlineCompletionHint && <p className="muted field-wide">{onlineCompletionHint}</p>}
         <FeedbackChoice
           legend="整體難度如何？"
           name={`difficulty-${material.id}`}
@@ -159,7 +162,7 @@ export function FeedbackForm({ material, onSaved, onClose }: FeedbackFormProps) 
 type FeedbackChoiceProps = {
   legend: string
   name: string
-  value: number
+  value: number | null
   options: Array<[number, string]>
   onChange: (value: number) => void
 }

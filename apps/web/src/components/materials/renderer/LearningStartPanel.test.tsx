@@ -39,8 +39,8 @@ describe('LearningStartPanel', () => {
     expect(html).toContain('先讀這一段')
     expect(html).toContain('試試前兩題')
     expect(html).toContain('先停，之後繼續')
-    expect(html).toContain('① 先讀先試 (約 10 分鐘)')
-    expect(html).toContain('② 理解與練習')
+    expect(html).toContain('先讀先試 (約 10 分鐘)')
+    expect(html).toContain('理解與練習')
     expect(html).toContain('草稿已同步，可在其他裝置接續')
   })
 

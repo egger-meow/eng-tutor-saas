@@ -14,15 +14,15 @@ export interface PracticeRendererProps {
 function getStageBadge(stage?: string): string {
   switch (stage) {
     case 'guided':
-      return '引導式練習 · Guided Practice'
+      return '跟著提示試一試'
     case 'independent':
-      return '獨立演練 · Independent Practice'
+      return '換你自己試'
     case 'cap-transfer':
-      return '會考題型遷移 · CAP Transfer'
+      return '用在會考題裡'
     case 'production':
-      return '寫作與產出 · Production'
+      return '寫出自己的想法'
     case 'retrieval':
-      return '記憶提取演練 · Retrieval'
+      return '不看提示，再想一次'
     default:
       return '課堂實戰練習'
   }

@@ -10,6 +10,7 @@ import { getSupabaseClient } from './lib/supabase'
 import { AboutPage } from './routes/AboutPage'
 import { ChildOnboardingPage } from './routes/ChildOnboardingPage'
 import { ChildProfilePage } from './routes/ChildProfilePage'
+import { ChildMaterialsPage } from './routes/ChildMaterialsPage'
 import { DashboardPage } from './routes/DashboardPage'
 import { GuidePage } from './routes/GuidePage'
 import { LandingPage } from './routes/LandingPage'
@@ -230,7 +231,7 @@ function App() {
 
   const page = !session
     ? <LandingPage />
-    : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'assessment' ? <AssessmentHubPage session={session} /> : route.name === 'child-assessment' ? <ChildAssessmentPage session={session} childId={route.params.id} /> : route.name === 'child-overview' || route.name === 'child-materials' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'authenticated-material' ? <AuthenticatedMaterialPage session={session} materialId={route.params.materialId} /> : route.name === 'feedback' ? <FeedbackPage session={session} materialId={route.params.materialId} /> : route.name === 'parent-guide-feedback' ? <ParentGuideFeedbackPage session={session} /> : route.name === 'billing' ? <BillingPage session={session} /> : route.name === 'announcements' ? <AnnouncementsPage session={session} /> : route.name === 'announcement-detail' ? <AnnouncementDetailPage session={session} announcementId={route.params.id} /> : <DashboardPage session={session} />
+    : route.name === 'child-new' ? <ChildOnboardingPage session={session} /> : route.name === 'child-edit' ? <ChildOnboardingPage session={session} childId={route.params.id} /> : route.name === 'assessment' ? <AssessmentHubPage session={session} /> : route.name === 'child-assessment' ? <ChildAssessmentPage session={session} childId={route.params.id} /> : route.name === 'child-materials' ? <ChildMaterialsPage session={session} childId={route.params.id} /> : route.name === 'child-overview' ? <ChildProfilePage session={session} childId={route.params.id} /> : route.name === 'authenticated-material' ? <AuthenticatedMaterialPage session={session} materialId={route.params.materialId} /> : route.name === 'feedback' ? <FeedbackPage session={session} materialId={route.params.materialId} /> : route.name === 'parent-guide-feedback' ? <ParentGuideFeedbackPage session={session} /> : route.name === 'billing' ? <BillingPage session={session} /> : route.name === 'announcements' ? <AnnouncementsPage session={session} /> : route.name === 'announcement-detail' ? <AnnouncementDetailPage session={session} announcementId={route.params.id} /> : <DashboardPage session={session} />
 
   return <MotionConfig reducedMotion="user"><motion.div className="route-stage" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: reduceMotion ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}>{page}</motion.div></MotionConfig>
 }

@@ -130,10 +130,10 @@ export function InstructionRenderer({ instruction }: InstructionRendererProps) {
       <div className="paper-section-header">
         <span className="paper-section-step">Step 4 · 文法與句構焦點</span>
         <h2 id="heading-instruction" className="paper-section-title">
-          核心語言規則精析
+          看懂句型，試著自己用
         </h2>
         <p className="paper-section-desc">
-          拆解語法規則、常見混淆與句型結構，奠定堅實的英文理解力。
+          先看例句，再比較容易混淆的地方。看懂一個重點，就試著用自己的話說一次。
         </p>
       </div>
 

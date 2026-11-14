@@ -7,6 +7,7 @@ import { FeedbackChoice } from '../../feedback/FeedbackForm'
 import { MaterialNextStepPanel } from './MaterialNextStepPanel'
 import { LearningStartPanel } from './LearningStartPanel'
 import { LearningSessionNav } from './LearningSessionNav'
+import { ChapterQuickNav } from './ChapterQuickNav'
 import { useMaterialLearningNavigation } from '../../../hooks/use-material-learning-navigation'
 import { buildMaterialSessionPlan, countAnsweredQuestions } from '../../../lib/material-session-plan'
 import type { StudentMaterialProjection } from '../../../types/student-material'
@@ -48,6 +49,8 @@ export function PaperReader({
   const [actionBusy, setActionBusy] = useState(false)
   const [actionError, setActionError] = useState('')
   const feedbackTrigger = useRef<HTMLButtonElement>(null)
+  const completionPanel = useRef<HTMLElement>(null)
+  const readerToolbar = useRef<HTMLElement>(null)
   const [feedbackActivated, setFeedbackActivated] = useState(false)
   const [feedbackChoice, setFeedbackChoice] = useState<'ask' | 'form' | 'skip' | 'saved'>('ask')
   const [requestMessage, setRequestMessage] = useState('')
@@ -193,14 +196,12 @@ export function PaperReader({
   }
 
   async function saveOptionalFeedback() {
-    if (actionBusy || !feedbackReady) return
+    if (actionBusy || !feedbackReady || reportedCompletion === null) return
     setActionBusy(true)
     setActionError('')
     try {
-      const answered = submission?.results.filter((result) => result.status !== 'unanswered').length ?? 0
-      const total = submission?.results.length ?? 0
       await saveStudentParentFeedback(projection.material_id, {
-        difficulty, completionRate: reportedCompletion ?? (total ? Math.round(answered * 4 / total) * 25 : 0),
+        difficulty, completionRate: reportedCompletion,
         weakArea: weakArea || null, comments, ...feedbackDetails,
       })
       setFeedbackChoice('saved')
@@ -333,7 +334,7 @@ export function PaperReader({
       />
 
       {/* In-flow toolbar with save status and chapter navigation */}
-      <header className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
+      <header ref={readerToolbar} className="paper-reader-toolbar" role="region" aria-label="教材閱讀工具列">
         <div className="paper-reader-toolbar-left">
           <div className="paper-reader-title-badge">
             <span>{projection.child_name}</span>
@@ -467,6 +468,7 @@ export function PaperReader({
           )}
         </nav>
       </header>
+      <ChapterQuickNav lesson={lesson} toolbarRef={readerToolbar} completionRef={completionPanel} onJump={handleChapterClick} />
       {downloadMessage && <p className="notice" role="status">{downloadMessage}</p>}
 
       {/* Conflict Resolution Banner */}
@@ -530,7 +532,7 @@ export function PaperReader({
           updateAnswer(key, value, immediate)
         }} onToggleSelfCheck={toggleSelfCheck} />
 
-      <section className="paper-sheet paper-completion" aria-label="完成本週教材">
+      <section ref={completionPanel} className="paper-sheet paper-completion" aria-label="完成本週教材">
         <h2 className="paper-section-title">完成本週教材</h2>
         {!submission && (
           <>
@@ -601,6 +603,8 @@ export function PaperReader({
               {feedbackLoading && <p role="status">正在載入家長回饋…</p>}
               {!feedbackReady && !feedbackLoading && <button type="button" className="button" onClick={() => void openFeedback()}>重試載入回饋</button>}
               <fieldset disabled={!feedbackReady || actionBusy} className="paper-feedback-fields">
+              <FeedbackChoice legend="這週完成多少？（含紙本）" name={`reader-completion-${projection.material_id}`} value={reportedCompletion} options={[[0, '還沒開始'], [25, '剛開始'], [50, '做了一部分'], [75, '大部分完成'], [100, '全部完成']]} onChange={setReportedCompletion} />
+              <p className="muted">線上已作答 {submission.results.filter(result => result.status !== 'unanswered').length}/{submission.results.length} 題；紙本作答不會自動計入。{reportedCompletion === null ? '請點選實際完成情況，再儲存回饋。' : '完成度以你選擇的情況為準，可包含紙本。'}</p>
               <FeedbackChoice legend="整體難度" name={`reader-difficulty-${projection.material_id}`} value={difficulty} options={[[1, '太簡單'], [3, '剛剛好'], [5, '太難']]} onChange={setDifficulty} />
               <fieldset className="feedback-question"><legend>最需要加強</legend><div className="choice-group">
                 {[[ '', '沒有特別'], ['vocabulary', '單字'], ['grammar', '文法'], ['reading', '閱讀'], ['writing', '寫作'], ['mixed', '多個部分']].map(([value, label]) => <label className="choice-chip" key={value}><input type="radio" name={`reader-weak-area-${projection.material_id}`} value={value} checked={weakArea === value} onChange={() => setWeakArea(value)} /><span>{label}</span></label>)}
@@ -611,7 +615,7 @@ export function PaperReader({
                 <textarea maxLength={2000} value={comments} onChange={(event) => setComments(event.target.value)} />
               </label>
               </Reveal>
-              <button className="button button-secondary" type="button" disabled={actionBusy || !feedbackReady} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
+              <button className="button button-secondary" type="button" disabled={actionBusy || !feedbackReady || reportedCompletion === null} onClick={() => void saveOptionalFeedback()}>儲存回饋</button>
               </fieldset>
               <button className="button button-quiet" type="button" disabled={actionBusy} onClick={() => { setFeedbackChoice('skip'); requestAnimationFrame(() => feedbackTrigger.current?.focus({ preventScroll: true })) }}>稍後再填</button>
             </div>}

@@ -12,6 +12,29 @@
 .paper-reader-container :is(.paper-sheet, .question-card) { scroll-margin-top: 6rem; min-width: 0; }
 .paper-reader-toolbar-left, .paper-reader-toolbar-right { flex-wrap: wrap; min-width: 0; }
 .paper-chapter-nav { max-width: 100%; }
+.paper-quick-nav {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  max-width: calc(100vw - 2rem);
+}
+.paper-quick-nav select {
+  min-height: 44px;
+  width: 11rem;
+  max-width: 100%;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-control);
+  box-shadow: 0 2px 8px rgba(24, 38, 31, 0.12);
+}
+/* Leave room for the software keyboard and keep the active answer unobscured. */
+.paper-reader-container:has(:is(input, textarea):focus) .paper-quick-nav { display: none; }
+@media print { .paper-quick-nav { display: none; } }
 .speech-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
 .speech-controls select { width: min(100%, 20rem); max-width: 100%; font: inherit; padding: 0.5rem 0.75rem; border: 1px solid var(--color-rule); border-radius: var(--radius-control); background: var(--color-paper); }
 .speech-controls label { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); flex: 1 1 20rem; }

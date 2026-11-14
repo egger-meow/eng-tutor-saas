@@ -116,6 +116,7 @@ export function useParentData(parentUserId: string) {
   const loadMoreMaterials = useCallback(async (childId: string) => {
     if (!snapshot.materialHasMore[childId] || loadingMoreMaterials[childId]) return
     setLoadingMoreMaterials((current) => ({ ...current, [childId]: true }))
+    setError('')
     try {
       const page = await listMaterials([childId], { offset: snapshot.materialOffsets[childId] ?? 0, includeFuture: false })
       setSnapshot((current) => {
@@ -130,6 +131,8 @@ export function useParentData(parentUserId: string) {
         parentDataCache.set(parentUserId, { snapshot: next, cachedAt: Date.now() })
         return next
       })
+    } catch {
+      setError('更早的教材暫時無法載入，已顯示的教材仍可使用，請再試一次。')
     } finally {
       setLoadingMoreMaterials((current) => ({ ...current, [childId]: false }))
     }

@@ -85,7 +85,7 @@ try {
         return
       }
       if (name === 'feedback') {
-        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ difficulty: 3, weak_area: 'reading', parent_comments: 'Existing observation', mistakes_text: 'Preserved mistakes', child_comments: 'Preserved child voice' }) })
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ difficulty: 3, completion_rate: savedFeedback?.p_completion_rate ?? null, weak_area: 'reading', parent_comments: 'Existing observation', mistakes_text: 'Preserved mistakes', child_comments: 'Preserved child voice' }) })
         return
       }
       if (name === 'get_student_material_submission' && failSubmissionRead) {
@@ -263,11 +263,15 @@ try {
     await page.goto(url)
     await page.getByRole('button', { name: '新增／修改家長觀察（選填）', exact: true }).click()
     await page.getByRole('button', { name: '儲存回饋', exact: true }).waitFor()
+    await page.getByRole('combobox', { name: '跳到教材章節' }).waitFor({ state: 'hidden' })
+    assert.equal(await page.getByRole('button', { name: '儲存回饋', exact: true }).isDisabled(), true, 'never invent parent-reported completion from online answers')
+    await page.getByRole('group', { name: '這週完成多少？（含紙本）', exact: true }).getByRole('radio', { name: '大部分完成', exact: true }).check()
     // Reveal animates after the form mounts; wait for visibility rather than
     // sampling the first animation frame synchronously.
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).waitFor({ state: 'visible' })
     await page.getByRole('textbox', { name: '其他觀察（選填）', exact: true }).fill('Updated observation')
     await page.getByRole('button', { name: '儲存回饋', exact: true }).click()
+    await page.getByText('✓ 家長回饋已儲存。', { exact: true }).waitFor()
     await page.getByRole('button', { name: '申請下一份教材', exact: true }).waitFor()
     assert.equal(requests, 1, 'saving optional feedback never requests next')
     assert.ok(learningEvents.includes('material_opened'))
@@ -278,6 +282,15 @@ try {
     assert.equal(savedFeedback.p_mistakes_text, 'Preserved mistakes')
     assert.equal(savedFeedback.p_child_comments, 'Preserved child voice')
     assert.equal(savedFeedback.p_parent_comments, 'Updated observation')
+    assert.equal(savedFeedback.p_completion_rate, 75, 'save the explicit parent choice, including paper completion')
+    await page.getByRole('button', { name: '修改家長觀察／回饋', exact: true }).click()
+    await page.waitForFunction(() => document.querySelector('input[name="reader-completion-synthetic-material"][value="75"]')?.checked)
+    await page.getByRole('button', { name: '收起回饋', exact: true }).click()
+    await page.locator('#q-card-q1').scrollIntoViewIfNeeded()
+    await page.getByRole('combobox', { name: '跳到教材章節' }).waitFor({ state: 'visible' })
+    await page.getByRole('combobox', { name: '跳到教材章節' }).selectOption('reading')
+    await page.waitForFunction(() => document.activeElement?.id === 'chapter-reading')
+    await page.screenshot({ path: resolve(`.runtime/online-materials/${device}-quick-chapters.png`) })
     evidence.push({ device, viewport, result: 'PASS', actualDevice: false })
     await context.close()
   }

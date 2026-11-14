@@ -140,6 +140,7 @@ export function ChildCard({ child, materials, onRefresh, onLoadMoreMaterials, ha
           <AssessmentRecommendation childId={child.id} childName={child.display_name} />
 
           <div className="history-toggle-section">
+            <a className="text-link" href={`/children/${child.id}/materials`} onClick={handleInternalLink}>查看 {child.display_name} 的所有教材 →</a>
             <button
               className="button-link text-link history-toggle-btn"
               type="button"

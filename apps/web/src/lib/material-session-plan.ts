@@ -75,7 +75,7 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
   const steps: SessionPlanStep[] = [
     {
       id: 'stage-1',
-      label: '① 先讀先試 (約 10 分鐘)',
+      label: '先讀先試 (約 10 分鐘)',
       chapterId: stage1ChapterId,
       questionIds: firstPracticeQuestionIds,
       descriptionZh: stage1Desc,
@@ -89,7 +89,7 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
     const stage2ChapterId = hasInstruction ? 'instruction' : practiceQuestionIds.length ? 'practice' : 'homework'
     steps.push({
       id: 'stage-2',
-      label: '② 理解與練習',
+      label: '理解與練習',
       chapterId: stage2ChapterId,
       questionIds: remainingPracticeQuestionIds,
       descriptionZh: remainingPracticeQuestionIds.length > 0
@@ -105,7 +105,7 @@ export function buildMaterialSessionPlan(lesson?: StudentLesson | null): Materia
     const stage3ChapterId = separateHomeworkIds.length ? 'homework' : 'selfcheck'
     steps.push({
       id: 'stage-3',
-      label: '③ 複習與作業',
+      label: '複習與作業',
       chapterId: stage3ChapterId,
       questionIds: separateHomeworkIds,
       descriptionZh: separateHomeworkIds.length
