@@ -19,7 +19,10 @@ export function ChildMaterialsPage({ session, childId }: { session: Session; chi
       <a className="text-link" href="/dashboard" onClick={handleInternalLink}>← 返回學習總覽</a>
       {data.loading ? <p role="status">正在載入教材…</p> : <>
         {data.error && <div className="notice notice-error" role="alert"><p>{data.error}</p><button type="button" className="button button-secondary" onClick={() => void data.refresh()}>重試載入</button></div>}
-        {!data.error && !child ? <p className="notice">找不到可查看的孩子資料。</p> : child && <MaterialHistory materials={materials} childName={child.display_name} onFeedbackSaved={() => void data.refresh()} hasMore={Boolean(data.materialHasMore[childId])} loadingMore={Boolean(data.loadingMoreMaterials[childId])} onLoadMore={() => void data.loadMoreMaterials(childId)} />}
+        {!data.error && !child ? <p className="notice">找不到可查看的孩子資料。</p> : child && <section aria-labelledby="child-materials-list-title">
+          <h2 id="child-materials-list-title">已開放教材</h2>
+          <MaterialHistory materials={materials} childName={child.display_name} onFeedbackSaved={() => void data.refresh()} hasMore={Boolean(data.materialHasMore[childId])} loadingMore={Boolean(data.loadingMoreMaterials[childId])} onLoadMore={() => void data.loadMoreMaterials(childId)} />
+        </section>}
       </>}
     </PageTransition>
   </AppShell>

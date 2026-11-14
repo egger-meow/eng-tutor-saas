@@ -25,6 +25,7 @@ describe('child material history route', () => {
   it('shows the requested child released history and pagination instead of profile editing', () => {
     const html = renderToStaticMarkup(<ChildMaterialsPage session={session} childId="child-a" />)
     expect(html).toContain('合成孩子 A 的所有教材')
+    expect(html).toContain('<h2 id="child-materials-list-title">已開放教材</h2>')
     expect(html).toContain('released')
     expect(html).toContain('載入更早教材')
     expect(html).not.toContain('future-private')
